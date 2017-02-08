@@ -1,5 +1,4 @@
 import keys from '../util/keys'
-import createSurfaceId from '../util/createSurfaceId'
 import Component from '../ui/Component'
 
 class AbstractIsolatedNodeComponent extends Component {
@@ -8,7 +7,7 @@ class AbstractIsolatedNodeComponent extends Component {
     super(...args)
 
     this.name = this.props.node.id
-    this._id = createSurfaceId(this)
+    this._id = this.context.surface.id +'/'+this.name
     this._state = {
       selectionFragment: null
     }
@@ -19,7 +18,7 @@ class AbstractIsolatedNodeComponent extends Component {
 
   getChildContext() {
     return {
-      surfaceParent: this
+      isolatedNodeComponent: this,
     }
   }
 
@@ -29,7 +28,7 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   didMount() {
-    super.didMount.call(this);
+    super.didMount()
 
     let editorSession = this.context.editorSession
     editorSession.onRender('selection', this.onSelectionChanged, this)
@@ -125,20 +124,47 @@ class AbstractIsolatedNodeComponent extends Component {
     return ComponentClass
   }
 
-  _getSurfaceParent() {
-    return this.context.surface
-  }
-
-  _getLevel() {
-    let level = 1;
-    let parent = this._getSurfaceParent()
-    while (parent) {
-      level++
-      parent = parent._getSurfaceParent()
+  _getSurface(selState) {
+    let surface = selState.get('surface')
+    if (surface === undefined) {
+      let sel = selState.getSelection()
+      if (sel && sel.surfaceId) {
+        let surfaceManager = this.context.surfaceManager
+        surface = surfaceManager.getSurface(sel.surfaceId)
+      } else {
+        surface = null
+      }
+      selState.set('surface', surface)
     }
-    return level
+    return surface
   }
 
+  // compute the list of surfaces and isolated nodes
+  // for the given selection
+  _getIsolatedNodes(selState) {
+    let isolatedNodes = selState.get('isolatedNodes')
+    if (!isolatedNodes) {
+      let sel = selState.getSelection()
+      isolatedNodes = []
+      if (sel && sel.surfaceId) {
+        let surfaceManager = this.context.surfaceManager
+        let surface = surfaceManager.getSurface(sel.surfaceId)
+        isolatedNodes = _computeIsolatedNodeChain(surface)
+      }
+      selState.set('isolatedNodes', isolatedNodes)
+    }
+    return isolatedNodes
+  }
+}
+
+function _computeIsolatedNodeChain(surface) {
+  let chain = []
+  let isolatedNodeComponent = surface.context.isolatedNodeComponent
+  while (isolatedNodeComponent) {
+    chain.push(isolatedNodeComponent)
+    isolatedNodeComponent = isolatedNodeComponent.context.isolatedNodeComponent
+  }
+  return chain
 }
 
 export default AbstractIsolatedNodeComponent

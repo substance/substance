@@ -1,4 +1,3 @@
-import createSurfaceId from '../../util/createSurfaceId'
 import inBrowser from '../../util/inBrowser'
 import isNil from '../../util/isNil'
 import keys from '../../util/keys'
@@ -67,7 +66,6 @@ class Surface extends Component {
   getChildContext() {
     return {
       surface: this,
-      surfaceParent: this,
       doc: this.getDocument()
     }
   }
@@ -90,8 +88,8 @@ class Surface extends Component {
     }
   }
 
-  didUpdate(oldProps, oldState) {
-    this._update(oldProps, oldState)
+  didUpdate() {
+    this._updateContentEditableState()
   }
 
   render($$) {
@@ -356,7 +354,10 @@ class Surface extends Component {
       event.__reserved__ = this
     }
 
-    if (this.state.mode === 'co-focused') {
+    // NOTE: this is here to make sure that this surface is contenteditable
+    // For instance, IsolatedNodeComponent sets contenteditable=false on this element
+    // to achieve selection isolation
+    if (this.isEditable()) {
       this.el.setAttribute('contenteditable', true)
     }
 
@@ -457,21 +458,6 @@ class Surface extends Component {
 
   // Internal implementations
 
-  _update(oldProps, oldState) {
-    this._updateContentEditableState(oldState)
-  }
-
-  _updateContentEditableState() {
-    // ContentEditable management
-    // Note: to be able to isolate nodes, we need to control
-    // how contenteditable is used in a hieriarchy of surfaces.
-    let mode = this.state.mode
-    if (!this.isEditable() || this.props.disabled || mode === 'co-focused') {
-      this.el.removeAttribute('contenteditable')
-    } else {
-      this.el.setAttribute('contenteditable', true)
-    }
-  }
 
   _onSelectionChanged(selection) {
     let newMode = this._deriveModeFromSelection(selection)
@@ -498,9 +484,32 @@ class Surface extends Component {
     return mode
   }
 
-  // surface parent is either a Surface or IsolatedNode
-  _getSurfaceParent() {
-    return this.context.surfaceParent
+  _updateContentEditableState() {
+    // NOTE: managing contenteditable is difficult in
+    // order to achieve a correct behavior for IsolatedNodes
+    // For 'closed' isolated nodes it is important that the parents'
+    // contenteditables are all false. Otherwise, the cursor
+    // can leave the isolated area.
+    let enableContenteditable = false
+    if (this.isEditable() && !this.props.disabled) {
+      enableContenteditable = true
+      if (this.state.mode === 'co-focused') {
+        let selState = this.context.editorSession.getSelectionState()
+        let sel = selState.getSelection()
+        let surface = this.context.surfaceManager.getSurface(sel.surfaceId)
+        if (surface) {
+          let isolatedNodeComponent = surface.context.isolatedNodeComponent
+          if (isolatedNodeComponent) {
+            enableContenteditable = isolatedNodeComponent.isOpen()
+          }
+        }
+      }
+    }
+    if (enableContenteditable) {
+      this.el.setAttribute('contenteditable', true)
+    } else {
+      this.el.removeAttribute('contenteditable')
+    }
   }
 
   _focus() {
@@ -746,6 +755,40 @@ Surface.getDOMRangeFromEvent = function(evt) {
   }
 
   return range
+}
+
+/*
+  Computes the id of a surface
+
+  With IsolatedNodes, surfaces can be nested.
+  In this case the id can be seen as a path from the top-most to the nested ones
+
+  @examples
+
+  - top-level surface: 'body'
+  - table cell: 'body/t1/t1-A1.content'
+  - figure caption: 'body/fig1/fig1-caption.content'
+  - nested containers: 'body/section1'
+*/
+function createSurfaceId(surface) {
+  let isolatedNodeComponent = surface.context.isolatedNodeComponent
+  if (isolatedNodeComponent) {
+    let parentSurface = isolatedNodeComponent.context.surface
+    // nested containers
+    if (surface.isContainerEditor()) {
+      if (isolatedNodeComponent._isInlineNodeComponent) {
+        return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
+      } else {
+        return parentSurface.id + '/' + surface.name
+      }
+    }
+    // other isolated nodes such as tables, figures, etc.
+    else {
+      return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
+    }
+  } else {
+    return surface.name
+  }
 }
 
 export default Surface

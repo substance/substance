@@ -1,4 +1,3 @@
-import startsWith from '../../util/startsWith'
 import Component from '../../ui/Component'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
@@ -50,27 +49,14 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     // always handle ESCAPE
     el.on('keydown', this.onKeydown)
 
-    let contentProps = {}
-    switch (this.blockingMode) {
-      case 'closed': {
-        // the blocker is rendered unless an inner surface has the focus
-        if (this.state.mode !== 'focused') {
-          el.attr('contenteditable', false)
-          el.append($$(Blocker).ref('blocker'))
-          contentProps.disabled = true
-        }
-        break
-      }
-      case 'open': {
-        el.attr('contenteditable', false)
-        break
-      }
-      default:
-        //
-    }
-    let content = this.renderContent($$, node, contentProps).ref('content')
+    let shouldRenderBlocker = (this.blockingMode === 'closed') && (this.state.mode !== 'focused')
+    let content = this.renderContent($$, node, {
+      disabled: this.props.disabled || shouldRenderBlocker
+    }).ref('content').attr('contenteditable', false)
     el.append(content)
-
+    if (shouldRenderBlocker) {
+      el.append($$(Blocker).ref('blocker'))
+    }
     return el
   }
 
@@ -82,16 +68,21 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     return this.refs.content
   }
 
+  isOpen() {
+    return this.blockingMode === 'open'
+  }
+
+  isClosed() {
+    return this.blockingMode === 'closed'
+  }
+
   _deriveStateFromSelectionState(selState) {
-    let sel = selState.getSelection()
-    let surfaceId = sel.surfaceId
-    if (!surfaceId) return
-    let id = this.getId()
-    let nodeId = this.props.node.id
-    let parentId = this._getSurfaceParent().getId()
-    let inParentSurface = (surfaceId === parentId)
+    let surface = this._getSurface(selState)
+    if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
-    if (inParentSurface) {
+    if (surface === this.context.surface) {
+      let sel = selState.getSelection()
+      let nodeId = this.props.node.id
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
           return { mode: 'selected' }
@@ -104,28 +95,17 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
         return { mode: 'co-selected' }
       }
-      return
     }
-    if (sel.isCustomSelection() && id === surfaceId) {
+    let isolatedNodeComponent = surface.context.isolatedNodeComponent
+    if (!isolatedNodeComponent) return null
+    if (isolatedNodeComponent === this) {
       return { mode: 'focused' }
     }
-    // HACK: a looks a bit hacky. Fine for now.
-    // TODO: we should think about switching to surfacePath, instead of surfaceId
-    else if (startsWith(surfaceId, id)) {
-      let path1 = id.split('/')
-      let path2 = surfaceId.split('/')
-      let len1 = path1.length
-      let len2 = path2.length
-      if (len2 > len1 && path1[len1-1] === path2[len1-1]) {
-        if (len2 === len1 + 1) {
-          return { mode: 'focused' }
-        } else {
-          return { mode: 'co-focused' }
-        }
-      } else {
-        return null
-      }
+    let isolatedNodes = this._getIsolatedNodes(selState)
+    if (isolatedNodes.indexOf(this) > -1) {
+      return { mode: 'co-focused' }
     }
+    return null
   }
 
   selectNode() {
@@ -155,33 +135,59 @@ IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 
 IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
+  // let domCoor
+  // if (coor.offset === 0) {
+  //   domCoor = {
+  //     container: comp.el.getNativeElement(),
+  //     offset: 0
+  //   }
+  // } else {
+  //   domCoor = {
+  //     container: comp.el.getNativeElement(),
+  //     offset: 1
+  //   }
+  // }
+  // return domCoor
   let domCoor
+  let offset = comp.blockingMode === 'open' ? 0 : 1
   if (coor.offset === 0) {
     domCoor = {
       container: comp.el.getNativeElement(),
-      offset: 0
+      offset: offset
     }
   } else {
     domCoor = {
       container: comp.el.getNativeElement(),
-      offset: 1
+      offset: offset+1
     }
   }
   return domCoor
 }
 
 IsolatedNodeComponent.getDOMCoordinates = function(comp) {
+  // let el = comp.el
+  // let parent = el.parentNode
+  // let childIdx = parent.getChildIndex(el)
+  // return {
+  //   start: {
+  //     container: parent.getNativeElement(),
+  //     offset: childIdx
+  //   },
+  //   end: {
+  //     container: parent.getNativeElement(),
+  //     offset: childIdx+1
+  //   }
+  // }
   let el = comp.el
-  let parent = el.parentNode
-  let childIdx = parent.getChildIndex(el)
+  let offset = comp.blockingMode === 'open' ? 0 : 1
   return {
     start: {
-      container: parent.getNativeElement(),
-      offset: childIdx
+      container: el.getNativeElement(),
+      offset: offset
     },
     end: {
-      container: parent.getNativeElement(),
-      offset: childIdx+1
+      container: el.getNativeElement(),
+      offset: offset+1
     }
   }
 }

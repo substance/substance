@@ -207,7 +207,7 @@ class ContainerEditor extends Surface {
     }.bind(this))
   }
 
-  _handleTabKey(event) {
+  _handleSpaceKey(event) {
     let sel = this.getEditorSession().getSelection()
     if (sel.isNodeSelection() && sel.isFull()) {
       let comp = this.refs[sel.getNodeId()]
@@ -218,9 +218,8 @@ class ContainerEditor extends Surface {
         return
       }
     }
-    super._handleTabKey(event)
+    super._handleSpaceKey(event)
   }
-
 
   // Used by Clipboard
   isContainerEditor() {

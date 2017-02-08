@@ -75,6 +75,19 @@ class SelectionState {
     return Boolean(this._state.isLast)
   }
 
+  get(key) {
+    return this._state[key]
+  }
+
+  // used to store custom states (e.g. IsolatedNodeComponent uses this)
+  set(key, value) {
+    this._state
+    if (this._state[key]) {
+      throw new Error(`State ${key} is already set`)
+    }
+    this._state[key] = value
+  }
+
   _deriveState(sel) {
     this._resetState()
     this._deriveContainerSelectionState(sel)
