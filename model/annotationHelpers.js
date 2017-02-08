@@ -81,8 +81,8 @@ function deletedText(doc, path, startOffset, endOffset) {
     if (pos2 <= start) {
       newStart -= length;
       newEnd -= length;
-      doc.set([anno.id, 'startOffset'], newStart);
-      doc.set([anno.id, 'endOffset'], newEnd);
+      doc.set([anno.id, 'start', 'offset'], newStart);
+      doc.set([anno.id, 'end', 'offset'], newEnd);
     } else {
       if (pos1 <= start) {
         newStart = start - Math.min(pos2-pos1, start-pos1);
@@ -190,7 +190,7 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
       newStart = newOffset + a.start.offset - offset;
       newEnd = newOffset + a.end.offset - offset;
       doc.set([a.id, 'start', 'path'], newPath);
-      doc.set([a.id, "start', 'offset"], newStart);
+      doc.set([a.id, 'start', 'offset'], newStart);
       doc.set([a.id, 'end', 'path'], newPath);
       doc.set([a.id, 'end', 'offset'], newEnd);
     }

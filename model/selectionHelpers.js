@@ -117,7 +117,7 @@ export function setCursor(tx, node, containerId, mode) {
 }
 
 export function selectNode(tx, nodeId, containerId) {
-  tx.setSelection(createNodeSelection(tx, nodeId, containerId))
+  tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerId }))
 }
 
 export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, surfaceId}) {
