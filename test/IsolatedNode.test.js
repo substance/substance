@@ -8,9 +8,7 @@ test("IsolatedNodes should be 'not-selected' when selection is null", function(t
   let { editorSession, editor } = setupEditor(t, nestedContainers)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection(null)
-  isolatedNodes.forEach(function(isolated){
-    t.ok(isolated.isNotSelected(), "isolated node '"+isolated.getId()+"' should not be selected.")
-  })
+  isolatedNodes.forEach(n => _notSelected(t, n))
   t.end()
 })
 
@@ -42,10 +40,7 @@ test("IsolatedNode should be 'selected' with node selection", function(t) {
     'body/c1': 'selected',
     'body/c1/c1/c2': undefined,
   }
-  isolatedNodes.forEach(function(isolated){
-    let id = isolated.getId()
-    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
-  })
+  isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
 })
 
@@ -67,10 +62,7 @@ test("IsolatedNode should be 'co-selected' with spanning container selection", f
     // it is a state related to the parent container
     'body/c1/c1/c2/c2': undefined,
   }
-  isolatedNodes.forEach(function(isolated){
-    let id = isolated.getId()
-    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
-  })
+  isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
 })
 
@@ -87,10 +79,7 @@ test("IsolatedNode should be 'focused' when having the selection", function(t) {
     'body/c1': 'focused',
     'body/c1/c1/c2': undefined,
   }
-  isolatedNodes.forEach(function(isolated){
-    let id = isolated.getId()
-    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
-  })
+  isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
 })
 
@@ -107,10 +96,7 @@ test("IsolatedNode should be 'co-focused' when child is having the selection", f
     'body/c1': 'co-focused',
     'body/c1/c1/c2': 'focused',
   }
-  isolatedNodes.forEach(function(isolated){
-    let id = isolated.getId()
-    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
-  })
+  isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
 })
 
@@ -128,16 +114,21 @@ test("Issue #696: IsolatedNode should detect 'co-focused' robustly in presence o
     surfaceId: 'body/sn2/sn2.title'
   })
   let expected = {
-    'body/sn': undefined,
+    'body/sn': null,
     'body/sn2': 'focused',
   }
-  isolatedNodes.forEach(function(isolated){
-    let id = isolated.getId()
-    t.equal(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
-  })
+  isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
 })
 
+function _notSelected(t, isolated) {
+  t.ok(isolated.isNotSelected(), "isolated node '"+isolated.getId()+"' should not be selected.")
+}
+
+function _modeOk(t, isolated, expected) {
+  let id = isolated.getId()
+  t.looseEqual(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
+}
 
 function _twoStructuredNodes(doc) {
   let body = doc.get('body')
