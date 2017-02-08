@@ -21,7 +21,7 @@ const test = module('Editing')
 // TODO: we should enable t.sandbox for all tests so that this implementation is
 // tested on all platforms
 
-test("[IT1]: Inserting text with cursor in the middle of a TextProperty", function(t) {
+test("IT1: Inserting text with cursor in the middle of a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -38,7 +38,7 @@ test("[IT1]: Inserting text with cursor in the middle of a TextProperty", functi
   t.end()
 })
 
-test("[IT2]: Inserting text with cursor within TextProperty inside annotation", function(t) {
+test("IT2: Inserting text with cursor within TextProperty inside annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -57,7 +57,7 @@ test("[IT2]: Inserting text with cursor within TextProperty inside annotation", 
   t.end()
 })
 
-test("[IT3]: Inserting text with cursor within TextProperty at the start of an annotation", function(t) {
+test("IT3: Inserting text with cursor within TextProperty at the start of an annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -77,7 +77,7 @@ test("[IT3]: Inserting text with cursor within TextProperty at the start of an a
   t.end()
 })
 
-test("[IT4]: Inserting text with cursor within TextProperty at the end of an annotation", function(t) {
+test("IT4: Inserting text with cursor within TextProperty at the end of an annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -97,7 +97,7 @@ test("[IT4]: Inserting text with cursor within TextProperty at the end of an ann
   t.end()
 })
 
-test("[IT5]: Inserting text with range within TextProperty", function(t) {
+test("IT5: Inserting text with range within TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -116,7 +116,7 @@ test("[IT5]: Inserting text with range within TextProperty", function(t) {
   t.end()
 })
 
-test("[IT6]: Inserting text with range within TextProperty overlapping an annotion aligned at the left side", function(t) {
+test("IT6: Inserting text with range within TextProperty overlapping an annotion aligned at the left side", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
   editorSession.transaction((tx) => {
@@ -139,7 +139,7 @@ test("[IT6]: Inserting text with range within TextProperty overlapping an annoti
   t.end()
 })
 
-test("[IT7]: Inserting text with range within TextProperty inside an annotion", function(t) {
+test("IT7: Inserting text with range within TextProperty inside an annotion", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -161,7 +161,7 @@ test("[IT7]: Inserting text with range within TextProperty inside an annotion", 
   t.end()
 })
 
-test("[IT8]: Inserting text with range within TextProperty starting inside an annotion", function(t) {
+test("IT8: Inserting text with range within TextProperty starting inside an annotion", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
   editorSession.transaction((tx) => {
@@ -184,7 +184,7 @@ test("[IT8]: Inserting text with range within TextProperty starting inside an an
   t.end()
 })
 
-test("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
+test("II1: Inserting InlineNode node into a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
@@ -209,7 +209,7 @@ test("[II1]: Inserting InlineNode node into a TextProperty", function(t) {
   t.end()
 })
 
-test("[IB2]: Inserting BlockNode using cursor at start of a TextNode", function(t) {
+test("IB2: Inserting BlockNode using cursor at start of a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -233,7 +233,18 @@ test("[IB2]: Inserting BlockNode using cursor at start of a TextNode", function(
   t.end()
 })
 
-test("[DR2]: Deleting using DELETE with cursor at the end of a TextNode at the end of a Container", function(t) {
+test("D-0: Deleting without selection", (t) => {
+  let { editorSession } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection(null)
+  t.doesNotThrow(() => {
+    editorSession.transaction((tx) => {
+      tx.deleteCharacter('right')
+    })
+  }, 'Should not throw')
+  t.end()
+})
+
+test("DR2: Deleting using DELETE with cursor at the end of a TextNode at the end of a Container", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -254,7 +265,7 @@ test("[DR2]: Deleting using DELETE with cursor at the end of a TextNode at the e
   t.end()
 })
 
-test("[DR3]: Deleting using DELETE with cursor in the middle of a TextProperty", function(t) {
+test("DR3: Deleting using DELETE with cursor in the middle of a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -271,7 +282,7 @@ test("[DR3]: Deleting using DELETE with cursor in the middle of a TextProperty",
   t.end()
 })
 
-test("[DR4-1]: Deleting using DELETE with cursor inside an empty TextNode and TextNode as successor", function(t) {
+test("DR4-1: Deleting using DELETE with cursor inside an empty TextNode and TextNode as successor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -293,7 +304,7 @@ test("[DR4-1]: Deleting using DELETE with cursor inside an empty TextNode and Te
   t.end()
 })
 
-test("[DR4-2]: Deleting using DELETE with cursor inside an empty TextNode and IsolatedNode as successor", function(t) {
+test("DR4-2: Deleting using DELETE with cursor inside an empty TextNode and IsolatedNode as successor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _block1)
   editorSession.setSelection({
     type: 'property',
@@ -313,7 +324,7 @@ test("[DR4-2]: Deleting using DELETE with cursor inside an empty TextNode and Is
   t.end()
 })
 
-test("[DR4-3]: Deleting using DELETE with cursor inside an empty TextNode and List as successor", function(t) {
+test("DR4-3: Deleting using DELETE with cursor inside an empty TextNode and List as successor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -333,7 +344,7 @@ test("[DR4-3]: Deleting using DELETE with cursor inside an empty TextNode and Li
   t.end()
 })
 
-test("[DR5-1]: Deleting using DELETE with cursor at the end of a non-empty TextNode and TextNode as successor", function(t) {
+test("DR5-1: Deleting using DELETE with cursor at the end of a non-empty TextNode and TextNode as successor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -354,7 +365,7 @@ test("[DR5-1]: Deleting using DELETE with cursor at the end of a non-empty TextN
   t.end()
 })
 
-test("[DR5-2]: Deleting using DELETE with cursor at the end of a non-empty TextNode and IsolatedNode as successor", function(t) {
+test("DR5-2: Deleting using DELETE with cursor at the end of a non-empty TextNode and IsolatedNode as successor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1)
   editorSession.setSelection({
     type: 'property',
@@ -379,7 +390,7 @@ test("[DR5-2]: Deleting using DELETE with cursor at the end of a non-empty TextN
 // TODO: test DR5 with list as successor
 
 
-test("[DL3]: Deleting using BACKSPACE with cursor in the middle of a TextProperty", function(t) {
+test("DL3: Deleting using BACKSPACE with cursor in the middle of a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
@@ -397,7 +408,7 @@ test("[DL3]: Deleting using BACKSPACE with cursor in the middle of a TextPropert
   t.end()
 })
 
-test("[DL4-1]: Deleting using BACKSPACE with cursor inside an empty TextNode and TextNode as predecessor", function(t) {
+test("DL4-1: Deleting using BACKSPACE with cursor inside an empty TextNode and TextNode as predecessor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -417,7 +428,7 @@ test("[DL4-1]: Deleting using BACKSPACE with cursor inside an empty TextNode and
   t.end()
 })
 
-test("[DL4-2]: Deleting using BACKSPACE with cursor inside an empty TextNode and IsolatedNode as predecessor", function(t) {
+test("DL4-2: Deleting using BACKSPACE with cursor inside an empty TextNode and IsolatedNode as predecessor", (t) => {
   let { editorSession, doc } = setupEditor(t, _block1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -438,7 +449,7 @@ test("[DL4-2]: Deleting using BACKSPACE with cursor inside an empty TextNode and
 
 // TODO: DL4 with List as predecessor
 
-test("[DL5-1]: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and TextNode as predecessor", function(t) {
+test("DL5-1: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and TextNode as predecessor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -459,7 +470,7 @@ test("[DL5-1]: Deleting using BACKSPACE with cursor at the start of a non-empty 
   t.end()
 })
 
-test("[DL5-2]: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and IsolatedNode as predecessor", function(t) {
+test("DL5-2: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and IsolatedNode as predecessor", (t) => {
   let { editorSession, doc } = setupEditor(t, _block1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -479,7 +490,7 @@ test("[DL5-2]: Deleting using BACKSPACE with cursor at the start of a non-empty 
   t.end()
 })
 
-test("[DL13]: Deleting using BACKSPACE with cursor after IsolatedNode", function(t) {
+test("DL13: Deleting using BACKSPACE with cursor after IsolatedNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -501,7 +512,7 @@ test("[DL13]: Deleting using BACKSPACE with cursor after IsolatedNode", function
   t.end()
 })
 
-test("[DL16]: Deleting using BACKSPACE with cursor before IsolatedNode with TextNode as predecessor", function(t) {
+test("DL16: Deleting using BACKSPACE with cursor before IsolatedNode with TextNode as predecessor", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block2)
   editorSession.setSelection({
     type: 'node',
@@ -523,7 +534,7 @@ test("[DL16]: Deleting using BACKSPACE with cursor before IsolatedNode with Text
   t.end()
 })
 
-test("[DL17]: Deleting using BACKSPACE with cursor before IsolatedNode and IsolatedNode as predecessor", function(t) {
+test("DL17: Deleting using BACKSPACE with cursor before IsolatedNode and IsolatedNode as predecessor", (t) => {
   let { editorSession, doc } = setupEditor(t, _block1, _block2)
   editorSession.setSelection({
     type: 'node',
@@ -543,7 +554,7 @@ test("[DL17]: Deleting using BACKSPACE with cursor before IsolatedNode and Isola
   t.end()
 })
 
-test("[D10]: Deleting an entirely selected IsolatedNode", function(t) {
+test("D10: Deleting an entirely selected IsolatedNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
@@ -564,7 +575,7 @@ test("[D10]: Deleting an entirely selected IsolatedNode", function(t) {
   t.end()
 })
 
-test("[D20-1]: Deleting a range starting before a TextNode and ending after a TextNode", function(t) {
+test("D20-1: Deleting a range starting before a TextNode and ending after a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
   let p1 = doc.get('p1')
   let p2 = doc.get('p2')
@@ -591,7 +602,7 @@ test("[D20-1]: Deleting a range starting before a TextNode and ending after a Te
   t.end()
 })
 
-test("[D20-2]: Deleting a range starting in the middle of a TextNode and ending after a TextNode", function(t) {
+test("D20-2: Deleting a range starting in the middle of a TextNode and ending after a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
   let p1 = doc.get('p1')
   let p2 = doc.get('p2')
@@ -618,7 +629,7 @@ test("[D20-2]: Deleting a range starting in the middle of a TextNode and ending 
   t.end()
 })
 
-test("[D20-3]: Deleting a range starting before a TextNode and ending in the middle of a TextNode", function(t) {
+test("D20-3: Deleting a range starting before a TextNode and ending in the middle of a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
   let p1 = doc.get('p1')
   let p2 = doc.get('p2')
@@ -645,7 +656,7 @@ test("[D20-3]: Deleting a range starting before a TextNode and ending in the mid
   t.end()
 })
 
-test("[D20-4]: Deleting a range starting in the middle of a TextNode and ending in the middle of a TextNode", function(t) {
+test("D20-4: Deleting a range starting in the middle of a TextNode and ending in the middle of a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
   let p1 = doc.get('p1')
   let p2 = doc.get('p2')
@@ -672,7 +683,7 @@ test("[D20-4]: Deleting a range starting in the middle of a TextNode and ending 
   t.end()
 })
 
-test("[D20-5]: Deleting a range starting in the middle of a TextNode and ending in the middle of a ListItem", function(t) {
+test("D20-5: Deleting a range starting in the middle of a TextNode and ending in the middle of a ListItem", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _l1)
   let p1 = doc.get('p1')
   let l1 = doc.get('l1')
@@ -698,7 +709,7 @@ test("[D20-5]: Deleting a range starting in the middle of a TextNode and ending 
   t.end()
 })
 
-test("[D20-6]: Deleting a range starting in the middle of a ListItem and ending in the middle of a TextNode", function(t) {
+test("D20-6: Deleting a range starting in the middle of a ListItem and ending in the middle of a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1, _block1, _block2, _p1)
   let p1 = doc.get('p1')
   let l1 = doc.get('l1')
@@ -725,7 +736,7 @@ test("[D20-6]: Deleting a range starting in the middle of a ListItem and ending 
   t.end()
 })
 
-test("[D20-7]: Deleting a range within a ListItem", function(t) {
+test("D20-7: Deleting a range within a ListItem", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   let l1 = doc.get('l1')
   editorSession.setSelection({
@@ -749,7 +760,7 @@ test("[D20-7]: Deleting a range within a ListItem", function(t) {
   t.end()
 })
 
-test("[D20-8]: Deleting a range across two ListItems within the same List", function(t) {
+test("D20-8: Deleting a range across two ListItems within the same List", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   let l1 = doc.get('l1')
   editorSession.setSelection({
@@ -773,11 +784,64 @@ test("[D20-8]: Deleting a range across two ListItems within the same List", func
   t.end()
 })
 
+test("BR1: Breaking without selection", (t) => {
+  let { editorSession } = setupEditor(t, _p1)
+  editorSession.setSelection(null)
+  t.doesNotThrow(() => {
+    editorSession.transaction((tx) => {
+      tx.break()
+    })
+  })
+  t.end()
+})
+
+test("BR2: Breaking a TextNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.break()
+  })
+  let body = doc.get('body')
+  t.equals(body.length, 2, 'There should be 2 nodes')
+  let first = body.getChildAt(0)
+  let second = body.getChildAt(1)
+  t.equals(second.type, 'paragraph', 'Second should be a paragraph')
+  t.equals(first.getText(), P1_TEXT.slice(0,3), 'First should be truncated')
+  t.equals(second.getText(), P1_TEXT.slice(3), '.. and second should contain the tail')
+  t.end()
+})
+
+test("BR3: Breaking annotated text with cursor before the annotation", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 1,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.break()
+  })
+  let body = doc.get('body')
+  let second = body.getChildAt(1)
+  let anno = doc.get('s1')
+  t.deepEqual(anno.start.path, second.getPath(), 'Annotation should now be on the second paragraph')
+  t.equal(anno.start.offset, 2, '.. starting at character 2')
+  t.equal(anno.end.offset, 4, '.. ending at character 4')
+  t.end()
+})
+
+
 // List Editing
 // ------------
 
 // TODO: add specification
-test("[L1]: Inserting text into a ListItem", function(t) {
+test("L1: Inserting text into a ListItem", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -795,7 +859,7 @@ test("[L1]: Inserting text into a ListItem", function(t) {
   t.end()
 })
 
-test("[L2]: Breaking a ListItem with cursor in the middle of text", function(t) {
+test("L2: Breaking a ListItem with cursor in the middle of text", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -818,7 +882,7 @@ test("[L2]: Breaking a ListItem with cursor in the middle of text", function(t) 
   t.end()
 })
 
-test("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
+test("L3: Breaking a ListItem with cursor at begin of text", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -841,7 +905,7 @@ test("[L3]: Breaking a ListItem with cursor at begin of text", function(t) {
   t.end()
 })
 
-test("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
+test("L4: Splitting a List by breaking an empty ListItem", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1, _l1_empty)
   editorSession.setSelection({
     type: 'property',
@@ -870,7 +934,7 @@ test("[L4]: Splitting a List by breaking an empty ListItem", function(t) {
   t.end()
 })
 
-test("[L5-1]: Toggling a ListItem using BACKSPACE", function(t) {
+test("L5-1: Toggling a ListItem using BACKSPACE", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -895,7 +959,7 @@ test("[L5-1]: Toggling a ListItem using BACKSPACE", function(t) {
   t.end()
 })
 
-test("[L5-2]: Merging two ListItems using DELETE", function(t) {
+test("L5-2: Merging two ListItems using DELETE", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -917,7 +981,7 @@ test("[L5-2]: Merging two ListItems using DELETE", function(t) {
   t.end()
 })
 
-test("[L6-1]: Merging a List into previous List using DELETE", function(t) {
+test("L6-1: Merging a List into previous List using DELETE", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1, _l2)
   editorSession.setSelection({
     type: 'property',
@@ -937,7 +1001,7 @@ test("[L6-1]: Merging a List into previous List using DELETE", function(t) {
   t.end()
 })
 
-test("[L8-1]: Toggling a paragraph into a List", function(t) {
+test("L8-1: Toggling a paragraph into a List", (t) => {
   let { doc, editorSession} = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
@@ -959,7 +1023,7 @@ test("[L8-1]: Toggling a paragraph into a List", function(t) {
   t.end()
 })
 
-test("[L8-2]: Toggling first list-item into a paragraph", function(t) {
+test("L8-2: Toggling first list-item into a paragraph", (t) => {
   let { doc, editorSession} = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -981,7 +1045,7 @@ test("[L8-2]: Toggling first list-item into a paragraph", function(t) {
   t.end()
 })
 
-test("[L8-2]: Toggling last list-item into a paragraph", function(t) {
+test("L8-2: Toggling last list-item into a paragraph", (t) => {
   let { doc, editorSession} = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -1003,7 +1067,7 @@ test("[L8-2]: Toggling last list-item into a paragraph", function(t) {
   t.end()
 })
 
-test("[L8-2]: Toggling a middle list-item into a paragraph splitting the list", function(t) {
+test("L8-2: Toggling a middle list-item into a paragraph splitting the list", (t) => {
   let { doc, editorSession} = setupEditor(t, _l1, _li3)
   editorSession.setSelection({
     type: 'property',
@@ -1028,7 +1092,7 @@ test("[L8-2]: Toggling a middle list-item into a paragraph splitting the list", 
   t.end()
 })
 
-test("[L9-1]: Indenting a ListItem", function(t) {
+test("L9-1: Indenting a ListItem", (t) => {
   let { doc, editorSession } = setupEditor(t, _l1)
   editorSession.setSelection({
     type: 'property',
@@ -1044,7 +1108,7 @@ test("[L9-1]: Indenting a ListItem", function(t) {
   t.end()
 })
 
-test("[L9-1]: Dedenting a ListItem", function(t) {
+test("L9-1: Dedenting a ListItem", (t) => {
   let { doc, editorSession } = setupEditor(t, _l1, _li1plus)
   editorSession.setSelection({
     type: 'property',
@@ -1060,7 +1124,7 @@ test("[L9-1]: Dedenting a ListItem", function(t) {
   t.end()
 })
 
-test("[IN-1]: Inserting text in an IsolatedNode", function(t) {
+test("IN-1: Inserting text in an IsolatedNode", (t) => {
   let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -1076,7 +1140,7 @@ test("[IN-1]: Inserting text in an IsolatedNode", function(t) {
   t.end()
 })
 
-test("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
+test("IN-2: Deleting a character in an IsolatedNode", (t) => {
   let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'property',
@@ -1094,7 +1158,7 @@ test("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
 
 
 
-// test("Create property annotation for a given property selection", function(t) {
+// test("Create property annotation for a given property selection", (t) => {
 //   var doc = fixture(headersAndParagraphs)
 
 //   // Selected text 'Paragraph' in p1
@@ -1119,7 +1183,7 @@ test("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
 //   t.end()
 // })
 
-// test("Create container annotation for a given container selection", function(t) {
+// test("Create container annotation for a given container selection", (t) => {
 //   var doc = fixture(headersAndParagraphs)
 
 //   // Selected text 'Paragraph' in p1
@@ -1146,7 +1210,7 @@ test("[IN-2]: Deleting a character in an IsolatedNode", function(t) {
 //   t.end()
 // })
 
-test("[C-1] Copying a property selection", function(t) {
+test("C-1 Copying a property selection", (t) => {
   let { doc } = setupEditor(t, headersAndParagraphs)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1163,7 +1227,7 @@ test("[C-1] Copying a property selection", function(t) {
   t.end()
 })
 
-test("[C-2] Copying a property selection with annotated text", function(t) {
+test("C-2 Copying a property selection with annotated text", (t) => {
   let { doc } = setupEditor(t, headersAndParagraphs)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1183,7 +1247,7 @@ test("[C-2] Copying a property selection with annotated text", function(t) {
   t.end()
 })
 
-test("[C-3] Copying a container selection", function(t) {
+test("C-3 Copying a container selection", (t) => {
   let { doc } = setupEditor(t, headersAndParagraphs)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1208,7 +1272,7 @@ test("[C-3] Copying a container selection", function(t) {
   t.end()
 })
 
-test("[C-4] Copying a paragraph", function(t) {
+test("C-4 Copying a paragraph", (t) => {
   let { doc } = setupEditor(t, _p1, _p2)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1225,7 +1289,7 @@ test("[C-4] Copying a paragraph", function(t) {
   t.end()
 })
 
-test("[C-5]: Copying two ListItems", function(t) {
+test("C-5: Copying two ListItems", (t) => {
   let { doc } = setupEditor(t, _l1)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1249,7 +1313,7 @@ test("[C-5]: Copying two ListItems", function(t) {
   t.end()
 })
 
-test("[C-6]: Copying a paragraph and a ListItem", function(t) {
+test("C-6: Copying a paragraph and a ListItem", (t) => {
   let { doc } = setupEditor(t, _p1, _l1)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1271,7 +1335,7 @@ test("[C-6]: Copying a paragraph and a ListItem", function(t) {
   t.end()
 })
 
-test("[C-7] Copying a table", function(t) {
+test("C-7 Copying a table", (t) => {
   let { doc } = setupEditor(t, _t1)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1294,7 +1358,7 @@ test("[C-7] Copying a table", function(t) {
   t.end()
 })
 
-test("[C-8] Copying a sparse table", function(t) {
+test("C-8 Copying a sparse table", (t) => {
   let { doc } = setupEditor(t, _t1_sparse)
   let editor = new EditingInterface(doc)
   editor.setSelection({
@@ -1320,7 +1384,7 @@ test("[C-8] Copying a sparse table", function(t) {
 // we must make sure to check that things are cloned correctly,
 // e.g., not that inadvertantly the copy references one of the original children
 
-test("[CP-5]: Copy and Pasting a List", function(t) {
+test("CP-5: Copy and Pasting a List", (t) => {
   let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -1352,7 +1416,7 @@ test("[CP-5]: Copy and Pasting a List", function(t) {
   t.end()
 })
 
-test("[CP-6]: Copy and Pasting a List partially", function(t) {
+test("CP-6: Copy and Pasting a List partially", (t) => {
   let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1)
   editorSession.transaction((tx) => {
     tx.setSelection({
@@ -1384,7 +1448,7 @@ test("[CP-6]: Copy and Pasting a List partially", function(t) {
   t.end()
 })
 
-test("[CP-7] Copy and Pasting a table", function(t) {
+test("CP-7 Copy and Pasting a table", (t) => {
   let { doc, editorSession } = setupEditor(t, _t1, _empty)
   editorSession.setSelection({
     type: 'node',
@@ -1419,7 +1483,7 @@ test("[CP-7] Copy and Pasting a table", function(t) {
   t.end()
 })
 
-// test("[CP-8] Copy and Pasting a sparse table", function(t) {
+// test("CP-8 Copy and Pasting a sparse table", (t) => {
 //   let { doc } = setupEditor(t, _t1_sparse)
 //   let editor = new EditingInterface(doc)
 //   editor.setSelection({
