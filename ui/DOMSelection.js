@@ -27,6 +27,9 @@ class DOMSelection {
     if (inBrowser) {
       this.wRange = window.document.createRange()
     }
+    // keeping the last DOM and Model coordinates
+    // TODO: why are we doing this?
+    this.state = { dom: null, model: null }
   }
 
   /**
@@ -60,18 +63,17 @@ class DOMSelection {
     @returns {model/Range}
   */
   mapDOMSelection(options) {
-    let range
     let wSel = window.getSelection()
+    let state = this.state
+    let range
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
     if (DEBUG) console.info('DOM->Model: ', wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
-    if (wSel.rangeCount === 0) {
-      return null;
-    }
+    if (wSel.rangeCount === 0) return _null()
     let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
     if (wSel.isCollapsed) {
       let coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options)
-      if (!coor) return null
+      if (!coor) return _null()
       range = _createRange({
         start: coor,
         end: coor
@@ -81,8 +83,15 @@ class DOMSelection {
       let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
       range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
     }
-    if (DEBUG) console.info('DOM->Model: range ', range ? range.toString() : null);
+    if (DEBUG) console.info('DOM->Model: range ', range ? range.toString() : null)
+    state.model = range
     return range
+
+    function _null() {
+      state.dom = null
+      state.model = null
+      return null
+    }
   }
 
   /**
@@ -93,45 +102,33 @@ class DOMSelection {
   setSelection(sel) {
     // HACK: ignore this if not Browser (e.g. when running the test suite in node)
     if (!inBrowser) return
-    // console.log('### DOMSelection: setting selection', sel.toString());
-    let {start, end} = this.mapModelToDOMCoordinates(sel)
-    if (!start) {
-      this.clear()
-      return
-    }
-    // if there is a range then set replace the window selection accordingly
+    let state = this.state
     let wSel = window.getSelection()
     let wRange = this.wRange
-    // if (wSel.rangeCount > 0) {
-    //   wRange = wSel.getRangeAt(0)
-    // } else {
-    //   wRange = this._wrange
-    // }
-    wSel.removeAllRanges()
-    if (sel.isCollapsed()) {
-      wRange.setStart(start.container, start.offset)
-      wRange.setEnd(start.container, start.offset)
+    if (!sel || sel.isNull()) return this.clear()
+    // console.log('### DOMSelection: setting selection', sel.toString());
+    let {start, end} = this.mapModelToDOMCoordinates(sel)
+    if (!start) return this.clear()
+    if (sel.isReverse()) {
+      [start, end] = [end, start]
+    }
+    state.dom = {
+      anchorNode: start.container,
+      anchorOffset: start.offset,
+      focusNode: end.container,
+      focusOffset: end.offset
+    }
+    _set(state.dom)
+
+    function _set({anchorNode, anchorOffset, focusNode, focusOffset}) {
+      wSel.removeAllRanges()
+      wRange.setStart(anchorNode, anchorOffset)
+      wRange.setEnd(anchorNode, anchorOffset)
       wSel.addRange(wRange)
-    } else {
-      if (sel.isReverse()) {
-        // console.log('DOMSelection: rendering a reverse selection.');
-        [start, end] = [end, start]
-        // HACK: using wRange setEnd does not work reliably
-        // so we set just the start anchor
-        // and then use window.Selection.extend()
-        // unfortunately we are not able to test this behavior as it needs
-        // triggering native keyboard events
-        wRange.setStart(start.container, start.offset)
-        wRange.setEnd(start.container, start.offset)
-        wSel.addRange(wRange)
-        wSel.extend(end.container, end.offset)
-      } else {
-        wRange.setStart(start.container, start.offset)
-        wRange.setEnd(end.container, end.offset)
-        wSel.addRange(wRange)
+      if (focusNode !== anchorOffset || focusOffset !== anchorOffset) {
+        wSel.extend(focusNode, focusOffset)
       }
     }
-    // console.log('Model->DOMSelection: mapped selection to DOM', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
   }
 
   mapModelToDOMCoordinates(sel) {
@@ -236,6 +233,8 @@ class DOMSelection {
   */
   clear() {
     window.getSelection().removeAllRanges()
+    this.state.dom = null
+    this.state.model = null
   }
 
   collapse(dir) {
