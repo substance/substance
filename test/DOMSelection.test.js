@@ -3,6 +3,7 @@ import setDOMSelection from '../util/setDOMSelection'
 import EditingInterface from '../model/EditingInterface'
 import setupEditor from './fixture/setupEditor'
 import checkValues from './fixture/checkValues'
+import { _p1, _empty, _t1 } from './fixture/samples'
 
 const test = module('DOMSelection')
 
@@ -143,65 +144,84 @@ test.UI("Rendering a ContainerSelection", function(t) {
   t.end()
 })
 
-// test.UI("Rendering a cursor after inline node", function(t) {
-//   let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
+test.UI("Rendering a cursor after inline node", function(t) {
+  let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
+  let domSelection = surface.context.domSelection
+  let sel = doc.createSelection({
+    type: 'property',
+    path: ['p', 'content'],
+    startOffset: 3,
+    containerId: 'body',
+    surfaceId: 'body'
+  })
+  let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
+  let pSpan = editor.el.find('[data-path="p.content"]')
+  let third = pSpan.getChildAt(2)
+  t.ok(start.container === third.getNativeElement(), 'anchorNode should be correct.')
+  t.equal(start.offset, 0, 'anchorOffset should be correct.')
+  t.ok(end.container === start.container, 'focusNode should be correct.')
+  t.equal(end.offset, 0, 'focusOffset should be correct.')
+  t.end()
+})
+
+test.UI("Rendering a cursor after inline node at the end of a property", function(t) {
+  let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
+  let domSelection = surface.context.domSelection
+  let sel = doc.createSelection({
+    type: 'property',
+    path: ['p', 'content'],
+    startOffset: 13,
+    containerId: 'body',
+    surfaceId: 'body'
+  })
+  let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
+  let pSpan = editor.el.find('[data-path="p.content"]')
+  t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
+  t.equal(start.offset, 6, 'anchorOffset should be correct.')
+  t.ok(end.container === start.container, 'focusNode should be correct.')
+  t.equal(end.offset, 6, 'focusOffset should be correct.')
+  t.end()
+})
+
+// test.UI("Rendering a cursor before isolated node", function(t) {
+//   let { doc, surface } = setupEditor(t, _t1)
 //   let domSelection = surface.context.domSelection
 //   let sel = doc.createSelection({
-//     type: 'property',
-//     path: ['p', 'content'],
-//     startOffset: 3,
+//     type: 'node',
+//     nodeId: 't1',
+//     mode: 'before',
 //     containerId: 'body',
 //     surfaceId: 'body'
 //   })
-//   let [start, end] = domSelection.mapModelToDOMCoordinates(sel)
-
-//   let pSpan = editor.el.find('[data-path="p.content"]')
-//   let third = pSpan.getChildAt(2)
-//   t.ok(start.container === third.getNativeElement(), 'anchorNode should be correct.')
-//   t.equal(start.offset, 0, 'anchorOffset should be correct.')
-//   t.ok(end.container === start.container, 'focusNode should be correct.')
-//   t.equal(end.offset, 0, 'focusOffset should be correct.')
+//   domSelection.setSelection(sel)
+//   // let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
+//   // let pSpan = editor.el.find('[data-path="p.content"]')
+//   // t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
+//   // t.equal(start.offset, 6, 'anchorOffset should be correct.')
+//   // t.ok(end.container === start.container, 'focusNode should be correct.')
+//   // t.equal(end.offset, 6, 'focusOffset should be correct.')
 //   t.end()
 // })
 
-// test.UI("Rendering a cursor after inline nod at the end of a property", function(t) {
-//   let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
+// test.UI("Rendering a cursor after isolated node", function(t) {
+//   let { doc, surface } = setupEditor(t, _t1)
 //   let domSelection = surface.context.domSelection
 //   let sel = doc.createSelection({
-//     type: 'property',
-//     path: ['p', 'content'],
-//     startOffset: 13,
+//     type: 'node',
+//     nodeId: 't1',
+//     mode: 'after',
 //     containerId: 'body',
 //     surfaceId: 'body'
 //   })
-//   let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
-//   let pSpan = editor.el.find('[data-path="p.content"]')
-//   t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
-//   t.equal(start.offset, 6, 'anchorOffset should be correct.')
-//   t.ok(end.container === start.container, 'focusNode should be correct.')
-//   t.equal(end.offset, 6, 'focusOffset should be correct.')
+//   domSelection.setSelection(sel)
+//   // let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
+//   // let pSpan = editor.el.find('[data-path="p.content"]')
+//   // t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
+//   // t.equal(start.offset, 6, 'anchorOffset should be correct.')
+//   // t.ok(end.container === start.container, 'focusNode should be correct.')
+//   // t.equal(end.offset, 6, 'focusOffset should be correct.')
 //   t.end()
 // })
-
-const P1_TEXT = 'abcdef'
-
-function _p1(doc, body) {
-  doc.create({
-    type: 'paragraph',
-    id: 'p1',
-    content: P1_TEXT
-  })
-  body.show('p1')
-}
-
-function _empty(doc, body) {
-  doc.create({
-    type: 'paragraph',
-    id: 'empty',
-    content: ''
-  })
-  body.show('empty')
-}
 
 function surfaceWithParagraphs(doc, body) {
   let tx = new EditingInterface(doc)

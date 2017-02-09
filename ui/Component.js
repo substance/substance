@@ -884,18 +884,6 @@ class Component extends EventEmitter {
     this.el.remove()
   }
 
-  _getContext() {
-    var context = {}
-    var parent = this.getParent()
-    if (parent) {
-      context = extend(context, parent.context)
-      if (parent.getChildContext) {
-        return extend(context, parent.getChildContext())
-      }
-    }
-    return context
-  }
-
   addEventListener() {
     throw new Error("Not supported.")
   }
@@ -912,6 +900,28 @@ class Component extends EventEmitter {
     if (this.el) {
       this.el.click()
     }
+  }
+
+  getComponentPath() {
+    let path = []
+    let comp = this
+    while (comp) {
+      path.unshift(comp)
+      comp = comp.getParent()
+    }
+    return path
+  }
+
+  _getContext() {
+    var context = {}
+    var parent = this.getParent()
+    if (parent) {
+      context = extend(context, parent.context)
+      if (parent.getChildContext) {
+        return extend(context, parent.getChildContext())
+      }
+    }
+    return context
   }
 
 }
@@ -1000,7 +1010,10 @@ function _mountChild(parent, child) {
 
 // NOTE: we keep a reference to the component in all DOMElement instances
 function _unwrapComp(el) {
-  if (el) return el._comp
+  if (el) {
+    if (!el._isDOMElement) el = el._wrapper
+    if (el) return el._comp
+  }
 }
 
 function _unwrapCompStrict(el) {

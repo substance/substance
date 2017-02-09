@@ -408,7 +408,14 @@ class Document extends EventEmitter {
           break
         }
         case 'node': {
-          sel = createNodeSelection(this, data.nodeId, data.containerId, data.mode)
+          sel = createNodeSelection({
+            doc: this,
+            nodeId: data.nodeId,
+            mode: data.mode,
+            containerId: data.containerId,
+            reverse: data.reverse,
+            surfaceId: data.surfaceId
+          })
           break
         }
         case 'custom': {
@@ -554,7 +561,9 @@ class Document extends EventEmitter {
     let inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
-        return NodeSelection._createFromRange(range)
+        // ATTENTION: we only create full NodeSelections
+        // when mapping from the DOM to Model  return new NodeSelection(range.containerId, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
+        return new NodeSelection(range.containerId, range.start.getNodeId(), 'full', range.reverse, range.surfaceId)
       } else {
         return this.createSelection({
           type: 'property',

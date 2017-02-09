@@ -194,6 +194,10 @@ class DocumentNode extends DataNode {
     return Boolean(this.constructor.isList)
   }
 
+  isIsolatedNode() {
+    return !this.isText() && !this.isList()
+  }
+
 }
 
 DocumentNode.prototype._isDocumentNode = true

@@ -29,6 +29,9 @@ class NodeSelection extends Selection {
     this.mode = mode;
     this.reverse = Boolean(reverse);
     this.surfaceId = surfaceId;
+
+    this.start = new Coordinate([nodeId], 0)
+    this.end = new Coordinate([nodeId], 1)
   }
 
   equals(other) {
@@ -126,18 +129,6 @@ NodeSelection.prototype._isNodeSelection = true
 NodeSelection.fromJSON = function(json) {
   return new NodeSelection(json);
 }
-
-NodeSelection._createFromRange = function(range) {
-  let startOffset = range.start.offset
-  let endOffset = range.end.offset
-  let mode
-  if (startOffset === endOffset) {
-    mode = startOffset === 0 ? 'before' : 'after'
-  } else {
-    mode = 'full'
-  }
-  return new NodeSelection(range.containerId, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
-};
 
 // TODO: is this used?
 NodeSelection._createFromCoordinate = function(coor) {

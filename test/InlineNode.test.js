@@ -5,6 +5,9 @@ import twoParagraphs from './fixture/twoParagraphs'
 
 const test = module('InlineNode')
 
+// NOTE: surface ids are a bit ids of Surfaces and IsolatedNodes are not very intuitive
+// body/in1 means parent surface of in1 is body -- while in1 is actually on p1.content, which is not a surface on its own
+
 test("InlineNodes should be not selected when selection is null", function(t) {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
@@ -90,13 +93,6 @@ test("InlineNode should be 'focused' when having the selection", function(t) {
     var id = node.getId()
     t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected') )
   })
-  // used this to play with the sandbox after the test was run, e.g. to find out
-  // the real surface ids
-  // editorSession.on('didUpdate', function(change) {
-  //   if (change.selection) {
-  //     console.log(change.selection)
-  //   }
-  // })
   t.end()
 })
 
@@ -122,10 +118,6 @@ test("InlineNode should be 'focused' when having the selection (II)", function(t
   t.end()
 })
 
-// TODO: ids of Surfaces and IsolatedNodes are not very intuitive
-// body/in1 means parent surface of in1 is body -- while in1 is actually on p1.content, which is not a surface on its own
-// Maybe we can find a better way for the ids
-
 test("InlineNode should be 'co-focused' when a nested inline node has the selection", function(t) {
   let { editorSession, editor } = setupEditor(t, nestedInlineNode)
   let nodes = editor.findAll('.sc-inline-node')
@@ -133,7 +125,7 @@ test("InlineNode should be 'co-focused' when a nested inline node has the select
     type: 'property',
     path: ['sn2', 'title'],
     startOffset: 2,
-    surfaceId: 'body/in1/sn1.title/in2'
+    surfaceId: 'body/in1/sn1.title/in2/sn2.title'
   })
   var expected = {
     'body/in1': 'co-focused',
@@ -153,7 +145,7 @@ function paragraphsWithInlineNodes(doc) {
   twoParagraphs(tx)
   var sn1 = tx.create({
     type: "structured-node",
-    id: "sn",
+    id: "sn1",
     title: "ABCDEFG"
   })
   tx.setSelection({

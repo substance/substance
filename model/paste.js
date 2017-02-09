@@ -4,6 +4,7 @@ import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import Document from '../model/Document'
 import documentHelpers from '../model/documentHelpers'
+import { setCursor } from '../model/selectionHelpers'
 
 /**
   Pastes clipboard content at the current selection
@@ -155,7 +156,8 @@ function _pasteDocument(tx, pasteDoc) {
     // Plus, it uses reflection to create owned nodes recursively,
     // and to transfer attached annotations.
     let newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
-    // ATTENTION: use node.id here, it might have changed by disambiguater
+    // get the node in the targetDocument
+    node = tx.get(newId)
     container.show(newId, insertPos++)
     insertedNodes.push(node)
   }
@@ -164,14 +166,7 @@ function _pasteDocument(tx, pasteDoc) {
     // select the whole pasted block
     let firstNode = insertedNodes[0]
     let lastNode = last(insertedNodes)
-    tx.setSelection({
-      type: 'container',
-      startPath: [firstNode.id],
-      startOffset: 0,
-      endPath: [lastNode.id],
-      endOffset: 1,
-      containerId: containerId
-    })
+    setCursor(tx, lastNode, containerId, 'after')
   }
 }
 

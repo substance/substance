@@ -29,6 +29,23 @@ class TableComponent extends Component {
     return el
   }
 
+  grabFocus(event) {
+    console.log('TableComponent.grabFocus()', event.target)
+
+    let firstCellId = this.props.node.cells[0][0]
+    if (firstCellId) {
+      let comp = this.refs[firstCellId]
+      let node = comp.props.node
+      this.context.editorSession.setSelection({
+        type: 'property',
+        path: node.getPath(),
+        startOffset: node.getLength(),
+        // TODO: would be nice if we could 'hide' these technical details
+        surfaceId: comp.refs.editor.id
+      })
+    }
+  }
+
 }
 
 TableComponent.hasDropzones = true

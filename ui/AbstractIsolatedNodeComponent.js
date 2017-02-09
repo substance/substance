@@ -1,6 +1,6 @@
 import keys from '../util/keys'
-import createSurfaceId from '../util/createSurfaceId'
 import Component from '../ui/Component'
+import platform from '../util/platform'
 
 class AbstractIsolatedNodeComponent extends Component {
 
@@ -8,18 +8,22 @@ class AbstractIsolatedNodeComponent extends Component {
     super(...args)
 
     this.name = this.props.node.id
-    this._id = createSurfaceId(this)
+    this._id = this.context.surface.id +'/'+this.name
     this._state = {
       selectionFragment: null
     }
 
-    this.handleAction('escape', this._escape)
+    this.handleAction('escape', this.escape)
     this.ContentClass = this._getContentClass(this.props.node) || Component
+
+    // NOTE: FF does not allow to navigate contenteditable isles
+    let useBlocker = platform.isFF || !this.ContentClass.noBlocker
+    this.blockingMode = useBlocker ? 'closed' : 'open'
   }
 
   getChildContext() {
     return {
-      surfaceParent: this
+      isolatedNodeComponent: this,
     }
   }
 
@@ -29,10 +33,10 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   didMount() {
-    super.didMount.call(this);
+    super.didMount()
 
     let editorSession = this.context.editorSession
-    editorSession.onRender('selection', this._onSelectionChanged, this)
+    editorSession.onRender('selection', this.onSelectionChanged, this)
   }
 
   dispose() {
@@ -42,38 +46,38 @@ class AbstractIsolatedNodeComponent extends Component {
     editorSession.off(this)
   }
 
-  renderContent($$, node) {
+  renderContent($$, node, options = {}) {
     let ComponentClass = this.ContentClass
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
       return $$(this.__elementTag)
     } else {
-      let props = {
+      let props = Object.assign({
+        disabled: this.props.disabled,
         node: node,
-        disabled: this.isDisabled(),
-        isolatedNodeState: this.state.mode
-      }
-      if (this.state.mode === 'focused') {
-        props.focused = true;
-      }
+        isolatedNodeState: this.state.mode,
+        focused: (this.state.mode === 'focused')
+      }, options)
       return $$(ComponentClass, props)
     }
-  }
-
-  shouldRenderBlocker() {
-    return true
-  }
-
-  shouldSelectOnClick() {
-    return this.state.mode !== 'focused' && this.state.mode !== 'co-focused'
   }
 
   getId() {
     return this._id
   }
 
+  get id() { return this.getId() }
+
   getMode() {
     return this.state.mode
+  }
+
+  isOpen() {
+    return this.blockingMode === 'open'
+  }
+
+  isClosed() {
+    return this.blockingMode === 'closed'
   }
 
   isNotSelected() {
@@ -96,31 +100,11 @@ class AbstractIsolatedNodeComponent extends Component {
     return this.state.mode === 'co-focused'
   }
 
-  isDisabled() {
-    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
+  escape() {
+    this.selectNode()
   }
 
-  _getContentClass(node) {
-    let componentRegistry = this.context.componentRegistry
-    let ComponentClass = componentRegistry.get(node.type)
-    return ComponentClass
-  }
-
-  _getSurfaceParent() {
-    return this.context.surface
-  }
-
-  _getLevel() {
-    let level = 1;
-    let parent = this._getSurfaceParent()
-    while (parent) {
-      level++
-      parent = parent._getSurfaceParent()
-    }
-    return level
-  }
-
-  _onSelectionChanged() {
+  onSelectionChanged() {
     let editorSession = this.context.editorSession
     let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
     if (!newState && this.state.mode) {
@@ -135,42 +119,57 @@ class AbstractIsolatedNodeComponent extends Component {
     event.stopPropagation()
   }
 
-  onClick(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (this.shouldSelectOnClick()) {
-      this._selectNode()
-    }
-  }
-
-  onClickBlocker(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (this.shouldSelectOnClick() && event.target === this.refs.blocker.getNativeElement()) {
-      this._selectNode()
-    }
-  }
-
   onKeydown(event) {
-    event.stopPropagation()
     // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,
     // there is no built-in way of receiving key events in other cases
     // We need a global event listener for keyboard events which dispatches to the current isolated node
     if (event.keyCode === keys.ESCAPE && this.state.mode === 'focused') {
+      event.stopPropagation()
       event.preventDefault()
-      this._escape()
+      this.escape()
     }
   }
 
-  _escape() {
-    this._selectNode()
+  _getContentClass(node) {
+    let componentRegistry = this.context.componentRegistry
+    let ComponentClass = componentRegistry.get(node.type)
+    return ComponentClass
   }
 
-  _stopPropagation(event) {
-    event.stopPropagation()
+  _getSurface(selState) {
+    let surface = selState.get('surface')
+    if (surface === undefined) {
+      let sel = selState.getSelection()
+      if (sel && sel.surfaceId) {
+        let surfaceManager = this.context.surfaceManager
+        surface = surfaceManager.getSurface(sel.surfaceId)
+      } else {
+        surface = null
+      }
+      selState.set('surface', surface)
+    }
+    return surface
   }
 
+  // compute the list of surfaces and isolated nodes
+  // for the given selection
+  _getIsolatedNodes(selState) {
+    let isolatedNodes = selState.get('isolatedNodes')
+    if (!isolatedNodes) {
+      let sel = selState.getSelection()
+      isolatedNodes = []
+      if (sel && sel.surfaceId) {
+        let surfaceManager = this.context.surfaceManager
+        let surface = surfaceManager.getSurface(sel.surfaceId)
+        isolatedNodes = surface.getComponentPath().filter(comp => comp._isAbstractIsolatedNodeComponent)
+      }
+      selState.set('isolatedNodes', isolatedNodes)
+    }
+    return isolatedNodes
+  }
 }
+
+AbstractIsolatedNodeComponent.prototype._isAbstractIsolatedNodeComponent = true
 
 export default AbstractIsolatedNodeComponent

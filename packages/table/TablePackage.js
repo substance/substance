@@ -14,5 +14,13 @@ export default {
     config.addConverter('html', TableCellHTMLConverter)
     config.addConverter('xml', TableHTMLConverter)
     config.addConverter('xml', TableCellHTMLConverter)
+    config.addLabel('table', {
+      en: 'Table',
+      de: 'Tabelle'
+    })
+    config.addLabel('table-cell.content', {
+      en: 'Cell',
+      de: 'Zelle'
+    })
   }
 }

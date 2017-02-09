@@ -1,10 +1,11 @@
 import isString from '../util/isString'
 import keys from '../util/keys'
-import platform from '../util/platform'
+// import platform from '../util/platform'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from '../packages/surface/Surface'
-import RenderingEngine from './RenderingEngine'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
+import RenderingEngine from '../ui/RenderingEngine'
+// import Component from '../ui/Component'
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -145,81 +146,94 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _handleUpOrDownArrowKey(event) {
-    event.stopPropagation()
-    let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
+  _selectNextIsolatedNode(direction) {
     let selState = this.getEditorSession().getSelectionState()
-    let sel = selState.getSelection()
-
-    // Note: this collapses the selection, just to let ContentEditable continue doing a cursor move
-    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
-      this.domSelection.collapse(direction)
+    let node = (direction === 'left') ? selState.getPreviousNode() : selState.getNextNode()
+    if (!node || !node.isIsolatedNode()) return false
+    if (
+      (direction === 'left' && selState.isFirst()) ||
+      (direction === 'right' && selState.isLast())
+    ) {
+      this.getEditorSession().setSelection({
+        type: 'node',
+        nodeId: node.id,
+        containerId: selState.getContainer().id,
+        surfaceId: this.id
+      })
+      return true
     }
-    // HACK: ATM we have a cursor behavior in Chrome and FF when collapsing a selection
-    // e.g. have a selection from up-to-down and the press up, seems to move the focus
-    else if (!platform.isIE && !sel.isCollapsed() && !event.shiftKey) {
-      this._setSelection(sel.collapse(direction))
-    } else if (sel.isCollapsed() && event.altKey) {
-      let container = this.getContainer()
-      let nodePos = container.getPosition(sel.getNodeId())
-      if (event.keyCode === keys.UP && nodePos > 0) {
-        let prev = container.getNodeAt(nodePos-1)
-        if (!prev.isText() && !prev.isList()) {
-          event.preventDefault()
-          this.getEditorSession().setSelection({
-            type: 'node',
-            nodeId: prev.id,
-            mode: 'full',
-            containerId: container.id,
-            surfaceId: this.id
-          })
-          return
-        }
-      } else if (event.keyCode === keys.DOWN && nodePos < container.getLength()) {
-        let next = container.getNodeAt(nodePos+1)
-        if (!next.isText() && !next.isList()) {
-          event.preventDefault()
-          this.getEditorSession().setSelection({
-            type: 'node',
-            nodeId: next.id,
-            mode: 'full',
-            containerId: container.id,
-            surfaceId: this.id
-          })
-          return
-        }
-      }
-    }
-    // Note: we need this timeout so that CE updates the DOM selection first
-    // before we try to map it to the model
-    window.setTimeout(function() {
-      if (!this.isMounted()) return
-      this._updateModelSelection({ direction: direction })
-    }.bind(this))
+    return false
   }
 
   _handleLeftOrRightArrowKey(event) {
     event.stopPropagation()
-    let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getEditorSession().getSelectionState()
-    let sel = selState.getSelection()
-    if (sel.isNodeSelection() && sel.isFull() && !event.shiftKey) {
-      this._setSelection(sel.collapse(direction))
-    } else {
-      super._handleLeftOrRightArrowKey.call(this, event)
+    const doc = this.getDocument()
+    const sel = this.getEditorSession().getSelection()
+    const left = (event.keyCode === keys.LEFT)
+    const right = !left
+    const direction = left ? 'left' : 'right'
+
+    if (sel && !sel.isNull()) {
+      const container = doc.get(sel.containerId, 'strict')
+
+      // Don't react if we are at the boundary of the document
+      if (sel.isNodeSelection()) {
+        let nodePos = container.getPosition(doc.get(sel.getNodeId()))
+        if ((left && nodePos === 0) || (right && nodePos === container.length-1)) {
+          event.preventDefault()
+          return
+        }
+      }
+
+      if (sel.isNodeSelection() && !event.shiftKey) {
+        this.domSelection.collapse(direction)
+      }
     }
+
+    window.setTimeout(() => {
+      this._updateModelSelection({ direction })
+    })
   }
 
-  // _handleEnterKey(event) {
-  //   let sel = this.getEditorSession().getSelection()
-  //   if (sel.isNodeSelection() && sel.isFull()) {
-  //     event.preventDefault()
-  //     event.stopPropagation()
-  //     // TODO: we could enter here
-  //   } else {
-  //     super._handleEnterKey.apply(this, arguments)
-  //   }
-  // }
+  _handleUpOrDownArrowKey(event) {
+    event.stopPropagation()
+    const doc = this.getDocument()
+    const sel = this.getEditorSession().getSelection()
+    const up = (event.keyCode === keys.UP)
+    const down = !up
+    const direction = up ? 'left' : 'right'
+
+    if (sel && !sel.isNull()) {
+      const container = doc.get(sel.containerId, 'strict')
+
+      // Don't react if we are at the boundary of the document
+      if (sel.isNodeSelection()) {
+        let nodePos = container.getPosition(doc.get(sel.getNodeId()))
+        if ((up && nodePos === 0) || (down && nodePos === container.length-1)) {
+          event.preventDefault()
+          return
+        }
+      }
+    }
+
+    window.setTimeout(() => {
+      this._updateModelSelection({ direction })
+    })
+  }
+
+  _handleSpaceKey(event) {
+    let sel = this.getEditorSession().getSelection()
+    if (sel.isNodeSelection() && sel.isFull()) {
+      let comp = this.refs[sel.getNodeId()]
+      if (comp && comp.grabFocus) {
+        event.preventDefault()
+        event.stopPropagation()
+        comp.grabFocus()
+        return
+      }
+    }
+    super._handleSpaceKey(event)
+  }
 
   // Used by Clipboard
   isContainerEditor() {

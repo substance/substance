@@ -1,4 +1,3 @@
-import createSurfaceId from '../../util/createSurfaceId'
 import inBrowser from '../../util/inBrowser'
 import isNil from '../../util/isNil'
 import keys from '../../util/keys'
@@ -67,8 +66,10 @@ class Surface extends Component {
   getChildContext() {
     return {
       surface: this,
-      surfaceParent: this,
-      doc: this.getDocument()
+      doc: this.getDocument(),
+      // HACK: clearing isolatedNodeComponent so that we can easily know
+      // if this surface is within an isolated node
+      isolatedNodeComponent: null
     }
   }
 
@@ -90,8 +91,8 @@ class Surface extends Component {
     }
   }
 
-  didUpdate(oldProps, oldState) {
-    this._update(oldProps, oldState)
+  didUpdate() {
+    this._updateContentEditableState()
   }
 
   render($$) {
@@ -247,6 +248,7 @@ class Surface extends Component {
    * Handle document key down events.
    */
   onKeyDown(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // console.log('Surface.onKeyDown()', this.getId());
 
     // ignore fake IME events (emitted in IE and Chromium)
@@ -286,6 +288,7 @@ class Surface extends Component {
   }
 
   onTextInput(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // console.log("TextInput:", event);
     event.preventDefault()
     event.stopPropagation()
@@ -299,13 +302,15 @@ class Surface extends Component {
   }
 
   // Handling Dead-keys under OSX
-  onCompositionStart() {
+  onCompositionStart(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // just tell DOM observer that we have everything under control
     this._state.skipNextObservation = true
   }
 
   // TODO: do we need this anymore?
   onTextInputShim(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // Filter out non-character keys
     if (
       // Catches most keys that don't produce output (charCode === 0, thus no character)
@@ -337,7 +342,13 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    // ATTENTION: stopping a mousedown stops clicks/mouseup from working in FF
+    if (!this._shouldConsumeEvent(event)) return
+
+    // EXPERIMENTAL: trying to 'reserve' a mousedown event
+    // so that parents know that they shouldn't react
+    // This is similar to event.stopPropagation() but without
+    // side-effects.
+    // Note: some browsers do not do clicks, selections etc. on children if propagation is stopped
     if (event.__reserved__) {
       // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
       return
@@ -346,7 +357,10 @@ class Surface extends Component {
       event.__reserved__ = this
     }
 
-    if (this.state.mode === 'co-focused') {
+    // NOTE: this is here to make sure that this surface is contenteditable
+    // For instance, IsolatedNodeComponent sets contenteditable=false on this element
+    // to achieve selection isolation
+    if (this.isEditable()) {
       this.el.setAttribute('contenteditable', true)
     }
 
@@ -384,10 +398,8 @@ class Surface extends Component {
     //   // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
     //   this.domSelection.clear();
     //   setTimeout(function() {
-    //     if (this.domSelection) {
     //       var sel = this.domSelection.getSelection();
     //       this._setSelection(sel);
-    //     }
     //   }.bind(this));
     // }
 
@@ -401,14 +413,14 @@ class Surface extends Component {
   // When a user right clicks the DOM selection is updated (in Chrome the nearest
   // word gets selected). Like we do with the left mouse clicks we need to sync up
   // our model selection.
-  onContextMenu() {
-    if (this.domSelection) {
-      let sel = this.domSelection.getSelection()
-      this._setSelection(sel)
-    }
+  onContextMenu(event) {
+    if (!this._shouldConsumeEvent(event)) return
+    let sel = this.domSelection.getSelection()
+    this._setSelection(sel)
   }
 
   onMouseUp(e) {
+    if (!this._shouldConsumeEvent(e)) return
     e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
@@ -416,10 +428,8 @@ class Surface extends Component {
     // holds the old value, and is set to the correct selection after this
     // being called.
     setTimeout(function() {
-      if (this.domSelection) {
-        let sel = this.domSelection.getSelection()
-        this._setSelection(sel)
-      }
+      let sel = this.domSelection.getSelection()
+      this._setSelection(sel)
     }.bind(this))
   }
 
@@ -451,21 +461,6 @@ class Surface extends Component {
 
   // Internal implementations
 
-  _update(oldProps, oldState) {
-    this._updateContentEditableState(oldState)
-  }
-
-  _updateContentEditableState() {
-    // ContentEditable management
-    // Note: to be able to isolate nodes, we need to control
-    // how contenteditable is used in a hieriarchy of surfaces.
-    let mode = this.state.mode
-    if (!this.isEditable() || this.props.disabled || mode === 'co-focused') {
-      this.el.removeAttribute('contenteditable')
-    } else {
-      this.el.setAttribute('contenteditable', true)
-    }
-  }
 
   _onSelectionChanged(selection) {
     let newMode = this._deriveModeFromSelection(selection)
@@ -492,9 +487,34 @@ class Surface extends Component {
     return mode
   }
 
-  // surface parent is either a Surface or IsolatedNode
-  _getSurfaceParent() {
-    return this.context.surfaceParent
+  _updateContentEditableState() {
+    // NOTE: managing contenteditable is difficult in
+    // order to achieve a correct behavior for IsolatedNodes
+    // For 'closed' isolated nodes it is important that the parents'
+    // contenteditables are all false. Otherwise, the cursor
+    // can leave the isolated area.
+    let enableContenteditable = false
+    if (this.isEditable() && !this.props.disabled) {
+      enableContenteditable = true
+      if (this.state.mode === 'co-focused') {
+        let selState = this.context.editorSession.getSelectionState()
+        let sel = selState.getSelection()
+        let surface = this.context.surfaceManager.getSurface(sel.surfaceId)
+        if (surface) {
+          let isolatedNodeComponent = surface.context.isolatedNodeComponent
+          if (isolatedNodeComponent) {
+            enableContenteditable = isolatedNodeComponent.isOpen()
+          }
+        }
+      }
+    }
+    if (enableContenteditable) {
+      this.el.setAttribute('contenteditable', true)
+    } else {
+      // TODO: find out what is better
+      this.el.removeAttribute('contenteditable')
+      // this.el.setAttribute('contenteditable', true)
+    }
   }
 
   _focus() {
@@ -516,23 +536,20 @@ class Surface extends Component {
     event.stopPropagation()
 
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getEditorSession().getSelectionState()
-    let sel = selState.getSelection()
-    // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
-    if (selState.isInlineNodeSelection() && !event.shiftKey) {
-      event.preventDefault()
-      this._setSelection(sel.collapse(direction))
-      return
-    }
+    // let selState = this.getEditorSession().getSelectionState()
+    // let sel = selState.getSelection()
+    // // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
+    // if (selState.isInlineNodeSelection() && !event.shiftKey) {
+    //   event.preventDefault()
+    //   this._setSelection(sel.collapse(direction))
+    //   return
+    // }
 
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
       if (!this.isMounted()) return
-      let options = {
-        direction: (event.keyCode === keys.LEFT) ? 'left' : 'right'
-      }
-      this._updateModelSelection(options)
+      this._updateModelSelection({direction})
     }.bind(this))
   }
 
@@ -680,14 +697,18 @@ class Surface extends Component {
     })
   }
 
+  // only take care of events which are emitted on targets which belong to this surface
+  _shouldConsumeEvent(event) {
+    let comp = Component.unwrap(event.target._wrapper)
+    return (comp && (comp === this || comp.context.surface === this))
+  }
+
   // Experimental: used by DragManager
   getSelectionFromEvent(event) {
-    if (this.domSelection) {
-      let domRange = Surface.getDOMRangeFromEvent(event)
-      let sel = this.domSelection.getSelectionForDOMRange(domRange)
-      sel.surfaceId = this.getId()
-      return sel;
-    }
+    let domRange = getDOMRangeFromEvent(event)
+    let sel = this.domSelection.getSelectionForDOMRange(domRange)
+    sel.surfaceId = this.getId()
+    return sel;
   }
 
   setSelectionFromEvent(event) {
@@ -708,37 +729,38 @@ class Surface extends Component {
 
 Surface.prototype._isSurface = true
 
-Surface.getDOMRangeFromEvent = function(evt) {
-  let range, x = evt.clientX, y = evt.clientY
+/*
+  Computes the id of a surface
 
-  // Try the simple IE way first
-  if (document.body.createTextRange) {
-    range = document.body.createTextRange()
-    range.moveToPoint(x, y)
+  With IsolatedNodes, surfaces can be nested.
+  In this case the id can be seen as a path from the top-most to the nested ones
+
+  @examples
+
+  - top-level surface: 'body'
+  - table cell: 'body/t1/t1-A1.content'
+  - figure caption: 'body/fig1/fig1-caption.content'
+  - nested containers: 'body/section1'
+*/
+function createSurfaceId(surface) {
+  let isolatedNodeComponent = surface.context.isolatedNodeComponent
+  if (isolatedNodeComponent) {
+    let parentSurface = isolatedNodeComponent.context.surface
+    // nested containers
+    if (surface.isContainerEditor()) {
+      if (isolatedNodeComponent._isInlineNodeComponent) {
+        return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
+      } else {
+        return parentSurface.id + '/' + surface.name
+      }
+    }
+    // other isolated nodes such as tables, figures, etc.
+    else {
+      return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
+    }
+  } else {
+    return surface.name
   }
-
-  else if (!isNil(document.createRange)) {
-    // Try Mozilla's rangeOffset and rangeParent properties,
-    // which are exactly what we want
-    if (!isNil(evt.rangeParent)) {
-      range = document.createRange()
-      range.setStart(evt.rangeParent, evt.rangeOffset)
-      range.collapse(true)
-    }
-    // Try the standards-based way next
-    else if (document.caretPositionFromPoint) {
-      let pos = document.caretPositionFromPoint(x, y)
-      range = document.createRange()
-      range.setStart(pos.offsetNode, pos.offset)
-      range.collapse(true)
-    }
-    // Next, the WebKit way
-    else if (document.caretRangeFromPoint) {
-      range = document.caretRangeFromPoint(x, y)
-    }
-  }
-
-  return range
 }
 
 export default Surface

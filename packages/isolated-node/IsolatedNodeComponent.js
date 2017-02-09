@@ -1,6 +1,26 @@
-import startsWith from '../../util/startsWith'
+import Component from '../../ui/Component'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
+import Coordinate from '../../model/Coordinate'
 
+const BRACKET = 'X'
+
+/*
+  Isolation Strategies:
+    - default: IsolatedNode renders a blocker the content gets enabled by a double-click.
+    - open: No blocker. Content is enabled when parent surface is.
+
+    > Notes:
+
+      The blocker is used to shield the inner UI and not to interfer with general editing gestures.
+      In some cases however, e.g. a figure (with image and caption), it feels better if the content directly accessible.
+      In this case, the content component must provide a means to drag the node, e.g. set `<img draggable=true>`.
+      This works only in browsers that are able to deal with 'contenteditable' isles,
+      i.e. a structure where the isolated node is contenteditable=false, and inner elements have contenteditable=true
+      Does not work in Edge. Works in Chrome, Safari
+
+      The the default unblocking gesture requires the content to implement a grabFocus() method, which should set the selection
+      into one of the surfaces, or set a CustomSelection.
+*/
 class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   constructor(...args) {
@@ -10,65 +30,51 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
   render($$) {
     let node = this.props.node
     let ContentClass = this.ContentClass
+    let disabled = this.props.disabled
+
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
     let el = $$('div')
     el.addClass(this.getClassNames())
       .addClass('sc-isolated-node')
       .addClass('sm-'+this.props.node.type)
       .attr("data-id", node.id)
-
-    let disabled = this.isDisabled()
-
+    if (disabled) {
+      el.addClass('sm-disabled')
+    }
     if (this.state.mode) {
       el.addClass('sm-'+this.state.mode)
-    } else {
-      el.addClass('sm-not-selected')
     }
-
     if (!ContentClass.noStyle) {
       el.addClass('sm-default-style')
     }
-
-    // shadowing handlers of the parent surface
-    // TODO: extract this into a helper so that we can reuse it anywhere where we want
-    // to prevent propagation to the parent surface
+    // always handle ESCAPE
     el.on('keydown', this.onKeydown)
-      .on('keypress', this._stopPropagation)
-      .on('keyup', this._stopPropagation)
-      .on('compositionstart', this._stopPropagation)
-      .on('textInput', this._stopPropagation)
 
-    if (this.state.mode === 'cursor' && this.state.position === 'before') {
-      el.append(
-        $$('div').addClass('se-cursor').addClass('sm-before')
-      )
+    let shouldRenderBlocker = (this.blockingMode === 'closed') && (this.state.mode !== 'focused')
+    if (!shouldRenderBlocker) {
+      el.addClass('sm-no-blocker')
     }
+
+    // HACK: we need something 'editable' where we can put DOM selection into,
+    // otherwise native cursor navigation gets broken
     el.append(
-      this.renderContent($$, node).ref('content')
+      $$('div').addClass('se-bracket sm-left').ref('left')
+        .append(BRACKET)
     )
 
-    if (disabled) {
-      el.addClass('sm-disabled')
-        .attr('contenteditable', false)
-        // ATTENTION: draggable=true causes trouble in Safari not to work at all
-        // i.e. does not select anymore
-        .attr('draggable', true)
-        .on('mousedown', this._reserveMousedown, this)
-        .on('click', this.onClick)
-    } else {
-      // ATTENTION: see above
-      if (this.state.mode !== 'focused') {
-        el.attr('draggable', true)
-      }
-      el.on('mousedown', this._reserveMousedown, this)
-        .on('click', this.onClick)
-    }
+    let content = this.renderContent($$, node, {
+      disabled: this.props.disabled || shouldRenderBlocker
+    }).ref('content')
+    content.attr('contenteditable', false)
 
-    if (this.state.mode === 'cursor' && this.state.position === 'after') {
-      el.append(
-        $$('div').addClass('se-cursor').addClass('sm-after')
-      )
-    }
+    el.append(content)
+
+    el.append($$(Blocker).ref('blocker'))
+
+    el.append(
+      $$('div').addClass('se-bracket sm-right').ref('right')
+        .append(BRACKET)
+    )
 
     return el
   }
@@ -82,15 +88,12 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
   }
 
   _deriveStateFromSelectionState(selState) {
-    let sel = selState.getSelection()
-    let surfaceId = sel.surfaceId
-    if (!surfaceId) return
-    let id = this.getId()
-    let nodeId = this.props.node.id
-    let parentId = this._getSurfaceParent().getId()
-    let inParentSurface = (surfaceId === parentId)
+    let surface = this._getSurface(selState)
+    if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
-    if (inParentSurface) {
+    if (surface === this.context.surface) {
+      let sel = selState.getSelection()
+      let nodeId = this.props.node.id
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
           return { mode: 'selected' }
@@ -103,31 +106,20 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
         return { mode: 'co-selected' }
       }
-      return
     }
-    if (sel.isCustomSelection() && id === surfaceId) {
+    let isolatedNodeComponent = surface.context.isolatedNodeComponent
+    if (!isolatedNodeComponent) return null
+    if (isolatedNodeComponent === this) {
       return { mode: 'focused' }
     }
-    // HACK: a looks a bit hacky. Fine for now.
-    // TODO: we should think about switching to surfacePath, instead of surfaceId
-    else if (startsWith(surfaceId, id)) {
-      let path1 = id.split('/')
-      let path2 = surfaceId.split('/')
-      let len1 = path1.length
-      let len2 = path2.length
-      if (len2 > len1 && path1[len1-1] === path2[len1-1]) {
-        if (len2 === len1 + 1) {
-          return { mode: 'focused' }
-        } else {
-          return { mode: 'co-focused' }
-        }
-      } else {
-        return null
-      }
+    let isolatedNodes = this._getIsolatedNodes(selState)
+    if (isolatedNodes.indexOf(this) > -1) {
+      return { mode: 'co-focused' }
     }
+    return null
   }
 
-  _selectNode() {
+  selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
@@ -135,19 +127,92 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     editorSession.setSelection({
       type: 'node',
       nodeId: nodeId,
-      mode: 'full',
       containerId: surface.getContainerId(),
       surfaceId: surface.id
     })
   }
 
+  grabFocus(event) {
+    let content = this.refs.content
+    if (content.grabFocus) {
+      content.grabFocus(event)
+    }
+  }
+
+}
+
+IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
+
+IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
+
+IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
+  let { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
+  if (coor.offset === 0) return start
+  else return end
+}
+
+IsolatedNodeComponent.getDOMCoordinates = function(comp) {
+  const left = comp.refs.left
+  const right = comp.refs.right
+  return {
+    start: {
+      container: left.getNativeElement(),
+      offset: 0
+    },
+    end: {
+      container: right.getNativeElement(),
+      offset: right.getChildCount()
+    }
+  }
+}
+
+IsolatedNodeComponent.getCoordinate = function(nodeEl, options) {
+  let comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
+  let offset = null
+  if (options.direction === 'left' || nodeEl === comp.refs.left.el) {
+    offset = 0
+  } else if (options.direction === 'right' || nodeEl === comp.refs.right.el) {
+    offset = 1
+  }
+  let coor
+  if (offset !== null) {
+    coor = new Coordinate([comp.props.node.id], offset)
+    coor._comp = comp
+  }
+  return coor
+}
+
+class Blocker extends Component {
+
+  render($$) {
+    return $$('div').addClass('sc-isolated-node-blocker')
+      .attr('draggable', true)
+      .attr('contenteditable', false)
+      .on('mousedown', this._reserveMousedown, this)
+      .on('click', this.onClick)
+      .on('dblclick', this.onDblClick)
+  }
+
   onClick(event) {
-    if (this._mousedown) {
-      this._mousedown = false
+    if (event.target !== this.getNativeElement()) return
+    console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
+    if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
       event.preventDefault()
       event.stopPropagation()
-      this._selectNode()
+      this._getIsolatedNodeComponent().selectNode()
     }
+  }
+
+  onDblClick(event) {
+    console.log('DblClicked on Blocker of %s', this.getParent().id, event)
+    // console.log('%s: onClick()', this.id, event)
+    event.preventDefault()
+    event.stopPropagation()
+    this._getIsolatedNodeComponent().grabFocus(event)
+  }
+
+  _getIsolatedNodeComponent() {
+    return this.context.isolatedNodeComponent
   }
 
   // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
@@ -159,44 +224,9 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     } else {
       // console.log('%s: taking mousedown ', this.id)
       event.__reserved__ = this
-      this._mousedown = true
     }
   }
 
-  get id() { return this.getId() }
-}
-
-IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
-
-IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
-
-IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
-  let domCoor
-  if (coor.offset === 0) {
-    domCoor = {
-      container: comp.el.getNativeElement(),
-      offset: 0
-    }
-  } else {
-    domCoor = {
-      container: comp.el.getNativeElement(),
-      offset: 1
-    }
-  }
-  return domCoor
-}
-
-IsolatedNodeComponent.getDOMCoordinates = function(comp) {
-  return {
-    start: {
-      container: comp.el.getNativeElement(),
-      offset: 0
-    },
-    end: {
-      container: comp.el.getNativeElement(),
-      offset: comp.el.getChildCount()
-    }
-  }
 }
 
 export default IsolatedNodeComponent

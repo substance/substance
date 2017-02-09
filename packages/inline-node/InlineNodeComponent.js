@@ -1,4 +1,3 @@
-import startsWith from '../../util/startsWith'
 import isEqual from '../../util/isEqual'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
@@ -31,19 +30,11 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     // TODO: extract this into a helper so that we can reuse it anywhere where we want
     // to prevent propagation to the parent surface
     el.on('keydown', this.onKeydown)
-      .on('mousedown', this._stopPropagation)
-      .on('keypress', this._stopPropagation)
-      .on('keyup', this._stopPropagation)
-      .on('compositionstart', this._stopPropagation)
-      .on('textInput', this._stopPropagation)
-
-    let level = this._getLevel()
 
     el.append(
       this.renderContent($$, node)
         .ref('content')
         .addClass('se-content')
-        .css({ 'z-index': level })
     )
 
     if (disabled) {
@@ -64,17 +55,15 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     return ''
   }
 
-  // TODO: this is almost the same as the super method. Try to consolidate.
+  // TODO: this is almost the same as in InlineNodeComponent
+  // We should try to consolidate this
   _deriveStateFromSelectionState(selState) {
-    let sel = selState.getSelection()
-    let surfaceId = sel.surfaceId
-    if (!surfaceId) return
-    let id = this.getId()
-    let node = this.props.node
-    let parentId = this._getSurfaceParent().getId()
-    let inParentSurface = (surfaceId === parentId)
+    let surface = this._getSurface(selState)
+    if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
-    if (inParentSurface) {
+    if (surface === this.context.surface) {
+      let sel = selState.getSelection()
+      let node = this.props.node
       if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.path, node.path)) {
         let nodeSel = node.getSelection()
         if(nodeSel.equals(sel)) {
@@ -84,24 +73,20 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
           return { mode: 'co-selected' }
         }
       }
-      return
     }
-    // for all other cases (focused / co-focused) the surface id prefix must match
-    if (!startsWith(surfaceId, id)) return
-    // Note: trying to distinguisd focused
-    // surfaceIds are a sequence of names joined with '/'
-    // a surface inside this node will have a path with length+1.
-    // a custom selection might just use the id of this IsolatedNode
-    let p1 = id.split('/')
-    let p2 = surfaceId.split('/')
-    if (p2.length >= p1.length && p2.length <= p1.length+1) {
+    let isolatedNodeComponent = surface.context.isolatedNodeComponent
+    if (!isolatedNodeComponent) return null
+    if (isolatedNodeComponent === this) {
       return { mode: 'focused' }
-    } else {
+    }
+    let isolatedNodes = this._getIsolatedNodes(selState)
+    if (isolatedNodes.indexOf(this) > -1) {
       return { mode: 'co-focused' }
     }
+    return null
   }
 
-  _selectNode() {
+  selectNode() {
     // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
@@ -116,6 +101,11 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
+  onClick(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.selectNode()
+  }
 }
 
 InlineNodeComponent.prototype._isInlineNodeComponent = true

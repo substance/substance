@@ -103,23 +103,33 @@ class EditingInterface {
   /* High-level editing */
 
   annotate(annotationData) {
-    return this._impl.annotate(this, annotationData)
+    if (this._selection && !this._selection.isNull()) {
+      return this._impl.annotate(this, annotationData)
+    }
   }
 
   break() {
-    this._impl.break(this)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.break(this)
+    }
   }
 
   copySelection() {
-    return copySelection(this.getDocument(), this._selection)
+    if (this._selection && !this._selection.isNull()) {
+      return copySelection(this.getDocument(), this._selection)
+    }
   }
 
   deleteSelection(options) {
-    this._impl.delete(this, 'right', options)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.delete(this, 'right', options)
+    }
   }
 
   deleteCharacter(direction) {
-    if (!this._selection.isCollapsed()) {
+    if (!this._selection || this._selection.isNull()) {
+      // nothing
+    } else if (!this._selection.isCollapsed()) {
       this.deleteSelection()
     } else {
       this._impl.delete(this, direction)
@@ -144,19 +154,27 @@ class EditingInterface {
   }
 
   switchTextType(nodeData) {
-    return this._impl.switchTextType(this, nodeData)
+    if (this._selection && !this._selection.isNull()) {
+      return this._impl.switchTextType(this, nodeData)
+    }
   }
 
   toggleList(params) {
-    return this._impl.toggleList(this, params)
+    if (this._selection && !this._selection.isNull()) {
+      return this._impl.toggleList(this, params)
+    }
   }
 
   indent() {
-    this._impl.indent(this)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.indent(this)
+    }
   }
 
   dedent() {
-    this._impl.dedent(this)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.dedent(this)
+    }
   }
 
   /* Legacy low-level API */
