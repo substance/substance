@@ -30,8 +30,6 @@ class TableComponent extends Component {
   }
 
   grabFocus(event) {
-    console.log('TableComponent.grabFocus()', event.target)
-
     let firstCellId = this.props.node.cells[0][0]
     if (firstCellId) {
       let comp = this.refs[firstCellId]
