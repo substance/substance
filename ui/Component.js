@@ -952,8 +952,8 @@ Component.render = function(props) {
 
 Component.mount = function(props, el) {
   if (arguments.length === 1) {
+    el = props
     props = {}
-    el = arguments[0]
   }
   if (!el) throw new Error("'el' is required.")
   if (isString(el)) {
