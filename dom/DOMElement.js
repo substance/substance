@@ -966,10 +966,6 @@ class DOMElement {
     return this.getOuterHTML()
   }
 
-  get childNodes() {
-    return this.getChildNodes()
-  }
-
   get firstChild() {
     return this.getFirstChild()
   }

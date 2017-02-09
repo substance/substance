@@ -33,8 +33,8 @@ class XDomHandler {
 
   _addDomElement(element) {
     let parent = this._tagStack[this._tagStack.length - 1]
-    if (!parent.children) parent.children = []
-    let siblings = parent.children
+    if (!parent.childNodes) parent.childNodes = []
+    let siblings = parent.childNodes
 
     let previousSibling = siblings[siblings.length - 1]
     // set up next/previous link
@@ -65,7 +65,7 @@ class XDomHandler {
     }
     let lastTag
     let _top = this._tagStack[this._tagStack.length - 1]
-    if (_top && _top.children) lastTag = _top.children[_top.children.length - 1]
+    if (_top && _top.childNodes) lastTag = _top.childNodes[_top.childNodes.length - 1]
     if (lastTag && lastTag.type === ElementType.Text) {
       lastTag.data += text
     } else {

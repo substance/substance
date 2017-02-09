@@ -232,6 +232,10 @@ class BrowserDOMElement extends DOMElement {
     return childNodes
   }
 
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
   getChildren() {
     // Some browsers don't filter elements here and also include text nodes,
     // that why we can't use el.children
@@ -242,6 +246,10 @@ class BrowserDOMElement extends DOMElement {
       }
     }
     return children
+  }
+
+  get children() {
+    return this.getChildren()
   }
 
   getChildAt(pos) {
@@ -378,6 +386,10 @@ class BrowserDOMElement extends DOMElement {
 
   getOwnerDocument() {
     return BrowserDOMElement.wrapNativeElement(this._getNativeOwnerDocument())
+  }
+
+  get ownerDocument() {
+    return this.getOwnerDocument()
   }
 
   _getNativeOwnerDocument() {
@@ -584,14 +596,6 @@ class BrowserDOMElement extends DOMElement {
       outerHeight += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10)
     }
     return outerHeight
-  }
-
-  get children() {
-    return this.getChildren()
-  }
-
-  get ownerDocument() {
-    return this.getOwnerDocument()
   }
 
 }

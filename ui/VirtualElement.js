@@ -36,6 +36,10 @@ class VirtualElement extends DOMElement {
     return this.parent
   }
 
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
   /*
     Provides the component after this VirtualElement has been rendered.
   */
@@ -112,8 +116,8 @@ class VirtualHTMLElement extends VirtualElement {
     this.style = null
     this.eventListeners = null
 
+    // TODO: this is semantically incorrect. It should be named childNodes
     this.children = []
-
   }
 
   getTagName() {

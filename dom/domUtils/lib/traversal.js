@@ -1,5 +1,5 @@
 var getChildren = exports.getChildren = function(elem){
-  return elem.children;
+  return elem.childNodes;
 };
 
 var getParent = exports.getParent = function(elem){
