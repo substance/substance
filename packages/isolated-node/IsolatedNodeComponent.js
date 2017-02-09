@@ -22,8 +22,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   constructor(...args) {
     super(...args)
-
-    this.blockingMode = this.ContentClass.noBlocker ? 'open' : 'closed'
   }
 
   render($$) {
@@ -50,9 +48,12 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     el.on('keydown', this.onKeydown)
 
     let shouldRenderBlocker = (this.blockingMode === 'closed') && (this.state.mode !== 'focused')
+
     let content = this.renderContent($$, node, {
       disabled: this.props.disabled || shouldRenderBlocker
-    }).ref('content').attr('contenteditable', false)
+    }).ref('content')
+    content.attr('contenteditable', false)
+
     el.append(content)
     if (shouldRenderBlocker) {
       el.append($$(Blocker).ref('blocker'))
@@ -66,14 +67,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   getContent() {
     return this.refs.content
-  }
-
-  isOpen() {
-    return this.blockingMode === 'open'
-  }
-
-  isClosed() {
-    return this.blockingMode === 'closed'
   }
 
   _deriveStateFromSelectionState(selState) {
@@ -121,11 +114,15 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
-  grabFocus() {
+  grabFocus(event) {
     let content = this.refs.content
     if (content.grabFocus) {
-      content.grabFocus()
+      content.grabFocus(event)
     }
+  }
+
+  _fixForNavigation() {
+    this.refs.content.el.removeAttribute('contenteditable')
   }
 
 }
@@ -135,59 +132,22 @@ IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 
 IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
-  // let domCoor
-  // if (coor.offset === 0) {
-  //   domCoor = {
-  //     container: comp.el.getNativeElement(),
-  //     offset: 0
-  //   }
-  // } else {
-  //   domCoor = {
-  //     container: comp.el.getNativeElement(),
-  //     offset: 1
-  //   }
-  // }
-  // return domCoor
-  let domCoor
-  let offset = comp.blockingMode === 'open' ? 0 : 1
-  if (coor.offset === 0) {
-    domCoor = {
-      container: comp.el.getNativeElement(),
-      offset: offset
-    }
-  } else {
-    domCoor = {
-      container: comp.el.getNativeElement(),
-      offset: offset+1
-    }
-  }
-  return domCoor
+  let { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
+  if (coor.offset === 0) return start
+  else return end
 }
 
 IsolatedNodeComponent.getDOMCoordinates = function(comp) {
-  // let el = comp.el
-  // let parent = el.parentNode
-  // let childIdx = parent.getChildIndex(el)
-  // return {
-  //   start: {
-  //     container: parent.getNativeElement(),
-  //     offset: childIdx
-  //   },
-  //   end: {
-  //     container: parent.getNativeElement(),
-  //     offset: childIdx+1
-  //   }
-  // }
   let el = comp.el
-  let offset = comp.blockingMode === 'open' ? 0 : 1
   return {
     start: {
       container: el.getNativeElement(),
-      offset: offset
+      offset: 0
     },
     end: {
       container: el.getNativeElement(),
-      offset: offset+1
+      // offset: 1
+      offset: el.getChildCount()
     }
   }
 }
@@ -195,7 +155,7 @@ IsolatedNodeComponent.getDOMCoordinates = function(comp) {
 class Blocker extends Component {
 
   render($$) {
-    return $$('div').addClass('se-blocker')
+    return $$('div').addClass('sc-isolated-node-blocker')
       .attr('draggable', true)
       .attr('contenteditable', false)
       .on('mousedown', this._reserveMousedown, this)
@@ -205,11 +165,11 @@ class Blocker extends Component {
 
   onClick(event) {
     if (event.target !== this.getNativeElement()) return
-    console.log('Clicked on Blocker of %s', this.getParent().id, event)
+    console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
     if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
       event.preventDefault()
       event.stopPropagation()
-      this.getParent().selectNode()
+      this._getIsolatedNodeComponent().selectNode()
     }
   }
 
@@ -218,7 +178,11 @@ class Blocker extends Component {
     // console.log('%s: onClick()', this.id, event)
     event.preventDefault()
     event.stopPropagation()
-    this.getParent().grabFocus()
+    this._getIsolatedNodeComponent().grabFocus(event)
+  }
+
+  _getIsolatedNodeComponent() {
+    return this.context.isolatedNodeComponent
   }
 
   // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event

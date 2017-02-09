@@ -1,5 +1,6 @@
 import keys from '../util/keys'
 import Component from '../ui/Component'
+import platform from '../util/platform'
 
 class AbstractIsolatedNodeComponent extends Component {
 
@@ -14,6 +15,10 @@ class AbstractIsolatedNodeComponent extends Component {
 
     this.handleAction('escape', this.escape)
     this.ContentClass = this._getContentClass(this.props.node) || Component
+
+    // NOTE: FF does not allow to navigate contenteditable isles
+    let useBlocker = platform.isFF || !this.ContentClass.noBlocker
+    this.blockingMode = useBlocker ? 'closed' : 'open'
   }
 
   getChildContext() {
@@ -65,6 +70,14 @@ class AbstractIsolatedNodeComponent extends Component {
 
   getMode() {
     return this.state.mode
+  }
+
+  isOpen() {
+    return this.blockingMode === 'open'
+  }
+
+  isClosed() {
+    return this.blockingMode === 'closed'
   }
 
   isNotSelected() {
@@ -149,7 +162,7 @@ class AbstractIsolatedNodeComponent extends Component {
       if (sel && sel.surfaceId) {
         let surfaceManager = this.context.surfaceManager
         let surface = surfaceManager.getSurface(sel.surfaceId)
-        isolatedNodes = _computeIsolatedNodeChain(surface)
+        isolatedNodes = surface.getComponentPath().filter(comp => comp._isAbstractIsolatedNodeComponent)
       }
       selState.set('isolatedNodes', isolatedNodes)
     }
@@ -157,14 +170,6 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 }
 
-function _computeIsolatedNodeChain(surface) {
-  let chain = []
-  let isolatedNodeComponent = surface.context.isolatedNodeComponent
-  while (isolatedNodeComponent) {
-    chain.push(isolatedNodeComponent)
-    isolatedNodeComponent = isolatedNodeComponent.context.isolatedNodeComponent
-  }
-  return chain
-}
+AbstractIsolatedNodeComponent.prototype._isAbstractIsolatedNodeComponent = true
 
 export default AbstractIsolatedNodeComponent

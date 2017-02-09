@@ -41,6 +41,10 @@ class PropertyAnnotation extends Annotation {
     return this.start.path
   }
 
+  getPath() {
+    return this.start.path
+  }
+
   getSelection() {
     return this.getDocument().createSelection({
       type: 'property',

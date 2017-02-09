@@ -25,7 +25,7 @@
   outline: 2px solid #A3CDFD;
 }
 
-.sc-isolated-node > .se-blocker {
+.sc-isolated-node-blocker {
   position: absolute;
   top: 0px; bottom: 0px; left: 0px; right: 0px;
   cursor: default;

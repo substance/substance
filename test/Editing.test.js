@@ -12,7 +12,7 @@ import {
   _in1, IN1_TITLE,
   _l1, _l1_empty, _l2, _li1plus, _li3, LI1_TEXT, LI2_TEXT, LI3_TEXT,
   _t1, _t1_sparse, T_CONTENT
-} from './samples'
+} from './fixture/samples'
 
 const test = module('Editing')
 

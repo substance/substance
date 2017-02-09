@@ -66,7 +66,10 @@ class Surface extends Component {
   getChildContext() {
     return {
       surface: this,
-      doc: this.getDocument()
+      doc: this.getDocument(),
+      // HACK: clearing isolatedNodeComponent so that we can easily know
+      // if this surface is within an isolated node
+      isolatedNodeComponent: null
     }
   }
 
@@ -508,7 +511,9 @@ class Surface extends Component {
     if (enableContenteditable) {
       this.el.setAttribute('contenteditable', true)
     } else {
+      // TODO: find out what is better
       this.el.removeAttribute('contenteditable')
+      // this.el.setAttribute('contenteditable', true)
     }
   }
 
@@ -700,7 +705,7 @@ class Surface extends Component {
 
   // Experimental: used by DragManager
   getSelectionFromEvent(event) {
-    let domRange = Surface.getDOMRangeFromEvent(event)
+    let domRange = getDOMRangeFromEvent(event)
     let sel = this.domSelection.getSelectionForDOMRange(domRange)
     sel.surfaceId = this.getId()
     return sel;
@@ -723,39 +728,6 @@ class Surface extends Component {
 }
 
 Surface.prototype._isSurface = true
-
-Surface.getDOMRangeFromEvent = function(evt) {
-  let range, x = evt.clientX, y = evt.clientY
-
-  // Try the simple IE way first
-  if (document.body.createTextRange) {
-    range = document.body.createTextRange()
-    range.moveToPoint(x, y)
-  }
-
-  else if (!isNil(document.createRange)) {
-    // Try Mozilla's rangeOffset and rangeParent properties,
-    // which are exactly what we want
-    if (!isNil(evt.rangeParent)) {
-      range = document.createRange()
-      range.setStart(evt.rangeParent, evt.rangeOffset)
-      range.collapse(true)
-    }
-    // Try the standards-based way next
-    else if (document.caretPositionFromPoint) {
-      let pos = document.caretPositionFromPoint(x, y)
-      range = document.createRange()
-      range.setStart(pos.offsetNode, pos.offset)
-      range.collapse(true)
-    }
-    // Next, the WebKit way
-    else if (document.caretRangeFromPoint) {
-      range = document.caretRangeFromPoint(x, y)
-    }
-  }
-
-  return range
-}
 
 /*
   Computes the id of a surface

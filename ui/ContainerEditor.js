@@ -3,8 +3,9 @@ import keys from '../util/keys'
 // import platform from '../util/platform'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from '../packages/surface/Surface'
-import RenderingEngine from './RenderingEngine'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
+import Component from '../ui/Component'
+import RenderingEngine from '../ui/RenderingEngine'
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -186,7 +187,8 @@ class ContainerEditor extends Surface {
 
   _handleUpOrDownArrowKey(event) {
     event.stopPropagation()
-    let direction = (event.keyCode === keys.UP) ? 'left' : 'right'
+    let up = (event.keyCode === keys.UP)
+    let direction = up ? 'left' : 'right'
     let sel = this.getEditorSession().getSelection()
 
     if (event.altKey && this._selectNextIsolatedNode(direction)) {
@@ -194,8 +196,36 @@ class ContainerEditor extends Surface {
       return
     }
 
-    if (sel.isNodeSelection() && !event.shiftKey) {
-      this.domSelection.collapse(direction)
+    // HACK: while LEFT/RIGHT seem to work well with our IsolatedNodes
+    // we need to fiddle with the DOM selection for UP/DOWN
+    // otherwise the cursor gets stuck.
+    if (sel && sel.start) {
+      if ((sel.start.isNodeCoordinate() && up) ||
+          (sel.end.isNodeCoordinate() && !up)) {
+        let el = this.el.find(`[data-id="${sel.start.getNodeId()}"]`)
+        let comp = Component.unwrap(el)
+        if (up) {
+          if (comp) comp._fixForNavigation()
+          this.domSelection.collapse(direction)
+        } else {
+          let parentNode = el.parentNode
+          let idx = parentNode.getChildIndex(el)
+          let offset = up ? idx : idx+1
+          if (!event.shiftKey) {
+            this.domSelection.setCursor(parentNode, offset)
+          } else {
+            this.domSelection.extend(parentNode, offset)
+          }
+        }
+        // let parentNode = el.parentNode
+        // let idx = parentNode.getChildIndex(el)
+        // let offset = up ? idx : idx+1
+        // if (!event.shiftKey) {
+        //   this.domSelection.setCursor(parentNode, offset)
+        // } else {
+        //   this.domSelection.extend(parentNode, offset)
+        // }
+      }
     }
 
     // Note: we need this timeout so that CE updates the DOM selection first

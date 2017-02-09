@@ -171,6 +171,8 @@ class DOMSelection {
         let coors = IsolatedNodeComponent.getDOMCoordinates(comp, sel)
         start = coors.start
         end = coors.end
+        if (sel.isAfter()) start = end
+        else if (sel.isBefore()) end = start
       } else {
         let _nodeEl = comp.el
         start = {
@@ -246,6 +248,27 @@ class DOMSelection {
       wSel.removeAllRanges()
       wSel.addRange(wRange)
     }
+  }
+
+  select(el) {
+    let wSel = window.getSelection()
+    let wRange = window.document.createRange()
+    wRange.selectNode(el.getNativeElement())
+    wSel.removeAllRanges()
+    wSel.addRange(wRange)
+  }
+
+  extend(el, offset) {
+    let wSel = window.getSelection()
+    wSel.extend(el.getNativeElement(), offset)
+  }
+
+  setCursor(el, offset) {
+    let wSel = window.getSelection()
+    let wRange = window.document.createRange()
+    wRange.setStart(el.getNativeElement(), offset)
+    wSel.removeAllRanges()
+    wSel.addRange(wRange)
   }
 
   /*

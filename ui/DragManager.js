@@ -1,4 +1,3 @@
-import NodeSelection from '../model/NodeSelection'
 import Component from '../ui/Component'
 import DragAndDropHandler from '../ui/DragAndDropHandler'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
@@ -129,65 +128,88 @@ class DragManager extends EventEmitter {
     // console.log('_initDrag')
     let sel = this._getSelection()
     let dragState = Object.assign({}, { event, mode: 'block'}, options)
+    this.dragState = dragState
 
+    // external drag
+    // Note: we only consider drops on the block-level or with custom dropzones
+    if (dragState.external) {
+      dragState.selectionDrag = false
+      dragState.sourceSelection = null
+      dragState.scrollPanes = this._getSurfacesGroupedByScrollPane()
+      this.emit('drag:started', dragState)
+      return
+    }
+
+    // Note: selection drags are always without drop-zones,
+    // but using the native cursor
     let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
     if (isSelectionDrag) {
       // console.log('DragManager: starting a selection drag', sel.toString())
       dragState.selectionDrag = true
       dragState.sourceSelection = sel
-    } else {
-      // console.log('DragManager: started dragging a node or from external')
-      // We need to determine all ContainerEditors and their scrollPanes; those have the drop
-      // zones attached
-      let surfaces = this.context.surfaceManager.getSurfaces()
-      let scrollPanes = {}
-      surfaces.forEach((surface) => {
-        // Skip for everything but container editors
-        if (!surface.isContainerEditor()) return
-        let scrollPane = surface.context.scrollPane
-        let scrollPaneName = scrollPane.getName()
-        let surfaceName = surface.getName()
-
-        if (!scrollPanes[scrollPaneName]) {
-          let surfaces = {}
-          surfaces[surfaceName] = surface
-          scrollPanes[scrollPaneName] = {
-            scrollPane,
-            surfaces
-          }
-        } else {
-          scrollPanes[scrollPaneName].surfaces[surfaceName] = surface
-        }
-      })
-      // We store the scrollPanes in dragState so the Dropzones component
-      // can use it to compute dropzones per scrollpane for each contained
-      // surface
-      dragState.scrollPanes = scrollPanes
-      // In an internal drag, we receive the source (= node being dragged)
-      let comp = this._getIsolatedNodeOrContainerChild(
-        DefaultDOMElement.wrapNativeElement(event.target)
-      )
-      if (comp && comp.props.node) {
-        let surface = comp.context.surface
-        let nodeSelection = new NodeSelection({
-          nodeId: comp.props.node.id,
-          containerId: surface.getContainerId(),
-          surfaceId: surface.id
-        })
-        dragState.sourceSelection = nodeSelection
-      } else {
-        // console.log('.... NOPE')
-        event.preventDefault()
-        event.stopPropagation()
+      // TODO: should we emit for dropzones?
+      return
+    }
+    let comp = Component.unwrap(event.target)
+    if (!comp) return _stop()
+    let isolatedNodeComponent = comp.context.isolatedNodeComponent
+    if (!isolatedNodeComponent) return _stop()
+    let surface = isolatedNodeComponent.context.surface
+    // dragging an InlineNode
+    if(isolatedNodeComponent._isInlineNodeComponent) {
+      let inlineNode = isolatedNodeComponent.props.node
+      dragState.selectionDrag = true
+      dragState.sourceSelection = {
+        type: 'property',
+        path: inlineNode.getPath(),
+        containerId: surface.getContainerId(),
+        surfaceId: comp.context.surface.id,
       }
+      return
     }
-
-    this.dragState = dragState
-
-    if (!isSelectionDrag) {
-      // console.log('... emitting dragstart for Dropzones')
-      this.emit('drag:started', this.dragState)
+    // dragging an IsolatedNode
+    // console.log('DragManager: started dragging a node or from external')
+    dragState.selectionDrag = false
+    dragState.sourceSelection = {
+      type: 'node',
+      nodeId: isolatedNodeComponent.props.node.id,
+      containerId: surface.getContainerId(),
+      surfaceId: surface.id
     }
+    // We store the scrollPanes in dragState so the Dropzones component
+    // can use it to compute dropzones per scrollpane for each contained
+    // surface
+    dragState.scrollPanes = this._getSurfacesGroupedByScrollPane()
+    // console.log('... emitting dragstart for Dropzones')
+    this.emit('drag:started', dragState)
+
+    function _stop() {
+      // console.log('.... NOPE')
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
+  _getSurfacesGroupedByScrollPane() {
+    // We need to determine all ContainerEditors and their scrollPanes; those have the drop
+    // zones attached
+    let surfaces = this.context.surfaceManager.getSurfaces()
+    let scrollPanes = {}
+    surfaces.forEach((surface) => {
+      // Skip for everything but container editors
+      if (!surface.isContainerEditor()) return
+      let scrollPane = surface.context.scrollPane
+      let scrollPaneName = scrollPane.getName()
+      let surfaceName = surface.getName()
+      if (!scrollPanes[scrollPaneName]) {
+        let surfaces = {}
+        surfaces[surfaceName] = surface
+        scrollPanes[scrollPaneName] = { scrollPane, surfaces }
+      } else {
+        scrollPanes[scrollPaneName].surfaces[surfaceName] = surface
+      }
+    })
+    return scrollPanes
   }
 
   _getSelection() {
