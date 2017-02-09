@@ -23,15 +23,15 @@ function DOMElementTests(impl) {
     var html = '<html><head><title>TEST</title></head><body>TEST</body></html>'
     var doc = DefaultDOMElement.parseHTML(html)
     var head = doc.find('head')
-    t.notNil(head)
+    t.notNil(head, '<head> should be there')
 
     var title = head.find('title')
     t.notNil(title, '<head> should contain <title>')
-    t.equal(title.text(), 'TEST')
+    t.equal(title.text(), 'TEST', '.. with correct text')
 
     var body = doc.find('body')
     t.notNil(body, 'document should have a <body> element.')
-    t.equal(body.text(), 'TEST', 'body content should be correct.')
+    t.equal(body.text(), 'TEST', '.. with correct text.')
     t.end()
   })
 
@@ -75,13 +75,13 @@ function DOMElementTests(impl) {
     var xml = "<mydoc><myhead><mytitle>TEST</mytitle></myhead><mybody>TEST</mybody></mydoc>"
     var doc = DefaultDOMElement.parseXML(xml)
     var head = doc.find('myhead')
-    t.notNil(head)
+    t.notNil(head, '<myhead> should be there')
     var title = head.find('mytitle')
     t.notNil(title, '<head> should contain <title>')
-    t.equal(title.text(), 'TEST')
+    t.equal(title.text(), 'TEST', '.. with correct text')
     var body = doc.find('mybody')
-    t.notNil(body, 'document should have a <body> element.')
-    t.equal(body.text(), 'TEST', 'body content should be correct.')
+    t.notNil(body, 'document should have a <body> element')
+    t.equal(body.text(), 'TEST', '.. with correct text')
     t.end()
   })
 
@@ -193,6 +193,13 @@ function DOMElementTests(impl) {
     t.ok(dummy.getChildAt(0).is('bla'), '.. the first should be <bla>')
     t.ok(dummy.getChildAt(1).is('blupp'), '.. the second should be <blupp>')
     t.equal(dummy.getChildAt(0).getChildCount(), 0, '.. and <bla> should have no children')
+    t.end()
+  })
+
+  test("children should only include elements", function(t) {
+    let dummy = DefaultDOMElement.parseXML('<dummy>bli<bla></bla>blupp</dummy>')
+    t.equal(dummy.children.length, 1, 'Should return only elements')
+    t.equal(dummy.children[0].tagName, 'bla', 'Should be bla')
     t.end()
   })
 

@@ -36,7 +36,7 @@ class XNode extends DOMElement {
         this.classes = new Set()
         this.styles = new Map()
         this.eventListeners = []
-        this.children = args.children || []
+        this.childNodes = args.children || args.childNodes || []
         this._assign(args)
         break
       }
@@ -58,7 +58,7 @@ class XNode extends DOMElement {
         let format = args.format
         this.format = format
         if (!format) throw new Error("'format' is mandatory.")
-        this.children = args.children || []
+        this.childNodes = args.children || args.childNodes || []
         switch(format) {
           case 'xml':
             this.contentType = 'application/xml'
@@ -78,7 +78,7 @@ class XNode extends DOMElement {
         this.classes = new Set()
         this.styles = new Map()
         this.eventListeners = []
-        this.children = args.children || []
+        this.childNodes = args.children || args.childNodes || []
     }
   }
 
@@ -88,10 +88,13 @@ class XNode extends DOMElement {
 
   clone(deep) {
     let clone = new XNode(this.type, this)
-    if (deep && this.children) {
-      this.children.forEach((child) => {
-        clone.appendChild(child.clone(deep))
-      })
+    if (this.childNodes) {
+      clone.childNodes.length = 0
+      if (deep) {
+        this.childNodes.forEach((child) => {
+          clone.appendChild(child.clone(deep))
+        })
+      }
     }
     return clone
   }
@@ -222,16 +225,16 @@ class XNode extends DOMElement {
   }
 
   // TODO: parse html using settings from el,
-  // clear old children and append new children
+  // clear old childNodes and append new childNodes
   setInnerHTML(html) {
-    if (this.children) {
+    if (this.childNodes) {
       let _doc = parseMarkup(html, {
         ownerDocument: this.getOwnerDocument()
       })
       this.empty()
-      // ATTENTION: important to copy the children array first
+      // ATTENTION: important to copy the childNodes array first
       // as appendChild removes from parent
-      _doc.children.slice(0).forEach((child) => {
+      _doc.childNodes.slice(0).forEach((child) => {
         this.appendChild(child)
       })
     }
@@ -249,7 +252,7 @@ class XNode extends DOMElement {
   setTextContent(text) {
     if (this.type === 'text') {
       this.data = text
-    } else if (this.children) {
+    } else if (this.childNodes) {
       let child = this.createTextNode(text)
       this.empty()
       this.appendChild(child)
@@ -284,46 +287,48 @@ class XNode extends DOMElement {
   }
 
   getChildCount() {
-    if (this.children) {
-      return this.children.length
+    if (this.childNodes) {
+      return this.childNodes.length
     } else {
       return 0
     }
   }
 
   getChildNodes() {
-    return this.children.slice(0)
+    return this.childNodes.slice(0)
   }
 
   getChildren() {
-    let children = this.children
-    children = children.filter(function(node) {
+    return this.childNodes.filter(function(node) {
       return node.type === "tag"
     })
-    return children
+  }
+
+  get children() {
+    return this.getChildren()
   }
 
   getChildAt(pos) {
-    if (this.children) {
-      return this.children[pos]
+    if (this.childNodes) {
+      return this.childNodes[pos]
     }
   }
 
   getChildIndex(child) {
-    if (this.children) {
-      return this.children.indexOf(child)
+    if (this.childNodes) {
+      return this.childNodes.indexOf(child)
     }
   }
 
   getLastChild() {
-    if (this.children) {
-      return last(this.children)
+    if (this.childNodes) {
+      return last(this.childNodes)
     }
   }
 
   getFirstChild() {
-    if (this.children) {
-      return this.children[0]
+    if (this.childNodes) {
+      return this.childNodes[0]
     }
   }
 
@@ -394,7 +399,7 @@ class XNode extends DOMElement {
   }
 
   appendChild(child) {
-    if (this.children && !isNil(child)) {
+    if (this.childNodes && !isNil(child)) {
       child = this._normalizeChild(child)
       if (!child) return this
       DomUtils.appendChild(this, child)
@@ -413,13 +418,13 @@ class XNode extends DOMElement {
   insertAt(pos, child) {
     child = this._normalizeChild(child)
     if (!child) return this
-    let children = this.children
-    if (children) {
+    let childNodes = this.childNodes
+    if (childNodes) {
       // NOTE: manipulating htmlparser's internal children array
-      if (pos >= children.length) {
+      if (pos >= childNodes.length) {
         DomUtils.appendChild(this, child)
       } else {
-        DomUtils.prepend(children[pos], child)
+        DomUtils.prepend(childNodes[pos], child)
       }
       child.ownerDocument = this.getOwnerDocument()
       this._onAttach(child)
@@ -428,8 +433,8 @@ class XNode extends DOMElement {
   }
 
   insertBefore(newChild, before) {
-    if (this.children) {
-      var pos = this.children.indexOf(before)
+    if (this.childNodes) {
+      var pos = this.childNodes.indexOf(before)
       if (pos > -1) {
         DomUtils.prepend(before, newChild)
         newChild.ownerDocument = this.getOwnerDocument()
@@ -442,9 +447,9 @@ class XNode extends DOMElement {
   }
 
   removeAt(pos) {
-    let children = this.children
-    if (children) {
-      let child = children[pos]
+    let childNodes = this.childNodes
+    if (childNodes) {
+      let child = childNodes[pos]
       child.remove()
       this._onDetach(child)
     }
@@ -452,13 +457,13 @@ class XNode extends DOMElement {
   }
 
   empty() {
-    let children = this.children
-    if (children) {
-      children.forEach((child) => {
+    let childNodes = this.childNodes
+    if (childNodes) {
+      childNodes.forEach((child) => {
         child.next = child.prev = child.parent = null
         this._onDetach(child)
       })
-      children.length = 0
+      childNodes.length = 0
     }
     return this
   }

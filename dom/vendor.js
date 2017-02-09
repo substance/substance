@@ -123,7 +123,7 @@ function render(dom, opts) {
     let elem = dom[i];
 
     if (elem.type === 'root') {
-      output.push(render(elem.children, opts));
+      output.push(render(elem.childNodes, opts));
     } else if (index.isTag(elem)) {
       output.push(renderTag(elem, opts));
     } else if (elem.type === index.Directive) {
@@ -153,13 +153,13 @@ function renderTag(elem, opts) {
 
   if (
     opts.xmlMode
-    && (!elem.children || elem.children.length === 0)
+    && (!elem.childNodes || elem.childNodes.length === 0)
   ) {
     tag += '/>';
   } else {
     tag += '>';
-    if (elem.children) {
-      tag += render(elem.children, opts);
+    if (elem.childNodes) {
+      tag += render(elem.childNodes, opts);
     }
 
     if (!singleTag[elem.name] || opts.xmlMode) {
@@ -184,7 +184,7 @@ function renderText(elem, opts) {
 }
 
 function renderCdata(elem) {
-  return '<![CDATA[' + elem.children[0].data + ']]>'
+  return '<![CDATA[' + elem.childNodes[0].data + ']]>'
 }
 
 function renderComment(elem) {
@@ -205,27 +205,27 @@ var getOuterHTML = require$$1;
 var isTag$1 = ElementType$1.isTag;
 
 var stringify = {
-	getInnerHTML: getInnerHTML,
-	getOuterHTML: getOuterHTML,
-	getText: getText$1
+  getInnerHTML: getInnerHTML,
+  getOuterHTML: getOuterHTML,
+  getText: getText$1
 };
 
 function getInnerHTML(elem, opts){
-	return elem.children ? elem.children.map(function(elem){
-		return getOuterHTML(elem, opts);
-	}).join("") : "";
+  return elem.childNodes ? elem.childNodes.map(function(elem){
+    return getOuterHTML(elem, opts);
+  }).join("") : "";
 }
 
 function getText$1(elem){
-	if(Array.isArray(elem)) return elem.map(getText$1).join("");
-	if(isTag$1(elem) || elem.type === ElementType$1.CDATA) return getText$1(elem.children);
-	if(elem.type === ElementType$1.Text) return elem.data;
-	return "";
+  if(Array.isArray(elem)) return elem.map(getText$1).join("");
+  if(isTag$1(elem) || elem.type === ElementType$1.CDATA) return getText$1(elem.childNodes);
+  if(elem.type === ElementType$1.Text) return elem.data;
+  return "";
 }
 
 var traversal = createCommonjsModule(function (module, exports) {
 var getChildren = exports.getChildren = function(elem){
-  return elem.children;
+  return elem.childNodes;
 };
 
 var getParent = exports.getParent = function(elem){
@@ -255,7 +255,7 @@ function removeElement(elem){
   if(elem.prev) elem.prev.next = elem.next;
   if(elem.next) elem.next.prev = elem.prev;
   if(elem.parent){
-    var childs = elem.parent.children;
+    var childs = elem.parent.childNodes;
     let pos = childs.lastIndexOf(elem);
     if (pos < 0) throw new Error('Invalid state')
     childs.splice(pos, 1);
@@ -277,7 +277,7 @@ function replaceElement(elem, replacement){
 
   var parent = replacement.parent = elem.parent;
   if(parent){
-    var childs = parent.children;
+    var childs = parent.childNodes;
     let pos = childs.lastIndexOf(elem);
     if (pos < 0) throw new Error('Invalid state')
     childs[pos] = replacement;
@@ -288,8 +288,8 @@ function appendChild(elem, child){
   if (child.parent) removeElement(child);
   child.parent = elem;
 
-  if(elem.children.push(child) !== 1){
-    var sibling = elem.children[elem.children.length - 2];
+  if(elem.childNodes.push(child) !== 1){
+    var sibling = elem.childNodes[elem.childNodes.length - 2];
     sibling.next = child;
     child.prev = sibling;
     child.next = null;
@@ -309,13 +309,13 @@ function append(elem, next){
   if(currNext){
     currNext.prev = next;
     if(parent){
-      var childs = parent.children;
+      var childs = parent.childNodes;
       let pos = childs.lastIndexOf(currNext);
       if (pos < 0) throw new Error('Invalid state')
       childs.splice(pos, 0, next);
     }
   } else if(parent){
-    parent.children.push(next);
+    parent.childNodes.push(next);
   }
 }
 
@@ -323,7 +323,7 @@ function prepend(elem, prev){
   if (prev.parent) removeElement(prev);
   var parent = elem.parent;
   if(parent){
-    var childs = parent.children;
+    var childs = parent.childNodes;
     let pos = childs.lastIndexOf(elem);
     if (pos < 0) throw new Error('Invalid state')
     childs.splice(pos, 0, prev);
@@ -349,96 +349,96 @@ exports.prepend = prepend;
 var isTag$2 = index.isTag;
 
 var querying = {
-	filter: filter,
-	find: find,
-	findOneChild: findOneChild,
-	findOne: findOne$1,
-	existsOne: existsOne,
-	findAll: findAll$1
+  filter: filter,
+  find: find,
+  findOneChild: findOneChild,
+  findOne: findOne$1,
+  existsOne: existsOne,
+  findAll: findAll$1
 };
 
 function filter(test, element, recurse, limit){
-	if(!Array.isArray(element)) element = [element];
+  if(!Array.isArray(element)) element = [element];
 
-	if(typeof limit !== "number" || !isFinite(limit)){
-		limit = Infinity;
-	}
-	return find(test, element, recurse !== false, limit);
+  if(typeof limit !== "number" || !isFinite(limit)){
+    limit = Infinity;
+  }
+  return find(test, element, recurse !== false, limit);
 }
 
 function find(test, elems, recurse, limit){
-	var result = [], childs;
+  var result = [], childs;
 
-	for(var i = 0, j = elems.length; i < j; i++){
-		if(test(elems[i])){
-			result.push(elems[i]);
-			if(--limit <= 0) break;
-		}
+  for(var i = 0, j = elems.length; i < j; i++){
+    if(test(elems[i])){
+      result.push(elems[i]);
+      if(--limit <= 0) break;
+    }
 
-		childs = elems[i].children;
-		if(recurse && childs && childs.length > 0){
-			childs = find(test, childs, recurse, limit);
-			result = result.concat(childs);
-			limit -= childs.length;
-			if(limit <= 0) break;
-		}
-	}
+    childs = elems[i].childNodes;
+    if(recurse && childs && childs.length > 0){
+      childs = find(test, childs, recurse, limit);
+      result = result.concat(childs);
+      limit -= childs.length;
+      if(limit <= 0) break;
+    }
+  }
 
-	return result;
+  return result;
 }
 
 function findOneChild(test, elems){
-	for(var i = 0, l = elems.length; i < l; i++){
-		if(test(elems[i])) return elems[i];
-	}
+  for(var i = 0, l = elems.length; i < l; i++){
+    if(test(elems[i])) return elems[i];
+  }
 
-	return null;
+  return null;
 }
 
 function findOne$1(test, elems){
-	var elem = null;
+  var elem = null;
 
-	for(var i = 0, l = elems.length; i < l && !elem; i++){
-		if(!isTag$2(elems[i])){
-			continue;
-		} else if(test(elems[i])){
-			elem = elems[i];
-		} else if(elems[i].children.length > 0){
-			elem = findOne$1(test, elems[i].children);
-		}
-	}
+  for(var i = 0, l = elems.length; i < l && !elem; i++){
+    if(!isTag$2(elems[i])){
+      continue;
+    } else if(test(elems[i])){
+      elem = elems[i];
+    } else if(elems[i].childNodes.length > 0){
+      elem = findOne$1(test, elems[i].childNodes);
+    }
+  }
 
-	return elem;
+  return elem;
 }
 
 function existsOne(test, elems){
-	for(var i = 0, l = elems.length; i < l; i++){
-		if(
-			isTag$2(elems[i]) && (
-				test(elems[i]) || (
-					elems[i].children.length > 0 &&
-					existsOne(test, elems[i].children)
-				)
-			)
-		){
-			return true;
-		}
-	}
+  for(var i = 0, l = elems.length; i < l; i++){
+    if(
+      isTag$2(elems[i]) && (
+        test(elems[i]) || (
+          elems[i].childNodes.length > 0 &&
+          existsOne(test, elems[i].childNodes)
+        )
+      )
+    ){
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 }
 
 function findAll$1(test, elems){
-	var result = [];
-	for(var i = 0, j = elems.length; i < j; i++){
-		if(!isTag$2(elems[i])) continue;
-		if(test(elems[i])) result.push(elems[i]);
+  var result = [];
+  for(var i = 0, j = elems.length; i < j; i++){
+    if(!isTag$2(elems[i])) continue;
+    if(test(elems[i])) result.push(elems[i]);
 
-		if(elems[i].children.length > 0){
-			result = result.concat(findAll$1(test, elems[i].children));
-		}
-	}
-	return result;
+    if(elems[i].childNodes.length > 0){
+      result = result.concat(findAll$1(test, elems[i].childNodes));
+    }
+  }
+  return result;
 }
 
 var legacy = createCommonjsModule(function (module, exports) {
@@ -535,42 +535,42 @@ var helpers = createCommonjsModule(function (module, exports) {
 // removeSubsets
 // Given an array of nodes, remove any member that is contained by another.
 exports.removeSubsets = function(nodes) {
-	var idx = nodes.length, node, ancestor, replace;
+  var idx = nodes.length, node, ancestor, replace;
 
-	// Check if each node (or one of its ancestors) is already contained in the
-	// array.
-	while (--idx > -1) {
-		node = ancestor = nodes[idx];
+  // Check if each node (or one of its ancestors) is already contained in the
+  // array.
+  while (--idx > -1) {
+    node = ancestor = nodes[idx];
 
-		// Temporarily remove the node under consideration
-		nodes[idx] = null;
-		replace = true;
+    // Temporarily remove the node under consideration
+    nodes[idx] = null;
+    replace = true;
 
-		while (ancestor) {
-			if (nodes.indexOf(ancestor) > -1) {
-				replace = false;
-				nodes.splice(idx, 1);
-				break;
-			}
-			ancestor = ancestor.parent;
-		}
+    while (ancestor) {
+      if (nodes.indexOf(ancestor) > -1) {
+        replace = false;
+        nodes.splice(idx, 1);
+        break;
+      }
+      ancestor = ancestor.parent;
+    }
 
-		// If the node has been found to be unique, re-insert it.
-		if (replace) {
-			nodes[idx] = node;
-		}
-	}
+    // If the node has been found to be unique, re-insert it.
+    if (replace) {
+      nodes[idx] = node;
+    }
+  }
 
-	return nodes;
+  return nodes;
 };
 
 // Source: http://dom.spec.whatwg.org/#dom-node-comparedocumentposition
 var POSITION = {
-	DISCONNECTED: 1,
-	PRECEDING: 2,
-	FOLLOWING: 4,
-	CONTAINS: 8,
-	CONTAINED_BY: 16
+  DISCONNECTED: 1,
+  PRECEDING: 2,
+  FOLLOWING: 4,
+  CONTAINS: 8,
+  CONTAINED_BY: 16
 };
 
 // Compare the position of one node against another node in any other document.
@@ -596,50 +596,50 @@ var POSITION = {
 //         See http://dom.spec.whatwg.org/#dom-node-comparedocumentposition for
 //         a description of these values.
 var comparePos = exports.compareDocumentPosition = function(nodeA, nodeB) {
-	var aParents = [];
-	var bParents = [];
-	var current, sharedParent, siblings, aSibling, bSibling, idx;
+  var aParents = [];
+  var bParents = [];
+  var current, sharedParent, siblings, aSibling, bSibling, idx;
 
-	if (nodeA === nodeB) {
-		return 0;
-	}
+  if (nodeA === nodeB) {
+    return 0;
+  }
 
-	current = nodeA;
-	while (current) {
-		aParents.unshift(current);
-		current = current.parent;
-	}
-	current = nodeB;
-	while (current) {
-		bParents.unshift(current);
-		current = current.parent;
-	}
+  current = nodeA;
+  while (current) {
+    aParents.unshift(current);
+    current = current.parent;
+  }
+  current = nodeB;
+  while (current) {
+    bParents.unshift(current);
+    current = current.parent;
+  }
 
-	idx = 0;
-	while (aParents[idx] === bParents[idx]) {
-		idx++;
-	}
+  idx = 0;
+  while (aParents[idx] === bParents[idx]) {
+    idx++;
+  }
 
-	if (idx === 0) {
-		return POSITION.DISCONNECTED;
-	}
+  if (idx === 0) {
+    return POSITION.DISCONNECTED;
+  }
 
-	sharedParent = aParents[idx - 1];
-	siblings = sharedParent.children;
-	aSibling = aParents[idx];
-	bSibling = bParents[idx];
+  sharedParent = aParents[idx - 1];
+  siblings = sharedParent.childNodes;
+  aSibling = aParents[idx];
+  bSibling = bParents[idx];
 
-	if (siblings.indexOf(aSibling) > siblings.indexOf(bSibling)) {
-		if (sharedParent === nodeB) {
-			return POSITION.FOLLOWING | POSITION.CONTAINED_BY;
-		}
-		return POSITION.FOLLOWING;
-	} else {
-		if (sharedParent === nodeA) {
-			return POSITION.PRECEDING | POSITION.CONTAINS;
-		}
-		return POSITION.PRECEDING;
-	}
+  if (siblings.indexOf(aSibling) > siblings.indexOf(bSibling)) {
+    if (sharedParent === nodeB) {
+      return POSITION.FOLLOWING | POSITION.CONTAINED_BY;
+    }
+    return POSITION.FOLLOWING;
+  } else {
+    if (sharedParent === nodeA) {
+      return POSITION.PRECEDING | POSITION.CONTAINS;
+    }
+    return POSITION.PRECEDING;
+  }
 };
 
 // Sort an array of nodes based on their relative position in the document and
@@ -650,34 +650,33 @@ var comparePos = exports.compareDocumentPosition = function(nodeA, nodeB) {
 //
 // @returns {Array} collection of unique nodes, sorted in document order
 exports.uniqueSort = function(nodes) {
-	var idx = nodes.length, node, position;
+  var idx = nodes.length, node, position;
 
-	nodes = nodes.slice();
+  nodes = nodes.slice();
 
-	while (--idx > -1) {
-		node = nodes[idx];
-		position = nodes.indexOf(node);
-		if (position > -1 && position < idx) {
-			nodes.splice(idx, 1);
-		}
-	}
-	nodes.sort(function(a, b) {
-		var relative = comparePos(a, b);
-		if (relative & POSITION.PRECEDING) {
-			return -1;
-		} else if (relative & POSITION.FOLLOWING) {
-			return 1;
-		}
-		return 0;
-	});
+  while (--idx > -1) {
+    node = nodes[idx];
+    position = nodes.indexOf(node);
+    if (position > -1 && position < idx) {
+      nodes.splice(idx, 1);
+    }
+  }
+  nodes.sort(function(a, b) {
+    var relative = comparePos(a, b);
+    if (relative & POSITION.PRECEDING) {
+      return -1;
+    } else if (relative & POSITION.FOLLOWING) {
+      return 1;
+    }
+    return 0;
+  });
 
-	return nodes;
+  return nodes;
 };
 });
 
 var index$3 = createCommonjsModule(function (module) {
 var DomUtils = module.exports;
-
 [
   stringify,
   traversal,

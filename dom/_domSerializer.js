@@ -100,7 +100,7 @@ function render(dom, opts) {
     let elem = dom[i]
 
     if (elem.type === 'root') {
-      output.push(render(elem.children, opts))
+      output.push(render(elem.childNodes, opts))
     } else if (ElementType.isTag(elem)) {
       output.push(renderTag(elem, opts))
     } else if (elem.type === ElementType.Directive) {
@@ -130,13 +130,13 @@ function renderTag(elem, opts) {
 
   if (
     opts.xmlMode
-    && (!elem.children || elem.children.length === 0)
+    && (!elem.childNodes || elem.childNodes.length === 0)
   ) {
     tag += '/>'
   } else {
     tag += '>'
-    if (elem.children) {
-      tag += render(elem.children, opts)
+    if (elem.childNodes) {
+      tag += render(elem.childNodes, opts)
     }
 
     if (!singleTag[elem.name] || opts.xmlMode) {
@@ -161,7 +161,7 @@ function renderText(elem, opts) {
 }
 
 function renderCdata(elem) {
-  return '<![CDATA[' + elem.children[0].data + ']]>'
+  return '<![CDATA[' + elem.childNodes[0].data + ']]>'
 }
 
 function renderComment(elem) {

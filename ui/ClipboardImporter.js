@@ -139,7 +139,7 @@ class ClipboardImporter extends HTMLImporter {
         childIterator.back()
         break
       }
-      wrapper.append(el.clone())
+      wrapper.append(el.clone(true))
     }
     // HACK: usually when we run into this case, then there is inline data only
     // Instead of detecting this case up-front we just set the proper id
