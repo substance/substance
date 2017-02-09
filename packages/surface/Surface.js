@@ -1,5 +1,4 @@
 import inBrowser from '../../util/inBrowser'
-import isNil from '../../util/isNil'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
 import startsWith from '../../util/startsWith'
@@ -7,6 +6,7 @@ import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
 import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
+import { getDOMRangeFromEvent } from '../../util/windowUtils'
 
 /**
    Abstract interface for editing components.

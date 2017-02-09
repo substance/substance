@@ -163,8 +163,6 @@ function _pasteDocument(tx, pasteDoc) {
   }
 
   if (insertedNodes.length > 0) {
-    // select the whole pasted block
-    let firstNode = insertedNodes[0]
     let lastNode = last(insertedNodes)
     setCursor(tx, lastNode, containerId, 'after')
   }

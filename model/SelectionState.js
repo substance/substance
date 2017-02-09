@@ -81,7 +81,6 @@ class SelectionState {
 
   // used to store custom states (e.g. IsolatedNodeComponent uses this)
   set(key, value) {
-    this._state
     if (this._state[key]) {
       throw new Error(`State ${key} is already set`)
     }

@@ -29,7 +29,7 @@ class TableComponent extends Component {
     return el
   }
 
-  grabFocus(event) {
+  grabFocus(event) { // eslint-disable-line
     let firstCellId = this.props.node.cells[0][0]
     if (firstCellId) {
       let comp = this.refs[firstCellId]

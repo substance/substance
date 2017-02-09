@@ -195,7 +195,7 @@ class Blocker extends Component {
 
   onClick(event) {
     if (event.target !== this.getNativeElement()) return
-    console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
+    // console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
     if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
       event.preventDefault()
       event.stopPropagation()
@@ -204,8 +204,7 @@ class Blocker extends Component {
   }
 
   onDblClick(event) {
-    console.log('DblClicked on Blocker of %s', this.getParent().id, event)
-    // console.log('%s: onClick()', this.id, event)
+    // console.log('DblClicked on Blocker of %s', this.getParent().id, event)
     event.preventDefault()
     event.stopPropagation()
     this._getIsolatedNodeComponent().grabFocus(event)

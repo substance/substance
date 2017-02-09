@@ -1,4 +1,6 @@
-function getDOMRangeFromEvent(evt) {
+import isNil from './isNil'
+
+export function getDOMRangeFromEvent(evt) {
   let range, x = evt.clientX, y = evt.clientY
   // Try the simple IE way first
   if (document.body.createTextRange) {
