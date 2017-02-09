@@ -6,8 +6,10 @@ export default function filter(iteratee, fn) {
     return iteratee.filter(fn)
   }
   let result = []
-  forEach(iteratee, (...args) => {
-    result.push(fn(...args))
+  forEach(iteratee, (val, key) => {
+    if (fn(val, key)) {
+      result.push(val)
+    }
   })
   return result
 }
