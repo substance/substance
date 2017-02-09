@@ -30,3 +30,17 @@
   top: 0px; bottom: 0px; left: 0px; right: 0px;
   cursor: default;
 }
+
+.sc-isolated-node.sm-no-blocker .sc-isolated-node-blocker {
+  display: none;
+}
+
+.sc-isolated-node > .se-bracket {
+  height: 1px;
+  width: 1px;
+  opacity: 0;
+}
+
+.sc-isolated-node.sm-no-blocker > .se-bracket {
+  display:none;
+}

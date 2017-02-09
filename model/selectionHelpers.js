@@ -111,7 +111,9 @@ export function setCursor(tx, node, containerId, mode) {
       type: 'node',
       containerId: containerId,
       nodeId: node.id,
-      mode: mode
+      // NOTE: ATM we mostly use 'full' NodeSelections
+      // Still, they are supported internally
+      // mode: mode
     })
   }
 }

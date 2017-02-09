@@ -81,7 +81,7 @@ class DOMSelection {
     }
     else {
       let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
-      range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
+      range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset, options)
     }
     if (DEBUG) console.info('DOM->Model: range ', range ? range.toString() : null)
     state.model = range
@@ -171,8 +171,9 @@ class DOMSelection {
         let coors = IsolatedNodeComponent.getDOMCoordinates(comp, sel)
         start = coors.start
         end = coors.end
-        if (sel.isAfter()) start = end
-        else if (sel.isBefore()) end = start
+        // Note: ATM we do not render collapsed NodeSelections differently
+        // if (sel.isAfter()) start = end
+        // else if (sel.isBefore()) end = start
       } else {
         let _nodeEl = comp.el
         start = {
@@ -222,12 +223,12 @@ class DOMSelection {
     @param {Range} range
     @returns {model/Range}
   */
-  mapDOMRange(wRange) {
+  mapDOMRange(wRange, options) {
     return this._getRange(
       DefaultDOMElement.wrapNativeElement(wRange.startContainer),
       wRange.startOffset,
       DefaultDOMElement.wrapNativeElement(wRange.endContainer),
-      wRange.endOffset)
+      wRange.endOffset, options)
   }
 
   /*
@@ -280,15 +281,16 @@ class DOMSelection {
     @param {number} focusOffset
     @returns {model/Range}
   */
-  _getRange(anchorNode, anchorOffset, focusNode, focusOffset) {
-    let start = this._getCoordinate(anchorNode, anchorOffset)
-    let end
-    if (anchorNode === focusNode && anchorOffset === focusOffset) {
-      end = start
-    } else {
-      end = this._getCoordinate(focusNode, focusOffset)
-    }
+  _getRange(anchorNode, anchorOffset, focusNode, focusOffset, options = {}) {
     let isReverse = DefaultDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
+    let isCollapsed = (anchorNode === focusNode && anchorOffset === focusOffset)
+    let start, end
+    if (isCollapsed) {
+      start = end = this._getCoordinate(anchorNode, anchorOffset, options)
+    } else {
+      start = this._getCoordinate(anchorNode, anchorOffset, { direction: isReverse ? 'right' : 'left' })
+      end = this._getCoordinate(focusNode, focusOffset, options)
+    }
     if (start && end) {
       return _createRange({ start, end, isReverse })
     } else {
@@ -329,16 +331,22 @@ class DOMSelection {
     Moving `left` would provide the previous address, `right` would provide the next address.
     The default direction is `right`.
   */
-  _getCoordinate(nodeEl, offset) {
+  _getCoordinate(nodeEl, offset, options={}) {
     let coor = null
     // this deals with a cursor in a TextProperty
     if (!coor) {
       coor = TextPropertyComponent.getCoordinate(this.editor.el, nodeEl, offset)
     }
+    let comp = Component.unwrap(nodeEl)
+    if (!coor && comp) {
+      // let IsolatedNodeComponent figure out where the selection is
+      if (comp.context.isolatedNodeComponent) {
+        coor = IsolatedNodeComponent.getCoordinate(nodeEl, options)
+      }
+    }
     // Edge-cases: These handlers are hacked so that the case is covered,
     // not solved 'elegantly'
     if (!coor) {
-      let comp = Component.unwrap(nodeEl)
       // as in #354: sometimes anchor or focus is the surface itself
       if (comp && comp._isContainerEditor) {
         let childIdx = (offset === 0) ? 0 : offset-1

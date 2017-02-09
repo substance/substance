@@ -1,5 +1,8 @@
 import Component from '../../ui/Component'
 import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
+import Coordinate from '../../model/Coordinate'
+
+const BRACKET = 'X'
 
 /*
   Isolation Strategies:
@@ -48,6 +51,16 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     el.on('keydown', this.onKeydown)
 
     let shouldRenderBlocker = (this.blockingMode === 'closed') && (this.state.mode !== 'focused')
+    if (!shouldRenderBlocker) {
+      el.addClass('sm-no-blocker')
+    }
+
+    // HACK: we need something 'editable' where we can put DOM selection into,
+    // otherwise native cursor navigation gets broken
+    el.append(
+      $$('div').addClass('se-bracket sm-left').ref('left')
+        .append(BRACKET)
+    )
 
     let content = this.renderContent($$, node, {
       disabled: this.props.disabled || shouldRenderBlocker
@@ -55,9 +68,14 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     content.attr('contenteditable', false)
 
     el.append(content)
-    if (shouldRenderBlocker) {
-      el.append($$(Blocker).ref('blocker'))
-    }
+
+    el.append($$(Blocker).ref('blocker'))
+
+    el.append(
+      $$('div').addClass('se-bracket sm-right').ref('right')
+        .append(BRACKET)
+    )
+
     return el
   }
 
@@ -121,10 +139,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     }
   }
 
-  _fixForNavigation() {
-    this.refs.content.el.removeAttribute('contenteditable')
-  }
-
 }
 
 IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
@@ -138,18 +152,34 @@ IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
 }
 
 IsolatedNodeComponent.getDOMCoordinates = function(comp) {
-  let el = comp.el
+  const left = comp.refs.left
+  const right = comp.refs.right
   return {
     start: {
-      container: el.getNativeElement(),
+      container: left.getNativeElement(),
       offset: 0
     },
     end: {
-      container: el.getNativeElement(),
-      // offset: 1
-      offset: el.getChildCount()
+      container: right.getNativeElement(),
+      offset: right.getChildCount()
     }
   }
+}
+
+IsolatedNodeComponent.getCoordinate = function(nodeEl, options) {
+  let comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
+  let offset = null
+  if (options.direction === 'left' || nodeEl === comp.refs.left.el) {
+    offset = 0
+  } else if (options.direction === 'right' || nodeEl === comp.refs.right.el) {
+    offset = 1
+  }
+  let coor
+  if (offset !== null) {
+    coor = new Coordinate([comp.props.node.id], offset)
+    coor._comp = comp
+  }
+  return coor
 }
 
 class Blocker extends Component {

@@ -4,8 +4,8 @@ import keys from '../util/keys'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from '../packages/surface/Surface'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
-import Component from '../ui/Component'
 import RenderingEngine from '../ui/RenderingEngine'
+// import Component from '../ui/Component'
 
 /**
   Represents a flow editor that manages a sequence of nodes in a container. Needs to be
@@ -167,74 +167,65 @@ class ContainerEditor extends Surface {
 
   _handleLeftOrRightArrowKey(event) {
     event.stopPropagation()
-    let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let sel = this.getEditorSession().getSelection()
+    const doc = this.getDocument()
+    const sel = this.getEditorSession().getSelection()
+    const left = (event.keyCode === keys.LEFT)
+    const right = !left
+    const direction = left ? 'left' : 'right'
 
-    if (this._selectNextIsolatedNode(direction)) {
-      event.preventDefault()
-      return
-    }
+    if (sel && !sel.isNull()) {
+      const container = doc.get(sel.containerId, 'strict')
 
-    if (sel.isNodeSelection() && !event.shiftKey) {
-      this.domSelection.collapse(direction)
+      // Don't react if we are at the boundary of the document
+      if (sel.isNodeSelection()) {
+        let nodePos = container.getPosition(doc.get(sel.getNodeId()))
+        if ((left && nodePos === 0) || (right && nodePos === container.length-1)) {
+          event.preventDefault()
+          return
+        }
+      }
+
+      if (this._selectNextIsolatedNode(direction)) {
+        event.preventDefault()
+        return
+      }
+
+      if (sel.isNodeSelection() && !event.shiftKey) {
+        this.domSelection.collapse(direction)
+      }
     }
 
     window.setTimeout(function() {
       if (!this.isMounted()) return
-      this._updateModelSelection({ direction: direction })
+      this._updateModelSelection({ direction })
     }.bind(this))
   }
 
   _handleUpOrDownArrowKey(event) {
     event.stopPropagation()
-    let up = (event.keyCode === keys.UP)
-    let direction = up ? 'left' : 'right'
-    let sel = this.getEditorSession().getSelection()
+    const doc = this.getDocument()
+    const sel = this.getEditorSession().getSelection()
+    const up = (event.keyCode === keys.UP)
+    const down = !up
+    const direction = up ? 'left' : 'right'
 
-    if (event.altKey && this._selectNextIsolatedNode(direction)) {
-      event.preventDefault()
-      return
-    }
+    if (sel && !sel.isNull()) {
+      const container = doc.get(sel.containerId, 'strict')
 
-    // HACK: while LEFT/RIGHT seem to work well with our IsolatedNodes
-    // we need to fiddle with the DOM selection for UP/DOWN
-    // otherwise the cursor gets stuck.
-    if (sel && sel.start) {
-      if ((sel.start.isNodeCoordinate() && up) ||
-          (sel.end.isNodeCoordinate() && !up)) {
-        let el = this.el.find(`[data-id="${sel.start.getNodeId()}"]`)
-        let comp = Component.unwrap(el)
-        if (up) {
-          if (comp) comp._fixForNavigation()
-          this.domSelection.collapse(direction)
-        } else {
-          let parentNode = el.parentNode
-          let idx = parentNode.getChildIndex(el)
-          let offset = up ? idx : idx+1
-          if (!event.shiftKey) {
-            this.domSelection.setCursor(parentNode, offset)
-          } else {
-            this.domSelection.extend(parentNode, offset)
-          }
+      // Don't react if we are at the boundary of the document
+      if (sel.isNodeSelection()) {
+        let nodePos = container.getPosition(doc.get(sel.getNodeId()))
+        if ((up && nodePos === 0) || (down && nodePos === container.length-1)) {
+          event.preventDefault()
+          return
         }
-        // let parentNode = el.parentNode
-        // let idx = parentNode.getChildIndex(el)
-        // let offset = up ? idx : idx+1
-        // if (!event.shiftKey) {
-        //   this.domSelection.setCursor(parentNode, offset)
-        // } else {
-        //   this.domSelection.extend(parentNode, offset)
-        // }
       }
     }
 
-    // Note: we need this timeout so that CE updates the DOM selection first
-    // before we try to map it to the model
-    window.setTimeout(function() {
-      // TODO: try to get rid of the isMounted() checks
-      if (!this.isMounted()) return
-      this._updateModelSelection({ direction: direction })
-    }.bind(this))
+    window.setTimeout(() => {
+      let newSel = this.domSelection.getSelection({ direction })
+      this._setSelection(newSel)
+    })
   }
 
   _handleSpaceKey(event) {
