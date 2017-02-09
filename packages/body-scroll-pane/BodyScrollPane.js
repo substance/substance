@@ -112,6 +112,10 @@ class BodyScrollPane extends AbstractScrollPane {
     console.warn('TODO: implement')
   }
 
+  _getContentRect() {
+    return window.document.body.getBoundingClientRect()
+  }
+
   /*
     Get selection rectangle relative to panel content element
   */
@@ -119,9 +123,8 @@ class BodyScrollPane extends AbstractScrollPane {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)
-    const contentRect = document.body.getBoundingClientRect()
+    const contentRect = this._getContentRect()
     const selectionRect = wrange.getBoundingClientRect()
-
     return _getRelativeRect(contentRect, selectionRect)
   }
 

@@ -242,6 +242,10 @@ class ScrollPane extends AbstractScrollPane {
     return getRelativeMouseBounds(e, contentContainerEl)
   }
 
+  _getContentRect() {
+    return this.getContentElement().getNativeElement().getBoundingClientRect()
+  }
+
   /*
     Get selection rectangle relative to panel content element
   */
@@ -249,7 +253,7 @@ class ScrollPane extends AbstractScrollPane {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)
-    let contentRect = this.getContentElement().getNativeElement().getBoundingClientRect()
+    let contentRect = this._getContentRect()
     let selectionRect = wrange.getBoundingClientRect()
     if (selectionRect.top === 0 && selectionRect.bottom === 0) {
       selectionRect = this._fixForCursorRectBug()

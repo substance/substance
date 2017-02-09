@@ -26,12 +26,14 @@ class AbstractScrollPane extends Component {
     and emit a dom-selection:rendered event with positioning hints
   */
   _onDomSelectionRendered() {
+    let contentRect = this._getContentRect()
     let selectionRect = this._getSelectionRect()
     if (!selectionRect) return
     // Allows overlays to do positioning relative to the current
     // selection bounding rectangle.
     this.emit('dom-selection:rendered', {
-      selectionRect: selectionRect
+      contentRect,
+      selectionRect
     })
     this._scrollSelectionIntoView(selectionRect)
   }
@@ -112,6 +114,10 @@ class AbstractScrollPane extends Component {
     @param {String} componentId component id, must be present in data-id attribute
   */
   scrollTo(componentId, onlyIfNotVisible) { // eslint-disable-line
+    throw new Error('Abstract method')
+  }
+
+  _getContentRect() {
     throw new Error('Abstract method')
   }
 
