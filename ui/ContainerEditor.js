@@ -185,20 +185,14 @@ class ContainerEditor extends Surface {
         }
       }
 
-      if (this._selectNextIsolatedNode(direction)) {
-        event.preventDefault()
-        return
-      }
-
       if (sel.isNodeSelection() && !event.shiftKey) {
         this.domSelection.collapse(direction)
       }
     }
 
-    window.setTimeout(function() {
-      if (!this.isMounted()) return
+    window.setTimeout(() => {
       this._updateModelSelection({ direction })
-    }.bind(this))
+    })
   }
 
   _handleUpOrDownArrowKey(event) {
@@ -223,8 +217,7 @@ class ContainerEditor extends Surface {
     }
 
     window.setTimeout(() => {
-      let newSel = this.domSelection.getSelection({ direction })
-      this._setSelection(newSel)
+      this._updateModelSelection({ direction })
     })
   }
 
