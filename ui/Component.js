@@ -1010,8 +1010,10 @@ function _mountChild(parent, child) {
 
 // NOTE: we keep a reference to the component in all DOMElement instances
 function _unwrapComp(el) {
-  if (!el._isDOMElement) el = el._wrapper
-  if (el) return el._comp
+  if (el) {
+    if (!el._isDOMElement) el = el._wrapper
+    if (el) return el._comp
+  }
 }
 
 function _unwrapCompStrict(el) {

@@ -319,7 +319,6 @@ test("DR4-2: Deleting using DELETE with cursor inside an empty TextNode and Isol
   let body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
   t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
-  t.ok(sel.isBefore(), '... before')
   t.equal(sel.getNodeId(), 'block1', '... block1')
   t.end()
 })
@@ -443,7 +442,6 @@ test("DL4-2: Deleting using BACKSPACE with cursor inside an empty TextNode and I
   t.isNil(doc.get('empty'), 'empty node should have been deleted')
   t.ok(sel.isNodeSelection(), 'Selection should be a node selection')
   t.equal(sel.getNodeId(), 'block1', '... on block1')
-  t.ok(sel.isAfter(), '... cursor after the node')
   t.end()
 })
 
