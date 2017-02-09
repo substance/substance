@@ -1,7 +1,6 @@
 import platform from '../../util/platform'
 import Scrollbar from '../scrollbar/Scrollbar'
 import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
-import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 import AbstractScrollPane from './AbstractScrollPane'
 
 /**
@@ -237,49 +236,7 @@ class ScrollPane extends AbstractScrollPane {
     this._updateScrollbar()
   }
 
-  _getMouseBounds(e) {
-    let contentContainerEl = this.getContentElement().getNativeElement()
-    return getRelativeMouseBounds(e, contentContainerEl)
-  }
-
-  _getContentRect() {
-    return this.getContentElement().getNativeElement().getBoundingClientRect()
-  }
-
-  /*
-    Get selection rectangle relative to panel content element
-  */
-  _getSelectionRect() {
-    const wsel = window.getSelection()
-    if (wsel.rangeCount === 0) return
-    const wrange = wsel.getRangeAt(0)
-    let contentRect = this._getContentRect()
-    let selectionRect = wrange.getBoundingClientRect()
-    if (selectionRect.top === 0 && selectionRect.bottom === 0) {
-      selectionRect = this._fixForCursorRectBug()
-    }
-    return _getRelativeRect(contentRect, selectionRect)
-  }
-
-  _fixForCursorRectBug() {
-    let wsel = window.getSelection()
-    let rects = wsel.anchorNode.parentElement.getClientRects()
-    return rects[0]
-  }
-
 }
 
-function _getRelativeRect(parentRect, childRect) {
-  var left = childRect.left - parentRect.left
-  var top = childRect.top - parentRect.top
-  return {
-    left: left,
-    top: top,
-    right: parentRect.width - left - childRect.width,
-    bottom: parentRect.height - top - childRect.height,
-    width: childRect.width,
-    height: childRect.height
-  }
-}
 
 export default ScrollPane

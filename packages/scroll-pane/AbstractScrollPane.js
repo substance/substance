@@ -1,3 +1,5 @@
+import { getSelectionRect } from '../../util/windowUtils'
+import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 import Component from '../../ui/Component'
 
 class AbstractScrollPane extends Component {
@@ -118,18 +120,18 @@ class AbstractScrollPane extends Component {
   }
 
   _getContentRect() {
-    throw new Error('Abstract method')
+    return this.getContentElement().getNativeElement().getBoundingClientRect()
   }
 
   /*
     Get selection rectangle relative to panel content element
   */
   _getSelectionRect() {
-    throw new Error('Abstract method')
+    return getSelectionRect(this._getContentRect())
   }
 
-  _getMouseBounds(e) { // eslint-disable-line
-    throw new Error('Abstract method')
+  _getMouseBounds(e) {
+    return getRelativeMouseBounds(e, this.getContentElement().getNativeElement())
   }
 
 }

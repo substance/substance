@@ -1,5 +1,4 @@
 import AbstractScrollPane from '../scroll-pane/AbstractScrollPane'
-import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 import DefaultDOMElement from '../../dom/DefaultDOMElement'
 
 /**
@@ -72,8 +71,7 @@ class BodyScrollPane extends AbstractScrollPane {
   }
 
   getContentElement() {
-    // TODO: should be wrapped in DefaultDOMElement
-    return DefaultDOMElement.wrapNativeElement(document.body)
+    return DefaultDOMElement.wrapNativeElement(window.document.body)
   }
 
   // /**
@@ -112,46 +110,6 @@ class BodyScrollPane extends AbstractScrollPane {
     console.warn('TODO: implement')
   }
 
-  _getContentRect() {
-    return window.document.body.getBoundingClientRect()
-  }
-
-  /*
-    Get selection rectangle relative to panel content element
-  */
-  _getSelectionRect() {
-    const wsel = window.getSelection()
-    if (wsel.rangeCount === 0) return
-    const wrange = wsel.getRangeAt(0)
-    const contentRect = this._getContentRect()
-    const selectionRect = wrange.getBoundingClientRect()
-    return _getRelativeRect(contentRect, selectionRect)
-  }
-
-  _fixForCursorRectBug() {
-    let wsel = window.getSelection()
-    let rects = wsel.anchorNode.parentElement.getClientRects()
-    return rects[0]
-  }
-
-  _getMouseBounds(e) {
-    return getRelativeMouseBounds(e, document.body)
-  }
-
 }
-
-function _getRelativeRect(parentRect, childRect) {
-  var left = childRect.left - parentRect.left
-  var top = childRect.top - parentRect.top
-  return {
-    left: left,
-    top: top,
-    right: parentRect.width - left - childRect.width,
-    bottom: parentRect.height - top - childRect.height,
-    width: childRect.width,
-    height: childRect.height
-  }
-}
-
 
 export default BodyScrollPane

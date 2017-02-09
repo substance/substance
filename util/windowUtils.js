@@ -1,4 +1,5 @@
 import isNil from './isNil'
+import inBrowser from './inBrowser'
 
 export function getDOMRangeFromEvent(evt) {
   let range, x = evt.clientX, y = evt.clientY
@@ -28,4 +29,40 @@ export function getDOMRangeFromEvent(evt) {
     }
   }
   return range
+}
+
+/*
+  Get selection rectangle relative to panel content element
+*/
+export function getSelectionRect(parentRect) {
+  if (inBrowser) {
+    const wsel = window.getSelection()
+    if (wsel.rangeCount === 0) return
+    const wrange = wsel.getRangeAt(0)
+    let contentRect = parentRect
+    let selectionRect = wrange.getBoundingClientRect()
+    if (selectionRect.top === 0 && selectionRect.bottom === 0) {
+      selectionRect = _fixForCursorRectBug()
+    }
+    return getRelativeRect(contentRect, selectionRect)
+  }
+}
+
+function _fixForCursorRectBug() {
+  let wsel = window.getSelection()
+  let rects = wsel.anchorNode.parentElement.getClientRects()
+  return rects[0]
+}
+
+export function getRelativeRect(parentRect, childRect) {
+  var left = childRect.left - parentRect.left
+  var top = childRect.top - parentRect.top
+  return {
+    left: left,
+    top: top,
+    right: parentRect.width - left - childRect.width,
+    bottom: parentRect.height - top - childRect.height,
+    width: childRect.width,
+    height: childRect.height
+  }
 }
