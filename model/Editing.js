@@ -810,7 +810,11 @@ class Editing {
       }
       // VI anno.start before and anno.end after
       else if (annoStart<startOffset && annoEnd>=endOffset) {
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
+        if (anno._isInlineNode) {
+          // skip
+        } else {
+          tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
+        }
       }
       else {
         console.warn('TODO: handle annotation update case.')

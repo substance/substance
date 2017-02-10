@@ -184,6 +184,31 @@ test("IT8: Inserting text with range within TextProperty starting inside an anno
   t.end()
 })
 
+test("IT9: Inserting text after an InlineNode node", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertInlineNode({
+      type: 'test-inline-node',
+      id: 'il1',
+      content: 'X'
+    })
+    tx.insertText('Y')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  let il1 = doc.get('il1')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+'\uFEFF'+'Y'+P1_TEXT.slice(3), 'Text should have been inserted correctly.') // eslint-disable-line no-useless-concat
+  t.equal(sel.start.offset, 5, 'Cursor should be after inserted character')
+  t.deepEqual([il1.start.offset, il1.end.offset], [3,4], 'InlineNode should have correct dimensions')
+  t.end()
+})
+
 test("II1: Inserting InlineNode node into a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
