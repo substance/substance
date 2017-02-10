@@ -58,8 +58,7 @@ class Surface extends Component {
 
     this._state = {
       // true if the document session's selection is addressing this surface
-      skipNextFocusEvent: false,
-      skipNextObservation: false
+      skipNextFocusEvent: false
     }
   }
 
@@ -293,8 +292,7 @@ class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-    // necessary for handling dead keys properly
-    this._state.skipNextObservation=true
+
     let text = event.data
     this.editorSession.transaction((tx) => {
       tx.insertText(text)
@@ -304,8 +302,6 @@ class Surface extends Component {
   // Handling Dead-keys under OSX
   onCompositionStart(event) {
     if (!this._shouldConsumeEvent(event)) return
-    // just tell DOM observer that we have everything under control
-    this._state.skipNextObservation = true
   }
 
   // TODO: do we need this anymore?
@@ -323,7 +319,6 @@ class Surface extends Component {
       return
     }
     let character = String.fromCharCode(event.which)
-    this._state.skipNextObservation=true
     if (!event.shiftKey) {
       character = character.toLowerCase()
     }
@@ -431,20 +426,6 @@ class Surface extends Component {
       let sel = this.domSelection.getSelection()
       this._setSelection(sel)
     }.bind(this))
-  }
-
-  onDomMutations(e) {
-    if (this._state.skipNextObservation) {
-      this._state.skipNextObservation = false
-      return
-    }
-    // Known use-cases:
-    //  - Context-menu:
-    //      - Delete
-    //      - Note: copy, cut, paste work just fine
-    //  - dragging selected text
-    //  - spell correction
-    console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e)
   }
 
   onNativeBlur() {
