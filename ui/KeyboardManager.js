@@ -1,4 +1,3 @@
-import forEach from '../util/forEach'
 import keys from '../util/keys'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
@@ -9,13 +8,19 @@ class KeyboardManager {
 
     this.context = options.context || {}
 
-    this.bindings = {}
-    forEach(bindings, (spec, combo) => {
+    this.keydownBindings = {}
+    this.textinputBindings = {}
+
+    bindings.forEach(({ key, spec }) => {
+      // default combos are evaluated on keydown
+      let type = spec.type || 'keydown'
       if(spec.command) {
         let handler = new ExecuteCommandHandler(editorSession, spec.command)
-        this.bindings[combo] = {
-          fn: handler.execute,
-          owner: handler
+        let hook = handler.execute.bind(handler)
+        if (type === 'keydown') {
+          this.keydownBindings[parseCombo(key)] = hook
+        } else if (type === 'textinput') {
+          this.textinputBindings[key] = hook
         }
       } else {
         throw new Error('Keyboard binding not supported', spec)
@@ -25,12 +30,20 @@ class KeyboardManager {
 
   onKeydown(event) {
     let key = generateKey(event)
-    let handler = this.bindings[key]
-    if (handler) {
+    let hook = this.keydownBindings[key]
+    if (hook) {
       event.preventDefault()
       event.stopPropagation()
       let params = this._getParams()
-      handler.fn.call(handler.owner, params, this.context)
+      return hook(params, this.context)
+    }
+  }
+
+  onTextInput(text) {
+    let hook = this.textinputBindings[text]
+    if (hook) {
+      let params = this._getParams()
+      return hook(params, this.context)
     }
   }
 

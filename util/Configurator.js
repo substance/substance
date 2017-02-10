@@ -70,7 +70,7 @@ class Configurator {
       editingBehaviors: [],
       macros: [],
       dndHandlers: [],
-      keyboardShortcuts: {},
+      keyboardShortcuts: [],
       icons: {},
       labels: {},
       lang: 'en_US',
@@ -367,8 +367,11 @@ class Configurator {
   }
 
   addKeyboardShortcut(combo, spec) {
-    let key = KeyboardManager.parseCombo(combo)
-    this.config.keyboardShortcuts[key] = spec
+    let entry = {
+      key: combo,
+      spec: spec
+    }
+    this.config.keyboardShortcuts.push(entry)
   }
 
   addFileProxy(FileProxyClass) {

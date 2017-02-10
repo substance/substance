@@ -294,9 +294,11 @@ class Surface extends Component {
     if (!event.data) return
 
     let text = event.data
-    this.editorSession.transaction((tx) => {
-      tx.insertText(text)
-    }, { action: 'type' })
+    if (!this.editorSession.keyboardManager.onTextInput(text)) {
+      this.editorSession.transaction((tx) => {
+        tx.insertText(text)
+      }, { action: 'type' })
+    }
   }
 
   // Handling Dead-keys under OSX
@@ -324,10 +326,12 @@ class Surface extends Component {
     }
     event.preventDefault()
     event.stopPropagation()
-    if (character.length>0) {
-      this.editorSession.transaction((tx) => {
-        tx.insertText(character)
-      }, { action: 'type' })
+    if (!this.editorSession.keyboardManager.onTextInput(character)) {
+      if (character.length>0) {
+        this.editorSession.transaction((tx) => {
+          tx.insertText(character)
+        }, { action: 'type' })
+      }
     }
   }
 
