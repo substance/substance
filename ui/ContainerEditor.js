@@ -122,7 +122,6 @@ class ContainerEditor extends Surface {
     return el
   }
 
-
   _renderNode($$, node) {
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
@@ -216,15 +215,20 @@ class ContainerEditor extends Surface {
         // Unfortunately we need to navigate out of an isolated node
         // manually, as even Chrome on Win is not able to do it.
         let editorSession = this.getEditorSession()
-        event.preventDefault()
-        if (up) {
-          let prev = container.getChildAt(nodePos-1)
-          setCursor(editorSession, prev, sel.containerId, 'after')
-          return
-        } else {
-          let next = container.getChildAt(nodePos+1)
-          setCursor(editorSession, next, sel.containerId, 'before')
-          return
+        // TODO the following fixes the mentioned problem for
+        // regular UP/DOWN (non expanding)
+        // For SHIFT+DOWN it happens to work, and only SHIFT-UP when started as NodeSelection needs to be fixed
+        if (!event.shiftKey) {
+          event.preventDefault()
+          if (up) {
+            let prev = container.getChildAt(nodePos-1)
+            setCursor(editorSession, prev, sel.containerId, 'after')
+            return
+          } else {
+            let next = container.getChildAt(nodePos+1)
+            setCursor(editorSession, next, sel.containerId, 'before')
+            return
+          }
         }
       }
     }
