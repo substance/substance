@@ -87,6 +87,7 @@ class DOMImporter {
 
   reset() {
     this.state.reset()
+    this.createDocument()
   }
 
   createDocument() {
