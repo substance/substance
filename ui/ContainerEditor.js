@@ -1,10 +1,11 @@
 import isString from '../util/isString'
 import keys from '../util/keys'
-// import platform from '../util/platform'
+import {setCursor} from '../model/selectionHelpers'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from '../packages/surface/Surface'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
 import RenderingEngine from '../ui/RenderingEngine'
+// import platform from '../util/platform'
 // import Component from '../ui/Component'
 
 /**
@@ -205,12 +206,24 @@ class ContainerEditor extends Surface {
 
     if (sel && !sel.isNull()) {
       const container = doc.get(sel.containerId, 'strict')
-
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
         let nodePos = container.getPosition(doc.get(sel.getNodeId()))
         if ((up && nodePos === 0) || (down && nodePos === container.length-1)) {
           event.preventDefault()
+          return
+        }
+        // Unfortunately we need to navigate out of an isolated node
+        // manually, as even Chrome on Win is not able to do it.
+        let editorSession = this.getEditorSession()
+        event.preventDefault()
+        if (up) {
+          let prev = container.getChildAt(nodePos-1)
+          setCursor(editorSession, prev, sel.containerId, 'after')
+          return
+        } else {
+          let next = container.getChildAt(nodePos+1)
+          setCursor(editorSession, next, sel.containerId, 'before')
           return
         }
       }
