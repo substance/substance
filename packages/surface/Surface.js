@@ -513,7 +513,6 @@ class Surface extends Component {
     } else {
       // TODO: find out what is better
       this.el.removeAttribute('contenteditable')
-      // this.el.setAttribute('contenteditable', true)
     }
   }
 
@@ -534,21 +533,10 @@ class Surface extends Component {
 
   _handleLeftOrRightArrowKey(event) {
     event.stopPropagation()
-
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    // let selState = this.getEditorSession().getSelectionState()
-    // let sel = selState.getSelection()
-    // // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
-    // if (selState.isInlineNodeSelection() && !event.shiftKey) {
-    //   event.preventDefault()
-    //   this._setSelection(sel.collapse(direction))
-    //   return
-    // }
-
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       this._updateModelSelection({direction})
     }.bind(this))
   }
@@ -558,7 +546,6 @@ class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       let options = {
         direction: (event.keyCode === keys.UP) ? 'left' : 'right'
       }
@@ -571,7 +558,6 @@ class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       let options = {
         direction: (event.keyCode === keys.HOME) ? 'left' : 'right'
       }
@@ -584,7 +570,6 @@ class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       let options = {
         direction: (event.keyCode === keys.PAGEUP) ? 'left' : 'right'
       }
