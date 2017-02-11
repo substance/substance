@@ -93,10 +93,8 @@ const singleTag = {
 };
 
 function formatAttribs(el, opts) {
-  const attributes = el.attributes;
-  if (!attributes) return
-
   let output = [];
+  const attributes = el.attributes;
   // Loop through the attributes
   attributes.forEach((value, key) => {
     // as 'class' and 'style' are computed dynamically we need to check if there are any values set
@@ -109,7 +107,12 @@ function formatAttribs(el, opts) {
       output.push(key + '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"');
     }
   });
-
+  if (el.classes.size > 0) {
+    output.push('class="'+el.getAttribute('class')+'"');
+  }
+  if (el.styles.size >0) {
+    output.push('style="'+el.getAttribute('style')+'"');
+  }
   return output.join(' ')
 }
 
