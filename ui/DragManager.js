@@ -4,6 +4,8 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import EventEmitter from '../util/EventEmitter'
 import inBrowser from '../util/inBrowser'
 import platform from '../util/platform'
+import { getDOMRangeFromEvent } from '../util/windowUtils'
+import DocumentChange from '../model/DocumentChange'
 
 class DragManager extends EventEmitter {
 
@@ -66,8 +68,7 @@ class DragManager extends EventEmitter {
         // why this happens and how it can be avoided
         console.warn('Not in a valid drag state.')
       } else if (this.dragState.selectionDrag) {
-        // cut and paste to destination
-        console.warn('TODO: drag selection', event)
+        this._dragSelection(event)
       } else {
         this.emit('drag:finished')
       }
@@ -118,6 +119,30 @@ class DragManager extends EventEmitter {
     this._onDragEnd(e)
   }
 
+  _dragSelection(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    let editorSession = this.context.editorSession
+    let doc = editorSession.getDocument()
+    let sourceSel = this.dragState.sourceSelection
+    let wrange = getDOMRangeFromEvent(event)
+    if (!wrange) return
+    let comp = Component.unwrap(event.target)
+    if (!comp) return
+    let domSelection = comp.context.domSelection
+    if (!domSelection) return
+    let range = domSelection.mapDOMRange(wrange)
+    if (!range) return
+    let targetSel = doc._createSelectionFromRange(range)
+    editorSession.transaction((tx) => {
+      tx.selection = sourceSel
+      let snippet = tx.copySelection()
+      tx.deleteSelection()
+      tx.selection = DocumentChange.transformSelection(targetSel, tx)
+      tx.paste(snippet)
+    })
+  }
+
   /*
     Initializes dragState, which encapsulate state through the whole
     drag + drop operation.
@@ -161,9 +186,11 @@ class DragManager extends EventEmitter {
       dragState.selectionDrag = true
       dragState.sourceSelection = {
         type: 'property',
-        path: inlineNode.getPath(),
+        path: inlineNode.start.path,
+        startOffset: inlineNode.start.offset,
+        endOffset: inlineNode.end.offset,
         containerId: surface.getContainerId(),
-        surfaceId: comp.context.surface.id,
+        surfaceId: comp.context.surface.id
       }
       return
     }
