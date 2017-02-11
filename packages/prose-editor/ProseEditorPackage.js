@@ -10,6 +10,7 @@ import StrongPackage from '../strong/StrongPackage'
 import CodePackage from '../code/CodePackage'
 import SubscriptPackage from '../subscript/SubscriptPackage'
 import SuperscriptPackage from '../superscript/SuperscriptPackage'
+import QuoteMarksPackage from '../quote-marks/QuoteMarksPackage'
 import ProseArticle from './ProseArticle'
 
 export default {
@@ -33,5 +34,6 @@ export default {
     config.import(SuperscriptPackage)
     config.import(CodePackage)
     config.import(LinkPackage)
+    config.import(QuoteMarksPackage)
   }
 }
