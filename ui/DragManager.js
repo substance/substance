@@ -169,6 +169,11 @@ class DragManager extends EventEmitter {
     // but using the native cursor
     let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
     if (isSelectionDrag) {
+      // TODO: we do not support dragging of ContainerSelection yet
+      if (sel.isContainerSelection()) {
+        console.warn('Dragging of ContainerSelection is not supported yet.')
+        return _stop()
+      }
       // console.log('DragManager: starting a selection drag', sel.toString())
       dragState.selectionDrag = true
       dragState.sourceSelection = sel
