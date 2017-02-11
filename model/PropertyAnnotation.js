@@ -71,25 +71,6 @@ class PropertyAnnotation extends Annotation {
     }
   }
 
-  // WIP
-  // FIXME: this is not correct if sel is a container selection
-  isInsideOf(sel, _strict) {
-    if (sel.isNull()) return false;
-    if (sel.isPropertySelection()) {
-      if (_strict) {
-        return (isArrayEqual(this.start.path, sel.start.path) &&
-          this.start.offset > sel.start.offset &&
-          this.end.offset < sel.end.offset)
-      } else {
-        return (isArrayEqual(this.start.path, sel.start.path) &&
-          this.start.offset >= sel.start.offset &&
-          this.end.offset <= sel.end.offset)
-      }
-    } else {
-      console.warn('PropertyAnnotation.isInsideOf() does not support other selection types.')
-    }
-  }
-
   get startPath() {
     return this.path
   }

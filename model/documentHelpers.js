@@ -158,7 +158,7 @@ function getMarkersForSelection(doc, sel) {
   // markers are stored as one hash for each path, grouped by marker key
   let markers = doc.getIndex('markers').get(path)
   const filtered = filter(markers, function(m) {
-    return m.isInsideOf(sel)
+    return m.containsSelection(sel)
   })
   return filtered
 }
