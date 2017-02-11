@@ -98,6 +98,12 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("outerHTML", function(t) {
+    var p = DefaultDOMElement.parseHTML('<p class="foo">TEST</p>')
+    t.equal(p.outerHTML, '<p class="foo">TEST</p>', 'outerHTML should be complete')
+    t.end()
+  })
+
   test("removeClass", function(t) {
     var p = DefaultDOMElement.parseHTML('<p class="foo">TEST</p>')
     p.removeClass('foo')
