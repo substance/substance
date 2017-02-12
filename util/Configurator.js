@@ -69,7 +69,7 @@ class Configurator {
       textTypes: [],
       editingBehaviors: [],
       macros: [],
-      dndHandlers: [],
+      dropHandlers: [],
       keyboardShortcuts: [],
       icons: {},
       labels: {},
@@ -360,10 +360,21 @@ class Configurator {
   }
 
   addDragAndDrop(DragAndDropHandlerClass) {
+    // we deprecated this after it became more clear what
+    // we actually needed to solve
+    console.warn('DEPRECATED: Use addDropHandler() instead')
     if (!DragAndDropHandlerClass.prototype._isDragAndDropHandler) {
       throw new Error('Only instances of DragAndDropHandler are allowed.')
     }
-    this.config.dndHandlers.push(DragAndDropHandlerClass)
+    this.addDropHandler(new DragAndDropHandlerClass())
+  }
+
+  addDropHandler(dropHandler) {
+    // legacy
+    if (dropHandler._isDragAndDropHandler) {
+      dropHandler.type = dropHandler.type || 'drop-asset'
+    }
+    this.config.dropHandlers.push(dropHandler)
   }
 
   addKeyboardShortcut(combo, spec) {
@@ -496,6 +507,10 @@ class Configurator {
     return this.converterRegistry
   }
 
+  getDropHandlers() {
+    return this.config.dropHandlers.slice(0)
+  }
+
   getSeed() {
     return this.config.seed
   }
@@ -524,12 +539,6 @@ class Configurator {
 
   getMacros() {
     return this.config.macros
-  }
-
-  createDragHandlers() {
-    return this.config.dndHandlers.map(function(DragAndDropHandlerClass) {
-      return new DragAndDropHandlerClass()
-    })
   }
 
   getKeyboardShortcuts() {

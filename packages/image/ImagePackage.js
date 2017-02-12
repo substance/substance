@@ -26,7 +26,7 @@ export default {
       de: 'Bild einfügen'
     })
 
-    config.addDragAndDrop(DropImage)
+    config.addDropHandler(DropImage)
     config.addFileProxy(ImageFileProxy)
   },
   ImageNode: ImageNode,

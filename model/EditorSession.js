@@ -80,7 +80,7 @@ class EditorSession extends EventEmitter {
 
     let configurator = this.configurator
     let commands = configurator.getCommands()
-    let dragHandlers = configurator.createDragHandlers()
+    let dropHandlers = configurator.getDropHandlers()
     let macros = configurator.getMacros()
     let converterRegistry = configurator.getConverterRegistry()
     let editingBehavior = configurator.getEditingBehavior()
@@ -101,7 +101,7 @@ class EditorSession extends EventEmitter {
     this.commandManager = new CommandManager(this._context, commands)
     // The drag manager dispatches drag requests to registered drag handlers
     // TODO: after consolidating the API of this class, we probably need a less diverse context
-    this.dragManager = new DragManager(dragHandlers, Object.assign({}, this._context, {
+    this.dragManager = new DragManager(dropHandlers, Object.assign({}, this._context, {
       commandManager: this.commandManager
     }))
     // The macro manager dispatches to macro detectors at the end of the flow
