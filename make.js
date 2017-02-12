@@ -266,6 +266,7 @@ b.task('npm:docs', function() {
 })
 
 b.task('npm:browser', function() {
+  _css(NPMDIST)
   _browser(NPMDIST, true, true)
 })
 
