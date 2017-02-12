@@ -60,10 +60,12 @@ b.task('build', ['clean', 'assets'], function() {
   b.copy('app/index.html', './dist/index.html')
   b.css('app/app.css', './dist/app.css')
   b.js('app/app.js', {
-    external: ['substance'],
-    dest: './dist/app.js',
-    format: 'umd',
-    moduleName: 'app'
+    target: {
+      dest: './dist/app.js',
+      format: 'umd',
+      moduleName: 'app'
+    },
+    external: ['substance']
   })
 })
 
@@ -163,7 +165,7 @@ export default {
     }),
     commonjs({
       // lodash is used as commonjs module
-      include: [ '/**/lodash/**' ]
+      include: [ '/**/lodash-es/**' ]
     }),
     buble()
   ],
