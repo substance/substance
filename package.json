@@ -37,7 +37,7 @@
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "0.7.0",
-    "substance-docgen": "0.5.1",
+    "substance-docgen": "0.5.2",
     "substance-test": "0.6.1"
   },
   "files": [
