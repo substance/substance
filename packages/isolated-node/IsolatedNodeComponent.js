@@ -50,7 +50,9 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     // always handle ESCAPE
     el.on('keydown', this.onKeydown)
 
-    let shouldRenderBlocker = (this.blockingMode === 'closed') && (this.state.mode !== 'focused')
+    // console.log('##### rendering IsolatedNode', this.id, this.state.unblocked)
+    let shouldRenderBlocker = (this.blockingMode === 'closed' && !this.state.unblocked)
+
     if (!shouldRenderBlocker) {
       el.addClass('sm-no-blocker')
     }
@@ -70,6 +72,10 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     el.append(content)
 
     el.append($$(Blocker).ref('blocker'))
+    if (this.state.unblocked) {
+      el.on('click', this.onClick)
+        .on('dblclick', this.onDblClick)
+    }
 
     el.append(
       $$('div').addClass('se-bracket sm-right').ref('right')
@@ -89,34 +95,42 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   _deriveStateFromSelectionState(selState) {
     let surface = this._getSurface(selState)
-    if (!surface) return null
+    let newState = { mode: null, unblocked: null}
+    if (!surface) return newState
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (surface === this.context.surface) {
       let sel = selState.getSelection()
       let nodeId = this.props.node.id
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
-          return { mode: 'selected' }
+          newState.mode = 'selected'
         } else if (sel.isBefore()) {
-          return { mode: 'cursor', position: 'before' }
+          newState.mode = 'cursor'
+          newState.position = 'before'
         } else if (sel.isAfter()) {
-          return { mode: 'cursor', position: 'after' }
+          newState.mode = 'cursor'
+          newState.position = 'after'
         }
       }
       if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
-        return { mode: 'co-selected' }
+        newState.mode = 'co-selected'
+      }
+    } else {
+      let isolatedNodeComponent = surface.context.isolatedNodeComponent
+      if (isolatedNodeComponent) {
+        if (isolatedNodeComponent === this) {
+          newState.mode = 'focused'
+          newState.unblocked = true
+        } else {
+          let isolatedNodes = this._getIsolatedNodes(selState)
+          if (isolatedNodes.indexOf(this) > -1) {
+            newState.mode = 'co-focused'
+            newState.unblocked = true
+          }
+        }
       }
     }
-    let isolatedNodeComponent = surface.context.isolatedNodeComponent
-    if (!isolatedNodeComponent) return null
-    if (isolatedNodeComponent === this) {
-      return { mode: 'focused' }
-    }
-    let isolatedNodes = this._getIsolatedNodes(selState)
-    if (isolatedNodes.indexOf(this) > -1) {
-      return { mode: 'co-focused' }
-    }
-    return null
+    return newState
   }
 
   selectNode() {
@@ -130,6 +144,18 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       containerId: surface.getContainerId(),
       surfaceId: surface.id
     })
+  }
+
+  // EXPERIMENTAL: trying to catch clicks not handler by the
+  // content when this is unblocked
+  onClick(event) {
+    // console.log('### Clicked on IsolatedNode', this.id, event.target)
+    event.stopPropagation()
+  }
+
+  onDblClick(event) {
+    // console.log('### DblClicked on IsolatedNode', this.id, event.target)
+    event.stopPropagation()
   }
 
   grabFocus(event) {
@@ -196,18 +222,15 @@ class Blocker extends Component {
   onClick(event) {
     if (event.target !== this.getNativeElement()) return
     // console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
-    if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
-      event.preventDefault()
-      event.stopPropagation()
-      this._getIsolatedNodeComponent().selectNode()
-    }
+    event.stopPropagation()
+    const comp = this._getIsolatedNodeComponent()
+    comp.extendState({ mode: 'selected', unblocked: true })
+    comp.selectNode()
   }
 
   onDblClick(event) {
     // console.log('DblClicked on Blocker of %s', this.getParent().id, event)
-    event.preventDefault()
     event.stopPropagation()
-    this._getIsolatedNodeComponent().grabFocus(event)
   }
 
   _getIsolatedNodeComponent() {
