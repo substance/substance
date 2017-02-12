@@ -11,6 +11,8 @@ import CodePackage from '../code/CodePackage'
 import SubscriptPackage from '../subscript/SubscriptPackage'
 import SuperscriptPackage from '../superscript/SuperscriptPackage'
 import QuoteMarksPackage from '../quote-marks/QuoteMarksPackage'
+import ListPackage from '../list/ListPackage'
+import TablePackage from '../table/TablePackage'
 import ProseArticle from './ProseArticle'
 
 export default {
@@ -35,5 +37,7 @@ export default {
     config.import(CodePackage)
     config.import(LinkPackage)
     config.import(QuoteMarksPackage)
+    config.import(ListPackage)
+    config.import(TablePackage)
   }
 }
