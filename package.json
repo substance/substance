@@ -53,6 +53,6 @@
     "*.css",
     "*.js",
     "*.md",
-    "packages.json"
+    "package.json"
   ]
 }
