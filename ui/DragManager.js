@@ -4,7 +4,7 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import EventEmitter from '../util/EventEmitter'
 import inBrowser from '../util/inBrowser'
 import platform from '../util/platform'
-import { getDOMRangeFromEvent } from '../util/windowUtils'
+import { getDOMRangeFromEvent, isMouseInsideDOMSelection } from '../util/windowUtils'
 import DocumentChange from '../model/DocumentChange'
 
 class DragManager extends EventEmitter {
@@ -43,6 +43,17 @@ class DragManager extends EventEmitter {
     var img = document.createElement("img")
     img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     e.dataTransfer.setDragImage(img, 0, 0)
+    // TODO: the following might probably not work in FF as it disallows setting the drag data
+    // Note: setData('text/html', ... ) is necessary so that the browser shows
+    // the target caret while dragging, the content must be allowed to drop inline
+    // console.log('#### dragState.mode', )
+    if (this.dragState.mode === 'inline') {
+      e.dataTransfer.setData('text/html', img.outerHTML)
+    } else {
+      // otherwise we clear the data trying to make the caret
+      // invisible this way
+      e.dataTransfer.setData('text/html', '<div></div>')
+    }
   }
 
   /*
@@ -119,30 +130,6 @@ class DragManager extends EventEmitter {
     this._onDragEnd(e)
   }
 
-  _dragSelection(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    let editorSession = this.context.editorSession
-    let doc = editorSession.getDocument()
-    let sourceSel = this.dragState.sourceSelection
-    let wrange = getDOMRangeFromEvent(event)
-    if (!wrange) return
-    let comp = Component.unwrap(event.target)
-    if (!comp) return
-    let domSelection = comp.context.domSelection
-    if (!domSelection) return
-    let range = domSelection.mapDOMRange(wrange)
-    if (!range) return
-    let targetSel = doc._createSelectionFromRange(range)
-    editorSession.transaction((tx) => {
-      tx.selection = sourceSel
-      let snippet = tx.copySelection()
-      tx.deleteSelection()
-      tx.selection = DocumentChange.transformSelection(targetSel, tx)
-      tx.paste(snippet)
-    })
-  }
-
   /*
     Initializes dragState, which encapsulate state through the whole
     drag + drop operation.
@@ -150,6 +137,11 @@ class DragManager extends EventEmitter {
     ATTENTION: This can not be debugged properly in Chrome
   */
   _initDrag(event, options) {
+    // TODO: we need to figure out how to enable dragging cursors
+    // e.g., when dragging an inline node containing an img, it looks
+    // nice, showing the target caret and a dragging cursor.
+    // Doing the same just with text content does show the forbidden symbol
+
     // console.log('_initDrag')
     let sel = this._getSelection()
     let dragState = Object.assign({}, { event, mode: 'block'}, options)
@@ -167,7 +159,10 @@ class DragManager extends EventEmitter {
 
     // Note: selection drags are always without drop-zones,
     // but using the native cursor
-    let isSelectionDrag = (sel.isPropertySelection() || sel.isContainerSelection()) && this._isMouseInsideDOMSelection(event)
+    let isSelectionDrag = (
+      (sel.isPropertySelection() || sel.isContainerSelection()) &&
+      isMouseInsideDOMSelection(event)
+    )
     if (isSelectionDrag) {
       // TODO: we do not support dragging of ContainerSelection yet
       if (sel.isContainerSelection()) {
@@ -177,12 +172,19 @@ class DragManager extends EventEmitter {
       // console.log('DragManager: starting a selection drag', sel.toString())
       dragState.selectionDrag = true
       dragState.sourceSelection = sel
+      dragState.mode = 'inline'
       // TODO: should we emit for dropzones?
       return
     }
     let comp = Component.unwrap(event.target)
     if (!comp) return _stop()
-    let isolatedNodeComponent = comp.context.isolatedNodeComponent
+    let isolatedNodeComponent
+    if (comp._isInlineNodeComponent) {
+      isolatedNodeComponent = comp
+      dragState.mode = 'inline'
+    } else {
+      isolatedNodeComponent = comp.context.isolatedNodeComponent
+    }
     if (!isolatedNodeComponent) return _stop()
     let surface = isolatedNodeComponent.context.surface
     // dragging an InlineNode
@@ -195,8 +197,9 @@ class DragManager extends EventEmitter {
         startOffset: inlineNode.start.offset,
         endOffset: inlineNode.end.offset,
         containerId: surface.getContainerId(),
-        surfaceId: comp.context.surface.id
+        surfaceId: surface.id
       }
+      dragState.mode = 'inline'
       return
     }
     // dragging an IsolatedNode
@@ -220,6 +223,30 @@ class DragManager extends EventEmitter {
       event.preventDefault()
       event.stopPropagation()
     }
+  }
+
+  _dragSelection(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    let editorSession = this.context.editorSession
+    let doc = editorSession.getDocument()
+    let sourceSel = this.dragState.sourceSelection
+    let wrange = getDOMRangeFromEvent(event)
+    if (!wrange) return
+    let comp = Component.unwrap(event.target)
+    if (!comp) return
+    let domSelection = comp.context.domSelection
+    if (!domSelection) return
+    let range = domSelection.mapDOMRange(wrange)
+    if (!range) return
+    let targetSel = doc._createSelectionFromRange(range)
+    editorSession.transaction((tx) => {
+      tx.selection = sourceSel
+      let snippet = tx.copySelection()
+      tx.deleteSelection()
+      tx.selection = DocumentChange.transformSelection(targetSel, tx)
+      tx.paste(snippet)
+    })
   }
 
   _getSurfacesGroupedByScrollPane() {
@@ -246,19 +273,6 @@ class DragManager extends EventEmitter {
 
   _getSelection() {
     return this.context.editorSession.getSelection()
-  }
-
-  _isMouseInsideDOMSelection(e) {
-    let domSelection = window.getSelection()
-    if (domSelection.rangeCount === 0) {
-      return false
-    }
-    let domRange = domSelection.getRangeAt(0)
-    let selectionRect = domRange.getBoundingClientRect()
-    return e.clientX >= selectionRect.left &&
-           e.clientX <= selectionRect.right &&
-           e.clientY >= selectionRect.top &&
-           e.clientY <= selectionRect.bottom;
   }
 
   _getComponents(targetEl) {
