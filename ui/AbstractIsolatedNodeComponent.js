@@ -104,7 +104,7 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   escape() {
-    console.log('Escaping from IsolatedNode', this.id)
+    // console.log('Escaping from IsolatedNode', this.id)
     this.selectNode()
   }
 

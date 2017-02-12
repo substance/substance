@@ -33,13 +33,13 @@ class TableComponent extends Component {
 
   onClick(event) {
     event.stopPropagation()
-    console.log('Clicked on Table', this.props.node.id, event.target)
+    // console.log('Clicked on Table', this.props.node.id, event.target)
   }
 
   // TODO: this should only be used for the initial table state
   onDblClick(event) {
     event.stopPropagation()
-    console.log('DblClicked on Table', this.props.node.id, event.target)
+    // console.log('DblClicked on Table', this.props.node.id, event.target)
 
     // HACK: assuming that if the event.target has a surface
     // it is a TextPropertyEditor of a cell
@@ -53,7 +53,7 @@ class TableComponent extends Component {
       } else if (comp._isTextPropertyComponent) {
         cellComp = comp.getParent().getParent()
       } else {
-        console.log('TODO: find the right cell')
+        console.warn('TODO: find the right cell')
       }
       if (cellComp) {
         cellComp.grabFocus()

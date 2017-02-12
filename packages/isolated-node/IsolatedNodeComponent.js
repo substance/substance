@@ -109,12 +109,12 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
   // EXPERIMENTAL: trying to catch clicks not handler by the
   // content when this is unblocked
   onClick(event) {
-    console.log('### Clicked on IsolatedNode', this.id, event.target)
+    // console.log('### Clicked on IsolatedNode', this.id, event.target)
     event.stopPropagation()
   }
 
   onDblClick(event) {
-    console.log('### DblClicked on IsolatedNode', this.id, event.target)
+    // console.log('### DblClicked on IsolatedNode', this.id, event.target)
     event.stopPropagation()
   }
 

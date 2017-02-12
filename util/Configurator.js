@@ -8,7 +8,6 @@ import ComponentRegistry from '../ui/ComponentRegistry'
 import FontAwesomeIconProvider from '../ui/FontAwesomeIconProvider'
 import LabelProvider from '../ui/DefaultLabelProvider'
 import ToolGroup from '../packages/tools/ToolGroup'
-import KeyboardManager from '../ui/KeyboardManager'
 import SaveHandlerStub from '../packages/persistence/SaveHandlerStub'
 
 /**

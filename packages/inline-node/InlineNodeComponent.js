@@ -61,7 +61,7 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
   }
 
   selectNode() {
-    console.log('IsolatedNodeComponent: selecting node.');
+    // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
     let node = this.props.node

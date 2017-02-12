@@ -99,8 +99,9 @@ class DragManager extends EventEmitter {
   onDragEnd(event) {
     if (event.__reserved__) return
     // console.log('onDragEnd', event)
-    event.stopPropagation()
     if (this.dragState) {
+      event.stopPropagation()
+      event.preventDefault()
       // HACK: there is no way to know if Dropzones wants to
       // extend state, as it can only do it on drop
       this._onDragEnd(event)
