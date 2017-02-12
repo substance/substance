@@ -30,7 +30,7 @@ Packages (aka Plugins)                                                      | �
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
 ContainerEditor for in-flow-editing                                         | ✓
-Scrollable ContentPanel with Support for highlights                         | ✓
+Scrollable ContentPanel with support for highlights                         | ✓
 Customizable Toolbar                                                        | ✓
 ScrollPane with interactive visual Scrollbar                                | ✓
 Interactive TOCPanel                                                        | ✓
