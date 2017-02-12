@@ -11,9 +11,9 @@ Features                                                                    | St
 Custom document schemas                                                     | ✓
 Custom converters (XML, HTML, etc.)                                         | ✓
 Custom HTML Rendering                                                       | ✓
-Drag & Drop Support                                                         | Beta 6
+Drag & Drop Support                                                         | ✓
 Annotations can hold information (e.g. a comment)                           | ✓
-Annotations that can span over multiple nodes                               | Beta 6
+Annotations that can span over multiple nodes                               | Beta 7
 Isolated Nodes (any content with any custom UI)                             | ✓
 Incremental document updates (undoable operations)                          | ✓
 Transformations for document manipulation                                   | ✓
@@ -23,8 +23,8 @@ Multi-language support                                                      | �
 Realtime collaboration                                                      | ✓
 Persistence API for documents                                               | ✓
 Text Macros                                                                 | ✓
-Key bindings                                                                | Beta 6
-Full Unicode support                                                        | Beta 6
+Key bindings                                                                | ✓
+Full Unicode support                                                        | Beta 7
 Packages (aka Plugins)                                                      | ✓
                                                                             |
 **UI Components**                                                           |
@@ -41,7 +41,8 @@ Heading                                                                     | �
 Blockquote                                                                  | ✓
 Codeblock                                                                   | ✓
 Image                                                                       | ✓
-List                                                                        | Beta 6
+List                                                                        | ✓
+Table                                                                       | ✓
                                                                             |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
