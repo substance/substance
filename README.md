@@ -24,7 +24,6 @@ Realtime collaboration                                                      | �
 Persistence API for documents                                               | ✓
 Text Macros                                                                 | ✓
 Key bindings                                                                | ✓
-Full Unicode support                                                        | Beta 7
 Packages (aka Plugins)                                                      | ✓
                                                                             |
 **UI Components**                                                           |
