@@ -1,7 +1,7 @@
+import cloneDeep from '../../util/cloneDeep'
 import inBrowser from '../../util/inBrowser'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import Component from '../../ui/Component'
-import cloneDeep from 'lodash/cloneDeep'
 
 class ResponsiveApplication extends Component {
   constructor(...args) {

@@ -1,6 +1,6 @@
-import each from 'lodash/each'
+import forEach from '../util/forEach'
 import EventEmitter from '../util/EventEmitter'
-import DefaultDOMElement from './DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 class Router extends EventEmitter {
   constructor(...args) {
@@ -108,7 +108,7 @@ class Router extends EventEmitter {
 
 Router.objectToRouteString = function(obj) {
   let route = []
-  each(obj, function(val, key) {
+  forEach(obj, function(val, key) {
     route.push(key+'='+val)
   })
   return route.join(',')

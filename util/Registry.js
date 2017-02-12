@@ -1,8 +1,8 @@
-import forEach from 'lodash/forEach'
+import forEach from './forEach'
 
 // just as a reference to detect name collisions
 // with native Object properties
-let _obj = {}
+const PLAINOBJ = {}
 
 /*
  * Simple registry implementation.
@@ -48,7 +48,7 @@ class Registry {
     if (this.validator) {
       this.validator(entry)
     }
-    if (_obj[name]) {
+    if (PLAINOBJ[name]) {
       throw new Error('Illegal key: "'+name+'" is a property of Object which is thus not allowed as a key.')
     }
     if (this.contains(name)) {

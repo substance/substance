@@ -1,7 +1,7 @@
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
-import get from 'lodash/get'
-import setWith from 'lodash/setWith'
+import get from 'lodash-es/get'
+import setWith from 'lodash-es/setWith'
+import isString from './isString'
+import isArray from './isArray'
 import deleteFromArray from './deleteFromArray'
 
 class TreeNode {}
@@ -121,6 +121,11 @@ class TreeIndex {
 
 class TreeIndexArrays extends TreeIndex {
 
+  contains(path) {
+    let val = super.get(path)
+    return Boolean(val)
+  }
+
   get(path) {
     let val = super.get(path)
     if (val instanceof TreeNode) {
@@ -129,8 +134,9 @@ class TreeIndexArrays extends TreeIndex {
     return val;
   }
 
-  set() {
-    throw new Error('TreeIndex.set() is not supported for array type.');
+  set(path, arr) {
+    let val = super.get(path)
+    val.__values__ = arr
   }
 
   add(path, value) {
@@ -164,7 +170,11 @@ class TreeIndexArrays extends TreeIndex {
   remove(path, value) {
     var arr = get(this, path);
     if (arr instanceof TreeNode) {
-      deleteFromArray(arr.__values__, value);
+      if (arguments.length === 1) {
+        delete arr.__values__
+      } else {
+        deleteFromArray(arr.__values__, value);
+      }
     }
   }
 

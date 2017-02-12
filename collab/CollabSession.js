@@ -1,11 +1,7 @@
-import debounce from 'lodash/debounce'
-import forEach from 'lodash/forEach'
-import clone from 'lodash/clone'
-import cloneDeep from 'lodash/cloneDeep'
+import cloneDeep from '../util/cloneDeep'
 import Err from '../util/SubstanceError'
-import DocumentSession from '../model/DocumentSession'
+import EditorSession from '../model/EditorSession'
 import DocumentChange from '../model/DocumentChange'
-import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 
 /*
   Session that is connected to a Substance Hub allowing
@@ -13,73 +9,54 @@ import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 
   Requires a connected and authenticated collabClient.
 */
-class CollabSession extends DocumentSession {
+class CollabSession extends EditorSession {
+
   constructor(doc, config) {
     super(doc, config)
-
     config = config || {}
     this.config = config
     this.collabClient = config.collabClient
-
     if (config.docVersion) {
       console.warn('config.docVersion is deprecated: Use config.version instead')
     }
-
     if (config.docVersion) {
       console.warn('config.docId is deprecated: Use config.documentId instead')
     }
-
     this.version = config.version
     this.documentId = config.documentId || config.docId
-
     if (config.autoSync !== undefined) {
       this.autoSync = config.autoSync
     } else {
       this.autoSync = true
     }
-
     if (!this.documentId) {
       throw new Err('InvalidArgumentsError', {message: 'documentId is mandatory'})
     }
-
     if (typeof this.version === undefined) {
       throw new Err('InvalidArgumentsError', {message: 'version is mandatory'})
     }
-
     // Internal state
     this._connected = false // gets flipped to true in syncDone
     this._nextChange = null // next change to be sent over the wire
     this._pendingChange = null // change that is currently being synced
+    this._pendingSync = false
     this._error = null
-
     // Note: registering a second document:changed handler where we trigger sync requests
-    this.doc.on('document:changed', this.afterDocumentChange, this, {priority: -10})
-
-    // Bind handlers
-    this._broadCastSelectionUpdateDebounced = debounce(this._broadCastSelectionUpdate, 250)
-
-    // Keep track of collaborators in a session
-    this.collaborators = {}
-
+    this.onUpdate('document', this.afterDocumentChange, this)
     // This happens on a reconnect
     this.collabClient.on('connected', this.onCollabClientConnected, this)
     this.collabClient.on('disconnected', this.onCollabClientDisconnected, this)
-
-    // Constraints used for computing color indexes
-    this.__maxColors = 5
-    this.__nextColorIndex = 0
     this.collabClient.on('message', this._onMessage.bind(this))
-
     // Attempt to open a document immediately, but only if the collabClient is
-    // already connected. If not the _onConnected handler will take care of it
-    // once websocket connection is ready.
+    // already connected. If not the onCollabClientConnected handler will take
+    // care of it once websocket connection is ready.
     if (this.collabClient.isConnected() && this.autoSync) {
       this.sync()
     }
   }
 
   /*
-    Unregister event handlers. Call this before throw away
+    Unregister event handlers. Call this before throwing away
     a CollabSession reference. Otherwise you will leak memory
   */
   dispose() {
@@ -96,7 +73,6 @@ class CollabSession extends DocumentSession {
       type: 'disconnect',
       documentId: this.documentId
     }
-
     // We abort pening syncs
     this._abortSync()
     this._send(msg)
@@ -106,38 +82,27 @@ class CollabSession extends DocumentSession {
     Synchronize with collab server
   */
   sync() {
-
     // If there is something to sync and there is no running sync
     if (this.__canSync()) {
-      let nextChange = this._getNextChange()
+      let nextChange = this._nextChange
       let msg = {
         type: 'sync',
         documentId: this.documentId,
         version: this.version,
-        change: this.serializeChange(nextChange)
+        change: nextChange ? this.serializeChange(nextChange) : undefined
       }
-
       this._send(msg)
+      this._pendingSync = true
       this._pendingChange = nextChange
+
       // Can be used to reset errors that arised from previous syncs.
       // When a new sync is started, users can use this event to unset the error
       this.emit('sync')
       this._nextChange = null
       this._error = null
     } else {
-      console.error('Can not sync. Either collabClient is not connected or we are already syncing')
+      console.error('Can not sync. Either collabClient is not connected or already syncing')
     }
-  }
-
-  /*
-    When selection is changed explicitly by the user we broadcast
-    that update to other collaborators
-  */
-  setSelection(sel) {
-    // We just remember beforeSel on the CollabSession (need for connect use-case)
-    let beforeSel = this.selection
-    super.setSelection.call(this, sel)
-    this._broadCastSelectionUpdateDebounced(beforeSel, sel)
   }
 
   getCollaborators() {
@@ -220,35 +185,19 @@ class CollabSession extends DocumentSession {
   update(args) {
     // console.log('CollabSession.update(): received remote update', args);
     let serverChange = args.change
-    let collaborators = args.collaborators
     let serverVersion = args.version
 
-    if (!this._nextChange && !this._pendingChange) {
-      let oldSelection = this.selection
+    if (!this._nextChange && !this._pendingSync) {
       if (serverChange) {
         serverChange = this.deserializeChange(serverChange)
         this._applyRemoteChange(serverChange)
       }
-      let newSelection = this.selection
       if (serverVersion) {
         this.version = serverVersion
       }
-      let update = {
-        change: serverChange
-      }
-      if (newSelection !== oldSelection) {
-        update.selection = newSelection
-      }
-      // collaboratorsChange only contains information about
-      // changed collaborators
-      let collaboratorsChange = this._updateCollaborators(collaborators)
-      if (collaboratorsChange) {
-        update.collaborators = collaboratorsChange
-        this.emit('collaborators:changed')
-      }
-      this._triggerUpdateEvent(update, { remote: true })
+      this.startFlow()
     } else {
-      // console.log('skipped remote update. Pending sync or local changes.');
+      console.info('skipped remote update. Pending sync or local changes.');
     }
   }
 
@@ -259,8 +208,8 @@ class CollabSession extends DocumentSession {
     the collaborators (=selections etc.)
   */
   syncDone(args) {
+    // console.log('syncDone', args)
     let serverChange = args.serverChange
-    let collaborators = args.collaborators
     let serverVersion = args.version
 
     if (serverChange) {
@@ -268,33 +217,14 @@ class CollabSession extends DocumentSession {
       this._applyRemoteChange(serverChange)
     }
     this.version = serverVersion
-
-    // Only apply updated collaborators if there are no local changes
-    // Otherwise they will not be accurate. We can safely skip this
-    // here as we know the next sync will be triggered soon. And if
-    // followed by an idle phase (_nextChange = null) will give us
-    // the latest collaborator records
-    let collaboratorsChange = this._updateCollaborators(collaborators)
-    if (this._nextChange) {
-      this._transformCollaboratorSelections(this._nextChange)
-    }
-
     // Important: after sync is done we need to reset _pendingChange and _error
     // In this state we can safely listen to
     this._pendingChange = null
+    this._pendingSync = false
     this._error = null
-
     // Each time the sync worked we consider the system connected
     this._connected = true
-
-    let update = {
-      change: serverChange
-    }
-    if (collaboratorsChange) {
-      update.collaborators = collaboratorsChange
-    }
-    this._triggerUpdateEvent(update, { remote: true })
-
+    this.startFlow()
     this.emit('connected')
     // Attempt to sync again (maybe we have new local changes)
     this._requestSync()
@@ -304,7 +234,7 @@ class CollabSession extends DocumentSession {
     Handle sync error
   */
   syncError(error) {
-    error('Sync error:', error)
+    console.info('SyncError occured. Aborting sync', error)
     this._abortSync()
   }
 
@@ -318,7 +248,6 @@ class CollabSession extends DocumentSession {
     Handle errors. This gets called if any request produced
     an error on the server.
   */
-
   error(message) {
     let error = message.error
     let errorFn = this[error.name]
@@ -372,32 +301,8 @@ class CollabSession extends DocumentSession {
      ================ */
 
   _commit(change, info) {
-    let selectionHasChanged = this._commitChange(change)
-
-    let collaboratorsChange = null
-    forEach(this.getCollaborators(), function(collaborator) {
-      // transform local version of collaborator selection
-      let id = collaborator.collaboratorId
-      let oldSelection = collaborator.selection
-      let newSelection = DocumentChange.transformSelection(oldSelection, change)
-      if (oldSelection !== newSelection) {
-        collaboratorsChange = collaboratorsChange || {}
-        collaborator = clone(collaborator)
-        collaborator.selection = newSelection
-        collaboratorsChange[id] = collaborator
-      }
-    })
-
-    let update = {
-      change: change
-    }
-    if (selectionHasChanged) {
-      update.selection = this.getSelection()
-    }
-    if (collaboratorsChange) {
-      update.collaborators = collaboratorsChange
-    }
-    this._triggerUpdateEvent(update, info)
+    this._commitChange(change, info)
+    this.startFlow()
   }
 
   /*
@@ -406,11 +311,15 @@ class CollabSession extends DocumentSession {
   _applyRemoteChange(change) {
     // console.log('CollabSession: applying remote change');
     if (change.ops.length > 0) {
-      this.stage._apply(change)
-      this.doc._apply(change)
+      this._transaction._apply(change)
+      this.getDocument()._apply(change)
+      this._setDirty('document')
       // Only undo+redo history is updated according to the new change
       this._transformLocalChangeHistory(change)
-      this.selection = this._transformSelection(change)
+      this._setSelection(this._transformSelection(change))
+      this._change = change
+      this._info = { remote: true }
+      this.startFlow()
     }
   }
 
@@ -428,35 +337,8 @@ class CollabSession extends DocumentSession {
     this._requestSync()
   }
 
-  /*
-    Get next change for sync.
-
-    If there are no local changes we create a change that only
-    holds the current selection.
-  */
-  _getNextChange() {
-    var nextChange = this._nextChange
-    if (!nextChange) {
-      // Change only holds the current selection
-      nextChange = this._getChangeForSelection(this.selection, this.selection)
-    }
-    return nextChange
-  }
-
-  /*
-    Send selection update to other collaborators
-  */
-  _broadCastSelectionUpdate(beforeSel, afterSel) {
-    if (this._nextChange) {
-      this._nextChange.after.selection = afterSel
-    } else {
-      this._nextChange = this._getChangeForSelection(beforeSel, afterSel)
-    }
-    this._requestSync()
-  }
-
   __canSync() {
-    return this.collabClient.isConnected() && !this._pendingChange
+    return this.collabClient.isConnected() && !this._pendingSync
   }
 
   /*
@@ -486,51 +368,9 @@ class CollabSession extends DocumentSession {
       }
       this._pendingChange = null
     }
+    this._pendingSync = false
     this._error = null
     this._nextChange = newNextChange
-  }
-
-  _transformCollaboratorSelections(change) {
-    // console.log('Transforming selection...', this.__id__);
-    // Transform the selection
-    let collaborators = this.getCollaborators()
-    if (collaborators) {
-      forEach(collaborators, function(collaborator) {
-        DocumentChange.transformSelection(collaborator.selection, change)
-      })
-    }
-  }
-
-  _updateCollaborators(collaborators) {
-    let collaboratorsChange = {}
-
-    forEach(collaborators, function(collaborator, collaboratorId) {
-      if (collaborator) {
-        let oldSelection
-        let old = this.collaborators[collaboratorId]
-        if (old) {
-          oldSelection = old.selection
-        }
-        let newSelection = selFromJSON(collaborator.selection)
-
-        newSelection.attach(this.doc)
-
-        // Assign colorIndex (try to restore from old record)
-        collaborator.colorIndex = old ? old.colorIndex : this._getNextColorIndex()
-        collaborator.selection = newSelection
-        this.collaborators[collaboratorId] = collaborator
-        if (!newSelection.equals(oldSelection)) {
-          collaboratorsChange[collaboratorId] = collaborator
-        }
-      } else {
-        collaboratorsChange[collaboratorId] = null
-        delete this.collaborators[collaboratorId]
-      }
-    }.bind(this))
-
-    if (Object.keys(collaboratorsChange).length>0) {
-      return collaboratorsChange
-    }
   }
 
   /*
@@ -538,33 +378,8 @@ class CollabSession extends DocumentSession {
     either explicitly or triggered by a connection drop out.
   */
   _afterDisconnected() {
-    let oldCollaborators = this.collaborators
-    this.collaborators = {}
-    let collaboratorIds = Object.keys(oldCollaborators)
-    if (collaboratorIds.length > 0) {
-      let collaboratorsChange = {}
-      // when this user disconnects we will need to remove all rendered collaborator infos (such as selection)
-      collaboratorIds.forEach(function(collaboratorId) {
-        collaboratorsChange[collaboratorId] = null
-      })
-      this._triggerUpdateEvent({
-        collaborators: collaboratorsChange
-      })
-    }
     this._connected = false
     this.emit('disconnected')
-  }
-
-  /*
-    Takes beforeSel + afterSel and wraps it in a no-op DocumentChange
-  */
-  _getChangeForSelection(beforeSel, afterSel) {
-    let change = new DocumentChange([], {
-      selection: beforeSel
-    }, {
-      selection: afterSel
-    })
-    return change
   }
 
   /*
@@ -572,17 +387,6 @@ class CollabSession extends DocumentSession {
   */
   _hasLocalChanges() {
     return this._nextChange && this._nextChange.ops.length > 0
-  }
-
-  /*
-    Get color index for rendering cursors and selections in round robin style.
-    Note: This implementation considers a configured maxColors value. The
-    first color will be reused as more then maxColors collaborators arrive.
-  */
-  _getNextColorIndex() {
-    let colorIndex = this.__nextColorIndex
-    this.__nextColorIndex = (this.__nextColorIndex + 1) % this.__maxColors
-    return colorIndex + 1 // so we can 1..5 instead of 0..4
   }
 
 }

@@ -1,4 +1,3 @@
-import each from 'lodash/each'
 import DataNode from './data/Node'
 import EventEmitter from '../util/EventEmitter'
 
@@ -11,11 +10,11 @@ import EventEmitter from '../util/EventEmitter'
 
   ```js
   class Todo extends TextBlock {}
-  Todo.define({
+  Todo.schema = {
     type: 'todo',
     content: 'text',
     done: { type: 'bool', default: false }
-  })
+  }
   ```
 
   The following data types are supported:
@@ -39,8 +38,6 @@ class DocumentNode extends DataNode {
     // if (!doc) throw new Error('Document instance is mandatory.')
     this.document = doc
   }
-
-  get _isDocumentNode() { return true }
 
   /**
     Get the Document instance.
@@ -67,6 +64,22 @@ class DocumentNode extends DataNode {
   */
   getParent() {
     return this.document.get(this.parent)
+  }
+
+  /**
+    Get the root node.
+
+    The root node is the last ancestor returned
+    by a sequence of `getParent()` calls.
+
+    @returns {DocumentNode}
+  */
+  getRoot() {
+    let node = this
+    while(node.parent) {
+      node = node.parent
+    }
+    return node
   }
 
   /**
@@ -105,22 +118,6 @@ class DocumentNode extends DataNode {
     return 0
   }
 
-  /**
-    Get the root node.
-
-    The root node is the last ancestor returned
-    by a sequence of `getParent()` calls.
-
-    @returns {DocumentNode}
-  */
-  getRoot() {
-    var node = this
-    while (node.hasParent()) {
-      node = node.getParent()
-    }
-    return node
-  }
-
   // TODO: should this really be here?
   // volatile property necessary to render highlighted node differently
   // TODO: We should get this out here
@@ -132,6 +129,8 @@ class DocumentNode extends DataNode {
     }
   }
 
+  // Experimental: we are working on a simpler API replacing the
+  // rather inconvenient EventProxy API.
   on(eventName, handler, ctx) {
     var match = _matchPropertyEvent(eventName)
     if (match) {
@@ -161,20 +160,6 @@ class DocumentNode extends DataNode {
     EventEmitter.prototype.off.apply(this, arguments)
   }
 
-  // Experimental: we are working on a simpler API replacing the
-  // rather inconvenient EventProxy API.
-  connect(ctx, handlers) {
-    console.warn('DEPRECATED: use Node.on() instead')
-    each(handlers, function(func, name) {
-      this.on(name, func, ctx)
-    }.bind(this))
-  }
-
-  disconnect(ctx) {
-    console.warn('DEPRECATED: use Node.off() instead')
-    this.off(ctx)
-  }
-
   _onPropertyChange(propertyName) {
     var args = [propertyName + ':changed']
       .concat(Array.prototype.slice.call(arguments, 1))
@@ -188,38 +173,34 @@ class DocumentNode extends DataNode {
     @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
   */
   isBlock() {
-    return this.constructor.isBlock
+    return Boolean(this.constructor.isBlock)
   }
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
   isText() {
-    return this.constructor.isText
-  }
-
-  /**
-    @returns {Boolean} true if node is an annotation node (e.g. Strong)
-  */
-  isPropertyAnnotation() {
-    return this.constructor.isPropertyAnnotation
+    return Boolean(this.constructor.isText)
   }
 
   /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
   isInline() {
-    return this.constructor.isInline
+    return Boolean(this.constructor.isInline)
   }
 
-  /**
-    @returns {Boolean} true if node is a container annotation (e.g. multiparagraph comment)
-  */
-  isContainerAnnotation() {
-    return this.constructor.isContainerAnnotation
+  isList() {
+    return Boolean(this.constructor.isList)
+  }
+
+  isIsolatedNode() {
+    return !this.isText() && !this.isList()
   }
 
 }
+
+DocumentNode.prototype._isDocumentNode = true
 
 /**
   Declares a node to be treated as block-type node.

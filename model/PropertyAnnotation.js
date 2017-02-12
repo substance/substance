@@ -1,5 +1,5 @@
-import isEqual from 'lodash/isEqual'
-import DocumentNode from './DocumentNode'
+import isArrayEqual from '../util/isArrayEqual'
+import Annotation from './Annotation'
 
 /**
   A property annotation can be used to overlay text and give it a special meaning.
@@ -21,6 +21,13 @@ import DocumentNode from './DocumentNode'
     tx.create({
       id: 's1',
       type: 'strong',
+      start: {
+        path: ['p1', 'content'],
+        offset: 10
+      },
+      end: {
+        offset
+      }
       path: ['p1', 'content'],
       "startOffset": 10,
       "endOffset": 19
@@ -28,102 +35,62 @@ import DocumentNode from './DocumentNode'
   })
   ```
 */
-class PropertyAnnotation extends DocumentNode {
+class PropertyAnnotation extends Annotation {
 
-  /**
-    Get the plain text spanned by this annotation.
-
-    @returns {String}
-  */
-  getText() {
-    var doc = this.getDocument()
-    if (!doc) {
-      console.warn('Trying to use an PropertyAnnotation which is not attached to the document.')
-      return ""
-    }
-    var text = doc.get(this.path)
-    return text.substring(this.startOffset, this.endOffset)
+  get path() {
+    return this.start.path
   }
 
-  /**
-    Determines if an annotation can be split e.g., when breaking a node.
-
-    In these cases, a new annotation will be created attached to the created node.
-
-    For certain annotation types,you may want to the annotation truncated
-    rather than split, where you need to override this method returning `false`.
-  */
-  canSplit() {
-    return true
+  getPath() {
+    return this.start.path
   }
 
-  /**
-    If this annotation is a an Anchor.
-
-    Anchors are annotations with a zero width.
-    For instance, ContainerAnnotation have a start and an end anchor,
-    or rendered cursors are modeled as anchors.
-
-    @returns {Boolean}
-  */
-  isAnchor() {
-    return false
-  }
-
-  // TODO: maybe this should go into documentHelpers
   getSelection() {
     return this.getDocument().createSelection({
       type: 'property',
       path: this.path,
-      startOffset: this.startOffset,
-      endOffset: this.endOffset
+      startOffset: this.start.offset,
+      endOffset: this.end.offset
     })
   }
 
-  updateRange(tx, sel) {
+  // used by annotationHelpers
+  _updateRange(tx, sel) {
     if (!sel.isPropertySelection()) {
-      throw new Error('Cannot change to ContainerAnnotation.')
+      throw new Error('Invalid argument: PropertyAnnotation._updateRange() requires a PropertySelection.')
     }
-    if (!isEqual(this.startPath, sel.start.path)) {
+    if (!isArrayEqual(this.start.path, sel.start.path)) {
       tx.set([this.id, 'path'], sel.start.path)
     }
-    if (this.startOffset !== sel.start.offset) {
-      tx.set([this.id, 'startOffset'], sel.start.offset)
+    // TODO: these should be Coordinate ops
+    if (this.start.offset !== sel.start.offset) {
+      tx.set([this.id, 'start', 'offset'], sel.start.offset)
     }
-    if (this.endOffset !== sel.end.offset) {
-      tx.set([this.id, 'endOffset'], sel.end.offset)
+    if (this.end.offset !== sel.end.offset) {
+      tx.set([this.id, 'end', 'offset'], sel.end.offset)
     }
   }
 
+  get startPath() {
+    return this.path
+  }
+
+  get endPath() {
+    return this.path
+  }
 }
 
-PropertyAnnotation.define({
-  type: "annotation",
-  path: ["string"],
-  startOffset: "number",
-  endOffset: "number",
-  // this is only used when an annotation is used 'stand-alone'
-  // i.e. not attached to a property
-  _content: { type: "string", optional: true}
-})
-
 PropertyAnnotation.isPropertyAnnotation = true
-
 PropertyAnnotation.prototype._isAnnotation = true
 PropertyAnnotation.prototype._isPropertyAnnotation = true
 
-// these properties making PropertyAnnotation compatible with ContainerAnnotations
-Object.defineProperties(PropertyAnnotation.prototype, {
-  startPath: {
-    get: function() {
-      return this.path
-    }
-  },
-  endPath: {
-    get: function() {
-      return this.path
-    }
-  }
-})
+PropertyAnnotation.schema = {
+  type: "annotation",
+  start: "coordinate",
+  end: "coordinate",
+  // this is only used when an annotation is used 'stand-alone'
+  // i.e. not attached to a property
+  _content: { type: "string", optional: true}
+}
 
 export default PropertyAnnotation

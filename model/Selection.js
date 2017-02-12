@@ -17,9 +17,6 @@ class Selection {
     _internal.doc = null
   }
 
-  // for duck-typed instanceof
-  get _isSelection() { return true; }
-
   clone() {
     var newSel = this._clone()
     if (this._internal.doc) {
@@ -91,6 +88,10 @@ class Selection {
     throw new Error('Selection.getType() is abstract.')
   }
 
+  get type() {
+    return this.getType()
+  }
+
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
@@ -136,7 +137,17 @@ class Selection {
   getFragments() {
     return []
   }
+
+  createWith(update) {
+    let SelectionClass = this.constructor
+    let data = this.toJSON()
+    Object.assign(data, update)
+    return SelectionClass.fromJSON(data)
+  }
 }
+
+// for duck-typed instanceof
+Selection.prototype._isSelection = true
 
 /*
   Class to represent null selections.
@@ -171,9 +182,6 @@ class NullSelection extends Selection {
 Selection.nullSelection = Object.freeze(new NullSelection())
 
 /**
-  A selection fragment. Used when we split a {@link ContainerSelection}
-  into their fragments, each corresponding to a property selection.
-
   @internal
 */
 class SelectionFragment extends EventEmitter {

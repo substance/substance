@@ -1,10 +1,10 @@
-import isEqual from 'lodash/isEqual'
-import isObject from 'lodash/isObject'
-import isArray from 'lodash/isArray'
-import map from 'lodash/map'
-import forEach from 'lodash/forEach'
-import clone from 'lodash/clone'
-import cloneDeep from 'lodash/cloneDeep'
+import isEqual from '../util/isEqual'
+import isObject from '../util/isObject'
+import clone from '../util/clone'
+import cloneDeep from '../util/cloneDeep'
+import isArray from '../util/isArray'
+import forEach from '../util/forEach'
+import map from '../util/map'
 import uuid from '../util/uuid'
 import OperationSerializer from './data/OperationSerializer'
 import ObjectOperation from './data/ObjectOperation'
@@ -41,19 +41,19 @@ class DocumentChange {
       // when the change has been applied
       this.timestamp = data.timestamp
       // application state before the change was applied
-      this.before = data.before
+      this.before = data.before || {}
       // array of operations
       this.ops = data.ops
       this.info = data.info; // custom change info
       // application state after the change was applied
-      this.after = data.after
+      this.after = data.after || {}
     } else if (arguments.length === 3) {
       this.sha = uuid()
       this.info = {}
       this.timestamp = Date.now()
       this.ops = ops.slice(0)
-      this.before = before
-      this.after = after
+      this.before = before || {}
+      this.after = after || {}
     } else {
       throw new Error('Illegal arguments.')
     }
@@ -78,40 +78,31 @@ class DocumentChange {
 
     // TODO: we will introduce a special operation type for coordinates
     function _checkAnnotation(op) {
-      var node = op.val
-      var path, propName
       switch (op.type) {
         case "create":
-        case "delete":
-          // HACK: detecting annotation changes in an opportunistic way
-          if (node.hasOwnProperty('startOffset')) {
-            path = node.path || node.startPath
-            updated[path] = true
+        case "delete": {
+          let node = op.val
+          if (node.hasOwnProperty('start')) {
+            updated[node.start.path] = true
           }
-          if (node.hasOwnProperty('endPath')) {
-            path = node.endPath
-            updated[path] = true
+          if (node.hasOwnProperty('end')) {
+            updated[node.end.path] = true
           }
           break
+        }
         case "update":
-        case "set":
+        case "set": {
           // HACK: detecting annotation changes in an opportunistic way
-          node = doc.get(op.path[0])
+          let node = doc.get(op.path[0])
           if (node) {
-            propName = op.path[1]
-            if (node.isPropertyAnnotation()) {
-              if ((propName === 'path' || propName === 'startOffset' ||
-                   propName === 'endOffset') && !deleted[node.path[0]]) {
-                updated[node.path] = true
-              }
-            } else if (node.isContainerAnnotation()) {
-              if (propName === 'startPath' || propName === 'startOffset' ||
-                  propName === 'endPath' || propName === 'endOffset') {
-                affectedContainerAnnos.push(node)
-              }
+            if (node._isPropertyAnnotation) {
+              updated[node.start.path] = true
+            } else if (node._isContainerAnnotation) {
+              affectedContainerAnnos.push(node)
             }
           }
           break
+        }
         default:
           throw new Error('Illegal state')
       }
@@ -128,16 +119,17 @@ class DocumentChange {
         deleted[op.val.id] = op.val
       }
       if (op.type === "set" || op.type === "update") {
-        // The old as well the new one is affected
         updated[op.path] = true
+        // also mark the node itself as dirty
+        updated[op.path[0]] = true
       }
       _checkAnnotation(op)
     }
 
     affectedContainerAnnos.forEach(function(anno) {
       var container = doc.get(anno.containerId, 'strict')
-      var startPos = container.getPosition(anno.startPath[0])
-      var endPos = container.getPosition(anno.endPath[0])
+      var startPos = container.getPosition(anno.start.path[0])
+      var endPos = container.getPosition(anno.end.path[0])
       for (var pos = startPos; pos <= endPos; pos++) {
         var node = container.getChildAt(pos)
         var path
@@ -192,6 +184,7 @@ class DocumentChange {
   }
 
   isUpdated(path) {
+    // TODO: decide which API we prefer
     return this.isAffected(path)
   }
 
@@ -337,9 +330,9 @@ function _transformSelectionInplace(sel, a) {
       hasChanged |= _transformCoordinateInplace(sel.end, op)
     } else {
       if (sel.isContainerSelection()) {
-        sel.endPath = sel.startPath
+        sel.end.path = sel.start.path
       }
-      sel.endOffset = sel.startOffset
+      sel.end.offset = sel.start.offset
     }
   }
   return hasChanged

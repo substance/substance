@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 
-import isEqual from 'lodash/isEqual'
+import isEqual from '../util/isEqual'
 import ObjectOperation from './data/ObjectOperation'
 
-var MAXIMUM_CHANGE_DURATION = 1500
+const MAXIMUM_CHANGE_DURATION = 1500
 
 class DefaultChangeCompressor {
 

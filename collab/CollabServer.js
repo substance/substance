@@ -1,7 +1,7 @@
 import Server from './Server'
 import CollabEngine from './CollabEngine'
 import Err from '../util/SubstanceError'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 
 /*
   Implements Substance CollabServer API.
@@ -11,7 +11,8 @@ class CollabServer extends Server {
     super(config)
 
     this.scope = 'substance/collab'
-    this.documentEngine = config.documentEngine
+    this.configurator = config.configurator
+    this.documentEngine = this.configurator.getDocumentEngine()
     this.collabEngine = new CollabEngine(this.documentEngine)
   }
 
@@ -19,7 +20,9 @@ class CollabServer extends Server {
     Send an error
   */
   _error(req, res, err) {
+    console.error(err)
     res.error({
+      scope: this.scope,
       type: 'error',
       error: {
         name: req.message.type+'Error',
@@ -27,7 +30,6 @@ class CollabServer extends Server {
           name: err.name
         }
       },
-      // errorName: err.name,
       documentId: req.message.documentId
     })
     this.next(req, res)
@@ -38,7 +40,7 @@ class CollabServer extends Server {
   */
   authenticate(req, res) {
     if (this.config.authenticate) {
-      this.config.authenticate(req, function(err, session) {
+      this.config.authenticate(req, (err, session) => {
         if (err) {
           console.error(err)
           // Send the response with some delay
@@ -47,7 +49,7 @@ class CollabServer extends Server {
         }
         req.setAuthenticated(session)
         this.next(req, res)
-      }.bind(this))
+      })
     } else {
       super.authenticate.apply(this, arguments);
     }
@@ -58,7 +60,7 @@ class CollabServer extends Server {
   */
   enhanceRequest(req, res) {
     if (this.config.enhanceRequest) {
-      this.config.enhanceRequest(req, function(err) {
+      this.config.enhanceRequest(req, (err) => {
         if (err) {
           console.error('enhanceRequest returned an error', err)
           this._error(req, res, err)
@@ -66,7 +68,7 @@ class CollabServer extends Server {
         }
         req.setEnhanced()
         this.next(req, res)
-      }.bind(this))
+      })
     } else {
       super.enhanceRequest.apply(this, arguments)
     }
@@ -76,7 +78,7 @@ class CollabServer extends Server {
     Called when a collaborator disconnects
   */
   onDisconnect(collaboratorId) {
-    // console.log('CollabServer.onDisconnect ', collaboratorId);
+    // console.info('CollabServer.onDisconnect ', collaboratorId)
     // All documents collaborator is currently collaborating to
     let documentIds = this.collabEngine.getDocumentIds(collaboratorId)
     documentIds.forEach(function(documentId) {
@@ -104,17 +106,15 @@ class CollabServer extends Server {
   sync(req, res) {
     let args = req.message
 
-    // console.log('CollabServer.connect', args.collaboratorId);
-
     // Takes an optional argument collaboratorInfo
-    this.collabEngine.sync(args, function(err, result) {
+    this.collabEngine.sync(args, (err, result) => {
       // result: changes, version, change
       if (err) {
         this._error(req, res, err)
         return
       }
 
-      // Get enhance collaborators (e.g. including some app-specific user-info)
+      // Get enhanced collaborators (e.g. including some app-specific user-info)
       let collaborators = this.collabEngine.getCollaborators(args.documentId, args.collaboratorId)
 
       // Send the response
@@ -124,25 +124,20 @@ class CollabServer extends Server {
         documentId: args.documentId,
         version: result.version,
         serverChange: result.serverChange,
-        collaborators: collaborators
       })
 
       // We need to broadcast a new change if there is one
-      // console.log('CollabServer.connect: update is broadcasted to collaborators', Object.keys(collaborators));
-      forEach(collaborators, function(collaborator) {
+      forEach(collaborators, (collaborator) => {
         this.send(collaborator.collaboratorId, {
           scope: this.scope,
           type: 'update',
           documentId: args.documentId,
           version: result.version,
-          change: result.change,
-          // collaboratorId: args.collaboratorId,
-          // All except of receiver record
-          collaborators: this.collabEngine.getCollaborators(args.documentId, collaborator.collaboratorId)
+          change: result.change
         })
-      }.bind(this))
+      })
       this.next(req, res)
-    }.bind(this))
+    })
   }
 
   /*
@@ -163,18 +158,6 @@ class CollabServer extends Server {
   }
 
   _disconnectDocument(collaboratorId, documentId) {
-    let collaboratorIds = this.collabEngine.getCollaboratorIds(documentId, collaboratorId)
-
-    let collaborators = {}
-    collaborators[collaboratorId] = null
-
-    this.broadCast(collaboratorIds, {
-      scope: this.scope,
-      type: 'update',
-      documentId: documentId,
-      // Removes the entry
-      collaborators: collaborators
-    })
     // Exit from each document session
     this.collabEngine.disconnect({
       documentId: documentId,

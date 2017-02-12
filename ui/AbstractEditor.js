@@ -1,9 +1,6 @@
 import Component from './Component'
-import CommandManager from './CommandManager'
-import MacroManager from './MacroManager'
-import GlobalEventHandler from './GlobalEventHandler'
-import SurfaceManager from '../packages/surface/SurfaceManager'
-import DragManager from './DragManager'
+import ResourceManager from './ResourceManager'
+import DOMSelection from './DOMSelection'
 
 /**
   Reusable abstract editor implementation.
@@ -12,13 +9,8 @@ import DragManager from './DragManager'
 
   ```js
   class SimpleWriter extends AbstractEditor {
-
     render($$) {
       // render editor
-    }
-
-    documentSessionUpdated() {
-      // actions in response to doc session updates. E.g. updating a toolbar
     }
   }
   ```
@@ -30,20 +22,44 @@ class AbstractEditor extends Component {
     this._initialize(this.props)
   }
 
+  _initialize(props) {
+    if (!props.editorSession) {
+      throw new Error('EditorSession instance required');
+    }
+    this.editorSession = props.editorSession
+    this.doc = this.editorSession.getDocument()
+
+    let configurator = this.editorSession.getConfigurator()
+    this.componentRegistry = configurator.getComponentRegistry()
+    this.toolGroups = configurator.getToolGroups()
+    this.labelProvider = configurator.getLabelProvider()
+    this.iconProvider = configurator.getIconProvider()
+
+    // legacy
+    this.surfaceManager = this.editorSession.surfaceManager
+    this.commandManager = this.editorSession.commandManager
+    this.dragManager = this.editorSession.dragManager
+    this.macroManager = this.editorSession.macroManager
+    this.converterRegistry = this.editorSession.converterRegistry
+    this.globalEventHandler = this.editorSession.globalEventHandler
+    this.editingBehavior = this.editorSession.editingBehavior
+    this.markersManager = this.editorSession.markersManager
+
+    this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
+
+    this.domSelection = new DOMSelection(this)
+  }
+
   /**
     Define the editors render method here.
   */
   render(...args) {
-    super.render(...args)
-  }
-
-  didMount() {
-    this.documentSession.on('didUpdate', this.documentSessionUpdated, this)
+    return super.render(...args)
   }
 
   willReceiveProps(nextProps) {
-    let newSession = nextProps.documentSession
-    let shouldDispose = newSession && newSession !== this.documentSession
+    let newSession = nextProps.editorSession
+    let shouldDispose = newSession && newSession !== this.editorSession
     if (shouldDispose) {
       this._dispose()
       this._initialize(nextProps)
@@ -55,11 +71,6 @@ class AbstractEditor extends Component {
   }
 
   _dispose() {
-    this.surfaceManager.dispose()
-    this.commandManager.dispose()
-    this.globalEventHandler.dispose()
-    this.dragManager.dispose()
-    this.documentSession.off(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
@@ -67,68 +78,47 @@ class AbstractEditor extends Component {
 
   getChildContext() {
     return {
-      controller: this,
-      iconProvider: this.iconProvider,
-      documentSession: this.documentSession,
-      doc: this.doc, // TODO: remove in favor of documentSession
+      editor: this,
+      editorSession: this.editorSession,
+      doc: this.doc, // TODO: remove in favor of editorSession
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
+      domSelection: this.domSelection,
       commandManager: this.commandManager,
-      tools: this.tools,
-      labelProvider: this.labelProvider,
+      markersManager: this.markersManager,
       converterRegistry: this.converterRegistry,
-      globalEventHandler: this.globalEventHandler,
-      editingBehavior: this.editingBehavior,
       dragManager: this.dragManager,
+      editingBehavior: this.editingBehavior,
+      globalEventHandler: this.globalEventHandler,
+      iconProvider: this.iconProvider,
+      labelProvider: this.labelProvider,
+      resourceManager: this.resourceManager,
+      // ATTENTION: this is a map of tool target names to maps of tool names to tools
+      // i.e. a declarative way to map tools to tool groups
+      toolGroups: this.toolGroups,
     }
   }
 
-  _initialize(props) {
-    let configurator = props.configurator
-    let commands = configurator.getCommands()
-    if (!props.documentSession) {
-      throw new Error('DocumentSession instance required');
-    }
-    this.documentSession = props.documentSession
-    this.doc = this.documentSession.getDocument()
-    this.componentRegistry = configurator.getComponentRegistry()
-    this.tools = configurator.getTools()
-    this.surfaceManager = new SurfaceManager(this.documentSession)
-    this.commandManager = new CommandManager(this.getCommandContext(), commands)
-    this.dragManager = new DragManager(configurator.createDragHandlers(), {
-      documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager,
-      commandManager: this.commandManager,
-    });
-    this.macroManager = new MacroManager(this.getMacroContext(), configurator.getMacros())
-    this.iconProvider = configurator.getIconProvider()
-    this.converterRegistry = configurator.getConverterRegistry()
-    this.globalEventHandler = new GlobalEventHandler(this.documentSession, this.surfaceManager)
-    this.editingBehavior = configurator.getEditingBehavior()
-    this.labelProvider = configurator.getLabelProvider()
+  getDocument() {
+    return this.editorSession.getDocument()
   }
 
-  getCommandContext() {
-    return {
-      documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager
-    }
+  getConfigurator() {
+    return this.editorSession.getConfigurator()
   }
 
-  getMacroContext() {
-    return {
-      documentSession: this.documentSession,
-      surfaceManager: this.surfaceManager
-    }
+  getEditorSession() {
+    return this.editorSession
   }
 
-  /**
-    Called when documentsession was updated (e.g. when the selection changes).
+  getComponentRegistry() {
+    return this.componentRegistry
+  }
 
-    E.g. update toolbars.
-  */
-  documentSessionUpdated() {
-    throw new Error('This method is abstract')
+  onSessionUnlocked() {
+    if (this.refs.blocker) {
+      this.refs.blocker.remove()
+    }
   }
 }
 

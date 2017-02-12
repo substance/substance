@@ -1,4 +1,5 @@
-import DocumentSession from './DocumentSession'
+import EditorSession from './EditorSession'
+import Configurator from '../util/Configurator'
 
 /*
   Creates a factory for documents and the correspondent initial changeset
@@ -27,21 +28,23 @@ function createDocumentFactory(ArticleClass, create) {
   return {
     ArticleClass: ArticleClass,
     createEmptyArticle: function() {
-      var doc = new ArticleClass();
-      return doc;
+      var doc = new ArticleClass()
+      return doc
     },
     createArticle: function() {
-      var doc = new ArticleClass();
-      create(doc);
-      return doc;
+      var doc = new ArticleClass()
+      create(doc)
+      return doc
     },
     createChangeset: function() {
-      var doc = new ArticleClass();
-      var session = new DocumentSession(doc);
-      var change = session.transaction(create);
-      return [change.toJSON()];
+      var doc = new ArticleClass()
+      var session = new EditorSession(doc, {
+        configurator: new Configurator()
+      })
+      var change = session.transaction(create)
+      return [change.toJSON()]
     }
-  };
+  }
 }
 
-export default createDocumentFactory;
+export default createDocumentFactory

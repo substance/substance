@@ -1,5 +1,4 @@
-This guide will teach you how to build a simple Substance editor with basic editing functionalities. We call it [SimpleWriter](http://github.com/substance/simple-writer).
-
+This guide will teach you how to build a simple Substance editor (SimpleWriter) with basic editing functionalities. The complete and fully functional code can be found on [Github](http://github.com/substance/simple-writer).
 
 ## The model
 
@@ -20,9 +19,9 @@ The body node inherits from {@link Container}.
 ```js
 class Body extends Container {}
 
-Body.define({
+Body.schema = {
   type: 'body'
-})
+}
 ```
 
 The Comment node is a {@link PropertyAnnotation} and defines a content property to hold the comment text.
@@ -30,15 +29,15 @@ The Comment node is a {@link PropertyAnnotation} and defines a content property 
 ```
 class Comment extends PropertyAnnotation {}
 
-Comment.define({
+Comment.schema = {
   type: 'comment',
   content: { type: 'string', default: '' }
-})
+}
 ```
 
 ## Node Converters
 
-We choose HTML as a serialization format for our article. Hence, we need to define a converter for our body node, which converts an HTML body element to a Substance body node referencing a sequence of content nodes (paragraphs, headings).
+We choose HTML as a serialization format for our article. Hence, we need to define a converter for our body node, which converts an HTML body element to a body node referencing a sequence of content nodes (paragraphs, headings, …).
 
 ```js
 export default {
@@ -82,8 +81,7 @@ export default {
 }
 ```
 
-## HTML Importer
-
+In order to read an HTML file we need to provide an HTMLImporter. This one just finds the body element and delegates the conversion to the converter specified in the body package.
 
 ```js
 class SimpleHTMLImporter extends HTMLImporter {
@@ -96,7 +94,7 @@ class SimpleHTMLImporter extends HTMLImporter {
 
 ## Node Components
 
-For each node, we need to implement a Component in order to display it. The body element for us will be where editing starts. Containers can be made editable by just wrapping them in {@link ContainerEditor}, which we do here.
+For each node, we need to implement a Component in order to display it. The body element for us will be where editing starts. Containers can be made editable by just wrapping them in a {@link ContainerEditor}.
 
 ```js
 class BodyComponent extends Component {
@@ -125,7 +123,7 @@ In order to create comments in the user interface, we need to define a {@link Co
 
 ```js
 class CommentCommand extends AnnotationCommand {
-  canFuse()   { return false }
+  canFuse() { return false }
   canDelete() { return false }
 }
 ```
@@ -241,52 +239,48 @@ export default {
 
 ## Define a SimpleWriter component.
 
-The SimpleWriter component forms our editor's heart. Some basic Substance infrastructure is set up by AbstractEditor, which we inherit from. We need to implement {@link AbstractEditor#render} and {@link AbstractEditor#documentSessionUpdated}. Substance uses a {@link Component} API similar to [React](https://facebook.github.io/react/), which be relatively easy to understand.
+The SimpleWriter component forms our editor's heart. Some basic Substance infrastructure is set up by AbstractEditor, which we inherit from. We need to implement {@link AbstractEditor#render}. Substance uses a {@link Component} API similar to [React](https://facebook.github.io/react/), which should be easy to understand.
 
-The following code shows the setup of an editor, rendering a toolbar on top and document's body. We delegate setting up the editor to the Body component, which is defined in a package and sets up the actual editor.
+The following code shows the setup of an editor, rendering a toolbar and the document's body. We delegate setting up the editor to the Body component, which is defined in a package and sets up the actual editor.
 
 ```js
 class SimpleWriter extends AbstractEditor {
 
   render($$) {
-    let el = $$('div').addClass('sc-simple-writer')
-    let configurator = this.props.configurator
     let SplitPane = this.componentRegistry.get('split-pane')
+    let el = $$('div').addClass('sc-simple-writer')
     let ScrollPane = this.componentRegistry.get('scroll-pane')
+    let Overlay = this.componentRegistry.get('overlay')
+    let ContextMenu = this.componentRegistry.get('context-menu')
+    let Dropzones = this.componentRegistry.get('dropzones')
     let commandStates = this.commandManager.getCommandStates()
+    let configurator = this.props.editorSession.getConfigurator()
     let Body = this.componentRegistry.get('body')
-
     let contentPanel = $$(ScrollPane, {
-      scrollbarPosition: 'right',
-      overlay: SimpleWriterOverlayTools,
+      scrollbarPosition: 'right'
     }).append(
       $$(Body, {
         disabled: this.props.disabled,
         node: this.doc.get('body'),
         commands: configurator.getSurfaceCommandNames(),
         textTypes: configurator.getTextTypes()
-      }).ref('body')
+      }).ref('body'),
+      $$(Overlay),
+      $$(ContextMenu),
+      $$(Dropzones)
     ).ref('contentPanel')
 
     el.append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
-        $$(Toolbar, {
-          commandStates: commandStates
-        }).ref('toolbar'),
+        $$('div').addClass('se-toolbar-wrapper').append(
+          $$(Toolbar, {
+            commandStates: commandStates
+          }).ref('toolbar')
+        ),
         contentPanel
       )
     )
     return el
-  }
-
-  documentSessionUpdated() {
-    let toolbar = this.refs.toolbar
-    if (toolbar) {
-      let commandStates = this.commandManager.getCommandStates()
-      toolbar.setProps({
-        commandStates: commandStates
-      })
-    }
   }
 }
 ```
@@ -302,11 +296,12 @@ window.onload = function() {
   let importer = cfg.createImporter('html')
   let doc = importer.importDocument(fixture)
   // This is the data structure manipulated by the editor
-  let documentSession = new DocumentSession(doc)
+  let editorSession = new EditorSession(doc, {
+    configurator
+  })
   // Mount SimpleWriter to the DOM and run it.
   SimpleWriter.mount({
-    documentSession: documentSession,
-    configurator: cfg
+    editorSession: editorSession
   }, document.body)
 }
 ```
@@ -318,5 +313,5 @@ Find the complete code for [SimpleWriter](https://github.com/substance/simple-wr
 - Enable a Substance core node type (e.g. Superscript, Image) for SimpleWriter (very easy)
 - Create a simple Highlight node type to emphasize parts of the text with a yellow background. Serialize as `<span data-type="highlight">...</span>` Tip: Look at existing implementations such as Strong. (easy)
 - Create a new text type FancyParagraph, that works like a regular paragraph, just with different styles. Serialize as `<p data-type="fancy">...</p>` (easy)
-- Create a simple Person node type with properties `firstname`, `lastname`, which are editable via regular input elements. Look at [Input Example](https://github.com/substance/examples/blob/v1.0.0-beta.5.1/input) as a reference implementation. Create a tool that allows insertion of Person nodes into the document (as a block element). Serialize as `<div data-type="person" data-firstname="John" data-lastname="Doe"></div>`. (medium)
-- Create new Monster node type that can be inserted inside the text. See [InlineNode example](https://github.com/substance/examples/blob/v1.0.0-beta.5.1/inline-node) as a reference implementation. Render a monster as small image that appears in the text. Bonus points: Allow different monster types and provide UI to change the moster type. Render a different image for each monster type. (medium)
+- Create a simple Person node type with properties `firstname`, `lastname`, which are editable via regular input elements. Look at [Input Example](https://github.com/substance/examples/tree/master/input) as a reference implementation. Create a tool that allows insertion of Person nodes into the document (as a block element). Serialize as `<div data-type="person" data-firstname="John" data-lastname="Doe"></div>`. (medium)
+- Create new Monster node type that can be inserted inside the text. See [InlineNode example](https://github.com/substance/examples/tree/master/inline-node) as a reference implementation. Render a monster as small image that appears in the text. Bonus points: Allow different monster types and provide UI to change the monster type. Render a different image for each monster type. (medium)

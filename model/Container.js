@@ -1,8 +1,6 @@
-import extend from 'lodash/extend'
-import isNumber from 'lodash/isNumber'
-import isString from 'lodash/isString'
+import isNumber from '../util/isNumber'
+import isString from '../util/isString'
 import DocumentNode from './DocumentNode'
-import ParentNodeMixin from './ParentNodeMixin'
 import ContainerAddress from './ContainerAddress'
 
 /*
@@ -10,59 +8,53 @@ import ContainerAddress from './ContainerAddress'
 
   While most editing occurs on a property level (such as editing text),
   other things happen on a node level, e.g., breaking or mergin nodes,
-  or spanning annotations or so called ContainerAnnotations.
-
-  @class
-  @prop {String[]} nodes
+  or spanning annotations so called ContainerAnnotations.
 */
 class Container extends DocumentNode {
 
   constructor(...args) {
     super(...args)
-    // HACK: we invalidate cached positions on every change
-    // NOTE, that in trans action docs we don't do caching
-    if (this.document && !this.document.isTransactionDocument) {
-      this.document.on('document:changed', this._onChange, this)
-    }
-  }
 
-  get _isContainer() { return true; }
+    // NOTE: we are caching positions as they are queried very often,
+    // whereas the number of changes to a container are quite rare.
+    // The cache gets invalidated whenever the container is changed.
+    this._enableCaching()
+  }
 
   dispose() {
     this.document.off(this)
   }
 
-  getPosition(nodeId) {
-    // HACK: ATM we are caching only in the real Document
-    // i.e., which is connected to the UI etc.
-    if (this.document && this.document.isTransactionDocument) {
-      return this.nodes.indexOf(nodeId)
-    } else {
-      var positions = this._getCachedPositions()
-      var pos = positions[nodeId]
-      if (pos === undefined) {
-        pos = -1
-      }
-      return pos
+  getContentPath() {
+    return [this.id, 'nodes']
+  }
+
+  getContent() {
+    return this.nodes
+  }
+
+  getPosition(node, strict) {
+    if (isString(node)) {
+      node = this.document.get(node)
     }
+    let pos = this._getPosition(node)
+    if (strict && pos < 0) {
+      throw new Error('Node is not within this container: ' + node.id)
+    }
+    return pos
+  }
+
+  getNodeAt(idx) {
+    let content = this.getContent()
+    if (idx < 0 || idx >= content.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
+    }
+    return this.getDocument().get(content[idx])
   }
 
   getNodes() {
-    var doc = this.getDocument()
-    var nodes = []
-    this.nodes.forEach(function(nodeId){
-      var node = doc.get(nodeId)
-      if (!node) {
-        console.error('Node does not exist: ', nodeId)
-      } else {
-        nodes.push(node)
-      }
-    })
-    return nodes
-  }
-
-  getNodeAt(pos) {
-    return this.getDocument().get(this.nodes[pos])
+    const doc = this.getDocument()
+    return this.getContent().map(id => doc.get(id)).filter(Boolean)
   }
 
   show(nodeId, pos) {
@@ -74,16 +66,16 @@ class Container extends DocumentNode {
       }
     }
     if (!isNumber(pos)) {
-      pos = this.nodes.length
+      pos = this.getLength()
     }
-    doc.update(this.getContentPath(), { insert: { offset: pos, value: nodeId } })
+    doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
   }
 
   hide(nodeId) {
     var doc = this.getDocument()
-    var pos = this.nodes.indexOf(nodeId)
+    var pos = this.getPosition(nodeId)
     if (pos >= 0) {
-      doc.update(this.getContentPath(), { delete: { offset: pos } })
+      doc.update(this.getContentPath(), { type: 'delete', pos: pos })
     }
   }
 
@@ -108,50 +100,115 @@ class Container extends DocumentNode {
   }
 
   getLength() {
-    return this.nodes.length
+    return this.getContent().length
   }
 
-  _onChange(change) {
+  get length() {
+    return this.getLength()
+  }
+
+  _getPosition(node) {
+    if (this._isCaching) {
+      return this._getCachedPosition(node)
+    } else {
+      return this._lookupPosition(node)
+    }
+  }
+
+  _getCachedPosition(node) {
+    let cache = this._cachedPositions || this._fillCache()
+    let nodeId = node.id
+    let pos = -1
+    if (cache.hasOwnProperty(nodeId)) {
+      pos = cache[nodeId]
+    } else {
+      pos = this._lookupPosition(node)
+      cache[nodeId] = pos
+    }
+    return pos
+  }
+
+  _fillCache() {
+    let positions = {}
+    this.nodes.forEach((id, pos) => {
+      positions[id] = pos
+    })
+    this._cachedPositions = positions
+    return positions
+  }
+
+  _invalidateCache() {
+    this._cachedPositions = null
+  }
+
+  _lookupPosition(node) {
+    if (node.hasParent()) {
+      node = node.getRoot()
+    }
+    return this.getContent().indexOf(node.id)
+  }
+
+  _enableCaching() {
+    // this hook is used to invalidate cached positions
+    // caching is done only in the 'real' document, not in a TransactionDocument
+    if (this.document) {
+      this.document.data.on('operation:applied', this._onOperationApplied, this)
+      this._isCaching = true
+    }
+  }
+
+  _onOperationApplied(op) {
+    if (op.type === 'set' || op.type === 'update') {
+      if (op.path[0] === this.id) {
+        this._invalidateCache()
+      }
+    }
+  }
+
+  _onDocumentChange(change) {
     if (change.isUpdated(this.getContentPath())) {
-      this.positions = null
+      this._invalidateCache()
     }
   }
 
-  _getCachedPositions() {
-    if (!this.positions) {
-      var positions = {}
-      this.nodes.forEach(function(id, pos) {
-        positions[id] = pos
-      })
-      this.positions = positions
+  // NOTE: this has been in ParentNodeMixin before
+  // TODO: try to get rid of this
+
+  hasChildren() {
+    return this.nodes.length > 0
+  }
+
+  getChildIndex(child) {
+    return this.nodes.indexOf(child.id)
+  }
+
+  getChildren() {
+    var doc = this.getDocument()
+    var childrenIds = this.nodes
+    return childrenIds.map(function(id) {
+      return doc.get(id)
+    })
+  }
+
+  getChildAt(idx) {
+    var childrenIds = this.nodes
+    if (idx < 0 || idx >= childrenIds.length) {
+      throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
     }
-    return this.positions
+    return this.getDocument().get(childrenIds[idx])
   }
 
-  getContentPath() {
-    return [this.id, 'nodes']
-  }
-
-}
-
-// HACK: using a mixin here
-// TODO: Get rid of this ParentNodeMixin
-extend(Container.prototype, ParentNodeMixin)
-
-Container.prototype.getChildrenProperty = function() {
-  return 'nodes'
-}
-
-Container.define({
-  type: "container",
-  nodes: { type: ['id'], default: [] }
-})
-
-Object.defineProperty(Container.prototype, 'length', {
-  get: function() {
-    console.warn('DEPRECATED: want to get rid of unnecessary properties. Use this.getLength() instead.')
+  getChildCount() {
     return this.nodes.length
   }
-})
+
+}
+
+Container.prototype._isContainer = true
+
+Container.schema = {
+  type: 'container',
+  nodes: { type: ['array', 'id'], default: [] }
+}
 
 export default Container

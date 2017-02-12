@@ -1,0 +1,8 @@
+.sc-table {
+  display: table;
+  width: 100%;
+}
+.sc-table .sc-table-cell {
+  border: 1px solid #ddd;
+  padding: 5px;
+}

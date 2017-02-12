@@ -1,18 +1,14 @@
-import isArray from 'lodash/isArray'
-import forEach from 'lodash/forEach'
+import forEach from '../util/forEach'
 
 class JSONConverter {
 
   importDocument(doc, json) {
-    if (!json.schema || !isArray(json.nodes)) {
+    if (!json.nodes) {
       throw new Error('Invalid JSON format.')
     }
     var schema = doc.getSchema()
-    if (schema.name !== json.schema.name) {
+    if (json.schema && schema.name !== json.schema.name) {
       throw new Error('Incompatible schema.')
-    }
-    if (schema.version !== json.schema.version) {
-      console.error('Different schema version. Conversion might be problematic.')
     }
     // the json should just be an array of nodes
     var nodes = json.nodes
@@ -35,14 +31,13 @@ class JSONConverter {
     var schema = doc.getSchema()
     var json = {
       schema: {
-        name: schema.name,
-        version: schema.version
+        name: schema.name
       },
-      nodes: []
+      nodes: {}
     }
     forEach(doc.getNodes(), function(node) {
       if (node._isDocumentNode) {
-        json.nodes.push(node.toJSON())
+        json.nodes[node.id] = node.toJSON()
       }
     })
     return json

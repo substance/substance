@@ -1,9 +1,4 @@
 module.exports = {
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "node": true
-  },
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 6,
@@ -12,10 +7,19 @@ module.exports = {
     },
   },
   "extends": "eslint:recommended",
-  "globals": {
-    "Promise": true,
-    "Map": true
-  },
+  "globals": [
+    // browser
+    "window", "document", "URL", "XMLHttpRequest",
+    // browser / nodejs
+    "console", "setTimeout", "setInterval", "clearInterval",
+    // nodejs
+    "global",
+    // EcmaScript 6
+    "Promise", "Map", "Set", "WeakMap",
+    // commonjs
+    "require", "module", "exports"
+    //
+  ].reduce((m, key)=>{m[key]=true;return m}, {}),
   "rules": {
     // 0 - off, 1 - warning, 2 - error
     "indent": ["error", 2, { "SwitchCase": 1 }],
@@ -44,6 +48,7 @@ module.exports = {
     // turned of as we want to be able to use this.hasOwnProperty() for instance
     "no-prototype-builtins": 0,
     "no-regex-spaces": 2,
+    "no-restricted-globals": [2, "Document", "Node"],
     "no-sparse-arrays": 0,
     "no-unexpected-multiline": 2,
     "no-unreachable": 2,

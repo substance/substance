@@ -1,10 +1,9 @@
+import isMatch from 'lodash-es/isMatch'
+import find from 'lodash-es/find'
+import clone from '../../util/clone'
 import Command from '../../ui/Command'
-import _isMatch from 'lodash/isMatch'
-import _find from 'lodash/find'
-import _clone from 'lodash/clone'
 
 class SwitchTextTypeCommand extends Command {
-
   // Available text types on the surface
   getTextTypes(params) {
     let surface = params.surface
@@ -17,7 +16,7 @@ class SwitchTextTypeCommand extends Command {
 
   getTextType(params) {
     let textTypes = this.getTextTypes(params)
-    return _find(textTypes, function(t) {
+    return find(textTypes, function(t) {
       return t.name === params.textType
     })
   }
@@ -28,26 +27,37 @@ class SwitchTextTypeCommand extends Command {
     let textTypes = this.getTextTypes(params)
     let currentTextType
     textTypes.forEach(function(textType) {
-      let nodeProps = _clone(textType.data)
+      let nodeProps = clone(textType.data)
       delete nodeProps.type
-      if (_isMatch(node, nodeProps) && node.type === textType.data.type) {
+      if (isMatch(node, nodeProps) && node.type === textType.data.type) {
         currentTextType = textType
       }
     })
     return currentTextType
   }
 
+  isDisabled({selection, surface}) {
+    if (!surface || !surface.isEnabled() || selection.isNull()) {
+      return true
+    }
+    // When command is configured to be disabled for collapsed cursor
+    if (selection && this.config.disableCollapsedCursor && selection.isCollapsed()) {
+      return true
+    }
+    return false
+  }
+
   getCommandState(params) {
-    let doc = params.documentSession.getDocument()
+    let doc = params.editorSession.getDocument()
     let sel = params.selection
-    let surface = params.surface
+
     let node
     let newState = {
       disabled: false,
       textTypes: this.getTextTypes(params)
     }
     // Set disabled when not a property selection
-    if (!surface || !surface.isEnabled() || sel.isNull()) {
+    if (this.isDisabled(params)) {
       newState.disabled = true
     } else if (sel.isContainerSelection()) {
       newState.disabled = true
@@ -81,19 +91,19 @@ class SwitchTextTypeCommand extends Command {
   }
 
   /**
-   Trigger a switchTextType transaction
+    Trigger a switchTextType transaction
    */
   execute(params) {
     let textType = this.getTextType(params)
     let nodeData = textType.data
     let surface = params.surface
+    let editorSession = params.editorSession
     if (!surface) {
       console.warn('No focused surface. Stopping command execution.')
       return
     }
-    surface.transaction(function(tx, args) {
-      args.data = nodeData
-      return surface.switchType(tx, args)
+    editorSession.transaction(function(tx) {
+      return tx.switchTextType(nodeData)
     })
     return nodeData
   }

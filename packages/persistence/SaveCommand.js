@@ -6,7 +6,7 @@ class SaveCommand extends Command {
   }
 
   getCommandState(params) {
-    let dirty = params.documentSession.isDirty()
+    let dirty = params.editorSession.hasUnsavedChanges()
     return {
       disabled: !dirty,
       active: false
@@ -14,8 +14,8 @@ class SaveCommand extends Command {
   }
 
   execute(params) {
-    let documentSession = params.documentSession
-    documentSession.save()
+    let editorSession = params.editorSession
+    editorSession.save()
     return {
       status: 'saving-process-started'
     }

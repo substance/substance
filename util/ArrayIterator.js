@@ -44,4 +44,4 @@ class ArrayIterator {
   }
 }
 
-export default ArrayIterator;
+export default ArrayIterator

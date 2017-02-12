@@ -1,16 +1,13 @@
 import EventEmitter from '../util/EventEmitter'
 import Err from '../util/SubstanceError'
 
-let __id__ = 0
-
 /**
   ClientConnection abstraction. Uses websockets internally
 */
-class ClientConnection extends EventEmitter { 
+class ClientConnection extends EventEmitter {
   constructor(config) {
     super()
 
-    this.__id__ = __id__++
     this.config = config
     this._onMessage = this._onMessage.bind(this)
     this._onConnectionOpen = this._onConnectionOpen.bind(this)

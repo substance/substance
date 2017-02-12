@@ -1,6 +1,4 @@
 import EventEmitter from '../util/EventEmitter'
-import JSONConverter from '../model/JSONConverter'
-import Err from '../util/SubstanceError'
 import SnapshotEngine from './SnapshotEngine'
 
 /*
@@ -9,168 +7,114 @@ import SnapshotEngine from './SnapshotEngine'
 class DocumentEngine extends EventEmitter {
   constructor(config) {
     super()
-
-    this.configurator = config.configurator
-    // Where changes are stored
-    this.documentStore = config.documentStore
     this.changeStore = config.changeStore
-
-    // SnapshotEngine instance is required
-    this.snapshotEngine = config.snapshotEngine || new SnapshotEngine({
-      configurator: this.configurator,
-      documentStore: this.documentStore,
-      changeStore: this.changeStore
+    this.snapshotStore = config.snapshotStore
+    // Snapshot creation frequency (e.g. if it equals 15 then every
+    // 15th version will be saved as snapshot)
+    this.snapshotFrequency = config.snapshotFrequency || 1
+    this.snapshotEngine = new SnapshotEngine({
+      changeStore: this.changeStore,
+      snapshotStore: this.snapshotStore
     })
   }
 
   /*
-    Creates a new empty or prefilled document
+    Creates a new document
 
-    Writes the initial change into the database.
-    Returns the JSON serialized version, as a starting point
+    A valid document must have at least one valid change
   */
-  createDocument(args, cb) {
-    let schema = this.configurator.getSchema()
-    if (!schema) {
-      return cb(new Err('SchemaNotFoundError', {
-        message: 'Schema not found for ' + args.schemaName
-      }))
-    }
-
-    let doc = this.configurator.createArticle()
-
-    // TODO: I have the feeling that this is the wrong approach.
-    // While in our tests we have seeds I don't think that this is a general pattern.
-    // A vanilla document should be just empty, or just have what its constructor
-    // is creating.
-    // To create some initial content, we should use the editor,
-    // e.g. an automated script running after creating the document.
-
-    // HACK: we use the info object for the change as well, however
-    // we should be able to control this separately.
-
-    this.documentStore.createDocument({
-      schemaName: schema.name,
-      schemaVersion: schema.version,
-      documentId: args.documentId,
-      version: 0, // we start with version 0 and waiting for the initial seed change from client
-      info: args.info
-    }, function(err, docRecord) {
-      if (err) {
-        return cb(new Err('CreateError', {
-          cause: err
-        }))
-      }
-
-      let converter = new JSONConverter();
-      cb(null, {
-        documentId: docRecord.documentId,
-        data: converter.exportDocument(doc),
-        version: 0
-      })
-    }.bind(this)) //eslint-disable-line
+  createDocument(documentId, initialChange, cb) {
+    this.addChange(documentId, initialChange, cb)
   }
 
   /*
-    Get a document snapshot.
-
-    @param args.documentId
-    @param args.version
+    Get a document snapshot for a given version. If no version
+    is provivded, the latest version is returned
   */
-  getDocument(args, cb) {
-    this.snapshotEngine.getSnapshot(args, cb)
+  getDocument(documentId, version, cb) {
+    if (typeof version === 'function') {
+      cb = version
+      version = undefined
+    }
+    if (!documentId) {
+      throw new Error('Invalid Arguments')
+    }
+    if (version === undefined) {
+      this.getVersion(documentId, (err, version) => {
+        if (err) return cb(err)
+        this.snapshotEngine.getSnapshot(documentId, version, cb)
+      })
+    } else {
+      this.snapshotEngine.getSnapshot(documentId, version, cb)
+    }
   }
 
   /*
     Delete document by documentId
   */
   deleteDocument(documentId, cb) {
-    this.changeStore.deleteChanges(documentId, function(err) {
+    this.changeStore.deleteChanges(documentId, (err) => {
       if (err) {
-        return cb(new Err('DeleteError', {
-          cause: err
-        }))
+        return cb(new Error('Deleting changes failed'))
       }
-      this.documentStore.deleteDocument(documentId, function(err, doc) {
-        if (err) {
-          return cb(new Err('DeleteError', {
-            cause: err
-          }))
-        }
-        cb(null, doc)
-      });
-    }.bind(this))
+    })
   }
 
   /*
     Check if a given document exists
   */
   documentExists(documentId, cb) {
-    this.documentStore.documentExists(documentId, cb)
+    this.getVersion(documentId, (err, version) => {
+      if (version >= 0) {
+        cb(null, true)
+      } else {
+        cb(null, false)
+      }
+    })
   }
 
   /*
     Get changes based on documentId, sinceVersion
   */
-  getChanges(args, cb) {
-    this.documentExists(args.documentId, function(err, exists) {
-      if (err || !exists) {
-        return cb(new Err('ReadError', {
-          message: !exists ? 'Document does not exist' : null,
-          cause: err
-        }))
-      }
-      this.changeStore.getChanges(args, cb)
-    }.bind(this))
+  getChanges(documentId, sinceVersion, toVersion, cb) {
+    this.changeStore.getChanges(documentId, sinceVersion, toVersion, cb)
   }
 
   /*
     Get version for given documentId
   */
   getVersion(documentId, cb) {
-    this.documentExists(documentId, function(err, exists) {
-      if (err || !exists) {
-        return cb(new Err('ReadError', {
-          message: !exists ? 'Document does not exist' : null,
-          cause: err
-        }))
-      }
-      this.changeStore.getVersion(documentId, cb)
-    }.bind(this))
+    this.changeStore.getVersion(documentId, cb)
   }
 
   /*
-    Add change to a given documentId
-
-    args: documentId, change [, documentInfo]
+    Here the implementer decides whether a snapshot should be created or not.
+    It may be a good strategy to only create a snaphot for every 10th version.
+    However for now we will just snapshot each change to keep things simple.
   */
-  addChange(args, cb) {
-    this.documentExists(args.documentId, function(err, exists) {
-      if (err || !exists) {
-        return cb(new Err('ReadError', {
-          message: !exists ? 'Document does not exist' : null,
-          cause: err
-        }))
-      }
-      this.changeStore.addChange(args, function(err, newVersion) {
-        if (err) return cb(err);
-        // We write the new version to the document store.
-        this.documentStore.updateDocument(args.documentId, {
-          version: newVersion,
-          // Store custom documentInfo
-          info: args.documentInfo
-        }, function(err) {
-          if (err) return cb(err)
-          this.snapshotEngine.requestSnapshot(args.documentId, newVersion, function() {
-            // no matter if errored or not we will complete the addChange
-            // successfully
-            cb(null, newVersion)
-          })
-        }.bind(this))
-      }.bind(this))
-    }.bind(this))
+  requestSnapshot(documentId, version, cb) {
+    if (version % this.snapshotFrequency === 0) {
+      this.snapshotEngine.createSnapshot(documentId, version, cb)
+    } else {
+      cb(null) // do nothing
+    }
   }
 
+  /*
+    Add change to a given documentId.
+
+    Snapshot creation is requested on each change to be stored.
+  */
+  addChange(documentId, change, cb) {
+    this.changeStore.addChange(documentId, change, (err, newVersion) => {
+      if (err) return cb(err)
+
+      this.requestSnapshot(documentId, newVersion, () => {
+        // no matter if snaphot creation errored or not we will confirm change
+        cb(null, newVersion)
+      })
+    })
+  }
 }
 
 export default DocumentEngine

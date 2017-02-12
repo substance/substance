@@ -5,7 +5,6 @@ import TestServerWebSocket from './TestServerWebSocket'
   Local in-process Websocket server implementation for client-side development
   of protocols.
 */
-
 class TestWebSocketServer extends EventEmitter {
 
   constructor(config) {
@@ -32,9 +31,12 @@ class TestWebSocketServer extends EventEmitter {
   */
   handleConnectionRequest(clientId) {
     // TODO: this implementation does not allow for multiple connections
-    // from one client to a server
-    // and ATM we have only one server
-    var sws = new TestServerWebSocket(this.messageQueue, this.serverId, clientId)
+    // from one client to a server and ATM we have only one server
+    var sws = new TestServerWebSocket(
+      this.messageQueue,
+      this.serverId,
+      clientId
+    )
     this.messageQueue.connectServerSocket(sws)
     this.clients[clientId] = sws
     // Emit connection event

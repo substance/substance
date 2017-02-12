@@ -3,14 +3,16 @@ import DocumentNode from './DocumentNode'
 /**
   A base class for all text-ish nodes, such as Paragraphs, Headings,
   Prerendered, etc.
-
-  @class
-  @abstract
 */
-
 class TextNode extends DocumentNode {
 
   getTextPath() {
+    // TODO: deprecate this
+    // console.warn('DEPRECATED: use node.getPath()')
+    return this.getPath()
+  }
+
+  getPath() {
     return [this.id, 'content']
   }
 
@@ -22,13 +24,18 @@ class TextNode extends DocumentNode {
     return !this.content
   }
 
+  getLength() {
+    return this.content.length
+  }
+
 }
 
 TextNode.isText = true
 
-TextNode.define({
+TextNode.schema = {
   type: "text",
-  content: 'text'
-})
+  content: "text",
+  direction: { type: "string", optional: true }
+}
 
 export default TextNode

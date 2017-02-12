@@ -1,5 +1,4 @@
 import Command from './Command'
-import insertNode from '../model/transform/insertNode'
 
 class InsertNodeCommand extends Command {
 
@@ -9,27 +8,20 @@ class InsertNodeCommand extends Command {
       disabled: true,
       active: false
     }
-    if (sel && !sel.isNull() && sel.isPropertySelection()) {
+    if (sel && !sel.isNull() && !sel.isCustomSelection() && sel.containerId) {
       newState.disabled = false
     }
     return newState
   }
 
-  execute(params) {
+  execute(params, context) {
     var state = params.commandState
     if (state.disabled) return
-    var surface = params.surface
-    if (surface) {
-      surface.transaction(function(tx, args) {
-        return this.insertNode(tx, args)
-      }.bind(this))
-    }
-    return true
-  }
-
-  insertNode(tx, args) {
-    args.node = this.createNodeData(tx, args)
-    return insertNode(tx, args)
+    let editorSession = this._getEditorSession(params, context)
+    editorSession.transaction((tx)=>{
+      let node = this.createNodeData(tx, params, context)
+      tx.insertBlockNode(node)
+    })
   }
 
   createNodeData(tx, args) { // eslint-disable-line

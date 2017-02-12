@@ -12,21 +12,17 @@ class ContainerAdapter extends Container {
     doc.data.nodes[this.id] = this
   }
 
-  get _isDocumentNode() { return false }
-
-  get _isContainer() { return false }
-
   getContentPath() {
     return this.path
   }
+
+  get nodes() {
+    return this.document.get(this.path)
+  }
+
 }
 
-Object.defineProperties(ContainerAdapter.prototype, {
-  nodes: {
-    get: function() {
-      return this.document.get(this.path)
-    },
-  }
-})
+ContainerAdapter.prototype._isDocumentNode = false
+ContainerAdapter.prototype._isContainer = false
 
 export default ContainerAdapter

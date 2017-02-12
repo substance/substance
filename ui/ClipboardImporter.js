@@ -1,10 +1,10 @@
-import isArray from 'lodash/isArray'
-import extend from 'lodash/extend'
-import forEach from 'lodash/forEach'
+import extend from '../util/extend'
+import isArray from '../util/isArray'
+import forEach from '../util/forEach'
 import Registry from '../util/Registry'
 import Document from '../model/Document'
 import HTMLImporter from '../model/HTMLImporter'
-import DefaultDOMElement from './DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import JSONConverter from '../model/JSONConverter'
 import platform from '../util/platform'
 
@@ -47,22 +47,20 @@ class ClipboardImporter extends HTMLImporter {
     if (this._isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
-      let match = /<!--StartFragment\-->(.*)<!--EndFragment-->/.exec(html)
+      let match = /<!--StartFragment-->(.*)<!--EndFragment-->/.exec(html)
       if (match) {
         html = match[1]
       }
     }
 
-    // when copying from a substance editor we store JSON in a meta tag
-    // Then we parse the
+    // when copying from a substance editor we store JSON in a script tag in the head
     // If the import fails e.g. because the schema is incompatible
     // we fall back to plain HTML import
-    if (html.search(/meta name=.substance./)>=0) {
+    if (html.search(/script id=.substance-clipboard./)>=0) {
       el = DefaultDOMElement.parseHTML(html)
-      let substanceData = el.find('meta[name="substance"]')
+      let substanceData = el.find('#substance-clipboard')
       if (substanceData) {
-        let jsonStr = atob(substanceData.attr('content'))
-        jsonStr = decodeURIComponent(jsonStr)
+        let jsonStr = substanceData.textContent
         try {
           return this.importFromJSON(jsonStr)
         } catch(err) {
@@ -82,7 +80,7 @@ class ClipboardImporter extends HTMLImporter {
       body = this._createElement('body')
       body.append(el)
     }
-    body = this._fixupGoogleDocsBody(body)
+    body = this._sanitizeBody(body)
     if (!body) {
       console.warn('Invalid HTML.')
       return null
@@ -92,6 +90,13 @@ class ClipboardImporter extends HTMLImporter {
     this.convertBody(body)
     let doc = this.generateDocument()
     return doc
+  }
+
+  _sanitizeBody(body) {
+    body = this._fixupGoogleDocsBody(body)
+    // Remove <meta> element
+    body.findAll('meta').forEach(el => el.remove())
+    return body
   }
 
   _fixupGoogleDocsBody(body) {
@@ -134,7 +139,7 @@ class ClipboardImporter extends HTMLImporter {
         childIterator.back()
         break
       }
-      wrapper.append(el.clone())
+      wrapper.append(el.clone(true))
     }
     // HACK: usually when we run into this case, then there is inline data only
     // Instead of detecting this case up-front we just set the proper id
@@ -166,7 +171,7 @@ class ClipboardImporter extends HTMLImporter {
 
 }
 
-let _converters = {
+const CONVERTERS = {
   'catch-all-block': {
     type: 'paragraph',
     matchElement: function(el) { return el.is('div') },
@@ -182,7 +187,7 @@ ClipboardImporter._addConverters = function(config) {
     config.converters.forEach(function(conv, name) {
       registry.add(name, conv)
     });
-    forEach(_converters, function(converter, name) {
+    forEach(CONVERTERS, function(converter, name) {
       registry.add(name, converter)
     });
     config.converters = registry

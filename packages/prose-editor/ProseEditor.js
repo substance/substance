@@ -1,6 +1,5 @@
 import AbstractEditor from '../../ui/AbstractEditor'
 import ContainerEditor from '../../ui/ContainerEditor'
-import ProseEditorOverlayTools from './ProseEditorOverlayTools'
 import Toolbar from '../tools/Toolbar'
 
 /**
@@ -15,10 +14,11 @@ import Toolbar from '../tools/Toolbar'
 
   window.onload = function() {
     let doc = configurator.createArticle(fixture)
-    let documentSession = new DocumentSession(doc)
-    ProseEditor.mount({
-      documentSession: documentSession,
+    let editorSession = new EditorSession(doc, {
       configurator: configurator
+    })
+    ProseEditor.mount({
+      editorSession: editorSession
     }, document.body)
   }
   ```
@@ -30,13 +30,22 @@ class ProseEditor extends AbstractEditor {
     let el = $$('div').addClass('sc-prose-editor')
     let toolbar = this._renderToolbar($$)
     let editor = this._renderEditor($$)
+
     let ScrollPane = this.componentRegistry.get('scroll-pane')
+    let Overlay = this.componentRegistry.get('overlay')
+    let ContextMenu = this.componentRegistry.get('context-menu')
+    let Dropzones = this.componentRegistry.get('dropzones')
 
     let contentPanel = $$(ScrollPane, {
+      name: 'contentPanel',
+      contextMenu: 'custom',
       scrollbarPosition: 'right',
-      overlay: ProseEditorOverlayTools,
+      scrollbarType: this.props.scrollbarType,
     }).append(
-      editor
+      editor,
+      $$(Overlay),
+      $$(ContextMenu),
+      $$(Dropzones)
     ).ref('contentPanel')
 
     el.append(
@@ -50,30 +59,22 @@ class ProseEditor extends AbstractEditor {
 
   _renderToolbar($$) {
     let commandStates = this.commandManager.getCommandStates()
-    return $$(Toolbar, {
-      commandStates: commandStates
-    }).ref('toolbar')
+    return $$('div').addClass('se-toolbar-wrapper').append(
+      $$(Toolbar, {
+        commandStates: commandStates
+      }).ref('toolbar')
+    )
   }
 
   _renderEditor($$) {
-    let configurator = this.props.configurator
+    let configurator = this.getConfigurator()
     return $$(ContainerEditor, {
       disabled: this.props.disabled,
-      documentSession: this.documentSession,
+      editorSession: this.editorSession,
       node: this.doc.get('body'),
       commands: configurator.getSurfaceCommandNames(),
       textTypes: configurator.getTextTypes()
     }).ref('body')
-  }
-
-  documentSessionUpdated() {
-    let toolbar = this.refs.toolbar
-    if (toolbar) {
-      let commandStates = this.commandManager.getCommandStates()
-      toolbar.setProps({
-        commandStates: commandStates
-      })
-    }
   }
 }
 

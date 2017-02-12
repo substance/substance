@@ -1,26 +1,22 @@
-import isString from 'lodash/isString'
-import isEqual from 'lodash/isEqual'
-import cloneDeep from 'lodash/cloneDeep'
-import DataObject from './DataObject'
-import Operation from './Operation'
+import isEqual from '../../util/isEqual'
+import isNil from '../../util/isNil'
+import isString from '../../util/isString'
+import cloneDeep from '../../util/cloneDeep'
+import PathObject from '../../util/PathObject'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'
+import CoordinateOperation from './CoordinateOperation'
 import Conflict from './Conflict'
 
-var NOP = "NOP"
-var CREATE = "create"
-var DELETE = 'delete'
-var UPDATE = 'update'
-var SET = 'set'
+const NOP = "NOP"
+const CREATE = "create"
+const DELETE = 'delete'
+const UPDATE = 'update'
+const SET = 'set'
 
-/*
-  @class
-  @extends Operation
-*/
-class ObjectOperation extends Operation {
+class ObjectOperation {
 
   constructor(data) {
-    super()
     if (!data) {
       throw new Error('Data of ObjectOperation is missing.')
     }
@@ -48,6 +44,8 @@ class ObjectOperation extends Operation {
           this.propertyType = 'string'
         } else if (data.diff._isArrayOperation) {
           this.propertyType = 'array'
+        } else if (data.diff._isCoordinateOperation) {
+          this.propertyType = 'coordinate'
         } else {
           throw new Error('Invalid data: diff must be a TextOperation or an ArrayOperation.')
         }
@@ -63,15 +61,13 @@ class ObjectOperation extends Operation {
     }
   }
 
-  get _isObjectOperation() { return true }
-
   apply(obj) {
     if (this.type === NOP) return obj
     var adapter
-    if (obj._isDataObject) {
+    if (obj._isPathObject) {
       adapter = obj
     } else {
-      adapter = new DataObject(obj)
+      adapter = new PathObject(obj)
     }
     if (this.type === CREATE) {
       adapter.set(this.path, cloneDeep(this.val))
@@ -82,18 +78,35 @@ class ObjectOperation extends Operation {
     }
     else if (this.type === UPDATE) {
       var diff = this.diff
-      var oldVal = adapter.get(this.path)
-      var newVal
-      if (diff._isArrayOperation) {
-        newVal = diff.apply(oldVal)
-      } else {
-        newVal = diff.apply(oldVal)
+      switch (this.propertyType) {
+        case 'array': {
+          let arr = adapter.get(this.path)
+          diff.apply(arr)
+          break
+        }
+        case 'string': {
+          let str = adapter.get(this.path)
+          if (isNil(str)) str = ''
+          str = diff.apply(str)
+          adapter.set(this.path, str)
+          break
+        }
+        case 'coordinate': {
+          let coor = adapter.get(this.path)
+          if (!coor) throw new Error('No coordinate with path '+this.path)
+          diff.apply(coor)
+          break
+        }
+        default:
+          throw new Error('Invalid state.')
       }
-      adapter.set(this.path, newVal)
     }
-    else /* if (this.type === SET) */ {
+    else if (this.type === SET) {
       // clone here as the operations value must not be changed
       adapter.set(this.path, cloneDeep(this.val))
+    }
+    else {
+      throw new Error('Invalid type.')
     }
     return obj
   }
@@ -152,8 +165,12 @@ class ObjectOperation extends Operation {
       var invertedDiff
       if (this.diff._isTextOperation) {
         invertedDiff = TextOperation.fromJSON(this.diff.toJSON()).invert()
-      } else {
+      } else if (this.diff._isArrayOperation) {
         invertedDiff = ArrayOperation.fromJSON(this.diff.toJSON()).invert()
+      } else if (this.diff._isCoordinateOperation) {
+        invertedDiff = CoordinateOperation.fromJSON(this.diff.toJSON()).invert()
+      } else {
+        throw new Error('Illegal type')
       }
       result.diff = invertedDiff
     }
@@ -180,10 +197,14 @@ class ObjectOperation extends Operation {
       data.val = this.val
     }
     else if (this.type === UPDATE) {
-      if (this.diff._isArrayOperation) {
-        data.propertyType = "array"
-      } else /* if (this.diff._isTextOperation) */ {
+      if (this.diff._isTextOperation) {
         data.propertyType = "string"
+      } else if (this.diff._isArrayOperation) {
+        data.propertyType = "array"
+      } else if (this.diff._isCoordinateOperation) {
+        data.propertyType = "coordinate"
+      } else {
+        throw new Error('Invalid property type.')
       }
       data.diff = this.diff.toJSON()
     }
@@ -232,37 +253,48 @@ class ObjectOperation extends Operation {
   }
 }
 
+ObjectOperation.prototype._isOperation = true
+ObjectOperation.prototype._isObjectOperation = true
+
 /* Low level implementation */
 
-var hasConflict = function(a, b) {
+function hasConflict(a, b) {
   if (a.type === NOP || b.type === NOP) return false
   return isEqual(a.path, b.path)
 }
 
-var transform_delete_delete = function(a, b) {
+function transform_delete_delete(a, b) {
   // both operations have the same effect.
   // the transformed operations are turned into NOPs
   a.type = NOP
   b.type = NOP
 }
 
-var transform_create_create = function() {
+function transform_create_create() {
   throw new Error("Can not transform two concurring creates of the same property")
 }
 
-var transform_delete_create = function() {
+function transform_delete_create() {
   throw new Error('Illegal state: can not create and delete a value at the same time.')
 }
 
-var transform_delete_update = function(a, b, flipped) {
+function transform_delete_update(a, b, flipped) {
   if (a.type !== DELETE) {
     return transform_delete_update(b, a, true)
   }
   var op
-  if (b.propertyType === 'string') {
-    op = TextOperation.fromJSON(b.diff)
-  } else /* if (b.propertyType === 'array') */ {
-    op = ArrayOperation.fromJSON(b.diff)
+  switch (b.propertyType) {
+    case 'string':
+      op = TextOperation.fromJSON(b.diff)
+      break
+    case 'array':
+      op = ArrayOperation.fromJSON(b.diff)
+      break
+    case 'coordinate':
+      op = CoordinateOperation.fromJSON(b.diff)
+      break
+    default:
+      throw new Error('Illegal type')
   }
   // (DELETE, UPDATE) is transformed into (DELETE, CREATE)
   if (!flipped) {
@@ -277,32 +309,42 @@ var transform_delete_update = function(a, b, flipped) {
   }
 }
 
-var transform_create_update = function() {
+function transform_create_update() {
   // it is not possible to reasonably transform this.
   throw new Error("Can not transform a concurring create and update of the same property")
 }
 
-var transform_update_update = function(a, b) {
+function transform_update_update(a, b) {
   // Note: this is a conflict the user should know about
   var op_a, op_b, t
-  if (b.propertyType === 'string') {
-    op_a = TextOperation.fromJSON(a.diff)
-    op_b = TextOperation.fromJSON(b.diff)
-    t = TextOperation.transform(op_a, op_b, {inplace: true})
-  } else /* if (b.propertyType === 'array') */ {
-    op_a = ArrayOperation.fromJSON(a.diff)
-    op_b = ArrayOperation.fromJSON(b.diff)
-    t = ArrayOperation.transform(op_a, op_b, {inplace: true})
+  switch(b.propertyType) {
+    case 'string':
+      op_a = TextOperation.fromJSON(a.diff)
+      op_b = TextOperation.fromJSON(b.diff)
+      t = TextOperation.transform(op_a, op_b, {inplace: true})
+      break
+    case 'array':
+      op_a = ArrayOperation.fromJSON(a.diff)
+      op_b = ArrayOperation.fromJSON(b.diff)
+      t = ArrayOperation.transform(op_a, op_b, {inplace: true})
+      break
+    case 'coordinate':
+      op_a = CoordinateOperation.fromJSON(a.diff)
+      op_b = CoordinateOperation.fromJSON(b.diff)
+      t = CoordinateOperation.transform(op_a, op_b, {inplace: true})
+      break
+    default:
+      throw new Error('Illegal type')
   }
   a.diff = t[0]
   b.diff = t[1]
 }
 
-var transform_create_set = function() {
+function transform_create_set() {
   throw new Error('Illegal state: can not create and set a value at the same time.')
 }
 
-var transform_delete_set = function(a, b, flipped) {
+function transform_delete_set(a, b, flipped) {
   if (a.type !== DELETE) return transform_delete_set(b, a, true)
   if (!flipped) {
     a.type = NOP
@@ -314,43 +356,49 @@ var transform_delete_set = function(a, b, flipped) {
   }
 }
 
-var transform_update_set = function() {
+function transform_update_set() {
   throw new Error("Unresolvable conflict: update + set.")
 }
 
-var transform_set_set = function(a, b) {
+function transform_set_set(a, b) {
   a.type = NOP
   b.original = a.val
 }
 
-var _NOP = 0
-var _CREATE = 1
-var _DELETE = 2
-var _UPDATE = 4
-var _SET = 8
+const _NOP = 0
+const _CREATE = 1
+const _DELETE = 2
+const _UPDATE = 4
+const _SET = 8
 
-var CODE = {}
-CODE[NOP] =_NOP
-CODE[CREATE] = _CREATE
-CODE[DELETE] = _DELETE
-CODE[UPDATE] = _UPDATE
-CODE[SET] = _SET
+const CODE = (() => {
+  const c = {}
+  c[NOP] =_NOP
+  c[CREATE] = _CREATE
+  c[DELETE] = _DELETE
+  c[UPDATE] = _UPDATE
+  c[SET] = _SET
+  return c
+})()
 
-/* eslint-disable no-multi-spaces */
-var __transform__ = []
-__transform__[_DELETE | _DELETE] = transform_delete_delete
-__transform__[_DELETE | _CREATE] = transform_delete_create
-__transform__[_DELETE | _UPDATE] = transform_delete_update
-__transform__[_CREATE | _CREATE] = transform_create_create
-__transform__[_CREATE | _UPDATE] = transform_create_update
-__transform__[_UPDATE | _UPDATE] = transform_update_update
-__transform__[_CREATE | _SET   ] = transform_create_set
-__transform__[_DELETE | _SET   ] = transform_delete_set
-__transform__[_UPDATE | _SET   ] = transform_update_set
-__transform__[_SET    | _SET   ] = transform_set_set
-/* eslint-enable no-multi-spaces */
+const __transform__ = (() => {
+  /* eslint-disable no-multi-spaces */
+  const t = {}
+  t[_DELETE | _DELETE] = transform_delete_delete
+  t[_DELETE | _CREATE] = transform_delete_create
+  t[_DELETE | _UPDATE] = transform_delete_update
+  t[_CREATE | _CREATE] = transform_create_create
+  t[_CREATE | _UPDATE] = transform_create_update
+  t[_UPDATE | _UPDATE] = transform_update_update
+  t[_CREATE | _SET   ] = transform_create_set
+  t[_DELETE | _SET   ] = transform_delete_set
+  t[_UPDATE | _SET   ] = transform_update_set
+  t[_SET    | _SET   ] = transform_set_set
+  /* eslint-enable no-multi-spaces */
+  return t
+})()
 
-var transform = function(a, b, options) {
+function transform(a, b, options) {
   options = options || {}
   if (options['no-conflict'] && hasConflict(a, b)) {
     throw new Conflict(a, b)
@@ -421,6 +469,9 @@ ObjectOperation.fromJSON = function(data) {
         break
       case "array":
         data.diff = ArrayOperation.fromJSON(data.diff)
+        break
+      case "coordinate":
+        data.diff = CoordinateOperation.fromJSON(data.diff)
         break
       default:
         throw new Error("Unsupported update diff:" + JSON.stringify(data.diff))

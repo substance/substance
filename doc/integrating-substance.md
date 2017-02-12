@@ -32,15 +32,17 @@ Your `index.html` file should look like this:
 <link rel="stylesheet" type="text/css" href="./app.css"/>
 ```
 
-### Using Substance Bundler
+### Substance Bundler
 
-Substance Bundler is a lightweight build tool for Javascript.
+Substance Bundler is our own build tool, which combines `chokidar` for file watching, `rollup` for bundling Javascript, `postcss` for CSS, and coming with a concept of tasks as you know it from `gulp`.
+
+First you need to install `substance-bundler`:
 
 ```bash
-npm install substance-bundler
+npm install --save-dev substance-bundler
 ```
 
-Now you need to write a simple build script (`make.js`) that does the actual work.
+Then write a build script `make.js` that does the actual work:
 
 ```js
 var b = require('substance-bundler')
@@ -50,56 +52,142 @@ b.task('clean', function() {
 })
 
 b.task('assets', function() {
-  b.copy('lib/**/*.css', './dist/')
+  b.copy('node_modules/substance/dist', './dist/substance')
   b.copy('node_modules/font-awesome', './dist/font-awesome')
 })
 
-// this optional task makes it easier to work on Substance core
-b.task('substance', function() {
-  b.make('substance', 'clean', 'css', 'browser')
-  b.copy('node_modules/substance/dist', './dist/substance')
-})
-
-b.task('build', ['clean', 'substance', 'assets'], function() {
+b.task('build', ['clean', 'assets'], function() {
   b.copy('app/index.html', './dist/index.html')
-  b.copy('app/app.css', './dist/app.css')
+  b.css('app/app.css', './dist/app.css')
   b.js('app/app.js', {
-    external: ['substance'],
-    commonjs: { include: ['node_modules/lodash/**'] },
-    dest: './dist/app.js',
-    format: 'umd',
-    moduleName: 'app'
+    target: {
+      dest: './dist/app.js',
+      format: 'umd',
+      moduleName: 'app'
+    },
+    external: ['substance']
   })
 })
 
 b.task('default', ['build'])
-
-// starts a server when CLI argument '-s' is set
-b.setServerPort(5555)
-b.serve({
-  static: true, route: '/', folder: 'dist'
-})
 ```
 
-And now run:
+To create your bundle you run
 
 ```bash
 node make
 ```
 
-Please you want to look at a complete project setup, just clone and run [SimpleWriter](http://github.com/substance/simple-writer).
+If you want to look at a complete project setup, just clone and run [SimpleWriter](http://github.com/substance/simple-writer).
 
-### Using Browserify and Babel
+### Browserify and Babel
 
-This does the same job, for bundling the Javascript.
+If you want to build your project with `browserify` you can do this
+
+First you would install `browserify`:
 
 ```bash
 npm install -g browserify
-npm install babel-preset-es2015 babelify
-browserify app/app.js -t babelify -o app.js
 ```
+
+They you need to install babelify
+
+```bash
+npm install babel-preset-es2015 babelify
+```
+
+To bundle `dist/app.js` you run:
+
+```bash
+browserify app/app.js -t babelify -o dist/app.js
+```
+
+### Rollup and Bublé
+
+You can use `rollup` together with some plugins to bundle Javascript.
+
+First install rollup:
+
+```
+npm install -g rollup
+```
+
+Then install `bublé`:
+
+```
+npm install rollup-plugin-buble
+```
+
+Create a `rollup.config.js` which looks like
+
+```js
+import buble from 'rollup-plugin-buble'
+
+export default {
+  entry: 'src/app.js',
+  plugins: [
+    buble()
+  ],
+  // This tells rollup to consider substance as external dependency
+  external: [ 'substance' ],
+  format: 'umd',
+  moduleName: 'app'
+}
+```
+
+To build `dist/app.js` you run
+
+```bash
+rollup -c -o dist/app.js
+```
+
+If you want to create a single file bundle, i.e. with Substance code included, you need the following additional plugins
+
+```
+npm install rollup-plugin-node-resolve rollup-plugin-commonjs
+```
+
+And your `rollup.config.js` looks like:
+
+```js
+import resolve from 'rollup-plugin-node-resolve'
+import commonjs from 'rollup-plugin-commonjs'
+import buble from 'rollup-plugin-buble'
+
+export default {
+  entry: 'src/app.js',
+  plugins: [
+    resolve({
+      // consider the browser field in `package.json`
+      browser: true,
+      // use es6 entry points
+      jsnext: true
+    }),
+    commonjs({
+      // lodash is used as commonjs module
+      include: [ '/**/lodash-es/**' ]
+    }),
+    buble()
+  ],
+  format: 'umd',
+  moduleName: 'app'
+}
+```
+
+> Note: bundling substance into your `app.js` will slow down your builds a bit.
 
 ### Other tools
 
 You are free to use other build tools, such as [Webpack](https://webpack.github.io/) or Gulp. Please consult the websites
 of those projects for usage documentation.
+
+Substance comes with a distribution folder `dist` with following content:
+
+- `substance.js`: a UMD bundle for the browser transpiled to ES5. Include it in your webpage and it will register Substance API under `window.substance`.
+- `substance.js.map`: source maps for `substance.js`
+- `substance.css`: A bundled CSS file indcluding styles for all core packages. It has been transpiled to CSS 2.1, i.e. with variables replaced.
+- `substance.css.map`: source maps for `substance.css`
+- `subsatnce.next.css`: same as `substance.css` but using modern CSS features, such as CSS variables.
+- `substance.css.next.map`: source maps for `substance.next.css`
+- `substance-pagestyle.css`: pagestyles that we use in our Substance apps.
+- `substance-reset.css`: CSS that clears default styles.

@@ -1,5 +1,5 @@
-import forEach from 'lodash/forEach'
-import isObject from 'lodash/isObject'
+import forEach from './forEach'
+import isObject from './isObject'
 
 /**
   Event support.
@@ -21,7 +21,7 @@ class EventEmitter {
       var args = Array.prototype.slice.call(arguments, 1)
       for (var i = 0, len = bindings.length; i < len; i++) {
         var binding = bindings[i]
-        // console.log("- triggering %s", binding.context.constructor.type)
+        // console.log("- triggering %s on %s", event, binding.context.constructor.name)
         binding.method.apply(binding.context, args)
       }
       return true
@@ -76,6 +76,14 @@ class EventEmitter {
     })
     /* eslint-enable no-console */
   }
+
+  get __events__() {
+    if (!this.___events___) {
+      this.___events___ = {}
+    }
+    return this.___events___
+  }
+
 }
 
 // sort descending as a listener with higher priority should be
@@ -151,22 +159,6 @@ function _off(event, method, context) {
   /* eslint-enable no-invalid-this */
 }
 
-/*
-  Internal implementation of connect.
- */
-function _connect(obj, methods, options) {
-  /* eslint-disable no-invalid-this */
-  var priority = 0
-  if (arguments.length === 3) {
-    priority = options.priority || priority
-  }
-  forEach(methods, function(method, event) {
-    _on.call(this, event, method, obj, priority)
-    this.__events__[event].sort(byPriorityDescending)
-  }.bind(this))
-  return this
-  /* eslint-enable no-invalid-this */
-}
 
 /**
   Internal implementation of disconnect.
@@ -207,28 +199,6 @@ function validateMethod(method, context) {
   } else if (typeof method !== 'function') {
     throw new Error( 'Invalid callback. Function or method name expected.' )
   }
-}
-
-const __events__ = {
-  get: function () {
-    if (!this.___events___) {
-      this.___events___ = {}
-    }
-    return this.___events___
-  },
-  configurable: true,
-  enumerable: false
-}
-
-Object.defineProperty(EventEmitter.prototype, '__events__', __events__)
-
-EventEmitter.mixin = function(clazz) {
-  var properties = Object.getOwnPropertyNames(EventEmitter.prototype)
-  properties.forEach(function(name) {
-    if (name === 'constructor' || name === '__events__') return
-    clazz.prototype[name] = EventEmitter.prototype[name]
-  })
-  Object.defineProperty(clazz.prototype, '__events__', __events__)
 }
 
 export default EventEmitter

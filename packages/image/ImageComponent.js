@@ -1,55 +1,72 @@
 import NodeComponent from '../../ui/NodeComponent'
-import percentage from '../../util/percentage'
 
 class ImageComponent extends NodeComponent {
 
   didMount() {
     super.didMount.call(this)
-    let node = this.props.node
-    node.on('src:changed', this.rerender, this)
-    // TODO: we should try to factor this out for reuse
-    node.on('upload:started', this.onUploadStarted, this)
-    node.on('upload:progress', this.onUploadProgress, this)
-    node.on('upload:finished', this.onUploadFinished, this)
+    this.context.editorSession.onRender('document', this._onDocumentChange, this)
   }
 
   dispose() {
     super.dispose.call(this)
+    this.context.editorSession.off(this)
+  }
 
-    this.props.node.off(this)
+  // TODO: verify if this check is correct and efficient
+  _onDocumentChange(change) {
+    if (change.isAffected(this.props.node.id) ||
+      change.isAffected(this.props.node.imageFile)) {
+      this.rerender()
+    }
   }
 
   render($$) {
-    let el = super.render.call(this, $$)
+    let el = super.render($$)
     el.addClass('sc-image')
-
     el.append(
       $$('img').attr({
-        src: this.props.node.src,
+        src: this.props.node.getUrl(),
       }).ref('image')
     )
-
-    if (this.state.uploading) {
-      let progressBar = $$('div')
-        .addClass('se-progress-bar')
-        .ref('progressBar')
-        .append('Uploading: ' + percentage(this.state.progress));
-      el.append(progressBar)
-    }
-
     return el
   }
 
-  onUploadStarted() {
-    this.setState({ uploading: true, progress: 0 })
+  /* Custom dropzone protocol */
+  getDropzoneSpecs() {
+    return [
+      {
+        component: this.refs['image'],
+        message: 'Replace Image',
+        dropParams: {
+          action: 'replace-image',
+          nodeId: this.props.node.id,
+        }
+      }
+    ]
   }
 
-  onUploadProgress(progress) {
-    this.setState({ uploading: true, progress: progress })
-  }
+  handleDrop(tx, dragState) {
+    let newImageFile = dragState.data.files[0]
+    if (dragState.external) {
+      let imageFile = tx.create({
+        type: 'file',
+        fileType: 'image',
+        mimeType: newImageFile.type,
+        url: URL.createObjectURL(newImageFile)
+      })
+      // TODO: we should delete the old image file if there are no
+      // referenecs to it anymore
+      tx.set([this.props.node.id, 'imageFile'], imageFile.id)
+    } else {
+      let nodeId = dragState.sourceSelection.nodeId
+      let node = tx.get(nodeId)
+      if (node.type === 'image') {
+        // Use the same filenode as the dragged source node
+        tx.set([this.props.node.id, 'imageFile'], node.imageFile)
+      }
+    }
 
-  onUploadFinished() {
-    this.setState({})
+
   }
 
 }

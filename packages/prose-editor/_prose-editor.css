@@ -1,11 +1,18 @@
 .sc-prose-editor {}
 .sc-prose-editor .sc-container-editor {
   padding:  var(--default-padding);
+  margin: 0 auto;
+  max-width: 800px;
 }
 /* Add padding to each child except last one */
-.sc-prose-editor .sc-container-editor > * + * {
-  padding-top:  var(--default-padding);
+.sc-prose-editor .sc-container-editor > * {
+  margin: 10px 0;
 }
-.sc-prose-editor .sc-toolbar {
+.sc-prose-editor .se-toolbar-wrapper {
   border-bottom: 1px solid  var(--border-color);
+}
+
+.sc-prose-editor .se-toolbar-wrapper .sc-toolbar {
+  max-width: 800px;
+  margin: 0 auto;
 }

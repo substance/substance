@@ -1,55 +1,15 @@
-import isArray from 'lodash/isArray'
-import each from 'lodash/each'
-import TreeIndex from '../../util/TreeIndex'
+import forEach from '../../util/forEach'
 
-/*
+/**
   Index for Nodes.
 
   Node indexes are first-class citizens in {@link model/data/Data}.
   I.e., they are updated after each operation, and before any other listener is notified.
+
+  @abstract
+
  */
 class NodeIndex {
-
-  constructor() {
-    /**
-      Internal storage.
-
-      @property {TreeIndex} index
-      @private
-     */
-    this.index = new TreeIndex()
-
-    this._property = "id"
-  }
-
-  /**
-    Get all indexed nodes for a given path.
-
-    @param {Array<String>} path
-    @returns A node or an object with ids and nodes as values.
-   */
-  get(path) {
-    return this.index.get(path) || {}
-  }
-
-  /**
-    Collects nodes recursively.
-
-    @returns An object with ids as keys and nodes as values.
-   */
-  getAll(path) {
-    return this.index.getAll(path)
-  }
-
-  /**
-    The property used for indexing.
-
-    @private
-    @type {String}
-   */
-  get property() { return this._property }
-
-  set property(p) { this._property = p }
 
   /**
     Check if a node should be indexed.
@@ -60,78 +20,40 @@ class NodeIndex {
     @param {Node}
     @returns {Boolean} true if the given node should be added to the index.
    */
-  select(node) {
-    if(!this.type) {
-      return true
-    } else {
-      return node.isInstanceOf(this.type)
-    }
+  select(node) { // eslint-disable-line no-unused-vars
+    throw new Error('This method is abstract.')
   }
 
   /**
     Called when a node has been created.
 
-    Override this in subclasses for customization.
-
-    @private
     @param {Node} node
    */
-  create(node) {
-    var values = node[this.property]
-    if (!isArray(values)) {
-      values = [values]
-    }
-    each(values, function(value) {
-      this.index.set([value, node.id], node)
-    }.bind(this))
+  create(node) { // eslint-disable-line no-unused-vars
+    throw new Error('This method is abstract.')
   }
 
   /**
-   * Called when a node has been deleted.
-   *
-   * Override this in subclasses for customization.
-   *
-   * @private
-   * @param {model/data/Node} node
+    Called when a node has been deleted.
+
+    @param {model/data/Node} node
    */
-  delete(node) {
-    var values = node[this.property]
-    if (!isArray(values)) {
-      values = [values]
-    }
-    each(values, function(value) {
-      this.index.delete([value, node.id])
-    }.bind(this))
+  delete(node) { // eslint-disable-line no-unused-vars
+    throw new Error('This method is abstract.')
+  }
+
+  set(node, path, newValue, oldValue) {
+    this.update(node, path, newValue, oldValue)
   }
 
   /**
     Called when a property has been updated.
 
-    Override this in subclasses for customization.
-
     @private
     @param {Node} node
    */
-  update(node, path, newValue, oldValue) {
-    if (!this.select(node) || path[1] !== this.property) return
-    var values = oldValue
-    if (!isArray(values)) {
-      values = [values]
-    }
-    each(values, function(value) {
-      this.index.delete([value, node.id])
-    }.bind(this))
-    values = newValue
-    if (!isArray(values)) {
-      values = [values]
-    }
-    each(values, function(value) {
-      this.index.set([value, node.id], node)
-    }.bind(this))
-  }
-
-  set(node, path, newValue, oldValue) {
-    this.update(node, path, newValue, oldValue)
+  update(node, path, newValue, oldValue) { // eslint-disable-line no-unused-vars
+    throw new Error('This method is abstract.')
   }
 
   /**
@@ -140,7 +62,7 @@ class NodeIndex {
     @private
    */
   reset(data) {
-    this.index.clear()
+    this._clear()
     this._initialize(data)
   }
 
@@ -155,14 +77,17 @@ class NodeIndex {
     return clone
   }
 
+  _clear() {
+    throw new Error('This method is abstract')
+  }
+
   _initialize(data) {
-    each(data.getNodes(), function(node) {
+    forEach(data.getNodes(), function(node) {
       if (this.select(node)) {
         this.create(node)
       }
     }.bind(this))
   }
-
 }
 
 /**

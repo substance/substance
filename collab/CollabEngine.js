@@ -1,22 +1,20 @@
 import EventEmitter from '../util/EventEmitter'
-import forEach from 'lodash/forEach'
-import map from 'lodash/map'
-import extend from 'lodash/extend'
+import extend from '../util/extend'
+import forEach from '../util/forEach'
+import map from '../util/map'
+
 import DocumentChange from '../model/DocumentChange'
-import Selection from '../model/Selection'
-import { fromJSON as selFromJSON } from '../model/selectionHelpers'
 import Err from '../util/SubstanceError'
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of
-  the real time editing as a reusable library.
+  real time editing as a reusable library.
 */
 class CollabEngine extends EventEmitter {
+
   constructor(documentEngine) {
     super()
-
     this.documentEngine = documentEngine
-
     // Active collaborators
     this._collaborators = {}
   }
@@ -24,7 +22,7 @@ class CollabEngine extends EventEmitter {
   /*
     Register collaborator for a given documentId
   */
-  _register(collaboratorId, documentId, selection, collaboratorInfo) {
+  _register(collaboratorId, documentId, collaboratorInfo) {
     let collaborator = this._collaborators[collaboratorId]
 
     if (!collaborator) {
@@ -38,9 +36,7 @@ class CollabEngine extends EventEmitter {
     collaborator.info = collaboratorInfo
 
     // Register document
-    collaborator.documents[documentId] = {
-      selection: selection
-    }
+    collaborator.documents[documentId] = {}
   }
 
   /*
@@ -54,11 +50,6 @@ class CollabEngine extends EventEmitter {
     if (docCount === 0) {
       delete this._collaborators[collaboratorId]
     }
-  }
-
-  _updateSelection(collaboratorId, documentId, sel) {
-    let docEntry = this._collaborators[collaboratorId].documents[documentId]
-    docEntry.selection = sel
   }
 
   /*
@@ -83,7 +74,7 @@ class CollabEngine extends EventEmitter {
       let doc = collab.documents[documentId]
       if (doc && collab.collaboratorId !== collaboratorId) {
         let entry = {
-          selection: doc.selection,
+          // selection: doc.selection,
           collaboratorId: collab.collaboratorId
         }
         entry = extend({}, collab.info, entry)
@@ -101,7 +92,7 @@ class CollabEngine extends EventEmitter {
     return map(collaborators, function(c) {
       return c.collaboratorId
     })
-  };
+  }
 
   /*
     Client starts a sync
@@ -113,12 +104,11 @@ class CollabEngine extends EventEmitter {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  sync(args, cb) {
-    // We now always get a change since the selection should be considered
-    this._sync(args, function(err, result) {
+  sync({documentId, version, change, collaboratorId}, cb) {
+    this._sync({documentId, version, change}, function(err, result) {
       if (err) return cb(err)
       // Registers the collaborator If not already registered for that document
-      this._register(args.collaboratorId, args.documentId, result.change.after.selection, args.collaboratorInfo)
+      this._register(collaboratorId, documentId)
       cb(null, result)
     }.bind(this))
   }
@@ -126,79 +116,63 @@ class CollabEngine extends EventEmitter {
   /*
     Internal implementation of sync
 
-    @param {String} args.collaboratorId collaboratorId
+
     @param {String} args.documentId document id
     @param {Number} args.version client version
-    @param {Number} args.change new change
+    @param {Number} args.change new change (optional)
 
-    OUT: version, changes, version
+    OUT: version, change (rebased client change), serverChange (ustream ops)
   */
-  _sync(args, cb) {
-    // Get latest doc version
-    this.documentEngine.getVersion(args.documentId, function(err, serverVersion) {
-      if (serverVersion === args.version) { // Fast forward update
-        this._syncFF(args, cb)
-      } else if (serverVersion > args.version) { // Client changes need to be rebased to latest serverVersion
-        this._syncRB(args, cb)
-      } else {
+  _sync({documentId, version, change}, cb) {
+    this.documentEngine.getVersion(documentId, (err, serverVersion) => {
+      if (version > serverVersion) {
         cb(new Err('InvalidVersionError', {
           message: 'Client version greater than server version'
         }))
+      } else if (change && serverVersion === version) {
+        this._syncFF({documentId, version, change}, cb)
+      } else if (change && serverVersion > version) {
+        this._syncRB({documentId, version, change}, cb)
+      } else if (!change) {
+        // E.g. when a client joins a session
+        this._syncPullOnly({documentId, version, change}, cb)
+      } else {
+        console.warn('Unhandled case')
       }
-    }.bind(this))
+    })
   }
 
-  /*
-    Update all collaborators selections of a document according to a given change
+  _syncPullOnly({documentId, version, change}, cb) {
+    console.warn('This code is not yet tested')
+    this.documentEngine.getChanges(documentId, version, (err, changes) => {
+      let serverChange
 
-    WARNING: This has not been tested quite well
-  */
-  _updateCollaboratorSelections(documentId, change) {
-    // By not providing the 2nd argument to getCollaborators the change
-    // creator is also included.
-    let collaborators = this.getCollaborators(documentId)
-
-    forEach(collaborators, function(collaborator) {
-      if (collaborator.selection) {
-        let sel = selFromJSON(collaborator.selection)
-        change = this.deserializeChange(change)
-        sel = DocumentChange.transformSelection(sel, change)
-        // Write back the transformed selection to the server state
-        this._updateSelection(collaborator.collaboratorId, documentId, sel.toJSON())
+      // Collect ops from all changes to turn them into a single change
+      if (changes.length > 0) {
+        let ops = []
+        changes.forEach((change) => {
+          ops = ops.concat(change.ops)
+        })
+        serverChange = new DocumentChange(ops, {}, {})
+        serverChange = this.serializeChange(serverChange)
       }
-    }.bind(this))
+      cb(null, {
+        serverChange: serverChange,
+        change: change,
+        version: version
+      })
+    })
   }
 
   /*
     Fast forward sync (client version = server version)
   */
-  _syncFF(args, cb) {
-    this._updateCollaboratorSelections(args.documentId, args.change)
-
-    // HACK: On connect we may receive a nop that only has selection data.
-    // We don't want to store such changes.
-    // TODO: it would be nice if we could handle this in a different
-    // branch of connect, so we don't spoil the commit implementation
-    if (args.change.ops.length === 0) {
-      return cb(null, {
-        change: args.change,
-        // changes: [],
-        serverChange: null,
-        version: args.version
-      })
-    }
-
-    // Store the commit
-    this.documentEngine.addChange({
-      documentId: args.documentId,
-      change: args.change,
-      documentInfo: args.documentInfo
-    }, function(err, serverVersion) {
-      if (err) return cb(err);
+  _syncFF({documentId, change}, cb) {
+    this.documentEngine.addChange(documentId, change, (err, serverVersion) => {
+      if (err) return cb(err)
       cb(null, {
-        change: args.change, // collaborators must be notified
+        change: change, // collaborators must be notified
         serverChange: null,
-        // changes: [], // no changes missed in fast-forward scenario
         version: serverVersion
       })
     })
@@ -207,58 +181,39 @@ class CollabEngine extends EventEmitter {
   /*
     Rebased sync (client version < server version)
   */
-  _syncRB(args, cb) {
-    this._rebaseChange({
-      documentId: args.documentId,
-      change: args.change,
-      version: args.version
-    }, function(err, rebased) {
+  _syncRB({documentId, change, version}, cb) {
+    this._rebaseChange({documentId, change, version}, function(err, rebased) {
       // result has change, changes, version (serverversion)
       if (err) return cb(err)
-
-      this._updateCollaboratorSelections(args.documentId, rebased.change)
-
-      // HACK: On connect we may receive a nop that only has selection data.
-      // We don't want to store such changes.
-      // TODO: it would be nice if we could handle this in a different
-      // branch of connect, so we don't spoil the commit implementation
-      if (args.change.ops.length === 0) {
-        return cb(null, {
-          change: rebased.change,
-          serverChange: rebased.serverChange,
-          version: rebased.version
-        })
-      }
-
       // Store the rebased commit
-      this.documentEngine.addChange({
-        documentId: args.documentId,
-        change: rebased.change, // rebased change
-        documentInfo: args.documentInfo
-      }, function(err, serverVersion) {
-        if (err) return cb(err)
-        cb(null, {
-          change: rebased.change,
-          serverChange: rebased.serverChange, // collaborators must be notified
-          version: serverVersion
-        })
-      })
+      this.documentEngine.addChange(
+        documentId,
+        change,
+        function(err, serverVersion) {
+          if (err) return cb(err)
+          cb(null, {
+            change: rebased.change,
+            // collaborators must be notified
+            serverChange: rebased.serverChange,
+            version: serverVersion
+          })
+        }
+      )
     }.bind(this))
   }
 
   /*
     Rebase change
 
-    IN: documentId, change, version (change version)
-    OUT: change, changes (server changes), version (server version)
+    IN: documentId, change, version (client version)
+    OUT: change, serverChange, version (server version)
   */
-  _rebaseChange(args, cb) {
-    this.documentEngine.getChanges({
-      documentId: args.documentId,
-      sinceVersion: args.version
-    }, function(err, result) {
-      let B = result.changes.map(this.deserializeChange)
-      let a = this.deserializeChange(args.change)
+  _rebaseChange({documentId, change, version}, cb) {
+    this.documentEngine.getChanges(documentId, version, function(err, result) {
+      // HACK: it happened that result.changes was empty
+      let changes = result.changes || []
+      let B = changes.map(this.deserializeChange)
+      let a = this.deserializeChange(change)
       // transform changes
       DocumentChange.transformInplace(a, B)
       let ops = B.reduce(function(ops, change) {

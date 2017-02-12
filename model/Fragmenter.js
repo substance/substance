@@ -1,9 +1,9 @@
-import each from 'lodash/each'
-import isString from 'lodash/isString'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
 
-var ENTER = 1
-var EXIT = -1
-var ANCHOR = -2
+const ENTER = 1
+const EXIT = -1
+const ANCHOR = -2
 
 // Fragmenter
 // --------
@@ -189,7 +189,7 @@ Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE
 function _extractEntries(annotations) {
   var openers = []
   var closers = []
-  each(annotations, function(a) {
+  forEach(annotations, function(a) {
     var isAnchor = (a.isAnchor ? a.isAnchor() : false)
     // special treatment for zero-width annos such as ContainerAnnotation.Anchors
     if (isAnchor) {
@@ -222,8 +222,8 @@ function _extractEntries(annotations) {
       } else if (a.hasOwnProperty('fragmentationHint')) {
         l = a.fragmentationHint
       }
-      var startOffset = Math.min(a.startOffset, a.endOffset)
-      var endOffset = Math.max(a.startOffset, a.endOffset)
+      var startOffset = Math.min(a.start.offset, a.end.offset)
+      var endOffset = Math.max(a.start.offset, a.end.offset)
       var opener = {
         pos: startOffset,
         mode: ENTER,

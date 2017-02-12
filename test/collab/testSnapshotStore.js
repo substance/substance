@@ -1,17 +1,15 @@
-// Please see snapshotStoreSeed.js for the used fixture data
-function testSnapshotStore(store, test) {
+import { series } from '../../util/async'
+
+let EXAMPLE_SNAPSHOT = {test: 'test'}
+
+function testSnapshotStore(createEmptySnapshotStore, test) {
 
   /*
-    Store snapshot
+    Save snapshot
   */
-  test('Store a snapshot', function(t) {
-    var snapshot = {
-      documentId: 'my-doc',
-      version: 1,
-      data: {some: 'snaphot'}
-    }
-
-    store.saveSnapshot(snapshot, function(err, snapshot) {
+  test('Save a snapshot', (t) => {
+    let snapshotStore = createEmptySnapshotStore()
+    snapshotStore.saveSnapshot('test-doc', 1, EXAMPLE_SNAPSHOT, (err, snapshot) => {
       t.notOk(err, 'should not error')
       t.ok(snapshot, 'stored snapshot entry expected')
       t.end()
@@ -21,67 +19,77 @@ function testSnapshotStore(store, test) {
   /*
     Get snapshot
   */
+  test('Retrieve snapshot for test-doc', (t) => {
+    let snapshotStore = createEmptySnapshotStore()
 
-  test('Retrieve snapshot for test-doc', function(t) {
-    store.getSnapshot({
-      documentId: 'test-doc'
-    }, function(err, snapshot) {
+    function _create(cb) {
+      snapshotStore.saveSnapshot('test-doc', 3, EXAMPLE_SNAPSHOT, cb)
+    }
+
+    function _get(cb) {
+      snapshotStore.getSnapshot('test-doc', 3, cb)
+    }
+
+    function _verify(err, snapshot) {
       t.notOk(err, 'should not error')
-      t.equal(snapshot.version, 1, 'Retrieved version should be 1')
-      t.ok(snapshot.data, 'Snapshot should have some data')
-      t.ok(snapshot.documentId, 'Snapshot should have the documentId')
+      t.equal(snapshot, EXAMPLE_SNAPSHOT)
       t.end()
-    })
+    }
+
+    series([_create, _get], _verify)
   })
 
-  test('Retrieve snapshot for test-doc with version=1', function(t) {
-    store.getSnapshot({
-      documentId: 'test-doc',
-      version: 1
-    }, function(err, snapshot) {
+  /*
+    Get versions
+  */
+  test('Get all available versions for a document', (t) => {
+    let snapshotStore = createEmptySnapshotStore()
+
+    function _createV1(cb) {
+      snapshotStore.saveSnapshot('test-doc', 1, EXAMPLE_SNAPSHOT, cb)
+    }
+
+    function _createV3(cb) {
+      snapshotStore.saveSnapshot('test-doc', 3, EXAMPLE_SNAPSHOT, cb)
+    }
+
+    function _getVersions(cb) {
+      snapshotStore.getVersions('test-doc', cb)
+    }
+
+    function _verify(err, versions) {
       t.notOk(err, 'should not error')
-      t.equal(snapshot.version, 1, 'Retrieved version should be 1')
-      t.ok(snapshot.data, 'Snapshot should have some data')
-      t.ok(snapshot.documentId, 'Snapshot should have the documentId')
+      t.deepEqual(versions, ['1', '3'])
       t.end()
-    })
+    }
+
+    series([_createV1, _createV3, _getVersions], _verify)
   })
 
-  test('Retrieve snapshot for test-doc-2', function(t) {
-    store.getSnapshot({
-      documentId: 'test-doc-2'
-    }, function(err, snapshot) {
-      t.notOk(err, 'should not error')
-      t.equal(snapshot.version, 3, 'Retrieved version should be 3')
-      t.ok(snapshot.data, 'Snapshot should have some data')
-      t.ok(snapshot.documentId, 'Snapshot should have the documentId')
-      t.end()
-    })
-  })
+  /*
+    Delete snapshot
+  */
+  test('Delete snapshot', (t) => {
+    let snapshotStore = createEmptySnapshotStore()
 
-  test('Retrieve snapshot for test-doc-2 with version=2', function(t) {
-    // in the fixture there does not exist a snapshot for version 2
-    store.getSnapshot({
-      documentId: 'test-doc-2',
-      version: 2
-    }, function(err, snapshot) {
-      t.notOk(err, 'should not error')
-      t.notOk(snapshot, 'snapshot should be undefined')
-      t.end()
-    })
-  })
+    function _create(cb) {
+      snapshotStore.saveSnapshot('test-doc', 4, EXAMPLE_SNAPSHOT, cb)
+    }
 
-  test('Retrieve snapshot for test-doc-2 with version=3', function(t) {
-    store.getSnapshot({
-      documentId: 'test-doc-2',
-      version: 3
-    }, function(err, snapshot) {
+    function _delete(cb) {
+      snapshotStore.deleteSnapshot('test-doc', 4, cb)
+    }
+
+    function _verify(err) {
       t.notOk(err, 'should not error')
-      t.equal(snapshot.version, 3, 'Retrieved version should be 3')
-      t.ok(snapshot.data, 'Snapshot should have some data')
-      t.ok(snapshot.documentId, 'Snapshot should have the documentId')
-      t.end()
-    })
+      snapshotStore.getSnapshot('test-doc', 4, (err, snapshot) => {
+        t.notOk(snapshot, 'snapshot should be undefined')
+        t.notOk(err, 'should not error')
+        t.end()
+      })
+    }
+
+    series([_create, _delete], _verify)
   })
 }
 

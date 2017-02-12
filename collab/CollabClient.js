@@ -1,5 +1,4 @@
 import EventEmitter from '../util/EventEmitter'
-let __id__ = 0
 
 /**
   Client for CollabServer API
@@ -10,7 +9,6 @@ class CollabClient extends EventEmitter {
   constructor(config) {
     super()
 
-    this.__id__ = __id__++
     this.config = config
     this.connection = config.connection
 

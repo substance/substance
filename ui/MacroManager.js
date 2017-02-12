@@ -3,32 +3,54 @@ class MacroManager {
   constructor(context, macros) {
     this.context = context
     this.macros = macros
-    this.context.documentSession.on('update', this.onUpdate, this)
+    this.context.editorSession.onFinalize('document', this.onDocumentChanged, this)
   }
 
-  onUpdate(update, info) {
-    if (update.change) {
-      this.executeMacros(update, info)
-    }
+  dispose() {
+    this.context.editorSession.off(this)
   }
 
-  executeMacros(update, info) {
-    let change = update.change
-    if (!change) {
-      return
-    }
-    let doc = this.context.documentSession.getDocument()
-    let nodeId, node, text
+  onDocumentChanged(change, info) {
+    this.executeMacros(change, info)
+  }
+
+  executeMacros(change, info) {
+    let doc = this.context.editorSession.getDocument()
+    let nodeId, node, text, start, end
     let path
-    if (info.action === 'type') {
-      // HACK: we know that there is only one op when we type something
-      let op = change.ops[0]
-      path = op.path
-      nodeId = path[0]
-      node = doc.get(nodeId)
-      text = doc.get(path)
-    } else {
-      return
+    // HACK: we exploit the information of the internal structure
+    // of this document changes
+    switch(info.action) {
+      case 'type': {
+        let op = change.ops[0]
+        if (op.type === 'update' && op.diff._isTextOperation) {
+          path = op.path
+          nodeId = path[0]
+          node = doc.get(nodeId)
+          text = doc.get(path)
+          start = op.diff.pos
+          end = start+op.diff.getLength()
+        }
+        break
+      }
+      case 'break': {
+        // We interpret a 'break' as kind of confirmation
+        // of the current node
+        // so we take the original selection
+        // to determine the original node
+        let sel = change.before.selection
+        if (!sel.isPropertySelection()) return
+        path = sel.path
+        nodeId = path[0]
+        node = doc.get(nodeId)
+        if (!node.isText()) return
+        text = node.getText()
+        start = sel.start.offset
+        end = start
+        break
+      }
+      default:
+        return
     }
 
     let props = {
@@ -36,16 +58,22 @@ class MacroManager {
       node: node,
       path: path,
       text: text,
-      selection: this.context.documentSession.getSelection()
+      start: start,
+      end: end,
+      editorSession: this.context.editorSession,
+      selection: this.context.editorSession.getSelection()
     }
-    for (let i = 0; i < this.macros.length; i++) {
-      let macro = this.macros[i]
-      let executed = macro.execute(props, this.context)
 
-      if (executed) {
-        break
+    setTimeout(() => {
+      for (let i = 0; i < this.macros.length; i++) {
+        let macro = this.macros[i]
+        let executed = macro.execute(props, this.context)
+        if (executed) {
+          break
+        }
       }
-    }
+    })
+
   }
 }
 

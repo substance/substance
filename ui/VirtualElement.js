@@ -1,24 +1,23 @@
-import clone from 'lodash/clone'
-import extend from 'lodash/extend'
-import flattenDeep from 'lodash/flattenDeep'
-import isArray from 'lodash/isArray'
-import isFunction from 'lodash/isFunction'
-import isNil from 'lodash/isNil'
-import isPlainObject from 'lodash/isPlainObject'
-import isString from 'lodash/isString'
-import map from 'lodash/map'
-import omit from 'lodash/omit'
-import without from 'lodash/without'
-import DOMElement from './DOMElement'
+import clone from '../util/clone'
+import extend from '../util/extend'
+import flattenOften from '../util/flattenOften'
+import isArray from '../util/isArray'
+import isFunction from '../util/isFunction'
+import isNumber from '../util/isNumber'
+import isNil from '../util/isNil'
+import isPlainObject from '../util/isPlainObject'
+import isString from '../util/isString'
+import without from '../util/without'
+import map from '../util/map'
+import DOMElement from '../dom/DOMElement'
+import DOMEventListener from '../dom/DOMEventListener'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
 
   A VirtualElement is just a description of a DOM structure. It represents a virtual
   DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
-  to actually create a real DOM element.
-
-  @class
+  to actually create a real DOM element, which is done by {@link RenderingEngine}
 */
 class VirtualElement extends DOMElement {
 
@@ -33,13 +32,19 @@ class VirtualElement extends DOMElement {
     this._ref = null
   }
 
-  /*
-    For instance of like checks.
-  */
-  get _isVirtualElement() { return true }
-
   getParent() {
     return this.parent
+  }
+
+  get childNodes() {
+    return this.getChildNodes()
+  }
+
+  /*
+    Provides the component after this VirtualElement has been rendered.
+  */
+  getComponent() {
+    return this._comp
   }
 
   /**
@@ -48,22 +53,49 @@ class VirtualElement extends DOMElement {
     When rendered the corresponding component is stored in the owner using the given key.
     In addition to that, components with a reference are preserved when its parent is rerendered.
 
+    > Attention: only the owner should use this method, as it only
+      affects the owner's references
+
     @param {String} ref id for the compiled Component
   */
   ref(ref) {
-    if (!ref) {
-      throw new Error('Illegal argument')
-    }
+    if (!ref) throw new Error('Illegal argument')
+    /*
+      Attention: only the owner can create a ref()
+      If you run into this situation, e.g. when you pass down a virtual element
+      to a component which wants to have a ref itself,
+      then you have other options:
+
+      1. via props:
+      ```js
+        this.props.content.getComponent()
+      ```
+
+      2. via Component.getChildAt or Component.find()
+      ```
+        this.getChildAt(0)
+        this.find('.child')
+      ```
+    */
+    if (this._ref) throw new Error('A VirtualElement can only be referenced once.')
     this._ref = ref
     if (this._context) {
-      this._context.refs[ref] = this
+      const refs = this._context.refs
+      if(refs[ref]) {
+        throw new Error('An item with reference "'+ref+'" already exists.')
+      }
+      refs[ref] = this
     }
     return this
   }
 
+  isInDocument() {
+    return false
+  }
+
 }
 
-DOMElement._defineProperties(VirtualElement, without(DOMElement._propertyNames, 'children'))
+VirtualElement.prototype._isVirtualElement = true
 
 /*
   A virtual HTML element.
@@ -84,11 +116,9 @@ class VirtualHTMLElement extends VirtualElement {
     this.style = null
     this.eventListeners = null
 
+    // TODO: this is semantically incorrect. It should be named childNodes
     this.children = []
-
   }
-
-  get _isVirtualHTMLElement() { return true; }
 
   getTagName() {
     return this._tagName
@@ -121,13 +151,9 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeAttr(attr) {
+  removeAttribute(name) {
     if (this.attributes) {
-      if (isString(attr)) {
-        delete this.attributes[attr]
-      } else {
-        this.attributes = omit(this.attributes, attr)
-      }
+      delete this.attributes[name]
     }
     return this
   }
@@ -348,6 +374,7 @@ class VirtualHTMLElement extends VirtualElement {
     if (!this.style) {
       this.style = {}
     }
+    if (DOMElement.pxStyles[name] && isNumber(value)) value = value + 'px'
     this.style[name] = value
     return this
   }
@@ -359,7 +386,7 @@ class VirtualHTMLElement extends VirtualElement {
     } else {
       options = options || {}
       options.context = options.context || this._owner._comp
-      listener = new DOMElement.EventListener(eventName, handler, options)
+      listener = new DOMEventListener(eventName, handler, options)
     }
     if (!this.eventListeners) {
       this.eventListeners = []
@@ -479,6 +506,9 @@ class VirtualHTMLElement extends VirtualElement {
     }
   }
 }
+
+VirtualHTMLElement.prototype._isVirtualHTMLElement = true
+
 
 /*
   A virtual element which gets rendered by a custom component.
@@ -638,11 +668,7 @@ VirtualElement.createElement = function() {
         ref = val
         break
       default:
-        if (key.slice(0,2) === 'on') {
-          eventHandlers.push({ name: key.slice(2), handler: val })
-        } else {
-          props[key] = val
-        }
+        props[key] = val
     }
   }
   if (type === 'element') {
@@ -675,7 +701,7 @@ VirtualElement.createElement = function() {
   // allow a notation similar to React.createElement
   // $$(MyComponent, {}, ...children)
   if (arguments.length > 2) {
-    content.append(flattenDeep(Array.prototype.slice.call(arguments, 2)))
+    content.append(flattenOften(Array.prototype.slice.call(arguments, 2), 3))
   }
   return content
 }

@@ -19,9 +19,9 @@ class InlineWrapperComponent extends InlineNodeComponent {
       let ComponentClass = componentRegistry.get(wrappedNode.type)
       if (ComponentClass) {
         el = $$(ComponentClass, {
-          disabled: this.isDisabled(),
+          disabled: this.props.disabled,
           node: wrappedNode,
-        }).ref('wrappedNode')
+        })
       } else {
         console.error('No component registered for node type' + wrappedNode.type)
       }

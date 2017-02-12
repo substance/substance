@@ -1,4 +1,4 @@
-import isString from 'lodash/isString'
+import isString from '../util/isString'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 
@@ -7,26 +7,32 @@ class NodeSelection extends Selection {
   constructor(containerId, nodeId, mode, reverse, surfaceId) {
     super()
 
+    if (arguments.length === 1) {
+      let data = arguments[0]
+      containerId = data.containerId
+      nodeId = data.nodeId
+      mode = data.mode
+      reverse = data.reverse
+      surfaceId = data.surfaceId
+    }
+
     if (!isString(containerId)) {
       throw new Error("'containerId' is mandatory.");
     }
     if (!isString(nodeId)) {
       throw new Error("'nodeId' is mandatory.");
     }
-    if (['full', 'before', 'after'].indexOf(mode) < 0) {
-      throw new Error("'mode' is mandatory.");
-    }
+    mode = mode || "full"
 
     this.containerId = containerId;
     this.nodeId = nodeId;
     this.mode = mode;
     this.reverse = Boolean(reverse);
     this.surfaceId = surfaceId;
+
+    this.start = new Coordinate([nodeId], 0)
+    this.end = new Coordinate([nodeId], 1)
   }
-
-  // for duck-typed instanceof
-  get _isNodeSelection() { return true }
-
 
   equals(other) {
     return (
@@ -66,10 +72,11 @@ class NodeSelection extends Selection {
 
   toJSON() {
     return {
-      containerId: this.containerId,
+      type: 'node',
       nodeId: this.nodeId,
       mode: this.mode,
       reverse: this.reverse,
+      containerId: this.containerId,
       surfaceId: this.surfaceId
     };
   }
@@ -113,30 +120,17 @@ class NodeSelection extends Selection {
   }
 
   _clone() {
-    return new NodeSelection(this.containerId, this.nodeId, this.mode, this.reverse, this.surfaceId);
+    return new NodeSelection(this);
   }
-
 }
+
+NodeSelection.prototype._isNodeSelection = true
 
 NodeSelection.fromJSON = function(json) {
-  return new NodeSelection(json.containerId, json.nodeId, json.mode, json.reverse);
+  return new NodeSelection(json);
 }
 
-NodeSelection._createFromRange = function(range) {
-  var containerId = range.containerId;
-  var nodeId = range.start.getNodeId();
-  var startOffset = range.start.offset;
-  var endOffset = range.end.offset;
-  var reverse = range.reverse;
-  var mode;
-  if (startOffset === endOffset) {
-    mode = startOffset === 0 ? 'before' : 'after';
-  } else {
-    mode = 'full';
-  }
-  return new NodeSelection(containerId, nodeId, mode, reverse);
-};
-
+// TODO: is this used?
 NodeSelection._createFromCoordinate = function(coor) {
   var containerId = coor.containerId;
   var nodeId = coor.getNodeId();

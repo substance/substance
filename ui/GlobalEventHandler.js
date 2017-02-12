@@ -8,8 +8,9 @@
 */
 
 import inBrowser from '../util/inBrowser'
-import DefaultDOMElement from './DefaultDOMElement'
-import DOMElement from './DOMElement'
+import DOMElement from '../dom/DOMElement'
+import DOMEventListener from '../dom/DOMEventListener'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable
@@ -22,8 +23,8 @@ const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy'
 
 class GlobalEventHandler {
 
-  constructor(documentSession, surfaceManager) {
-    this.documentSession = documentSession
+  constructor(editorSession, surfaceManager) {
+    this.editorSession = editorSession
     this.surfaceManager = surfaceManager
     this.listeners = []
     this.initialize()
@@ -49,7 +50,7 @@ class GlobalEventHandler {
     if (!options.id) {
       throw new Error("GlobalEventHandler can only be used with option 'id'")
     }
-    let listener = new DOMElement.EventListener(eventName, handler, options)
+    let listener = new DOMEventListener(eventName, handler, options)
     this.listeners.push(listener)
   }
 
@@ -65,8 +66,8 @@ class GlobalEventHandler {
   }
 
   _getActiveListener(eventName) {
-    let documentSession = this.documentSession
-    let sel = documentSession.getSelection()
+    let editorSession = this.editorSession
+    let sel = editorSession.getSelection()
     if (sel) {
       let surfaceId = sel.surfaceId
       for (let i = 0; i < this.listeners.length; i++) {

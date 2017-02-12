@@ -1,5 +1,5 @@
-import each from 'lodash/each'
-import includes from 'lodash/includes'
+import includes from '../../util/includes'
+import forEach from '../../util/forEach'
 import EventEmitter from '../../util/EventEmitter'
 
 /*
@@ -78,7 +78,7 @@ class TOCProvider extends EventEmitter {
     let config = this.config
     let entries = []
     let contentNodes = doc.get(config.containerId).nodes
-    each(contentNodes, function(nodeId) {
+    forEach(contentNodes, function(nodeId) {
       let node = doc.get(nodeId)
       if (node.type === 'heading') {
         entries.push({

@@ -21,10 +21,10 @@ import ContainerAnnotation from './ContainerAnnotation'
 
   class Comment extends PropertyAnnotation {}
 
-  Comment.define({
+  Comment.schema = {
     type: 'comment',
     content: 'string'
-  })
+  }
 
   let schema = new Document.Schema('my-article')
   schema.getDefaultTextType = function() {
@@ -36,6 +36,12 @@ import ContainerAnnotation from './ContainerAnnotation'
 
 class DocumentSchema extends Schema {
 
+  constructor(name, version, options = {}) {
+    super(name, version)
+
+    this.defaultTextType = options.defaultTextType
+  }
+
   /**
     Returns default text type. E.g. used when hitting ENTER in a text node, which
     produces a new node of the type returned here. Abstract method, which must be implemented.
@@ -45,7 +51,7 @@ class DocumentSchema extends Schema {
   */
 
   getDefaultTextType() {
-    throw new Error('DocumentSchema.getDefaultTextType() is abstract and must be overridden.')
+    return this.defaultTextType
   }
 
   isAnnotationType(type) {

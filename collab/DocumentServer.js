@@ -1,11 +1,13 @@
-
 /*
   DocumentServer module. Can be bound to an express instance
 */
 class DocumentServer {
-  constructor(config) {
-    this.engine = config.documentEngine
-    this.path = config.path
+
+  constructor(params) {
+    this.configurator = params.configurator
+    this.engine = this.configurator.getDocumentEngine()
+    // TODO: make path configurable through configurator
+    this.path = '/api/documents'
   }
 
   /*
@@ -18,18 +20,13 @@ class DocumentServer {
   }
 
   /*
-    Create a new document, given a schemaName and schemaVersion
+    Create a new document, given a documentId and initial change
   */
   _createDocument(req, res, next) {
-    let args = req.body
-    let newDoc = {
-      schemaName: args.schemaName, // e.g. prose-article
-      info: args.info // optional
-    }
-
-    this.engine.createDocument(newDoc, function(err, result) {
+    const { documentId, change } = req.body
+    this.engine.createDocument(documentId, change, function(err, version) {
       if (err) return next(err)
-      res.json(result)
+      res.json(version)
     })
   }
 
@@ -37,12 +34,13 @@ class DocumentServer {
     Get a document with given document id
   */
   _getDocument(req, res, next) {
-    let documentId = req.params.id
-    this.engine.getDocument({
-      documentId: documentId
-    }, function(err, result) {
+    const documentId = req.params.id
+    this.engine.getDocument(documentId, function(err, jsonDoc, version) {
       if (err) return next(err)
-      res.json(result)
+      res.json({
+        data: jsonDoc,
+        version: version
+      })
     })
   }
 

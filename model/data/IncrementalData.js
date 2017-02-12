@@ -1,10 +1,11 @@
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
-import cloneDeep from 'lodash/cloneDeep'
+import isString from '../../util/isString'
+import isArray from '../../util/isArray'
+import cloneDeep from '../../util/cloneDeep'
 import Data from './Data'
 import ObjectOperation from './ObjectOperation'
 import ArrayOperation from './ArrayOperation'
 import TextOperation from './TextOperation'
+import CoordinateOperation from './CoordinateOperation'
 
 /**
   Incremental data storage implemention.
@@ -20,7 +21,10 @@ class IncrementalData extends Data {
     @returns {ObjectOperation} The applied operation.
    */
   create(nodeData) {
-    var op = ObjectOperation.Create([nodeData.id], nodeData)
+    if (nodeData._isNode) {
+      nodeData = nodeData.toJSON()
+    }
+    let op = ObjectOperation.Create([nodeData.id], nodeData)
     this.apply(op)
     return op
   }
@@ -100,11 +104,16 @@ class IncrementalData extends Data {
         // array ops work inplace
         diff.apply(oldVal)
       } else if (op.propertyType === 'string') {
-        if (! (diff._isTextOperation) ) {
+        if (!(diff._isTextOperation) ) {
           diff = TextOperation.fromJSON(diff)
         }
         var newVal = diff.apply(oldVal)
         super.set(op.path, newVal)
+      } else if (op.propertyType === 'coordinate') {
+        if (!(diff._isCoordinateOperation) ) {
+          diff = CoordinateOperation.fromJSON(diff)
+        }
+        diff.apply(oldVal)
       } else {
         throw new Error("Unsupported type for operational update.")
       }
@@ -130,31 +139,43 @@ class IncrementalData extends Data {
       diffOp = diff
     } else {
       var value = this.get(path)
-      var start, end, pos, val
+      diff = this._normalizeDiff(value, diff)
       if (value === null || value === undefined) {
         throw new Error('Property has not been initialized: ' + JSON.stringify(path))
       } else if (isString(value)) {
-        if (diff['delete']) {
-          // { delete: [2, 5] }
-          start = diff['delete'].start
-          end = diff['delete'].end
-          diffOp = TextOperation.Delete(start, value.substring(start, end))
-        } else if (diff['insert']) {
-          // { insert: [2, "foo"] }
-          pos = diff['insert'].offset
-          val = diff['insert'].value
-          diffOp = TextOperation.Insert(pos, val)
+        switch (diff.type) {
+          case 'delete': {
+            diffOp = TextOperation.Delete(diff.start, value.substring(diff.start, diff.end))
+            break
+          }
+          case 'insert': {
+            diffOp = TextOperation.Insert(diff.start, diff.text)
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       } else if (isArray(value)) {
-        if (diff['delete']) {
-          // { delete: 2 }
-          pos = diff['delete'].offset
-          diffOp = ArrayOperation.Delete(pos, value[pos])
-        } else if (diff['insert']) {
-          // { insert: [2, "foo"] }
-          pos = diff['insert'].offset
-          val = diff['insert'].value
-          diffOp = ArrayOperation.Insert(pos, val)
+        switch (diff.type) {
+          case 'delete': {
+            diffOp = ArrayOperation.Delete(diff.pos, value[diff.pos])
+            break
+          }
+          case 'insert': {
+            diffOp = ArrayOperation.Insert(diff.pos, diff.value)
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
+        }
+      } else if (value._isCoordinate) {
+        switch (diff.type) {
+          case 'shift': {
+            diffOp = CoordinateOperation.Shift(diff.value)
+            break
+          }
+          default:
+            throw new Error('Unknown diff type')
         }
       }
     }

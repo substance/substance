@@ -1,19 +1,13 @@
-import isString from 'lodash/isString'
-import isNumber from 'lodash/isNumber'
-import Operation from './Operation'
+import isString from '../../util/isString'
+import isNumber from '../../util/isNumber'
 import Conflict from './Conflict'
 
-var INSERT = "insert"
-var DELETE = "delete"
+const INSERT = "insert"
+const DELETE = "delete"
 
-/*
-  @class
-  @extends Operation
-*/
-class TextOperation extends Operation {
+class TextOperation {
 
   constructor(data) {
-    super()
     if (!data || data.type === undefined || data.pos === undefined || data.str === undefined) {
       throw new Error("Illegal argument: insufficient data.")
     }
@@ -34,8 +28,6 @@ class TextOperation extends Operation {
       throw new Error("Illegal argument: expecting positive number as pos.")
     }
   }
-
-  get _isTextOperation() { return true }
 
   apply(str) {
     if (this.isEmpty()) return str
@@ -110,6 +102,9 @@ class TextOperation extends Operation {
     return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.pos, ",'", this.str, "')"].join('')
   }
 }
+
+TextOperation.prototype._isOperation = true
+TextOperation.prototype._isTextOperation = true
 
 function hasConflict(a, b) {
   // Insert vs Insert:
@@ -202,7 +197,7 @@ function transform_insert_delete(a, b) {
   }
 }
 
-var transform = function(a, b, options) {
+function transform(a, b, options) {
   options = options || {}
   if (options["no-conflict"] && hasConflict(a, b)) {
     throw new Conflict(a, b)

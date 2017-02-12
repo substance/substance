@@ -6,14 +6,15 @@ class LinkComponent extends AnnotationComponent {
     super.didMount(...args)
 
     let node = this.props.node
-    node.on('properties:changed', this.rerender, this)
+    this.context.editorSession.onRender('document', this.rerender, this, {
+      path: [node.id, 'url']
+    })
   }
 
   dispose(...args) {
     super.dispose(...args)
 
-    let node = this.props.node
-    node.off(this)
+    this.context.editorSession.off(this)
   }
 
   render($$) { // eslint-disable-line

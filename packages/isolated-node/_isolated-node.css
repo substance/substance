@@ -1,45 +1,47 @@
-.sc-isolated-node {}
-.sc-isolated-node > .se-container {
-  display: inline-block;
+.sc-isolated-node {
   position: relative;
 }
-.sc-isolated-node > .se-container > .se-blocker {
-  position: absolute;
-  top:0; bottom: 0; left: 0; right: 0;
-  z-index: 1;
+
+.sc-isolated-node.sm-default-style.sm-selected,
+.sc-isolated-node.sm-default-style.sm-co-selected {
+  /*background: rgba(163,205,253, 0.6);*/
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
 }
-.sc-isolated-node > .se-container > .se-cursor {
+.sc-isolated-node.sm-default-style.sm-focused,
+.sc-isolated-node.sm-default-style.sm-co-focused {
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
+}
+
+/* Hide selection fragments when in selected-state */
+.sc-isolated-node.sm-selected ::selection,
+.sc-isolated-node.sm-selected ::selection {
+  background: transparent;
+}
+
+.sc-isolated-node.sm-selected {
+  background: rgba(163, 205, 253, 0.3);
+  outline: 2px solid #A3CDFD;
+}
+
+.sc-isolated-node-blocker {
   position: absolute;
-  top: 0; bottom: 0;
+  top: 0px; bottom: 0px; left: 0px; right: 0px;
+  cursor: default;
+}
+
+.sc-isolated-node.sm-no-blocker .sc-isolated-node-blocker {
+  display: none;
+}
+
+.sc-isolated-node > .se-bracket {
+  height: 1px;
   width: 1px;
-}
-.sc-isolated-node > .se-container > .se-cursor.sm-before {
-  left: -5px;
-  border-left: 2px solid var(--local-selection-color);
-}
-.sc-isolated-node > .se-container > .se-cursor.sm-after {
-  right: -5px;
-  border-right: 2px solid var(--local-selection-color);
-}
-.sc-isolated-node > .se-container.sm-full-width {
-  display: block;
-}
-.sc-isolated-node > .se-slug {
-  /*
-    as we found out in a spike, the only cross-browser compatible
-    way is to use font-size:1px
-  */
-  font-size: 1px;
   opacity: 0;
 }
-.sc-isolated-node.sm-default-style.sm-selected > .se-container,
-.sc-isolated-node.sm-default-style.sm-co-selected > .se-container {
-  background: rgba(163,205,253, 0.6);
-  outline: 2px solid;
-  outline-color: var(--local-selection-color);
-}
-.sc-isolated-node.sm-default-style.sm-focused > .se-container,
-.sc-isolated-node.sm-default-style.sm-co-focused > .se-container {
-  outline: 2px solid;
-  outline-color: var(--local-selection-color);
+
+.sc-isolated-node.sm-no-blocker > .se-bracket {
+  /*display:none;*/
+  visibility: hidden;
 }

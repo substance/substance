@@ -1,38 +1,27 @@
-import forEach from 'lodash/forEach'
-import isUndefined from 'lodash/isUndefined'
-import startsWith from 'lodash/startsWith'
-import createSurfaceId from '../../util/createSurfaceId'
-import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import inBrowser from '../../util/inBrowser'
 import keys from '../../util/keys'
 import platform from '../../util/platform'
-import inBrowser from '../../util/inBrowser'
-import copySelection from '../../model/transform/copySelection'
-import deleteSelection from '../../model/transform/deleteSelection'
-import deleteCharacter from '../../model/transform/deleteCharacter'
-import insertText from '../../model/transform/insertText'
+import startsWith from '../../util/startsWith'
 import Clipboard from '../../ui/Clipboard'
 import Component from '../../ui/Component'
-import DefaultDOMElement from '../../ui/DefaultDOMElement'
-import DOMSelection from '../../ui/DOMSelection'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import UnsupportedNode from '../../ui/UnsupportedNodeComponent'
+import { getDOMRangeFromEvent } from '../../util/windowUtils'
 
 /**
    Abstract interface for editing components.
    Dances with contenteditable, so you don't have to.
-
-   @class
-   @component
-   @abstract
 */
 class Surface extends Component {
+
   constructor(...args) {
     super(...args)
 
-    // DocumentSession instance must be provided either as a prop
+    // EditorSession instance must be provided either as a prop
     // or via dependency-injection
-    this.documentSession = this.props.documentSession || this.context.documentSession
-    if (!this.documentSession) {
-      throw new Error('No DocumentSession provided')
+    this.editorSession = this.props.editorSession || this.context.editorSession
+    if (!this.editorSession) {
+      throw new Error('No EditorSession provided')
     }
     this.name = this.props.name
     if (!this.name) {
@@ -46,11 +35,13 @@ class Surface extends Component {
     // considering nesting in IsolatedNodes
     this._surfaceId = createSurfaceId(this)
 
-    this.clipboard = new Clipboard(this, {
+    this.clipboard = new Clipboard(this.editorSession, {
       converterRegistry: this.context.converterRegistry
     })
 
-    this.domSelection = null
+    this.domSelection = this.context.domSelection
+    if (!this.domSelection) throw new Error('DOMSelection instance must be provided via context.')
+
     this.domObserver = null
 
     // HACK: we need to listen to mousup on document
@@ -61,37 +52,23 @@ class Surface extends Component {
 
     // set when editing is enabled
     this.undoEnabled = true
-    this.textTypes = this.props.textTypes
 
     // a registry for TextProperties which allows us to dispatch changes
     this._textProperties = {}
 
     this._state = {
       // true if the document session's selection is addressing this surface
-      skipNextFocusEvent: false,
-      skipNextObservation: false,
-      // used to avoid multiple rerenderings (e.g. simultanous update of text and fragments)
-      isDirty: false,
-      dirtyProperties: {},
-      // while fragments are provided as a hash of (type -> [Fragment])
-      // we derive a hash of (prop-key -> [Fragment]); in other words, Fragments grouped by property
-      fragments: {},
-      // we want to show the cursor fragment only when blurred, so we keep it separated from the other fragments
-      cursorFragment: null
+      skipNextFocusEvent: false
     }
-
-    Surface.prototype._deriveInternalState.call(this, this.props)
-  }
-
-  get _isSurface() {
-    return true
   }
 
   getChildContext() {
     return {
       surface: this,
-      surfaceParent: this,
-      doc: this.getDocument()
+      doc: this.getDocument(),
+      // HACK: clearing isolatedNodeComponent so that we can easily know
+      // if this surface is within an isolated node
+      isolatedNodeComponent: null
     }
   }
 
@@ -99,18 +76,12 @@ class Surface extends Component {
     if (this.context.surfaceManager) {
       this.context.surfaceManager.registerSurface(this)
     }
-    if (!this.isReadonly() && inBrowser) {
-      this.domSelection = new DOMSelection(this)
-      // this.domObserver = new window.MutationObserver(this.onDomMutations.bind(this));
-      // this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
-    }
-    this.documentSession.on('update', this._onSessionUpdate, this)
+    this.editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
 
   dispose() {
-    this.documentSession.off(this)
-    this.domSelection = null
+    this.editorSession.off(this)
     if (this.domObserver) {
       this.domObserver.disconnect()
     }
@@ -119,20 +90,16 @@ class Surface extends Component {
     }
   }
 
-  willReceiveProps(nextProps) {
-    Surface.prototype._deriveInternalState.call(this, nextProps)
-  }
-
-  didUpdate(oldProps, oldState) {
-    this._update(oldProps, oldState)
+  didUpdate() {
+    this._updateContentEditableState()
   }
 
   render($$) {
     let tagName = this.props.tagName || 'div'
     let el = $$(tagName)
       .addClass('sc-surface')
-      .attr('spellCheck', false)
       .attr('tabindex', 2)
+      .attr('data-surface-id', this.id)
 
     if (!this.isDisabled()) {
       if (this.isEditable()) {
@@ -155,16 +122,13 @@ class Surface extends Component {
       if (!this.isReadonly()) {
         // Mouse Events
         el.on('mousedown', this.onMouseDown)
+        el.on('contextmenu', this.onContextMenu)
         // disable drag'n'drop
         // we will react on this to render a custom selection
         el.on('focus', this.onNativeFocus)
         el.on('blur', this.onNativeBlur)
         // activate the clipboard
         this.clipboard.attach(el)
-      }
-
-      if (this.context.dragManager) {
-        el.on('drop', this.onDrop)
       }
 
     }
@@ -217,16 +181,12 @@ class Surface extends Component {
     return this.el
   }
 
-  getController() {
-    return this.context.controller
-  }
-
   getDocument() {
-    return this.documentSession.getDocument()
+    return this.editorSession.getDocument()
   }
 
-  getDocumentSession() {
-    return this.documentSession
+  getEditorSession() {
+    return this.editorSession
   }
 
   isEnabled() {
@@ -237,73 +197,12 @@ class Surface extends Component {
     return false
   }
 
+  hasNativeSpellcheck() {
+    return this.props.spellcheck === 'native'
+  }
+
   getContainerId() {
     return null
-  }
-
-  /**
-    Run a transformation as a transaction properly configured for this surface.
-
-    @param transformation a transformation function(tx, args) which receives
-                          the selection the transaction was started with, and should return
-                          output arguments containing a selection, as well.
-
-    @example
-
-    Returning a new selection:
-    ```js
-    surface.transaction(function(tx, args) {
-      var selection = args.selection;
-      ...
-      selection = tx.createSelection(...);
-      return {
-        selection: selection
-      };
-    });
-    ```
-
-    Adding event information to the transaction:
-
-    ```js
-    surface.transaction(function(tx, args) {
-      tx.info.foo = 'bar';
-      ...
-    });
-    ```
-   */
-  transaction(transformation, info) {
-    // TODO: we would like to get rid of this method, and only have
-    // documentSession.transaction()
-    // The problem is, that we need to get surfaceId into the change,
-    // to be able to set the selection into the right surface.
-    // ATM we put this into the selection, which is hacky, and makes it
-    // unnecessarily inconvient to create selections.
-    // Maybe documentSession should provide a means to augment the before/after
-    // state of a change.
-    let documentSession = this.documentSession
-    let surfaceId = this.getId()
-    return documentSession.transaction(function(tx, args) {
-      tx.before.surfaceId = surfaceId
-      return transformation(tx, args)
-    }, info)
-  }
-
-  getSelection() {
-    return this.documentSession.getSelection()
-  }
-
-  /**
-   * Set the model selection and update the DOM selection accordingly
-   */
-  setSelection(sel) {
-    // console.log('Surface.setSelection()', this.name, sel);
-    // storing the surface id so that we can associate
-    // the selection with this surface later
-    if (sel && !sel.isNull()) {
-      sel.surfaceId = this.getId()
-      sel.containerId = sel.containerId || this.getContainerId()
-    }
-    this._setSelection(sel)
   }
 
   blur() {
@@ -324,13 +223,16 @@ class Surface extends Component {
     this._focus()
   }
 
+  // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
   rerenderDOMSelection() {
     if (this.isDisabled()) return
     if (inBrowser) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
-      let sel = this.getSelection()
+      let sel = this.editorSession.getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
+        // this will let our parents know that the DOM selection is ready
+        this.send('domSelectionRendered')
       }
     }
   }
@@ -339,189 +241,74 @@ class Surface extends Component {
     return this.el.getNativeElement().querySelector('*[data-id="'+nodeId+'"]')
   }
 
-  /* Editing behavior */
-
-  /* Note: In a regular Surface all text properties are treated independently
-     like in a form */
-
-  /**
-    Selects all text
-  */
-  selectAll() {
-    let doc = this.getDocument()
-    let sel = this.getSelection()
-    if (sel.isPropertySelection()) {
-      let path = sel.path
-      let text = doc.get(path)
-      sel = doc.createSelection({
-        type: 'property',
-        path: path,
-        startOffset: 0,
-        endOffset: text.length
-      })
-      this.setSelection(sel)
-    }
-  }
-
-  /**
-    Performs an {@link model/transform/insertText} transformation
-  */
-  insertText(tx, args) {
-    let sel = args.selection
-    if (sel.isPropertySelection() || sel.isContainerSelection()) {
-      return insertText(tx, args)
-    }
-  }
-
-  /**
-    Performs a {@link model/transform/deleteSelection} transformation
-  */
-  delete(tx, args) {
-    let sel = args.selection
-    if (!sel.isCollapsed()) {
-      return deleteSelection(tx, args)
-    }
-    else if (sel.isPropertySelection() || sel.isNodeSelection()) {
-      return deleteCharacter(tx, args)
-    }
-  }
-
-  // No breaking in properties, insert softbreak instead
-  break(tx, args) {
-    return this.softBreak(tx, args)
-  }
-
-  /**
-    Inserts a soft break
-  */
-  softBreak(tx, args) {
-    args.text = "\n"
-    return this.insertText(tx, args)
-  }
-
-  /**
-    Copy the current selection. Performs a {@link model/transform/copySelection}
-    transformation.
-  */
-  copy(doc, selection) {
-    let result = copySelection(doc, { selection: selection })
-    return result.doc
-  }
-
-  /**
-    Performs a {@link model/transform/paste} transformation
-  */
-  paste(tx, args) {
-    // TODO: for now only plain text is inserted
-    // We could do some stitching however, preserving the annotations
-    // received in the document
-    if (args.text) {
-      return this.insertText(tx, args)
-    }
-  }
-
   /* Event handlers */
 
   /*
    * Handle document key down events.
    */
   onKeyDown(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // console.log('Surface.onKeyDown()', this.getId());
 
-    let commandManager = this.context.commandManager
-    if ( event.which === 229 ) {
-      // ignore fake IME events (emitted in IE and Chromium)
-      return
-    }
+    // ignore fake IME events (emitted in IE and Chromium)
+    if ( event.which === 229 ) return
+
+    // core handlers for cursor movements and editor interactions
     switch ( event.keyCode ) {
+      // Cursor movements
       case keys.LEFT:
       case keys.RIGHT:
         return this._handleLeftOrRightArrowKey(event)
       case keys.UP:
       case keys.DOWN:
         return this._handleUpOrDownArrowKey(event)
-      case keys.ENTER:
-        return this._handleEnterKey(event)
-      case keys.SPACE:
-        return this._handleSpaceKey(event)
-      case keys.BACKSPACE:
-      case keys.DELETE:
-        return this._handleDeleteKey(event)
       case keys.HOME:
       case keys.END:
         return this._handleHomeOrEndKey(event)
       case keys.PAGEUP:
       case keys.PAGEDOWN:
         return this._handlePageUpOrDownKey(event)
+      // Input (together with text-input)
+      case keys.ENTER:
+        return this._handleEnterKey(event)
+      case keys.SPACE:
+        return this._handleSpaceKey(event)
+      case keys.TAB:
+        return this._handleTabKey(event)
+      case keys.BACKSPACE:
+      case keys.DELETE:
+        return this._handleDeleteKey(event)
       default:
         break
     }
 
-    // Note: when adding a new handler you might want to enable this log to see keyCodes etc.
-    // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
-
-    // Built-in key combos
-    // Ctrl+A: select all
-    let handled = false
-    if ( (event.ctrlKey||event.metaKey) && event.keyCode === 65) {
-      this.selectAll()
-      handled = true
-    }
-    // Undo/Redo: cmd+z, cmd+shift+z
-    else if (this.undoEnabled && event.keyCode === 90 && (event.metaKey||event.ctrlKey)) {
-      if (event.shiftKey) {
-        commandManager.executeCommand('redo')
-      } else {
-        commandManager.executeCommand('undo')
-      }
-      handled = true
-    }
-    // Toggle strong: cmd+b ctrl+b
-    else if (event.keyCode === 66 && (event.metaKey||event.ctrlKey)) {
-      commandManager.executeCommand('strong')
-      handled = true
-    }
-    // Toggle emphasis: cmd+i ctrl+i
-    else if (event.keyCode === 73 && (event.metaKey||event.ctrlKey)) {
-      commandManager.executeCommand('emphasis')
-      handled = true
-    }
-    // Toggle link: cmd+k ctrl+k
-    else if (event.keyCode === 75 && (event.metaKey||event.ctrlKey)) {
-      commandManager.executeCommand('link')
-      handled = true
-    }
-
-    if (handled) {
-      event.preventDefault()
-      event.stopPropagation()
-    }
+    // keyboard shortcuts
+    this.editorSession.keyboardManager.onKeydown(event)
   }
 
   onTextInput(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // console.log("TextInput:", event);
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-    // necessary for handling dead keys properly
-    this._state.skipNextObservation=true
-    this.transaction(function(tx, args) {
-      if (this.domSelection) {
-        // trying to remove the DOM selection to reduce flickering
-        this.domSelection.clear()
-      }
-      args.text = event.data
-      return this.insertText(tx, args)
-    }.bind(this), { action: 'type' })
+
+    let text = event.data
+    if (!this.editorSession.keyboardManager.onTextInput(text)) {
+      this.editorSession.transaction((tx) => {
+        tx.insertText(text)
+      }, { action: 'type' })
+    }
   }
 
   // Handling Dead-keys under OSX
-  onCompositionStart() {
-    // just tell DOM observer that we have everything under control
-    this._state.skipNextObservation = true
+  onCompositionStart(event) {
+    if (!this._shouldConsumeEvent(event)) return
   }
 
+  // TODO: do we need this anymore?
   onTextInputShim(event) {
+    if (!this._shouldConsumeEvent(event)) return
     // Filter out non-character keys
     if (
       // Catches most keys that don't produce output (charCode === 0, thus no character)
@@ -534,25 +321,17 @@ class Surface extends Component {
       return
     }
     let character = String.fromCharCode(event.which)
-    this._state.skipNextObservation=true
     if (!event.shiftKey) {
       character = character.toLowerCase()
     }
-    if (character.length>0) {
-      this.transaction(function(tx, args) {
-        if (this.domSelection) {
-          // trying to remove the DOM selection to reduce flickering
-          this.domSelection.clear()
-        }
-        args.text = character;
-        return this.insertText(tx, args)
-      }.bind(this), { action: 'type' })
-      event.preventDefault()
-      event.stopPropagation()
-      return
-    } else {
-      event.preventDefault()
-      event.stopPropagation()
+    event.preventDefault()
+    event.stopPropagation()
+    if (!this.editorSession.keyboardManager.onTextInput(character)) {
+      if (character.length>0) {
+        this.editorSession.transaction((tx) => {
+          tx.insertText(character)
+        }, { action: 'type' })
+      }
     }
   }
 
@@ -562,12 +341,36 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    // console.log('mousedown on', this.getId());
-    // event.stopPropagation();
+    if (!this._shouldConsumeEvent(event)) return
+
+    // EXPERIMENTAL: trying to 'reserve' a mousedown event
+    // so that parents know that they shouldn't react
+    // This is similar to event.stopPropagation() but without
+    // side-effects.
+    // Note: some browsers do not do clicks, selections etc. on children if propagation is stopped
+    if (event.__reserved__) {
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      // console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+    }
+
+    // NOTE: this is here to make sure that this surface is contenteditable
+    // For instance, IsolatedNodeComponent sets contenteditable=false on this element
+    // to achieve selection isolation
+    if (this.isEditable()) {
+      this.el.setAttribute('contenteditable', true)
+    }
+
+    // TODO: what is this exactly?
+    if ( event.button !== 0 ) {
+      return
+    }
 
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
-      let sel = this.getSelection()
+      let sel = this.getEditorSession().getSelection()
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path)
         event.preventDefault()
@@ -580,30 +383,11 @@ class Surface extends Component {
         return
       }
     }
-    // TODO: what is this exactly?
-    if ( event.which !== 1 ) {
-      return
-    }
     // 'mouseDown' is triggered before 'focus' so we tell
     // our focus handler that we are already dealing with it
     // The opposite situation, when the surface gets focused e.g. using keyboard
     // then the handler needs to kick in and recover a persisted selection or such
     this._state.skipNextFocusEvent = true
-
-    // UX-wise, the proper way is to apply the selection on mousedown, and if a drag is started (range selection)
-    // we could maybe map the selection during the drag, but finally once after mouse is released.
-    // TODO: this needs to be solved properly; be aware of browser incompatibilities
-    // HACK: not working in IE which then does not allow a range selection anymore
-    // if (!platform.isIE) {
-    //   // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
-    //   this.domSelection.clear();
-    //   setTimeout(function() {
-    //     if (this.domSelection) {
-    //       var sel = this.domSelection.getSelection();
-    //       this.setSelection(sel);
-    //     }
-    //   }.bind(this));
-    // }
 
     // Bind mouseup to the whole document in case of dragging out of the surface
     if (this.documentEl) {
@@ -612,37 +396,27 @@ class Surface extends Component {
     }
   }
 
-  onMouseUp() {
+  onMouseUp(e) {
+    if (!this._shouldConsumeEvent(e)) return
+    e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still
     // holds the old value, and is set to the correct selection after this
     // being called.
     setTimeout(function() {
-      if (this.domSelection) {
-        let sel = this.domSelection.getSelection()
-        this.setSelection(sel)
-      }
+      let sel = this.domSelection.getSelection()
+      this._setSelection(sel)
     }.bind(this))
   }
 
-  onDomMutations(e) {
-    if (this._state.skipNextObservation) {
-      this._state.skipNextObservation = false
-      return
-    }
-    // Known use-cases:
-    //  - Context-menu:
-    //      - Delete
-    //      - Note: copy, cut, paste work just fine
-    //  - dragging selected text
-    //  - spell correction
-    console.info("We want to enable a DOM MutationObserver which catches all changes made by native interfaces (such as spell corrections, etc). Lookout for this message and try to set Surface.skipNextObservation=true when you know that you will mutate the DOM.", e)
-  }
-
-  onDrop(event) {
-    // console.log('Received drop on Surface', this.getId(), event);
-    this.context.dragManager.onDrop(event, this)
+  // When a user right clicks the DOM selection is updated (in Chrome the nearest
+  // word gets selected). Like we do with the left mouse clicks we need to sync up
+  // our model selection.
+  onContextMenu(event) {
+    if (!this._shouldConsumeEvent(event)) return
+    let sel = this.domSelection.getSelection()
+    this._setSelection(sel)
   }
 
   onNativeBlur() {
@@ -659,148 +433,19 @@ class Surface extends Component {
 
   // Internal implementations
 
-  // called whenever we receive props
-  // used to compute fragments that get dispatched to TextProperties
-  _deriveInternalState(nextProps) {
-    let _state = this._state
-    let oldFragments = _state.fragments
-    if (oldFragments) {
-      forEach(oldFragments, function(frag, key) {
-        if (this._getComponentForKey(key)) {
-          this._markAsDirty(_state, key)
-        }
-      }.bind(this));
-    }
-    let nextFragments = nextProps.fragments
-    if (nextFragments) {
-      this._deriveFragments(nextFragments)
-    }
-  }
 
-  // fragments are all dynamic informations that we are displaying
-  // like annotations (such as selections)
-  _deriveFragments(newFragments) {
-    // console.log('deriving fragments', newFragments, this.getId());
-    let _state = this._state
-    _state.cursorFragment = null
-    // group fragments by property
-    let fragments = {}
-    this._forEachFragment(newFragments, function(frag, owner) {
-      let key = frag.path.toString()
-      frag.key = key
-      // skip frags which are not rendered here
-      if (!this._getComponentForKey(key)) return
-      // extract the cursor fragment for special treatment (not shown when focused)
-      if (frag.type === 'cursor' && owner === 'local-user') {
-        _state.cursorFragment = frag
-        return
-      }
-      let propertyFrags = fragments[key]
-      if (!propertyFrags) {
-        propertyFrags = []
-        fragments[key] = propertyFrags
-      }
-      propertyFrags.push(frag)
-      this._markAsDirty(_state, key)
-    }.bind(this))
-    _state.fragments = fragments
-    // console.log('derived fragments', fragments, window.clientId);
-  }
-
-  _forEachFragment(fragments, fn) {
-    forEach(fragments, function(frags, owner) {
-      frags.forEach(function(frag) {
-        fn(frag, owner)
+  _onSelectionChanged(selection) {
+    let newMode = this._deriveModeFromSelection(selection)
+    if (this.state.mode !== newMode) {
+      this.extendState({
+        mode: newMode
       })
-    })
-  }
-
-  // called by SurfaceManager to know which text properties need to be
-  // updated because of model changes
-  _checkForUpdates(change) {
-    let _state = this._state
-    Object.keys(change.updated).forEach(function(key) {
-      if (this._getComponentForKey(key)) {
-        this._markAsDirty(_state, key)
-      }
-    }.bind(this))
-    return _state.isDirty
-  }
-
-  _update(oldProps, oldState) {
-    this._updateContentEditableState(oldState)
-    this._updateProperties()
-  }
-
-  _updateContentEditableState(oldState) {
-    // ContentEditable management
-    // Note: to be able to isolate nodes, we need to control
-    // how contenteditable is used in a hieriarchy of surfaces.
-    if (oldState.mode === 'co-focused') {
-      this.el.off('mousedown', this._enableContentEditable, this)
-    }
-    if (!this.isEditable()) {
-      this.el.setAttribute('contenteditable', false)
-    } else if (this.state.mode !== oldState.mode) {
-      switch(this.state.mode) {
-        case 'co-focused':
-          this.el.setAttribute('contenteditable', false)
-          this.el.on('mousedown', this._enableContentEditable, this)
-          break
-        default:
-          this.el.setAttribute('contenteditable', true)
-      }
-    }
-  }
-
-  _enableContentEditable() {
-    this.el.setAttribute('contenteditable', true)
-  }
-
-  _updateProperties() {
-    let _state = this._state
-    let dirtyProperties = Object.keys(_state.dirtyProperties)
-    for (let i = 0; i < dirtyProperties.length; i++) {
-      this._updateProperty(dirtyProperties[i])
-    }
-    _state.isDirty = false
-    _state.dirtyProperties = {}
-  }
-
-  _markAsDirty(_state, key) {
-    _state.isDirty = true
-    _state.dirtyProperties[key] = true
-  }
-
-  _updateProperty(key) {
-    let _state = this._state
-    // hide the cursor fragment when focused
-    let cursorFragment = this._hasNativeFocus() ? null : _state.cursorFragment
-    let frags = _state.fragments[key] || []
-    if (cursorFragment && cursorFragment.key === key) {
-      frags = frags.concat([cursorFragment])
-    }
-    let comp = this._getComponentForKey(key)
-    if (comp) {
-      comp.extendProps({
-        fragments: frags
-      })
-    }
-  }
-
-  _onSessionUpdate(update) {
-    if (update.selection) {
-      let newMode = this._deriveModeFromSelection(update.selection)
-      if (this.state.mode !== newMode) {
-        this.extendState({
-          mode: newMode
-        })
-      }
     }
   }
 
   // helper to manage surface mode which is derived from the current selection
   _deriveModeFromSelection(sel) {
+    if (!sel) return null
     let surfaceId = sel.surfaceId
     let id = this.getId()
     let mode
@@ -814,13 +459,33 @@ class Surface extends Component {
     return mode
   }
 
-  // surface parent is either a Surface or IsolatedNode
-  _getSurfaceParent() {
-    return this.context.surfaceParent
-  }
-
-  _getComponentForKey(key) {
-    return this._textProperties[key]
+  _updateContentEditableState() {
+    // NOTE: managing contenteditable is difficult in
+    // order to achieve a correct behavior for IsolatedNodes
+    // For 'closed' isolated nodes it is important that the parents'
+    // contenteditables are all false. Otherwise, the cursor
+    // can leave the isolated area.
+    let enableContenteditable = false
+    if (this.isEditable() && !this.props.disabled) {
+      enableContenteditable = true
+      if (this.state.mode === 'co-focused') {
+        let selState = this.context.editorSession.getSelectionState()
+        let sel = selState.getSelection()
+        let surface = this.context.surfaceManager.getSurface(sel.surfaceId)
+        if (surface) {
+          let isolatedNodeComponent = surface.context.isolatedNodeComponent
+          if (isolatedNodeComponent) {
+            enableContenteditable = isolatedNodeComponent.isOpen()
+          }
+        }
+      }
+    }
+    if (enableContenteditable) {
+      this.el.setAttribute('contenteditable', true)
+    } else {
+      // TODO: find out what is better
+      this.el.removeAttribute('contenteditable')
+    }
   }
 
   _focus() {
@@ -840,25 +505,11 @@ class Surface extends Component {
 
   _handleLeftOrRightArrowKey(event) {
     event.stopPropagation()
-
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
-    let selState = this.getDocumentSession().getSelectionState()
-    let sel = selState.getSelection()
-    // Note: collapsing the selection and let ContentEditable still continue doing a cursor move
-    if (selState.isInlineNodeSelection() && !event.shiftKey) {
-      event.preventDefault()
-      this.setSelection(sel.collapse(direction))
-      return
-    }
-
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
-      let options = {
-        direction: (event.keyCode === keys.LEFT) ? 'left' : 'right'
-      }
-      this._updateModelSelection(options)
+      this._updateModelSelection({direction})
     }.bind(this))
   }
 
@@ -867,7 +518,6 @@ class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       let options = {
         direction: (event.keyCode === keys.UP) ? 'left' : 'right'
       }
@@ -880,7 +530,6 @@ class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       let options = {
         direction: (event.keyCode === keys.HOME) ? 'left' : 'right'
       }
@@ -893,7 +542,6 @@ class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     window.setTimeout(function() {
-      if (!this.isMounted()) return
       let options = {
         direction: (event.keyCode === keys.PAGEUP) ? 'left' : 'right'
       }
@@ -904,36 +552,33 @@ class Surface extends Component {
   _handleSpaceKey(event) {
     event.preventDefault()
     event.stopPropagation()
-    this.transaction(function(tx, args) {
-      // trying to remove the DOM selection to reduce flickering
-      this.domSelection.clear()
-      args.text = " "
-      return this.insertText(tx, args)
-    }.bind(this), { action: 'type' })
+    this.editorSession.transaction((tx) => {
+      tx.insertText(' ')
+    }, { action: 'type' })
+  }
+
+  _handleTabKey(event) {
+    event.stopPropagation()
+    window.setTimeout(()=>{
+      this._updateModelSelection()
+    })
   }
 
   _handleEnterKey(event) {
     event.preventDefault()
     event.stopPropagation()
-    if (event.shiftKey) {
-      this.transaction(function(tx, args) {
-        return this.softBreak(tx, args)
-      }.bind(this), { action: 'break' })
-    } else {
-      this.transaction(function(tx, args) {
-        return this.break(tx, args)
-      }.bind(this), { action: 'break' })
-    }
+    this.editorSession.transaction((tx) => {
+      tx.break()
+    }, { action: 'break' })
   }
 
   _handleDeleteKey(event) {
     event.preventDefault()
     event.stopPropagation()
     let direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right'
-    this.transaction(function(tx, args) {
-      args.direction = direction
-      return this.delete(tx, args)
-    }.bind(this), { action: 'delete' })
+    this.editorSession.transaction((tx) => {
+      tx.deleteCharacter(direction)
+    }, { action: 'delete' })
   }
 
   _hasNativeFocus() {
@@ -948,12 +593,11 @@ class Surface extends Component {
     // when a new DOM selection is set.
     // ATTENTION: in FF 44 this was causing troubles, making the CE unselectable
     // until the next native blur.
-    // Should not be necessary anymore as this should be covered by this._focus()
-    // which will eventually be called at the end of the update flow
-    if (!sel.isNull() && sel.surfaceId === this.getId() && platform.isFF) {
+    // TODO: check if this is still necessary
+    if (!sel.isNull() && sel.surfaceId === this.id && platform.isFF) {
       this._focus()
     }
-    this.documentSession.setSelection(sel)
+    this.editorSession.setSelection(sel)
   }
 
   _updateModelSelection(options) {
@@ -961,13 +605,18 @@ class Surface extends Component {
     // console.log('Surface: updating model selection', sel.toString());
     // NOTE: this will also lead to a rerendering of the selection
     // via session.on('update')
-    this.setSelection(sel)
+    this._setSelection(sel)
   }
 
   _selectProperty(path) {
     let doc = this.getDocument()
     let text = doc.get(path)
-    this.setSelection(doc.createSelection(path, 0, text.length))
+    this._setSelection(doc.createSelection({
+      type: 'property',
+      path: path,
+      startOffset: 0,
+      endOffset: text.length
+    }))
   }
 
   // internal API for TextProperties to enable dispatching
@@ -1005,150 +654,70 @@ class Surface extends Component {
     })
   }
 
-  /*
-    Called when starting a transaction to populate the transaction
-    arguments.
-    ATM used only by ContainerEditor.
-  */
-  _prepareArgs(args) { // eslint-disable-line
+  // only take care of events which are emitted on targets which belong to this surface
+  _shouldConsumeEvent(event) {
+    let comp = Component.unwrap(event.target._wrapper)
+    return (comp && (comp === this || comp.context.surface === this))
   }
 
   // Experimental: used by DragManager
   getSelectionFromEvent(event) {
-    if (this.domSelection) {
-      let domRange = Surface.getDOMRangeFromEvent(event)
-      let sel = this.domSelection.getSelectionForDOMRange(domRange)
-      sel.surfaceId = this.getId()
-      return sel;
-    }
+    let domRange = getDOMRangeFromEvent(event)
+    let sel = this.domSelection.getSelectionForDOMRange(domRange)
+    sel.surfaceId = this.getId()
+    return sel;
   }
 
   setSelectionFromEvent(event) {
     let sel = this.getSelectionFromEvent(event)
     if (sel) {
       this._state.skipNextFocusEvent = true
-      this.setSelection(sel)
+      this._setSelection(sel)
     } else {
       console.error('Could not create a selection from event.');
     }
   }
 
-  // EXPERIMENTAL: get bounding box for current selection
-  getBoundingRectangleForSelection() {
-    let sel = this.getSelection()
-    if (this.isDisabled() ||
-        !sel || sel.isNull() ||
-        sel.isNodeSelection() || sel.isCustomSelection()) return {}
-
-    // TODO: selection rectangle should be calculated
-    // relative to scrolling container, which either is
-    // the parent scrollPane, or the body element
-    let containerEl
-    if (this.context.scrollPane) {
-      containerEl = this.context.scrollPane.refs.content.el.el
-    } else {
-      containerEl = document.body
-    }
-
-    let wsel = window.getSelection()
-    let wrange
-    if (wsel.rangeCount > 0) {
-      wrange = wsel.getRangeAt(0)
-    }
-
-    // having a DOM selection?
-    if (wrange && wrange.collapsed) {
-      // unfortunately, collapsed selections do not have a boundary rectangle
-      // thus we need to insert a span temporarily and take its rectangle
-      // if (wrange.collapsed) {
-      let span = document.createElement('span')
-      // Ensure span has dimensions and position by
-      // adding a zero-width space character
-      this._state.skipNextObservation = true
-      span.appendChild(window.document.createTextNode("\u200b"))
-      wrange.insertNode(span)
-      let rect = getRelativeBoundingRect(span, containerEl)
-      let spanParent = span.parentNode
-      this._state.skipNextObservation = true
-      spanParent.removeChild(span)
-      // Glue any broken text nodes back together
-      spanParent.normalize()
-      // HACK: in FF the DOM selection gets corrupted
-      // by the span-insertion above
-      if (platform.isFF) {
-        this.rerenderDOMSelection()
-      }
-      return rect;
-    } else {
-      let nativeEl = this.el.el
-      if (sel.isCollapsed()) {
-        let cursorEl = nativeEl.querySelector('.se-cursor')
-        if (cursorEl) {
-          return getRelativeBoundingRect(cursorEl, containerEl)
-        } else {
-          // TODO: in the most cases we actually do not have a
-          // cursor element.
-          // console.warn('FIXME: there should be a rendered cursor element.');
-          return {}
-        }
-      } else {
-        let selFragments = nativeEl.querySelectorAll('.se-selection-fragment')
-        if (selFragments.length > 0) {
-          return getRelativeBoundingRect(selFragments, containerEl)
-        } else {
-          console.warn('FIXME: there should be a rendered selection fragments element.')
-          return {}
-        }
-      }
-    }
-  }
-
-  _sendOverlayHints() {
-    // TODO: we need to rethink this.
-    // The overlay is owned by the ScrollPane.
-    // So the current solution is to send up hints
-    // which are dispatched to the overlay instance.
-    let selectionRect = this.getBoundingRectangleForSelection()
-    this.send('updateOverlayHints', {
-      rectangle: selectionRect
-    })
+  get id() {
+    return this._surfaceId
   }
 
 }
 
-Surface.getDOMRangeFromEvent = function(evt) {
-  let range, x = evt.clientX, y = evt.clientY
+Surface.prototype._isSurface = true
 
-  // Try the simple IE way first
-  if (document.body.createTextRange) {
-    range = document.body.createTextRange()
-    range.moveToPoint(x, y)
+/*
+  Computes the id of a surface
+
+  With IsolatedNodes, surfaces can be nested.
+  In this case the id can be seen as a path from the top-most to the nested ones
+
+  @examples
+
+  - top-level surface: 'body'
+  - table cell: 'body/t1/t1-A1.content'
+  - figure caption: 'body/fig1/fig1-caption.content'
+  - nested containers: 'body/section1'
+*/
+function createSurfaceId(surface) {
+  let isolatedNodeComponent = surface.context.isolatedNodeComponent
+  if (isolatedNodeComponent) {
+    let parentSurface = isolatedNodeComponent.context.surface
+    // nested containers
+    if (surface.isContainerEditor()) {
+      if (isolatedNodeComponent._isInlineNodeComponent) {
+        return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
+      } else {
+        return parentSurface.id + '/' + surface.name
+      }
+    }
+    // other isolated nodes such as tables, figures, etc.
+    else {
+      return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
+    }
+  } else {
+    return surface.name
   }
-
-  else if (!isUndefined(document.createRange)) {
-    // Try Mozilla's rangeOffset and rangeParent properties,
-    // which are exactly what we want
-    if (!isUndefined(evt.rangeParent)) {
-      range = document.createRange()
-      range.setStart(evt.rangeParent, evt.rangeOffset)
-      range.collapse(true)
-    }
-
-    // Try the standards-based way next
-    else if (document.caretPositionFromPoint) {
-      let pos = document.caretPositionFromPoint(x, y)
-      range = document.createRange()
-      range.setStart(pos.offsetNode, pos.offset)
-      range.collapse(true)
-    }
-
-    // Next, the WebKit way
-    else if (document.caretRangeFromPoint) {
-      range = document.caretRangeFromPoint(x, y)
-    }
-  }
-
-  return range
 }
 
 export default Surface

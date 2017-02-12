@@ -1,11 +1,13 @@
-import isBoolean from 'lodash/isBoolean'
-import isNumber from 'lodash/isNumber'
-import isString from 'lodash/isString'
-import isArray from 'lodash/isArray'
-import isObject from 'lodash/isObject'
-import cloneDeep from 'lodash/cloneDeep'
-import each from 'lodash/each'
+import cloneDeep from '../../util/cloneDeep'
+import forEach from '../../util/forEach'
+import isArray from '../../util/isArray'
+import isBoolean from '../../util/isBoolean'
+import isNumber from '../../util/isNumber'
+import isObject from '../../util/isObject'
+import isString from '../../util/isString'
+import isPlainObject from '../../util/isPlainObject'
 import EventEmitter from '../../util/EventEmitter'
+import Property from './Property'
 
 /*
   Base node implementation.
@@ -17,34 +19,32 @@ class Node extends EventEmitter {
   /**
     @param {Object} properties
   */
-  constructor(props) {
+  constructor(data) {
     super()
 
-    var NodeClass = this.constructor
+    const NodeClass = this.constructor
 
-    var schema = NodeClass.schema
+    let schema = NodeClass.schema
     for (var name in schema) {
       if (!schema.hasOwnProperty(name)) continue
-      var prop = schema[name]
-      // check integrity of provided props, such as type correctness,
+      let prop = schema[name]
+      // check integrity of provided data, such as type correctness,
       // and mandatory properties
-      var propIsGiven = (props[name] !== undefined)
-      var hasDefault = prop.hasOwnProperty('default')
-      var isOptional = prop.optional
+      const propIsGiven = (data[name] !== undefined)
+      const hasDefault = prop.hasDefault()
+      const isOptional = prop.isOptional()
       if ( (!isOptional && !hasDefault) && !propIsGiven) {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
-        this[name] = _checked(prop, props[name])
+        this[name] = _checked(prop, data[name])
       } else if (hasDefault) {
-        this[name] = cloneDeep(_checked(prop, prop.default))
+        this[name] = cloneDeep(_checked(prop, prop.getDefault()))
       } else {
         // property is optional
       }
     }
   }
-
-  get _isNode() { return true; }
 
   dispose() {}
 
@@ -56,6 +56,10 @@ class Node extends EventEmitter {
   */
   isInstanceOf(typeName) {
     return Node.isInstanceOf(this.constructor, typeName)
+  }
+
+  getSchema() {
+    return this.constructor.schema
   }
 
   /**
@@ -93,32 +97,51 @@ class Node extends EventEmitter {
     var data = {
       type: this.type
     }
-    each(this.constructor.schema, function(prop, name) {
-      data[prop.name] = this[name]
-    }.bind(this))
+    const schema = this.getSchema()
+    forEach(schema, (prop, name) => {
+      let val = this[name]
+      if (prop.isOptional() && val === undefined) return
+      if (isArray(val) || isPlainObject(val)) {
+        val = cloneDeep(val)
+      }
+      data[prop.name] = val
+    })
     return data
   }
 
-}
-
-Node.define = Node.defineSchema = function(schema) {
-  _defineSchema(this, schema)
-}
-
-Node.define({
-  type: "node",
-  id: 'string'
-})
-
-Object.defineProperty(Node.prototype, 'type', {
-  configurable: false,
-  get: function() {
+  get type() {
     return this.constructor.type
-  },
-  set: function() {
-    throw new Error('read-only')
+  }
+
+}
+
+Node.prototype._isNode = true
+
+// NOTE: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
+Object.defineProperty(Node, 'schema', {
+  get() { return this._schema },
+  set(schema) {
+    let NodeClass = this
+    // TODO: discuss if we want this. Is a bit more convenient
+    // ATM we transfer 'type' to the static property
+    if (schema.type) {
+      NodeClass.type = schema.type
+    }
+    // collects a full schema considering the schemas of parent class
+    // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
+    // or fill in default values for undefined properties.
+    NodeClass._schema = compileSchema(NodeClass, schema)
   }
 })
+
+Node.define = Node.defineSchema = function define(schema) {
+  this.schema = schema
+}
+
+Node.schema = {
+  type: "node",
+  id: 'string'
+}
 
 /**
   Internal implementation of Node.prototype.isInstanceOf.
@@ -144,22 +167,27 @@ Node.isInstanceOf = function(NodeClass, typeName) {
 
 // ### Internal implementation
 
-function _defineSchema(NodeClass, schema) {
-  if (schema.type) {
-    NodeClass.type = schema.type
+function compileSchema(NodeClass, schema) {
+  let compiledSchema = _compileSchema(schema)
+  let schemas = [compiledSchema]
+  let clazz = NodeClass
+  while(clazz) {
+    var parentProto = Object.getPrototypeOf(clazz.prototype)
+    if (!parentProto) {
+      break
+    }
+    clazz = parentProto.constructor
+    if (clazz && clazz._schema) {
+      schemas.unshift(clazz._schema)
+    }
   }
-  var compiledSchema = _compileSchema(schema)
-  // collects a full schema considering the schemas of parent class
-  // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
-  // or fill in default values for undefined properties.
-  NodeClass.schema = _unfoldedSchema(NodeClass, compiledSchema)
-  // computes the set of default properties only once
-  NodeClass.defaultProps = _extractDefaultProps(NodeClass)
+  schemas.unshift({})
+  return Object.assign.apply(null, schemas)
 }
 
 function _compileSchema(schema) {
-  var compiledSchema = {}
-  each(schema, function(definition, name) {
+  let compiledSchema = {}
+  forEach(schema, function(definition, name) {
     // skip 'type'
     if (name === 'type') {
       return
@@ -169,68 +197,42 @@ function _compileSchema(schema) {
     }
     definition = _compileDefintion(definition)
     definition.name = name
-    compiledSchema[name] = definition
+    compiledSchema[name] = new Property(definition)
   })
   return compiledSchema
 }
 
 function _compileDefintion(definition) {
-  var result = definition
-  if (isArray(definition.type) && definition[0] !== "array") {
+  let result = definition
+  if (isArray(definition.type) && definition.type[0] !== "array") {
     definition.type = [ "array", definition.type[0] ]
   } else if (definition.type === 'text') {
     result = {
       type: "string",
-      default: ''
+      default: '',
+      _isText: true
     }
   }
   return result
 }
 
-function _unfoldedSchema(NodeClass, compiledSchema) {
-  var schemas = [compiledSchema]
-  var clazz = NodeClass
-  while(clazz) {
-    var parentProto = Object.getPrototypeOf(clazz.prototype)
-    if (!parentProto) {
-      break
-    }
-    clazz = parentProto.constructor
-    if (clazz && clazz.schema) {
-      schemas.unshift(clazz.schema)
-    }
-  }
-  schemas.unshift({})
-  return Object.assign.apply(null, schemas)
-}
-
-function _extractDefaultProps(NodeClass) {
-  var unfoldedSchema = NodeClass.unfoldedSchema
-  var defaultProps = {}
-  each(unfoldedSchema, function(prop, name) {
-    if (prop.hasOwnProperty('default')) {
-      defaultProps[name] = prop['default']
-    }
-  })
-  return defaultProps
-}
-
 function _checked(prop, value) {
-  var type
-  if (isArray(prop.type)) {
+  let type
+  let name = prop.name
+  if (prop.isArray()) {
     type = "array"
   } else {
     type = prop.type
   }
   if (value === null) {
-    if (prop.notNull) {
-      throw new Error('Value for property ' + prop.name + ' is null.')
+    if (prop.isNotNull()) {
+      throw new Error('Value for property ' + name + ' is null.')
     } else {
       return value
     }
   }
   if (value === undefined) {
-    throw new Error('Value for property ' + prop.name + ' is undefined.')
+    throw new Error('Value for property ' + name + ' is undefined.')
   }
   if (type === "string" && !isString(value) ||
       type === "boolean" && !isBoolean(value) ||
@@ -238,7 +240,7 @@ function _checked(prop, value) {
       type === "array" && !isArray(value) ||
       type === "id" && !isString(value) ||
       type === "object" && !isObject(value)) {
-    throw new Error('Illegal value type for property ' + prop.name + ': expected ' + type + ', was ' + (typeof value))
+    throw new Error('Illegal value type for property ' + name + ': expected ' + type + ', was ' + (typeof value))
   }
   return value
 }

@@ -27,6 +27,7 @@ import TextProperty from './TextPropertyComponent'
 */
 
 class TextPropertyEditor extends Surface {
+
   constructor(parent, props) {
     // making props.name optional
     props.name = props.name || props.path.join('.')
@@ -43,7 +44,9 @@ class TextPropertyEditor extends Surface {
 
     if (!this.props.disabled) {
       el.addClass('sm-enabled')
-      el.setAttribute('contenteditable', true)
+      el.attr('contenteditable', true)
+      // native spellcheck
+      el.attr('spellcheck', this.props.spellcheck === 'native')
     }
 
     el.append(
@@ -57,22 +60,19 @@ class TextPropertyEditor extends Surface {
     return el
   }
 
-  /**
-    Selects all text
-  */
-  selectAll() {
-    let doc = this.getDocument()
-    let path = this.props.path
-    let text = doc.get(path)
-    let sel = doc.createSelection({
-      type: 'property',
-      path: path,
-      startOffset: 0,
-      endOffset: text.length
-    })
-    this.setSelection(sel)
+  _handleEnterKey(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    if (this.props.multiLine) {
+      super._handleEnterKey(event)
+    }
   }
 
+  getPath() {
+    return this.props.path
+  }
 }
+
+TextPropertyEditor.prototype._isTextPropertyEditor = true
 
 export default TextPropertyEditor

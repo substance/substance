@@ -1,29 +1,35 @@
-import last from 'lodash/last'
+// import last from '../util/last'
+import inBrowser from '../util/inBrowser'
 import Coordinate from '../model/Coordinate'
 import Range from '../model/Range'
-import DefaultDOMElement from './DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import TextPropertyComponent from './TextPropertyComponent'
-import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
+import Component from '../ui/Component'
+
+const DEBUG = false
 
 /*
- * A class that maps DOM selections to model selections.
- *
- * There are some difficulties with mapping model selections:
- * 1. DOM selections can not model discontinuous selections.
- * 2. Not all positions reachable via ContentEditable can be mapped to model selections. For instance,
- *    there are extra positions before and after non-editable child elements.
- * 3. Some native cursor behaviors need to be overidden.
- *
- * @class DOMSelection
- * @constructor
- * @param {Element} rootElement
+  A class that maps DOM selections to model selections.
+
+  There are some difficulties with mapping model selections:
+  1. DOM selections can not model discontinuous selections.
+  2. Not all positions reachable via ContentEditable can be mapped to model selections. For instance,
+     there are extra positions before and after non-editable child elements.
+  3. Some native cursor behaviors need to be overidden.
+
+  @param {Editor} Editor component
  */
 class DOMSelection {
 
-  constructor(surface) {
-    this.surface = surface
-    this._wrange = window.document.createRange()
+  constructor(editor) {
+    this.editor = editor
+    if (inBrowser) {
+      this.wRange = window.document.createRange()
+    }
+    // keeping the last DOM and Model coordinates
+    // TODO: why are we doing this?
+    this.state = { dom: null, model: null }
   }
 
   /**
@@ -35,24 +41,58 @@ class DOMSelection {
     @returns {model/Selection}
   */
   getSelection(options) {
+    // HACK: ignore this if not Browser (e.g. when running the test suite in node)
+    if (!inBrowser) return
     let range = this.mapDOMSelection(options)
-    let doc = this.surface.getDocument()
-    return doc.createSelection(range)
+    let doc = this.editor.getDocument()
+    // TODO: consolidate
+    return doc._createSelectionFromRange(range)
   }
 
   getSelectionForDOMRange(wrange) {
     let range = this.mapDOMRange(wrange)
-    let doc = this.surface.getDocument()
-    return doc.createSelection(range)
+    let doc = this.editor.getDocument()
+    return doc._createSelectionFromRange(range)
   }
 
-  // function _printStacktrace() {
-  //   try {
-  //     throw new Error();
-  //   } catch (err) {
-  //     console.log(err.stack);
-  //   }
-  // }
+  /*
+    Maps the current DOM selection to a model range.
+
+    @param {object} [options]
+      - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
+    @returns {model/Range}
+  */
+  mapDOMSelection(options) {
+    let wSel = window.getSelection()
+    let state = this.state
+    let range
+    // Use this log whenever the mapping goes wrong to analyze what
+    // is actually being provided by the browser
+    if (DEBUG) console.info('DOM->Model: ', wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
+    if (wSel.rangeCount === 0) return _null()
+    let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
+    if (wSel.isCollapsed) {
+      let coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options)
+      if (!coor) return _null()
+      range = _createRange({
+        start: coor,
+        end: coor
+      })
+    }
+    else {
+      let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
+      range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset, options)
+    }
+    if (DEBUG) console.info('DOM->Model: range ', range ? range.toString() : null)
+    state.model = range
+    return range
+
+    function _null() {
+      state.dom = null
+      state.model = null
+      return null
+    }
+  }
 
   /**
     Transfer a given model selection into the DOM.
@@ -60,47 +100,80 @@ class DOMSelection {
     @param {model/Selection} sel
   */
   setSelection(sel) {
-    // console.log('### DOMSelection: setting selection', sel.toString());
+    // HACK: ignore this if not Browser (e.g. when running the test suite in node)
+    if (!inBrowser) return
+    let state = this.state
     let wSel = window.getSelection()
-    if (sel.isNull() || sel.isCustomSelection()) {
-      this.clear()
-      return
+    let wRange = this.wRange
+    if (!sel || sel.isNull()) return this.clear()
+    // console.log('### DOMSelection: setting selection', sel.toString());
+    let {start, end} = this.mapModelToDOMCoordinates(sel)
+    if (!start) return this.clear()
+    if (sel.isReverse()) {
+      [start, end] = [end, start]
     }
+    state.dom = {
+      anchorNode: start.container,
+      anchorOffset: start.offset,
+      focusNode: end.container,
+      focusOffset: end.offset
+    }
+    _set(state.dom)
+
+    function _set({anchorNode, anchorOffset, focusNode, focusOffset}) {
+      wSel.removeAllRanges()
+      wRange.setStart(anchorNode, anchorOffset)
+      wRange.setEnd(anchorNode, anchorOffset)
+      wSel.addRange(wRange)
+      if (focusNode !== anchorOffset || focusOffset !== anchorOffset) {
+        wSel.extend(focusNode, focusOffset)
+      }
+    }
+  }
+
+  mapModelToDOMCoordinates(sel) {
+    if (DEBUG) console.info('Model->DOM: sel =', sel.toString());
+    let rootEl
+    let surface = this.editor.surfaceManager.getSurface(sel.surfaceId)
+    if (!surface) {
+      console.warn('Selection should have "surfaceId" set.')
+      rootEl = this.editor.el
+    } else {
+      rootEl = surface.el
+    }
+    if (sel.isNull() || sel.isCustomSelection()) {
+      return {}
+    }
+
     let start, end
     if (sel.isPropertySelection() || sel.isContainerSelection()) {
-      start = this._getDOMCoordinate(sel.start)
+      start = this._getDOMCoordinate(rootEl, sel.start)
       if (!start) {
         console.warn('FIXME: selection seems to be invalid.')
-        this.clear()
-        return
+        return {}
       }
       if (sel.isCollapsed()) {
         end = start
       } else {
-        end = this._getDOMCoordinate(sel.end)
+        end = this._getDOMCoordinate(rootEl, sel.end)
         if (!end) {
           console.warn('FIXME: selection seems to be invalid.')
-          this.clear()
-          return
+          return {}
         }
       }
     } else if (sel.isNodeSelection()) {
-      let comp = this.surface.find('*[data-id="'+sel.getNodeId()+'"]')
+      let comp = Component.unwrap(rootEl.find('*[data-id="'+sel.getNodeId()+'"]'))
       if (!comp) {
         console.error('Could not find component with id', sel.getNodeId())
-        this.clear()
-        return
+        return {}
       }
       if (comp._isIsolatedNodeComponent) {
-        let coors = IsolatedNodeComponent.getDOMCoordinates(comp)
-        if (sel.isFull()) {
-          start = coors.start
-          end = coors.end
-        } else if (sel.isBefore()) {
-          start = end = coors.start
-        } else {
-          start = end = coors.end
-        }
+        let coors = IsolatedNodeComponent.getDOMCoordinates(comp, sel)
+        start = coors.start
+        end = coors.end
+        // Note: ATM we do not render collapsed NodeSelections differently
+        // if (sel.isAfter()) start = end
+        // else if (sel.isBefore()) end = start
       } else {
         let _nodeEl = comp.el
         start = {
@@ -111,67 +184,32 @@ class DOMSelection {
           container: _nodeEl.getNativeElement(),
           offset: _nodeEl.getChildCount()
         }
-        if (sel.isBefore()) {
-          end = start
-        } else if (sel.isAfter()) {
-          start = end
-        }
       }
     }
-    // console.log('Model->DOMSelection: mapped to DOM coordinates', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
-
-    // if there is a range then set replace the window selection accordingly
-    let wRange
-    if (wSel.rangeCount > 0) {
-      wRange = wSel.getRangeAt(0)
-    } else {
-      wRange = this._wrange
-    }
-    wSel.removeAllRanges()
-    if (sel.isCollapsed()) {
-      wRange.setStart(start.container, start.offset)
-      wRange.setEnd(start.container, start.offset)
-      wSel.addRange(wRange)
-    } else {
-      if (sel.isReverse()) {
-        // console.log('DOMSelection: rendering a reverse selection.');
-        let tmp = start
-        start = end
-        end = tmp
-        // HACK: using wRange setEnd does not work reliably
-        // so we set just the start anchor
-        // and then use window.Selection.extend()
-        // unfortunately we are not able to test this behavior as it needs
-        // triggering native keyboard events
-        wRange.setStart(start.container, start.offset)
-        wRange.setEnd(start.container, start.offset)
-        wSel.addRange(wRange)
-        wSel.extend(end.container, end.offset)
-      } else {
-        wRange.setStart(start.container, start.offset)
-        wRange.setEnd(end.container, end.offset)
-        wSel.addRange(wRange)
-      }
-    }
-    // console.log('Model->DOMSelection: mapped selection to DOM', 'anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
+    if (DEBUG) console.info('Model->DOM:', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
+    return {start,end}
   }
 
-  _getDOMCoordinate(coor) {
+  _getDOMCoordinate(rootEl, coor) {
     let comp, domCoor = null
     if (coor.isNodeCoordinate()) {
-      comp = this.surface.find('*[data-id="'+coor.getNodeId()+'"]')
+      comp = Component.unwrap(rootEl.find('*[data-id="'+coor.getNodeId()+'"]'))
       if (comp) {
         if (comp._isIsolatedNodeComponent) {
           domCoor = IsolatedNodeComponent.getDOMCoordinate(comp, coor)
         } else {
+          let domOffset = 0
+          if (coor.offset > 0) {
+            domOffset = comp.getChildCount()
+          }
           domCoor = {
             container: comp.getNativeElement(),
-            offset: coor.offset
+            offset: domOffset
           }
         }
       }
     } else {
-      comp = this.surface._getTextPropertyComponent(coor.path)
+      comp = Component.unwrap(rootEl.find('.sc-text-property[data-path="'+coor.path.join('.')+'"]'))
       if (comp) {
         domCoor = comp.getDOMCoordinate(coor.offset)
       }
@@ -185,61 +223,12 @@ class DOMSelection {
     @param {Range} range
     @returns {model/Range}
   */
-  mapDOMRange(wRange) {
+  mapDOMRange(wRange, options) {
     return this._getRange(
       DefaultDOMElement.wrapNativeElement(wRange.startContainer),
       wRange.startOffset,
       DefaultDOMElement.wrapNativeElement(wRange.endContainer),
-      wRange.endOffset)
-  }
-
-  /*
-    Maps the current DOM selection to a model range.
-
-    @param {object} [options]
-      - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
-    @returns {model/Range}
-  */
-  mapDOMSelection(options) {
-    let range
-    let wSel = window.getSelection()
-    // Use this log whenever the mapping goes wrong to analyze what
-    // is actually being provided by the browser
-    // console.log('DOMSelection->Model: anchorNode:', wSel.anchorNode, 'anchorOffset:', wSel.anchorOffset, 'focusNode:', wSel.focusNode, 'focusOffset:', wSel.focusOffset, 'collapsed:', wSel.collapsed);
-    if (wSel.rangeCount === 0) {
-      return null;
-    }
-    let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
-    if (wSel.isCollapsed) {
-      let coor = this._getCoordinate(anchorNode, wSel.anchorOffset, options)
-      if (!coor) return null
-      // EXPERIMENTAL: when the cursor is in an IsolatedNode
-      // we return a selection for the whole node
-      if (coor.__inIsolatedBlockNode__) {
-        range = _createRangeForIsolatedBlockNode(coor.path[0], this.getContainerId())
-      } else if (coor.__inInlineNode__) {
-        // HACK: relying on hints left by InlineNodeComponent.getCoordinate()
-        range = _createRange(
-          new Coordinate(coor.path, coor.__startOffset__),
-          new Coordinate(coor.path, coor.__endOffset__),
-          false, this.getContainerId()
-        )
-      } else {
-        range = _createRange(coor, coor, false, this.getContainerId())
-      }
-    }
-    // HACK: special treatment for edge cases as addressed by #354.
-    // Sometimes anchorNode and focusNodes are the surface
-    else {
-      if (anchorNode.isElementNode() && anchorNode.is('.sc-surface')) {
-        range = this._getEnclosingRange(wSel.getRangeAt(0))
-      } else {
-        let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
-        range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset)
-      }
-    }
-    // console.log('DOMSelection->Model: extracted range', range.toString());
-    return range
+      wRange.endOffset, options)
   }
 
   /*
@@ -247,6 +236,8 @@ class DOMSelection {
   */
   clear() {
     window.getSelection().removeAllRanges()
+    this.state.dom = null
+    this.state.model = null
   }
 
   collapse(dir) {
@@ -260,12 +251,25 @@ class DOMSelection {
     }
   }
 
-  getContainerId() {
-    if (this.surface.isContainerEditor()) {
-      return this.surface.getContainerId();
-    } else {
-      return null;
-    }
+  select(el) {
+    let wSel = window.getSelection()
+    let wRange = window.document.createRange()
+    wRange.selectNode(el.getNativeElement())
+    wSel.removeAllRanges()
+    wSel.addRange(wRange)
+  }
+
+  extend(el, offset) {
+    let wSel = window.getSelection()
+    wSel.extend(el.getNativeElement(), offset)
+  }
+
+  setCursor(el, offset) {
+    let wSel = window.getSelection()
+    let wRange = window.document.createRange()
+    wRange.setStart(el.getNativeElement(), offset)
+    wSel.removeAllRanges()
+    wSel.addRange(wRange)
   }
 
   /*
@@ -277,17 +281,18 @@ class DOMSelection {
     @param {number} focusOffset
     @returns {model/Range}
   */
-  _getRange(anchorNode, anchorOffset, focusNode, focusOffset) {
-    let start = this._getCoordinate(anchorNode, anchorOffset)
-    let end
-    if (anchorNode === focusNode && anchorOffset === focusOffset) {
-      end = start
-    } else {
-      end = this._getCoordinate(focusNode, focusOffset)
-    }
+  _getRange(anchorNode, anchorOffset, focusNode, focusOffset, options = {}) {
     let isReverse = DefaultDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
+    let isCollapsed = (anchorNode === focusNode && anchorOffset === focusOffset)
+    let start, end
+    if (isCollapsed) {
+      start = end = this._getCoordinate(anchorNode, anchorOffset, options)
+    } else {
+      start = this._getCoordinate(anchorNode, anchorOffset, { direction: isReverse ? 'right' : 'left' })
+      end = this._getCoordinate(focusNode, focusOffset, options)
+    }
     if (start && end) {
-      return _createRange(start, end, isReverse, this.getContainerId())
+      return _createRange({ start, end, isReverse })
     } else {
       return null
     }
@@ -326,156 +331,49 @@ class DOMSelection {
     Moving `left` would provide the previous address, `right` would provide the next address.
     The default direction is `right`.
   */
-  _getCoordinate(nodeEl, offset, options) {
-    // Trying to apply the most common situation first
-    // and after that covering known edge cases
-    let surfaceEl = this.surface.el
+  _getCoordinate(nodeEl, offset, options={}) {
     let coor = null
+    // this deals with a cursor in a TextProperty
     if (!coor) {
-      coor = InlineNodeComponent.getCoordinate(nodeEl, offset)
-      if (coor) {
-        coor.__inInlineNode__ = true
+      coor = TextPropertyComponent.getCoordinate(this.editor.el, nodeEl, offset)
+    }
+    let comp = Component.unwrap(nodeEl)
+    if (!coor && comp) {
+      // let IsolatedNodeComponent figure out where the selection is
+      if (comp.context.isolatedNodeComponent) {
+        coor = IsolatedNodeComponent.getCoordinate(nodeEl, options)
       }
     }
-    // as this is the most often case, try to map the coordinate within
-    // a TextPropertyComponent
+    // Edge-cases: These handlers are hacked so that the case is covered,
+    // not solved 'elegantly'
     if (!coor) {
-      coor = TextPropertyComponent.getCoordinate(surfaceEl, nodeEl, offset)
-    }
-    // special treatment for isolated nodes
-    if (!coor) {
-      coor = IsolatedNodeComponent.getCoordinate(surfaceEl, nodeEl, offset)
-      if (coor) {
-        coor.__inIsolatedBlockNode__ = true
+      // as in #354: sometimes anchor or focus is the surface itself
+      if (comp && comp._isContainerEditor) {
+        let childIdx = (offset === 0) ? 0 : offset-1
+        let isBefore = (offset === 0)
+        let container = comp.getContainer()
+        let childNode = container.getNodeAt(childIdx)
+        let childComp = comp.getChildAt(childIdx)
+        coor = new Coordinate([childNode.id], isBefore?0:1 )
+        coor._comp = childComp
       }
-    }
-    // finally fall back to a brute-force search
-    if (!coor) {
-      coor = this._searchForCoordinate(nodeEl, offset, options)
+      // sometimes anchor or focus is a Node component with TextPropertyComponents as children (all TextNode Components)
+      else if (nodeEl.isElementNode() && nodeEl.getChildCount() > 0) {
+        let child = (offset > 0) ? nodeEl.getChildAt(offset-1) : nodeEl.firstChild
+        let prop
+        let childComp = Component.unwrap(child)
+        if (childComp && childComp._isTextPropertyComponent) {
+          prop = child
+        }
+        // let prop = last(child.findAll('data-path'))
+        if (prop) {
+          coor = TextPropertyComponent.getCoordinate(nodeEl, prop, (offset > 0) ? prop.getChildCount() : 0)
+        }
+      }
     }
     return coor
   }
 
-  /*
-    Map a DOM coordinate to a model coordinate via a brute-force search
-    on all properties.
-
-    This is used as a backup strategy for delicate DOM selections.
-
-    @param {Node} node
-    @param {number} offset
-    @param {object} options
-    @param {'left'|'right'} options.direction
-    @returns {model/Coordinate} the coordinate
-  */
-  _searchForCoordinate(node, offset, options) {
-    // NOTE: assuming that most situations are covered by
-    // TextPropertyComponent.getCoordinate already, we are trying just to
-    // solve the remaining scenarios, in an opportunistic way
-    options = options || {}
-    options.direction = options.direction || 'right'
-    let dir = options.direction
-    if (node.isElementNode()) {
-      let childCount = node.getChildCount()
-      offset = Math.max(0, Math.min(childCount, offset))
-      let el = node.getChildAt(offset)
-      while (el) {
-        let textPropertyEl
-        if (dir === 'right') {
-          if (el.isElementNode()) {
-            if (el.getAttribute('data-path')) {
-              textPropertyEl = el
-            } else {
-              textPropertyEl = el.find('*[data-path]')
-            }
-            if (textPropertyEl) {
-              return new Coordinate(_getPath(textPropertyEl), 0)
-            }
-          }
-          el = el.getNextSibling()
-        } else {
-          if (el.isElementNode()) {
-            if (el.getAttribute('data-path')) {
-              textPropertyEl = el
-            } else {
-              let textPropertyEls = el.findAll('*[data-path]')
-              textPropertyEl = last(textPropertyEls)
-            }
-            if (textPropertyEl) {
-              let path = _getPath(textPropertyEl)
-              let doc = this.surface.getDocument()
-              let text = doc.get(path)
-              return new Coordinate(path, text.length)
-            }
-          }
-          el = el.getPreviousSibling()
-        }
-      }
-    }
-    // if we land here then we could not find an addressable element on this level.
-    // try to find it one level higher
-    if (node !== this.surface.el) {
-      let parent = node.getParent()
-      let nodeIdx = parent.getChildIndex(node)
-      if (dir === 'right') {
-        nodeIdx++
-      }
-      return this._searchForCoordinate(parent, nodeIdx, options)
-    }
-
-    return null
-  }
-
-  /*
-    Computes a model range that encloses all properties
-    spanned by a given DOM range.
-
-    This is used in edge cases, where DOM selection anchors are not
-    within TextProperties.
-
-    @param {Range} range
-    @returns {model/Range}
-  */
-  _getEnclosingRange(wRange) {
-    let frag = wRange.cloneContents()
-    let props = frag.querySelectorAll('*[data-path]')
-    if (props.length === 0) {
-      return null
-    } else {
-      let doc = this.surface.getDocument()
-      let first = props[0]
-      let last = props[props.length-1]
-      let startPath = _getPath(first)
-      let text
-      if (first === last) {
-        text = doc.get(startPath)
-        return new Range(
-          new Coordinate(startPath, 0),
-          new Coordinate(startPath, text.length),
-          false
-        )
-      } else {
-        let endPath = _getPath(last)
-        text = doc.get(endPath)
-        return new Range(
-          new Coordinate(startPath, 0),
-          new Coordinate(endPath, text.length),
-          false
-        )
-      }
-    }
-  }
-}
-
-function _getPath(el) {
-  if (!el._isDOMElement) {
-    el = DefaultDOMElement.wrapNativeElement(el)
-  }
-  if (el.isElementNode()) {
-    let pathStr = el.getAttribute('data-path')
-    return pathStr.split('.')
-  }
-  throw new Error("Can't get path from element:" + el.outerHTML)
 }
 
 /*
@@ -488,18 +386,24 @@ function _getPath(el) {
  and only at the end exploit the fact deriving an isReverse flag
  and bringing start and end in the correct order.
 */
-function _createRange(start, end, isReverse, containerId) {
+function _createRange({start, end, isReverse}) {
   if (isReverse) {
-    let tmp = start
-    start = end
-    end = tmp
+    [start, end] = [end, start]
   }
-  return new Range(start, end, isReverse, containerId)
+  if (!start._comp || !end._comp) {
+    console.error('FIXME: getCoordinate() should provide a component instance')
+    return null
+  }
+  let surface = start._comp.context.surface
+  if (!surface) {
+    console.error('FIXME: Editable components should have their surface in the context')
+    return null
+  }
+  if (surface !== end._comp.context.surface) {
+    console.error('Coordinates are within two different surfaces. Can not create a selection.')
+    return null
+  }
+  return new Range(start, end, isReverse, surface.getContainerId(), surface.id)
 }
-
-function _createRangeForIsolatedBlockNode(nodeId, containerId) {
-  return new Range(new Coordinate([nodeId], 0), new Coordinate([nodeId], 1), false, containerId)
-}
-
 
 export default DOMSelection

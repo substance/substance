@@ -1,10 +1,7 @@
 import DOMImporter from './DOMImporter'
-import DefaultDOMElement from '../ui/DefaultDOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
-  @class
-  @abstract
-
   Base class for custom XML importers. If you want to use HTML as your
   exchange format see {@link model/HTMLImporter}.
 
@@ -13,8 +10,8 @@ import DefaultDOMElement from '../ui/DefaultDOMElement'
 
 class XMLImporter extends DOMImporter {
 
-  constructor(config) {
-    super(Object.assign({ idAttribute: 'id' }, config))
+  constructor(config, context) {
+    super(Object.assign({ idAttribute: 'id' }, config), context)
     // only used internally for creating wrapper elements
     this._el = DefaultDOMElement.parseXML('<dummy></dummy>')
   }

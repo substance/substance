@@ -1,40 +1,40 @@
-import switchTextType from '../../model/transform/switchTextType'
-import deleteSelection from '../../model/transform/deleteSelection'
-
-let HeadingMacro = {
+export default {
 
   appliesTo: ['paragraph'],
 
-  execute: function(props, context) {
+  execute: function(props) {
     if (this.appliesTo.indexOf(props.node.type) === -1) {
-      return false;
+      return false
+    }
+    if (props.action !== 'type') {
+      return false
     }
     let match = /^#\s/.exec(props.text)
-
     if (match) {
-      let surface = context.surfaceManager.getSurface(props.selection.surfaceId)
-      surface.transaction(function(tx, args) {
-        let deleteSel = tx.createSelection(props.path, 0, match[0].length)
-        deleteSelection(tx, {
-          selection: deleteSel
+      // console.log('Applying HeadingMacro')
+      let editorSession = props.editorSession
+      let sel = editorSession.getSelection()
+      let path = sel.start.path
+      let startOffset = sel.start.offset
+      editorSession.transaction(function(tx) {
+        tx.setSelection({
+          type: 'property',
+          path: path,
+          startOffset: 0,
+          endOffset: match[0].length
         })
-        let switchTextResult = switchTextType(tx, {
-          selection: props.selection,
-          containerId: args.containerId,
-          data: {
-            type: 'heading',
-            level: 1
-          }
+        tx.deleteSelection()
+        let node = tx.switchTextType({
+          type: 'heading',
+          level: 1
         })
-        if (props.action === 'type') {
-          return {
-            selection: tx.createSelection(switchTextResult.node.getTextPath(), 0)
-          }
-        }
+        tx.setSelection({
+          type: 'property',
+          path: node.getTextPath(),
+          startOffset: startOffset - match[0].length
+        })
       })
       return true
     }
   }
 }
-
-export default HeadingMacro

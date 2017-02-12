@@ -1,9 +1,21 @@
+## Beta 6
+
+- Advanced drag & drop gestures for adding and moving content
+- Spell checking support
+- Tables
+- Lists
+- Introduced generalized concept for overlays
+- New imperative editing API
+- Overhauled `IsolatedNode` implementation
+- Improved ES6 module bundling
+- Stabilized Beta 5 features
+
 ## Beta 5
 
 - Substance is now written in ES6
 - More usage options: Use Substance via `<script>` tag or use a module bundler of your choice (Rollup, Browserify, Webpack, ...)
 - Pure CSS instead of SASS for easier integration
-- Extracted develoment environment into substance-bundler tool.
+- Extracted development environment into substance-bundler tool.
 - Extracted test environment into substance-test
 - Extracted API docs generator into substance-docgen
 - Improved Tool API: Simplified command and tool APIs.

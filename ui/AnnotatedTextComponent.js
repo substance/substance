@@ -15,22 +15,10 @@ import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
 
 class AnnotatedTextComponent extends Component {
 
-  // TODO: this component should listen on changes to the property
-  // Otherwise will not be updated.
-  // Note that in contrast, TextPropertyComponents get updated by Surface.
-
-  /**
-    Node render implementation. Use model/Fragmenter for rendering of annotations.
-
-    @return {VirtualNode} VirtualNode created using ui/Component
-   */
   render($$) {
     let el = this._renderContent($$)
       .addClass('sc-annotated-text')
-      .css({
-        whiteSpace: "pre-wrap"
-      })
-
+      .css({ whiteSpace: "pre-wrap" })
     return el
   }
 
@@ -42,10 +30,20 @@ class AnnotatedTextComponent extends Component {
     return this.getDocument().getIndex('annotations').get(this.props.path)
   }
 
+  _getTagName() {
+    return this.props.tagName
+  }
+
+  _onDocumentChange(update) {
+    if (update.change && update.change.updated[this.getPath()]) {
+      this.rerender()
+    }
+  }
+
   _renderContent($$) {
     let text = this.getText();
     let annotations = this.getAnnotations()
-    let el = $$(this.props.tagName || 'span')
+    let el = $$(this._getTagName() || 'span')
     if (annotations && annotations.length > 0) {
       let fragmenter = new Fragmenter({
         onText: this._renderTextNode.bind(this),
@@ -69,26 +67,28 @@ class AnnotatedTextComponent extends Component {
     let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
+    // TODO: fix support for container annotations
     if (node.type === "container-annotation-fragment") {
-      return $$(AnnotationComponent, { doc: doc, node: node })
-        .addClass("se-annotation-fragment")
-        .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
+      // return $$(AnnotationComponent, { doc: doc, node: node })
+      //   .addClass("se-annotation-fragment")
+      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
     } else if (node.type === "container-annotation-anchor") {
-      return $$(AnnotationComponent, { doc: doc, node: node })
-        .addClass("se-anchor")
-        .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
-        .addClass(node.isStart?"start-anchor":"end-anchor")
+      // return $$(AnnotationComponent, { doc: doc, node: node })
+      //   .addClass("se-anchor")
+      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
+      //   .addClass(node.isStart?"start-anchor":"end-anchor")
+    } else {
+      let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
+      if (node.constructor.isInline &&
+          // also no extra wrapping if the node is already an inline node
+          !ComponentClass.prototype._isInlineNodeComponent &&
+          // opt-out for custom implementations
+          !ComponentClass.isCustom) {
+        ComponentClass = InlineNodeComponent
+      }
+      let el = $$(ComponentClass, { doc: doc, node: node })
+      return el
     }
-    let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
-    if (node.constructor.isInline &&
-        // opt-out for custom implementations
-        !ComponentClass.isCustom &&
-        // also no extra wrapping if the node is already an inline node
-        !ComponentClass.prototype._isInlineNodeComponent) {
-      ComponentClass = InlineNodeComponent
-    }
-    let el = $$(ComponentClass, { doc: doc, node: node })
-    return el
   }
 
   _finishFragment(fragment, context, parentContext) {
@@ -102,10 +102,6 @@ class AnnotatedTextComponent extends Component {
    */
   getDocument() {
     return this.props.doc || this.context.doc
-  }
-
-  getComponentRegistry() {
-    return this.props.componentRegistry || this.context.componentRegistry
   }
 
 }

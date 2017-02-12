@@ -1,44 +1,89 @@
-import isEqual from 'lodash/isEqual'
-import startsWith from 'lodash/startsWith'
-import Coordinate from '../../model/Coordinate'
-import IsolatedNodeComponent from '../isolated-node/IsolatedNodeComponent'
+import isEqual from '../../util/isEqual'
+import AbstractIsolatedNodeComponent from '../../ui/AbstractIsolatedNodeComponent'
 
-class InlineNodeComponent extends IsolatedNodeComponent {
+class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
-  get _isInlineNodeComponent() {
-    return true
-  }
+  render($$) {
+    let node = this.props.node
+    let ContentClass = this.ContentClass
 
-  // use spans everywhere
-  get __elementTag() {
-    return 'span'
-  }
+    let el = $$('span')
+    el.addClass(this.getClassNames())
+      .addClass('sc-inline-node')
+      .addClass('sm-'+this.props.node.type)
+      .attr("data-id", node.id)
+      .attr('data-inline', '1')
 
-  get __slugChar() {
-    return "\uFEFF"
-  }
+    let disabled = this.isDisabled()
 
-  getClassNames() {
-    return 'sc-inline-node'
-  }
+    if (this.state.mode) {
+      el.addClass('sm-'+this.state.mode)
+    } else {
+      el.addClass('sm-not-selected')
+    }
 
-  render($$) { // eslint-disable-line
-    let el = super.render($$)
-    el.attr('data-inline', '1')
+    if (!ContentClass.noStyle) {
+      el.addClass('sm-default-style')
+    }
+
+    // shadowing handlers of the parent surface
+    // TODO: extract this into a helper so that we can reuse it anywhere where we want
+    // to prevent propagation to the parent surface
+    el.on('keydown', this.onKeydown)
+
+    el.append(
+      this.renderContent($$, node)
+        .ref('content')
+        .addClass('se-content')
+    )
+
+    if (disabled) {
+      el.addClass('sm-disabled')
+         .attr('contenteditable', false)
+         .on('click', this.onClick)
+    }
+
+    el.attr('draggable', true)
     return el
   }
 
-  // TODO: this is almost the same as the super method. Try to consolidate.
-  _deriveStateFromSelectionState(selState) {
-    let sel = selState.getSelection()
-    let surfaceId = sel.surfaceId
-    if (!surfaceId) return
-    let id = this.getId()
+  isDisabled() {
+    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
+  }
+
+  getClassNames() {
+    return ''
+  }
+
+  onClick(event) {
+    if (!this._shouldConsumeEvent(event)) return
+    this.selectNode()
+  }
+
+  selectNode() {
+    // console.log('IsolatedNodeComponent: selecting node.');
+    let editorSession = this.context.editorSession
+    let surface = this.context.surface
     let node = this.props.node
-    let parentId = this._getSurfaceParent().getId()
-    let inParentSurface = (surfaceId === parentId)
+    editorSession.setSelection({
+      type: 'property',
+      path: node.start.path,
+      startOffset: node.start.offset,
+      endOffset: node.end.offset,
+      containerId: surface.getContainerId(),
+      surfaceId: surface.id
+    })
+  }
+
+  // TODO: this is almost the same as in InlineNodeComponent
+  // We should try to consolidate this
+  _deriveStateFromSelectionState(selState) {
+    let surface = this._getSurface(selState)
+    if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
-    if (inParentSurface) {
+    if (surface === this.context.surface) {
+      let sel = selState.getSelection()
+      let node = this.props.node
       if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.path, node.path)) {
         let nodeSel = node.getSelection()
         if(nodeSel.equals(sel)) {
@@ -48,64 +93,21 @@ class InlineNodeComponent extends IsolatedNodeComponent {
           return { mode: 'co-selected' }
         }
       }
-      return
     }
-    // for all other cases (focused / co-focused) the surface id prefix must match
-    if (!startsWith(surfaceId, id)) return
-    // Note: trying to distinguisd focused
-    // surfaceIds are a sequence of names joined with '/'
-    // a surface inside this node will have a path with length+1.
-    // a custom selection might just use the id of this IsolatedNode
-    let p1 = id.split('/')
-    let p2 = surfaceId.split('/')
-    if (p2.length >= p1.length && p2.length <= p1.length+1) {
+    let isolatedNodeComponent = surface.context.isolatedNodeComponent
+    if (!isolatedNodeComponent) return null
+    if (isolatedNodeComponent === this) {
       return { mode: 'focused' }
-    } else {
+    }
+    let isolatedNodes = this._getIsolatedNodes(selState)
+    if (isolatedNodes.indexOf(this) > -1) {
       return { mode: 'co-focused' }
     }
-  }
-
-  _selectNode() {
-    // console.log('IsolatedNodeComponent: selecting node.');
-    let surface = this.context.surface
-    let doc = surface.getDocument()
-    let node = this.props.node
-    surface.setSelection(doc.createSelection({
-      type: 'property',
-      path: node.path,
-      startOffset: node.startOffset,
-      endOffset: node.endOffset
-    }))
+    return null
   }
 
 }
 
-InlineNodeComponent.getCoordinate = function(el) {
-  // special treatment for block-level isolated-nodes
-  let parent = el.getParent()
-  if (el.isTextNode() && parent.is('.se-slug')) {
-    let slug = parent
-    let nodeEl = slug.getParent()
-    if (nodeEl.is('.sc-inline-node')) {
-      let startOffset = Number(nodeEl.getAttribute('data-offset'))
-      let len = Number(nodeEl.getAttribute('data-length'))
-      let charPos = startOffset
-      if (slug.is('sm-after')) charPos += len
-      let path
-      while ( (nodeEl = nodeEl.getParent()) ) {
-        let pathStr = nodeEl.getAttribute('data-path')
-        if (pathStr) {
-          path = pathStr.split('.')
-          let coor = new Coordinate(path, charPos)
-          coor.__inInlineNode__ = true
-          coor.__startOffset__ = startOffset
-          coor.__endOffset__ = startOffset+len
-          return coor
-        }
-      }
-    }
-  }
-  return null
-}
+InlineNodeComponent.prototype._isInlineNodeComponent = true
 
 export default InlineNodeComponent

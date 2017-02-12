@@ -6,13 +6,18 @@ export default {
   type: 'image',
   tagName: 'img',
 
-  import: function(el, node) {
-    node.src = el.attr('src')
-    node.previewSrc = el.attr('data-preview-src')
+  import: function(el, node, converter) {
+    let imageFile = converter.createNode({
+      id: 'file-'+node.id,
+      type: 'file',
+      fileType: 'image',
+      url: el.attr('src')
+    })
+    node.imageFile = imageFile.id
   },
 
   export: function(node, el) {
-    el.attr('src', node.src)
-    if (node.previewSrc) el.attr('data-preview-src', node.previewSrc)
+    let imageFile = node.document.get(node.imageFile)
+    el.attr('src', imageFile.getUrl())
   }
 }

@@ -1,8 +1,10 @@
-import isNumber from 'lodash/isNumber'
+import diff from '../util/diff'
+import isNumber from '../util/isNumber'
 import Coordinate from '../model/Coordinate'
-import AnnotatedTextComponent from './AnnotatedTextComponent'
-import CursorComponent from './CursorComponent'
-import SelectionFragmentComponent from './SelectionFragmentComponent'
+import Component from '../ui/Component'
+import AnnotatedTextComponent from '../ui/AnnotatedTextComponent'
+import CursorComponent from '../ui/CursorComponent'
+import SelectionFragmentComponent from '../ui/SelectionFragmentComponent'
 
 /**
   Renders a text property. Used internally by different components to render
@@ -26,25 +28,36 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 class TextPropertyComponent extends AnnotatedTextComponent {
 
-  get _isTextPropertyComponent() {
-    return true 
+  getInitialState() {
+    const markersManager = this.context.markersManager
+    let path = this.props.path
+    let markers
+    if (markersManager) {
+      // register and get initial set of markers
+      markersManager.register(this)
+      markers = markersManager.getMarkers(path, {
+        surfaceId: this.getSurfaceId(),
+        containerId: this.getContainerId()
+      })
+    } else {
+      const doc = this.getDocument()
+      markers = doc.getAnnotations(path)
+    }
+    return {
+      markers: markers
+    }
   }
 
   didMount() {
-    super.didMount.call(this)
-    // TODO: instead of letting Surface manage TextProperties
-    // we should instead use the Flow in future
-    let surface = this.getSurface()
-    if (surface) {
-      surface._registerTextProperty(this)
+    if (this.context.surface && this.context.surface.hasNativeSpellcheck()) {
+      this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
+      this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
     }
   }
 
   dispose() {
-    super.dispose.call(this);
-    let surface = this.getSurface()
-    if (surface) {
-      surface._unregisterTextProperty(this)
+    if (this.context.markersManager) {
+      this.context.markersManager.deregister(this)
     }
   }
 
@@ -54,23 +67,20 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     let el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
-        'data-path': path.join('.'),
-        spellCheck: false,
+        'data-path': path.join('.')
       })
       .css({
         'white-space': 'pre-wrap'
       })
 
-    if (this.context.dragManager) {
-      el.on('dragenter', this.onDragEnter)
-        .on('dragover', this.onDragOver)
-        .on('drop', this.onDrop)
-    }
-
     if (!this.props.withoutBreak) {
       el.append($$('br'))
     }
     return el
+  }
+
+  getAnnotations() {
+    return this.state.markers
   }
 
   _renderFragment($$, fragment) {
@@ -83,32 +93,56 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       el = $$(SelectionFragmentComponent, { collaborator: node.collaborator })
     } else {
       el = super._renderFragment.apply(this, arguments)
-      if (node.constructor.isInline) {
-        el.ref(id)
-      }
+      el.ref(id + '@' + fragment.counter)
+      // NOTE: before we only preserved inline nodes, or if configured explicitly
+      // now the performance seems good enough to do this all the time.
+      // if (node.constructor.isInline) {
+      //   el.ref(id)
+      // }
       // Adding refs here, enables preservative rerendering
       // TODO: while this solves problems with rerendering inline nodes
       // with external content, it decreases the overall performance too much.
       // We should optimize the component first before we can enable this.
-      else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
-        el.ref(id + '@' + fragment.counter)
-      }
+      // else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
+      //   el.ref(id + '@' + fragment.counter)
+      // }
     }
     el.attr('data-offset', fragment.pos)
     return el
   }
 
-  onDragEnter(event) {
-    event.preventDefault()
+  _onDomMutations(mutations) {
+    // HACK: only detecting mutations that are coming from the native spell-correction
+    if (mutations.length === 2 && mutations[0].target === mutations[1].target) {
+      let textEl = mutations[0].target._wrapper
+      if (textEl) {
+        this._applyTextMutation(textEl, mutations[0].oldValue)
+        return
+      }
+    }
+    // in all other cases, revert the change by rerendering
+    this.rerender()
   }
 
-  onDragOver(event) {
-    event.preventDefault()
-  }
+  _applyTextMutation(textEl, oldText) {
+    // find the offset
+    let offset = _getCharPos(textEl, 0)
+    let newText = textEl.textContent
+    let changes = diff(oldText, newText, offset)
 
-  onDrop(event) {
-    // console.log('Received drop on TextProperty', this.getPath());
-    this.context.dragManager.onDrop(event, this)
+    let editorSession = this.context.editorSession
+    let path = this.getPath()
+    editorSession.transaction(function(tx) {
+      changes.forEach(function(change) {
+        // NOTE: atomic text replace is not supported currently
+        if (change.type === 'replace') {
+          tx.update(path, { type: 'delete', start: change.start, end: change.end })
+          tx.update(path, { type: 'insert', start: change.start, text: change.text })
+        } else {
+          tx.update(path, change)
+        }
+      })
+    })
   }
 
   getPath() {
@@ -119,26 +153,22 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return this.getDocument().get(this.getPath())
   }
 
-  getAnnotations() {
-    let path = this.getPath()
-    let annotations = this.getDocument().getIndex('annotations').get(path)
-    let fragments = this.props.fragments
-    if (fragments) {
-      annotations = annotations.concat(fragments)
-    }
-    return annotations
-  }
-
   getDocument() {
     return this.props.doc ||this.context.doc
   }
 
-  getController() {
-    return this.props.controller || this.context.controller
+  getSurface() {
+    return this.props.surface || this.context.surface
   }
 
-  getSurface() {
-    return this.props.surface ||this.context.surface
+  getSurfaceId() {
+    let surface = this.getSurface()
+    return surface ? surface.id : null
+  }
+
+  getContainerId() {
+    let surface = this.getSurface()
+    return surface ? surface.getContainerId() : null
   }
 
   isEditable() {
@@ -152,6 +182,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   getDOMCoordinate(charPos) {
     return this._getDOMCoordinate(this.el, charPos)
   }
+
 
   _finishFragment(fragment, context, parentContext) {
     context.attr('data-length', fragment.length)
@@ -209,29 +240,42 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       }
     }
   }
+
 }
+
+TextPropertyComponent.prototype._isTextPropertyComponent = true
+
 
 // Helpers for DOM selection mapping
 
-TextPropertyComponent.getCoordinate = function(root, node, offset) {
-  let context = _getPropertyContext(root, node, offset)
+/*
+  Used to map from DOM to model.
+  Given a root element and a DOM element - which is typically somewhere inside a surface
+  it tries to find the next TextProperty by walking up the DOM.
+  If found it computes the character position, counting chars and using the hints, data-length and data-offset,
+  rendered by the TextPropertyComponent
+*/
+TextPropertyComponent.getCoordinate = function(root, el, offset) {
+  let context = _getPropertyContext(root, el, offset)
   if (!context) {
     return null
   }
   // in some cases we need to normalize the DOM coordinate
   // before we can use it for retrieving charPos
   // E.g. observed with #273
-  node = context.node
-  offset = context.offset
-  var charPos = _getCharPos(context.node, context.offset)
+  let charPos = _getCharPos(context.node, context.offset)
   if (isNumber(charPos)) {
-    return new Coordinate(context.path, charPos)
+    let coor = new Coordinate(context.path, charPos)
+    coor._comp = context.comp
+    return coor
+  } else {
+    return null
   }
-  return null
 }
 
 function _getPropertyContext(root, node, offset) {
   let result = {
+    comp: null,
     el: null,
     path: null,
     node: node,
@@ -239,16 +283,17 @@ function _getPropertyContext(root, node, offset) {
   }
   while (node && node !== root) {
     if (node.isElementNode()) {
-      let path = node.getAttribute('data-path')
-      if (path) {
-        result.el = node;
-        result.path = path.split('.')
+      let comp = Component.unwrap(node)
+      if (comp && comp._isTextPropertyComponent) {
+        result.comp = comp
+        result.el = node
+        result.path = comp.getPath()
         return result;
       }
+      // we need to normalize situations where the DOM coordinate
+      // is inside an inline node, which we have observed
+      // can actually happen.
       if (node.getAttribute('data-inline')) {
-        // we need to normalize situations where the DOM coordinate
-        // is inside an inline node, which we have observed
-        // can actually happen.
         result.node = node
         if (offset > 0) {
           result.offset = 1

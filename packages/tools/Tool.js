@@ -1,6 +1,5 @@
-import capitalize from 'lodash/capitalize'
-import extend from 'lodash/extend'
-import Button from '../button/Button'
+import capitalize from '../../util/capitalize'
+import extend from '../../util/extend'
 import Component from '../../ui/Component'
 
 /**
@@ -66,10 +65,11 @@ class Tool extends Component {
   }
 
   renderButton($$) {
+    let Button = this.getComponent('button')
     let btn = $$(Button, {
-      icon: this.props.icon,
-      label: this.props.label,
-      hint: this.props.hint,
+      icon: this.props.showIcon ? this.props.name : null,
+      label: this.props.showLabel ? this.props.name : null,
+      hint: this.props.showHint ? this.props.name : null,
       active: this.props.active,
       disabled: this.props.disabled,
       style: this.props.style
