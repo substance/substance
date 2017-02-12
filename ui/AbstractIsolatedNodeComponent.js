@@ -114,11 +114,6 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  onMousedown(event) {
-    // console.log('AbstractIsolatedNodeComponent.onMousedown', this.getId());
-    event.stopPropagation()
-  }
-
   onKeydown(event) {
     // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,

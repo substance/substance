@@ -389,33 +389,11 @@ class Surface extends Component {
     // then the handler needs to kick in and recover a persisted selection or such
     this._state.skipNextFocusEvent = true
 
-    // UX-wise, the proper way is to apply the selection on mousedown, and if a drag is started (range selection)
-    // we could maybe map the selection during the drag, but finally once after mouse is released.
-    // TODO: this needs to be solved properly; be aware of browser incompatibilities
-    // HACK: not working in IE which then does not allow a range selection anymore
-    // if (!platform.isIE) {
-    //   // HACK: clearing the DOM selection, otherwise we have troubles with the old selection being in the way for the next selection
-    //   this.domSelection.clear();
-    //   setTimeout(function() {
-    //       var sel = this.domSelection.getSelection();
-    //       this._setSelection(sel);
-    //   }.bind(this));
-    // }
-
     // Bind mouseup to the whole document in case of dragging out of the surface
     if (this.documentEl) {
       // TODO: we should handle mouse up only if we started a drag (and the selection has really changed)
       this.documentEl.on('mouseup', this.onMouseUp, this, { once: true })
     }
-  }
-
-  // When a user right clicks the DOM selection is updated (in Chrome the nearest
-  // word gets selected). Like we do with the left mouse clicks we need to sync up
-  // our model selection.
-  onContextMenu(event) {
-    if (!this._shouldConsumeEvent(event)) return
-    let sel = this.domSelection.getSelection()
-    this._setSelection(sel)
   }
 
   onMouseUp(e) {
@@ -430,6 +408,15 @@ class Surface extends Component {
       let sel = this.domSelection.getSelection()
       this._setSelection(sel)
     }.bind(this))
+  }
+
+  // When a user right clicks the DOM selection is updated (in Chrome the nearest
+  // word gets selected). Like we do with the left mouse clicks we need to sync up
+  // our model selection.
+  onContextMenu(event) {
+    if (!this._shouldConsumeEvent(event)) return
+    let sel = this.domSelection.getSelection()
+    this._setSelection(sel)
   }
 
   onNativeBlur() {
