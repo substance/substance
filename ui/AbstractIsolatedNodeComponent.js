@@ -24,6 +24,9 @@ class AbstractIsolatedNodeComponent extends Component {
   getChildContext() {
     return {
       isolatedNodeComponent: this,
+      // TODO: we should clear 'surface' here
+      // so that we know that we are not controlled by a surface
+      surface: undefined
     }
   }
 
@@ -36,7 +39,7 @@ class AbstractIsolatedNodeComponent extends Component {
     super.didMount()
 
     let editorSession = this.context.editorSession
-    editorSession.onRender('selection', this.onSelectionChanged, this)
+    editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
   dispose() {
@@ -101,10 +104,11 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   escape() {
+    console.log('Escaping from IsolatedNode', this.id)
     this.selectNode()
   }
 
-  onSelectionChanged() {
+  _onSelectionChanged() {
     let editorSession = this.context.editorSession
     let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
     if (!newState && this.state.mode) {
@@ -163,6 +167,12 @@ class AbstractIsolatedNodeComponent extends Component {
     }
     return isolatedNodes
   }
+
+  _shouldConsumeEvent(event) {
+    let comp = Component.unwrap(event.target)
+    return (comp && (comp === this || comp.context.isolatedNodeComponent === this))
+  }
+
 }
 
 AbstractIsolatedNodeComponent.prototype._isAbstractIsolatedNodeComponent = true

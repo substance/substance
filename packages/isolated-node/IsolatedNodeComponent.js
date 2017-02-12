@@ -70,17 +70,16 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     content.attr('contenteditable', false)
 
     el.append(content)
-
     el.append($$(Blocker).ref('blocker'))
-    if (this.state.unblocked) {
-      el.on('click', this.onClick)
-        .on('dblclick', this.onDblClick)
-    }
-
     el.append(
       $$('div').addClass('se-bracket sm-right').ref('right')
         .append(BRACKET)
     )
+    if (this.state.unblocked) {
+      el.on('click', this.onClick)
+        .on('dblclick', this.onDblClick)
+    }
+    el.on('mousedown', this._reserveMousedown, this)
 
     return el
   }
@@ -91,6 +90,50 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   getContent() {
     return this.refs.content
+  }
+
+  selectNode() {
+    // console.log('IsolatedNodeComponent: selecting node.');
+    let editorSession = this.context.editorSession
+    let surface = this.context.surface
+    let nodeId = this.props.node.id
+    editorSession.setSelection({
+      type: 'node',
+      nodeId: nodeId,
+      containerId: surface.getContainerId(),
+      surfaceId: surface.id
+    })
+  }
+
+  // EXPERIMENTAL: trying to catch clicks not handler by the
+  // content when this is unblocked
+  onClick(event) {
+    console.log('### Clicked on IsolatedNode', this.id, event.target)
+    event.stopPropagation()
+  }
+
+  onDblClick(event) {
+    console.log('### DblClicked on IsolatedNode', this.id, event.target)
+    event.stopPropagation()
+  }
+
+  grabFocus(event) {
+    let content = this.refs.content
+    if (content.grabFocus) {
+      content.grabFocus(event)
+    }
+  }
+
+  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
+  // and only reacting on click or mouseup when the mousedown has been reserved
+  _reserveMousedown(event) {
+    if (event.__reserved__) {
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      // console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+    }
   }
 
   _deriveStateFromSelectionState(selState) {
@@ -131,38 +174,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       }
     }
     return newState
-  }
-
-  selectNode() {
-    // console.log('IsolatedNodeComponent: selecting node.');
-    let editorSession = this.context.editorSession
-    let surface = this.context.surface
-    let nodeId = this.props.node.id
-    editorSession.setSelection({
-      type: 'node',
-      nodeId: nodeId,
-      containerId: surface.getContainerId(),
-      surfaceId: surface.id
-    })
-  }
-
-  // EXPERIMENTAL: trying to catch clicks not handler by the
-  // content when this is unblocked
-  onClick(event) {
-    // console.log('### Clicked on IsolatedNode', this.id, event.target)
-    event.stopPropagation()
-  }
-
-  onDblClick(event) {
-    // console.log('### DblClicked on IsolatedNode', this.id, event.target)
-    event.stopPropagation()
-  }
-
-  grabFocus(event) {
-    let content = this.refs.content
-    if (content.grabFocus) {
-      content.grabFocus(event)
-    }
   }
 
 }
@@ -214,7 +225,6 @@ class Blocker extends Component {
     return $$('div').addClass('sc-isolated-node-blocker')
       .attr('draggable', true)
       .attr('contenteditable', false)
-      .on('mousedown', this._reserveMousedown, this)
       .on('click', this.onClick)
       .on('dblclick', this.onDblClick)
   }
@@ -235,18 +245,6 @@ class Blocker extends Component {
 
   _getIsolatedNodeComponent() {
     return this.context.isolatedNodeComponent
-  }
-
-  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
-  // and only reacting on click or mouseup when the mousedown has been reserved
-  _reserveMousedown(event) {
-    if (event.__reserved__) {
-      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
-      return
-    } else {
-      // console.log('%s: taking mousedown ', this.id)
-      event.__reserved__ = this
-    }
   }
 
 }
