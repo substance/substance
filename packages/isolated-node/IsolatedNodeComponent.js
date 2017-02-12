@@ -50,10 +50,11 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     // always handle ESCAPE
     el.on('keydown', this.onKeydown)
 
-    let shouldRenderBlocker = (this.blockingMode === 'closed') && (this.state.mode !== 'focused')
-    if (!shouldRenderBlocker) {
-      el.addClass('sm-no-blocker')
-    }
+    // console.log('##### rendering IsolatedNode', this.id)
+    let shouldRenderBlocker = (
+      this.blockingMode === 'closed' &&
+      !this.state.unblocked
+    )
 
     // HACK: we need something 'editable' where we can put DOM selection into,
     // otherwise native cursor navigation gets broken
@@ -68,13 +69,18 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     content.attr('contenteditable', false)
 
     el.append(content)
-
     el.append($$(Blocker).ref('blocker'))
-
     el.append(
       $$('div').addClass('se-bracket sm-right').ref('right')
         .append(BRACKET)
     )
+
+    if (!shouldRenderBlocker) {
+      el.addClass('sm-no-blocker')
+      el.on('click', this.onClick)
+        .on('dblclick', this.onDblClick)
+    }
+    el.on('mousedown', this._reserveMousedown, this)
 
     return el
   }
@@ -85,38 +91,6 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   getContent() {
     return this.refs.content
-  }
-
-  _deriveStateFromSelectionState(selState) {
-    let surface = this._getSurface(selState)
-    if (!surface) return null
-    // detect cases where this node is selected or co-selected by inspecting the selection
-    if (surface === this.context.surface) {
-      let sel = selState.getSelection()
-      let nodeId = this.props.node.id
-      if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
-        if (sel.isFull()) {
-          return { mode: 'selected' }
-        } else if (sel.isBefore()) {
-          return { mode: 'cursor', position: 'before' }
-        } else if (sel.isAfter()) {
-          return { mode: 'cursor', position: 'after' }
-        }
-      }
-      if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
-        return { mode: 'co-selected' }
-      }
-    }
-    let isolatedNodeComponent = surface.context.isolatedNodeComponent
-    if (!isolatedNodeComponent) return null
-    if (isolatedNodeComponent === this) {
-      return { mode: 'focused' }
-    }
-    let isolatedNodes = this._getIsolatedNodes(selState)
-    if (isolatedNodes.indexOf(this) > -1) {
-      return { mode: 'co-focused' }
-    }
-    return null
   }
 
   selectNode() {
@@ -132,11 +106,76 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
+  // EXPERIMENTAL: trying to catch clicks not handler by the
+  // content when this is unblocked
+  onClick(event) {
+    // console.log('### Clicked on IsolatedNode', this.id, event.target)
+    event.stopPropagation()
+  }
+
+  onDblClick(event) {
+    // console.log('### DblClicked on IsolatedNode', this.id, event.target)
+    event.stopPropagation()
+  }
+
   grabFocus(event) {
     let content = this.refs.content
     if (content.grabFocus) {
       content.grabFocus(event)
     }
+  }
+
+  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
+  // and only reacting on click or mouseup when the mousedown has been reserved
+  _reserveMousedown(event) {
+    if (event.__reserved__) {
+      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
+      return
+    } else {
+      // console.log('%s: taking mousedown ', this.id)
+      event.__reserved__ = this
+    }
+  }
+
+  _deriveStateFromSelectionState(selState) {
+    let surface = this._getSurface(selState)
+    let newState = { mode: null, unblocked: null}
+    if (!surface) return newState
+    // detect cases where this node is selected or co-selected by inspecting the selection
+    if (surface === this.context.surface) {
+      let sel = selState.getSelection()
+      let nodeId = this.props.node.id
+      if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
+        if (sel.isFull()) {
+          newState.mode = 'selected'
+          newState.unblocked = true
+        } else if (sel.isBefore()) {
+          newState.mode = 'cursor'
+          newState.position = 'before'
+        } else if (sel.isAfter()) {
+          newState.mode = 'cursor'
+          newState.position = 'after'
+        }
+      }
+      if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
+        newState.mode = 'co-selected'
+      }
+    } else {
+      let isolatedNodeComponent = surface.context.isolatedNodeComponent
+      if (isolatedNodeComponent) {
+        if (isolatedNodeComponent === this) {
+          newState.mode = 'focused'
+          newState.unblocked = true
+        } else {
+          let isolatedNodes = this._getIsolatedNodes(selState)
+          if (isolatedNodes.indexOf(this) > -1) {
+            newState.mode = 'co-focused'
+            newState.unblocked = true
+          }
+        }
+      }
+    }
+    return newState
   }
 
 }
@@ -188,7 +227,6 @@ class Blocker extends Component {
     return $$('div').addClass('sc-isolated-node-blocker')
       .attr('draggable', true)
       .attr('contenteditable', false)
-      .on('mousedown', this._reserveMousedown, this)
       .on('click', this.onClick)
       .on('dblclick', this.onDblClick)
   }
@@ -196,34 +234,19 @@ class Blocker extends Component {
   onClick(event) {
     if (event.target !== this.getNativeElement()) return
     // console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
-    if (this.state.mode !== 'selected' && this.state.mode !== 'focused') {
-      event.preventDefault()
-      event.stopPropagation()
-      this._getIsolatedNodeComponent().selectNode()
-    }
+    event.stopPropagation()
+    const comp = this._getIsolatedNodeComponent()
+    comp.extendState({ mode: 'selected', unblocked: true })
+    comp.selectNode()
   }
 
   onDblClick(event) {
     // console.log('DblClicked on Blocker of %s', this.getParent().id, event)
-    event.preventDefault()
     event.stopPropagation()
-    this._getIsolatedNodeComponent().grabFocus(event)
   }
 
   _getIsolatedNodeComponent() {
     return this.context.isolatedNodeComponent
-  }
-
-  // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
-  // and only reacting on click or mouseup when the mousedown has been reserved
-  _reserveMousedown(event) {
-    if (event.__reserved__) {
-      // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
-      return
-    } else {
-      // console.log('%s: taking mousedown ', this.id)
-      event.__reserved__ = this
-    }
   }
 
 }

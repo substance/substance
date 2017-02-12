@@ -19,7 +19,19 @@ class TableCellComponent extends Component {
     }
     return el
   }
+
+  grabFocus() {
+    let node = this.props.node
+    this.context.editorSession.setSelection({
+      type: 'property',
+      path: node.getPath(),
+      startOffset: node.getLength(),
+      surfaceId: this.refs.editor.id
+    })
+  }
 }
+
+TableCellComponent.prototype._isTableCellComponent = true
 
 
 export default TableCellComponent

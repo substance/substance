@@ -80,10 +80,10 @@ class AnnotatedTextComponent extends Component {
     } else {
       let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
       if (node.constructor.isInline &&
-          // opt-out for custom implementations
-          !ComponentClass.isCustom &&
           // also no extra wrapping if the node is already an inline node
-          !ComponentClass.prototype._isInlineNodeComponent) {
+          !ComponentClass.prototype._isInlineNodeComponent &&
+          // opt-out for custom implementations
+          !ComponentClass.isCustom) {
         ComponentClass = InlineNodeComponent
       }
       let el = $$(ComponentClass, { doc: doc, node: node })

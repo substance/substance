@@ -42,5 +42,6 @@
 }
 
 .sc-isolated-node.sm-no-blocker > .se-bracket {
-  display:none;
+  /*display:none;*/
+  visibility: hidden;
 }

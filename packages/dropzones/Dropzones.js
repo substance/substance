@@ -12,7 +12,6 @@ export default class Dropzones extends Component {
   render($$) {
     let el = $$('div').addClass('sc-dropzones')
 
-
     if (this.state.dropzones) {
       el.on('dragenter', this.onDrag)
         .on('dragover', this.onDrag)
@@ -100,7 +99,9 @@ export default class Dropzones extends Component {
   }
 
   onDrop(e) {
-    // console.log('onDrop', e.target)
+    // console.log('Dropzones.onDrop()', e.target)
+    // HACK: try if this is really necessary
+    e.__reserved__ = true
     e.preventDefault()
     e.stopPropagation()
     let dropzoneIndex = e.target.parentNode.dataset.dropzoneIndex
@@ -113,13 +114,16 @@ export default class Dropzones extends Component {
     // Original component (e.g. img element)
     let component = dropzone.component
     let dropzoneComponent = dropzone.dropzoneComponent
-    this.context.dragManager.handleDrop(e, {
+    // HACK: extending the dragState here
+    let dragManager = this.context.dragManager
+    dragManager.extendDragState({
       targetSurface,
       dropType,
       dropParams,
       component,
       dropzoneComponent
     })
+    dragManager._onDragEnd(e)
   }
 
   /*

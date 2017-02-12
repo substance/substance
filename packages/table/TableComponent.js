@@ -26,21 +26,46 @@ class TableComponent extends Component {
       }
       el.append(rowEl)
     }
+    el.on('click', this.onClick)
+    el.on('dblclick', this.onDblClick)
     return el
   }
 
-  grabFocus(event) { // eslint-disable-line
-    let firstCellId = this.props.node.cells[0][0]
-    if (firstCellId) {
-      let comp = this.refs[firstCellId]
-      let node = comp.props.node
-      this.context.editorSession.setSelection({
-        type: 'property',
-        path: node.getPath(),
-        startOffset: node.getLength(),
-        // TODO: would be nice if we could 'hide' these technical details
-        surfaceId: comp.refs.editor.id
-      })
+  onClick(event) {
+    event.stopPropagation()
+    // console.log('Clicked on Table', this.props.node.id, event.target)
+  }
+
+  // TODO: this should only be used for the initial table state
+  onDblClick(event) {
+    event.stopPropagation()
+    // console.log('DblClicked on Table', this.props.node.id, event.target)
+
+    // HACK: assuming that if the event.target has a surface
+    // it is a TextPropertyEditor of a cell
+    let comp = Component.unwrap(event.target)
+    if (comp) {
+      let cellComp
+      if (comp._isTableCellComponent) {
+        cellComp = comp
+      } else if (comp._isTextPropertyEditor) {
+        cellComp = comp.getParent()
+      } else if (comp._isTextPropertyComponent) {
+        cellComp = comp.getParent().getParent()
+      } else {
+        console.warn('TODO: find the right cell')
+      }
+      if (cellComp) {
+        cellComp.grabFocus()
+      }
+    }
+  }
+
+  grabFocus() {
+    let cellId = this.props.node.cells[0][0]
+    if (cellId) {
+      let comp = this.refs[cellId]
+      comp.grabFocus()
     }
   }
 

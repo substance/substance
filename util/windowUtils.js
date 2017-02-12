@@ -66,3 +66,16 @@ export function getRelativeRect(parentRect, childRect) {
     height: childRect.height
   }
 }
+
+export function isMouseInsideDOMSelection(e) {
+  let wsel = window.getSelection()
+  if (wsel.rangeCount === 0) {
+    return false
+  }
+  let wrange = wsel.getRangeAt(0)
+  let selectionRect = wrange.getBoundingClientRect()
+  return e.clientX >= selectionRect.left &&
+         e.clientX <= selectionRect.right &&
+         e.clientY >= selectionRect.top &&
+         e.clientY <= selectionRect.bottom
+}
