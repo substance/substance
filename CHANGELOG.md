@@ -4,7 +4,7 @@
 - Spell checking support
 - Tables
 - Lists
-- Introduce generalized concept for overlays
+- Introduced generalized concept for overlays
 - New imperative editing API
 - Overhauled `IsolatedNode` implementation
 - Improved ES6 module bundling
