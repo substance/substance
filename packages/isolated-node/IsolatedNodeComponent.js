@@ -50,12 +50,11 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     // always handle ESCAPE
     el.on('keydown', this.onKeydown)
 
-    // console.log('##### rendering IsolatedNode', this.id, this.state.unblocked)
-    let shouldRenderBlocker = (this.blockingMode === 'closed' && !this.state.unblocked)
-
-    if (!shouldRenderBlocker) {
-      el.addClass('sm-no-blocker')
-    }
+    // console.log('##### rendering IsolatedNode', this.id)
+    let shouldRenderBlocker = (
+      this.blockingMode === 'closed' &&
+      !this.state.unblocked
+    )
 
     // HACK: we need something 'editable' where we can put DOM selection into,
     // otherwise native cursor navigation gets broken
@@ -75,7 +74,9 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       $$('div').addClass('se-bracket sm-right').ref('right')
         .append(BRACKET)
     )
-    if (this.state.unblocked) {
+
+    if (!shouldRenderBlocker) {
+      el.addClass('sm-no-blocker')
       el.on('click', this.onClick)
         .on('dblclick', this.onDblClick)
     }
@@ -147,6 +148,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
           newState.mode = 'selected'
+          newState.unblocked = true
         } else if (sel.isBefore()) {
           newState.mode = 'cursor'
           newState.position = 'before'
