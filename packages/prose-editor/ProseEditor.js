@@ -38,7 +38,7 @@ class ProseEditor extends AbstractEditor {
 
     let contentPanel = $$(ScrollPane, {
       name: 'contentPanel',
-      contextMenu: 'custom',
+      contextMenu: this.props.contextMenu || 'native',
       scrollbarPosition: 'right',
       scrollbarType: this.props.scrollbarType,
     }).append(
