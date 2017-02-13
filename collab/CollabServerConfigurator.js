@@ -65,7 +65,9 @@ class CollabServerConfigurator {
       this.documentEngine = new DocumentEngine({
         documentStore: this.config.documentStore,
         changeStore: this.config.changeStore,
-        snapshotStore: this.config.snapshotStore
+        snapshotStore: this.config.snapshotStore,
+        readSnapshot: this.config.readSnapshot,
+        writeSnapshot: this.config.writeSnapshot
       })
     }
     return this.documentEngine
@@ -77,7 +79,6 @@ class CollabServerConfigurator {
                              takes a Configurator instance as the first method.
     @param  {Object} options Additional options to pass to the
                              package.`configure` method
-
     @return {configurator}   returns the configurator instance to make it easy
                              to chain calls to import.
    */

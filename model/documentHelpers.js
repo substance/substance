@@ -413,4 +413,3 @@ function mergeListItems(doc, listId, itemPos) {
   annotationHelpers.transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
   doc.delete(source.id)
 }
-

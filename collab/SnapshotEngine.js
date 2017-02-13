@@ -1,7 +1,5 @@
 import computeSnapshot from './computeSnapshot'
 
-const EMPTY_DOC = { nodes: {} }
-
 /*
   API for creating and retrieving document snapshots
 */
@@ -19,14 +17,13 @@ class SnapshotEngine {
     the changes since version 16 and apply those, plus the very new change.
   */
   getSnapshot(documentId, version, cb) {
-    let jsonDoc = EMPTY_DOC
     this._getClosestSnapshot(documentId, version, (err, snapshot, closestVersion) => {
       if (err) {
         return cb(err)
       }
       if (snapshot && version === closestVersion) {
-        // we alread have a snapshot for this version
-        return cb(null, snapshot, version)
+        // We don't need to fetch additional changes
+        return cb(null, this._readSnapshot(snapshot, []), version)
       }
       let knownVersion
       if (snapshot) {
@@ -34,19 +31,29 @@ class SnapshotEngine {
       } else {
         knownVersion = 0 // we need to fetch all changes
       }
-      if (snapshot) {
-        jsonDoc = snapshot
-      }
+
       // Now we get the remaining changes after the known version
       this.changeStore.getChanges(documentId, knownVersion, version, (err, changes) => {
         if (err) return cb(err)
         if (changes.length < (version - knownVersion)) {
           return cb('Changes missing for reconstructing version '+ version)
         }
-        jsonDoc = computeSnapshot(jsonDoc, changes)
-        cb(null, jsonDoc, version)
+        cb(null, this._readSnapshot(snapshot, changes), version)
       })
     })
+  }
+
+  _readSnapshot(rawSnapshot, changes) {
+    console.info('_readSnapshot', rawSnapshot, changes)
+    let snapshot
+    if (rawSnapshot) {
+      snapshot = JSON.parse(rawSnapshot)
+    } else {
+      console.info('Building snapshot from scratch.')
+      snapshot = { nodes: {} }
+    }
+    snapshot = computeSnapshot(snapshot, changes)
+    return JSON.stringify(snapshot)
   }
 
   /*
