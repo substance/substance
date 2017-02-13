@@ -15,4 +15,4 @@ npm start
 
 Now you can access the example at `http://localhost:5000`.
 
-Once you have that working head over to the {@link your-first-editor}. To learn about how to integrate Substance into your development setup, see {@link integrating-substance}
+Once you have that working head over to create {@link your-first-editor}. To learn about how to integrate Substance into your development setup, see {@link integrating-substance}.
