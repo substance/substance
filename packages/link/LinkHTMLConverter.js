@@ -3,7 +3,7 @@
  */
 export default {
 
-  type: "link",
+  type: 'link',
   tagName: 'a',
 
   import: function(el, node) {
@@ -12,10 +12,10 @@ export default {
   },
 
   export: function(link, el) {
-    el.attr({
-      href: link.url,
-      title: link.title
-    })
+    el.attr('href', link.url)
+    if (link.title) {
+      el.attr('title', link.title)
+    }
   }
 
 }
