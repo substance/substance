@@ -5,6 +5,7 @@ import computeSnapshot from './computeSnapshot'
 */
 class SnapshotEngine {
   constructor(config) {
+    this.configurator = config.configurator
     this.changeStore = config.changeStore
     this.snapshotStore = config.snapshotStore
   }
@@ -23,7 +24,7 @@ class SnapshotEngine {
       }
       if (snapshot && version === closestVersion) {
         // We don't need to fetch additional changes
-        return cb(null, this._readSnapshot(snapshot, []), version)
+        return cb(null, this._buildSnapshot(snapshot, []), version)
       }
       let knownVersion
       if (snapshot) {
@@ -31,19 +32,23 @@ class SnapshotEngine {
       } else {
         knownVersion = 0 // we need to fetch all changes
       }
-
       // Now we get the remaining changes after the known version
       this.changeStore.getChanges(documentId, knownVersion, version, (err, changes) => {
         if (err) return cb(err)
         if (changes.length < (version - knownVersion)) {
           return cb('Changes missing for reconstructing version '+ version)
         }
-        cb(null, this._readSnapshot(snapshot, changes), version)
+        cb(null, this._buildSnapshot(snapshot, changes), version)
       })
     })
   }
 
-  _readSnapshot(rawSnapshot, changes) {
+  _buildSnapshot(rawSnapshot, changes) {
+    let buildSnapshotFn = this.configurator.getSnapshotBuilder()
+    return buildSnapshotFn(rawSnapshot, changes)
+  }
+
+  _readSnapshotJSON(rawSnapshot, changes) {
     console.info('_readSnapshot', rawSnapshot, changes)
     let snapshot
     if (rawSnapshot) {

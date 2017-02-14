@@ -1,13 +1,15 @@
 import DocumentEngine from './DocumentEngine'
+import Configurator from '../util/Configurator'
 
-class CollabServerConfigurator {
-  constructor() {
-    this.config = {
+class CollabServerConfigurator extends Configurator {
+  constructor(...args) {
+    super(...args)
+    this.config = Object.assign(this.config, {
       heartbeat: 30*1000,
       documentStore: undefined,
       changeStore: undefined,
       snapshotStore: undefined
-    }
+    })
   }
 
   setHost(host) {
@@ -33,6 +35,10 @@ class CollabServerConfigurator {
     this.config.snapshotStore = snapshotStore
   }
 
+  setSnapshotBuilder(snapshotBuilderFn) {
+    this.config.snapshotBuilderFn = snapshotBuilderFn
+  }
+
   // Config Interpreter API
   // ------------------------
 
@@ -56,6 +62,10 @@ class CollabServerConfigurator {
     return this.config.snapshotStore
   }
 
+  getSnapshotBuilder() {
+    return this.config.snapshotBuilderFn
+  }
+
   /*
     TODO: We should discuss if it is a good idea that the configurator 'owns'
     instances. Don't see a better solution for now though.
@@ -63,28 +73,13 @@ class CollabServerConfigurator {
   getDocumentEngine() {
     if (!this.documentEngine) {
       this.documentEngine = new DocumentEngine({
+        configurator: this,
         documentStore: this.config.documentStore,
         changeStore: this.config.changeStore,
-        snapshotStore: this.config.snapshotStore,
-        readSnapshot: this.config.readSnapshot,
-        writeSnapshot: this.config.writeSnapshot
+        snapshotStore: this.config.snapshotStore
       })
     }
     return this.documentEngine
-  }
-
-  /**
-    Configure this instance of configuration for provided package.
-    @param  {Object} pkg     Object should contain a `configure` method that
-                             takes a Configurator instance as the first method.
-    @param  {Object} options Additional options to pass to the
-                             package.`configure` method
-    @return {configurator}   returns the configurator instance to make it easy
-                             to chain calls to import.
-   */
-  import(pkg, options) {
-    pkg.configure(this, options || {})
-    return this
   }
 
 }
