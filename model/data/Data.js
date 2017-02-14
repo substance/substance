@@ -130,6 +130,7 @@ class Data extends EventEmitter {
    */
   delete(nodeId) {
     var node = this.nodes[nodeId]
+    if (!node) return
     node.dispose()
     delete this.nodes[nodeId]
 
