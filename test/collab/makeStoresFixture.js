@@ -1,4 +1,4 @@
-import computeSnapshot from '../../collab/computeSnapshot'
+import buildJSONSnapshot from '../../collab/buildJSONSnapshot'
 import SnapshotStore from '../../collab/SnapshotStore'
 import ChangeStore from '../../collab/ChangeStore'
 import createTestArticle from '../fixture/createTestArticle'
@@ -38,8 +38,8 @@ function makeStoresFixture(numChanges, snapshots) {
   })
   let snapshotSeed = {'test-doc': {}}
   snapshots.forEach((version) => {
-    snapshotSeed['test-doc'][version] = computeSnapshot(
-      EMPTY_DOC,
+    snapshotSeed['test-doc'][version] = buildJSONSnapshot(
+      JSON.stringify(EMPTY_DOC),
       changes.slice(0,version)
     )
   })

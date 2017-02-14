@@ -1,5 +1,6 @@
 import DocumentEngine from './DocumentEngine'
 import Configurator from '../util/Configurator'
+import buildJSONSnapshot from './buildJSONSnapshot'
 
 class CollabServerConfigurator extends Configurator {
   constructor(...args) {
@@ -8,7 +9,8 @@ class CollabServerConfigurator extends Configurator {
       heartbeat: 30*1000,
       documentStore: undefined,
       changeStore: undefined,
-      snapshotStore: undefined
+      snapshotStore: undefined,
+      snapshotBuilderFn: buildJSONSnapshot
     })
   }
 

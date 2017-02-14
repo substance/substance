@@ -1,4 +1,3 @@
-import computeSnapshot from './computeSnapshot'
 
 /*
   API for creating and retrieving document snapshots
@@ -48,19 +47,6 @@ class SnapshotEngine {
     return buildSnapshotFn(rawSnapshot, changes)
   }
 
-  _readSnapshotJSON(rawSnapshot, changes) {
-    console.info('_readSnapshot', rawSnapshot, changes)
-    let snapshot
-    if (rawSnapshot) {
-      snapshot = JSON.parse(rawSnapshot)
-    } else {
-      console.info('Building snapshot from scratch.')
-      snapshot = { nodes: {} }
-    }
-    snapshot = computeSnapshot(snapshot, changes)
-    return JSON.stringify(snapshot)
-  }
-
   /*
     Creates a snapshot
   */
@@ -88,7 +74,7 @@ class SnapshotEngine {
       if (!closestVersion) {
         return cb(null, undefined)
       }
-      this.snapshotStore.getSnapshot(documentId, version, cb)
+      this.snapshotStore.getSnapshot(documentId, closestVersion, cb)
     })
   }
 }
