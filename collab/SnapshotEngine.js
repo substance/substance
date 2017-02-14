@@ -4,7 +4,7 @@
 */
 class SnapshotEngine {
   constructor(config) {
-    this.configurator = config.configurator
+    this.snapshotBuilder = config.snapshotBuilder
     this.changeStore = config.changeStore
     this.snapshotStore = config.snapshotStore
   }
@@ -43,8 +43,7 @@ class SnapshotEngine {
   }
 
   _buildSnapshot(rawSnapshot, changes) {
-    let buildSnapshotFn = this.configurator.getSnapshotBuilder()
-    return buildSnapshotFn(rawSnapshot, changes)
+    return this.snapshotBuilder(rawSnapshot, changes)
   }
 
   /*

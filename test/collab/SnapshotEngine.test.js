@@ -2,12 +2,14 @@
 import { module } from 'substance-test'
 import SnapshotEngine from '../../collab/SnapshotEngine'
 import makeStoresFixture from './makeStoresFixture'
+import buildJSONSnapshot from '../../collab/buildJSONSnapshot'
 
 const test = module('collab/SnapshotEngine')
 
 function _fixture(numChanges, snapshots) {
-  let stores = makeStoresFixture(numChanges, snapshots)
-  return new SnapshotEngine(stores)
+  let config = makeStoresFixture(numChanges, snapshots)
+  config.snapshotBuilder = buildJSONSnapshot
+  return new SnapshotEngine(config)
 }
 
 test('Should error when getting snapshot that does not exist', function(t) {

@@ -7,14 +7,13 @@ import SnapshotEngine from './SnapshotEngine'
 class DocumentEngine extends EventEmitter {
   constructor(config) {
     super()
-    this.configurator = config.configurator
     this.changeStore = config.changeStore
     this.snapshotStore = config.snapshotStore
     // Snapshot creation frequency (e.g. if it equals 15 then every
     // 15th version will be saved as snapshot)
     this.snapshotFrequency = config.snapshotFrequency || 1
     this.snapshotEngine = new SnapshotEngine({
-      configurator: this.configurator,
+      snapshotBuilder: config.snapshotBuilder,
       changeStore: this.changeStore,
       snapshotStore: this.snapshotStore
     })

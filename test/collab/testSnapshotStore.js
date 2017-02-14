@@ -1,6 +1,8 @@
 import { series } from '../../util/async'
 
-let EXAMPLE_SNAPSHOT = {test: 'test'}
+let EXAMPLE_SNAPSHOT = JSON.stringify({
+  test: 'test'
+})
 
 function testSnapshotStore(createEmptySnapshotStore, test) {
 

@@ -75,7 +75,7 @@ class CollabServerConfigurator extends Configurator {
   getDocumentEngine() {
     if (!this.documentEngine) {
       this.documentEngine = new DocumentEngine({
-        configurator: this,
+        snapshotBuilder: this.config.snapshotBuilderFn,
         documentStore: this.config.documentStore,
         changeStore: this.config.changeStore,
         snapshotStore: this.config.snapshotStore

@@ -1,7 +1,9 @@
 /* eslint-disable consistent-return */
 import { module } from 'substance-test'
 import DocumentEngine from '../../collab/DocumentEngine'
+import buildJSONSnapshot from '../../collab/buildJSONSnapshot'
 import makeStoresFixture from './makeStoresFixture'
+
 
 const test = module('collab/DocumentEngine')
 
@@ -58,6 +60,7 @@ test('Should be able to retrieve changes', function(t) {
 function _fixture(numChanges, snapshots) {
   let stores = makeStoresFixture(numChanges, snapshots)
   let documentEngine = new DocumentEngine({
+    snapshotBuilder: buildJSONSnapshot,
     changeStore: stores.changeStore,
     snapshotStore: stores.snapshotStore,
     snapshotFrequency: 1 // store snapshots for each version
