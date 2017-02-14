@@ -121,7 +121,7 @@ class Surface extends Component {
       }
       if (!this.isReadonly()) {
         // Mouse Events
-        el.on('mousedown', this.onMouseDown)
+        el.on('mousedown', this.onMouseDown.bind(this))
         el.on('contextmenu', this.onContextMenu)
         // disable drag'n'drop
         // we will react on this to render a custom selection
