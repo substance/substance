@@ -51,12 +51,13 @@ function findOne(test, elems){
   var elem = null;
 
   for(var i = 0, l = elems.length; i < l && !elem; i++){
-    if(!isTag(elems[i])){
+    const child = elems[i]
+    if(!isTag(child)){
       continue;
-    } else if(test(elems[i])){
-      elem = elems[i];
-    } else if(elems[i].childNodes.length > 0){
-      elem = findOne(test, elems[i].childNodes);
+    } else if(test(child)){
+      elem = child;
+    } else if(child.childNodes.length > 0){
+      elem = findOne(test, child.childNodes);
     }
   }
 

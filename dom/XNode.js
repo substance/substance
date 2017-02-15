@@ -109,12 +109,20 @@ class XNode extends DOMElement {
 
   getTagName() {
     if (this.name) {
-      return this.name.toLowerCase()
+      if (this.getFormat() === 'xml') {
+        return this.name
+      } else {
+        return this.name.toLowerCase()
+      }
     }
   }
 
   setTagName(tagName) {
-    this.name = String(tagName).toLowerCase()
+    if (this.getFormat() === 'xml') {
+      this.name = String(tagName)
+    } else {
+      this.name = String(tagName).toLowerCase()
+    }
     return this
   }
 
@@ -242,7 +250,7 @@ class XNode extends DOMElement {
   }
 
   getOuterHTML() {
-    return domSerializer(this, { xmlMode: this.ownerDocument.format === 'xml' })
+    return domSerializer(this, { xmlMode: this.getFormat() === 'xml' })
   }
 
   getTextContent() {
@@ -275,15 +283,15 @@ class XNode extends DOMElement {
   }
 
   is(cssSelector) {
-    return cssSelect.is(this, cssSelector)
+    return cssSelect.is(this, cssSelector, { xmlMode: this.getFormat() === 'xml' })
   }
 
   find(cssSelector) {
-    return cssSelect.selectOne(cssSelector, this)
+    return cssSelect.selectOne(cssSelector, this, { xmlMode: this.getFormat() === 'xml' })
   }
 
   findAll(cssSelector) {
-    return cssSelect.selectAll(cssSelector, this)
+    return cssSelect.selectAll(cssSelector, this, { xmlMode: this.getFormat() === 'xml' })
   }
 
   getChildCount() {
@@ -352,6 +360,10 @@ class XNode extends DOMElement {
 
   getOwnerDocument() {
     return (this.type === 'document') ? this : this.ownerDocument
+  }
+
+  getFormat() {
+    return this.getOwnerDocument().format
   }
 
   isTextNode() {
