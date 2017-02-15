@@ -9,6 +9,8 @@
 .sc-context-menu.sm-hidden {
   /* we don't use display none because we want to determine the content's width */
   visibility: hidden;
+  left: 0px;
+  top: 0px;
 }
 
 .sc-context-menu > .sc-tool-group {
