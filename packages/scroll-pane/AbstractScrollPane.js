@@ -1,4 +1,6 @@
 import { getSelectionRect } from '../../util/windowUtils'
+import inBrowser from '../../util/inBrowser'
+import DefaultDOMElement from '../../dom/DefaultDOMElement'
 import getRelativeMouseBounds from '../../util/getRelativeMouseBounds'
 import Component from '../../ui/Component'
 
@@ -17,6 +19,17 @@ class AbstractScrollPane extends Component {
     this.handleActions({
       'domSelectionRendered': this._onDomSelectionRendered
     })
+
+    if (inBrowser) {
+      this.windowEl = DefaultDOMElement.wrapNativeElement(window)
+      this.windowEl.on('resize', this._onDomSelectionRendered, this)
+    }
+  }
+
+  dispose() {
+    if (this.windowEl) {
+      this.windowEl.off(this)
+    }
   }
 
   getName() {
@@ -33,6 +46,8 @@ class AbstractScrollPane extends Component {
     if (!selectionRect) return
     // Allows overlays to do positioning relative to the current
     // selection bounding rectangle.
+    // TODO: We should rename that event since it's not only triggered
+    // on selection change, but also on resize.
     this.emit('dom-selection:rendered', {
       contentRect,
       selectionRect
@@ -47,7 +62,6 @@ class AbstractScrollPane extends Component {
   _onContextMenu(e) {
     e.preventDefault()
     let mouseBounds = this._getMouseBounds(e)
-
     this.emit('context-menu:opened', {
       mouseBounds: mouseBounds
     })
