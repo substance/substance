@@ -859,6 +859,27 @@ test("BR3: Breaking annotated text with cursor before the annotation", (t) => {
   t.end()
 })
 
+test("BR4: Breaking annotated text with cursor inside the annotation", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.break()
+  })
+  let body = doc.get('body')
+  let secondPara = body.getChildAt(1)
+  let anno = doc.get('s1')
+  t.equal(anno.start.offset, 3, '.. starting at character 3')
+  t.equal(anno.end.offset, 4, '.. ending at character 4')
+  let secondAnno = doc.getIndex('annotations').get([secondPara.id, 'content'])[0]
+  t.equal(secondAnno.start.offset, 0, '.. starting at character 0')
+  t.equal(secondAnno.end.offset, 1, '.. ending at character 1')
+  t.end()
+})
 
 // List Editing
 // ------------
