@@ -269,7 +269,8 @@ class CollabSession extends EditorSession {
 
   afterDocumentChange(change, info) {
     // Record local changes into nextCommit
-    if (!info.remote) {
+    // TODO: consolidate usage of info.history
+    if (!info.remote && info.history !== false) {
       this._recordChange(change)
     }
   }
