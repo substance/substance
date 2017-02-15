@@ -365,45 +365,45 @@ class Editing {
       // transfer anchors of ContainerAnnotations to previous or next node:
       //  - start anchors go to the next node
       //  - end anchors go to the previous node
-      // let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
-      // for (let i = 0; i < anchors.length; i++) {
-      //   let anchor = anchors[i]
-      //   container = tx.get(anchor.containerId)
-      //   // Note: during the course of this loop we might have deleted the node already
-      //   // so, don't do it again
-      //   if (!tx.get(anchor.id)) continue
-      //   let pos = container.getPosition(anchor.path[0])
-      //   let path, offset
-      //   if (anchor.isStart) {
-      //     if (pos < container.getLength()-1) {
-      //       let nextNode = container.getChildAt(pos+1)
-      //       if (nextNode.isText()) {
-      //         path = [nextNode.id, 'content']
-      //       } else {
-      //         path = [nextNode.id]
-      //       }
-      //       tx.set([anchor.id, 'start', 'path'], path)
-      //       tx.set([anchor.id, 'start', 'offset'], 0)
-      //     } else {
-      //       tx.delete(anchor.id)
-      //     }
-      //   } else {
-      //     if (pos > 0) {
-      //       let previousNode = container.getChildAt(pos-1)
-      //       if (previousNode.isText()) {
-      //         path = [previousNode.id, 'content']
-      //         offset = tx.get(path).length
-      //       } else {
-      //         path = [previousNode.id]
-      //         offset = 1
-      //       }
-      //       tx.set([anchor.id, 'endPath'], path)
-      //       tx.set([anchor.id, 'endOffset'], offset)
-      //     } else {
-      //       tx.delete(anchor.id)
-      //     }
-      //   }
-      // }
+      let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
+      for (let i = 0; i < anchors.length; i++) {
+        let anchor = anchors[i]
+        container = tx.get(anchor.containerId)
+        // Note: during the course of this loop we might have deleted the node already
+        // so, don't do it again
+        if (!tx.get(anchor.id)) continue
+        let pos = container.getPosition(anchor.path[0])
+        let path, offset
+        if (anchor.isStart) {
+          if (pos < container.getLength()-1) {
+            let nextNode = container.getChildAt(pos+1)
+            if (nextNode.isText()) {
+              path = [nextNode.id, 'content']
+            } else {
+              path = [nextNode.id]
+            }
+            tx.set([anchor.id, 'start', 'path'], path)
+            tx.set([anchor.id, 'start', 'offset'], 0)
+          } else {
+            tx.delete(anchor.id)
+          }
+        } else {
+          if (pos > 0) {
+            let previousNode = container.getChildAt(pos-1)
+            if (previousNode.isText()) {
+              path = [previousNode.id, 'content']
+              offset = tx.get(path).length
+            } else {
+              path = [previousNode.id]
+              offset = 1
+            }
+            tx.set([anchor.id, 'end', 'path'], path)
+            tx.set([anchor.id, 'end', 'offset'], offset)
+          } else {
+            tx.delete(anchor.id)
+          }
+        }
+      }
     }
     documentHelpers.deleteNode(tx, node)
   }

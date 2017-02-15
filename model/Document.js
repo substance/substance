@@ -10,7 +10,7 @@ import EventEmitter from '../util/EventEmitter'
 import PropertyIndex from './data/PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
-// import AnchorIndex from './AnchorIndex'
+import AnchorIndex from './AnchorIndex'
 import DocumentChange from './DocumentChange'
 import PathEventProxy from './PathEventProxy'
 import IncrementalData from './data/IncrementalData'
@@ -80,7 +80,7 @@ class Document extends EventEmitter {
     // in the schema
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
-    // this.addIndex('container-annotation-anchors', new AnchorIndex())
+    this.addIndex('container-annotation-anchors', new AnchorIndex())
 
     // change event proxies are triggered after a document change has been applied
     // before the regular document:changed event is fired.

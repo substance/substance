@@ -2,6 +2,7 @@ import isEqual from '../util/isEqual'
 import forEach from '../util/forEach'
 import Annotation from './Annotation'
 import Selection from './Selection'
+import Anchor from './Anchor'
 
 /*
   Describes an annotation sticking on a container that can span over multiple
@@ -52,6 +53,20 @@ class ContainerAnnotation extends Annotation {
     })
   }
 
+  getStartAnchor() {
+    if (!this._startAnchor) {
+      this._startAnchor = new ContainerAnnotationAnchor(this, 'isStart')
+    }
+    return this._startAnchor
+  }
+
+  getEndAnchor() {
+    if (!this._endAnchor) {
+      this._endAnchor = new ContainerAnnotationAnchor(this)
+    }
+    return this._endAnchor
+  }
+
   setHighlighted(highlighted, scope) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted
@@ -83,11 +98,56 @@ class ContainerAnnotation extends Annotation {
   }
 }
 
+/**
+  @internal
+*/
+class ContainerAnnotationAnchor extends Anchor {
+
+  constructor(anno, isStart) {
+    super('SKIP')
+    // Note: we are not calling Anchor() as it is not useful for us
+    // as we need to delegate to the annos value dynamically
+    // Anchor.call(this, path, offset)
+
+    this.type = "container-annotation-anchor"
+    this.anno = anno
+    // TODO: remove this.node in favor of this.anno
+    this.node = anno
+    this.id = anno.id
+    this.containerId = anno.containerId
+    this.isStart = Boolean(isStart)
+    Object.freeze(this)
+  }
+
+
+  getTypeNames() {
+    return [this.type]
+  }
+
+  getPath() {
+    return (this.isStart ? this.node.startPath : this.node.endPath)
+  }
+
+  getOffset() {
+    return (this.isStart ? this.node.startOffset : this.node.endOffset)
+  }
+
+  get path() {
+    return this.getPath()
+  }
+
+  get offset() {
+    return this.getOffset()
+  }
+}
+
 ContainerAnnotation.schema = {
   type: "container-annotation",
   containerId: "string"
 }
 
 ContainerAnnotation.prototype._isContainerAnnotation = true
+
+ContainerAnnotation.Anchor = ContainerAnnotationAnchor
 
 export default ContainerAnnotation

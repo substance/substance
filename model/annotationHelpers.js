@@ -1,5 +1,6 @@
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
+import uniq from '../util/uniq'
 import uuid from '../util/uuid'
 
 
@@ -46,24 +47,24 @@ function insertedText(doc, coordinate, length) {
   });
 
   // TODO: fix support for container annotations
-  // // same for container annotation anchors
-  // index = doc.getIndex('container-annotation-anchors');
-  // var anchors = index.get(coordinate.path);
-  // forEach(anchors, function(anchor) {
-  //   var pos = coordinate.offset;
-  //   var start = anchor.offset;
-  //   var changed = false;
-  //   if ( (pos < start) ||
-  //        (pos === start && !coordinate.after) ) {
-  //     start += length;
-  //     changed = true;
-  //   }
-  //   if (changed) {
-  //     let coor = (anchor.isStart?'start':'end');
-  //     // TODO: Use coordintate ops!
-  //     doc.set([anchor.id, coor, 'offset'], start);
-  //   }
-  // });
+  // same for container annotation anchors
+  index = doc.getIndex('container-annotation-anchors');
+  var anchors = index.get(coordinate.path);
+  forEach(anchors, function(anchor) {
+    var pos = coordinate.offset;
+    var start = anchor.offset;
+    var changed = false;
+    if ( (pos < start) ||
+         (pos === start && !coordinate.after) ) {
+      start += length;
+      changed = true;
+    }
+    if (changed) {
+      let coor = (anchor.isStart?'start':'end');
+      // TODO: Use coordintate ops!
+      doc.set([anchor.id, coor, 'offset'], start);
+    }
+  });
 }
 
 function deletedText(doc, path, startOffset, endOffset) {
@@ -104,44 +105,45 @@ function deletedText(doc, path, startOffset, endOffset) {
       }
     }
   });
+
   // TODO: fix support for container annotations
-  // // same for container annotation anchors
-  // index = doc.getIndex('container-annotation-anchors');
-  // var anchors = index.get(path);
-  // var containerAnnoIds = [];
-  // forEach(anchors, function(anchor) {
-  //   containerAnnoIds.push(anchor.id);
-  //   var pos1 = startOffset;
-  //   var pos2 = endOffset;
-  //   var start = anchor.offset;
-  //   var changed = false;
-  //   if (pos2 <= start) {
-  //     start -= length;
-  //     changed = true;
-  //   } else {
-  //     if (pos1 <= start) {
-  //       var newStart = start - Math.min(pos2-pos1, start-pos1);
-  //       if (start !== newStart) {
-  //         start = newStart;
-  //         changed = true;
-  //       }
-  //     }
-  //   }
-  //   if (changed) {
-  //     // TODO: Use coordintate ops!
-  //     let coor = (anchor.isStart?'start':'end');
-  //     doc.set([anchor.id, coor, 'offset'], start);
-  //   }
-  // });
-  // // check all anchors after that if they have collapsed and remove the annotation in that case
-  // forEach(uniq(containerAnnoIds), function(id) {
-  //   var anno = doc.get(id);
-  //   var annoSel = anno.getSelection();
-  //   if(annoSel.isCollapsed()) {
-  //     // console.log("...deleting container annotation because it has collapsed" + id);
-  //     doc.delete(id);
-  //   }
-  // });
+  // same for container annotation anchors
+  index = doc.getIndex('container-annotation-anchors');
+  var anchors = index.get(path);
+  var containerAnnoIds = [];
+  forEach(anchors, function(anchor) {
+    containerAnnoIds.push(anchor.id);
+    var pos1 = startOffset;
+    var pos2 = endOffset;
+    var start = anchor.offset;
+    var changed = false;
+    if (pos2 <= start) {
+      start -= length;
+      changed = true;
+    } else {
+      if (pos1 <= start) {
+        var newStart = start - Math.min(pos2-pos1, start-pos1);
+        if (start !== newStart) {
+          start = newStart;
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      // TODO: Use coordintate ops!
+      let coor = (anchor.isStart?'start':'end');
+      doc.set([anchor.id, coor, 'offset'], start);
+    }
+  });
+  // check all anchors after that if they have collapsed and remove the annotation in that case
+  forEach(uniq(containerAnnoIds), function(id) {
+    var anno = doc.get(id);
+    var annoSel = anno.getSelection();
+    if(annoSel.isCollapsed()) {
+      // console.log("...deleting container annotation because it has collapsed" + id);
+      doc.delete(id);
+    }
+  });
 }
 
 // used when breaking a node to transfer annotations to the new property
@@ -197,29 +199,29 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
   });
 
   // TODO: fix support for container annotations
-  // // same for container annotation anchors
-  // index = doc.getIndex('container-annotation-anchors');
-  // var anchors = index.get(path);
-  // var containerAnnoIds = [];
-  // forEach(anchors, function(anchor) {
-  //   containerAnnoIds.push(anchor.id);
-  //   var start = anchor.offset;
-  //   if (offset <= start) {
-  //     // TODO: Use coordintate ops!
-  //     let coor = anchor.isStart?'start':'end'
-  //     doc.set([anchor.id, coor, 'path'], newPath);
-  //     doc.set([anchor.id, coor, 'offset'], newOffset + anchor.offset - offset);
-  //   }
-  // });
-  // // check all anchors after that if they have collapsed and remove the annotation in that case
-  // forEach(uniq(containerAnnoIds), function(id) {
-  //   var anno = doc.get(id);
-  //   var annoSel = anno.getSelection();
-  //   if(annoSel.isCollapsed()) {
-  //     // console.log("...deleting container annotation because it has collapsed" + id);
-  //     doc.delete(id);
-  //   }
-  // });
+  // same for container annotation anchors
+  index = doc.getIndex('container-annotation-anchors');
+  var anchors = index.get(path);
+  var containerAnnoIds = [];
+  forEach(anchors, function(anchor) {
+    containerAnnoIds.push(anchor.id);
+    var start = anchor.offset;
+    if (offset <= start) {
+      // TODO: Use coordintate ops!
+      let coor = anchor.isStart?'start':'end'
+      doc.set([anchor.id, coor, 'path'], newPath);
+      doc.set([anchor.id, coor, 'offset'], newOffset + anchor.offset - offset);
+    }
+  });
+  // check all anchors after that if they have collapsed and remove the annotation in that case
+  forEach(uniq(containerAnnoIds), function(id) {
+    var anno = doc.get(id);
+    var annoSel = anno.getSelection();
+    if(annoSel.isCollapsed()) {
+      // console.log("...deleting container annotation because it has collapsed" + id);
+      doc.delete(id);
+    }
+  });
 }
 
 /*
