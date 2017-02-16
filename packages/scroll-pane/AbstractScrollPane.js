@@ -46,8 +46,11 @@ class AbstractScrollPane extends Component {
     if (!selectionRect) return
     // Allows overlays to do positioning relative to the current
     // selection bounding rectangle.
-    // TODO: We should rename that event since it's not only triggered
-    // on selection change, but also on resize.
+    this.emit('selection:positioned', {
+      contentRect,
+      selectionRect
+    })
+    // TODO: Remove legacy support
     this.emit('dom-selection:rendered', {
       contentRect,
       selectionRect

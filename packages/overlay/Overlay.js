@@ -10,7 +10,7 @@ class Overlay extends Toolbox {
     if (!this.context.scrollPane) {
       throw new Error('Requires scrollPane context')
     }
-    this.context.scrollPane.on('dom-selection:rendered', this._onDomSelectionRendered, this)
+    this.context.scrollPane.on('selection:positioned', this._onSelectionPositioned, this)
   }
 
   dispose() {
@@ -55,15 +55,12 @@ class Overlay extends Toolbox {
     this.el.addClass('sm-hidden')
   }
 
-  _onDomSelectionRendered(hints) {
+  _onSelectionPositioned(hints) {
     if (this.hasActiveTools()) {
-
       this.el.removeClass('sm-hidden')
-
       let overlayWidth = this.el.htmlProp('offsetWidth')
       let selRect = hints.selectionRect
       let selectionMaxWidth = selRect.width
-
       // By default, Overlays are aligned center/bottom to the selection
       this.el.css('top', selRect.top + selRect.height)
       let leftPos = selRect.left + selectionMaxWidth/2 - overlayWidth/2
