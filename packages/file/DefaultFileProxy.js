@@ -10,7 +10,7 @@ class DefaultFileProxy extends FileProxy {
     super(fileNode, context)
 
     // used locally e.g. after drop or file dialog
-    this.file = fileNode.data
+    this.file = fileNode.sourceFile
     if (this.file) {
       this._fileUrl = URL.createObjectURL(this.file)
     }

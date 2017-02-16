@@ -6,6 +6,12 @@ function cloneDeep(val) {
   if (isArray(val)) {
     return _cloneArrayDeep(val);
   }
+  // Note: should we clone Files?
+  // ATM we only use it when creating FileNodes
+  // where the File instance is actually not serialized
+  if (val instanceof File) {
+    return val
+  }
   if (isObject(val)) {
     return _cloneObjectDeep(val)
   }
