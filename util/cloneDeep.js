@@ -1,15 +1,16 @@
 import isObject from './isObject'
 import isArray from './isArray'
 import forEach from './forEach'
+import inBrowser from './inBrowser'
 
 function cloneDeep(val) {
   if (isArray(val)) {
     return _cloneArrayDeep(val);
   }
-  // Note: should we clone Files?
+  // HACK: should we clone Files?
   // ATM we only use it when creating FileNodes
   // where the File instance is actually not serialized
-  if (val instanceof File) {
+  if (inBrowser && val instanceof window.File) {
     return val
   }
   if (isObject(val)) {
