@@ -792,7 +792,13 @@ class Editing {
         tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
       }
       // III anno is deleted
-      else if (annoStart>=startOffset && annoEnd<endOffset) {
+      // NOTE: InlineNodes only have a length of one character
+      // so they are always 'covered', and as they can not expand
+      // they are deleted
+      else if (
+        (annoStart>=startOffset && annoEnd<endOffset) ||
+        (anno._isInlineNode && annoStart>=startOffset && annoEnd<=endOffset)
+      ) {
         tx.delete(anno.id)
       }
       // IV anno.start between and anno.end after
