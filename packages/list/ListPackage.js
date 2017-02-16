@@ -8,22 +8,29 @@ import InsertListTool from './InsertListTool'
 
 export default {
   name: 'list',
-  configure: function(config, options) {
-    options = options || {}
+  configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(ListNode)
     config.addNode(ListItemNode)
     config.addComponent('list', ListComponent)
 
-    config.addCommand('insert-unordered-list', InsertListCommand, { nodeType: 'list', ordered: false })
-    config.addTool('insert-unordered-list', InsertListTool, { toolGroup: options.toolGroup })
+    config.addCommand('insert-unordered-list', InsertListCommand, {
+      nodeType: 'list',
+      ordered: false,
+      disableCollapsedCursor
+    })
+    config.addTool('insert-unordered-list', InsertListTool, { toolGroup })
     config.addLabel('insert-unordered-list', {
       en: 'Unordered list',
       de: 'Aufzählung'
     })
     config.addIcon('insert-unordered-list', { 'fontawesome': 'fa-list-ul' })
 
-    config.addCommand('insert-ordered-list', InsertListCommand, { nodeType: 'list', ordered: true })
-    config.addTool('insert-ordered-list', InsertListTool, { toolGroup: options.toolGroup })
+    config.addCommand('insert-ordered-list', InsertListCommand, {
+      nodeType: 'list',
+      ordered: true,
+      disableCollapsedCursor
+    })
+    config.addTool('insert-ordered-list', InsertListTool, { toolGroup })
     config.addLabel('insert-ordered-list', {
       en: 'Ordered list',
       de: 'Nummerierte Liste'
