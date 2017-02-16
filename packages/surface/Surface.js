@@ -397,7 +397,10 @@ class Surface extends Component {
   }
 
   onMouseUp(e) {
-    if (!this._shouldConsumeEvent(e)) return
+    // ATTENTION: filtering events does not make sense here,
+    // as we need to make sure that pick the selection even
+    // when the mouse is released outside the surface
+    // if (!this._shouldConsumeEvent(e)) return
     e.stopPropagation()
     // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
