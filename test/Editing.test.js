@@ -10,7 +10,8 @@ import {
   _s1, _empty, _il1,
   _block1, _block2,
   _in1, IN1_TITLE,
-  _l1, _l1_empty, _l2, _li1plus, _li3, LI1_TEXT, LI2_TEXT, LI3_TEXT,
+  _l1, _l1_empty, _l1_empty_last,
+  _l2, _li1plus, _li3, LI1_TEXT, LI2_TEXT, LI3_TEXT,
   _t1, _t1_sparse, T_CONTENT
 } from './fixture/samples'
 
@@ -23,14 +24,15 @@ const test = module('Editing')
 
 test("IT1: Inserting text with cursor in the middle of a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 3
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(0,3)+'xxx'+P1_TEXT.slice(3), 'Text should have been inserted correctly.')
@@ -40,14 +42,15 @@ test("IT1: Inserting text with cursor in the middle of a TextProperty", (t) => {
 
 test("IT2: Inserting text with cursor within TextProperty inside annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 4
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 4,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
@@ -59,14 +62,15 @@ test("IT2: Inserting text with cursor within TextProperty inside annotation", (t
 
 test("IT3: Inserting text with cursor within TextProperty at the start of an annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 3
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
@@ -79,14 +83,15 @@ test("IT3: Inserting text with cursor within TextProperty at the start of an ann
 
 test("IT4: Inserting text with cursor within TextProperty at the end of an annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 5
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 5,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
@@ -99,15 +104,16 @@ test("IT4: Inserting text with cursor within TextProperty at the end of an annot
 
 test("IT5: Inserting text with range within TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 2,
-      endOffset: 5
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 2,
+    endOffset: 5,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 2)+'xxx'+P1_TEXT.slice(5), 'Text should have been inserted correctly.')
@@ -119,15 +125,16 @@ test("IT5: Inserting text with range within TextProperty", (t) => {
 test("IT6: Inserting text with range within TextProperty overlapping an annotion aligned at the left side", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 3,
-      endOffset: 5
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    endOffset: 5,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
@@ -141,15 +148,16 @@ test("IT6: Inserting text with range within TextProperty overlapping an annotion
 
 test("IT7: Inserting text with range within TextProperty inside an annotion", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 3,
-      endOffset: 5
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    endOffset: 5,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
@@ -164,15 +172,16 @@ test("IT7: Inserting text with range within TextProperty inside an annotion", (t
 test("IT8: Inserting text with range within TextProperty starting inside an annotion", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
-  editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset:4,
-      endOffset: 6
-    })
-    tx.insertText('xxx')
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 4,
+    endOffset: 6,
+    containerId: 'body'
   })
+  editorSession.transaction((tx) => {
+    tx.insertText('xxx')
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let s1 = doc.get('s1')
@@ -185,21 +194,16 @@ test("IT8: Inserting text with range within TextProperty starting inside an anno
 })
 
 test("IT9: Inserting text after an InlineNode node", (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  let { editorSession, doc } = setupEditor(t, _p1, _il1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
-    startOffset: 3,
+    startOffset: 4,
     containerId: 'body'
   })
   editorSession.transaction((tx) => {
-    tx.insertInlineNode({
-      type: 'test-inline-node',
-      id: 'il1',
-      content: 'X'
-    })
     tx.insertText('Y')
-  })
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let p1 = doc.get('p1')
   let il1 = doc.get('il1')
@@ -220,8 +224,7 @@ test("IT10: Typing over an InlineNode node", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
-  })
-  let sel = editorSession.getSelection()
+  }, { action: 'type' })
   let p1 = doc.get('p1')
   let il1 = doc.get('il1')
   t.nil(il1, 'InlineNode should have been deleted.')
@@ -848,7 +851,7 @@ test("BR2: Breaking a TextNode", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.break()
-  })
+  }, { action: 'break' })
   let body = doc.get('body')
   t.equals(body.length, 2, 'There should be 2 nodes')
   let first = body.getChildAt(0)
@@ -869,7 +872,7 @@ test("BR3: Breaking annotated text with cursor before the annotation", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.break()
-  })
+  }, { action: 'break' })
   let body = doc.get('body')
   let second = body.getChildAt(1)
   let anno = doc.get('s1')
@@ -889,7 +892,7 @@ test("BR4: Breaking annotated text with cursor inside the annotation", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.break()
-  })
+  }, { action: 'break' })
   let body = doc.get('body')
   let secondPara = body.getChildAt(1)
   let anno = doc.get('s1')
@@ -915,7 +918,7 @@ test("L1: Inserting text into a ListItem", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
-  })
+  }, { action: 'type' })
   let sel = editorSession.getSelection()
   let li = doc.get('l1-1')
   t.equal(li.getText(), LI1_TEXT.slice(0,3)+'xxx'+LI1_TEXT.slice(3), 'Text should have been inserted correctly.')
@@ -933,7 +936,7 @@ test("L2: Breaking a ListItem with cursor in the middle of text", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.break()
-  })
+  }, { action: 'break' })
   let sel = editorSession.getSelection()
   let l = doc.get('l1')
   t.equal(l.items.length, 3, 'List should have 3 items')
@@ -956,7 +959,7 @@ test("L3: Breaking a ListItem with cursor at begin of text", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.break()
-  })
+  }, { action: 'break' })
   let sel = editorSession.getSelection()
   let l = doc.get('l1')
   t.equal(l.items.length, 3, 'List should have 3 items')
@@ -979,7 +982,7 @@ test("L4: Splitting a List by breaking an empty ListItem", (t) => {
   })
   editorSession.transaction((tx) => {
     tx.break()
-  })
+  }, { action: 'break' })
   let sel = editorSession.getSelection()
   let body = doc.get('body')
   t.equal(body.nodes.length, 3, 'There should be three nodes')
