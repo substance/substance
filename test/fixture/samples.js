@@ -103,6 +103,16 @@ export function _l1_empty(doc) {
   l1.insertItemAt(1, 'l1-empty')
 }
 
+export function _l1_empty_last(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'l1-empty',
+    content: ''
+  })
+  let l1 = doc.get('l1')
+  l1.insertItemAt(2, 'l1-empty')
+}
+
 export function _li1plus(doc) {
   doc.set(['l1-1', 'level'], 2)
 }

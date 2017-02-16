@@ -1001,6 +1001,31 @@ test("L4: Splitting a List by breaking an empty ListItem", (t) => {
   t.end()
 })
 
+test("L4-2: Breaking the last empty list item", (t) => {
+  let { editorSession, doc } = setupEditor(t, _l1, _l1_empty_last)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['l1-empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.break()
+  }, { action: 'break' })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  t.equal(body.nodes.length, 2, 'There should be two nodes')
+  let l1 = body.getChildAt(0)
+  let p = body.getChildAt(1)
+  t.ok(l1.isList() && p.isText(), '... list, and paragraph')
+  t.equal(l1.items.length, 2, 'The list should now have only two items')
+  t.equal(p.getText(), '', 'The paragraph should be empty')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
+  t.equal(sel.start.offset, 0, '... at first position')
+  t.end()
+})
+
 test("L5-1: Toggling a ListItem using BACKSPACE", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1)
   editorSession.setSelection({
