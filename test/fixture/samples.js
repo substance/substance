@@ -1,3 +1,4 @@
+import EditingInterface from '../../model/EditingInterface'
 export const P1_TEXT = 'p1:abcdef'
 
 export function _p1(doc, body) {
@@ -40,6 +41,21 @@ export function _s1(doc) {
     end: {
       offset: 5
     }
+  })
+}
+
+export function _il1(doc) {
+  let tx = new EditingInterface(doc)
+  tx.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  tx.insertInlineNode({
+    type: 'test-inline-node',
+    id: 'il1',
+    content: 'X'
   })
 }
 

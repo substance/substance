@@ -7,7 +7,7 @@ import headersAndParagraphs from './fixture/headersAndParagraphs'
 import {
   _p1, P1_TEXT,
   _p2, P2_TEXT,
-  _s1, _empty,
+  _s1, _empty, _il1,
   _block1, _block2,
   _in1, IN1_TITLE,
   _l1, _l1_empty, _l2, _li1plus, _li3, LI1_TEXT, LI2_TEXT, LI3_TEXT,
@@ -206,6 +206,26 @@ test("IT9: Inserting text after an InlineNode node", (t) => {
   t.equal(p1.getText(), P1_TEXT.slice(0,3)+'\uFEFF'+'Y'+P1_TEXT.slice(3), 'Text should have been inserted correctly.') // eslint-disable-line no-useless-concat
   t.equal(sel.start.offset, 5, 'Cursor should be after inserted character')
   t.deepEqual([il1.start.offset, il1.end.offset], [3,4], 'InlineNode should have correct dimensions')
+  t.end()
+})
+
+test("IT10: Typing over an InlineNode node", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _il1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    endOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertText('Y')
+  })
+  let sel = editorSession.getSelection()
+  let p1 = doc.get('p1')
+  let il1 = doc.get('il1')
+  t.nil(il1, 'InlineNode should have been deleted.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+'Y'+P1_TEXT.slice(3), 'Text should have been inserted correctly.') // eslint-disable-line no-useless-concat
   t.end()
 })
 
