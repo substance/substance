@@ -113,7 +113,7 @@ class ContainerAnnotationAnchor extends Anchor {
     this.anno = anno
     // TODO: remove this.node in favor of this.anno
     this.node = anno
-    this.id = anno.id
+    this.id = isStart ? anno.id + '-start' : anno.id + '-end'
     this.containerId = anno.containerId
     this.isStart = Boolean(isStart)
     Object.freeze(this)
@@ -125,11 +125,11 @@ class ContainerAnnotationAnchor extends Anchor {
   }
 
   getPath() {
-    return (this.isStart ? this.node.startPath : this.node.endPath)
+    return (this.isStart ? this.node.start.path : this.node.end.path)
   }
 
   getOffset() {
-    return (this.isStart ? this.node.startOffset : this.node.endOffset)
+    return (this.isStart ? this.node.start.offset : this.node.end.offset)
   }
 
   get path() {
