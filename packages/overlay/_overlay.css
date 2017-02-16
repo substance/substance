@@ -1,5 +1,7 @@
 .sc-overlay { z-index: 200; position: absolute; }
-.sc-overlay.sm-hidden { visibility: hidden; }
+
+.sc-overlay.sm-hidden { visibility: hidden; left: 0px; top: 0px; }
+
 .sc-overlay.sm-theme-dark {}
 
 .sc-overlay.sm-theme-dark::before {

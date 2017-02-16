@@ -110,7 +110,9 @@ class MarkersIndex {
   }
 
   dispose() {
-    this.document.indexes.delete('markers')
+    // TODO: add an API to remove a custom index
+    // and we should add a test which disposes the editor session
+    delete this.document.data.indexes['markers']
     this.editorSession.off(this)
   }
 

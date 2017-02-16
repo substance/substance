@@ -53,7 +53,7 @@ class Coordinate {
 
   toJSON() {
     return {
-      path: this.path,
+      path: this.path.slice(),
       offset: this.offset
     }
   }

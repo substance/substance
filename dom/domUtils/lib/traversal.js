@@ -20,5 +20,5 @@ exports.hasAttrib = function(elem, name){
 };
 
 exports.getName = function(elem){
-  return elem.name;
+  return elem.name
 };

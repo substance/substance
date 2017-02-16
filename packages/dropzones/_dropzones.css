@@ -26,6 +26,8 @@
 
 .sc-dropzones.sm-hidden {
   visibility: hidden;
+  left: 0px;
+  top: 0px;
 }
 
 /* Custom Dropzone styles */

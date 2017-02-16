@@ -249,7 +249,7 @@ exports.hasAttrib = function(elem, name){
 };
 
 exports.getName = function(elem){
-  return elem.name;
+  return elem.name
 };
 });
 
@@ -402,12 +402,13 @@ function findOne$1(test, elems){
   var elem = null;
 
   for(var i = 0, l = elems.length; i < l && !elem; i++){
-    if(!isTag$2(elems[i])){
+    const child = elems[i];
+    if(!isTag$2(child)){
       continue;
-    } else if(test(elems[i])){
-      elem = elems[i];
-    } else if(elems[i].childNodes.length > 0){
-      elem = findOne$1(test, elems[i].childNodes);
+    } else if(test(child)){
+      elem = child;
+    } else if(child.childNodes.length > 0){
+      elem = findOne$1(test, child.childNodes);
     }
   }
 

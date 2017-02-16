@@ -5,7 +5,6 @@ import isBoolean from '../../util/isBoolean'
 import isNumber from '../../util/isNumber'
 import isObject from '../../util/isObject'
 import isString from '../../util/isString'
-import isPlainObject from '../../util/isPlainObject'
 import EventEmitter from '../../util/EventEmitter'
 import Property from './Property'
 
@@ -101,7 +100,7 @@ class Node extends EventEmitter {
     forEach(schema, (prop, name) => {
       let val = this[name]
       if (prop.isOptional() && val === undefined) return
-      if (isArray(val) || isPlainObject(val)) {
+      if (isArray(val) || isObject(val)) {
         val = cloneDeep(val)
       }
       data[prop.name] = val

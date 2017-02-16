@@ -37,16 +37,6 @@ class BodyScrollPane extends AbstractScrollPane {
     return 'body'
   }
 
-  didMount() {
-    this.handleActions({
-      'domSelectionRendered': this._onDomSelectionRendered
-    })
-  }
-
-  dispose() {
-    this.context.editorSession.off(this)
-  }
-
   render($$) {
     let el = $$('div')
     if (this.props.contextMenu === 'custom') {

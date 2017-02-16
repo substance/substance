@@ -1,3 +1,4 @@
+import EditingInterface from '../../model/EditingInterface'
 export const P1_TEXT = 'p1:abcdef'
 
 export function _p1(doc, body) {
@@ -43,6 +44,21 @@ export function _s1(doc) {
   })
 }
 
+export function _il1(doc) {
+  let tx = new EditingInterface(doc)
+  tx.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    containerId: 'body'
+  })
+  tx.insertInlineNode({
+    type: 'test-inline-node',
+    id: 'il1',
+    content: 'X'
+  })
+}
+
 export const LI1_TEXT = 'l1-1:abcdef'
 export const LI2_TEXT = 'l1-2:0123456'
 export const LI3_TEXT = 'l1-3:ghij'
@@ -85,6 +101,16 @@ export function _l1_empty(doc) {
   })
   let l1 = doc.get('l1')
   l1.insertItemAt(1, 'l1-empty')
+}
+
+export function _l1_empty_last(doc) {
+  doc.create({
+    type: 'list-item',
+    id: 'l1-empty',
+    content: ''
+  })
+  let l1 = doc.get('l1')
+  l1.insertItemAt(2, 'l1-empty')
 }
 
 export function _li1plus(doc) {
