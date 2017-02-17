@@ -137,20 +137,28 @@ class EditingInterface {
   }
 
   insertText(text) {
-    this._impl.insertText(this, text)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.insertText(this, text)
+    }
   }
 
   // insert an inline node with given data at the current selection
   insertInlineNode(inlineNode) {
-    this._impl.insertInlineNode(this, inlineNode)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.insertInlineNode(this, inlineNode)
+    }
   }
 
   insertBlockNode(blockNode) {
-    this._impl.insertBlockNode(this, blockNode)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.insertBlockNode(this, blockNode)
+    }
   }
 
   paste(content) {
-    this._impl.paste(this, content)
+    if (this._selection && !this._selection.isNull()) {
+      this._impl.paste(this, content)
+    }
   }
 
   switchTextType(nodeData) {

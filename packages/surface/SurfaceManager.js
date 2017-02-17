@@ -63,6 +63,9 @@ class SurfaceManager {
   unregisterSurface(surface) {
     surface.off(this)
     let surfaceId = surface.getId()
+    if (surface === this.getFocusedSurface()) {
+      this.editorSession.setSelection(null)
+    }
     let registeredSurface = this.surfaces[surfaceId]
     if (registeredSurface === surface) {
       let focusedSurface = this.getFocusedSurface()
