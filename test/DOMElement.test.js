@@ -104,6 +104,12 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("outerHTML of XML with camelCase tagnames", function(t) {
+    let el = DefaultDOMElement.parseXML('<dummy><myNode></myNode></dummy>')
+    t.equal(el.outerHTML, '<dummy><myNode/></dummy>', 'XML tags should be serialized preserving case.')
+    t.end()
+  })
+
   test("removeClass", function(t) {
     var p = DefaultDOMElement.parseHTML('<p class="foo">TEST</p>')
     p.removeClass('foo')
@@ -166,6 +172,13 @@ function DOMElementTests(impl) {
     let el = DefaultDOMElement.parseXML('<dummy><bla data-id="foo"></bla></dummy>')
     let foo = el.find('[data-id=foo]')
     t.notNil(foo, 'Should find a element with data-id=foo')
+    t.end()
+  })
+
+  test("find in XML with camelCase tagnames", function(t) {
+    let el = DefaultDOMElement.parseXML('<dummy><myNode myValue="foo"></myNode></dummy>')
+    t.notNil(el.find('myNode'), 'Should find a <myNode> element')
+    t.notNil(el.find('[myValue="foo"]'), 'Should find a [myValue] element')
     t.end()
   })
 

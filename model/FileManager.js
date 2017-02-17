@@ -36,6 +36,7 @@ class FileManager {
         this.proxies[fileNode.id] = proxy
       }
     }
+    fileNode.proxy = proxy
     return proxy
   }
 

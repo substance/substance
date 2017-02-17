@@ -164,7 +164,7 @@ class Clipboard {
     let editorSession = this.getEditorSession()
     editorSession.transaction(function(tx) {
       tx.paste(plainText)
-    })
+    }, { action: 'paste' })
   }
 
   /*
@@ -213,7 +213,7 @@ class Clipboard {
     if (content) {
       editorSession.transaction((tx) => {
         tx.paste(content)
-      })
+      }, { action: 'paste' })
     }
   }
 

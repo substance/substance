@@ -1,4 +1,3 @@
-import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import uuid from '../util/uuid'
 
@@ -20,8 +19,9 @@ export default {
 function insertedText(doc, coordinate, length) {
   if (!length) return;
   var index = doc.getIndex('annotations');
-  var annotations = index.get(coordinate.path);
-  forEach(annotations, function(anno) {
+  var annotations = index.get(coordinate.path)
+  for (let i = 0; i < annotations.length; i++) {
+    let anno = annotations[i]
     var pos = coordinate.offset;
     var start = anno.start.offset;
     var end = anno.end.offset;
@@ -43,7 +43,7 @@ function insertedText(doc, coordinate, length) {
     if (newEnd !== end) {
       doc.set([anno.id, 'end', 'offset'], newEnd);
     }
-  });
+  }
 
   // TODO: fix support for container annotations
   // // same for container annotation anchors
@@ -71,7 +71,8 @@ function deletedText(doc, path, startOffset, endOffset) {
   var index = doc.getIndex('annotations');
   var annotations = index.get(path);
   var length = endOffset - startOffset;
-  forEach(annotations, function(anno) {
+  for (let i = 0; i < annotations.length; i++) {
+    let anno = annotations[i]
     var pos1 = startOffset;
     var pos2 = endOffset;
     var start = anno.start.offset;
@@ -103,7 +104,7 @@ function deletedText(doc, path, startOffset, endOffset) {
         }
       }
     }
-  });
+  }
   // TODO: fix support for container annotations
   // // same for container annotation anchors
   // index = doc.getIndex('container-annotation-anchors');
@@ -148,37 +149,38 @@ function deletedText(doc, path, startOffset, endOffset) {
 function transferAnnotations(doc, path, offset, newPath, newOffset) {
   var index = doc.getIndex('annotations');
   var annotations = index.get(path, offset);
-  forEach(annotations, function(a) {
+  for (let i = 0; i < annotations.length; i++) {
+    let a = annotations[i]
     var isInside = (offset > a.start.offset && offset < a.end.offset);
     var start = a.start.offset;
     var end = a.end.offset;
-    var newStart, newEnd;
     // 1. if the cursor is inside an annotation it gets either split or truncated
     if (isInside) {
       // create a new annotation if the annotation is splittable
       if (a.canSplit()) {
-        var newAnno = a.toJSON();
+        let newAnno = a.toJSON();
         newAnno.id = uuid(a.type + "_");
-        newAnno.start.offset = newOffset;
-        newAnno.end.offset = newOffset + a.end.offset - offset;
-        newAnno.path = newPath;
+        newAnno.start.path = newPath
+        newAnno.start.offset = newOffset
+        newAnno.end.path = newPath
+        newAnno.end.offset = newOffset + a.end.offset - offset
         doc.create(newAnno);
       }
       // in either cases truncate the first part
-      newStart = a.start.offset;
-      newEnd = offset;
+      let newStartOffset = a.start.offset;
+      let newEndOffset = offset;
       // if after truncate the anno is empty, delete it
-      if (newEnd === newStart) {
+      if (newEndOffset === newStartOffset) {
         doc.delete(a.id);
       }
       // ... otherwise update the range
       else {
         // TODO: Use coordintate ops!
-        if (newStart !== start) {
-          doc.set([a.id, 'start', 'offset'], newStart);
+        if (newStartOffset !== start) {
+          doc.set([a.id, 'start', 'offset'], newStartOffset);
         }
-        if (newEnd !== end) {
-          doc.set([a.id, 'end', 'offset'], newEnd);
+        if (newEndOffset !== end) {
+          doc.set([a.id, 'end', 'offset'], newEndOffset);
         }
       }
     }
@@ -187,14 +189,12 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
       // TODO: Use coordintate ops!
       // Note: we are preserving the annotation so that anything which is connected to the annotation
       // remains valid.
-      newStart = newOffset + a.start.offset - offset;
-      newEnd = newOffset + a.end.offset - offset;
       doc.set([a.id, 'start', 'path'], newPath);
-      doc.set([a.id, 'start', 'offset'], newStart);
+      doc.set([a.id, 'start', 'offset'], newOffset + a.start.offset - offset);
       doc.set([a.id, 'end', 'path'], newPath);
-      doc.set([a.id, 'end', 'offset'], newEnd);
+      doc.set([a.id, 'end', 'offset'], newOffset + a.end.offset - offset);
     }
-  });
+  }
 
   // TODO: fix support for container annotations
   // // same for container annotation anchors

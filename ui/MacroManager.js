@@ -34,6 +34,10 @@ class MacroManager {
         break
       }
       case 'break': {
+        // FIXME: this impl turned out to be fragile,
+        // as the selection before the transaction
+        // can show to nodes not being there anymore
+
         // We interpret a 'break' as kind of confirmation
         // of the current node
         // so we take the original selection
@@ -43,10 +47,27 @@ class MacroManager {
         path = sel.path
         nodeId = path[0]
         node = doc.get(nodeId)
-        if (!node.isText()) return
+        // HACK: fragile - before.selection is not a good reference
+        if (!node || !node.isText()) return
         text = node.getText()
         start = sel.start.offset
         end = start
+        break
+      }
+      case 'paste': {
+        // HACK: just support primitive plain-text paste
+        if (change.ops.length === 1) {
+          let op = change.ops[0]
+          if (op.type === 'update' && op.propertyType === 'string') {
+            path = op.path
+            nodeId = path[0]
+            node = doc.get(nodeId)
+            if (!node.isText()) return
+            text = node.getText()
+            start = op.diff.pos
+            end = start+op.diff.getLength()
+          }
+        }
         break
       }
       default:
