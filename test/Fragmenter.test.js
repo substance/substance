@@ -14,14 +14,14 @@ test("No annos.", function(t) {
 })
 
 test("With one anno.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6)]
+  var annos = [_anno('b', 'b1', 3, 6)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>DEF</b>GHI')
   t.end()
 })
 
 test("With one anchor.", function(t) {
-  var annos = [new Anno('a', 'a1', 3, 3, {
+  var annos = [_anno('a', 'a1', 3, 3, {
     isAnchor: true
   })]
   var html = _render(TEXT, annos)
@@ -30,28 +30,28 @@ test("With one anchor.", function(t) {
 })
 
 test("With one inline.", function(t) {
-  var annos = [new Anno('i', 'i1', 3, 4)]
+  var annos = [_anno('i', 'i1', 3, 4)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<i>D</i>EFGHI')
   t.end()
 })
 
 test("One nested anno.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 5)]
+  var annos = [_anno('b', 'b1', 3, 6), _anno('i', 'i1', 4, 5)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>D<i>E</i>F</b>GHI')
   t.end()
 })
 
 test("Overlapping annos.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 8)]
+  var annos = [_anno('b', 'b1', 3, 6), _anno('i', 'i1', 4, 8)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>D<i>EF</i></b><i>GH</i>I')
   t.end()
 })
 
 test("Equal annos.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 3, 6)]
+  var annos = [_anno('b', 'b1', 3, 6), _anno('i', 'i1', 3, 6)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b><i>DEF</i></b>GHI')
   t.end()
@@ -59,8 +59,8 @@ test("Equal annos.", function(t) {
 
 test("Overlapping with fragmentation hint.", function(t) {
   var annos = [
-    new Anno('b', 'b1', 3, 6),
-    new Anno('a', 'link1', 4, 8, {
+    _anno('b', 'b1', 3, 6),
+    _anno('a', 'link1', 4, 8, {
       fragmentation: Fragmenter.SHOULD_NOT_SPLIT
     })
   ]
@@ -71,8 +71,8 @@ test("Overlapping with fragmentation hint.", function(t) {
 
 test("Anchors should rendered as early as possible.", function(t) {
   var annos = [
-    new Anno('b', 'b1', 3, 6),
-    new Anno('a', 'a1', 3, 3, {
+    _anno('b', 'b1', 3, 6),
+    _anno('a', 'a1', 3, 3, {
       isAnchor: true
     })
   ]
@@ -84,10 +84,10 @@ test("Anchors should rendered as early as possible.", function(t) {
 
 test("Two subsequent inline nodes.", function(t) {
   var annos = [
-    new Anno('a', 'inline1', 3, 4, {
+    _anno('a', 'inline1', 3, 4, {
       isInline: true
     }),
-    new Anno('b', 'inline2', 4, 5, {
+    _anno('b', 'inline2', 4, 5, {
       isInline: true
     })
   ]
@@ -98,7 +98,7 @@ test("Two subsequent inline nodes.", function(t) {
 
 test("Collapsed annotation.", function(t) {
   var annos = [
-    new Anno('a', 'a1', 0, 0, {
+    _anno('a', 'a1', 0, 0, {
     })
   ]
   var html = _render(TEXT, annos)
@@ -108,9 +108,9 @@ test("Collapsed annotation.", function(t) {
 
 test("Two collapsed annotations.", function(t) {
   var annos = [
-    new Anno('a', 'a1', 0, 0, {
+    _anno('a', 'a1', 0, 0, {
     }),
-    new Anno('b', 'b2', 0, 0, {
+    _anno('b', 'b2', 0, 0, {
     })
   ]
   var html = _render(TEXT, annos)
@@ -120,8 +120,8 @@ test("Two collapsed annotations.", function(t) {
 
 test("Anchors should not fragment other annotations.", function(t) {
   var annos = [
-    new Anno('a', 'a1', 3, 6),
-    new Anno('b', 'b1', 4, 4, {
+    _anno('a', 'a1', 3, 6),
+    _anno('b', 'b1', 4, 4, {
       isAnchor: true
     })
   ]
@@ -130,34 +130,36 @@ test("Anchors should not fragment other annotations.", function(t) {
   t.end()
 })
 
+function _anno(tagName, id, startOffset, endOffset, opts = {}) {
+  class AnonymousAnno extends Anno {}
+  if (opts.hasOwnProperty('fragmentation')) {
+    AnonymousAnno.fragmentation = opts.fragmentation
+  }
+  let anno = new AnonymousAnno(tagName, id, startOffset, endOffset)
+  if (opts.hasOwnProperty('isAnchor')) {
+    anno._isAnchor = opts.isAnchor
+    anno.zeroWidth = true
+    anno.offset = startOffset
+  }
+  if (opts.hasOwnProperty('isInline')) {
+    anno._isInline = opts.isInline
+  }
+  return anno
+}
+
 class Anno extends Annotation {
 
-  constructor(tagName, id, startOffset, endOffset, opts) {
+  constructor(tagName, id, startOffset, endOffset) {
     super(null, {
       id: id,
       start: { path: [id, 'content'], offset: startOffset},
       end: { path: [id, 'content'], offset: endOffset }
     })
 
-    opts = opts || {}
     this.tagName = tagName
 
     this._isAnchor = false
     this._isInline = false
-
-    if (opts.hasOwnProperty('fragmentation')) {
-      this.fragmentationHint = opts.fragmentation
-    }
-
-    if (opts.hasOwnProperty('isAnchor')) {
-      this._isAnchor = opts.isAnchor
-      this.zeroWidth = true
-      this.offset = startOffset
-    }
-
-    if (opts.hasOwnProperty('isInline')) {
-      this._isInline = opts.isInline
-    }
   }
 
   // anchors are special annotations that have zero width

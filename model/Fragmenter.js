@@ -219,8 +219,6 @@ function _extractEntries(annotations) {
         l = Number.MAX_VALUE
       } else if (a.constructor.hasOwnProperty('fragmentation')) {
         l = a.constructor.fragmentation
-      } else if (a.hasOwnProperty('fragmentationHint')) {
-        l = a.fragmentationHint
       }
       var startOffset = Math.min(a.start.offset, a.end.offset)
       var endOffset = Math.max(a.start.offset, a.end.offset)
