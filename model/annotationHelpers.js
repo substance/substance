@@ -8,152 +8,156 @@ import uuid from '../util/uuid'
 // As we treat annotations as overlay of plain text we need to keep them up-to-date during editing.
 
 export default {
-  insertedText,
-  deletedText,
+  updateAnnotationsAfterInsert,
+  updateAnnotationsAfterDelete,
   transferAnnotations,
   expandAnnotation,
   fuseAnnotation,
   truncateAnnotation
 }
 
-function insertedText(doc, coordinate, length) {
-  if (!length) return;
-  var index = doc.getIndex('annotations');
-  var annotations = index.get(coordinate.path)
-  for (let i = 0; i < annotations.length; i++) {
-    let anno = annotations[i]
-    var pos = coordinate.offset;
-    var start = anno.start.offset;
-    var end = anno.end.offset;
-    var newStart = start;
-    var newEnd = end;
-    if ( (pos < start) ||
-         (pos === start) ) {
-      newStart += length;
+// helper for updating annotations after inserting text
+export function updateAnnotationsAfterInsert(doc, path, startOffset, endOffset, text, typeover) {
+  let L = text.length
+  // update annotations
+  let annos = doc.getAnnotations(path)
+  for (let i = 0; i < annos.length; i++) {
+    let anno = annos[i]
+    let annoStart = anno.start.offset
+    let annoEnd = anno.end.offset
+    // I anno is before
+    if (annoEnd<startOffset) {
+      return
     }
-    // inline nodes do not expand automatically
-    if ( (pos < end) ||
-         (pos === end && !anno.isInline()) ) {
-      newEnd += length;
+    // II anno is after
+    else if (annoStart>=endOffset) {
+      doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset+L })
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
     }
-    // TODO: Use coordintate ops!
-    if (newStart !== start) {
-      doc.set([anno.id, 'start', 'offset'], newStart);
+    // III anno is deleted
+    // NOTE: InlineNodes only have a length of one character
+    // so they are always 'covered', and as they can not expand
+    // they are deleted
+    else if (
+      (annoStart>=startOffset && annoEnd<endOffset) ||
+      (anno._isInlineNode && annoStart>=startOffset && annoEnd<=endOffset)
+    ) {
+      doc.delete(anno.id)
     }
-    if (newEnd !== end) {
-      doc.set([anno.id, 'end', 'offset'], newEnd);
+    // IV anno.start between and anno.end after
+    else if (annoStart>=startOffset && annoEnd>=endOffset) {
+      // do not move start if typing over
+      if (annoStart>startOffset || !typeover) {
+        doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart+L })
+      }
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
+    }
+    // V anno.start before and anno.end between
+    else if (annoStart<startOffset && annoEnd<endOffset) {
+      // NOTE: here the anno gets expanded (that's the common way)
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd+L })
+    }
+    // VI anno.start before and anno.end after
+    else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
+      if (anno._isInlineNode) {
+        // skip
+      } else {
+        doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
+      }
+    }
+    else {
+      console.warn('TODO: handle annotation update case.')
     }
   }
-
-  // TODO: fix support for container annotations
-  // // same for container annotation anchors
-  // index = doc.getIndex('container-annotation-anchors');
-  // var anchors = index.get(coordinate.path);
-  // forEach(anchors, function(anchor) {
-  //   var pos = coordinate.offset;
-  //   var start = anchor.offset;
-  //   var changed = false;
-  //   if ( (pos < start) ||
-  //        (pos === start && !coordinate.after) ) {
-  //     start += length;
-  //     changed = true;
-  //   }
-  //   if (changed) {
-  //     let coor = (anchor.isStart?'start':'end');
-  //     // TODO: Use coordintate ops!
-  //     doc.set([anchor.id, coor, 'offset'], start);
-  //   }
-  // });
+  // same for container annotation anchors
+  let anchors = doc.getIndex('container-annotations').getAnchorsForPath(path)
+  for (let i = 0; i < anchors.length; i++) {
+    let anchor = anchors[i]
+    let start = anchor.offset
+    if (startOffset <= start) {
+      start += L
+      // HACK: In the ctor of Annotation we add _isStart and _isEnd, which are not regular Coordinate props otherwise
+      let coor = (anchor._isStart ? 'start' : 'end')
+      // TODO: Use coordintate ops!
+      doc.set([anchor._annotationId, coor, 'offset'], start)
+    }
+  }
 }
 
-function deletedText(doc, path, startOffset, endOffset) {
-  if (startOffset === endOffset) return;
-  var index = doc.getIndex('annotations');
-  var annotations = index.get(path);
-  var length = endOffset - startOffset;
-  for (let i = 0; i < annotations.length; i++) {
-    let anno = annotations[i]
-    var pos1 = startOffset;
-    var pos2 = endOffset;
-    var start = anno.start.offset;
-    var end = anno.end.offset;
-    var newStart = start;
-    var newEnd = end;
-    if (pos2 <= start) {
-      newStart -= length;
-      newEnd -= length;
-      doc.set([anno.id, 'start', 'offset'], newStart);
-      doc.set([anno.id, 'end', 'offset'], newEnd);
-    } else {
-      if (pos1 <= start) {
-        newStart = start - Math.min(pos2-pos1, start-pos1);
+export function updateAnnotationsAfterDelete(doc, path, startOffset, endOffset) {
+  if (startOffset === endOffset) return
+  const annos = doc.getIndex('annotations').get(path)
+  const L = endOffset - startOffset;
+  for (let i = 0; i < annos.length; i++) {
+    const anno = annos[i]
+    let annoStart = anno.start.offset
+    let annoEnd = anno.end.offset
+    // I anno is before
+    if (annoEnd<=startOffset) {
+      return
+    }
+    // II anno is after
+    else if (annoStart>=endOffset) {
+      doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset })
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    }
+    // III anno is deleted
+    else if (annoStart>=startOffset && annoEnd<=endOffset) {
+      doc.delete(anno.id)
+    }
+    // IV anno.start between and anno.end after
+    else if (annoStart>=startOffset && annoEnd>=endOffset) {
+      if (annoStart>startOffset) {
+        doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart })
       }
-      if (pos1 <= end) {
-        newEnd = end - Math.min(pos2-pos1, end-pos1);
-      }
-      // delete the annotation if it has collapsed by this delete
-      if (start !== end && newStart === newEnd) {
-        doc.delete(anno.id);
-      } else {
-        // TODO: Use coordintate ops!
-        if (start !== newStart) {
-          doc.set([anno.id, 'start', 'offset'], newStart);
-        }
-        if (end !== newEnd) {
-          doc.set([anno.id, 'end', 'offset'], newEnd);
-        }
-      }
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    }
+    // V anno.start before and anno.end between
+    else if (annoStart<=startOffset && annoEnd<=endOffset) {
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd })
+    }
+    // VI anno.start before and anno.end after
+    else if (annoStart<startOffset && annoEnd >= endOffset) {
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    }
+    else {
+      console.warn('TODO: handle annotation update case.')
     }
   }
-  // TODO: fix support for container annotations
-  // // same for container annotation anchors
-  // index = doc.getIndex('container-annotation-anchors');
-  // var anchors = index.get(path);
-  // var containerAnnoIds = [];
-  // forEach(anchors, function(anchor) {
-  //   containerAnnoIds.push(anchor.id);
-  //   var pos1 = startOffset;
-  //   var pos2 = endOffset;
-  //   var start = anchor.offset;
-  //   var changed = false;
-  //   if (pos2 <= start) {
-  //     start -= length;
-  //     changed = true;
-  //   } else {
-  //     if (pos1 <= start) {
-  //       var newStart = start - Math.min(pos2-pos1, start-pos1);
-  //       if (start !== newStart) {
-  //         start = newStart;
-  //         changed = true;
-  //       }
-  //     }
-  //   }
-  //   if (changed) {
-  //     // TODO: Use coordintate ops!
-  //     let coor = (anchor.isStart?'start':'end');
-  //     doc.set([anchor.id, coor, 'offset'], start);
-  //   }
-  // });
-  // // check all anchors after that if they have collapsed and remove the annotation in that case
-  // forEach(uniq(containerAnnoIds), function(id) {
-  //   var anno = doc.get(id);
-  //   var annoSel = anno.getSelection();
-  //   if(annoSel.isCollapsed()) {
-  //     // console.log("...deleting container annotation because it has collapsed" + id);
-  //     doc.delete(id);
-  //   }
-  // });
+  // same for container annotation anchors
+  let anchors = doc.getIndex('container-annotations').getAnchorsForPath(path)
+  for (let i = 0; i < anchors.length; i++) {
+    const anchor = anchors[i]
+    const pos1 = startOffset
+    const pos2 = endOffset
+    const start = anchor.offset
+    const coor = anchor._isStart ? 'start' : 'end'
+    const anno = doc.get(anchor._annotationId)
+    if (pos2 <= start) {
+      doc.update([anno.id, coor], { type: 'shift', value: -L })
+    } else if (pos1 <= start) {
+      let newStart = start - Math.min(pos2-pos1, start-pos1)
+      if (newStart !== start) {
+        doc.update([anno.id, coor], { type: 'shift', value: newStart-start })
+      }
+    }
+    // check if the annotation has collapsed due to the last change and remove it in that case
+    if (anno.start.equals(anno.end)) {
+      // console.log('deleting container annotation', anno.id)
+      doc.delete(anno.id);
+    }
+  }
 }
 
 // used when breaking a node to transfer annotations to the new property
-function transferAnnotations(doc, path, offset, newPath, newOffset) {
-  var index = doc.getIndex('annotations');
-  var annotations = index.get(path, offset);
+export function transferAnnotations(tx, path, offset, newPath, newOffset) {
+  const doc = tx.getDocument()
+  const annotations = doc.getIndex('annotations').get(path, offset);
   for (let i = 0; i < annotations.length; i++) {
-    let a = annotations[i]
-    var isInside = (offset > a.start.offset && offset < a.end.offset);
-    var start = a.start.offset;
-    var end = a.end.offset;
+    const a = annotations[i]
+    const isInside = (offset > a.start.offset && offset < a.end.offset);
+    const startOffset = a.start.offset;
+    const endOffset = a.end.offset;
     // 1. if the cursor is inside an annotation it gets either split or truncated
     if (isInside) {
       // create a new annotation if the annotation is splittable
@@ -163,63 +167,54 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
         newAnno.start.path = newPath
         newAnno.start.offset = newOffset
         newAnno.end.path = newPath
-        newAnno.end.offset = newOffset + a.end.offset - offset
-        doc.create(newAnno);
+        newAnno.end.offset = newOffset + endOffset - offset
+        tx.create(newAnno);
       }
       // in either cases truncate the first part
-      let newStartOffset = a.start.offset;
-      let newEndOffset = offset;
+      let newStartOffset = startOffset
+      let newEndOffset = offset
       // if after truncate the anno is empty, delete it
       if (newEndOffset === newStartOffset) {
-        doc.delete(a.id);
+        tx.delete(a.id);
       }
       // ... otherwise update the range
       else {
-        // TODO: Use coordintate ops!
-        if (newStartOffset !== start) {
-          doc.set([a.id, 'start', 'offset'], newStartOffset);
+        // TODO: use coordintate ops
+        if (newStartOffset !== startOffset) {
+          tx.set([a.id, 'start', 'offset'], newStartOffset);
         }
-        if (newEndOffset !== end) {
-          doc.set([a.id, 'end', 'offset'], newEndOffset);
+        if (newEndOffset !== endOffset) {
+          tx.set([a.id, 'end', 'offset'], newEndOffset);
         }
       }
     }
     // 2. if the cursor is before an annotation then simply transfer the annotation to the new node
-    else if (a.start.offset >= offset) {
-      // TODO: Use coordintate ops!
-      // Note: we are preserving the annotation so that anything which is connected to the annotation
-      // remains valid.
-      doc.set([a.id, 'start', 'path'], newPath);
-      doc.set([a.id, 'start', 'offset'], newOffset + a.start.offset - offset);
-      doc.set([a.id, 'end', 'path'], newPath);
-      doc.set([a.id, 'end', 'offset'], newOffset + a.end.offset - offset);
+    else if (startOffset >= offset) {
+      // TODO: use coordintate ops
+      tx.set([a.id, 'start', 'path'], newPath);
+      tx.set([a.id, 'start', 'offset'], newOffset + startOffset - offset);
+      tx.set([a.id, 'end', 'path'], newPath);
+      tx.set([a.id, 'end', 'offset'], newOffset + endOffset - offset);
     }
   }
 
-  // TODO: fix support for container annotations
-  // // same for container annotation anchors
-  // index = doc.getIndex('container-annotation-anchors');
-  // var anchors = index.get(path);
-  // var containerAnnoIds = [];
-  // forEach(anchors, function(anchor) {
-  //   containerAnnoIds.push(anchor.id);
-  //   var start = anchor.offset;
-  //   if (offset <= start) {
-  //     // TODO: Use coordintate ops!
-  //     let coor = anchor.isStart?'start':'end'
-  //     doc.set([anchor.id, coor, 'path'], newPath);
-  //     doc.set([anchor.id, coor, 'offset'], newOffset + anchor.offset - offset);
-  //   }
-  // });
-  // // check all anchors after that if they have collapsed and remove the annotation in that case
-  // forEach(uniq(containerAnnoIds), function(id) {
-  //   var anno = doc.get(id);
-  //   var annoSel = anno.getSelection();
-  //   if(annoSel.isCollapsed()) {
-  //     // console.log("...deleting container annotation because it has collapsed" + id);
-  //     doc.delete(id);
-  //   }
-  // });
+  // same for container annotation anchors
+  let anchors = doc.getIndex('container-annotations').getAnchorsForPath(path)
+  for (let i = 0; i < anchors.length; i++) {
+    const anchor = anchors[i]
+    const startOffset = anchor.offset
+    let anno = tx.get(anchor._annotationId)
+    if (offset <= startOffset) {
+      let coor = anchor._isStart ? 'start' : 'end'
+      // TODO: use coordintate ops
+      tx.set([anno.id, coor, 'path'], newPath);
+      tx.set([anno.id, coor, 'offset'], newOffset + startOffset - offset)
+    }
+    // check if the annotation has collapsed due to the last change and remove it in that case
+    if (anno.start.equals(anno.end)) {
+      tx.delete(anno.id)
+    }
+  }
 }
 
 /*
@@ -227,7 +222,7 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
  @param {model/PropertyAnnotation} args.anno annotation which should be expanded
  @param {model/Selection}  args.selection selection to which to expand
 */
-function truncateAnnotation(tx, anno, sel) {
+export function truncateAnnotation(tx, anno, sel) {
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
   if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.')
   let annoSel = anno.getSelection()
@@ -241,7 +236,7 @@ function truncateAnnotation(tx, anno, sel) {
  @param {model/PropertyAnnotation} args.anno annotation which should be expanded
  @param {model/Selection}  args.selection selection to which to expand
 */
-function expandAnnotation(tx, anno, sel) {
+export function expandAnnotation(tx, anno, sel) {
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
   if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.')
   let annoSel = anno.getSelection()
@@ -254,7 +249,7 @@ function expandAnnotation(tx, anno, sel) {
  @param {model/Document} tx
  @param {model/PropertyAnnotation[]} args.annos annotations which should be fused
 */
-function fuseAnnotation(tx, annos) {
+export function fuseAnnotation(tx, annos) {
   if (!isArray(annos) || annos.length < 2) {
     throw new Error('fuseAnnotation(): at least two annotations are necessary.')
   }

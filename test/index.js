@@ -1,8 +1,9 @@
 // model
+import "./annotationHelpers.test.js"
 import "./ContainerAddress.test.js"
+import "./ContainerAnnotation.test.js"
 import "./ContainerSelection.test.js"
 import "./Document.test.js"
-import "./annotationHelpers.test.js"
 import "./documentHelpers.test.js"
 import "./Editing.test.js"
 import "./EditorSession.test.js"

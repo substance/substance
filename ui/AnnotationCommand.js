@@ -1,5 +1,5 @@
 import Command from './Command'
-import annotationHelpers from '../model/annotationHelpers'
+import { expandAnnotation, fuseAnnotation, truncateAnnotation } from '../model/annotationHelpers'
 
 /**
   A class for commands intended to be executed on the annotations.
@@ -115,6 +115,7 @@ class AnnotationCommand extends Command {
   canDelete(annos, sel) {
     // When the cursor or selection is inside an existing annotation
     if (annos.length !== 1) return false
+    // TODO: this could be generalized using a helper based on coordinates
     let annoSel = annos[0].getSelection()
     return sel.isInsideOf(annoSel)
   }
@@ -132,6 +133,7 @@ class AnnotationCommand extends Command {
   canExpand(annos, sel) {
     // When there's some overlap with only a single annotation we do an expand
     if (annos.length !== 1) return false
+    // TODO: this could be generalized using a helper based on coordinates
     let annoSel = annos[0].getSelection()
     return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel)
   }
@@ -148,8 +150,8 @@ class AnnotationCommand extends Command {
    */
   canTruncate(annos, sel) {
     if (annos.length !== 1) return false
+    // TODO: this could be generalized using a helper based on coordinates
     let annoSel = annos[0].getSelection()
-
     return (sel.isLeftAlignedWith(annoSel) || sel.isRightAlignedWith(annoSel)) &&
            !sel.contains(annoSel) &&
            !sel.isCollapsed()
@@ -246,7 +248,7 @@ class AnnotationCommand extends Command {
     let annos = this._getAnnotationsForSelection(params);
     this._checkPrecondition(params, annos, this.canFuse);
     this._applyTransform(params, function(tx) {
-      annotationHelpers.fuseAnnotation(tx, annos)
+      fuseAnnotation(tx, annos)
     })
     return {
       mode: 'fuse',
@@ -259,7 +261,7 @@ class AnnotationCommand extends Command {
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canTruncate)
     this._applyTransform(params, function(tx) {
-      annotationHelpers.truncateAnnotation(tx, anno, params.selection)
+      truncateAnnotation(tx, anno, params.selection)
     })
     return {
       mode: 'truncate',
@@ -272,7 +274,7 @@ class AnnotationCommand extends Command {
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canExpand)
     this._applyTransform(params, function(tx) {
-      annotationHelpers.expandAnnotation(tx, anno, params.selection)
+      expandAnnotation(tx, anno, params.selection)
     })
     return {
       mode: 'expand',

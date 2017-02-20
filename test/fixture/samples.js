@@ -21,6 +21,17 @@ export function _p2(doc, body) {
   body.show('p2')
 }
 
+export const P3_TEXT = 'p3:lmnopq'
+
+export function _p3(doc, body) {
+  doc.create({
+    type: 'paragraph',
+    id: 'p3',
+    content: P3_TEXT
+  })
+  body.show('p3')
+}
+
 export function _empty(doc, body) {
   doc.create({
     type: 'paragraph',

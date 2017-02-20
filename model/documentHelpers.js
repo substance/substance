@@ -6,7 +6,7 @@ import isArrayEqual from '../util/isArrayEqual'
 import DocumentIndex from './DocumentIndex'
 import ObjectOperation from './data/ObjectOperation'
 import DocumentChange from './DocumentChange'
-import annotationHelpers from './annotationHelpers'
+import { transferAnnotations, updateAnnotationsAfterDelete } from './annotationHelpers'
 import { isEntirelySelected } from './selectionHelpers'
 
 /**
@@ -81,15 +81,18 @@ function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   // of an annotation. Opposed to that, common annotations are bound
   // to properties which make it easy to lookup.
   if (!containerId) {
-    throw new Error("'containerId' is required.");
+    throw new Error("'containerId' is required.")
   }
   options = options || {};
-  var index = doc.getIndex('container-annotations');
-  var annotations = index.get(containerId, options.type);
+  var index = doc.getIndex('container-annotations')
+  var annotations = index.get(containerId, options.type)
   annotations = filter(annotations, function(anno) {
-    return sel.overlaps(anno.getSelection());
-  });
-  return annotations;
+    // TODO: this could be optimized
+    // The basic idea would be to get start and end address/coordinate of the selection
+    // as well as of the annotation
+    return sel.overlaps(anno.getSelection())
+  })
+  return annotations
 }
 
 /**
@@ -275,73 +278,22 @@ function copyNode(node) {
   VI: <-|--|->     :   move end by total span
 */
 function deleteTextRange(doc, start, end) {
-  if (!start) {
-    start = {
-      path: end.path,
-      offset: 0
-    }
-  }
+  if (!start) start = { path: end.path, offset: 0 }
   let path = start.path
   let text = doc.get(path)
-  if (!end) {
-    end = {
-      path: start.path,
-      offset: text.length
-    }
-  }
+  if (!end) end = { path: start.path, offset: text.length }
   if (!isArrayEqual(start.path, end.path)) throw new Error('Unsupported state: selection should be on one property')
   let startOffset = start.offset
   let endOffset = end.offset
   doc.update(path, { type: 'delete', start: startOffset, end: endOffset })
-  // update annotations
-  let annos = doc.getAnnotations(path)
-  annos.forEach(function(anno) {
-    let annoStart = anno.start.offset
-    let annoEnd = anno.end.offset
-    // I anno is before
-    if (annoEnd<=startOffset) {
-      return
-    }
-    // II anno is after
-    else if (annoStart>=endOffset) {
-      doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset })
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
-    }
-    // III anno is deleted
-    else if (annoStart>=startOffset && annoEnd<=endOffset) {
-      doc.delete(anno.id)
-    }
-    // IV anno.start between and anno.end after
-    else if (annoStart>=startOffset && annoEnd>=endOffset) {
-      if (annoStart>startOffset) {
-        doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart })
-      }
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
-    }
-    // V anno.start before and anno.end between
-    else if (annoStart<=startOffset && annoEnd<=endOffset) {
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd })
-    }
-    // VI anno.start before and anno.end after
-    else if (annoStart<startOffset && annoEnd >= endOffset) {
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
-    }
-    else {
-      console.warn('TODO: handle annotation update case.')
-    }
-  })
+  updateAnnotationsAfterDelete(doc, path, startOffset, endOffset)
 }
 
 function deleteListRange(doc, list, start, end) {
   if (doc !== list.getDocument()) {
     list = doc.get(list.id)
   }
-  if (!start) {
-    start = {
-      path: list.getItemAt(0).getTextPath(),
-      offset: 0
-    }
-  }
+  if (!start) start = { path: list.getItemAt(0).getTextPath(), offset: 0 }
   if (!end) {
     let item = list.getLastItem()
     end = {
@@ -410,7 +362,7 @@ function mergeListItems(doc, listId, itemPos) {
   // append the text
   doc.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
   // transfer annotations
-  annotationHelpers.transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
+  transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
   doc.delete(source.id)
 }
 

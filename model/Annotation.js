@@ -10,45 +10,51 @@ class Annotation extends DocumentNode {
     // wrap coordinates
     this.start = new Coordinate(this.start)
     this.end = new Coordinate(this.end)
+
+    // HACK: leaving custom information so that we can better understand the role of the coordinate within the annotation
+    this.start._isStart = true
+    this.start._annotationId = this.id
+    this.end._isEnd = true
+    this.end._annotationId = this.id
   }
 
   get startPath() {
-    console.warn('DEPRECATED: use Annotation.start.path instead.')
+    // console.warn('DEPRECATED: use Annotation.start.path instead.')
     return this.start.path
   }
 
   set startPath(path) {
-    console.warn('DEPRECATED: use Annotation.start.path instead.')
+    // console.warn('DEPRECATED: use Annotation.start.path instead.')
     this.start.path = path
   }
 
   get startOffset() {
-    console.warn('DEPRECATED: use Annotation.start.offset instead.')
+    // console.warn('DEPRECATED: use Annotation.start.offset instead.')
     return this.start.offset
   }
 
   set startOffset(offset) {
-    console.warn('DEPRECATED: use Annotation.start.offset instead.')
+    // console.warn('DEPRECATED: use Annotation.start.offset instead.')
     this.start.offset = offset
   }
 
   get endPath() {
-    console.warn('DEPRECATED: use Annotation.end.path instead.')
+    // console.warn('DEPRECATED: use Annotation.end.path instead.')
     return this.end.path
   }
 
   set endPath(path) {
-    console.warn('DEPRECATED: use Annotation.end.path instead.')
+    // console.warn('DEPRECATED: use Annotation.end.path instead.')
     this.end.path = path
   }
 
   get endOffset() {
-    console.warn('DEPRECATED: use Annotation.end.offset instead.')
+    // console.warn('DEPRECATED: use Annotation.end.offset instead.')
     return this.end.offset
   }
 
   set endOffset(offset) {
-    console.warn('DEPRECATED: use Annotation.end.offset instead.')
+    // console.warn('DEPRECATED: use Annotation.end.offset instead.')
     this.end.offset = offset
   }
 
@@ -108,7 +114,7 @@ function _normalizedProps(props) {
       use
         { start: { path: [], offset: 0 }, end: { path: [], offset: 10 } }
     */
-    console.warn('DEPRECATED: create Annotation with "start" and "end" coordinate instead.')
+    // console.warn('DEPRECATED: create Annotation with "start" and "end" coordinate instead.')
     props = Object.assign({}, props)
     props.start = {
       path: props.startPath || props.path,

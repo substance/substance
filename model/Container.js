@@ -37,6 +37,7 @@ class Container extends DocumentNode {
     if (isString(node)) {
       node = this.document.get(node)
     }
+    if (!node) return -1
     let pos = this._getPosition(node)
     if (strict && pos < 0) {
       throw new Error('Node is not within this container: ' + node.id)
@@ -200,6 +201,30 @@ class Container extends DocumentNode {
 
   getChildCount() {
     return this.nodes.length
+  }
+
+  // EXPERIMENTAL:
+  // We are trying to find an efficient and still simple implementation
+  // for managing container annotation fragments.
+  _getAnnotationMap() {
+    if (this._annotationMap) return this._annotationMap
+    const doc = this.getDocument()
+    const annos = doc.getIndex('container-annotations').get(this.id)
+    const annotationMap = {}
+    for (let i = 0; i < annos.length; i++) {
+      const anno = annos[i]
+      const annoId = anno.id
+      const startPos = this.getPosition(anno.start.path[0])
+      const endPos = this.getPosition(anno.end.path[0])
+      for (let i = startPos; i <= endPos; i++) {
+        if (!annotationMap[i]) annotationMap[i] = {}
+        const fragments = annotationMap[i]
+        if (!fragments[annoId]) fragments[annoId] = {}
+        const fragment = fragments[annoId]
+      }
+    }
+    this._annotationMap = annotationMap
+    return annotationMap
   }
 
 }

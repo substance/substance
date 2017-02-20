@@ -15,7 +15,7 @@ module.exports = {
     // nodejs
     "global",
     // EcmaScript 6
-    "Promise", "Map", "Set", "WeakMap",
+    "Promise", "Map", "Set", "WeakMap", "Symbol",
     // commonjs
     "require", "module", "exports"
     //

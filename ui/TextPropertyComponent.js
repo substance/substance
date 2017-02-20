@@ -87,11 +87,14 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     let node = fragment.node
     let id = node.id
     let el
-    if (node.type === 'cursor') {
-      el = $$(CursorComponent, { collaborator: node.collaborator })
-    } else if (node.type === 'selection-fragment') {
-      el = $$(SelectionFragmentComponent, { collaborator: node.collaborator })
-    } else {
+    // Note: we moved away from rendering selections. Instead we introduced the concept of markers
+    // That means, if we want to render a selection which is not the DOM selection then we would need
+    // to add a marker.
+    // if (node.type === 'cursor') {
+    //   el = $$(CursorComponent, { collaborator: node.collaborator })
+    // } else if (node.type === 'selection-fragment') {
+    //   el = $$(SelectionFragmentComponent, { collaborator: node.collaborator })
+    // } else {
       el = super._renderFragment.apply(this, arguments)
       el.ref(id + '@' + fragment.counter)
       // NOTE: before we only preserved inline nodes, or if configured explicitly
@@ -106,7 +109,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       // else if (this.context.config && this.context.config.preservativeTextPropertyRendering) {
       //   el.ref(id + '@' + fragment.counter)
       // }
-    }
+    // }
     el.attr('data-offset', fragment.pos)
     return el
   }

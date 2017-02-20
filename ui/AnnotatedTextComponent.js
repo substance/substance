@@ -2,6 +2,7 @@ import Fragmenter from '../model/Fragmenter'
 import Component from './Component'
 import AnnotationComponent from './AnnotationComponent'
 import InlineNodeComponent from '../packages/inline-node/InlineNodeComponent'
+import ContainerAnnotationFragment from './ContainerAnnotationFragment'
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -67,28 +68,26 @@ class AnnotatedTextComponent extends Component {
     let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
-    // TODO: fix support for container annotations
-    if (node.type === "container-annotation-fragment") {
-      // return $$(AnnotationComponent, { doc: doc, node: node })
-      //   .addClass("se-annotation-fragment")
-      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-    } else if (node.type === "container-annotation-anchor") {
-      // return $$(AnnotationComponent, { doc: doc, node: node })
-      //   .addClass("se-anchor")
-      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
-      //   .addClass(node.isStart?"start-anchor":"end-anchor")
-    } else {
-      let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
-      if (node.constructor.isInline &&
+    // allow using a custom Component
+    let ComponentClass = componentRegistry.get(node.type)
+    // if no custom class is registered use built-ins.
+    if (!ComponentClass) {
+      if (node.type === 'container-annotation-fragment') {
+        ComponentClass = ContainerAnnotationFragment
+      } else if (node.constructor.isInline &&
           // also no extra wrapping if the node is already an inline node
           !ComponentClass.prototype._isInlineNodeComponent &&
           // opt-out for custom implementations
+          // TODO: where is this used?
           !ComponentClass.isCustom) {
         ComponentClass = InlineNodeComponent
+      } else {
+        // default
+        ComponentClass = AnnotationComponent
       }
-      let el = $$(ComponentClass, { doc: doc, node: node })
-      return el
     }
+    let el = $$(ComponentClass, { doc: doc, node: node })
+    return el
   }
 
   _finishFragment(fragment, context, parentContext) {

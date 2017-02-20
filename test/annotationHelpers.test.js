@@ -1,15 +1,11 @@
 import { module } from 'substance-test'
 
-import annotationHelpers from '../model/annotationHelpers'
+import { truncateAnnotation, expandAnnotation, fuseAnnotation } from '../model/annotationHelpers'
 import EditingInterface from '../model/EditingInterface'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
 
 const test = module('annotationHelpers')
-
-let truncateAnnotation = annotationHelpers.truncateAnnotation
-let expandAnnotation = annotationHelpers.expandAnnotation
-let fuseAnnotation = annotationHelpers.fuseAnnotation
 
 test("Truncate property annotation with a given property selection", function(t) {
   let doc = fixture(A1)

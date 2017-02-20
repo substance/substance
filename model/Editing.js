@@ -2,7 +2,7 @@ import isArrayEqual from '../util/isArrayEqual'
 import isString from '../util/isString'
 import last from '../util/last'
 import uuid from '../util/uuid'
-import annotationHelpers from '../model/annotationHelpers'
+import { updateAnnotationsAfterInsert, updateAnnotationsAfterDelete, transferAnnotations } from '../model/annotationHelpers'
 import documentHelpers from '../model/documentHelpers'
 import { setCursor, isEntirelySelected, selectNode } from '../model/selectionHelpers'
 import paste from '../model/paste'
@@ -244,7 +244,7 @@ class Editing {
     let start = sel.start.offset
     let end = sel.end.offset
     tx.update(path, { type: 'delete', start: start, end: end })
-    annotationHelpers.deletedText(tx, path, start, end)
+    updateAnnotationsAfterDelete(tx, path, start, end)
   }
 
   // deletes all inner nodes and 'truncates' start and end node
@@ -532,6 +532,7 @@ class Editing {
   }
 
   insertText(tx, text) {
+    if (!text) return
     let sel = tx.selection
     // type over a selected node or insert a paragraph before
     // or after
@@ -617,7 +618,7 @@ class Editing {
     }, data)
     let newPath = [newNode.id, 'content']
     newNode = tx.create(newNode)
-    annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0)
+    transferAnnotations(tx, path, 0, newPath, 0)
 
     // hide the old one, show the new node
     let container = tx.get(sel.containerId)
@@ -655,7 +656,7 @@ class Editing {
           type: 'list-item',
           content: node.getText(),
         })
-        annotationHelpers.transferAnnotations(tx, node.getTextPath(), 0, newItem.getTextPath(), 0)
+        transferAnnotations(tx, node.getTextPath(), 0, newItem.getTextPath(), 0)
         let newList = tx.create(Object.assign({
           type: 'list',
           items: [newItem.id]
@@ -673,7 +674,7 @@ class Editing {
         let itemPos = node.getItemPosition(itemId)
         let item = node.getItemAt(itemPos)
         let newTextNode = tx.createDefaultTextNode(item.getText())
-        annotationHelpers.transferAnnotations(tx, item.getTextPath(), 0, newTextNode.getTextPath(), 0)
+        transferAnnotations(tx, item.getTextPath(), 0, newTextNode.getTextPath(), 0)
         // take the item out of the list
         node.removeItemAt(itemPos)
         if (node.getLength() === 0) {
@@ -762,6 +763,7 @@ class Editing {
     VII: <-|--|->    :   move end by total span+L
   */
   _insertText(tx, sel, text) {
+    if (!text) return
     let start = sel.start
     let end = sel.end
     if (!isArrayEqual(start.path, end.path)) {
@@ -771,66 +773,13 @@ class Editing {
     let startOffset = start.offset
     let endOffset = end.offset
     let typeover = !sel.isCollapsed()
-    let L = text.length
     // delete selected text
     if (typeover) {
       tx.update(path, { type: 'delete', start: startOffset, end: endOffset })
     }
     // insert new text
     tx.update(path, { type: 'insert', start: startOffset, text: text })
-    // update annotations
-    let annos = tx.getAnnotations(path)
-    annos.forEach(function(anno) {
-      let annoStart = anno.start.offset
-      let annoEnd = anno.end.offset
-      // I anno is before
-      if (annoEnd<startOffset) {
-        return
-      }
-      // II anno is after
-      else if (annoStart>=endOffset) {
-        tx.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset+L })
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
-      }
-      // III anno is deleted
-      // NOTE: InlineNodes only have a length of one character
-      // so they are always 'covered', and as they can not expand
-      // they are deleted
-      else if (
-        (annoStart>=startOffset && annoEnd<endOffset) ||
-        (anno._isInlineNode && annoStart>=startOffset && annoEnd<=endOffset)
-      ) {
-        tx.delete(anno.id)
-      }
-      // IV anno.start between and anno.end after
-      else if (annoStart>=startOffset && annoEnd>=endOffset) {
-        // do not move start if typing over
-        if (annoStart>startOffset || !typeover) {
-          tx.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart+L })
-        }
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
-      }
-      // V anno.start before and anno.end between
-      else if (annoStart<startOffset && annoEnd<endOffset) {
-        // NOTE: here the anno gets expanded (that's the common way)
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd+L })
-      }
-      // VI
-      else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
-          // skip
-      }
-      // VII anno.start before and anno.end after
-      else if (annoStart<startOffset && annoEnd>=endOffset) {
-        if (anno._isInlineNode) {
-          // skip
-        } else {
-          tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
-        }
-      }
-      else {
-        console.warn('TODO: handle annotation update case.')
-      }
-    })
+    updateAnnotationsAfterInsert(tx, path, startOffset, endOffset, text, typeover)
     let offset = startOffset + text.length
     tx.setSelection({
       type: 'property',
@@ -888,7 +837,7 @@ class Editing {
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, newNode.getTextPath(), 0)
+        transferAnnotations(tx, path, offset, newNode.getTextPath(), 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
@@ -981,7 +930,7 @@ class Editing {
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, [newItem.id,'content'], 0)
+        transferAnnotations(tx, path, offset, [newItem.id,'content'], 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
@@ -1051,7 +1000,7 @@ class Editing {
         // append the text
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+        transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
         tx.delete(source.id)
         tx.setSelection({
           type: 'property',
@@ -1068,7 +1017,7 @@ class Editing {
         // append the text
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+        transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
         // delete item and prune empty list
         tx.delete(source.id)
         if (list.getLength() === 0) {
@@ -1096,7 +1045,7 @@ class Editing {
         // append the text
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+        transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
         tx.delete(source.id)
         tx.setSelection({
           type: 'property',
