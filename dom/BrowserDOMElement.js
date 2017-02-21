@@ -12,11 +12,6 @@ class BrowserDOMElement extends DOMElement {
     console.assert(el instanceof window.Node, "Expecting native DOM node.")
     this.el = el
     el._wrapper = this
-    // a store for event listeners: necessary so that we can 'reuse' the listener and do reasoning for incremental rendering
-    this.eventListeners = []
-    // store for changed properties: unfortunately this is necessary for incremental
-    // rerendering, as there seems no way to get a set of changed properties in a general way
-    this._changedProperties = new Set()
   }
 
   getNativeElement() {
@@ -64,9 +59,11 @@ class BrowserDOMElement extends DOMElement {
 
   getProperties() {
     let properties = {}
-    this._changedProperties.forEach((name) => {
-      properties[name] = this.el[name]
-    })
+    if (this._changedProperties) {
+      this._changedProperties.forEach((name) => {
+        properties[name] = this.el[name]
+      })
+    }
     return properties
   }
 
@@ -75,13 +72,17 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setProperty(name, value) {
+    if (!this._changedProperties) this._changedProperties = new Set()
     this._changedProperties.add(name)
     this.el[name] = value
     return this
   }
 
   removeProperty(name) {
-    this._changedProperties.delete(name)
+    if (this._changedProperties) {
+      this._changedProperties.delete(name)
+      // TODO: maybe delete _changedProperties if empty
+    }
     delete this.el[name]
     return this
   }
@@ -105,13 +106,15 @@ class BrowserDOMElement extends DOMElement {
       let attr = attributes.item(i)
       newEl.setAttribute(attr.name, attr.value)
     }
+    if (!this._changedProperties) this._changedProperties = new Set()
     this._changedProperties.forEach((name)=>{
       newEl[name] = this.el[name]
     })
-    this.eventListeners.forEach(function(listener) {
-      newEl.addEventListener(listener.eventName, listener.handler, listener.capture)
-    })
-
+    if (this.eventListeners) {
+      this.eventListeners.forEach(function(listener) {
+        newEl.addEventListener(listener.eventName, listener.handler, listener.capture)
+      })
+    }
     newEl.append(this.getChildNodes())
 
     this._replaceNativeEl(newEl.getNativeElement())
@@ -191,12 +194,14 @@ class BrowserDOMElement extends DOMElement {
       listener.__hasEventDelegation__ = true
     }
     this.el.addEventListener(listener.eventName, listener.handler, listener.capture)
+    if (!this.eventListeners) this.eventListeners = []
     this.eventListeners.push(listener)
     listener._el = this
     return this
   }
 
   removeEventListener(eventName, handler) {
+    if (!this.eventListeners) return
     // console.log('removing event listener', eventName, handler);
     let listener = null, idx = -1
     idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
@@ -211,17 +216,18 @@ class BrowserDOMElement extends DOMElement {
   }
 
   removeAllEventListeners() {
+    if (!this.eventListeners) return
     for (let i = 0; i < this.eventListeners.length; i++) {
       let listener = this.eventListeners[i]
       // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
       listener._el = null
       this.el.removeEventListener(listener.eventName, listener.handler)
     }
-    this.eventListeners = []
+    delete this.eventListeners
   }
 
   getEventListeners() {
-    return this.eventListeners
+    return this.eventListeners || []
   }
 
   getChildCount() {
@@ -732,7 +738,6 @@ class BrowserWindow {
     // Note: not
     this.el = window
     window.__BrowserDOMElementWrapper__ = this
-    this.eventListeners = []
   }
 
 }
