@@ -23,8 +23,6 @@ class Registry {
     }
   }
 
-  get _isRegistry() { return true }
-
   /**
    * Check if an entry is registered for a given name.
    *
@@ -90,8 +88,12 @@ class Registry {
    * @method get
    * @memberof module:Basics.Registry.prototype
    */
-  get(name) {
-    return this.entries[name]
+  get(name, strict) {
+    let result = this.entries[name]
+    if (strict && !result) {
+      throw new Error('No entry registered for name '+name)
+    }
+    return result
   }
 
   /*
@@ -133,5 +135,7 @@ class Registry {
     return result
   }
 }
+
+Registry.prototype._isRegistry = true
 
 export default Registry
