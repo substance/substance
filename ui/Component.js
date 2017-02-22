@@ -329,8 +329,7 @@ class Component extends EventEmitter {
     if (!el._isDOMElement) {
       el = DefaultDOMElement.wrapNativeElement(el)
     }
-    // this makes this component a root component
-    this.parent = null
+    // Makes sure a new element is created for the component
     this.el = null
     this.renderingEngine = new RenderingEngine({ elementFactory: el.getOwnerDocument() })
     this._render()

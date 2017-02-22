@@ -232,7 +232,9 @@ class Surface extends Component {
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
         // this will let our parents know that the DOM selection is ready
-        this.send('domSelectionRendered')
+        this.send('domSelectionRendered', {
+          surface: this
+        })
       }
     }
   }

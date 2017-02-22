@@ -1,6 +1,6 @@
 import isString from '../util/isString'
 import keys from '../util/keys'
-import {setCursor} from '../model/selectionHelpers'
+import { setCursor, stepIntoIsolatedNode } from '../model/selectionHelpers'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from '../packages/surface/Surface'
 import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
@@ -238,18 +238,18 @@ class ContainerEditor extends Surface {
     })
   }
 
-  _handleSpaceKey(event) {
-    let sel = this.getEditorSession().getSelection()
+  _handleTabKey(event) {
+    const editorSession = this.getEditorSession()
+    const sel = editorSession.getSelection()
     if (sel.isNodeSelection() && sel.isFull()) {
-      let comp = this.refs[sel.getNodeId()]
-      if (comp && comp.grabFocus) {
+      const comp = this.refs[sel.getNodeId()]
+      if (comp && stepIntoIsolatedNode(editorSession, comp)) {
         event.preventDefault()
         event.stopPropagation()
-        comp.grabFocus()
         return
       }
     }
-    super._handleSpaceKey(event)
+    super._handleTabKey(event)
   }
 
   // Used by Clipboard
@@ -264,7 +264,6 @@ class ContainerEditor extends Surface {
     return this.containerId
   }
 
-  // TODO: do we really need this in addition to getContainerId?
   getContainer() {
     return this.getDocument().get(this.getContainerId())
   }

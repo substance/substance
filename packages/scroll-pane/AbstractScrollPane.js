@@ -40,22 +40,25 @@ class AbstractScrollPane extends Component {
     Determine selection rectangle relative to content element
     and emit a dom-selection:rendered event with positioning hints
   */
-  _onDomSelectionRendered() {
+  _onDomSelectionRendered({surface}) {
     let contentRect = this._getContentRect()
     let selectionRect = this._getSelectionRect()
     if (!selectionRect) return
+    let hints = {
+      contentRect,
+      selectionRect,
+      surface
+    }
+    this._emitSelectionPositioned(hints)
+    this._scrollSelectionIntoView(selectionRect)
+  }
+
+  _emitSelectionPositioned(hints) {
     // Allows overlays to do positioning relative to the current
     // selection bounding rectangle.
-    this.emit('selection:positioned', {
-      contentRect,
-      selectionRect
-    })
+    this.emit('selection:positioned', hints)
     // TODO: Remove legacy support
-    this.emit('dom-selection:rendered', {
-      contentRect,
-      selectionRect
-    })
-    this._scrollSelectionIntoView(selectionRect)
+    this.emit('dom-selection:rendered', hints)
   }
 
   /*
