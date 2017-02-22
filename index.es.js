@@ -129,6 +129,9 @@ export { default as Grid } from './packages/grid/Grid'
 // drop-teaser
 export { default as Dropzones } from './packages/dropzones/Dropzones'
 
+// overlay
+export { default as Overlay } from './packages/overlay/Overlay'
+
 // tabbed-pane
 export { default as TabbedPanePackage } from './packages/tabbed-pane/TabbedPanePackage'
 export { default as TabbedPane } from './packages/tabbed-pane/TabbedPane'
