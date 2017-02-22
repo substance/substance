@@ -227,7 +227,7 @@ class ScrollPane extends AbstractScrollPane {
     Determines the selection bounding rectangle relative to the scrollpane's content.
   */
   _onDomSelectionRendered() {
-    super._onDomSelectionRendered()
+    super._onDomSelectionRendered(...arguments)
     this._updateScrollbar()
   }
 
