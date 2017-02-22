@@ -122,6 +122,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     let content = this.refs.content
     if (content.grabFocus) {
       content.grabFocus(event)
+      return true
     }
   }
 
