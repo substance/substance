@@ -161,3 +161,34 @@ export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, s
     return new NodeSelection({ nodeId, mode, reverse, containerId, surfaceId })
   }
 }
+
+export function stepIntoIsolatedNode(editorSession, comp) {
+  // this succeeds if the content component provides
+  // a grabFocus() implementation
+  if (comp.grabFocus()) return true
+
+  // otherwise we try to find the first surface
+  let surface = comp.find('.sc-surface')
+  if (surface) {
+    if (surface._isTextPropertyEditor) {
+      const doc = editorSession.getDocument()
+      const path = surface.getPath()
+      const text = doc.get(path, 'strict')
+      editorSession.setSelection({
+        type: 'property',
+        path: path,
+        startOffset: text.length,
+        surfaceId: surface.id
+      })
+      return true
+    } else if (surface._isContainerEditor) {
+      let container = surface.getContainer()
+      if (container.length > 0) {
+        let first = container.getChildAt(0)
+        setCursor(editorSession, first, container.id, 'after')
+      }
+      return true
+    }
+  }
+  return false
+}
