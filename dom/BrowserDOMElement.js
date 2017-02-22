@@ -87,7 +87,11 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getTagName() {
-    if (this.el.tagName) {
+    // it is convenient in HTML mode to always use tagName in lower case
+    // however, in XML this is not allowed, as tag names are case sensitive there
+    if (this._isXML()) {
+      return this.el.tagName
+    } else if (this.el.tagName) {
       return this.el.tagName.toLowerCase()
     }
   }
@@ -596,6 +600,10 @@ class BrowserDOMElement extends DOMElement {
       outerHeight += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10)
     }
     return outerHeight
+  }
+
+  _isXML() {
+    return this._getNativeOwnerDocument().contentType === 'application/xml'
   }
 
 }
