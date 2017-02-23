@@ -237,7 +237,9 @@ class Surface extends Component {
         // this will let the scrollpane know that the DOM selection is ready
         const scrollPane = this.context.scrollPane
         if (scrollPane) {
-          this.context.scrollPane.onSelectionPositioned()
+          this.context.scrollPane.updateSelection({
+            editorId: this.editorSession.id
+          })
         }
       }
     }

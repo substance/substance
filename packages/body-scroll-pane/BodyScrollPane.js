@@ -38,7 +38,7 @@ class BodyScrollPane extends AbstractScrollPane {
   }
 
   render($$) {
-    let el = $$('div')
+    let el = $$('div').addClass('sc-body-scroll-pane')
     if (this.props.contextMenu === 'custom') {
       el.on('contextmenu', this._onContextMenu)
     }
