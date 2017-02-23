@@ -12,10 +12,12 @@ import MacroManager from '../ui/MacroManager'
 import KeyboardManager from '../ui/KeyboardManager'
 import forEach from '../util/forEach'
 import isPlainObject from '../util/isPlainObject'
+import uuid from '../util/uuid'
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
 import EventEmitter from '../util/EventEmitter'
 import FileManager from './FileManager'
+
 
 class EditorSession extends EventEmitter {
 
@@ -24,6 +26,7 @@ class EditorSession extends EventEmitter {
 
     options = options || {}
 
+    this.id = options.id || uuid()
     this.document = doc
     if (!options.configurator) {
       throw new Error('No configurator provided.')
