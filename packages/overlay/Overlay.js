@@ -34,7 +34,6 @@ class Overlay extends Toolbox {
         $$(toolGroup.Class, toolGroupProps)
       )
     })
-
     el.append(activeToolsEl)
     return el
   }
@@ -55,8 +54,16 @@ class Overlay extends Toolbox {
     this.el.addClass('sm-hidden')
   }
 
+  /*
+    Based on a new hint (editorId) we can determine wether the overlay
+    is active or not. We hide overlays for all inactive editors.
+  */
   _onSelectionPositioned(hints) {
-    if (this.hasActiveTools()) {
+    let isActiveEditor = true
+    if (hints.editorId !== this.context.editorSession.id) {
+      isActiveEditor = false
+    }
+    if (this.hasActiveTools() && isActiveEditor) {
       this.el.removeClass('sm-hidden')
       let overlayWidth = this.el.htmlProp('offsetWidth')
       let selRect = hints.selectionRect
