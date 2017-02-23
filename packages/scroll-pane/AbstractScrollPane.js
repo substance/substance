@@ -33,6 +33,17 @@ class AbstractScrollPane extends Component {
   }
 
   /*
+    This gets called in the Surface after a selection change.
+
+    NOTE: We need to cache the editorId value since we need it when we compute
+    new overlay hints on window resize.
+  */
+  updateSelection({editorId}) {
+    this._editorId = editorId
+    this.onSelectionPositioned()
+  }
+
+  /*
     Determine selection rectangle relative to content element
     and emit a selection:positioned event with positioning hints
   */
@@ -42,7 +53,8 @@ class AbstractScrollPane extends Component {
     if (!selectionRect) return
     let hints = {
       contentRect,
-      selectionRect
+      selectionRect,
+      editorId: this._editorId
     }
     this._emitSelectionPositioned(hints)
     this._scrollSelectionIntoView(selectionRect)
