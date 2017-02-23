@@ -16,13 +16,9 @@ class AbstractScrollPane extends Component {
   }
 
   didMount() {
-    this.handleActions({
-      'domSelectionRendered': this._onDomSelectionRendered
-    })
-
     if (inBrowser) {
       this.windowEl = DefaultDOMElement.wrapNativeElement(window)
-      this.windowEl.on('resize', this._onDomSelectionRendered, this)
+      this.windowEl.on('resize', this.onSelectionPositioned, this)
     }
   }
 
@@ -38,16 +34,15 @@ class AbstractScrollPane extends Component {
 
   /*
     Determine selection rectangle relative to content element
-    and emit a dom-selection:rendered event with positioning hints
+    and emit a selection:positioned event with positioning hints
   */
-  _onDomSelectionRendered({surface}) {
+  onSelectionPositioned() {
     let contentRect = this._getContentRect()
     let selectionRect = this._getSelectionRect()
     if (!selectionRect) return
     let hints = {
       contentRect,
-      selectionRect,
-      surface
+      selectionRect
     }
     this._emitSelectionPositioned(hints)
     this._scrollSelectionIntoView(selectionRect)
