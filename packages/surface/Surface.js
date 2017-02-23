@@ -232,7 +232,9 @@ class Surface extends Component {
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
         // this will let the scrollpane know that the DOM selection is ready
-        this.context.scrollPane.onSelectionPositioned()
+        this.context.scrollPane.updateSelection({
+          editorId: this.editorSession.id
+        })
       }
     }
   }
