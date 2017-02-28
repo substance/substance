@@ -31,6 +31,8 @@ export default {
       config.addKeyboardShortcut('ctrl+i', { command: 'emphasis' })
     }
   },
-  Emphasis: Emphasis,
-  EmphasisHTMLConverter: EmphasisHTMLConverter
+  Emphasis,
+  EmphasisComponent,
+  EmphasisHTMLConverter,
+  EmphasisXMLConverter,
 }
