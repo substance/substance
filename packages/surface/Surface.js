@@ -251,7 +251,7 @@ class Surface extends Component {
     // console.log('Surface.onKeyDown()', this.getId());
 
     // ignore fake IME events (emitted in IE and Chromium)
-    if ( event.which === 229 ) return
+    if ( event.which === 229 || event.key === 'Dead' ) return
 
     // core handlers for cursor movements and editor interactions
     switch ( event.keyCode ) {
