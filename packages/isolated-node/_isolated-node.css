@@ -21,8 +21,8 @@
 }
 
 .sc-isolated-node.sm-selected {
-  background: rgba(163, 205, 253, 0.3);
-  outline: 2px solid #A3CDFD;
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
 }
 
 .sc-isolated-node-blocker {
