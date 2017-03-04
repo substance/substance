@@ -534,7 +534,7 @@ class DOMImporter {
   }
 
   _converterCanBeApplied(converter, el) {
-    return converter.matchElement(el, converter)
+    return converter.matchElement(el, this)
   }
 
   _createElement(tagName) {
