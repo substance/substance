@@ -18,13 +18,13 @@ class InsertNodeCommand extends Command {
     var state = params.commandState
     if (state.disabled) return
     let editorSession = this._getEditorSession(params, context)
-    editorSession.transaction((tx)=>{
+    editorSession.transaction((tx) => {
       let node = this.createNodeData(tx, params, context)
       tx.insertBlockNode(node)
     })
   }
 
-  createNodeData(tx, args) { // eslint-disable-line
+  createNodeData(tx, params) { // eslint-disable-line
     throw new Error('InsertNodeCommand.createNodeData() is abstract.')
   }
 }
