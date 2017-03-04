@@ -7,13 +7,18 @@ import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'code',
-  configure: function(config, options) {
+  configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(Code);
     config.addConverter('html', CodeHTMLConverter)
     config.addConverter('xml', CodeXMLConverter)
     config.addComponent('code', AnnotationComponent)
-    config.addCommand('code', AnnotationCommand, { nodeType: Code.type })
-    config.addTool('code', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
+    config.addCommand('code', AnnotationCommand, {
+      disableCollapsedCursor,
+      nodeType: Code.type
+    })
+    config.addTool('code', AnnotationTool, {
+      toolGroup: toolGroup || 'annotations'
+    })
     config.addIcon('code', { 'fontawesome': 'fa-code' })
     config.addLabel('code', {
       en: 'Code',
