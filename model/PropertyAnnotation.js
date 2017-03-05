@@ -81,6 +81,7 @@ class PropertyAnnotation extends Annotation {
 }
 
 PropertyAnnotation.isPropertyAnnotation = true
+PropertyAnnotation.autoExpandRight = true
 PropertyAnnotation.prototype._isAnnotation = true
 PropertyAnnotation.prototype._isPropertyAnnotation = true
 
