@@ -758,8 +758,7 @@ class Editing {
     III: |-<-->-|    :   delete anno
     IV: |-<-|->      :   move start by diff to start+L, and end by total span+L
     V: <-|->-|       :   move end by diff to start+L
-    VI: <-->|--|     :   noting if !anno.autoExpandRight
-    VII: <-|--|->    :   move end by total span+L
+    VI: <-|--|->     :   move end by total span+L
   */
   _insertText(tx, sel, text) {
     let start = sel.start
@@ -815,11 +814,7 @@ class Editing {
         // NOTE: here the anno gets expanded (that's the common way)
         tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd+L })
       }
-      // VI
-      else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
-          // skip
-      }
-      // VII anno.start before and anno.end after
+      // VI anno.start before and anno.end after
       else if (annoStart<startOffset && annoEnd>=endOffset) {
         if (anno._isInlineNode) {
           // skip
