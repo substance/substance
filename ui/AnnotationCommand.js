@@ -60,11 +60,12 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not command could be executed.
    */
-  isDisabled(sel) {
+  isDisabled(sel, params) {
+    let selectionState = params.editorSession.getSelectionState()
     // TODO: Container selections should be valid if the annotation type
     // is a container annotation. Currently we only allow property selections.
     if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()||
-        sel.isNodeSelection() || sel.isContainerSelection()) {
+        sel.isNodeSelection() || sel.isContainerSelection() || selectionState.isInlineNodeSelection()) {
       return true
     }
 
@@ -167,7 +168,7 @@ class AnnotationCommand extends Command {
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
-    if (this.isDisabled(sel)) {
+    if (this.isDisabled(sel, params)) {
       return {
         disabled: true
       }
