@@ -223,6 +223,8 @@ export { series } from './util/async'
 
 // dom
 export { default as DefaultDOMElement } from './dom/DefaultDOMElement'
+export { default as BrowserDOMElement } from './dom/BrowserDOMElement'
+export { default as MemoryDOMElement } from './dom/XNode'
 
 // aliases (mainly for backward compatibility)
 export { default as ProseEditorConfigurator } from './util/Configurator'
