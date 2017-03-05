@@ -7,13 +7,16 @@ import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'subscript',
-  configure: function(config, options) {
+  configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(Subscript)
     config.addConverter('html', SubscriptHTMLConverter)
     config.addConverter('xml', SubscriptXMLConverter)
     config.addComponent('subscript', AnnotationComponent)
-    config.addCommand('subscript', AnnotationCommand, { nodeType: 'subscript' })
-    config.addTool('subscript', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
+    config.addCommand('subscript', AnnotationCommand, {
+      nodeType: 'subscript',
+      disableCollapsedCursor
+    })
+    config.addTool('subscript', AnnotationTool, {toolGroup: toolGroup || 'annotations'})
     config.addIcon('subscript', { 'fontawesome': 'fa-subscript' })
     config.addLabel('subscript', {
       en: 'Subscript',
