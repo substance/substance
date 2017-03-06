@@ -67,6 +67,9 @@ class AbstractEditor extends Component {
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
+    // not necessary
+    // this.domSelection.dispose()
+    this.resourceManager.dispose()
   }
 
   getChildContext() {

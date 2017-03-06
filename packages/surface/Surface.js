@@ -82,6 +82,7 @@ class Surface extends Component {
 
   dispose() {
     this.editorSession.off(this)
+    this.clipboard.dispose()
     if (this.domObserver) {
       this.domObserver.disconnect()
     }

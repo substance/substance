@@ -62,6 +62,7 @@ class TransactionDocument extends Document {
 
   dispose() {
     this.document.off(this)
+    this.data.off()
   }
 
   create(nodeData) {

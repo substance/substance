@@ -98,6 +98,11 @@ class Document extends EventEmitter {
     ParentNodeHook.register(this)
   }
 
+  dispose() {
+    this.off()
+    this.data.off()
+  }
+
   get id() {
     return this.__id__
   }

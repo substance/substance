@@ -2,7 +2,7 @@ import forEach from './forEach'
 import isObject from './isObject'
 
 // for debugging
-const DEBUG = true
+const DEBUG = false
 let count = 0
 const COUNT_MSG = '%s listeners registered in the whole system.'
 
