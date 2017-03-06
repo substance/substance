@@ -564,7 +564,9 @@ class EditorSession extends EventEmitter {
     @internal
   */
   startFlow() {
-    if (this._flowing) return
+    if (this._flowing) {
+      throw new Error('Already in a flow. You need to postpone the update.')
+    }
     this._flowing = true
     try {
       this.performFlow()
