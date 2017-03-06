@@ -20,7 +20,7 @@ export default {
     config.addTool('insert-table', Tool, { toolGroup: 'insert' })
     config.addIcon('insert-table', { 'fontawesome': 'fa-table' })
     config.addLabel('insert-table', {
-      en: 'Insert table',
+      en: 'Insert Table',
       de: 'Tabelle einfügen'
     })
     config.addLabel('table', {
