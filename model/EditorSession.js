@@ -442,8 +442,6 @@ class EditorSession extends EventEmitter {
     var change = from.pop()
     if (change) {
       this._applyChange(change, {})
-      // keep tx in sync
-      this._transaction._apply(change)
       // move change to the opposite change list (undo <-> redo)
       to.push(change.invert())
       // use selection from change
@@ -485,6 +483,7 @@ class EditorSession extends EventEmitter {
 
   _commitChange(change, info) {
     change.timestamp = Date.now()
+    this._transaction._document._skipNextDocumentChange = true
     this._applyChange(change, info)
     if (info['history'] !== false && !info['hidden']) {
       this._history.push(change.invert())
@@ -503,7 +502,9 @@ class EditorSession extends EventEmitter {
       console.error('FIXME: change is null.')
       return
     }
-    this.getDocument()._apply(change)
+    const doc = this.getDocument()
+    doc._apply(change)
+    doc._notifyChangeListeners(change, info)
     this._setDirty('document')
     this._change = change
     this._info = info
