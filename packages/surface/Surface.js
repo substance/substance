@@ -232,8 +232,13 @@ class Surface extends Component {
       let sel = this.editorSession.getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
+        // HACK: accessing the scrollpane directly
+        // TODO: this should be done in a different way
         // this will let the scrollpane know that the DOM selection is ready
-        this.context.scrollPane.onSelectionPositioned()
+        const scrollPane = this.context.scrollPane
+        if (scrollPane) {
+          this.context.scrollPane.onSelectionPositioned()
+        }
       }
     }
   }
