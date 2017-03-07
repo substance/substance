@@ -174,16 +174,7 @@ class Data extends EventEmitter {
   }
 
   _set(path, newValue) {
-    let oldValue
-    if (path.length === 2) {
-      oldValue = this.nodes[path[0]][path[1]]
-      this.nodes[path[0]][path[1]] = newValue
-    } else if (path.length === 3) {
-      oldValue = this.nodes[path[0]][path[1]][path[2]]
-      this.nodes[path[0]][path[1]][path[2]] = newValue
-    } else {
-      throw new Error('Path of length '+path.length+' not supported.')
-    }
+    let oldValue = _setValue(this.nodes, path, newValue)
     return oldValue
   }
 
@@ -407,6 +398,18 @@ class Data extends EventEmitter {
     }
   }
 
+}
+
+function _setValue(root, path, newValue) {
+  let ctx = root
+  let L = path.length
+  for (let i = 0; i < L-1; i++) {
+    ctx = ctx[path[i]]
+    if (!ctx) throw new Error('Can not set value.')
+  }
+  let oldValue = ctx[path[L-1]]
+  ctx[path[L-1]] = newValue
+  return oldValue
 }
 
 export default Data
