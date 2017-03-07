@@ -52,8 +52,10 @@ export default {
       config.addKeyboardShortcut('ctrl+k', { command: 'link' })
     }
   },
-  Link: Link,
-  LinkComponent: LinkComponent,
-  LinkCommand: LinkCommand,
-  EditLinkTool: EditLinkTool,
+  Link,
+  LinkComponent,
+  LinkCommand,
+  LinkHTMLConverter,
+  LinkXMLConverter,
+  EditLinkTool,
 }

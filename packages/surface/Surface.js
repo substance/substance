@@ -82,6 +82,7 @@ class Surface extends Component {
 
   dispose() {
     this.editorSession.off(this)
+    this.clipboard.dispose()
     if (this.domObserver) {
       this.domObserver.disconnect()
     }
@@ -231,8 +232,13 @@ class Surface extends Component {
       let sel = this.editorSession.getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
+        // HACK: accessing the scrollpane directly
+        // TODO: this should be done in a different way
         // this will let the scrollpane know that the DOM selection is ready
-        this.context.scrollPane.onSelectionPositioned()
+        const scrollPane = this.context.scrollPane
+        if (scrollPane) {
+          this.context.scrollPane.onSelectionPositioned()
+        }
       }
     }
   }
@@ -251,7 +257,7 @@ class Surface extends Component {
     // console.log('Surface.onKeyDown()', this.getId());
 
     // ignore fake IME events (emitted in IE and Chromium)
-    if ( event.which === 229 ) return
+    if ( event.key === 'Dead' ) return
 
     // core handlers for cursor movements and editor interactions
     switch ( event.keyCode ) {
@@ -271,8 +277,6 @@ class Surface extends Component {
       // Input (together with text-input)
       case keys.ENTER:
         return this._handleEnterKey(event)
-      case keys.SPACE:
-        return this._handleSpaceKey(event)
       case keys.TAB:
         return this._handleTabKey(event)
       case keys.BACKSPACE:
@@ -550,14 +554,6 @@ class Surface extends Component {
       }
       this._updateModelSelection(options)
     }.bind(this))
-  }
-
-  _handleSpaceKey(event) {
-    event.preventDefault()
-    event.stopPropagation()
-    this.editorSession.transaction((tx) => {
-      tx.insertText(' ')
-    }, { action: 'type' })
   }
 
   _handleTabKey(event) {

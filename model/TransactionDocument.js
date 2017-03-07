@@ -57,10 +57,12 @@ class TransactionDocument extends Document {
 
     // make sure that we mirror all changes that are done outside of transactions
     document.on('document:changed', this._onDocumentChanged, this)
+    this._skipNextDocumentChange = false
   }
 
   dispose() {
     this.document.off(this)
+    this.data.off()
   }
 
   create(nodeData) {
@@ -108,9 +110,13 @@ class TransactionDocument extends Document {
   }
 
   _onDocumentChanged(change) {
-    // NOTE: this is hooked to document:changed (low-level), to make sure that we
-    // update the transaction document too when the document is manipulated directly, e.g. using `document.create(...)`
-    this._apply(change)
+    if (this._skipNextDocumentChange) {
+      this._skipNextDocumentChange = false
+    } else {
+      // NOTE: this is hooked to document:changed (low-level), to make sure that we
+      // update the transaction document too when the document is manipulated directly, e.g. using `document.create(...)`
+      this._apply(change)
+    }
   }
 
   _apply(documentChange) {

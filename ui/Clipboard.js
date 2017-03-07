@@ -37,6 +37,12 @@ class Clipboard {
     this.htmlExporter = new ClipboardExporter(_config)
   }
 
+  dispose() {
+    this.htmlImporter.dispose()
+    // does not need to be disposed
+    // this.htmlExporter.dispose()
+  }
+
   getEditorSession() {
     return this.editorSession
   }
