@@ -20,6 +20,7 @@ export default {
       de: 'Tiefgestellt'
     })
   },
-  Subscript: Subscript,
-  SubscriptHTMLConverter: SubscriptHTMLConverter
+  Subscript,
+  SubscriptHTMLConverter,
+  SubscriptXMLConverter
 }

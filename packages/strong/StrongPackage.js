@@ -32,6 +32,8 @@ export default {
       config.addKeyboardShortcut('ctrl+b', { command: 'strong' })
     }
   },
-  Strong: Strong,
-  StrongHTMLConverter: StrongHTMLConverter
+  Strong,
+  StrongComponent,
+  StrongHTMLConverter,
+  StrongXMLConverter
 }

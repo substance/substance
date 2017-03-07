@@ -1,6 +1,11 @@
 import forEach from './forEach'
 import isObject from './isObject'
 
+// for debugging
+const DEBUG = false
+let count = 0
+const COUNT_MSG = '%s listeners registered in the whole system.'
+
 /**
   Event support.
 */
@@ -41,24 +46,18 @@ class EventEmitter {
     @param {String} event
     @param {Function} method
     @param {Object} context
-    @param {Object} options
    */
-  on(event, method, context, options) {
-    var priority = 0
-    if (arguments.length === 4) {
-      priority = options.priority || priority
-    }
-    _on.call(this, event, method, context, priority)
-    this.__events__[event].sort(byPriorityDescending)
+  on(event, method, context) {
+    // TODO: we could add options like 'once'
+    _on.call(this, event, method, context)
   }
 
   /**
-    Unsubscrive a listener from an event.
+    Unsubscribe a listener from an event.
 
     @param {String} event
     @param {Function} method
     @param {Object} context
-    @param {Object} options
    */
   off(event, method, context) { // eslint-disable-line no-unused-vars
     if (arguments.length === 1 && isObject(arguments[0])) {
@@ -71,7 +70,7 @@ class EventEmitter {
   _debugEvents() {
     /* eslint-disable no-console */
     console.log('### EventEmitter: ', this)
-    forEach(this.__events__, function(handlers, name) {
+    forEach(this.__events__, (handlers, name) => {
       console.log("- %s listeners for %s: ", handlers.length, name, handlers)
     })
     /* eslint-enable no-console */
@@ -86,12 +85,6 @@ class EventEmitter {
 
 }
 
-// sort descending as a listener with higher priority should be
-// called earlier
-function byPriorityDescending(a, b) {
-  return b.priority - a.priority
-}
-
 /*
   Internal implementation for registering a listener.
 
@@ -99,7 +92,7 @@ function byPriorityDescending(a, b) {
   @param {Function} method
   @param {Object} context
  */
-function _on(event, method, context, priority) {
+function _on(event, method, context) {
   /* eslint-disable no-invalid-this */
   var bindings
   validateMethod( method, context )
@@ -112,9 +105,13 @@ function _on(event, method, context, priority) {
   // Add binding
   bindings.push({
     method: method,
-    context: context || null,
-    priority: priority
+    context: context || null
   })
+  if (DEBUG) {
+    count++
+    console.info('_on()', event, method.name, context, this)
+    console.info(COUNT_MSG, count)
+  }
   return this
   /*eslint-enable no-invalid-this */
 }
@@ -128,53 +125,69 @@ function _on(event, method, context, priority) {
  */
 function _off(event, method, context) {
   /* eslint-disable no-invalid-this */
-  var i, bindings
-  if ( arguments.length === 1 ) {
+  if (arguments.length === 0) {
+    if (DEBUG) {
+      forEach(this.__events__, (bindings) => {
+        bindings.forEach((b) => {
+          console.info('_off()', b.method.name, b.context, this)
+        })
+        count -= bindings.length
+      })
+      console.info(COUNT_MSG, count)
+    }
+    this.___events___ = {}
+    return this
+  }
+  if (arguments.length === 1) {
     // Remove all bindings for event
+    if (DEBUG) {
+      count -= (this.__events__[event] || []).length
+      console.info(COUNT_MSG, count)
+    }
     delete this.__events__[event]
     return this
   }
-  validateMethod( method, context )
-  if ( !( event in this.__events__ ) || !this.__events__[event].length ) {
+  validateMethod(method, context)
+  if (!(event in this.__events__) || !this.__events__[event].length) {
+    if (DEBUG) console.info('NO MATCHING BINDINGS')
     // No matching bindings
     return this
   }
   // Default to null context
-  if ( arguments.length < 3 ) {
+  if (arguments.length < 3) {
     context = null
   }
   // Remove matching handlers
-  bindings = this.__events__[event]
-  i = bindings.length
-  while ( i-- ) {
-    if ( bindings[i].method === method && bindings[i].context === context ) {
-      bindings.splice( i, 1 )
+  let bindings = this.__events__[event]
+  for (let i = bindings.length-1; i >= 0; i--) {
+    const b = bindings[i]
+    if (b.method === method && b.context === context) {
+      bindings.splice(i, 1)
+      if (DEBUG) count--
     }
   }
   // Cleanup if now empty
-  if ( bindings.length === 0 ) {
+  if (bindings.length === 0) {
     delete this.__events__[event]
   }
+  if (DEBUG) console.info(COUNT_MSG, count)
   return this
   /* eslint-enable no-invalid-this */
 }
 
-
-/**
-  Internal implementation of disconnect.
- */
+// removes a listener from all events
 function _disconnect(context) {
   /* eslint-disable no-invalid-this */
   // Remove all connections to the context
-  forEach(this.__events__, function(bindings, event) {
-    for (var i = bindings.length-1; i>=0; i--) {
+  forEach(this.__events__, (bindings, event) => {
+    for (let i = bindings.length-1; i>=0; i--) {
       // bindings[i] may have been removed by the previous steps
       // so check it still exists
       if (bindings[i] && bindings[i].context === context) {
         _off.call(this, event, bindings[i].method, context)
       }
     }
-  }.bind(this))
+  })
   return this
   /* eslint-enable no-invalid-this */
 }

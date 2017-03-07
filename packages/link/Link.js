@@ -12,4 +12,6 @@ Link.schema = {
 // in presence of overlapping annotations will try to render this as one element
 Link.fragmentation = Fragmenter.SHOULD_NOT_SPLIT
 
+Link.autoExpandRight = false
+
 export default Link

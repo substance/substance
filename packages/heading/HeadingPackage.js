@@ -35,7 +35,8 @@ export default {
       de: 'Überschrift 3'
     })
   },
-  Heading: Heading,
-  HeadingComponent: HeadingComponent,
-  HeadingHTMLConverter: HeadingHTMLConverter
+  Heading,
+  HeadingComponent,
+  HeadingHTMLConverter,
+  HeadingXMLConverter
 }

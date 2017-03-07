@@ -50,13 +50,6 @@ class AbstractEditor extends Component {
     this.domSelection = new DOMSelection(this)
   }
 
-  /**
-    Define the editors render method here.
-  */
-  render(...args) {
-    return super.render(...args)
-  }
-
   willReceiveProps(nextProps) {
     let newSession = nextProps.editorSession
     let shouldDispose = newSession && newSession !== this.editorSession
@@ -74,6 +67,9 @@ class AbstractEditor extends Component {
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
+    // not necessary
+    // this.domSelection.dispose()
+    this.resourceManager.dispose()
   }
 
   getChildContext() {
@@ -113,12 +109,6 @@ class AbstractEditor extends Component {
 
   getComponentRegistry() {
     return this.componentRegistry
-  }
-
-  onSessionUnlocked() {
-    if (this.refs.blocker) {
-      this.refs.blocker.remove()
-    }
   }
 }
 

@@ -4,6 +4,7 @@ import flattenOften from '../util/flattenOften'
 import isArray from '../util/isArray'
 import isFunction from '../util/isFunction'
 import isNumber from '../util/isNumber'
+import isBoolean from '../util/isBoolean'
 import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
@@ -201,8 +202,7 @@ class VirtualHTMLElement extends VirtualElement {
   }
 
   setTextContent(text) {
-    if (!isString(text)) throw new Error('Illegal argument: expecting a string.')
-    text = text || ''
+    text = String(text || '')
     this.empty()
     this.appendChild(text)
     return this
@@ -415,10 +415,15 @@ class VirtualHTMLElement extends VirtualElement {
   }
 
   _normalizeChild(child) {
-    if (isString(child)) {
-      child = new VirtualTextNode(child)
+    if (isNil(child)) {
+      return
+    } else if (child._isVirtualElement) {
+      return child
+    } else if (isString(child) || isBoolean(child) || isNumber(child)) {
+      return new VirtualTextNode(String(child))
+    } else {
+      throw new Error('Unsupported child type')
     }
-    return child
   }
 
   _append(outlet, args) {

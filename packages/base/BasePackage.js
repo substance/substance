@@ -100,5 +100,8 @@ export default {
       config.addKeyboardShortcut('ctrl+shift+z', { command: 'redo' })
       config.addKeyboardShortcut('ctrl+a', { command: 'select-all' })
     }
-  }
+  },
+  UndoCommand,
+  RedoCommand,
+  SelectAllCommand
 }

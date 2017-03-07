@@ -21,5 +21,6 @@ export default {
     })
   },
   Code: Code,
-  CodeHTMLConverter: CodeHTMLConverter
+  CodeHTMLConverter: CodeHTMLConverter,
+  CodeXMLConverter: CodeXMLConverter,
 }

@@ -38,6 +38,10 @@ class ClipboardImporter extends HTMLImporter {
     this._emptyDoc = this._createDocument(this.schema)
   }
 
+  dispose() {
+    this._emptyDoc.dispose()
+  }
+
   /**
     Parses HTML and applies some sanitization/normalization.
   */

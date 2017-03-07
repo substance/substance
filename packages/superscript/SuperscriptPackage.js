@@ -20,6 +20,7 @@ export default {
       de: 'Hochgestellt'
     })
   },
-  Superscript: Superscript,
-  SuperscriptHTMLConverter: SuperscriptHTMLConverter
+  Superscript,
+  SuperscriptHTMLConverter,
+  SuperscriptXMLConverter
 }
