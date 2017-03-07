@@ -118,6 +118,7 @@ class EditorSession extends EventEmitter {
   }
 
   dispose() {
+    this._transaction.dispose()
     this.surfaceManager.dispose()
     this.fileManager.dispose()
     this.commandManager.dispose()
