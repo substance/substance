@@ -606,6 +606,10 @@ class BrowserDOMElement extends DOMElement {
     return this._getNativeOwnerDocument().contentType === 'application/xml'
   }
 
+  emit(name, data) {
+    let event = new window.Event(name, data)
+    this.el.dispatchEvent(event)
+  }
 }
 
 BrowserDOMElement.prototype._isBrowserDOMElement = true
