@@ -153,7 +153,6 @@ function _off(event, method, context) {
     // No matching bindings
     return this
   }
-  console.info('_off()', event, method.name, context, this)
   // Default to null context
   if (arguments.length < 3) {
     context = null
@@ -162,7 +161,7 @@ function _off(event, method, context) {
   let bindings = this.__events__[event]
   for (let i = bindings.length-1; i >= 0; i--) {
     const b = bindings[i]
-    if (b[i].method === method && b[i].context === context) {
+    if (b.method === method && b.context === context) {
       bindings.splice(i, 1)
       if (DEBUG) count--
     }
