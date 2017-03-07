@@ -202,8 +202,7 @@ class VirtualHTMLElement extends VirtualElement {
   }
 
   setTextContent(text) {
-    if (!isString(text)) throw new Error('Illegal argument: expecting a string.')
-    text = text || ''
+    text = String(text || '')
     this.empty()
     this.appendChild(text)
     return this
