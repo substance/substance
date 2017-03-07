@@ -34,6 +34,7 @@ export default function getTestConfig() {
   config.addToolGroup('default')
   config.addToolGroup('annotations')
   config.addToolGroup('overlay')
+  config.addToolGroup('insert')
   config.defineSchema({
     name: 'test-article',
     ArticleClass: TestArticle,
