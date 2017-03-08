@@ -161,17 +161,18 @@ class ContainerSelection extends Selection {
   }
 
   containsNode(nodeId, strict) {
-    var container = this.getContainer();
-    var coor = new Coordinate([nodeId], 0);
-    var address = container.getAddress(coor);
-    var r = this._range(this);
+    const container = this.getContainer()
+    if (!container.contains(nodeId)) return false
+    const coor = new Coordinate([nodeId], 0)
+    const address = container.getAddress(coor)
+    const r = this._range(this)
     // console.log('ContainerSelection.containsNode()', address, 'is within', r.start, '->', r.end, '?');
-    var contained = r.start.isBefore(address, strict);
+    let contained = r.start.isBefore(address, strict)
     if (contained) {
-      address.offset = 1;
-      contained = r.end.isAfter(address, strict);
+      address.offset = 1
+      contained = r.end.isAfter(address, strict)
     }
-    return contained;
+    return contained
   }
 
   overlaps(other) {
