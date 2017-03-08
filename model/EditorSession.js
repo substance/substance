@@ -171,6 +171,10 @@ class EditorSession extends EventEmitter {
     return this.configurator
   }
 
+  getContext() {
+    return this._context
+  }
+
   getDocument() {
     return this.document
   }
