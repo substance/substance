@@ -60,6 +60,7 @@ export { default as PersistencePackage } from './packages/persistence/Persistenc
 export { default as StrongPackage } from './packages/strong/StrongPackage'
 export { default as SubscriptPackage } from './packages/subscript/SubscriptPackage'
 export { default as SuperscriptPackage } from './packages/superscript/SuperscriptPackage'
+export { default as TextInputPackage } from './packages/text-input/TextInputPackage'
 
 // file
 export { default as FilePackage } from './packages/file/FilePackage'
