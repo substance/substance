@@ -94,6 +94,9 @@ class SurfaceManager {
   _recoverDOMSelection() {
     // at the end of the update flow, make sure the surface is focused
     // and displays the right DOM selection.
+    let info = this.editorSession.getChangeInfo() || {}
+    if (info.skipSelectionRerender) return
+
     let focusedSurface = this.getFocusedSurface()
     if (focusedSurface && !focusedSurface.isDisabled()) {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorSession.getSelection().toString());
