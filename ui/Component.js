@@ -406,18 +406,22 @@ class Component extends EventEmitter {
     ```
   */
   triggerDidMount() {
-    // Trigger didMount for the children first
-    this.getChildren().forEach(function(child) {
-      // We pass isMounted=true to save costly calls to Component.isMounted
-      // for each child / grandchild
-      child.triggerDidMount(true)
-    })
+    // TODO: discuss and leave the decision here as a statement
+    // while rendering is done bottom up, IMO  it makes
+    // sense to propagate didMount() from top to down.
+
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.
     if (!this.__isMounted__) {
       this.__isMounted__ = true
       this.didMount()
     }
+    // Trigger didMount for the children first
+    this.getChildren().forEach(function(child) {
+      // We pass isMounted=true to save costly calls to Component.isMounted
+      // for each child / grandchild
+      child.triggerDidMount(true)
+    })
   }
 
   /**
