@@ -918,7 +918,7 @@ class DOMElement {
     @param {String} name
     @param {Object} data
   */
-  emit(name, data) {
+  emit(name, data) { // eslint-disable-line
     throw new Error(NOT_IMPLEMENTED)
   }
 

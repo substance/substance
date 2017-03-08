@@ -549,7 +549,7 @@ class XNode extends DOMElement {
   }
 
   emit(name, data) {
-    this._propagateEvent(new XNodeEvent(eventName, data))
+    this._propagateEvent(new XNodeEvent(name, data))
   }
 
   _propagateEvent(event) {
