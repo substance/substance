@@ -16,8 +16,9 @@ class ToolGroup extends Component {
         showLabel: this.props.showLabels,
         style: this.props.toolStyle
       })
+
       el.append(
-        $$(tool.Class, toolProps)
+        $$(tool.Class, toolProps).ref(tool.name)
       )
     })
     return el

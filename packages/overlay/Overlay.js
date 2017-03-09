@@ -31,7 +31,7 @@ class Overlay extends Toolbox {
         showIcons: true
       })
       activeToolsEl.append(
-        $$(toolGroup.Class, toolGroupProps)
+        $$(toolGroup.Class, toolGroupProps).ref(toolGroup.name)
       )
     })
 
