@@ -39,11 +39,8 @@ class Overlay extends Toolbox {
     return el
   }
 
-  /*
-    Override if you just want to use a different style
-  */
   getToolStyle() {
-    return 'plain-dark'
+    return this.props.theme || 'plain-dark'
   }
 
   show(hints) {

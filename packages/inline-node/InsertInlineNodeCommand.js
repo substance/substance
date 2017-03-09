@@ -46,12 +46,29 @@ class InsertInlineNodeCommand extends Command {
     if selection is a property selection.
   */
   getCommandState(params) {
-    let sel = params.selection
     let newState = {
-      disabled: !sel.isPropertySelection(),
+      disabled: this.isDisabled(params),
       active: false
     }
     return newState
+  }
+
+  isDisabled(params) {
+    let sel = params.selection
+    let selectionState = params.editorSession.getSelectionState()
+    if (!sel.isPropertySelection()) {
+      return true
+    }
+    if (this.config.disableCollapsedCursor && sel.isCollapsed()) {
+      return true
+    }
+
+    // We don't allow inserting an inline node on top of an existing inline
+    // node.
+    if (selectionState.isInlineNodeSelection()) {
+      return true
+    }
+    return false
   }
 
   /**
@@ -61,7 +78,7 @@ class InsertInlineNodeCommand extends Command {
     let state = this.getCommandState(params)
     if (state.disabled) return
     let editorSession = this._getEditorSession(params)
-    editorSession.transaction((tx)=>{
+    editorSession.transaction((tx) => {
       let nodeData = this.createNodeData(tx, params)
       tx.insertInlineNode(nodeData)
     })
