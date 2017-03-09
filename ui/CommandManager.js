@@ -1,6 +1,5 @@
 import extend from '../util/extend'
 import forEach from '../util/forEach'
-import isEqual from '../util/isEqual'
 import Registry from '../util/Registry'
 
 /*
@@ -55,11 +54,13 @@ class CommandManager {
     this.commandRegistry.forEach(function(cmd) {
       commandStates[cmd.getName()] = cmd.getCommandState(params, commandContext)
     })
-    // poor-man's immutable style
-    if (!isEqual(this.commandStates, commandStates)) {
-      this.commandStates = commandStates
-      editorSession.setCommandStates(commandStates)
-    }
+
+    // NOTE: We previously did a check if commandStates were actually changed
+    // before updating them. However, we currently have complex objects
+    // in the command state (e.g. EditInlineNodeCommand) so we had to remove it.
+    // See Issue #1004
+    this.commandStates = commandStates
+    editorSession.setCommandStates(commandStates)
   }
 
   /*
