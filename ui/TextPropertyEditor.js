@@ -66,7 +66,13 @@ class TextPropertyEditor extends Surface {
     if (this.props.multiLine) {
       super._handleEnterKey(event)
     }
-    this.el.emit('enter', event)
+    this.el.emit('enter', {
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
+      code: event.code
+    })
   }
 
   getPath() {
