@@ -103,6 +103,10 @@ class AbstractIsolatedNodeComponent extends Component {
     return this.state.mode === 'co-focused'
   }
 
+  getParentSurface() {
+    return this.context.surface
+  }
+
   escape() {
     // console.log('Escaping from IsolatedNode', this.id)
     this.selectNode()
