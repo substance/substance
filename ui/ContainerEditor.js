@@ -9,17 +9,10 @@ import RenderingEngine from '../ui/RenderingEngine'
 // import Component from '../ui/Component'
 
 /**
-  Represents a flow editor that manages a sequence of nodes in a container. Needs to be
-  instantiated inside a {@link ui/Controller} context.
-
-  @class ContainerEditor
-  @component
-  @extends ui/Surface
+  Represents an editor for content rendered in a flow, such as a manuscript.
 
   @prop {String} name unique editor name
   @prop {String} containerId container id
-  @prop {Object[]} textTypes array of textType definition objects
-  @prop {ui/SurfaceCommand[]} commands array of command classes to be available
 
   @example
 
@@ -30,12 +23,7 @@ import RenderingEngine from '../ui/RenderingEngine'
   ```js
   $$(ContainerEditor, {
     name: 'bodyEditor',
-    containerId: 'body',
-    textTypes: [
-      {name: 'paragraph', data: {type: 'paragraph'}},
-      {name: 'heading1',  data: {type: 'heading', level: 1}}
-    ],
-    commands: [StrongCommand, EmphasisCommand, SwitchTextTypeCommand],
+    containerId: 'body'
   })
   ```
 */
