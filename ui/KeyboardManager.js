@@ -1,4 +1,4 @@
-import keys from '../util/keys'
+import {keys, parseKeyEvent} from '../util/keyboardHelpers'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
 class KeyboardManager {
@@ -29,13 +29,14 @@ class KeyboardManager {
   }
 
   onKeydown(event) {
-    let key = generateKey(event)
+    let key = parseKeyEvent(event)
     let hook = this.keydownBindings[key]
     if (hook) {
       event.preventDefault()
       event.stopPropagation()
       let params = this._getParams()
-      return hook(params, this.context)
+      hook(params, this.context)
+      return true
     }
   }
 
@@ -60,24 +61,6 @@ class KeyboardManager {
     }
   }
 
-}
-
-// transforms a string like 'cmd+a' into an internal normalized representation
-
-function generateKey(event) {
-  let frags = []
-  if (event.altKey) {
-    if (event.code === 'AltRight') {
-      frags.push('ALTGR')
-    } else {
-      frags.push('ALT')
-    }
-  }
-  if (event.ctrlKey) frags.push('CTRL')
-  if (event.metaKey) frags.push('META')
-  if (event.shiftKey) frags.push('SHIFT')
-  frags.push(event.keyCode)
-  return frags.join('+')
 }
 
 function parseCombo(combo) {
@@ -119,7 +102,7 @@ function parseCombo(combo) {
         }
     }
   }
-  return generateKey(data)
+  return parseKeyEvent(data)
 }
 
 KeyboardManager.parseCombo = parseCombo
