@@ -259,35 +259,36 @@ class Surface extends Component {
     // ignore fake IME events (emitted in IE and Chromium)
     if ( event.key === 'Dead' ) return
 
-    // core handlers for cursor movements and editor interactions
-    switch ( event.keyCode ) {
-      // Cursor movements
-      case keys.LEFT:
-      case keys.RIGHT:
-        return this._handleLeftOrRightArrowKey(event)
-      case keys.UP:
-      case keys.DOWN:
-        return this._handleUpOrDownArrowKey(event)
-      case keys.HOME:
-      case keys.END:
-        return this._handleHomeOrEndKey(event)
-      case keys.PAGEUP:
-      case keys.PAGEDOWN:
-        return this._handlePageUpOrDownKey(event)
-      // Input (together with text-input)
-      case keys.ENTER:
-        return this._handleEnterKey(event)
-      case keys.TAB:
-        return this._handleTabKey(event)
-      case keys.BACKSPACE:
-      case keys.DELETE:
-        return this._handleDeleteKey(event)
-      default:
-        break
-    }
-
     // keyboard shortcuts
-    this.editorSession.keyboardManager.onKeydown(event)
+    let custom = this.editorSession.keyboardManager.onKeydown(event)
+    if (!custom) {
+      // core handlers for cursor movements and editor interactions
+      switch ( event.keyCode ) {
+        // Cursor movements
+        case keys.LEFT:
+        case keys.RIGHT:
+          return this._handleLeftOrRightArrowKey(event)
+        case keys.UP:
+        case keys.DOWN:
+          return this._handleUpOrDownArrowKey(event)
+        case keys.HOME:
+        case keys.END:
+          return this._handleHomeOrEndKey(event)
+        case keys.PAGEUP:
+        case keys.PAGEDOWN:
+          return this._handlePageUpOrDownKey(event)
+        // Input (together with text-input)
+        case keys.ENTER:
+          return this._handleEnterKey(event)
+        case keys.TAB:
+          return this._handleTabKey(event)
+        case keys.BACKSPACE:
+        case keys.DELETE:
+          return this._handleDeleteKey(event)
+        default:
+          break
+      }
+    }
   }
 
   onTextInput(event) {
