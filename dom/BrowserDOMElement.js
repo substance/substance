@@ -607,7 +607,12 @@ class BrowserDOMElement extends DOMElement {
   }
 
   emit(name, data) {
-    let event = new window.Event(name, data)
+    let event
+    if (data) {
+      event = new window.CustomEvent(name, { detail: data })
+    } else {
+      event = new window.Event(name)
+    }
     this.el.dispatchEvent(event)
   }
 }
