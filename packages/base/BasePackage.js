@@ -19,6 +19,7 @@ import platform from '../../util/platform'
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 import SelectAllCommand from './SelectAllCommand'
+import InsertNodeCommand from '../../ui/InsertNodeCommand'
 
 export default {
   name: 'base',
@@ -51,6 +52,8 @@ export default {
     config.addCommand('undo', UndoCommand)
     config.addCommand('redo', RedoCommand)
     config.addCommand('select-all', SelectAllCommand)
+
+    config.addCommand('insert-node', InsertNodeCommand)
 
     // Tools
     config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
