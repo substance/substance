@@ -58,8 +58,21 @@ class EditingInterface {
 
   /* Selection API */
 
-  createSelection(...args) {
-    return this._document.createSelection(...args)
+  createSelection(selData) {
+    // TODO: this is questionable
+    // I'd like to convenience first for the 99% use cases
+    // which means that I copy over containerId and surfaceId
+    // if possible and not explicitly set
+    const oldSel = this._selection
+    if (selData && oldSel) {
+      if (!selData.containerId && oldSel.containerId) {
+        selData.containerId = oldSel.containerId
+      }
+      if (!selData.surfaceId && oldSel.surfaceId) {
+        selData.surfaceId = oldSel.surfaceId
+      }
+    }
+    return this._document.createSelection(selData)
   }
 
   setSelection(sel) {
