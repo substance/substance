@@ -193,6 +193,7 @@ export { default as UnsupportedNodeComponent } from './ui/UnsupportedNodeCompone
 // util
 export { default as ArrayIterator } from './util/ArrayIterator'
 export { default as Configurator } from './util/Configurator'
+export { default as debounce } from './util/debounce'
 export * from './util/domHelpers'
 export { default as EventEmitter } from './util/EventEmitter'
 export { default as Factory } from './util/Factory'
