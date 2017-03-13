@@ -3,7 +3,7 @@ import setDOMSelection from '../util/setDOMSelection'
 import EditingInterface from '../model/EditingInterface'
 import setupEditor from './fixture/setupEditor'
 import checkValues from './fixture/checkValues'
-import { _p1, _empty, _t1 } from './fixture/samples'
+import { _p1, _empty } from './fixture/samples'
 
 const test = module('DOMSelection')
 

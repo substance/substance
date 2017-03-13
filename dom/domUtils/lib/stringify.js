@@ -1,6 +1,6 @@
-var ElementType = require("domelementtype"),
-    getOuterHTML = require("dom-serializer"),
-    isTag = ElementType.isTag;
+let ElementType = require("domelementtype")
+let getOuterHTML = require("dom-serializer")
+let isTag = ElementType.isTag
 
 module.exports = {
   getInnerHTML: getInnerHTML,
