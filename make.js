@@ -197,17 +197,27 @@ b.task('test:browser:pure', function() {
 })
 .describe('same as test:browser but without transpilation')
 
+b.task('test:browser', function() {
+  _buildTestsBrowser(true, false)
+  _runTestBrowser()
+})
+
 b.task('test:browser:coverage', function() {
   _buildTestsBrowser(true, true)
   _runTestBrowser()
 })
-.describe('runs the instrumented test-suite in karma')
 
 b.task('test:node', function() {
   _buildTestsNode()
   _runTestsNode()
 })
 .describe('runs the test-suite in node')
+
+b.task('test', ['test:node', 'test:browser'])
+.describe('runs the test suites on all platforms')
+
+b.task('cover', ['test:browser:coverage'])
+.describe('generates a coverage report')
 
 b.task('npm:clean', function() {
   b.rm(NPM)

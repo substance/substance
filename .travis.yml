@@ -19,5 +19,5 @@ before_install:
 before_script:
     - 'npm install'
 script:
-  - make lint
-  - make cover
+  - npm run lint
+  - npm run cover
