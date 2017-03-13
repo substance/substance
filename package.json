@@ -14,8 +14,8 @@
   "scripts": {
     "lint": "eslint -c .eslintrc.js collab doc dom model packages test ui util index.es.js; exit 0",
     "dev": "node make test:browser:pure -w -s",
-    "test": "node make test:node && node make test:browser:coverage && codecov",
-    "coverage": "node make test:browser:coverage",
+    "test": "node make test:node && node make test:browser",
+    "cover": "node make test:browser:coverage && codecov",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },
