@@ -5,7 +5,7 @@
 
 var b = require('substance-bundler')
 var path = require('path')
-var run = require('substance-bundler/extensions/fork')
+var fork = require('substance-bundler/extensions/fork')
 var runKarma = require('substance-bundler/extensions/karma')
 
 // Constants
@@ -103,7 +103,7 @@ function _buildTestsNode() {
 }
 
 function _runTestsNode() {
-  run(b, require.resolve('substance-test/bin/test'), './tmp/tests.cjs.js')
+  fork(b, require.resolve('substance-test/bin/test'), './tmp/tests.cjs.js', { verbose: true })
 }
 
 function _runTestBrowser() {
