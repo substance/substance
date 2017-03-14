@@ -872,14 +872,27 @@ class Component extends EventEmitter {
     }
   }
 
+  // ATTENTION: we had problems here, that using
+  // component.el.empty() instead of component.empty()
+  // did cause the children not to dispose(), which is maybe
+  // impossible to achieve.
+  // TODO: Thus we may consider to rename it, or take
+  // other measure to warn the the user about this problem
   empty() {
-    if (this.el) {
+    this._clear()
+    return this
+  }
+
+  _clear() {
+    let el = this.el
+    if (el) {
       this.getChildNodes().forEach(function(child) {
         _disposeChild(child)
       })
-      this.el.empty()
+      el.empty()
     }
-    return this
+    this.refs = {}
+    this.__foreignRefs__ = {}
   }
 
   remove() {
