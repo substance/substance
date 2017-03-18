@@ -346,7 +346,10 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    if (!this._shouldConsumeEvent(event)) return
+    if (!this._shouldConsumeEvent(event)) {
+      // console.log('skipping mousedown', this.id)
+      return
+    }
 
     // EXPERIMENTAL: trying to 'reserve' a mousedown event
     // so that parents know that they shouldn't react
@@ -402,12 +405,12 @@ class Surface extends Component {
   }
 
   onMouseUp(e) {
+    // console.log('Surface.onMouseup', this.id);
     // ATTENTION: filtering events does not make sense here,
     // as we need to make sure that pick the selection even
     // when the mouse is released outside the surface
     // if (!this._shouldConsumeEvent(e)) return
     e.stopPropagation()
-    // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still
     // holds the old value, and is set to the correct selection after this
@@ -667,7 +670,8 @@ class Surface extends Component {
 
   // only take care of events which are emitted on targets which belong to this surface
   _shouldConsumeEvent(event) {
-    let comp = Component.unwrap(event.target._wrapper)
+    // console.log('should consume?', event.target, this.id)
+    let comp = Component.unwrap(event.target)
     return (comp && (comp === this || comp.context.surface === this))
   }
 
