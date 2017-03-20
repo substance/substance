@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash-es'
+import cloneDeep from '../util/cloneDeep'
 import ObjectOperation from '../model/data/ObjectOperation'
 
 /*
