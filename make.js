@@ -45,8 +45,10 @@ function _browser(DIST, transpileToES5, production) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
       useStrict: !transpileToES5,
     },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
+    },
     buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] },
     cleanup: Boolean(production)
   })
 }
@@ -59,8 +61,10 @@ function _server(DIST, transpileToES5, production) {
       format: 'cjs',
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
+    },
     buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] },
     cleanup: Boolean(production)
   })
 }
@@ -73,6 +77,9 @@ function _buildTestsBrowser(transpileToES5, coverage) {
       format: 'umd', moduleName: 'tests'
     },
     buble: transpileToES5,
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
+    },
     external: {
       'substance-test': 'substanceTest'
     },
@@ -95,6 +102,9 @@ function _buildTestsNode() {
     target: {
       dest: TMP+'tests.cjs.js',
       format: 'cjs'
+    },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
     },
     external: ['substance-test'],
     buble: true,
@@ -129,6 +139,14 @@ function _docs(mode, dest) {
     dest: dest,
     config: './.docgenrc.js',
     mode: mode // one of: 'source', 'json', 'site' (default: 'json')
+  })
+}
+
+function _vendor_lodash() {
+  b.js('./vendor/_lodash.es.js', {
+    dest: './vendor/lodash.js',
+    format: 'es',
+    debug: false
   })
 }
 
@@ -269,6 +287,9 @@ b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
 
 b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
 .describe('creates the npm bundle')
+
+b.task('vendor:lodash', _vendor_lodash)
+.describe('pre-bundles lodash')
 
 b.task('vendor:xdom', _vendor_xdom)
 .describe('pre-bundles the dependencies for the memory DOM implementation')
