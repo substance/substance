@@ -102,13 +102,19 @@ class RenderingEngine {
       state.setOldState(vel, oldState);
     }
     try {
+      // capture: this calls the render() method of components, creating a virtual DOM
+      // console.log('### capturing...')
+      // let t0 = Date.now()
       _capture(state, vel, 'forceCapture');
-      if (vel._isVirtualComponent) {
-        _render(state, vel._content);
-      } else {
-        _render(state, vel);
-      }
+      // console.log('### ... finished in %s ms', Date.now()-t0)
+
+      // console.log('### rendering...')
+      // t0 = Date.now()
+      _render(state, vel);
+      // console.log('### ... finished in %s ms', Date.now()-t0)
+
       _triggerUpdate(state, vel);
+
     } finally {
       state.dispose();
     }
@@ -255,6 +261,7 @@ function _capture(state, vel, forceCapture) {
 
 function _render(state, vel) {
   if (state.isSkipped(vel)) return;
+  // console.log('... rendering', vel._ref)
 
   // before changes can be applied, a VirtualElement must have been captured
   // FIXME: with DEBUG_RENDERING we are having troubles with this assumption.
@@ -263,14 +270,28 @@ function _render(state, vel) {
   // However, it seems not to be critical, as these components don't need to be rerendered
   // Still we should find a consistent way
 
-  var comp = vel._comp;
+  let comp = vel._comp;
   console.assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.");
 
   // VirtualComponents apply changes to its content element
   if (vel._isVirtualComponent) {
     _render(state, vel._content);
+
+    // store refs and foreignRefs
+    const context = vel._content._context
+    let refs = {}
+    let foreignRefs = {}
+    forEach(context.refs, (vel, ref) => {
+      refs[ref] = vel._comp;
+    })
+    forEach(context.foreignRefs, (vel, ref) => {
+      foreignRefs[ref] = vel._comp;
+    })
+    comp.refs = refs;
+    comp.__foreignRefs__ = foreignRefs;
     return;
   }
+
   // render the element
   if (!comp.el) {
     comp.el = _createElement(state, vel);
@@ -362,7 +383,8 @@ function _render(state, vel) {
       else if (state.isMapped(oldComp)) {
         _insertChildBefore(state, comp, newComp, oldComp);
         pos1--;
-      } else {
+      }
+      else {
         // both elements are not mapped
         // TODO: we could try to reuse components if they are of same type
         // However, this needs a better mapping strategy, not only
@@ -371,22 +393,6 @@ function _render(state, vel) {
       }
     }
   }
-
-  // HACK: a temporary solution to handle refs owned by an ancestor
-  // is to store them here as well, so that we can map virtual components
-  // efficiently
-  var refs = {};
-  var foreignRefs = {};
-  if (vel._context) {
-    forEach(vel._context.refs, function(vel, ref) {
-      refs[ref] = vel._comp;
-    });
-    forEach(vel._context.foreignRefs, function(vel, ref) {
-      foreignRefs[ref] = vel._comp;
-    });
-  }
-  comp.refs = refs;
-  comp.__foreignRefs__ = foreignRefs;
 
   state.setRendered(vel);
 }
