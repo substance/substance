@@ -22,22 +22,14 @@ class Editing {
   // create an annotation for the current selection using the given data
   annotate(tx, annotation) {
     let sel = tx.selection
-    if (!sel || sel.isNull() || sel.isCollapsed()) {
-      throw new Error('Non-collapsed selection required for tx.annotate()')
-    }
-    if (sel.isCollapsed()) return
     let schema = tx.getSchema()
     let AnnotationClass = schema.getNodeClass(annotation.type)
     if (!AnnotationClass) throw new Error('Unknown annotation type', annotation)
-    if (sel.isNodeSelection()) {
-      throw new Error('Node selections are not supported by tx.annotate()')
-    } else if (sel.isCustomSelection()) {
-      throw new Error('Custom selections are not supported by tx.annotate()')
-    }
     let start = sel.start
     let end = sel.end
     let containerId = sel.containerId
     let nodeData = { start, end, containerId }
+    /* istanbul ignore else  */
     if (sel.isPropertySelection()) {
       if (!AnnotationClass.prototype._isAnnotation) {
         throw new Error('Annotation can not be created for a selection.')
@@ -46,8 +38,6 @@ class Editing {
       if (AnnotationClass.prototype._isPropertyAnnotation) {
         console.warn('NOT SUPPORTED YET: creating property annotations for a non collapsed container selection.')
       }
-    } else {
-      throw new Error('Unsupported selection.')
     }
     Object.assign(nodeData, annotation)
     return tx.create(nodeData)
@@ -76,7 +66,7 @@ class Editing {
       let containerId = sel.containerId
       if (!sel.isCollapsed()) {
         // delete the selection
-        this.deletePropertySelection(tx, sel)
+        this._deletePropertySelection(tx, sel)
         tx.setSelection(sel.collapse('left'))
       }
       // then break the node
@@ -85,28 +75,16 @@ class Editing {
         let nodeId = sel.start.path[0]
         let node = tx.get(nodeId)
         this._breakNode(tx, node, sel.start, container)
-      } else {
-        this.insertText(tx, '\n')
       }
     }
     else if (sel.isContainerSelection()) {
-      if (sel.start.hasSamePath(sel.end)) {
-        this.deleteContainerSelection(tx, sel)
-        this.break(tx)
-      } else {
-        let start = sel.start
-        let containerId = sel.containerId
-        let container = tx.get(containerId)
-        let startNodeId = start.path[0]
-        let nodePos = container.getPosition(startNodeId, 'strict')
-        this.deleteContainerSelection(tx, sel)
-        if (nodePos < container.length-1) {
-          setCursor(tx, container.getNodeAt(nodePos+1), containerId, 'before')
-        } else {
-          tx.setSelection(sel.collapse('left'))
-          this.break(tx)
-        }
-      }
+      let start = sel.start
+      let containerId = sel.containerId
+      let container = tx.get(containerId)
+      let startNodeId = start.path[0]
+      let nodePos = container.getPosition(startNodeId, 'strict')
+      this._deleteContainerSelection(tx, sel, {noMerge: true })
+      setCursor(tx, container.getNodeAt(nodePos+1), containerId, 'before')
     }
   }
 
@@ -115,8 +93,9 @@ class Editing {
     // special implementation for node selections:
     // either delete the node (replacing with an empty text node)
     // or just move the cursor
+    /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
-      this.deleteNodeSelection(tx, sel, direction)
+      this._deleteNodeSelection(tx, sel, direction)
     }
     // TODO: what to do with custom selections?
     else if (sel.isCustomSelection()) {}
@@ -166,14 +145,14 @@ class Editing {
     }
     // deleting a range within a container (across multiple nodes)
     else if (sel.isContainerSelection()) {
-      this.deleteContainerSelection(tx, sel)
+      this._deleteContainerSelection(tx, sel)
     }
     else {
       console.warn('Unsupported case: tx.delete(%)', direction, sel)
     }
   }
 
-  deleteNodeSelection(tx, sel, direction) {
+  _deleteNodeSelection(tx, sel, direction) {
     let nodeId = sel.getNodeId()
     let container = tx.get(sel.containerId)
     let nodePos = container.getPosition(nodeId, 'strict')
@@ -193,6 +172,7 @@ class Editing {
         containerId: container.id,
       })
     } else {
+      /* istanbul ignore else  */
       if (sel.isBefore() && direction === 'left') {
         if (nodePos > 0) {
           let previous = container.getNodeAt(nodePos-1)
@@ -239,7 +219,7 @@ class Editing {
     }
   }
 
-  deletePropertySelection(tx, sel) {
+  _deletePropertySelection(tx, sel) {
     let path = sel.start.path
     let start = sel.start.offset
     let end = sel.end.offset
@@ -248,7 +228,7 @@ class Editing {
   }
 
   // deletes all inner nodes and 'truncates' start and end node
-  deleteContainerSelection(tx, sel) {
+  _deleteContainerSelection(tx, sel, options = {}) {
     let containerId = sel.containerId
     let container = tx.get(containerId)
     let start = sel.start
@@ -338,7 +318,9 @@ class Editing {
         containerId: containerId
       })
     } else if (!firstEntirelySelected && !lastEntirelySelected) {
-      this._merge(tx, firstNode, sel.start, 'right', container)
+      if (!options.noMerge) {
+        this._merge(tx, firstNode, sel.start, 'right', container)
+      }
       tx.setSelection(sel.collapse('left'))
     } else if (firstEntirelySelected) {
       setCursor(tx, lastNode, container.id, 'before')
@@ -472,7 +454,7 @@ class Editing {
       if (!sel.containerId) throw new Error('insertBlockNode can only be used within a container.')
       let container = tx.get(sel.containerId)
       if (!sel.isCollapsed()) {
-        this.deletePropertySelection(tx)
+        this._deletePropertySelection(tx)
         tx.setSelection(sel.collapse('left'))
       }
       let node = tx.get(sel.path[0])
@@ -559,7 +541,7 @@ class Editing {
       this._insertText(tx, sel, text)
       // console.log('### setting selection after typing: ', tx.selection.toString())
     } else if (sel.isContainerSelection()) {
-      this.deleteContainerSelection(tx, sel)
+      this._deleteContainerSelection(tx, sel)
       this.insertText(tx, text)
     }
   }

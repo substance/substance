@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { module } from 'substance-test'
-import Document from '../model/Document'
-import EditingInterface from '../model/EditingInterface'
+import {Document, EditingInterface, forEach} from '../index.es'
 import setupEditor from './fixture/setupEditor'
 import headersAndParagraphs from './fixture/headersAndParagraphs'
 import {
@@ -292,6 +291,22 @@ test("D-0: Deleting without selection", (t) => {
   t.end()
 })
 
+test("Deleting a property selection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 0,
+    endOffset: 3
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  t.equal(p1.getText(), P1_TEXT.slice(3), 'Parargaph should be truncated')
+  t.end()
+})
+
 test("DR2: Deleting using DELETE with cursor at the end of a TextNode at the end of a Container", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
@@ -434,8 +449,45 @@ test("DR5-2: Deleting using DELETE with cursor at the end of a non-empty TextNod
   t.end()
 })
 
-// TODO: test DR5 with list as successor
+test("Deleting using DELETE with cursor after an IsolatedNode and a TextNode as successor", (t) => {
+  let { editorSession, doc } = setupEditor(t, _block1, _p1)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'block1',
+    mode: 'after',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  let p1 = doc.get('p1')
+  t.equal(p1.getText(), P1_TEXT.slice(1), 'First character of paragraph should have been deleted.')
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 0
+  })
+  t.end()
+})
 
+test("Deleting using DELETE with cursor after an IsolatedNode and an IsolatedNode as successor", (t) => {
+  let { editorSession } = setupEditor(t, _block1, _block2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'block1',
+    mode: 'after',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('right')
+  })
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'node',
+    nodeId: 'block2',
+    mode: 'full'
+  })
+  t.end()
+})
 
 test("DL3: Deleting using BACKSPACE with cursor in the middle of a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
@@ -1596,3 +1648,137 @@ test("CP-7 Copy and Pasting a table", (t) => {
 //   }
 //   t.end()
 // })
+
+test("Annotating without unknown annotation type", (t) => {
+  let { editorSession } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    endOffset: 3
+  })
+  t.throws(() => {
+    editorSession.transaction((tx)=>{
+      tx.annotate({type: 'unknown-annotation'})
+    })
+  }, 'Should throw an exception')
+  t.end()
+})
+
+test("Tying to annotate using a non-annotation type", (t) => {
+  let { editorSession } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    endOffset: 3
+  })
+  t.throws(() => {
+    editorSession.transaction((tx)=>{
+      tx.annotate({type: 'paragraph'})
+    })
+  }, 'Should throw an exception')
+  t.end()
+})
+
+test("Breaking a ContainerSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'container',
+    startPath: ['p1', 'content'],
+    startOffset: 3,
+    endPath: ['p2', 'content'],
+    endOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let p2 = doc.get('p2')
+  t.equal(p2.getText(), P2_TEXT.slice(4))
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 0,
+    endOffset: 0
+  })
+  t.end()
+})
+
+test("Breaking a NodeSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 4, 'There should be one more node')
+  let newP = body.getChildAt(2)
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: newP.getPath(),
+    startOffset: 0,
+    endOffset: 0
+  })
+  t.end()
+})
+
+test("Breaking a NodeSelection (before)", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'before',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 4, 'There should be one more node')
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'before',
+    containerId: 'body'
+  })
+  t.end()
+})
+
+test("Breaking with an expanded PropertySelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1','content'],
+    startOffset: 3,
+    endOffset: 5,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let body = doc.get('body')
+  let first = body.getChildAt(0)
+  let second = body.getChildAt(1)
+  t.equal(first.getText(), P1_TEXT.slice(0, 3), 'First paragraph should be truncated')
+  t.equal(second.getText(), P1_TEXT.slice(5), '.. and tail should be moved to second paragraph')
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: second.getPath(),
+    startOffset: 0
+  })
+  t.end()
+})
+
+function _checkSelection(t, actual, exp) {
+  let _data = actual.toJSON()
+  let data = {}
+  forEach(exp, (value, key) => {
+    data[key] = _data[key]
+  })
+  t.deepEqual(data, exp, 'Selection should be correct')
+}
