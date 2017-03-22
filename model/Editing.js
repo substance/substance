@@ -485,6 +485,7 @@ class Editing {
 
   paste(tx, content) {
     if (!content) return
+    /* istanbul ignore else  */
     if (isString(content)) {
       paste(tx, {text: content})
     } else if (content._isDocument) {
@@ -683,6 +684,7 @@ class Editing {
   _insertText(tx, sel, text) {
     let start = sel.start
     let end = sel.end
+    /* istanbul ignore next  */
     if (!isArrayEqual(start.path, end.path)) {
       throw new Error('Unsupported state: range should be on one property')
     }
@@ -702,6 +704,8 @@ class Editing {
     annos.forEach(function(anno) {
       let annoStart = anno.start.offset
       let annoEnd = anno.end.offset
+
+      /* istanbul ignore else  */
       // I anno is before
       if (annoEnd<startOffset) {
         return
@@ -763,6 +767,7 @@ class Editing {
   _breakNode(tx, node, coor, container) {
     // ATTENTION: we need the root here, e.g. a list, not the list-item
     node = node.getRoot()
+    /* istanbul ignore else  */
     if (node.isText()) {
       this._breakTextNode(tx, node, coor, container)
     } else if (node.isList()) {
