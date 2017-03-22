@@ -231,6 +231,81 @@ test("IT10: Typing over an InlineNode node", (t) => {
   t.end()
 })
 
+test("Typing over a selected IsolatedNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _in1)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertText('Y')
+  }, { action: 'type' })
+  let body = doc.get('body')
+  t.isNil(doc.get('in1'), 'IsolatedNode should have been deleted.')
+  t.equal(body.getLength(), 1, 'There should be one node.')
+  t.equal(body.getChildAt(0).getText(), 'Y', '.. containing the typed text.')
+  t.end()
+})
+
+test("Typing before an IsolatedNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _in1)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'before',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertText('Y')
+  }, { action: 'type' })
+
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should be two nodes.')
+  t.equal(body.getChildAt(0).getText(), 'Y', '.. first one containing the typed text.')
+  t.end()
+})
+
+test("Typing after an IsolatedNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _in1)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'after',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertText('Y')
+  }, { action: 'type' })
+
+  let body = doc.get('body')
+  t.equal(body.getLength(), 2, 'There should be two nodes.')
+  t.equal(body.getChildAt(1).getText(), 'Y', '.. second one containing the typed text.')
+  t.end()
+})
+
+test("Typing over a ContainerSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  let p1 = doc.get('p1')
+  let p2 = doc.get('p2')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getPath(),
+    startOffset: 3,
+    endPath: p2.getPath(),
+    endOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertText('Y')
+  }, { action: 'type' })
+
+  let body = doc.get('body')
+  t.deepEqual(body.nodes, ['p1'], 'Only the first paragraph should be left.')
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+'Y'+P2_TEXT.slice(4), 'The content should have been merged correctly')
+  t.end()
+})
+
 test("II1: Inserting InlineNode node into a TextProperty", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({

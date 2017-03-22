@@ -467,7 +467,7 @@ class Editing {
         container.show(textNode, nodePos+1)
       } else {
         container.hide(nodeId)
-        documentHelpers.deleteNode(tx.get(nodeId))
+        documentHelpers.deleteNode(tx, tx.get(nodeId))
         container.show(textNode, nodePos)
       }
       setCursor(tx, textNode, sel.containerId, 'after')
