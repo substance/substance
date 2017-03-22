@@ -485,10 +485,22 @@ ContainerSelection.fromJSON = function(properties) {
 }
 
 function _createNewSelection(containerSel, start, end) {
-  var newSel = new ContainerSelection(containerSel.containerId,
+  let newSel
+
+  if (start === end) {
+    newSel = new PropertySelection({
+      path: start.path,
+      startOffset: start.offset,
+      endOffset: start.offset,
+      containerId: containerSel.containerId,
+      surfaceId: containerSel.surfaceId
+    })
+  } else {
+    newSel = new ContainerSelection(containerSel.containerId,
     start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
+  }
   // we need to attach the new selection
-  var doc = containerSel._internal.doc;
+  const doc = containerSel._internal.doc;
   if (doc) {
     newSel.attach(doc);
   }
@@ -496,4 +508,3 @@ function _createNewSelection(containerSel, start, end) {
 }
 
 export default ContainerSelection
-
