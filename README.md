@@ -25,7 +25,6 @@ Persistence API for documents                                               | �
 Text Macros                                                                 | ✓
 Key bindings                                                                | ✓
 Packages (aka Plugins)                                                      | ✓
-                                                                            |
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
 ContainerEditor for in-flow-editing                                         | ✓
@@ -33,7 +32,6 @@ Scrollable ContentPanel with support for highlights                         | �
 Customizable Toolbar                                                        | ✓
 ScrollPane with interactive visual Scrollbar                                | ✓
 Interactive TOCPanel                                                        | ✓
-                                                                            |
 **Predefined content types**                                                |
 Paragraph                                                                   | ✓
 Heading                                                                     | ✓
@@ -42,7 +40,6 @@ Codeblock                                                                   | �
 Image                                                                       | ✓
 List                                                                        | ✓
 Table                                                                       | ✓
-                                                                            |
 **Predefined annotation types**                                             |
 Strong                                                                      | ✓
 Emphasis                                                                    | ✓
@@ -50,7 +47,6 @@ Link                                                                        | �
 Subscript                                                                   | ✓
 Superscript                                                                 | ✓
 Code                                                                        | ✓
-                                                                            |
 **Platform support**                                                        |
 Mozilla Firefox (>=49)                                                      | ✓
 Apple Safari (>=10)                                                         | ✓
