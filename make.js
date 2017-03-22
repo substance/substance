@@ -216,12 +216,12 @@ b.task('test:browser:pure', function() {
 .describe('same as test:browser but without transpilation')
 
 b.task('test:karma', function() {
-  _buildTestsBrowser(true, false)
+  _buildTestsBrowser(false, false)
   _runTestBrowser()
 })
 
 b.task('test:coverage', function() {
-  _buildTestsBrowser(true, true)
+  _buildTestsBrowser(false, true)
   _runTestBrowser()
 })
 
