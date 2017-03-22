@@ -1249,6 +1249,99 @@ test("BR4: Breaking annotated text with cursor inside the annotation", (t) => {
   t.end()
 })
 
+test("Breaking a ContainerSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'container',
+    startPath: ['p1', 'content'],
+    startOffset: 3,
+    endPath: ['p2', 'content'],
+    endOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let p2 = doc.get('p2')
+  t.equal(p2.getText(), P2_TEXT.slice(4))
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 0,
+    endOffset: 0
+  })
+  t.end()
+})
+
+test("Breaking a NodeSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 4, 'There should be one more node')
+  let newP = body.getChildAt(2)
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: newP.getPath(),
+    startOffset: 0,
+    endOffset: 0
+  })
+  t.end()
+})
+
+test("Breaking a NodeSelection (before)", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'before',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 4, 'There should be one more node')
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'before',
+    containerId: 'body'
+  })
+  t.end()
+})
+
+test("Breaking with an expanded PropertySelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1','content'],
+    startOffset: 3,
+    endOffset: 5,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx)=>{
+    tx.break()
+  })
+  let body = doc.get('body')
+  let first = body.getChildAt(0)
+  let second = body.getChildAt(1)
+  t.equal(first.getText(), P1_TEXT.slice(0, 3), 'First paragraph should be truncated')
+  t.equal(second.getText(), P1_TEXT.slice(5), '.. and tail should be moved to second paragraph')
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: second.getPath(),
+    startOffset: 0
+  })
+  t.end()
+})
+
 // List Editing
 // ------------
 
@@ -1974,96 +2067,26 @@ test("Tying to annotate using a non-annotation type", (t) => {
   t.end()
 })
 
-test("Breaking a ContainerSelection", (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+test("Switching text type", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  let p1 = doc.get('p1')
   editorSession.setSelection({
-    type: 'container',
-    startPath: ['p1', 'content'],
-    startOffset: 3,
-    endPath: ['p2', 'content'],
-    endOffset: 4,
-    containerId: 'body'
-  })
-  editorSession.transaction((tx)=>{
-    tx.break()
-  })
-  let p2 = doc.get('p2')
-  t.equal(p2.getText(), P2_TEXT.slice(4))
-  _checkSelection(t, editorSession.getSelection(), {
     type: 'property',
-    path: ['p2', 'content'],
+    path: p1.getPath(),
     startOffset: 0,
-    endOffset: 0
-  })
-  t.end()
-})
-
-test("Breaking a NodeSelection", (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
-  editorSession.setSelection({
-    type: 'node',
-    nodeId: 'in1',
+    endOffset: 0,
     containerId: 'body'
   })
   editorSession.transaction((tx)=>{
-    tx.break()
+    tx.switchTextType({type: 'heading', level: 1})
   })
   let body = doc.get('body')
-  t.equal(body.getLength(), 4, 'There should be one more node')
-  let newP = body.getChildAt(2)
-  _checkSelection(t, editorSession.getSelection(), {
-    type: 'property',
-    path: newP.getPath(),
-    startOffset: 0,
-    endOffset: 0
-  })
-  t.end()
-})
-
-test("Breaking a NodeSelection (before)", (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
-  editorSession.setSelection({
-    type: 'node',
-    nodeId: 'in1',
-    mode: 'before',
-    containerId: 'body'
-  })
-  editorSession.transaction((tx)=>{
-    tx.break()
-  })
-  let body = doc.get('body')
-  t.equal(body.getLength(), 4, 'There should be one more node')
-  _checkSelection(t, editorSession.getSelection(), {
-    type: 'node',
-    nodeId: 'in1',
-    mode: 'before',
-    containerId: 'body'
-  })
-  t.end()
-})
-
-test("Breaking with an expanded PropertySelection", (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
-  editorSession.setSelection({
-    type: 'property',
-    path: ['p1','content'],
-    startOffset: 3,
-    endOffset: 5,
-    containerId: 'body'
-  })
-  editorSession.transaction((tx)=>{
-    tx.break()
-  })
-  let body = doc.get('body')
+  t.equal(body.getLength(), 1, 'There should be one node.')
   let first = body.getChildAt(0)
-  let second = body.getChildAt(1)
-  t.equal(first.getText(), P1_TEXT.slice(0, 3), 'First paragraph should be truncated')
-  t.equal(second.getText(), P1_TEXT.slice(5), '.. and tail should be moved to second paragraph')
-  _checkSelection(t, editorSession.getSelection(), {
-    type: 'property',
-    path: second.getPath(),
-    startOffset: 0
-  })
+  t.equal(first.type, 'heading', '.. of type heading')
+  t.equal(first.getText(), P1_TEXT, '.. with correct content')
+  let annos = doc.getAnnotations(first.getPath())
+  t.equal(annos.length, 1, '.. and with one annotation')
   t.end()
 })
 

@@ -516,18 +516,21 @@ class Editing {
   */
   switchTextType(tx, data) {
     let sel = tx.selection
+    /* istanbul ignore next */
     if (!sel.isPropertySelection()) {
       throw new Error("Selection must be a PropertySelection.")
     }
     let containerId = sel.containerId
+    /* istanbul ignore next */
     if (!containerId) {
       throw new Error("Selection must be within a container.")
     }
     let path = sel.path
     let nodeId = path[0]
     let node = tx.get(nodeId)
+    /* istanbul ignore next */
     if (!(node.isInstanceOf('text'))) {
-      throw new Error('Trying to use switchTextType on a non text node. Skipping.')
+      throw new Error('Trying to use switchTextType on a non text node.')
     }
     // create a new node and transfer annotations
     let newNode = Object.assign({
