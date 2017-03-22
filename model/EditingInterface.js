@@ -116,7 +116,8 @@ class EditingInterface {
   /* High-level editing */
 
   annotate(annotationData) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && (sel.isPropertySelection() || sel.isContainerSelection())) {
       return this._impl.annotate(this, annotationData)
     }
   }
@@ -128,21 +129,24 @@ class EditingInterface {
   }
 
   copySelection() {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
       return copySelection(this.getDocument(), this._selection)
     }
   }
 
   deleteSelection(options) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
       this._impl.delete(this, 'right', options)
     }
   }
 
   deleteCharacter(direction) {
-    if (!this._selection || this._selection.isNull()) {
+    const sel = this._selection
+    if (!sel || sel.isNull()) {
       // nothing
-    } else if (!this._selection.isCollapsed()) {
+    } else if (!sel.isCollapsed()) {
       this.deleteSelection()
     } else {
       this._impl.delete(this, direction)
@@ -150,50 +154,58 @@ class EditingInterface {
   }
 
   insertText(text) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       this._impl.insertText(this, text)
     }
   }
 
   // insert an inline node with given data at the current selection
   insertInlineNode(inlineNode) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.insertInlineNode(this, inlineNode)
     }
   }
 
   insertBlockNode(blockNode) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.insertBlockNode(this, blockNode)
     }
   }
 
   paste(content) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.paste(this, content)
     }
   }
 
   switchTextType(nodeData) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.switchTextType(this, nodeData)
     }
   }
 
   toggleList(params) {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.toggleList(this, params)
     }
   }
 
   indent() {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.indent(this)
     }
   }
 
   dedent() {
-    if (this._selection && !this._selection.isNull()) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.dedent(this)
     }
   }
