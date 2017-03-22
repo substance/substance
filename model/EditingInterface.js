@@ -58,8 +58,21 @@ class EditingInterface {
 
   /* Selection API */
 
-  createSelection(...args) {
-    return this._document.createSelection(...args)
+  createSelection(selData) {
+    // TODO: this is questionable
+    // I'd like to convenience first for the 99% use cases
+    // which means that I copy over containerId and surfaceId
+    // if possible and not explicitly set
+    const oldSel = this._selection
+    if (selData && oldSel) {
+      if (!selData.containerId && oldSel.containerId) {
+        selData.containerId = oldSel.containerId
+      }
+      if (!selData.surfaceId && oldSel.surfaceId) {
+        selData.surfaceId = oldSel.surfaceId
+      }
+    }
+    return this._document.createSelection(selData)
   }
 
   setSelection(sel) {
@@ -145,19 +158,19 @@ class EditingInterface {
   // insert an inline node with given data at the current selection
   insertInlineNode(inlineNode) {
     if (this._selection && !this._selection.isNull()) {
-      this._impl.insertInlineNode(this, inlineNode)
+      return this._impl.insertInlineNode(this, inlineNode)
     }
   }
 
   insertBlockNode(blockNode) {
     if (this._selection && !this._selection.isNull()) {
-      this._impl.insertBlockNode(this, blockNode)
+      return this._impl.insertBlockNode(this, blockNode)
     }
   }
 
   paste(content) {
     if (this._selection && !this._selection.isNull()) {
-      this._impl.paste(this, content)
+      return this._impl.paste(this, content)
     }
   }
 
@@ -175,13 +188,13 @@ class EditingInterface {
 
   indent() {
     if (this._selection && !this._selection.isNull()) {
-      this._impl.indent(this)
+      return this._impl.indent(this)
     }
   }
 
   dedent() {
     if (this._selection && !this._selection.isNull()) {
-      this._impl.dedent(this)
+      return this._impl.dedent(this)
     }
   }
 

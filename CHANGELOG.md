@@ -1,3 +1,19 @@
+## Beta 7
+
+- introduced `DOMElement.emit(event, data)` for custom events
+- improved several Commands (new option `disableCollapsedCursor`, disable when cursor on InlineNode)
+- Surface allows to override core key event handlers via KeyboardManager
+- Surface emits `tab` event
+- introduced `DocumentChange.info.skipSelectionRerender` to skip rendering the selection
+- introduced InsertTableCommand
+- introduced TextInputPackage
+- Toolbox now rerenders on every change
+- introduced white-/black-list of commands to control which Commands are available in a specific Surface
+- **(!)** changed the order of `Component.didMount()` call, now top-to-down, was bottom-to-up before
+- InsertNodeCommand now sets cursor into inserted node
+- TextPropertyComponent allows to render markers passed via props (as opposed to markers provided by MarkersManager)
+- TextPropertyEditor emits 'enter' event
+
 ## Beta 6
 
 - Advanced drag & drop gestures for adding and moving content

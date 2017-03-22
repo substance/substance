@@ -1,27 +1,39 @@
 import forEach from '../util/forEach'
-import Icon from './FontAwesomeIcon'
+import FontAwesomeIcon from './FontAwesomeIcon'
 
 class FontAwesomeIconProvider {
 
   constructor(icons) {
-    this.map = {}
+    this.faMap = {}
+    this.textMap = {}
     forEach(icons, function(config, name) {
       let faClass = config['fontawesome']
       if (faClass) {
-        this.addIcon(name, faClass)
+        this.addFAIcon(name, faClass)
+      }
+      let text = config['text']
+      if (text) {
+        this.addTextIcon(name, text)
       }
     }.bind(this))
   }
 
   renderIcon($$, name) {
-    let iconClass = this.map[name]
-    if (iconClass) {
-      return $$(Icon, {icon:iconClass})
+    let faClass = this.faMap[name]
+    let text = this.textMap[name]
+    if (faClass) {
+      return $$(FontAwesomeIcon, { icon: faClass })
+    } else if (text) {
+      return text
     }
   }
 
-  addIcon(name, faClass) {
-    this.map[name] = faClass
+  addFAIcon(name, faClass) {
+    this.faMap[name] = faClass
+  }
+
+  addTextIcon(name, text) {
+    this.textMap[name] = text
   }
 }
 

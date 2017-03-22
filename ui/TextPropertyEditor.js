@@ -1,5 +1,5 @@
 import Surface from '../packages/surface/Surface'
-import TextProperty from './TextPropertyComponent'
+import TextPropertyComponent from './TextPropertyComponent'
 
 /**
   Editor for a text property (annotated string). Needs to be
@@ -50,9 +50,10 @@ class TextPropertyEditor extends Surface {
     }
 
     el.append(
-      $$(TextProperty, {
+      $$(TextPropertyComponent, {
         tagName: this.props.tagName || "div",
         path: this.props.path,
+        markers: this.props.markers,
         withoutBreak: this.props.withoutBreak
       })
     )
@@ -66,6 +67,13 @@ class TextPropertyEditor extends Surface {
     if (this.props.multiLine) {
       super._handleEnterKey(event)
     }
+    this.el.emit('enter', {
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
+      code: event.code
+    })
   }
 
   getPath() {

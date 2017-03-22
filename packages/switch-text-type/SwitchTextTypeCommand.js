@@ -1,5 +1,5 @@
-import isMatch from 'lodash-es/isMatch'
-import find from 'lodash-es/find'
+import isMatch from '../../util/isMatch'
+import find from '../../util/find'
 import clone from '../../util/clone'
 import Command from '../../ui/Command'
 

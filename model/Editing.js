@@ -529,6 +529,7 @@ class Editing {
         return this.insertBlockNode(tx, blockNode)
       }
     }
+    return blockNode
   }
 
   insertText(tx, text) {

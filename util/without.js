@@ -1,1 +1,1 @@
-export { default } from 'lodash-es/without'
+export { without as default } from 'lodash-es'

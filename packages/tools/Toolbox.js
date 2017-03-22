@@ -1,5 +1,4 @@
 import Component from '../../ui/Component'
-import isEqual from '../../util/isEqual'
 
 class Toolbox extends Component {
 
@@ -9,16 +8,19 @@ class Toolbox extends Component {
     }
   }
 
-  shouldRerender(newProps, newState) {
-    // poor-man's immutable style
-    let hasChanged = !isEqual(this.props, newProps) || !isEqual(this.state.activeToolGroups, newState.activeToolGroups)
-
-    if (!hasChanged) {
-      this.hide()
-      return false
-    }
-    return true
-  }
+  // NOTE: We disable this, as its premature optimization and can cause
+  // side effects. Rendering the toolbox always is not a big performance
+  // issue atm.
+  // shouldRerender(newProps, newState) {
+  //   // poor-man's immutable style
+  //   let hasChanged = !isEqual(this.props, newProps) || !isEqual(this.state.activeToolGroups, newState.activeToolGroups)
+  //
+  //   if (!hasChanged) {
+  //     this.hide()
+  //     return false
+  //   }
+  //   return true
+  // }
 
   didMount() {
     // rerender the context menu after anything else has been updated
@@ -71,16 +73,16 @@ class Toolbox extends Component {
     let commandStates = this._getCommandStates()
 
     tools.forEach((tool, toolName) => {
-      if (!commandStates[toolName]) {
-        throw new Error(`Could not find commandState for ${toolName}`)
-      }
-
-      let toolProps = Object.assign({}, commandStates[toolName], {
-        name: toolName,
-        label: toolName,
-        // style hint only interprerted by generic Tool class
-        style: this.getToolStyle(toolName)
-      })
+      let toolProps = Object.assign(
+        { disabled: true },
+        commandStates[toolName],
+        {
+          name: toolName,
+          label: toolName,
+          // style hint only interprerted by generic Tool class
+          style: this.getToolStyle(toolName)
+        }
+      )
 
       if (!toolProps.disabled || this.showDisabled()) {
         activeTools.set(tool.name, {

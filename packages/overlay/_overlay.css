@@ -12,12 +12,12 @@
   height: 0;
   border-style: solid;
   border-width: 0 4px 8px 4px;
-  border-color: transparent transparent #2E2E2C transparent;
+  border-color: transparent transparent var(--dark-bg-color) transparent;
 }
 
 .sc-overlay.sm-theme-dark > .se-active-tools {
   border-radius: 5px;
-  background: #2E2E2C;
+  background: var(--dark-bg-color);
   padding: 5px;
 }
 

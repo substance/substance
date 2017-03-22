@@ -912,6 +912,16 @@ class DOMElement {
     return this.createElement.bind(this)
   }
 
+  /**
+    Triggers a custom event.
+
+    @param {String} name
+    @param {Object} data
+  */
+  emit(name, data) { // eslint-disable-line
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
   // properties
 
   get id() {

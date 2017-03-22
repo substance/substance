@@ -18,3 +18,7 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 before_script:
     - 'npm install'
+script:
+  - npm run lint
+  - npm run test
+  - npm run cover

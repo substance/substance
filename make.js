@@ -1,15 +1,18 @@
 /*
   IMPORTANT: Don't use ES6 here, as some people are still on Node 4.
 */
+/* globals __dirname, process */
 
 var b = require('substance-bundler')
 var path = require('path')
+var fork = require('substance-bundler/extensions/fork')
+var runKarma = require('substance-bundler/extensions/karma')
 
 // Constants
 // ---------
 
 var DIST = 'dist/'
-var TEST ='.test/'
+var TMP = 'tmp/'
 var NPM = '.npm/'
 var NPMDIST = NPM+'dist/'
 var STUFF = [
@@ -42,8 +45,10 @@ function _browser(DIST, transpileToES5, production) {
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
       useStrict: !transpileToES5,
     },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
+    },
     buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] },
     cleanup: Boolean(production)
   })
 }
@@ -56,22 +61,28 @@ function _server(DIST, transpileToES5, production) {
       format: 'cjs',
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
+    },
     buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] },
     cleanup: Boolean(production)
   })
 }
 
 // bundles the test suite to be run in a browser
-function _testBrowser(transpileToES5, coverage) {
-
+function _buildTestsBrowser(transpileToES5, coverage) {
   b.js('./test/index.js', {
     target: {
-      dest: TEST+'tests.js',
+      dest: TMP+'tests.js',
       format: 'umd', moduleName: 'tests'
     },
     buble: transpileToES5,
-    external: { 'substance-test': 'substanceTest' },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
+    },
+    external: {
+      'substance-test': 'substanceTest'
+    },
     istanbul: coverage ? {
       include: [
         'collab/*.js',
@@ -86,11 +97,14 @@ function _testBrowser(transpileToES5, coverage) {
   })
 }
 
-function _testNode() {
+function _buildTestsNode() {
   b.js('./test/index.js', {
     target: {
-      dest: TEST+'tests.cjs.js',
+      dest: TMP+'tests.cjs.js',
       format: 'cjs'
+    },
+    alias: {
+      'lodash-es': path.join(__dirname, 'vendor/lodash.js')
     },
     external: ['substance-test'],
     buble: true,
@@ -98,34 +112,13 @@ function _testNode() {
   })
 }
 
+function _runTestsNode() {
+  fork(b, require.resolve('substance-test/bin/test'), './tmp/tests.cjs.js', { verbose: true })
+}
+
 function _runTestBrowser() {
-  b.custom('Running browser tests...', {
-    execute: function() {
-      let karma = require('karma')
-      const browser = process.env.TRAVIS ? 'ChromeTravis': 'Chrome'
-      return new Promise(function(resolve) {
-        let fails = 0
-        const server = new karma.Server({
-          configFile: __dirname + '/karma.conf.js',
-          browsers: [browser],
-          singleRun: true,
-          failOnEmptyTestSuite: false
-        }, function() {
-          // why is exitCode always == 1?
-          if (fails > 0) {
-            process.exit(1)
-          } else {
-            resolve()
-          }
-        })
-        server.on('run_complete', function(browsers, results) {
-          if (results && results.failed > 0) {
-            fails += results.failed
-          }
-        })
-        server.start()
-      })
-    }
+  runKarma(b, {
+    browsers: process.env.TRAVIS?['ChromeTravis']:['Chrome']
   })
 }
 
@@ -146,6 +139,14 @@ function _docs(mode, dest) {
     dest: dest,
     config: './.docgenrc.js',
     mode: mode // one of: 'source', 'json', 'site' (default: 'json')
+  })
+}
+
+function _vendor_lodash() {
+  b.js('./vendor/_lodash.es.js', {
+    dest: './vendor/lodash.js',
+    format: 'es',
+    debug: false
   })
 }
 
@@ -200,40 +201,41 @@ b.task('server:pure', function() {
   _server(DIST, false)
 })
 
-b.task('test:clean', function() {
-  b.rm(TEST)
-})
-
-b.task('test:assets', function() {
-  // TODO: it would be nice to treat such glob patterns
-  // differently, so that we do not need to specify glob root
-  b.copy('./node_modules/substance-test/dist/*', TEST, { root: './node_modules/substance-test/dist' })
-})
-
-b.task('test:browser', ['test:clean', 'test:assets'], function() {
+// builds the test suite to be run in browser
+b.task('test:browser', function() {
   // buble necessary here, as travis has old browser versions
-  _testBrowser(true)
+  _buildTestsBrowser(true)
 })
+.describe('builds tests for the browser test-suite')
 
-b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
+// builds the test suite to be run in browser (without transpilation)
+b.task('test:browser:pure', function() {
   // Pure ES6, and no buble here, for better dev experience
-  _testBrowser(false)
+  _buildTestsBrowser(false)
+})
+.describe('same as test:browser but without transpilation')
+
+b.task('test:browser', function() {
+  _buildTestsBrowser(true, false)
+  _runTestBrowser()
 })
 
-b.task('test:browser:coverage', ['test:clean', 'test:assets'], function() {
-  _testBrowser(true, true)
+b.task('test:browser:coverage', function() {
+  _buildTestsBrowser(true, true)
+  _runTestBrowser()
 })
 
-b.task('test:node', ['test:clean', 'test:assets'], _testNode)
+b.task('test:node', function() {
+  _buildTestsNode()
+  _runTestsNode()
+})
+.describe('runs the test-suite in node')
 
-b.task('build:test', ['test:clean', 'test:assets', 'test:browser', 'test:node'])
+b.task('test', ['test:node', 'test:browser'])
+.describe('runs the test suites on all platforms')
 
-b.task('run:test:browser', ['test:browser'], _runTestBrowser)
-
-b.task('run:test:coverage', ['test:browser:coverage'], _runTestBrowser)
-
-b.task('run:test', ['build:test'], _runTestBrowser)
-
+b.task('cover', ['test:browser:coverage'])
+.describe('generates a coverage report')
 
 b.task('npm:clean', function() {
   b.rm(NPM)
@@ -254,16 +256,19 @@ b.task('npm:copy:sources', function() {
     b.copy(f, NPM)
   })
 })
+.describe('copies all sources into .npm folder')
 
 b.task('docs', function() {
   // creates a data.js file with prebuilt documentation
   // this gives the best trade-off between build and load time
   _docs('json', '.docs/')
 })
+.describe('generates API documentation')
 
 b.task('npm:docs', function() {
   _docs('site', NPM+'docs/')
 })
+.describe('generates API documentation into .npm folder')
 
 b.task('npm:browser', function() {
   _css(NPMDIST)
@@ -275,17 +280,24 @@ b.task('npm:server', function() {
 })
 
 b.task('build', ['clean', 'browser', 'server'])
+.describe('builds the library')
 
 b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
+.describe('builds the library without transpilation')
 
 b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
+.describe('creates the npm bundle')
+
+b.task('vendor:lodash', _vendor_lodash)
+.describe('pre-bundles lodash')
 
 b.task('vendor:xdom', _vendor_xdom)
+.describe('pre-bundles the dependencies for the memory DOM implementation')
 
 b.task('default', ['build'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
+b.task('dev', ['clean', 'browser:pure', 'test:browser:pure' , 'docs'])
 
 // HTTP server
 // -----------

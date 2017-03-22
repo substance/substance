@@ -1,1 +1,1 @@
-export { default } from 'lodash-es/debounce'
+export { debounce as default } from 'lodash-es'

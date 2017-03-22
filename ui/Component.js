@@ -406,18 +406,22 @@ class Component extends EventEmitter {
     ```
   */
   triggerDidMount() {
-    // Trigger didMount for the children first
-    this.getChildren().forEach(function(child) {
-      // We pass isMounted=true to save costly calls to Component.isMounted
-      // for each child / grandchild
-      child.triggerDidMount(true)
-    })
+    // TODO: discuss and leave the decision here as a statement
+    // while rendering is done bottom up, IMO  it makes
+    // sense to propagate didMount() from top to down.
+
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.
     if (!this.__isMounted__) {
       this.__isMounted__ = true
       this.didMount()
     }
+    // Trigger didMount for the children first
+    this.getChildren().forEach(function(child) {
+      // We pass isMounted=true to save costly calls to Component.isMounted
+      // for each child / grandchild
+      child.triggerDidMount(true)
+    })
   }
 
   /**
@@ -868,14 +872,27 @@ class Component extends EventEmitter {
     }
   }
 
+  // ATTENTION: we had problems here, that using
+  // component.el.empty() instead of component.empty()
+  // did cause the children not to dispose(), which is maybe
+  // impossible to achieve.
+  // TODO: Thus we may consider to rename it, or take
+  // other measure to warn the the user about this problem
   empty() {
-    if (this.el) {
+    this._clear()
+    return this
+  }
+
+  _clear() {
+    let el = this.el
+    if (el) {
       this.getChildNodes().forEach(function(child) {
         _disposeChild(child)
       })
-      this.el.empty()
+      el.empty()
     }
-    return this
+    this.refs = {}
+    this.__foreignRefs__ = {}
   }
 
   remove() {

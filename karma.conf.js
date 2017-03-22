@@ -3,8 +3,8 @@ module.exports = function(config) {
     basePath: '.',
     frameworks: ['tap'],
     files: [
-      '.test/test.browser.js',
-      '.test/tests.js',
+      'node_modules/substance-test/dist/test.browser.js',
+      'tmp/tests.js',
     ],
     browsers: ['Chrome'],
     customLaunchers: {
@@ -15,5 +15,8 @@ module.exports = function(config) {
     },
     singleRun: true,
     reporters: ['tape', 'coverage'],
+    coverageReporter: {
+      reporters: [{type: 'lcov'}]
+    }
   });
 };

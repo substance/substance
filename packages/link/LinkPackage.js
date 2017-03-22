@@ -12,8 +12,7 @@ export default {
   name: 'link',
   configure: function(config, {
     toolGroup,
-    editLinkToolGroup,
-    disableCollapsedCursor
+    editLinkToolGroup
   }) {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
@@ -21,7 +20,7 @@ export default {
     config.addConverter('xml', LinkXMLConverter)
     config.addCommand('link', LinkCommand, {
       nodeType: 'link',
-      disableCollapsedCursor
+      disableCollapsedCursor: true
     })
     config.addCommand('edit-link', EditAnnotationCommand, {
       nodeType: 'link'

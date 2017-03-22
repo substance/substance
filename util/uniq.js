@@ -1,1 +1,1 @@
-export { default } from 'lodash-es/uniq'
+export { uniq as default } from 'lodash-es'

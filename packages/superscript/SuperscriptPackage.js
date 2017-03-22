@@ -7,13 +7,16 @@ import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'superscript',
-  configure: function(config, options) {
+  configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(Superscript)
     config.addConverter('html', SuperscriptHTMLConverter)
     config.addConverter('xml', SuperscriptXMLConverter)
     config.addComponent('superscript', AnnotationComponent)
-    config.addCommand('superscript', AnnotationCommand, { nodeType: 'superscript' })
-    config.addTool('superscript', AnnotationTool, {toolGroup: options.toolGroup || 'annotations'})
+    config.addCommand('superscript', AnnotationCommand, {
+      nodeType: 'superscript',
+      disableCollapsedCursor
+    })
+    config.addTool('superscript', AnnotationTool, {toolGroup: toolGroup || 'annotations'})
     config.addIcon('superscript', { 'fontawesome': 'fa-superscript' })
     config.addLabel('superscript', {
       en: 'Superscript',

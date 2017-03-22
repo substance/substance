@@ -50,7 +50,12 @@ export function getSelectionRect(parentRect) {
 
 function _fixForCursorRectBug() {
   let wsel = window.getSelection()
-  let rects = wsel.anchorNode.parentElement.getClientRects()
+  let el = wsel.anchorNode
+  if (!el) return
+  while (el && el.nodeType !== 1) {
+    el = el.parentNode
+  }
+  let rects = el.getClientRects()
   let rect = rects[0]
   return {
     left: rect.left,

@@ -544,13 +544,12 @@ class XNode extends DOMElement {
   }
 
   click() {
-    this._emitEvent('click', { target: this })
+    this.emit('click', { target: this })
     return this
   }
 
-  // TODO: flesh this out
-  _emitEvent(eventName, data) {
-    this._propagateEvent(new XNodeEvent(eventName, data))
+  emit(name, data) {
+    this._propagateEvent(new XNodeEvent(name, data))
   }
 
   _propagateEvent(event) {

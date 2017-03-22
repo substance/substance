@@ -259,35 +259,36 @@ class Surface extends Component {
     // ignore fake IME events (emitted in IE and Chromium)
     if ( event.key === 'Dead' ) return
 
-    // core handlers for cursor movements and editor interactions
-    switch ( event.keyCode ) {
-      // Cursor movements
-      case keys.LEFT:
-      case keys.RIGHT:
-        return this._handleLeftOrRightArrowKey(event)
-      case keys.UP:
-      case keys.DOWN:
-        return this._handleUpOrDownArrowKey(event)
-      case keys.HOME:
-      case keys.END:
-        return this._handleHomeOrEndKey(event)
-      case keys.PAGEUP:
-      case keys.PAGEDOWN:
-        return this._handlePageUpOrDownKey(event)
-      // Input (together with text-input)
-      case keys.ENTER:
-        return this._handleEnterKey(event)
-      case keys.TAB:
-        return this._handleTabKey(event)
-      case keys.BACKSPACE:
-      case keys.DELETE:
-        return this._handleDeleteKey(event)
-      default:
-        break
-    }
-
     // keyboard shortcuts
-    this.editorSession.keyboardManager.onKeydown(event)
+    let custom = this.editorSession.keyboardManager.onKeydown(event)
+    if (!custom) {
+      // core handlers for cursor movements and editor interactions
+      switch ( event.keyCode ) {
+        // Cursor movements
+        case keys.LEFT:
+        case keys.RIGHT:
+          return this._handleLeftOrRightArrowKey(event)
+        case keys.UP:
+        case keys.DOWN:
+          return this._handleUpOrDownArrowKey(event)
+        case keys.HOME:
+        case keys.END:
+          return this._handleHomeOrEndKey(event)
+        case keys.PAGEUP:
+        case keys.PAGEDOWN:
+          return this._handlePageUpOrDownKey(event)
+        // Input (together with text-input)
+        case keys.ENTER:
+          return this._handleEnterKey(event)
+        case keys.TAB:
+          return this._handleTabKey(event)
+        case keys.BACKSPACE:
+        case keys.DELETE:
+          return this._handleDeleteKey(event)
+        default:
+          break
+      }
+    }
   }
 
   onTextInput(event) {
@@ -345,7 +346,10 @@ class Surface extends Component {
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
   onMouseDown(event) {
-    if (!this._shouldConsumeEvent(event)) return
+    if (!this._shouldConsumeEvent(event)) {
+      // console.log('skipping mousedown', this.id)
+      return
+    }
 
     // EXPERIMENTAL: trying to 'reserve' a mousedown event
     // so that parents know that they shouldn't react
@@ -401,12 +405,12 @@ class Surface extends Component {
   }
 
   onMouseUp(e) {
+    // console.log('Surface.onMouseup', this.id);
     // ATTENTION: filtering events does not make sense here,
     // as we need to make sure that pick the selection even
     // when the mouse is released outside the surface
     // if (!this._shouldConsumeEvent(e)) return
     e.stopPropagation()
-    // console.log('mouseup on', this.getId());
     // ATTENTION: this delay is necessary for cases the user clicks
     // into an existing selection. In this case the window selection still
     // holds the old value, and is set to the correct selection after this
@@ -558,9 +562,20 @@ class Surface extends Component {
 
   _handleTabKey(event) {
     event.stopPropagation()
-    window.setTimeout(()=>{
-      this._updateModelSelection()
-    })
+    if (this.props.handleTab === false) {
+      event.preventDefault()
+      this.el.emit('tab', {
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        shiftKey: event.shiftKey,
+        code: event.code
+      })
+    } else {
+      window.setTimeout(()=>{
+        this._updateModelSelection()
+      })
+    }
   }
 
   _handleEnterKey(event) {
@@ -655,7 +670,8 @@ class Surface extends Component {
 
   // only take care of events which are emitted on targets which belong to this surface
   _shouldConsumeEvent(event) {
-    let comp = Component.unwrap(event.target._wrapper)
+    // console.log('should consume?', event.target, this.id)
+    let comp = Component.unwrap(event.target)
     return (comp && (comp === this || comp.context.surface === this))
   }
 

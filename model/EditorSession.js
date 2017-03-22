@@ -171,6 +171,10 @@ class EditorSession extends EventEmitter {
     return this.configurator
   }
 
+  getContext() {
+    return this._context
+  }
+
   getDocument() {
     return this.document
   }
@@ -325,6 +329,36 @@ class EditorSession extends EventEmitter {
     this._undoRedo('redo')
   }
 
+/* eslint-disable no-invalid-this*/
+
+  on(...args) {
+    let name = args[0]
+    if (this._flowStages.indexOf(name) >= 0) {
+      // remove the stage name from the args
+      args.shift()
+      let options = args[2] || {}
+      let resource = options.resource
+      if (resource) {
+        delete options.resource
+        args.unshift(resource)
+      }
+      this._registerObserver(name, args)
+    } else {
+      EventEmitter.prototype.on.apply(this, args)
+    }
+  }
+
+  off(...args) {
+    if (args.length === 1) {
+      super.off(...args)
+    } else {
+      const stage = args[0]
+      const method = args[1]
+      const observer = args[2]
+      this._deregisterObserver(stage, method, observer)
+    }
+  }
+
   /**
     Registers a hook for the `update` phase.
 
@@ -417,11 +451,6 @@ class EditorSession extends EventEmitter {
 
   onFinalize(...args) {
     return this._registerObserver('finalize', args)
-  }
-
-  off(observer) {
-    super.off(observer)
-    this._deregisterObserver(observer)
   }
 
   _setSelection(sel) {
@@ -641,22 +670,36 @@ class EditorSession extends EventEmitter {
     observers.push(observer)
   }
 
-  _deregisterObserver(observer) {
-    // TODO: we should optimize this, as ATM this needs to traverse
-    // a lot of registered listeners
-    forEach(this._observers, (observers) => {
-      for (var i = 0; i < observers.length; i++) {
-        var entry = observers[i]
-        if (entry.context === observer) {
-          // console.log('## removing observer')
-          observers.splice(i, 1)
-          i--
+  _deregisterObserver(stage, method, observer) {
+    let self = this // eslint-disable-line no-invalid-this
+    if (arguments.length === 1) {
+      // TODO: we should optimize this, as ATM this needs to traverse
+      // a lot of registered listeners
+      forEach(self._observers, (observers) => {
+        for (let i = observers.length-1; i >=0 ; i--) {
+          const o = observers[i]
+          if (o.context === observer) {
+            observers.splice(i, 1)
+            o._deregistered = true
+          }
+        }
+      })
+    } else {
+      let observers = self._observers[stage]
+      // if no observers are registered, then this might not
+      // be a deregistration for a stage, but a regular event
+      if (!observers) {
+        EventEmitter.prototype.off.apply(self, arguments)
+      } else {
+        for (let i = observers.length-1; i >= 0; i--) {
+          let o = observers[i]
+          if (o.handler === method && o.context === observer) {
+            observers.splice(i, 1)
+            o._deregistered = true
+          }
         }
       }
-    })
-    // add this flag so that we can skip when a listener has deregistered
-    // during notification iteration
-    observer._deregistered = true
+    }
   }
 
   _notifyObservers(stage) {

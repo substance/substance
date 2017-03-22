@@ -33,10 +33,15 @@ class Container extends DocumentNode {
     return this.nodes
   }
 
+  contains(nodeId) {
+    return this.getPosition(nodeId) >= 0
+  }
+
   getPosition(node, strict) {
     if (isString(node)) {
       node = this.document.get(node)
     }
+    if (!node) return -1
     let pos = this._getPosition(node)
     if (strict && pos < 0) {
       throw new Error('Node is not within this container: ' + node.id)

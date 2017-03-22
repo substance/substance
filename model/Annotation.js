@@ -108,7 +108,7 @@ function _normalizedProps(props) {
       use
         { start: { path: [], offset: 0 }, end: { path: [], offset: 10 } }
     */
-    console.warn('DEPRECATED: create Annotation with "start" and "end" coordinate instead.')
+    // console.warn('DEPRECATED: create Annotation with "start" and "end" coordinate instead.')
     props = Object.assign({}, props)
     props.start = {
       path: props.startPath || props.path,

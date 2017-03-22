@@ -1,6 +1,5 @@
 import extend from '../util/extend'
 import forEach from '../util/forEach'
-import isEqual from '../util/isEqual'
 import Registry from '../util/Registry'
 
 /*
@@ -49,17 +48,47 @@ class CommandManager {
     Compute new command states object
   */
   updateCommandStates(editorSession) {
-    let commandStates = {}
-    let commandContext = this.getCommandContext()
-    let params = this._getCommandParams()
-    this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(params, commandContext)
-    })
-    // poor-man's immutable style
-    if (!isEqual(this.commandStates, commandStates)) {
-      this.commandStates = commandStates
-      editorSession.setCommandStates(commandStates)
+    const commandContext = this.getCommandContext()
+    const params = this._getCommandParams()
+    const surface = params.surface
+    const commandRegistry = this.commandRegistry
+
+    // EXPERIMENTAL:
+    // We want to control which commands are available
+    // in each surface
+    // Trying out a white-list and a black list
+    // TODO: discuss, and maybe think about optimizing this
+    // by caching the result...
+    let commandNames = commandRegistry.names.slice()
+    if (surface) {
+      let included = surface.props.commands
+      let excluded = surface.props.excludedCommands
+      if (included) {
+        commandNames = included
+      } else if (excluded) {
+        excluded = excluded.slice(0)
+        for (let i = commandNames.length - 1; i >= 0; i--) {
+          let idx = excluded.indexOf(commandNames[i])
+          if (idx >= 0) {
+            excluded.splice(idx, 1)
+            commandNames.splice(i, 1)
+          }
+        }
+      }
     }
+    const commands = commandNames.map(name => commandRegistry.get(name))
+    let commandStates = {}
+    commands.forEach((cmd) => {
+      if (cmd) {
+        commandStates[cmd.getName()] = cmd.getCommandState(params, commandContext)
+      }
+    })
+    // NOTE: We previously did a check if commandStates were actually changed
+    // before updating them. However, we currently have complex objects
+    // in the command state (e.g. EditInlineNodeCommand) so we had to remove it.
+    // See Issue #1004
+    this.commandStates = commandStates
+    editorSession.setCommandStates(commandStates)
   }
 
   /*
