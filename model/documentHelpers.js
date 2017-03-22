@@ -195,6 +195,7 @@ function deleteNode(doc, node) {
     console.warn('Invalid arguments')
     return
   }
+  // TODO: bring back support for container annotations
   if (node.isText()) {
     // remove all associated annotations
     let annos = doc.getIndex('annotations').get(node.id)

@@ -162,7 +162,7 @@ class Editing {
       // replace the node with default text node
       let contentPath = container.getContentPath()
       tx.update(contentPath, { type: 'delete', pos: nodePos })
-      tx.delete(nodeId)
+      documentHelpers.deleteNode(tx, tx.get(nodeId))
       let newNode = tx.createDefaultTextNode()
       tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
       tx.setSelection({
@@ -242,6 +242,7 @@ class Editing {
     if (startPos === endPos) {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = tx.get(startId).getRoot()
+      /* istanbul ignore else  */
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, start, end)
       } else if (node.isList()) {
@@ -251,13 +252,6 @@ class Editing {
       }
       tx.setSelection(sel.collapse('left'))
       return
-    }
-
-    // normalize the range if it is 'reverse'
-    if (startPos > endPos) {
-      [start, end] = [end, start];
-      [startPos, endPos] = [endPos, startPos];
-      [startId, endId] = [endId, startId]
     }
 
     // TODO: document the algorithm
@@ -329,70 +323,8 @@ class Editing {
     }
   }
 
-  /*
-    Delete a node and all annotations attached to it,
-    and removes the node from the container.
-
-    @param {String} nodeId
-    @param {String} [containerId]
-   */
-  deleteNode(tx, nodeId, containerId) {
-    if (!nodeId) throw new Error('Parameter `nodeId` is mandatory.')
-    let node = tx.get(nodeId)
-    if (!node) throw new Error('Node does not exist')
-    if (containerId) {
-      let container = tx.get(containerId)
-      container.hide(nodeId)
-      // TODO: fix support for container annotations
-      // transfer anchors of ContainerAnnotations to previous or next node:
-      //  - start anchors go to the next node
-      //  - end anchors go to the previous node
-      // let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
-      // for (let i = 0; i < anchors.length; i++) {
-      //   let anchor = anchors[i]
-      //   container = tx.get(anchor.containerId)
-      //   // Note: during the course of this loop we might have deleted the node already
-      //   // so, don't do it again
-      //   if (!tx.get(anchor.id)) continue
-      //   let pos = container.getPosition(anchor.path[0])
-      //   let path, offset
-      //   if (anchor.isStart) {
-      //     if (pos < container.getLength()-1) {
-      //       let nextNode = container.getChildAt(pos+1)
-      //       if (nextNode.isText()) {
-      //         path = [nextNode.id, 'content']
-      //       } else {
-      //         path = [nextNode.id]
-      //       }
-      //       tx.set([anchor.id, 'start', 'path'], path)
-      //       tx.set([anchor.id, 'start', 'offset'], 0)
-      //     } else {
-      //       tx.delete(anchor.id)
-      //     }
-      //   } else {
-      //     if (pos > 0) {
-      //       let previousNode = container.getChildAt(pos-1)
-      //       if (previousNode.isText()) {
-      //         path = [previousNode.id, 'content']
-      //         offset = tx.get(path).length
-      //       } else {
-      //         path = [previousNode.id]
-      //         offset = 1
-      //       }
-      //       tx.set([anchor.id, 'endPath'], path)
-      //       tx.set([anchor.id, 'endOffset'], offset)
-      //     } else {
-      //       tx.delete(anchor.id)
-      //     }
-      //   }
-      // }
-    }
-    documentHelpers.deleteNode(tx, node)
-  }
-
   insertInlineNode(tx, nodeData) {
     let sel = tx.selection
-    if (!sel.isPropertySelection()) throw new Error('insertInlineNode requires a PropertySelection')
     let text = "\uFEFF"
     this.insertText(tx, text)
     sel = tx.selection
@@ -413,7 +345,6 @@ class Editing {
 
   insertBlockNode(tx, nodeData) {
     let sel = tx.selection
-    if (!sel || sel.isNull()) throw new Error('Selection is null.')
     // don't create the node if it already exists
     let blockNode
     if (!nodeData._isNode || !tx.get(nodeData.id)) {
@@ -441,7 +372,7 @@ class Editing {
         })
       } else {
         tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
-        tx.delete(sel.getNodeId())
+        documentHelpers.deleteNode(tx, tx.get(nodeId))
         tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
         tx.setSelection({
           type: 'node',
@@ -451,21 +382,24 @@ class Editing {
         })
       }
     } else if (sel.isPropertySelection()) {
+      /* istanbul ignore next */
       if (!sel.containerId) throw new Error('insertBlockNode can only be used within a container.')
       let container = tx.get(sel.containerId)
       if (!sel.isCollapsed()) {
-        this._deletePropertySelection(tx)
+        this._deletePropertySelection(tx, sel)
         tx.setSelection(sel.collapse('left'))
       }
       let node = tx.get(sel.path[0])
+      /* istanbul ignore next */
       if (!node) throw new Error('Invalid selection.')
       let nodePos = container.getPosition(node.id, 'strict')
+      /* istanbul ignore else  */
       if (node.isText()) {
         let text = node.getText()
         // replace node
         if (text.length === 0) {
           tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
-          tx.delete(node.id)
+          documentHelpers.deleteNode(tx, node)
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
           setCursor(tx, blockNode, container.id, 'after')
         }
@@ -485,12 +419,12 @@ class Editing {
           setCursor(tx, blockNode, container.id, 'after')
         }
       } else {
-        // TODO: this will be necessary for lists
-        console.error('Not yet implemented: insertBlockNode() on a custom node')
+        console.error('Not supported: insertBlockNode() on a custom node')
       }
     } else if (sel.isContainerSelection()) {
       if (sel.isCollapsed()) {
         let start = sel.start
+        /* istanbul ignore else  */
         if (start.isPropertyCoordinate()) {
           tx.setSelection({
             type: 'property',
@@ -508,6 +442,9 @@ class Editing {
         } else {
           throw new Error('Unsupported selection for insertBlockNode')
         }
+        return this.insertBlockNode(tx, blockNode)
+      } else {
+        this.break(tx)
         return this.insertBlockNode(tx, blockNode)
       }
     }
@@ -530,7 +467,7 @@ class Editing {
         container.show(textNode, nodePos+1)
       } else {
         container.hide(nodeId)
-        tx.delete(nodeId)
+        documentHelpers.deleteNode(tx.get(nodeId))
         container.show(textNode, nodePos)
       }
       setCursor(tx, textNode, sel.containerId, 'after')
@@ -602,14 +539,13 @@ class Editing {
     newNode = tx.create(newNode)
     annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0)
 
-    // hide the old one, show the new node
+    // hide and delete the old one, show the new node
     let container = tx.get(sel.containerId)
     let pos = container.getPosition(nodeId, 'strict')
     container.hide(nodeId)
+    documentHelpers.deleteNode(tx, node)
     container.show(newNode.id, pos)
 
-    // remove the old one from the document
-    this.deleteNode(tx, node.id, containerId)
     tx.setSelection({
       type: 'property',
       path: newPath,
@@ -643,7 +579,7 @@ class Editing {
           type: 'list',
           items: [newItem.id]
         }, params))
-        tx.delete(node.id)
+        documentHelpers.deleteNode(tx, node)
         tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newList.id })
         tx.setSelection({
           type: 'property',
@@ -661,7 +597,7 @@ class Editing {
         node.removeItemAt(itemPos)
         if (node.getLength() === 0) {
           tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
-          tx.delete(node.id)
+          documentHelpers.deleteNode(tx, node)
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
         } else if (itemPos === 0) {
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
@@ -907,19 +843,19 @@ class Editing {
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
           container.hide(node.id)
-          tx.delete(node.id)
+          documentHelpers.deleteNode(tx, node)
           container.show(newTextNode.id, nodePos)
         }
         // if at the first list item, remove the item
         else if (itemPos === 0) {
           node.remove(listItem.id)
-          tx.delete(listItem.id)
+          documentHelpers.deleteNode(tx, listItem)
           container.show(newTextNode.id, nodePos)
         }
         // if at the last list item, remove the item and append the paragraph
         else if (itemPos >= L-1) {
           node.remove(listItem.id)
-          tx.delete(listItem.id)
+          documentHelpers.deleteNode(tx, listItem)
           container.show(newTextNode.id, nodePos+1)
         }
         // otherwise create a new list
@@ -1018,7 +954,7 @@ class Editing {
       // Simplification for empty nodes
       if (first.isEmpty()) {
         container.hide(first.id)
-        tx.delete(first.id)
+        documentHelpers.deleteNode(tx, first)
         // TODO: need to clear where to handle
         // selections ... probably better not to do it here
         setCursor(tx, second, container.id, 'before')
@@ -1035,7 +971,7 @@ class Editing {
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        tx.delete(source.id)
+        documentHelpers.deleteNode(tx, source)
         tx.setSelection({
           type: 'property',
           path: targetPath,
@@ -1053,10 +989,10 @@ class Editing {
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
         // delete item and prune empty list
-        tx.delete(source.id)
+        documentHelpers.deleteNode(tx, source)
         if (list.getLength() === 0) {
           container.hide(list.id)
-          tx.delete(list.id)
+          documentHelpers.deleteNode(tx, list)
         }
         tx.setSelection({
           type: 'property',
@@ -1080,7 +1016,7 @@ class Editing {
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        tx.delete(source.id)
+        documentHelpers.deleteNode(tx, source)
         tx.setSelection({
           type: 'property',
           path: target.getTextPath(),
@@ -1095,7 +1031,7 @@ class Editing {
           second.removeItemAt(0)
           first.appendItem(secondItems[i])
         }
-        tx.delete(second.id)
+        documentHelpers.deleteNode(tx, second)
         if (direction === 'left') {
           tx.setSelection({
             type: 'property',
@@ -1118,7 +1054,7 @@ class Editing {
     } else {
       if (second.isText() && second.isEmpty()) {
         container.hide(second.id)
-        tx.delete(second.id)
+        documentHelpers.deleteNode(tx, second)
         setCursor(tx, first, container.id, 'after')
       } else {
         selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
