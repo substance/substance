@@ -258,12 +258,13 @@ test("II1: Inserting InlineNode node into a TextProperty", (t) => {
 
 test("IB2: Inserting BlockNode using cursor at start of a TextNode", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
   editorSession.transaction((tx) => {
-    tx.setSelection({
-      type: 'property',
-      path: ['p1', 'content'],
-      startOffset: 0
-    })
     tx.insertBlockNode({
       type: 'test-block',
       id: 'ib1'
@@ -277,6 +278,200 @@ test("IB2: Inserting BlockNode using cursor at start of a TextNode", (t) => {
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, p1.getTextPath(), '... on paragraph')
   t.equal(sel.start.offset, 0, '... first position')
+  t.end()
+})
+
+test("Inserting an existing BlockNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.create({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  const ib1 = doc.get('ib1')
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode(ib1)
+  })
+  let body = doc.get('body')
+  t.ok(body.getChildAt(0) === ib1, 'First node should be the very block node instance created before.')
+  t.end()
+})
+
+test("Inserting a BlockNode when an IsolatedNode is selected", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.equals(body.length, 3, 'There should be three nodes.')
+  t.equals(body.nodes[1], 'ib1', 'The second one should be the inserted block node.')
+  t.isNil(doc.get('in1'), 'The IsolatedNode should have been deleted.')
+  t.end()
+})
+
+test("Inserting a BlockNode before an IsolatedNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'before',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.nodes, ['p1', 'ib1', 'in1', 'p2'], 'The body nodes should be in proper order.')
+  t.end()
+})
+
+test("Inserting a BlockNode after an IsolatedNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: 'in1',
+    mode: 'after',
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.nodes, ['p1', 'in1', 'ib1', 'p2'], 'The body nodes should be in proper order.')
+  t.end()
+})
+
+test("Inserting a BlockNode with an expanded PropertySelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 3,
+    endOffset: 5,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 3, 'There should be 3 nodes.')
+  t.equal(body.nodes[1], 'ib1', 'The second should be the inserted block node.')
+  t.equal(p1.getText(), P1_TEXT.slice(0, 3), 'The paragraph should have been truncated.')
+  t.equal(body.getChildAt(2).getText(), P1_TEXT.slice(5), '.. and the tail stored in a new paragraph.')
+  t.end()
+})
+
+test("Inserting a BlockNode into an empty paragraph", (t) => {
+  let { editorSession, doc } = setupEditor(t, _empty)
+  let empty = doc.get('empty')
+  editorSession.setSelection({
+    type: 'property',
+    path: empty.getPath(),
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.nodes, ['ib1'], 'There should only be the inserted block node.')
+  t.nil(doc.get('empty'), 'The empty paragraph should have been deleted.')
+  t.end()
+})
+
+test("Inserting a BlockNode after a text node", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: p1.getLength(),
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.nodes, ['p1', 'ib1'], 'The block node should have been inserted after the paragraph.')
+  t.end()
+})
+
+test("Inserting a BlockNode with a collapsed ContainerSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getPath(),
+    startOffset: 3,
+    endPath: p1.getPath(),
+    endOffset: 3,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.equal(body.getLength(), 3, 'There should be three nodes.')
+  t.equal(body.nodes[1], 'ib1', '.. the second one being the inserted block node.')
+  t.end()
+})
+
+test("Inserting a BlockNode with a ContainerSelection", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  let p1 = doc.get('p1')
+  let p2 = doc.get('p2')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getPath(),
+    startOffset: 3,
+    endPath: p2.getPath(),
+    endOffset: 4,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.insertBlockNode({
+      type: 'test-block',
+      id: 'ib1'
+    })
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.nodes, ['p1', 'ib1', 'p2'], 'There should be three nodes.')
+  t.equal(p1.getText(), P1_TEXT.slice(0, 3), 'The first paragraph should have been truncated correctly')
+  t.equal(p2.getText(), P2_TEXT.slice(4), 'The second paragraph should have been truncated correctly')
   t.end()
 })
 
