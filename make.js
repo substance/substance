@@ -215,12 +215,12 @@ b.task('test:browser:pure', function() {
 })
 .describe('same as test:browser but without transpilation')
 
-b.task('test:browser', function() {
+b.task('test:karma', function() {
   _buildTestsBrowser(true, false)
   _runTestBrowser()
 })
 
-b.task('test:browser:coverage', function() {
+b.task('test:coverage', function() {
   _buildTestsBrowser(true, true)
   _runTestBrowser()
 })
@@ -231,10 +231,10 @@ b.task('test:node', function() {
 })
 .describe('runs the test-suite in node')
 
-b.task('test', ['test:node', 'test:browser'])
+b.task('test', ['test:node', 'test:karma'])
 .describe('runs the test suites on all platforms')
 
-b.task('cover', ['test:browser:coverage'])
+b.task('cover', ['test:coverage'])
 .describe('generates a coverage report')
 
 b.task('npm:clean', function() {

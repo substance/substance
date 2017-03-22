@@ -13,6 +13,7 @@
 - InsertNodeCommand now sets cursor into inserted node
 - TextPropertyComponent allows to render markers passed via props (as opposed to markers provided by MarkersManager)
 - TextPropertyEditor emits 'enter' event
+- Improved re-rendering performance
 
 ## Beta 6
 
