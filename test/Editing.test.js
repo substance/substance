@@ -882,6 +882,29 @@ test("D20-8: Deleting a range across two ListItems within the same List", (t) =>
   t.end()
 })
 
+test("Deleting a ContainerSelection within a single TextNode", (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'container',
+    startPath: p1.getPath(),
+    startOffset: 3,
+    endPath: p1.getPath(),
+    endOffset: 5,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  t.equal(p1.getText(), P1_TEXT.slice(0,3)+P1_TEXT.slice(5), 'The text should have been deleted')
+  _checkSelection(t, editorSession.getSelection(), {
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 3
+  })
+  t.end()
+})
+
 test("BR1: Breaking without selection", (t) => {
   let { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection(null)
