@@ -32,11 +32,12 @@ class DocumentNode extends DataNode {
     @param {object} node properties
   */
   constructor(doc, props) {
-    super(props)
-    // being less strict here allows us to create a detached node
-    // which can be useful for testing
-    // if (!doc) throw new Error('Document instance is mandatory.')
+    super(doc, props)
+  }
+
+  _initialize(doc, props) {
     this.document = doc
+    super._initialize(props)
   }
 
   /**

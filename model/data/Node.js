@@ -18,9 +18,15 @@ class Node extends EventEmitter {
   /**
     @param {Object} properties
   */
-  constructor(data) {
+  constructor() {
     super()
 
+    // NOTE: this indirection allows us to implement a overridable initializer
+    // For instance, DocumentNode sets the document instance and the props
+    this._initialize.apply(this, arguments)
+  }
+
+  _initialize(data) {
     const NodeClass = this.constructor
 
     let schema = NodeClass.schema
@@ -45,7 +51,9 @@ class Node extends EventEmitter {
     }
   }
 
-  dispose() {}
+  dispose() {
+    // nothing by default
+  }
 
   /**
     Check if the node is of a given type.
