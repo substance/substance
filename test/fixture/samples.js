@@ -97,7 +97,7 @@ export function _l1(doc, body) {
   body.show('l1')
 }
 
-export function _l11(doc, body) {
+export function _l11(doc) {
   const l1 = doc.get('l1')
   doc.create({
     type: 'list-item',
@@ -107,7 +107,7 @@ export function _l11(doc, body) {
   l1.appendItem('l1-1')
 }
 
-export function _l12(doc, body) {
+export function _l12(doc) {
   const l1 = doc.get('l1')
   doc.create({
     type: 'list-item',
@@ -152,7 +152,7 @@ export function _l2(doc, body) {
   body.show('l2')
 }
 
-export function _l21(doc, body) {
+export function _l21(doc) {
   const l2 = doc.get('l2')
   doc.create({
     type: 'list-item',
@@ -162,7 +162,7 @@ export function _l21(doc, body) {
   l2.appendItem('l2-1')
 }
 
-export function _l22(doc, body) {
+export function _l22(doc) {
   const l2 = doc.get('l2')
   doc.create({
     type: 'list-item',
