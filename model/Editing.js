@@ -268,6 +268,7 @@ class Editing {
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = lastNode.getRoot()
+      /* istanbul ignore else  */
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, null, end)
       } else if (node.isList()) {
@@ -291,6 +292,7 @@ class Editing {
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = firstNode.getRoot()
+      /* istanbul ignore else  */
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, start, null)
       } else if (node.isList()) {
@@ -352,6 +354,7 @@ class Editing {
     } else {
       blockNode = tx.get(nodeData.id)
     }
+    /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
       let containerId = sel.containerId
       let container = tx.get(containerId)
@@ -455,6 +458,7 @@ class Editing {
     let sel = tx.selection
     // type over a selected node or insert a paragraph before
     // or after
+    /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
       let containerId = sel.containerId
       let container = tx.get(containerId)
@@ -564,13 +568,16 @@ class Editing {
   toggleList(tx, params) {
     let sel = tx.selection
     let container = tx.get(sel.containerId)
-    // not possible without container
-    if (!container) return
+    /* istanbul ignore next */
+    if (!container) {
+      throw new Error("Selection must be within a container.")
+    }
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.path[0]
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = tx.get(nodeId).getRoot()
       let nodePos = container.getPosition(node.id, 'strict')
+      /* istanbul ignore else  */
       if (node.isText()) {
         tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
         // TODO: what if this should create a different list-item type?
@@ -599,7 +606,7 @@ class Editing {
         annotationHelpers.transferAnnotations(tx, item.getTextPath(), 0, newTextNode.getTextPath(), 0)
         // take the item out of the list
         node.removeItemAt(itemPos)
-        if (node.getLength() === 0) {
+        if (node.isEmpty()) {
           tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
           documentHelpers.deleteNode(tx, node)
           tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
@@ -630,6 +637,8 @@ class Editing {
           startOffset: sel.start.offset,
           containerId: sel.containerId
         })
+      } else {
+        // unsupported node type
       }
     } else if (sel.isContainerSelection()) {
       console.error('TODO: support toggleList with ContainerSelection')
@@ -651,7 +660,7 @@ class Editing {
         }
       }
     } else if (sel.isContainerSelection()) {
-      // TODO support ContainerSelection
+      console.error('TODO: support toggleList with ContainerSelection')
     }
   }
 
@@ -669,7 +678,7 @@ class Editing {
         }
       }
     } else if (sel.isContainerSelection()) {
-      // TODO support ContainerSelection
+      console.error('TODO: support toggleList with ContainerSelection')
     }
   }
 
@@ -988,17 +997,19 @@ class Editing {
         })
       } else if (second.isList()) {
         let list = second
-        let source = list.getFirstItem()
-        let sourcePath = source.getTextPath()
-        // remove merged item from list
-        list.removeItemAt(0)
-        // append the text
-        tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
-        // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        // delete item and prune empty list
-        documentHelpers.deleteNode(tx, source)
-        if (list.getLength() === 0) {
+        if (!second.isEmpty()) {
+          let source = list.getFirstItem()
+          let sourcePath = source.getTextPath()
+          // remove merged item from list
+          list.removeItemAt(0)
+          // append the text
+          tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+          // transfer annotations
+          annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+          // delete item and prune empty list
+          documentHelpers.deleteNode(tx, source)
+        }
+        if (list.isEmpty()) {
           container.hide(list.id)
           documentHelpers.deleteNode(tx, list)
         }
@@ -1032,6 +1043,12 @@ class Editing {
           containerId: container.id
         })
       } else if (second.isList()) {
+        /* istanbul ignore next */
+        if (direction !== 'right') {
+          // ATTENTION: merging two lists by using BACKSPACE is not possible,
+          // as BACKSPACE will first turn the list into a paragraph
+          throw new Error('Illegal state')
+        }
         container.hide(second.id)
         let firstItems = first.items.slice()
         let secondItems = second.items.slice()
@@ -1040,22 +1057,13 @@ class Editing {
           first.appendItem(secondItems[i])
         }
         documentHelpers.deleteNode(tx, second)
-        if (direction === 'left') {
-          tx.setSelection({
-            type: 'property',
-            path: tx.get(secondItems[0]).getTextPath(),
-            startOffset: 0,
-            containerId: container.id
-          })
-        } else {
-          let item = tx.get(last(firstItems))
-          tx.setSelection({
-            type: 'property',
-            path: item.getTextPath(),
-            startOffset: item.getLength(),
-            containerId: container.id
-          })
-        }
+        let item = tx.get(last(firstItems))
+        tx.setSelection({
+          type: 'property',
+          path: item.getTextPath(),
+          startOffset: item.getLength(),
+          containerId: container.id
+        })
       } else {
         selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
       }
