@@ -1,4 +1,29 @@
 import EditingInterface from '../../model/EditingInterface'
+
+export const H1_TEXT = 'h1:abcdefg'
+
+export function _h1(doc, body) {
+  doc.create({
+    type: 'heading',
+    id: 'h1',
+    content: H1_TEXT,
+    level: 1
+  })
+  body.show('h1')
+}
+
+export const H2_TEXT = 'h2:lmnopqrs'
+
+export function _h2(doc, body) {
+  doc.create({
+    type: 'heading',
+    id: 'h2',
+    content: H2_TEXT,
+    level:2
+  })
+  body.show('h2')
+}
+
 export const P1_TEXT = 'p1:abcdef'
 
 export function _p1(doc, body) {
@@ -66,51 +91,50 @@ export const LI3_TEXT = 'l1-3:ghij'
 // list with two items
 export function _l1(doc, body) {
   doc.create({
+    type: 'list',
+    id: 'l1'
+  })
+  body.show('l1')
+}
+
+export function _l11(doc) {
+  const l1 = doc.get('l1')
+  doc.create({
     type: 'list-item',
     id: 'l1-1',
     content: LI1_TEXT
   })
+  l1.appendItem('l1-1')
+}
+
+export function _l12(doc) {
+  const l1 = doc.get('l1')
   doc.create({
     type: 'list-item',
     id: 'l1-2',
     content: LI2_TEXT
   })
-  doc.create({
-    type: 'list',
-    id: 'l1',
-    items: ['l1-1', 'l1-2']
-  })
-  body.show('l1')
+  l1.appendItem('l1-2')
 }
 
-export function _li3(doc) {
+export function _l13(doc) {
+  const l1 = doc.get('l1')
   doc.create({
     type: 'list-item',
     id: 'l1-3',
     content: LI3_TEXT
   })
-  let l1 = doc.get('l1')
-  l1.insertItemAt(1, 'l1-3')
+  l1.appendItem('l1-3')
 }
 
 export function _l1_empty(doc) {
+  const l1 = doc.get('l1')
   doc.create({
     type: 'list-item',
     id: 'l1-empty',
     content: ''
   })
-  let l1 = doc.get('l1')
-  l1.insertItemAt(1, 'l1-empty')
-}
-
-export function _l1_empty_last(doc) {
-  doc.create({
-    type: 'list-item',
-    id: 'l1-empty',
-    content: ''
-  })
-  let l1 = doc.get('l1')
-  l1.insertItemAt(2, 'l1-empty')
+  l1.appendItem('l1-empty')
 }
 
 export function _li1plus(doc) {
@@ -122,23 +146,45 @@ export const LI22_TEXT = 'l2-2:0123456'
 
 export function _l2(doc, body) {
   doc.create({
+    type: 'list',
+    id: 'l2'
+  })
+  body.show('l2')
+}
+
+export function _l21(doc) {
+  const l2 = doc.get('l2')
+  doc.create({
     type: 'list-item',
     id: 'l2-1',
     content: LI21_TEXT
   })
+  l2.appendItem('l2-1')
+}
+
+export function _l22(doc) {
+  const l2 = doc.get('l2')
   doc.create({
     type: 'list-item',
     id: 'l2-2',
     content: LI22_TEXT
   })
-  doc.create({
-    type: 'list',
-    id: 'l2',
-    items: ['l2-1', 'l2-2']
-  })
-  body.show('l2')
+  l2.appendItem('l2-2')
 }
 
+export function _l1_single(doc, body) {
+  doc.create({
+    type: 'list-item',
+    id: 'l1-1',
+    content: LI1_TEXT
+  })
+  doc.create({
+    type: 'list',
+    id: 'l1',
+    items: ['l1-1']
+  })
+  body.show('l1')
+}
 
 export function _block1(doc, body) {
   doc.create({

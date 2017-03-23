@@ -50,6 +50,10 @@ class ListNode extends DocumentNode {
     }
   }
 
+  isEmpty() {
+    return this.items.length === 0
+  }
+
   getLength() {
     return this.items.length
   }

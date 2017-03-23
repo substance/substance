@@ -163,7 +163,7 @@ class EditingInterface {
   // insert an inline node with given data at the current selection
   insertInlineNode(inlineNode) {
     const sel = this._selection
-    if (sel && !sel.isNull()) {
+    if (sel && !sel.isNull() && sel.isPropertySelection()) {
       return this._impl.insertInlineNode(this, inlineNode)
     }
   }
