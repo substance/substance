@@ -4,7 +4,7 @@ class InsertListCommand extends Command {
   getCommandState (params) {
     let sel = this._getSelection(params)
     let selectionState = params.editorSession.getSelectionState()
-    let commandState = {}
+    let commandState = { disabled: false }
     let _disabledCollapsedCursor = this.config.disableCollapsedCursor && sel.isCollapsed()
     if (_disabledCollapsedCursor || !sel.isPropertySelection() || selectionState.isInlineNodeSelection()) {
       commandState.disabled = true
