@@ -28,7 +28,8 @@ class Clipboard {
     let _config = {
       schema: schema,
       DocumentClass: doc.constructor,
-      converters: htmlConverters
+      converters: htmlConverters,
+      editorOptions: config.editorOptions
     }
 
     this.htmlImporter = new ClipboardImporter(_config)
