@@ -73,7 +73,8 @@ class Configurator {
       icons: {},
       labels: {},
       lang: 'en_US',
-      SaveHandlerClass: null
+      SaveHandlerClass: null,
+      editorOptions: []
     }
   }
 
@@ -90,7 +91,23 @@ class Configurator {
     this.config.schema = schema
   }
 
-  /**
+  addEditorOption(option) {
+    if (!option.key) {
+      throw new Error('An option key must be defined')
+    }
+
+    if (!option.value) {
+      throw new Error('An option value must be defined')
+    }
+
+    this.config.editorOptions[option.key] = option.value;
+  }
+
+  getEditorOptions() {
+    return this.config.editorOptions;
+  }
+
+    /**
     Adds a node to this configuration. Later, when you use
     {@link Configurator#getSchema()}, this node will be added to that schema.
     Usually, used within a package to add its own nodes to the schema.
@@ -560,6 +577,7 @@ class Configurator {
     let SaveHandler = this.config.SaveHandlerClass || SaveHandlerStub
     return new SaveHandler()
   }
+
 }
 
 export default Configurator
