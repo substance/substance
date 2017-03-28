@@ -36,6 +36,9 @@ class ClipboardImporter extends HTMLImporter {
     this._isWindows = platform.isWindows
 
     this._emptyDoc = this._createDocument(this.schema)
+
+    this.editorOptions = config.editorOptions
+
   }
 
   dispose() {
@@ -71,6 +74,10 @@ class ClipboardImporter extends HTMLImporter {
           console.error(err)
         }
       }
+    }
+
+    if (this.editorOptions && this.editorOptions['forcePlainTextPaste']) {
+      return null;
     }
 
     el = DefaultDOMElement.parseHTML(html)
