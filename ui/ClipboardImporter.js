@@ -76,7 +76,7 @@ class ClipboardImporter extends HTMLImporter {
       }
     }
 
-    if (this.editorOptions['forcePlainTextPaste']) {
+    if (this.editorOptions && this.editorOptions['forcePlainTextPaste']) {
       return null;
     }
 
