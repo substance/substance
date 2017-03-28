@@ -73,6 +73,10 @@ class ClipboardImporter extends HTMLImporter {
       }
     }
 
+    if (Boolean(config.editorOptions['forcePlainTextPaste'])) {
+      return null;
+    }
+
     el = DefaultDOMElement.parseHTML(html)
     if (isArray(el)) {
       body = this._createElement('body')
