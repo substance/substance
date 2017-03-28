@@ -30,10 +30,10 @@ class Clipboard {
     let _config = {
       schema: schema,
       DocumentClass: doc.constructor,
-      converters: htmlConverters
+      converters: htmlConverters,
+      editorOptions: config.editorOptions
     }
 
-    this.forcePlainTextPaste = Boolean(config.editorOptions['forcePlainTextPaste'])
     this.htmlImporter = new ClipboardImporter(_config)
     this.htmlExporter = new ClipboardExporter(_config)
   }
@@ -153,7 +153,7 @@ class Clipboard {
 
     // if we have content given as HTML we let the importer assess the quality first
     // and fallback to plain text import if it's bad
-    if (!this.forcePlainTextPaste && html) {
+    if (html) {
       if (!this._pasteHtml(html, plainText)) {
         this._pastePlainText(plainText)
       }
