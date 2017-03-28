@@ -57,8 +57,8 @@ class ClipboardImporter extends HTMLImporter {
       }
     }
 
-    if (this.editorOptions['forcePlainTextPaste']) {
-      return null
+    if (this.editorOptions && this.editorOptions['forcePlainTextPaste']) {
+      return null;
     }
 
     let htmlDoc = DefaultDOMElement.parseHTML(html)
