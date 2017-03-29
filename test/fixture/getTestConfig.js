@@ -3,6 +3,7 @@ import {
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
   ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage, InlineWrapperPackage,
 } from 'substance'
+
 import TestNode from './TestNode'
 import TestBlockNode from './TestBlockNode'
 import TestContainerAnnotation from './TestContainerAnnotation'

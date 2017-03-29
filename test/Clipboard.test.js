@@ -90,11 +90,7 @@ function ClipboardTests(memory) {
 
     let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
     let body = htmlDoc.find('body')
-    let childNodes = body.getChildNodes()
-    t.equal(childNodes.length, 1, "There should be only one element")
-    let el = childNodes[0]
-    t.equal(el.nodeType, 'text', "HTML element should be a text node.")
-    t.equal(el.text(), TEXT, "HTML text should be correct.")
+    t.equal(body.text(), TEXT, "HTML text should be correct.")
     t.end()
   })
 

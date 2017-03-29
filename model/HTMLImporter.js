@@ -20,9 +20,7 @@ class HTMLImporter extends DOMImporter {
   importDocument(html) {
     this.reset()
     var parsed = DefaultDOMElement.parseHTML(html)
-    // creating all nodes
     this.convertDocument(parsed)
-    this.generateDocument()
     return this.state.doc
   }
 

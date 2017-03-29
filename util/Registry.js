@@ -97,16 +97,10 @@ class Registry {
   }
 
   /*
-   * Iterate all registered entries in the order they were registered.
-   *
-   * @param {Function} callback with signature function(entry, name)
-   * @param {Object} execution context
-   */
-  each(callback, ctx) {
-    console.warn('DEPRECATED: use Registry.forEach(cb) instead')
-    return this.forEach(callback.bind(ctx))
-  }
+    Iterate all registered entries in the order they were registered.
 
+    @param {Function} callback with signature function(entry, name)
+   */
   forEach(callback) {
     for (let i = 0; i < this.names.length; i++) {
       let name = this.names[i]
@@ -119,7 +113,7 @@ class Registry {
 
   map(callback) {
     let result = []
-    this.forEach(function(entry, name) {
+    this.forEach((entry, name) => {
       result.push(callback(entry, name))
     })
     return result
@@ -133,6 +127,10 @@ class Registry {
       }
     })
     return result
+  }
+
+  values() {
+    return this.filter(() => { return true })
   }
 }
 

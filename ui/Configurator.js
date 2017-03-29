@@ -422,10 +422,11 @@ class Configurator {
   }
 
   getSchema() {
-    const schemaConfig = this.config.schema
-    const schema = new DocumentSchema(schemaConfig)
-    schema.addNodes(this.config.nodes)
-    return schema
+    if (!this.schema) {
+      this.schema = new DocumentSchema(this.config.schema)
+      this.schema.addNodes(this.config.nodes)
+    }
+    return this.schema
   }
 
   getDocumentClass() {
@@ -433,9 +434,9 @@ class Configurator {
   }
 
   createArticle(seed) {
-    var schemaConfig = this.config.schema
-    var schema = this.getSchema()
-    var doc = new schemaConfig.ArticleClass(schema)
+    const schema = this.getSchema()
+    const DocumentClass = schema.getDocumentClass()
+    let doc = new DocumentClass(schema)
     if (seed) {
       seed(doc)
     }
@@ -446,8 +447,7 @@ class Configurator {
     var ImporterClass = this.config.importers[type]
     var config = Object.assign({
       schema: this.getSchema(),
-      converters: this.getConverterRegistry().get(type),
-      DocumentClass: this.config.schema.ArticleClass
+      converters: this.getConverterRegistry().get(type).values(),
     }, options)
     return new ImporterClass(config, context)
   }
@@ -456,7 +456,7 @@ class Configurator {
     var ExporterClass = this.config.exporters[type]
     var config = Object.assign({
       schema: this.getSchema(),
-      converters: this.getConverterRegistry().get(type)
+      converters: this.getConverterRegistry().get(type).values()
     }, options)
     return new ExporterClass(config, context)
   }

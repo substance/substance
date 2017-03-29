@@ -1,22 +1,19 @@
 import { DefaultDOMElement } from '../dom'
-import { isArray, forEach, Registry, platform } from '../util'
+import { platform } from '../util'
 import { Document, HTMLImporter, JSONConverter } from '../model'
+
+const INLINENODES = ['a','b','big','i','small','tt','abbr','acronym','cite','code','dfn','em','kbd','strong','samp','time','var','bdo','br','img','map','object','q','script','span','sub','sup','button','input','label','select','textarea'].reduce((m,n)=>{m[n]=true;return m}, {})
 
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
 
   @internal
 */
+export default
 class ClipboardImporter extends HTMLImporter {
 
   constructor(config) {
-    ClipboardImporter._addConverters(config)
-
-    if (!config.schema) {
-      throw new Error('Missing argument: config.schema is required.')
-    }
-
-    super(config)
+    super(_withCatchAllConverter(config))
     // disabling warnings about default importers
     this.IGNORE_DEFAULT_WARNINGS = true
 
@@ -28,20 +25,12 @@ class ClipboardImporter extends HTMLImporter {
     // ATTENTION: this is only here so we can enfore windows conversion
     // mode from within tests
     this._isWindows = platform.isWindows
-
-    this._emptyDoc = this._createDocument(this.schema)
-  }
-
-  dispose() {
-    this._emptyDoc.dispose()
   }
 
   /**
     Parses HTML and applies some sanitization/normalization.
   */
   importDocument(html) {
-    let body, el
-
     if (this._isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
@@ -55,38 +44,29 @@ class ClipboardImporter extends HTMLImporter {
     // If the import fails e.g. because the schema is incompatible
     // we fall back to plain HTML import
     if (html.search(/script id=.substance-clipboard./)>=0) {
-      el = DefaultDOMElement.parseHTML(html)
-      let substanceData = el.find('#substance-clipboard')
+      let htmlDoc = DefaultDOMElement.parseHTML(html)
+      let substanceData = htmlDoc.find('#substance-clipboard')
       if (substanceData) {
         let jsonStr = substanceData.textContent
         try {
           return this.importFromJSON(jsonStr)
-        } catch(err) {
-          console.error(err)
+        } finally {
+          // nothing
         }
       }
     }
 
-    el = DefaultDOMElement.parseHTML(html)
-    if (isArray(el)) {
-      body = this._createElement('body')
-      body.append(el)
-    } else {
-      body = el.find('body')
-    }
-    if (!body) {
-      body = this._createElement('body')
-      body.append(el)
-    }
+    let htmlDoc = DefaultDOMElement.parseHTML(html)
+    let body = htmlDoc.find('body')
     body = this._sanitizeBody(body)
     if (!body) {
       console.warn('Invalid HTML.')
       return null
     }
-
+    this._wrapIntoParagraph(body)
     this.reset()
     this.convertBody(body)
-    let doc = this.generateDocument()
+    const doc = this.state.doc
     return doc
   }
 
@@ -110,8 +90,31 @@ class ClipboardImporter extends HTMLImporter {
     return body
   }
 
+  _wrapIntoParagraph(body) {
+    let childNodes = body.getChildNodes()
+    let shouldWrap = false
+    for (let i = 0; i < childNodes.length; i++) {
+      const c = childNodes[i]
+      if (c.isTextNode()) {
+        if (!(/^\s+$/.exec(c.textContent))) {
+          shouldWrap = true
+          break
+        }
+      } else if (INLINENODES[c.tagName]) {
+        shouldWrap = true
+        break
+      }
+    }
+    if (shouldWrap) {
+      let p = body.createElement('p')
+      p.append(childNodes)
+      body.append(p)
+    }
+  }
+
   importFromJSON(jsonStr) {
-    let doc = this.createDocument()
+    this.reset()
+    let doc = this.getDocument()
     let jsonData = JSON.parse(jsonStr)
     let converter = new JSONConverter()
     converter.importDocument(doc, jsonData)
@@ -127,69 +130,25 @@ class ClipboardImporter extends HTMLImporter {
     this.convertContainer(body.childNodes, Document.SNIPPET_ID)
   }
 
-  _wrapInlineElementsIntoBlockElement(childIterator) {
-    let wrapper = this._createElement('p')
-    while(childIterator.hasNext()) {
-      let el = childIterator.next()
-      // if there is a block node we finish this wrapper
-      let blockTypeConverter = this._getConverterForElement(el, 'block')
-      if (blockTypeConverter) {
-        childIterator.back()
-        break
-      }
-      wrapper.append(el.clone(true))
-    }
-    // HACK: usually when we run into this case, then there is inline data only
-    // Instead of detecting this case up-front we just set the proper id
-    // and hope that all goes well.
-    // Note: when this is called a second time, the id will be overridden.
-    wrapper.attr('data-id', Document.TEXT_SNIPPET_ID)
-    let node = this.defaultConverter(wrapper, this)
-    if (node) {
-      if (!node.type) {
-        throw new Error('Contract: Html.defaultConverter() must return a node with type.')
-      }
-      this._createAndShow(node)
-    }
-    return node
-  }
-
   /**
     Creates substance document to paste.
 
     @return {Document} the document instance
   */
-  createDocument() {
-    return this._emptyDoc.createSnippet()
+  _createDocument() {
+    let emptyDoc = super._createDocument()
+    return emptyDoc.createSnippet()
   }
-
-  _getUnsupportedNodeConverter() {
-    // nothing
-  }
-
 }
 
-const CONVERTERS = {
-  'catch-all-block': {
-    type: 'paragraph',
+function _withCatchAllConverter(config) {
+  let defaultTextType = config.schema.getDefaultTextType()
+  config.converters = config.converters.concat([{
+    type: defaultTextType,
     matchElement: function(el) { return el.is('div') },
     import: function(el, node, converter) {
       node.content = converter.annotatedText(el, [node.id, 'content'])
     }
-  }
+  }])
+  return config
 }
-
-ClipboardImporter._addConverters = function(config) {
-  if (config.converters) {
-    let registry = new Registry()
-    config.converters.forEach(function(conv, name) {
-      registry.add(name, conv)
-    });
-    forEach(CONVERTERS, function(converter, name) {
-      registry.add(name, converter)
-    });
-    config.converters = registry
-  }
-}
-
-export default ClipboardImporter

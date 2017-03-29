@@ -4,6 +4,7 @@ import {
   LinkPackage, ImagePackage, CodeblockPackage, ListPackage,
   InlineWrapperPackage
 } from 'substance'
+
 import MetaNode from './TestMetaNode'
 import TestNode from './TestNode'
 import TestContainerAnnotation from './TestContainerAnnotation'
