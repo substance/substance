@@ -373,12 +373,6 @@ class MemoryDOMElement extends DOMElement {
     return this.parent
   }
 
-  getRoot() {
-    let el = this
-    while (el.parent) el = el.parent
-    return el
-  }
-
   getOwnerDocument() {
     return (this.type === 'document') ? this : this.ownerDocument
   }
@@ -625,14 +619,6 @@ MemoryDOMElement.parseMarkup = function(str, format, options={}) {
   } else {
     return doc
   }
-}
-
-MemoryDOMElement.parseHTML = function(html, options) {
-  return MemoryDOMElement.parseMarkup(html, 'html', options)
-}
-
-MemoryDOMElement.parseXML = function(html, options) {
-  return MemoryDOMElement.parseMarkup(html, 'xml', options)
 }
 
 MemoryDOMElement.wrap =

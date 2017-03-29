@@ -361,6 +361,7 @@ class BrowserDOMElement extends DOMElement {
     // ATTENTION: looking at https://developer.mozilla.org/en/docs/Web/API/Element/matches
     // Element.matches might not be supported by some mobile browsers
     let el = this.el
+    /* istanbul ignore else */
     if (this.isElementNode()) {
       return matches(el, cssSelector)
     } else {
@@ -370,21 +371,12 @@ class BrowserDOMElement extends DOMElement {
 
   getParent() {
     let parent = this.el.parentNode
+    /* istanbul ignore else */
     if (parent) {
       return BrowserDOMElement.wrap(parent)
     } else {
       return null
     }
-  }
-
-  getRoot() {
-    let el = this.el
-    let parent = el
-    while (parent) {
-      el = parent;
-      parent = el.parentNode
-    }
-    return BrowserDOMElement.wrap(el)
   }
 
   getOwnerDocument() {
@@ -675,14 +667,6 @@ BrowserDOMElement.parseMarkup = function(str, format, options={}) {
     }
     return doc
   }
-}
-
-BrowserDOMElement.parseHTML = function(html, options) {
-  return BrowserDOMElement.parseMarkup(html, 'html', options)
-}
-
-BrowserDOMElement.parseXML = function(html, options) {
-  return BrowserDOMElement.parseMarkup(html, 'xml', options)
 }
 
 BrowserDOMElement.wrap =

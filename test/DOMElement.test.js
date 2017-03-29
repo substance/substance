@@ -551,5 +551,12 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("getOwnerDocument()", (t) => {
+    let doc = DefaultDOMElement.createDocument('html')
+    let el = doc.createElement('div')
+    t.equal(el.getOwnerDocument(), doc, 'should return the ownerDocument')
+    t.equal(el.ownerDocument, doc, 'should also work via property getter')
+    t.end()
+  })
 
 }

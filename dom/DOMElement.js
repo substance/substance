@@ -705,18 +705,6 @@ class DOMElement {
   }
 
   /**
-    Get the root ancestor element of this element.
-
-    In the browser this is the `window.document`.
-
-    @returns {DOMElement} the root element
-   */
-  getRoot() {
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
-  }
-
-  /**
     Get the ownerDocument of this element.
 
     @returns {DOMElement} the document element

@@ -34,6 +34,7 @@
 - **(!)** `DOMImporter` (`HTMLImporter`/`XMLImporter`) takes two mandatory configuration parameters: `schema` and `converters`
 
   If you have used the `Configurator` API to create importers and exporters, you should be good.
+- **(!)** removed DOMElement.getRoot()
 
 ## Beta 6
 
