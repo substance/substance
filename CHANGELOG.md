@@ -14,6 +14,26 @@
 - TextPropertyComponent allows to render markers passed via props (as opposed to markers provided by MarkersManager)
 - TextPropertyEditor emits 'enter' event
 - Improved re-rendering performance
+- **(!)** changed behavior of `DefaultDOMElement.parseHTML()` and `parseXML()`:
+  Now `DefaultDOMElement.parseHTML()` and `parseXML()` always return the DOM document, i.e., a `DOMElement` instance of type `document`.
+  The former behavior was confusing and inconsistent.
+  `parseHTML()` now always creates a 'full' HTML document, i.e. containing `<head>` and `<body>`
+
+  If you want to parse *snippets* (as opposed to full documents), use:
+  ```
+    let el = DefaultDOMElement.parseSnippet('<p>Lorem ipsum dolor sit amet</p>', 'html')
+    let els = DefaultDOMElement.parseSnippet('Lorem ipsum <b>dolor</b> sit amet', 'xml')
+
+    ...or...
+
+    let el = DefaultDOMElement.parseSnippet('<myNode>...</myNode>', 'xml')
+    let els = DefaultDOMElement.parseSnippet('<myNode>...</myNode><myNode>...</myNode>', 'xml')
+  ```
+  Notice, that `parseSnippet` returns either one element, or an array of elements, depending on the input you provided.
+
+- **(!)** `DOMImporter` (`HTMLImporter`/`XMLImporter`) takes two mandatory configuration parameters: `schema` and `converters`
+
+  If you have used the `Configurator` API to create importers and exporters, you should be good.
 
 ## Beta 6
 
