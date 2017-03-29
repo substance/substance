@@ -1,6 +1,4 @@
-import includes from '../../util/includes'
-import forEach from '../../util/forEach'
-import EventEmitter from '../../util/EventEmitter'
+import { includes, forEach, EventEmitter } from '../../util'
 
 /*
   Manages a table of content for a container. Default implementation considers

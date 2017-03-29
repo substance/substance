@@ -1,4 +1,4 @@
-import XMLImporter from '../../model/XMLImporter'
+import { XMLImporter } from 'substance'
 
 class TestXMLImporter extends XMLImporter {
 

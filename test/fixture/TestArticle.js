@@ -1,4 +1,4 @@
-import Document from '../../model/Document'
+import { Document } from 'substance'
 
 class TestArticle extends Document {
 

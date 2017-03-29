@@ -1,6 +1,5 @@
-import forEach from '../../util/forEach'
-import Tool from '../tools/Tool'
-import keys from '../../util/keys'
+import { forEach, keys } from '../../util'
+import { Tool } from '../../ui'
 
 /**
   SwitchTextTypeTool. Implements the SurfaceTool API.

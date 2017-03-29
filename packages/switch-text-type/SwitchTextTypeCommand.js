@@ -1,7 +1,5 @@
-import isMatch from '../../util/isMatch'
-import find from '../../util/find'
-import clone from '../../util/clone'
-import Command from '../../ui/Command'
+import { isMatch, find, clone } from '../../util'
+import { Command } from '../../ui'
 
 class SwitchTextTypeCommand extends Command {
   // Available text types on the surface

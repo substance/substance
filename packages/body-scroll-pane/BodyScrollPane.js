@@ -1,5 +1,5 @@
-import AbstractScrollPane from '../scroll-pane/AbstractScrollPane'
-import DefaultDOMElement from '../../dom/DefaultDOMElement'
+import { DefaultDOMElement } from '../../dom'
+import { AbstractScrollPane } from '../../ui'
 
 /**
   Wraps content in a scroll pane.

@@ -1,9 +1,6 @@
+import { forEach, isBoolean, isNumber, isString } from '../util'
+import { DefaultDOMElement } from '../dom'
 import DOMExporter from './DOMExporter'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import forEach from '../util/forEach'
-import isBoolean from '../util/isBoolean'
-import isNumber from '../util/isNumber'
-import isString from '../util/isString'
 
 /*
   Base class for custom HTML exporters. If you want to use XML as your

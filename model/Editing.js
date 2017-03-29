@@ -1,11 +1,10 @@
-import isArrayEqual from '../util/isArrayEqual'
-import isString from '../util/isString'
-import last from '../util/last'
-import uuid from '../util/uuid'
-import annotationHelpers from '../model/annotationHelpers'
-import documentHelpers from '../model/documentHelpers'
-import { setCursor, isEntirelySelected, selectNode } from '../model/selectionHelpers'
-import paste from '../model/paste'
+import { isArrayEqual, isString, last, uuid } from '../util'
+import annotationHelpers from './annotationHelpers'
+import documentHelpers from './documentHelpers'
+import * as selectionHelpers from './selectionHelpers'
+import paste from './paste'
+
+const { setCursor, isEntirelySelected, selectNode } = selectionHelpers
 
 /**
   Core editing implementation, that controls meta behavior

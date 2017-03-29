@@ -1,4 +1,4 @@
-import isArray from '../util/isArray'
+import { isArray } from '../util'
 
 /*
   This is an experiment trying to have better support for data types with a hierarchical

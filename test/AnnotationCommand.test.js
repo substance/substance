@@ -1,6 +1,5 @@
 import { module } from 'substance-test'
-import SelectionState from '../model/SelectionState'
-import AnnotationCommand from '../ui/AnnotationCommand'
+import { SelectionState, AnnotationCommand } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import containerAnnoSample from './fixture/containerAnnoSample'
 

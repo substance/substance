@@ -1,6 +1,5 @@
 import { module } from 'substance-test'
-
-import documentHelpers from '../model/documentHelpers'
+import { documentHelpers } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import containerAnnoSample from './fixture/containerAnnoSample'

@@ -1,24 +1,22 @@
 import { module } from 'substance-test'
-import inBrowser from '../util/inBrowser'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import XNode from '../dom/XNode'
+import { DefaultDOMElement, MemoryDOMElement, platform } from 'substance'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import getTestConfig from './fixture/getTestConfig'
 
 const CONTENT = '0123456789'
 
-xmlExporterTests()
+XMLExporterTests()
 
-if (inBrowser) {
-  xmlExporterTests('memory')
+if (platform.inBrowser) {
+  XMLExporterTests('memory')
 }
 
-function xmlExporterTests(memory) {
+function XMLExporterTests(memory) {
 
   const test = module('XMLExporter' + ( memory ? ' [memory]' : ''), {
     before: function(t) {
-      t.elementFactory = memory ? XNode.createDocument('xml') : DefaultDOMElement.createDocument('xml')
+      t.elementFactory = memory ? MemoryDOMElement.createDocument('xml') : DefaultDOMElement.createDocument('xml')
     }
   })
 

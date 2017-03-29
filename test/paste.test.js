@@ -1,6 +1,5 @@
 import { module } from 'substance-test'
-import Document from '../model/Document'
-import EditingInterface from '../model/EditingInterface'
+import { Document, EditingInterface } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 

@@ -7,10 +7,8 @@
   This implementation is just a prototype and might change with the next releases.
 */
 
-import inBrowser from '../util/inBrowser'
-import DOMElement from '../dom/DOMElement'
-import DOMEventListener from '../dom/DOMEventListener'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
+import { DOMElement, DOMEventListener, DefaultDOMElement } from '../dom'
+import { platform } from '../util'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable
@@ -19,7 +17,7 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
   to window.document.
 */
 
-const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy']
+const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy' ]
 
 class GlobalEventHandler {
 
@@ -31,7 +29,7 @@ class GlobalEventHandler {
   }
 
   initialize() {
-    if (inBrowser) {
+    if (platform.inBrowser) {
       let document = DefaultDOMElement.wrapNativeElement(window.document)
       events.forEach(function(name) {
         document.on(name, this._dispatch.bind(this, name), this)
@@ -40,7 +38,7 @@ class GlobalEventHandler {
   }
 
   dispose() {
-    if (inBrowser) {
+    if (platform.inBrowser) {
       let document = DefaultDOMElement.wrapNativeElement(window.document)
       document.off(this)
     }

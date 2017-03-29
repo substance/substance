@@ -1,14 +1,8 @@
+import { extend, forEach, isString, isFunction, uuid,
+  EventEmitter, platform } from '../util'
+import { DOMElement, DefaultDOMElement } from '../dom'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
-import DOMElement from '../dom/DOMElement'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import inBrowser from '../util/inBrowser'
-import extend from '../util/extend'
-import forEach from '../util/forEach'
-import isString from '../util/isString'
-import isFunction from '../util/isFunction'
-import uuid from '../util/uuid'
-import EventEmitter from '../util/EventEmitter'
 
 /**
   A light-weight component implementation inspired by
@@ -96,6 +90,7 @@ import EventEmitter from '../util/EventEmitter'
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
+export default
 class Component extends EventEmitter {
   /**
     Construcutor is only used internally.
@@ -326,9 +321,7 @@ class Component extends EventEmitter {
     if (!el) {
       throw new Error('Element is required.')
     }
-    if (!el._isDOMElement) {
-      el = DefaultDOMElement.wrapNativeElement(el)
-    }
+    el = DefaultDOMElement.wrap(el)
     // Makes sure a new element is created for the component
     this.el = null
     this.renderingEngine = new RenderingEngine({ elementFactory: el.getOwnerDocument() })
@@ -974,16 +967,14 @@ Component.mount = function(props, el) {
   if (!el) throw new Error("'el' is required.")
   if (isString(el)) {
     var selector = el
-    if (inBrowser) {
+    if (platform.inBrowser) {
       el = window.document.querySelector(selector)
     } else {
       throw new Error("This selector is not supported on server side.")
     }
   }
-  if (!el._isDOMElement) {
-    el = new DefaultDOMElement.wrapNativeElement(el)
-  }
-  var ComponentClass = this
+  el = new DefaultDOMElement.wrap(el)
+  const ComponentClass = this
   let comp = new ComponentClass(null, props)
   comp.mount(el)
   return comp
@@ -1000,9 +991,9 @@ Component.unwrapDOMElement = function(el) {
 
 Component.getComponentFromNativeElement = function(nativeEl) {
   // while it sounds strange to wrap a native element
-  // first, it makes sense after all, as DefaultDOMElement.wrapNativeElement()
+  // first, it makes sense after all, as DefaultDOMElement.wrap()
   // provides the DOMElement instance of a previously wrapped native element.
-  return _unwrapComp(DefaultDOMElement.wrapNativeElement(nativeEl))
+  return _unwrapComp(DefaultDOMElement.wrap(nativeEl))
 }
 
 // NOTE: this is used for incremental updates only
@@ -1027,7 +1018,7 @@ function _mountChild(parent, child) {
 // NOTE: we keep a reference to the component in all DOMElement instances
 function _unwrapComp(el) {
   if (el) {
-    if (!el._isDOMElement) el = el._wrapper
+    if (!el._isDOMElement) el = DefaultDOMElement.unwrap(el)
     if (el) return el._comp
   }
 }
@@ -1078,8 +1069,5 @@ class TextNodeComponent extends Component {
 TextNodeComponent.prototype._isTextNodeComponent = true
 TextNodeComponent.prototype._SKIP_COMPONENT_INIT = true
 
-
 Component.Element = ElementComponent
 Component.TextNode = TextNodeComponent
-
-export default Component

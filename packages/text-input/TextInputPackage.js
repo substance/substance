@@ -1,4 +1,5 @@
 import TextInput from './TextInput'
+
 export default {
   name: 'text-input',
   configure(config) {

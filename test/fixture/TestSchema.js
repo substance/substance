@@ -1,18 +1,24 @@
-import Schema from '../../model/DocumentSchema'
-import Paragraph from '../../packages/paragraph/Paragraph'
-import Heading from '../../packages/heading/Heading'
-import Emphasis from '../../packages/emphasis/Emphasis'
-import Strong from '../../packages/strong/Strong'
-import Link from '../../packages/link/Link'
-import ImageNode from '../../packages/image/ImageNode'
-import Codeblock from '../../packages/codeblock/Codeblock'
-import List from '../../packages/list/ListNode'
-import ListItem from '../../packages/list/ListItemNode'
-import InlineWrapper from '../../packages/inline-wrapper/InlineWrapper'
+import {
+  DocumentSchema as Schema,
+  ParagraphPackage, HeadingPackage, EmphasisPackage, StrongPackage,
+  LinkPackage, ImagePackage, CodeblockPackage, ListPackage,
+  InlineWrapperPackage
+} from 'substance'
 import MetaNode from './TestMetaNode'
 import TestNode from './TestNode'
 import TestContainerAnnotation from './TestContainerAnnotation'
 import TestStructuredNode from './TestStructuredNode'
+
+const Paragraph = ParagraphPackage.Paragraph
+const Heading = HeadingPackage.Heading
+const Strong = StrongPackage.Strong
+const Emphasis = EmphasisPackage.Emphasis
+const Link = LinkPackage.Link
+const ImageNode = ImagePackage.ImageNode
+const Codeblock = CodeblockPackage.Codeblock
+const List = ListPackage.ListNode
+const ListItem = ListPackage.ListItemNode
+const InlineWrapper = InlineWrapperPackage.InlineWrapper
 
 var schema = new Schema("test-article", "1.0.0")
 

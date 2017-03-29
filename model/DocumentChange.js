@@ -1,13 +1,6 @@
-import isEqual from '../util/isEqual'
-import isObject from '../util/isObject'
-import clone from '../util/clone'
-import cloneDeep from '../util/cloneDeep'
-import isArray from '../util/isArray'
-import forEach from '../util/forEach'
-import map from '../util/map'
-import uuid from '../util/uuid'
-import OperationSerializer from './data/OperationSerializer'
-import ObjectOperation from './data/ObjectOperation'
+import { isEqual, isObject, clone, cloneDeep, isArray, forEach, map, uuid } from '../util'
+import OperationSerializer from './OperationSerializer'
+import ObjectOperation from './ObjectOperation'
 import { fromJSON as selectionFromJSON } from './selectionHelpers'
 
 /*

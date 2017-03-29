@@ -1,5 +1,6 @@
-import DragAndDropHandler from '../../ui/DragAndDropHandler'
+import { DragAndDropHandler } from '../../ui'
 
+export default
 class MoveNode extends DragAndDropHandler {
   match(dragState) {
     let {type, insertPos} = dragState.dropParams
@@ -41,5 +42,3 @@ class MoveNode extends DragAndDropHandler {
     tx.paste(copy)
   }
 }
-
-export default MoveNode

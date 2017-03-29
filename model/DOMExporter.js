@@ -1,8 +1,5 @@
-import isString from '../util/isString'
-import isFunction from '../util/isFunction'
-import Registry from '../util/Registry'
+import { isString, isFunction, Registry, encodeXMLEntities } from '../util'
 import Fragmenter from './Fragmenter'
-import encodeXMLEntities from '../util/encodeXMLEntities'
 
 class DOMExporter {
 

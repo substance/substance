@@ -1,5 +1,4 @@
-import Document from '../../model/Document'
-import EditorSession from '../../model/EditorSession'
+import { Document, EditorSession } from 'substance'
 import getTestConfig from './getTestConfig'
 
 export default function createEditorSession(...args) {

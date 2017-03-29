@@ -1,8 +1,6 @@
-import inBrowser from '../util/inBrowser'
+import { platform } from '../util'
 import BrowserDOMElement from './BrowserDOMElement'
-import XNode from './XNode'
-
-const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : XNode
+import MemoryDOMElement from './MemoryDOMElement'
 
 /**
   A Bridge to the default DOMElement implementation, either BrowserDOMElement, or MemoryDOMElement.
@@ -10,15 +8,21 @@ const DefaultDOMElementClass = inBrowser ? BrowserDOMElement : XNode
 let DefaultDOMElement = {}
 
 DefaultDOMElement.createDocument = function(format) {
-  return DefaultDOMElement._impl.createDocument(format)
+  return _getDefaultImpl().createDocument(format)
 }
 
+/* istanbul ignore next */
 DefaultDOMElement.createElement = function(tagName) {
-  return DefaultDOMElement._impl.createElement(tagName)
+  console.error("DEPRECATED: every element should have an ownerDocument. Use DefaultDOMElement.createDocument() to create a document first")
+  let doc = DefaultDOMElement.createDocument('html')
+  return doc.createElement(tagName)
 }
 
+/* istanbul ignore next */
 DefaultDOMElement.createTextNode = function(text) {
-  return DefaultDOMElement._impl.createTextNode(text)
+  console.error("DEPRECATED: every element should have a ownerDocument. Use DefaultDOMElement.createDocument() to create a document first")
+  let doc = DefaultDOMElement.createDocument('html')
+  return doc.createTextNode(text)
 }
 
 /*
@@ -26,45 +30,52 @@ DefaultDOMElement.createTextNode = function(text) {
   the DOMElement's eventlistener API.
 */
 DefaultDOMElement.getBrowserWindow = function() {
-  return DefaultDOMElement._impl.getBrowserWindow()
+  return _getDefaultImpl().getBrowserWindow()
 }
 
 /*
   @param {String} html
   @returns {DOMElement|DOMElement[]}
 */
-DefaultDOMElement.parseHTML = function(html) {
-  return DefaultDOMElement._impl.parseHTML(html)
+DefaultDOMElement.parseHTML = function(html, options) {
+  return _getDefaultImpl().parseMarkup(html, 'html', options)
 }
 
 /*
   @param {String} xml
   @returns {DOMElement|DOMElement[]}
 */
-DefaultDOMElement.parseXML = function(xml, fullDoc) {
-  return DefaultDOMElement._impl.parseXML(xml, fullDoc)
+DefaultDOMElement.parseXML = function(xml, options) {
+  return _getDefaultImpl().parseMarkup(xml, 'xml', options)
+}
+
+DefaultDOMElement.parseSnippet = function(str, format) {
+  return _getDefaultImpl().parseMarkup(str, format, {snippet: true})
 }
 
 DefaultDOMElement.wrap =
-DefaultDOMElement.wrapNativeElement = function(el) {
-  if (!el) throw new Error('Illegal argument')
-  // in Browser we can use both implementations
-  if (el._isXNode) return el
-  else return DefaultDOMElement._impl.wrapNativeElement(el)
+DefaultDOMElement.wrapNativeElement = function(nativeEl) {
+  if (!nativeEl) throw new Error('Illegal argument')
+  return _getDefaultImpl().wrap(nativeEl)
 }
 
+DefaultDOMElement.unwrap = function(nativeEl) {
+  if (!nativeEl) throw new Error('Illegal argument')
+  return _getDefaultImpl().unwrap(nativeEl)
+}
+
+//TODO: this should not be part of DefaultDOMElement
+/* istanbul ignore next */
 DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focusOffset) {
-  return DefaultDOMElement._impl.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
+  return _getDefaultImpl().isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
 }
 
-DefaultDOMElement._impl = DefaultDOMElementClass
-
-DefaultDOMElement._reset = function() {
-  DefaultDOMElement._impl = DefaultDOMElementClass
-}
-
-DefaultDOMElement._useXNode = function() {
-  DefaultDOMElement._impl = XNode
+function _getDefaultImpl() {
+  if (platform.inBrowser && !platform.inNodeJS) {
+    return BrowserDOMElement
+  } else {
+    return MemoryDOMElement
+  }
 }
 
 export default DefaultDOMElement

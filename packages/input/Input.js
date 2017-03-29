@@ -1,4 +1,4 @@
-import Component from '../../ui/Component'
+import { Component } from '../../ui'
 
 class Input extends Component {
 

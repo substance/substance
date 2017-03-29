@@ -1,6 +1,3 @@
-/*
- * HTML converter for Paragraph.
- */
 export default {
 
   type: 'paragraph',

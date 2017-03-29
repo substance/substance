@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import ContainerSelection from '../model/ContainerSelection'
+import { ContainerSelection } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import containerAnnoSample from './fixture/containerAnnoSample'

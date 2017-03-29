@@ -1,4 +1,4 @@
-import BlockNode from '../../model/BlockNode'
+import { BlockNode } from 'substance'
 
 class TestBlockNode extends BlockNode {}
 TestBlockNode.type = 'test-block'

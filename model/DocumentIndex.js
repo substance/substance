@@ -1,4 +1,4 @@
-import NodeIndex from './data/NodeIndex'
+import NodeIndex from './NodeIndex'
 
 class DocumentIndex extends NodeIndex {}
 

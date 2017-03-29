@@ -1,4 +1,4 @@
-import DocumentNode from '../../model/DocumentNode'
+import { DocumentNode } from 'substance'
 
 class TestMetaNode extends DocumentNode {}
 

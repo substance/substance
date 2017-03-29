@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import ContainerAddress from '../model/ContainerAddress'
+import { ContainerAddress } from 'substance'
 
 const test = module('ContainerAddress')
 

@@ -1,6 +1,4 @@
-import AbstractEditor from '../../ui/AbstractEditor'
-import ContainerEditor from '../../ui/ContainerEditor'
-import Toolbar from '../tools/Toolbar'
+import { AbstractEditor, ContainerEditor, Toolbar } from '../../ui'
 
 /**
   Configurable ProseEditor component

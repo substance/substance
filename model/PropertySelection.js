@@ -1,5 +1,4 @@
-import isArrayEqual from '../util/isArrayEqual'
-import isNumber from '../util/isNumber'
+import { isArrayEqual, isNumber } from '../util'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 

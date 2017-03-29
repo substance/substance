@@ -1,4 +1,4 @@
-import TreeIndex from '../util/TreeIndex'
+import { TreeIndex } from '../util'
 import Selection from './Selection'
 import documentHelpers from './documentHelpers'
 import { isFirst, isLast } from './selectionHelpers'

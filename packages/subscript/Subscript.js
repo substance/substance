@@ -1,5 +1,4 @@
-import PropertyAnnotation from '../../model/PropertyAnnotation'
-import Fragmenter from '../../model/Fragmenter'
+import { PropertyAnnotation, Fragmenter } from '../../model'
 
 class Subscript extends PropertyAnnotation {}
 

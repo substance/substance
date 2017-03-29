@@ -1,4 +1,4 @@
-import forEach from '../util/forEach'
+import { forEach } from '../util'
 
 /*
   Each time a resource node is created an automatic fetch is triggered. This

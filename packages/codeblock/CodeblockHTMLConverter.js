@@ -1,6 +1,3 @@
-/*
- * HTML converter for Codeblock.
- */
 export default {
 
   type: 'codeblock',
@@ -21,5 +18,4 @@ export default {
       )
     )
   }
-
 }

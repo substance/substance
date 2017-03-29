@@ -1,9 +1,9 @@
+import { last } from '../util'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
-import last from '../util/last'
 
 export function fromJSON(json) {
   if (!json) return Selection.nullSelection

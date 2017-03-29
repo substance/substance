@@ -1,17 +1,15 @@
+import { platform } from '../../util'
+import { AnnotationCommand, AnnotationTool } from '../../ui'
 import Emphasis from './Emphasis'
 import EmphasisHTMLConverter from './EmphasisHTMLConverter'
-import EmphasisXMLConverter from './EmphasisXMLConverter'
-import AnnotationCommand from '../../ui/AnnotationCommand'
 import EmphasisComponent from './EmphasisComponent'
-import AnnotationTool from '../../ui/AnnotationTool'
-import platform from '../../util/platform'
 
 export default {
   name: 'emphasis',
   configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(Emphasis)
     config.addConverter('html', EmphasisHTMLConverter)
-    config.addConverter('xml', EmphasisXMLConverter)
+    config.addConverter('xml', EmphasisHTMLConverter)
     config.addComponent('emphasis', EmphasisComponent)
     config.addCommand('emphasis', AnnotationCommand, {
       nodeType: Emphasis.type,
@@ -33,6 +31,5 @@ export default {
   },
   Emphasis,
   EmphasisComponent,
-  EmphasisHTMLConverter,
-  EmphasisXMLConverter,
+  EmphasisHTMLConverter
 }

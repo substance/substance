@@ -1,5 +1,5 @@
+import { isArrayEqual } from '../util'
 import PropertyAnnotation from './PropertyAnnotation'
-import isArrayEqual from '../util/isArrayEqual'
 
 class Marker extends PropertyAnnotation {
   invalidate() {}

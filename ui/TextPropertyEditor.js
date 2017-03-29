@@ -1,4 +1,4 @@
-import Surface from '../packages/surface/Surface'
+import Surface from './Surface'
 import TextPropertyComponent from './TextPropertyComponent'
 
 /**

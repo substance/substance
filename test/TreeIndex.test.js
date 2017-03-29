@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import TreeIndex from '../util/TreeIndex'
+import { TreeIndex } from 'substance'
 
 const test = module('TreeIndex')
 

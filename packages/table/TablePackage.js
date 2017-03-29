@@ -1,9 +1,9 @@
+import { Tool } from '../../ui'
 import Table from './Table'
 import TableCell from './TableCell'
 import TableComponent from './TableComponent'
 import TableHTMLConverter from './TableHTMLConverter'
 import TableCellHTMLConverter from './TableCellHTMLConverter'
-import Tool from '../tools/Tool'
 import InsertTableCommand from './InsertTableCommand'
 
 export default {

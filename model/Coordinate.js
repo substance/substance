@@ -1,6 +1,4 @@
-import isArray from '../util/isArray'
-import isNumber from '../util/isNumber'
-import isArrayEqual from '../util/isArrayEqual'
+import { isArray, isArrayEqual, isNumber } from '../util'
 
 /**
   @internal

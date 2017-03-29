@@ -1,7 +1,7 @@
-import isPlainObject from '../util/isPlainObject'
-import copySelection from '../model/copySelection'
-import Editing from '../model/Editing'
-import Selection from '../model/Selection'
+import { isPlainObject } from '../util'
+import copySelection from './copySelection'
+import Editing from './Editing'
+import Selection from './Selection'
 
 /*
   Abstract base class for document editor APIs such as Transaction.

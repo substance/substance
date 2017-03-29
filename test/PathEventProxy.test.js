@@ -1,7 +1,5 @@
 import { module } from 'substance-test'
-
-import EditorSession from '../model/EditorSession'
-import Configurator from '../util/Configurator'
+import { EditorSession, Configurator } from 'substance'
 import fixture from './fixture/createTestArticle'
 import headersAndParagraphs from './fixture/headersAndParagraphs'
 

@@ -1,5 +1,5 @@
 import domutils from 'domutils';
-import BaseFuncs from 'boolbase';
+import boolbase from 'boolbase';
 import cssWhat from 'css-what';
 import nthCheck from 'nth-check';
 
@@ -12,7 +12,7 @@ var child = -1;
 var parent = -1;
 var sibling = -1;
 var adjacent = -1;
-var procedure = {
+var procedure$2 = {
 	universal: universal,
 	tag: tag,
 	attribute: attribute,
@@ -24,7 +24,7 @@ var procedure = {
 	adjacent: adjacent
 };
 
-var procedure$1 = Object.freeze({
+var procedure$3 = Object.freeze({
 	universal: universal,
 	tag: tag,
 	attribute: attribute,
@@ -34,16 +34,16 @@ var procedure$1 = Object.freeze({
 	parent: parent,
 	sibling: sibling,
 	adjacent: adjacent,
-	default: procedure
+	default: procedure$2
 });
 
-var procedure$2 = ( procedure$1 && procedure ) || procedure$1;
+var require$$0 = ( procedure$3 && procedure$2 ) || procedure$3;
 
 var sort = sortByProcedure;
 
 
 
-
+var procedure$1 = require$$0;
 
 var attributes = {
 	__proto__: null,
@@ -75,9 +75,9 @@ function sortByProcedure(arr){
 }
 
 function getProcedure(token){
-	var proc = procedure$2[token.type];
+	var proc = procedure$1[token.type];
 
-	if(proc === procedure$2.attribute){
+	if(proc === procedure$1.attribute){
 		proc = attributes[token.action];
 
 		if(proc === attributes.equals && token.name === "id"){
@@ -90,7 +90,7 @@ function getProcedure(token){
 			
 			proc >>= 1;
 		}
-	} else if(proc === procedure$2.pseudo){
+	} else if(proc === procedure$1.pseudo){
 		if(!token.data){
 			proc = 3;
 		} else if(token.name === "has" || token.name === "contains"){
@@ -116,7 +116,7 @@ function getProcedure(token){
 	return proc;
 }
 
-var falseFunc$2 = BaseFuncs.falseFunc;
+var falseFunc$2 = boolbase.falseFunc;
 
 
 var reChars = /[-[\]{}()*+?.,\\^$|#\s]/g;
@@ -304,12 +304,14 @@ function factory(adapter){
 
 var attributes$1 = factory;
 
+var attributeFactory = attributes$1;
+
 function generalFactory(adapter, Pseudos){
 	
 	return {
 		__proto__: null,
 
-		attribute: attributes$1(adapter).compile,
+		attribute: attributeFactory(adapter).compile,
 		pseudo: Pseudos.compile,
 
 		
@@ -400,11 +402,14 @@ function generalFactory(adapter, Pseudos){
 
 var general = generalFactory;
 
-var trueFunc$1          = BaseFuncs.trueFunc;
-var falseFunc$3         = BaseFuncs.falseFunc;
+var getNCheck         = nthCheck;
+var BaseFuncs$1         = boolbase;
+var attributesFactory = attributes$1;
+var trueFunc$1          = BaseFuncs$1.trueFunc;
+var falseFunc$3         = BaseFuncs$1.falseFunc;
 
 function filtersFactory(adapter){
-	var attributes  = attributes$1(adapter),
+	var attributes  = attributesFactory(adapter),
 		checkAttrib = attributes.rules.equals;
 
 	
@@ -443,7 +448,7 @@ function filtersFactory(adapter){
 
 		
 		"nth-child": function(next, rule){
-			var func = nthCheck(rule);
+			var func = getNCheck(rule);
 
 			if(func === falseFunc$3) return func;
 			if(func === trueFunc$1)  return getChildFunc(next);
@@ -462,7 +467,7 @@ function filtersFactory(adapter){
 			};
 		},
 		"nth-last-child": function(next, rule){
-			var func = nthCheck(rule);
+			var func = getNCheck(rule);
 
 			if(func === falseFunc$3) return func;
 			if(func === trueFunc$1)  return getChildFunc(next);
@@ -481,7 +486,7 @@ function filtersFactory(adapter){
 			};
 		},
 		"nth-of-type": function(next, rule){
-			var func = nthCheck(rule);
+			var func = getNCheck(rule);
 
 			if(func === falseFunc$3) return func;
 			if(func === trueFunc$1)  return getChildFunc(next);
@@ -500,7 +505,7 @@ function filtersFactory(adapter){
 			};
 		},
 		"nth-last-of-type": function(next, rule){
-			var func = nthCheck(rule);
+			var func = getNCheck(rule);
 
 			if(func === falseFunc$3) return func;
 			if(func === trueFunc$1)  return getChildFunc(next);
@@ -556,7 +561,7 @@ function filtersFactory(adapter){
 	return filters;
 }
 
-function pseudosFactory(adapter){
+function pseudosFactory$1(adapter){
 	
 	function getFirstElement(elems){
 		for(var i = 0; elems && i < elems.length; i++){
@@ -758,7 +763,7 @@ function verifyArgs(func, name, subselect){
 var re_CSS3 = /^(?:(?:nth|last|first|only)-(?:child|of-type)|root|empty|(?:en|dis)abled|checked|not)$/;
 
 function factory$1(adapter){
-	var pseudos = pseudosFactory(adapter);
+	var pseudos = pseudosFactory$1(adapter);
 	var filters = filtersFactory(adapter);
 
 	return {
@@ -793,15 +798,21 @@ function factory$1(adapter){
 
 var pseudos = factory$1;
 
-var compile = compileFactory;
+var compile = compileFactory$1;
 
+var parse          = cssWhat;
+var BaseFuncs      = boolbase;
+var sortRules      = sort;
+var procedure      = require$$0;
+var rulesFactory   = general;
+var pseudosFactory = pseudos;
 var trueFunc       = BaseFuncs.trueFunc;
 var falseFunc$1      = BaseFuncs.falseFunc;
 
-function compileFactory(adapter){
-	var Pseudos     = pseudos(adapter),
+function compileFactory$1(adapter){
+	var Pseudos     = pseudosFactory(adapter),
 		filters     = Pseudos.filters,
-		Rules 			= general(adapter, Pseudos);
+		Rules 			= rulesFactory(adapter, Pseudos);
 
 	function compile(selector, options, context){
 		var next = compileUnsafe(selector, options, context);
@@ -815,7 +826,7 @@ function compileFactory(adapter){
 	}
 
 	function compileUnsafe(selector, options, context){
-		var token = cssWhat(selector, options);
+		var token = parse(selector, options);
 		return compileToken(token, options, context);
 	}
 
@@ -860,7 +871,7 @@ function compileFactory(adapter){
 	function compileToken(token, options, context){
 		token = token.filter(function(t){ return t.length > 0; });
 
-		token.forEach(sort);
+		token.forEach(sortRules);
 
 		var isArrayContext = Array.isArray(context);
 
@@ -889,7 +900,7 @@ function compileFactory(adapter){
 	}
 
 	function isTraversal(t){
-		return procedure$2[t.type] < 0;
+		return procedure[t.type] < 0;
 	}
 
 	function compileRules(rules, options, context){
@@ -993,17 +1004,19 @@ function compileFactory(adapter){
 
 var index = CSSselect$1;
 
-var falseFunc      = BaseFuncs.falseFunc;
-var defaultCompile = compile(domutils);
+var DomUtils       = domutils;
+var falseFunc      = boolbase.falseFunc;
+var compileFactory = compile;
+var defaultCompile = compileFactory(DomUtils);
 
 function adapterCompile(adapter){
-	return adapter === domutils ? defaultCompile : compile(adapter);
+	return adapter === DomUtils ? defaultCompile : compileFactory(adapter);
 }
 
 function getSelectorFunc(searchFunc){
 	return function select(query, elems, options){
 		options = options || {};
-		options.adapter = options.adapter || domutils;
+		options.adapter = options.adapter || DomUtils;
 		var compile$$1 = adapterCompile(options.adapter);
 
 		if(typeof query !== "function") query = compile$$1.compileUnsafe(query, options, elems);
@@ -1044,7 +1057,7 @@ var selectOne = getSelectorFunc(function selectOne(query, elems, options){
 
 function is(elem, query, options){
 	options = options || {};
-	options.adapter = options.adapter || domutils;
+	options.adapter = options.adapter || DomUtils;
 	var compile$$1 = adapterCompile(options.adapter);
 	return (typeof query === "function" ? query : compile$$1(query, options))(elem);
 }

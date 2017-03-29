@@ -1,4 +1,4 @@
-import Schema from './data/Schema'
+import Schema from './Schema'
 import DocumentNode from './DocumentNode'
 import Container from './Container'
 import PropertyAnnotation from './PropertyAnnotation'

@@ -1,4 +1,4 @@
-import Tool from '../tools/Tool'
+import { Tool } from '../../ui'
 
 /**
   Tool to edit an existing link.

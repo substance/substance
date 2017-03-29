@@ -1,5 +1,4 @@
-import isNumber from '../util/isNumber'
-import isString from '../util/isString'
+import { isNumber, isString } from '../util'
 import DocumentNode from './DocumentNode'
 import ContainerAddress from './ContainerAddress'
 

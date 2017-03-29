@@ -1,4 +1,4 @@
-import Toolbox from '../tools/Toolbox'
+import { Toolbox } from '../../ui'
 
 /*
   A default implementation to render the content for the overlay (aka popup) tools.

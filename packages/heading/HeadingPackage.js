@@ -1,7 +1,6 @@
 import Heading from './Heading'
 import HeadingComponent from './HeadingComponent'
 import HeadingHTMLConverter from './HeadingHTMLConverter'
-import HeadingXMLConverter from './HeadingXMLConverter'
 
 export default {
   name: 'heading',
@@ -9,7 +8,7 @@ export default {
     config.addNode(Heading)
     config.addComponent(Heading.type, HeadingComponent)
     config.addConverter('html', HeadingHTMLConverter)
-    config.addConverter('xml', HeadingXMLConverter)
+    config.addConverter('xml', HeadingHTMLConverter)
     config.addTextType({
       name: 'heading1',
       data: {type: 'heading', level: 1}
@@ -37,6 +36,5 @@ export default {
   },
   Heading,
   HeadingComponent,
-  HeadingHTMLConverter,
-  HeadingXMLConverter
+  HeadingHTMLConverter
 }

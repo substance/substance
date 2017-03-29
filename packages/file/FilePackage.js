@@ -1,4 +1,4 @@
-import FileNode from './FileNode'
+import { FileNode } from '../../model'
 
 export default {
   name: 'file',

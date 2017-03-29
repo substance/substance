@@ -1,5 +1,5 @@
+import { annotationHelpers } from '../model'
 import Command from './Command'
-import annotationHelpers from '../model/annotationHelpers'
 
 /**
   A class for commands intended to be executed on the annotations.

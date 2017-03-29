@@ -1,10 +1,5 @@
-import EventEmitter from '../util/EventEmitter'
-import extend from '../util/extend'
-import forEach from '../util/forEach'
-import map from '../util/map'
-
-import DocumentChange from '../model/DocumentChange'
-import Err from '../util/SubstanceError'
+import { EventEmitter, forEach, map, SubstanceError as Err } from '../util'
+import { DocumentChange } from '../model'
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of
@@ -77,7 +72,7 @@ class CollabEngine extends EventEmitter {
           // selection: doc.selection,
           collaboratorId: collab.collaboratorId
         }
-        entry = extend({}, collab.info, entry)
+        entry = Object.assign({}, collab.info, entry)
         collaborators[collab.collaboratorId] = entry
       }
     })

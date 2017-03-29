@@ -1,11 +1,9 @@
-// import last from '../util/last'
-import inBrowser from '../util/inBrowser'
-import Coordinate from '../model/Coordinate'
-import Range from '../model/Range'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
+import { DefaultDOMElement } from '../dom'
+import { platform } from '../util'
+import { Coordinate, Range } from '../model'
+import Component from './Component'
 import TextPropertyComponent from './TextPropertyComponent'
-import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
-import Component from '../ui/Component'
+import IsolatedNodeComponent from './IsolatedNodeComponent'
 
 const DEBUG = false
 
@@ -24,7 +22,7 @@ class DOMSelection {
 
   constructor(editor) {
     this.editor = editor
-    if (inBrowser) {
+    if (platform.inBrowser) {
       this.wRange = window.document.createRange()
     }
     // keeping the last DOM and Model coordinates
@@ -42,7 +40,7 @@ class DOMSelection {
   */
   getSelection(options) {
     // HACK: ignore this if not Browser (e.g. when running the test suite in node)
-    if (!inBrowser) return
+    if (!platform.inBrowser) return
     let range = this.mapDOMSelection(options)
     let doc = this.editor.getDocument()
     // TODO: consolidate
@@ -101,7 +99,7 @@ class DOMSelection {
   */
   setSelection(sel) {
     // HACK: ignore this if not Browser (e.g. when running the test suite in node)
-    if (!inBrowser) return
+    if (!platform.inBrowser) return
     let state = this.state
     let wSel = window.getSelection()
     let wRange = this.wRange

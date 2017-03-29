@@ -1,18 +1,8 @@
-import ParagraphPackage from '../../packages/paragraph/ParagraphPackage'
-import HeadingPackage from '../../packages/heading/HeadingPackage'
-import StrongPackage from '../../packages/strong/StrongPackage'
-import EmphasisPackage from '../../packages/emphasis/EmphasisPackage'
-import ListPackage from '../../packages/list/ListPackage'
-import LinkPackage from '../../packages/link/LinkPackage'
-import TablePackage from '../../packages/table/TablePackage'
-import CodeblockPackage from '../../packages/codeblock/CodeblockPackage'
-import FilePackage from '../../packages/file/FilePackage'
-import ImagePackage from '../../packages/image/ImagePackage'
-import Component from '../../ui/Component'
-import Configurator from '../../util/Configurator'
-import InlineWrapper from '../../packages/inline-wrapper/InlineWrapper'
-import InlineWrapperComponent from '../../packages/inline-wrapper/InlineWrapperComponent'
-
+import {
+  ImagePackage, Component, Configurator,
+  ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
+  ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage, InlineWrapperPackage,
+} from 'substance'
 import TestNode from './TestNode'
 import TestBlockNode from './TestBlockNode'
 import TestContainerAnnotation from './TestContainerAnnotation'
@@ -28,6 +18,8 @@ import TestXMLImporter from './TestXMLImporter'
 import TestHTMLExporter from './TestHTMLExporter'
 import TestXMLExporter from './TestXMLExporter'
 import TestArticle from './TestArticle'
+
+const { InlineWrapper, InlineWrapperComponent } = InlineWrapperPackage
 
 export default function getTestConfig() {
   let config = new Configurator()

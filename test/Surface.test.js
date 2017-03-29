@@ -1,6 +1,6 @@
 /* eslint-disable no-invalid-this */
 import { module } from 'substance-test'
-import BrowserDOMElement from '../dom/BrowserDOMElement'
+import { BrowserDOMElement } from 'substance'
 import setupEditor from './fixture/setupEditor'
 
 const test = module('Surface')

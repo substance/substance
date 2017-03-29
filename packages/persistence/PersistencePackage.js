@@ -1,5 +1,5 @@
+import { Tool } from '../../ui'
 import SaveCommand from './SaveCommand'
-import Tool from '../tools/Tool'
 
 export default {
   name: 'persistence',

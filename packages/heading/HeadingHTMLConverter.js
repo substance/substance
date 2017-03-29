@@ -1,6 +1,3 @@
-/*
- * HTML converter for Paragraphs.
- */
 export default {
 
   type: "heading",

@@ -6517,12 +6517,14 @@ var decode$1 = Object.freeze({
 	default: decode
 });
 
-var decodeMap = ( decode$1 && decode ) || decode$1;
+var require$$0$1 = ( decode$1 && decode ) || decode$1;
 
-var decode_codepoint = decodeCodePoint;
+var decodeMap = require$$0$1;
+
+var decode_codepoint = decodeCodePoint$1;
 
 
-function decodeCodePoint(codePoint){
+function decodeCodePoint$1(codePoint){
 
 	if((codePoint >= 0xD800 && codePoint <= 0xDFFF) || codePoint > 0x10FFFF){
 		return "\uFFFD";
@@ -6792,16 +6794,20 @@ var _entities_xmlJSON$1 = Object.freeze({
 	default: _entities_xmlJSON
 });
 
-var decodeCodePoint$1 = ( _entities_decodeCodepoint$1 && _entities_decodeCodepoint ) || _entities_decodeCodepoint$1;
+var require$$0$1$1 = ( _entities_decodeCodepoint$1 && _entities_decodeCodepoint ) || _entities_decodeCodepoint$1;
 
-var entityMap = ( _entities_entitiesJSON$1 && _entities_entitiesJSON ) || _entities_entitiesJSON$1;
+var require$$1$1 = ( _entities_entitiesJSON$1 && _entities_entitiesJSON ) || _entities_entitiesJSON$1;
 
-var legacyMap = ( _entities_legacyJSON$1 && _entities_legacyJSON ) || _entities_legacyJSON$1;
+var require$$2 = ( _entities_legacyJSON$1 && _entities_legacyJSON ) || _entities_legacyJSON$1;
 
-var xmlMap = ( _entities_xmlJSON$1 && _entities_xmlJSON ) || _entities_xmlJSON$1;
+var require$$3 = ( _entities_xmlJSON$1 && _entities_xmlJSON ) || _entities_xmlJSON$1;
 
 var Tokenizer_1 = Tokenizer$1;
 
+var decodeCodePoint = require$$0$1$1;
+var entityMap = require$$1$1;
+var legacyMap = require$$2;
+var xmlMap    = require$$3;
 var i = 0;
 var TEXT                      = i++;
 var BEFORE_TAG_NAME           = i++;
@@ -7337,7 +7343,7 @@ Tokenizer$1.prototype._decodeNumericEntity = function(offset, base){
 		var entity = this._buffer.substring(sectionStart, this._index);
 		var parsed = parseInt(entity, base);
 
-		this._emitPartial(decodeCodePoint$1(parsed));
+		this._emitPartial(decodeCodePoint(parsed));
 		this._sectionStart = this._index;
 	} else {
 		this._sectionStart--;
@@ -7678,9 +7684,9 @@ var _resolve_empty$1 = Object.freeze({
 	default: _resolve_empty
 });
 
-var require$$1$1 = ( _inherits$1 && _inherits ) || _inherits$1;
+var require$$1$2 = ( _inherits$1 && _inherits ) || _inherits$1;
 
-var require$$2 = ( _resolve_empty$1 && _resolve_empty ) || _resolve_empty$1;
+var require$$2$1 = ( _resolve_empty$1 && _resolve_empty ) || _resolve_empty$1;
 
 var Tokenizer = Tokenizer_1;
 
@@ -7785,7 +7791,7 @@ function Parser$1(cbs, options){
 	if(this._cbs.onparserinit) this._cbs.onparserinit(this);
 }
 
-require$$1$1(Parser$1, require$$2.EventEmitter);
+require$$1$2(Parser$1, require$$2$1.EventEmitter);
 
 Parser$1.prototype._updatePosition = function(initialOffset){
 	if(this.endIndex === null){

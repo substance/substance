@@ -1,10 +1,7 @@
-import isArray from '../util/isArray'
-import last from '../util/last'
-import forEach from '../util/forEach'
-import uuid from '../util/uuid'
-import Document from '../model/Document'
-import documentHelpers from '../model/documentHelpers'
-import { setCursor } from '../model/selectionHelpers'
+import { isArray, last, forEach, uuid } from '../util'
+import Document from './Document'
+import documentHelpers from './documentHelpers'
+import { setCursor } from './selectionHelpers'
 
 /**
   Pastes clipboard content at the current selection

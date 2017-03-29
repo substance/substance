@@ -1,5 +1,5 @@
+import { last } from '../../util'
 import getListTagName from './getListTagName'
-import last from '../../util/last'
 
 export default function renderListNode(node, rootEl, createElement) {
   let items = node.getItems()

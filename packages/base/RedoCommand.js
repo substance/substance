@@ -1,5 +1,6 @@
-import Command from '../../ui/Command'
+import { Command } from '../../ui'
 
+export default
 class Redo extends Command {
 
   getCommandState(params) {
@@ -21,5 +22,3 @@ class Redo extends Command {
   }
 
 }
-
-export default Redo

@@ -1,9 +1,9 @@
 /* eslint-disable no-invalid-this, indent */
 import { module } from 'substance-test'
-import substanceGlobals from '../util/substanceGlobals'
-import RenderingEngine from '../ui/RenderingEngine'
-import Component from '../ui/Component'
+import { substanceGlobals, RenderingEngine, Component } from 'substance'
 import TestComponent from './fixture/TestComponent'
+import getMountPoint from './fixture/getMountPoint'
+
 const Simple = TestComponent.Simple
 const internal = RenderingEngine._internal
 
@@ -163,7 +163,7 @@ function RenderingEngineTests(debug) {
       }
     }
     let t0 = Date.now()
-    let comp = Matrix.mount({data}, t.sandbox)
+    let comp = Matrix.mount({data}, getMountPoint(t))
     let t1 = Date.now() - t0
     t0 = Date.now()
     comp.setProps({data})

@@ -1,5 +1,4 @@
-import Component from '../../ui/Component'
-import ContainerEditor from '../../ui/ContainerEditor'
+import { Component, ContainerEditor } from 'substance'
 
 class TestContainerComponent extends Component {
 

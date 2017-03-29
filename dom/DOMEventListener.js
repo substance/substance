@@ -1,10 +1,9 @@
-import isFunction from '../util/isFunction'
-import isString from '../util/isString'
-import findIndex from '../util/findIndex'
+import { isFunction, isString, findIndex } from '../util'
 
 /*
   Internal implementation used to store event bindings.
 */
+export default
 class DOMEventListener {
 
   constructor(eventName, handler, options) {
@@ -62,5 +61,3 @@ function _once(listener, handler) {
     listener._el.removeEventListener(listener)
   }
 }
-
-export default DOMEventListener

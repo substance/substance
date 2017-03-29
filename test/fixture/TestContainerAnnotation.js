@@ -1,4 +1,4 @@
-import ContainerAnnotation from '../../model/ContainerAnnotation'
+import { ContainerAnnotation } from 'substance'
 
 class TestContainerAnnotation extends ContainerAnnotation {}
 

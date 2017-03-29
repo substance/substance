@@ -1,12 +1,8 @@
-import isString from '../util/isString'
-import keys from '../util/keys'
-import { setCursor, stepIntoIsolatedNode } from '../model/selectionHelpers'
-import EditingBehavior from '../model/EditingBehavior'
-import Surface from '../packages/surface/Surface'
-import IsolatedNodeComponent from '../packages/isolated-node/IsolatedNodeComponent'
-import RenderingEngine from '../ui/RenderingEngine'
-// import platform from '../util/platform'
-// import Component from '../ui/Component'
+import { isString, keys } from '../util'
+import { selectionHelpers, EditingBehavior } from '../model'
+import Surface from './Surface'
+import IsolatedNodeComponent from './IsolatedNodeComponent'
+import RenderingEngine from './RenderingEngine'
 
 /**
   Represents an editor for content rendered in a flow, such as a manuscript.
@@ -210,11 +206,11 @@ class ContainerEditor extends Surface {
           event.preventDefault()
           if (up) {
             let prev = container.getChildAt(nodePos-1)
-            setCursor(editorSession, prev, sel.containerId, 'after')
+            selectionHelpers.setCursor(editorSession, prev, sel.containerId, 'after')
             return
           } else {
             let next = container.getChildAt(nodePos+1)
-            setCursor(editorSession, next, sel.containerId, 'before')
+            selectionHelpers.setCursor(editorSession, next, sel.containerId, 'before')
             return
           }
         }
@@ -231,7 +227,7 @@ class ContainerEditor extends Surface {
     const sel = editorSession.getSelection()
     if (sel.isNodeSelection() && sel.isFull()) {
       const comp = this.refs[sel.getNodeId()]
-      if (comp && stepIntoIsolatedNode(editorSession, comp)) {
+      if (comp && selectionHelpers.stepIntoIsolatedNode(editorSession, comp)) {
         event.preventDefault()
         event.stopPropagation()
         return

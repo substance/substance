@@ -1,11 +1,8 @@
-import Component from '../ui/Component'
-import DragAndDropHandler from '../ui/DragAndDropHandler'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import EventEmitter from '../util/EventEmitter'
-import inBrowser from '../util/inBrowser'
-import platform from '../util/platform'
-import { getDOMRangeFromEvent, isMouseInsideDOMSelection } from '../util/windowUtils'
-import DocumentChange from '../model/DocumentChange'
+import { DefaultDOMElement } from '../dom'
+import { EventEmitter, platform, getDOMRangeFromEvent, isMouseInsideDOMSelection } from '../util'
+import { DocumentChange } from '../model'
+import Component from './Component'
+import DragAndDropHandler from './DragAndDropHandler'
 
 class DragManager extends EventEmitter {
 
@@ -45,7 +42,7 @@ class DragManager extends EventEmitter {
       // not via configuration
       new CustomHandler(),
     ]
-    if (inBrowser) {
+    if (platform.inBrowser) {
       this.el = DefaultDOMElement.wrapNativeElement(document)
       this.el.on('dragstart', this.onDragStart, this)
       // this.el.on('dragend', this.onDragEnd, this)

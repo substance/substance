@@ -1,6 +1,4 @@
-import EventEmitter from '../util/EventEmitter'
-import forEach from '../util/forEach'
-import without from '../util/without'
+import { forEach, EventEmitter, without } from '../util'
 
 /*
   Manages highlights. Used by {@link ui/ScrollPane}.

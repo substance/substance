@@ -1,6 +1,5 @@
-import computeSnapshot from '../../collab/computeSnapshot'
-import SnapshotStore from '../../collab/SnapshotStore'
-import ChangeStore from '../../collab/ChangeStore'
+import { SnapshotStore, ChangeStore } from 'substance'
+import computeSnapshot from './computeTestSnapshot'
 import createTestArticle from '../fixture/createTestArticle'
 import createChangeset from '../fixture/createChangeset'
 import twoParagraphs from '../fixture/twoParagraphs'

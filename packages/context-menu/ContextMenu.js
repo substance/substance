@@ -1,4 +1,4 @@
-import Toolbox from '../tools/Toolbox'
+import { Toolbox } from '../../ui'
 
 class ContextMenu extends Toolbox {
 

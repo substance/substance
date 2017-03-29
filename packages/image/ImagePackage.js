@@ -1,7 +1,6 @@
 import ImageNode from './ImageNode'
 import ImageComponent from './ImageComponent'
 import ImageHTMLConverter from './ImageHTMLConverter'
-import ImageXMLConverter from './ImageXMLConverter'
 import InsertImageCommand from './InsertImageCommand'
 import InsertImageTool from './InsertImageTool'
 import DropImage from './DropImage'
@@ -13,7 +12,7 @@ export default {
     config.addNode(ImageNode);
     config.addComponent('image', ImageComponent)
     config.addConverter('html', ImageHTMLConverter)
-    config.addConverter('xml', ImageXMLConverter)
+    config.addConverter('xml', ImageHTMLConverter)
     config.addCommand('insert-image', InsertImageCommand)
     config.addTool('insert-image', InsertImageTool)
     config.addIcon('insert-image', { 'fontawesome': 'fa-image' })

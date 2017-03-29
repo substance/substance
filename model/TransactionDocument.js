@@ -1,7 +1,6 @@
-import forEach from '../util/forEach'
-import uuid from '../util/uuid'
+import { forEach, uuid } from '../util'
 import Document from './Document'
-import IncrementalData from './data/IncrementalData'
+import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
 import ParentNodeHook from './ParentNodeHook'
 

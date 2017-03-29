@@ -1,6 +1,5 @@
-import Component from '../../ui/Component'
-import forEach from '../../util/forEach'
-import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import { forEach, getRelativeBoundingRect } from '../../util'
+import { Component } from '../../ui'
 
 export default class Dropzones extends Component {
 

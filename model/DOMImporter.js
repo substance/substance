@@ -1,9 +1,4 @@
-import clone from '../util/clone'
-import extend from '../util/extend'
-import forEach from '../util/forEach'
-import last from '../util/last'
-import createCountingIdGenerator from '../util/createCountingIdGenerator'
-import ArrayIterator from '../util/ArrayIterator'
+import { clone, forEach, last, createCountingIdGenerator, ArrayIterator } from '../util'
 
 const WS_LEFT = /^\s+/g
 const WS_LEFT_ALL = /^\s*/g
@@ -32,7 +27,7 @@ class DOMImporter {
       throw new Error('DocumentClass is mandatory')
     }
 
-    this.config = extend({ idAttribute: 'id' }, config)
+    this.config = Object.assign({ idAttribute: 'id' }, config)
     this.schema = config.schema
     this.state = null
 

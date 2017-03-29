@@ -47,7 +47,7 @@ class Command {
 
   /**
     Get the command name specified at command registration. See
-    {@link util/Configurator#addCommand}
+    {@link Configurator#addCommand}
   */
   getName() {
     return this.name

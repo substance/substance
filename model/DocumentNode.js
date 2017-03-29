@@ -1,5 +1,5 @@
-import DataNode from './data/Node'
-import EventEmitter from '../util/EventEmitter'
+import { EventEmitter } from '../util'
+import DataNode from './Node'
 
 /**
   Base node type for document nodes.

@@ -1,5 +1,5 @@
 import isNil from './isNil'
-import inBrowser from './inBrowser'
+import platform from './platform'
 
 export function getDOMRangeFromEvent(evt) {
   let range, x = evt.clientX, y = evt.clientY
@@ -35,7 +35,7 @@ export function getDOMRangeFromEvent(evt) {
   Get selection rectangle relative to panel content element
 */
 export function getSelectionRect(parentRect) {
-  if (inBrowser) {
+  if (platform.inBrowser) {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)

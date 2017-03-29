@@ -1,10 +1,7 @@
-import isString from '../../util/isString'
+import { isString } from '../../util'
 import renderListNode from './renderListNode'
 import getListTagName from './getListTagName'
 
-/*
-  HTML converter for Lists.
- */
 export default {
 
   type: "list",

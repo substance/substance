@@ -1,5 +1,4 @@
-import filter from '../util/filter'
-import TreeIndex from '../util/TreeIndex'
+import { filter, TreeIndex } from '../util'
 import DocumentIndex from './DocumentIndex'
 
 class AnchorIndex extends DocumentIndex {

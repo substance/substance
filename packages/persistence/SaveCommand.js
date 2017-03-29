@@ -1,4 +1,4 @@
-import Command from '../../ui/Command'
+import { Command } from '../../ui'
 
 class SaveCommand extends Command {
   constructor() {

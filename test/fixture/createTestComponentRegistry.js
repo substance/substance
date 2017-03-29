@@ -1,9 +1,10 @@
-import Registry from '../../util/Registry'
-import ParagraphComponent from '../../packages/paragraph/ParagraphComponent'
-import HeadingComponent from '../../packages/heading/HeadingComponent'
+import { Registry, ParagraphPackage, HeadingPackage, InlineWrapperPackage } from 'substance'
 import TestContainerComponent from './TestContainerComponent'
 import TestStructuredNodeComponent from './TestStructuredNodeComponent'
-import InlineWrapperComponent from '../../packages/inline-wrapper/InlineWrapperComponent'
+
+const ParagraphComponent = ParagraphPackage.ParagraphComponent
+const HeadingComponent = HeadingPackage.HeadingComponent
+const InlineWrapperComponent = InlineWrapperPackage.InlineWrapperComponent
 
 export default function createTestComponentRegistry() {
   var componentRegistry = new Registry()

@@ -1,7 +1,7 @@
-import isFunction from '../util/isFunction'
-import DocumentChange from '../model/DocumentChange'
-import TransactionDocument from '../model/TransactionDocument'
-import EditingInterface from '../model/EditingInterface'
+import { isFunction } from '../util'
+import DocumentChange from './DocumentChange'
+import TransactionDocument from './TransactionDocument'
+import EditingInterface from './EditingInterface'
 
 /*
   A transaction for editing a document in an EditorSession.

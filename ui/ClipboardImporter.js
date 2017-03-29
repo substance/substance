@@ -1,12 +1,6 @@
-import extend from '../util/extend'
-import isArray from '../util/isArray'
-import forEach from '../util/forEach'
-import Registry from '../util/Registry'
-import Document from '../model/Document'
-import HTMLImporter from '../model/HTMLImporter'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import JSONConverter from '../model/JSONConverter'
-import platform from '../util/platform'
+import { DefaultDOMElement } from '../dom'
+import { isArray, forEach, Registry, platform } from '../util'
+import { Document, HTMLImporter, JSONConverter } from '../model'
 
 /**
   Import HTML from clipboard. Used for inter-application copy'n'paste.
@@ -26,7 +20,7 @@ class ClipboardImporter extends HTMLImporter {
     // disabling warnings about default importers
     this.IGNORE_DEFAULT_WARNINGS = true
 
-    extend(config, {
+    Object.assign(config, {
       trimWhitespaces: true,
       REMOVE_INNER_WS: true
     })

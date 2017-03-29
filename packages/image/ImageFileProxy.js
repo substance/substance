@@ -1,4 +1,4 @@
-import DefaultFileProxy from '../file/DefaultFileProxy'
+import { DefaultFileProxy } from '../../model'
 
 class ImageProxy extends DefaultFileProxy {}
 

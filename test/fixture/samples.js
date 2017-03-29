@@ -1,4 +1,4 @@
-import EditingInterface from '../../model/EditingInterface'
+import { EditingInterface } from 'substance'
 
 export const H1_TEXT = 'h1:abcdefg'
 
