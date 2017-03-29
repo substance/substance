@@ -515,4 +515,41 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("getChildNodes()", (t) => {
+    let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
+    let childNodes = el.childNodes
+    t.deepEqual(childNodes.map(c => c.nodeType), ['text', 'element', 'text'], "should return all childNodes")
+    t.end()
+  })
+
+  test("getChildren()", (t) => {
+    let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
+    let children = el.children
+    t.deepEqual(children.map(c => c.tagName), ['span'], "should return all children")
+    t.end()
+  })
+
+  test("firstChild", (t) => {
+    let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
+    let firstChild = el.firstChild
+    t.equal(firstChild.textContent, 'Foo', "should return all firstChild")
+    t.end()
+  })
+
+  test("lastChild", (t) => {
+    let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
+    let lastChild = el.lastChild
+    t.equal(lastChild.textContent, 'Baz', "should return all lastChild")
+    t.end()
+  })
+
+  test("is()", (t) => {
+    let doc = DefaultDOMElement.createDocument('html')
+    let el = doc.createElement('div').attr('data-id', 'foo')
+    t.ok(el.is('div[data-id=foo]'))
+    t.notOk(el.is('foo'))
+    t.end()
+  })
+
+
 }

@@ -280,6 +280,7 @@ class BrowserDOMElement extends DOMElement {
 
   getFirstChild() {
     let firstChild = this.el.firstChild
+    /* istanbul ignore else */
     if (firstChild) {
       return BrowserDOMElement.wrap(firstChild)
     } else {
@@ -289,6 +290,7 @@ class BrowserDOMElement extends DOMElement {
 
   getLastChild() {
     var lastChild = this.el.lastChild
+    /* istanbul ignore else */
     if (lastChild) {
       return BrowserDOMElement.wrap(lastChild)
     } else {
@@ -298,6 +300,7 @@ class BrowserDOMElement extends DOMElement {
 
   getNextSibling() {
     let next = this.el.nextSibling
+    /* istanbul ignore else */
     if (next) {
       return BrowserDOMElement.wrap(next)
     } else {
@@ -307,6 +310,7 @@ class BrowserDOMElement extends DOMElement {
 
   getPreviousSibling() {
     let previous = this.el.previousSibling
+    /* istanbul ignore else */
     if (previous) {
       return BrowserDOMElement.wrap(previous)
     } else {
