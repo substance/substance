@@ -12,19 +12,20 @@ const TABS_OR_NL = /[\t\n\r]+/g
 /**
   A generic base implementation for XML/HTML importers.
 
-  @class
   @param {Object} config
+  @param {DocumentSchema} config.schema
+  @param {object[]} config.converters
  */
 class DOMImporter {
 
   constructor(config, context) {
     this.context = context || {}
 
-    if (!config.converters) {
-      throw new Error('config.converters is mandatory')
+    if (!config.schema) {
+      throw new Error('"config.schema" is mandatory')
     }
-    if (!config.DocumentClass) {
-      throw new Error('DocumentClass is mandatory')
+    if (!config.converters) {
+      throw new Error('"config.converters" is mandatory')
     }
 
     this.config = Object.assign({ idAttribute: 'id' }, config)
@@ -36,10 +37,15 @@ class DOMImporter {
     this._blockConverters = []
     this._propertyAnnotationConverters = []
 
-    var schema = this.schema
-    var defaultTextType = schema.getDefaultTextType()
+    this.state = new DOMImporter.State()
 
-    config.converters.forEach(function(Converter) {
+    this._initialize()
+  }
+
+  _initialize() {
+    let schema = this.schema
+    let defaultTextType = schema.getDefaultTextType()
+    this.config.converters.forEach((Converter) => {
       var converter
       if (typeof Converter === 'function') {
         // console.log('installing converter', Converter)
@@ -75,9 +81,7 @@ class DOMImporter {
         this._blockConverters.push(converter)
       }
 
-    }.bind(this))
-
-    this.state = new DOMImporter.State()
+    })
   }
 
   reset() {
@@ -92,10 +96,11 @@ class DOMImporter {
 
   // Note: this is e.g. shared by ClipboardImporter which has a different
   // implementation of this.createDocument()
-  _createDocument(schema) {
+  _createDocument() {
     // create an empty document and initialize the container if not present
-    var doc = new this.config.DocumentClass(schema)
-    return doc
+    const schema = this.config.schema
+    const DocumentClass = schema.getDocumentClass()
+    return new DocumentClass(schema)
   }
 
   // should be called at the end to finish conversion

@@ -83,8 +83,12 @@ class Configurator {
         from this configuration.
    */
   defineSchema(schema) {
-    if (!schema.ArticleClass) {
-      throw new Error('schema.ArticleClass is mandatory')
+    if (schema.ArticleClass) {
+      console.warn('DEPRECATED: schema.ArticleClass is now called schema.DocumentClass')
+      schema.DocumentClass = schema.ArticleClass
+    }
+    if (!schema.DocumentClass) {
+      throw new Error('schema.DocumentClass is mandatory')
     }
     this.config.schema = schema
   }

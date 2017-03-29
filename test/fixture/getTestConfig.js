@@ -29,7 +29,7 @@ export default function getTestConfig() {
   config.addToolGroup('insert')
   config.defineSchema({
     name: 'test-article',
-    ArticleClass: TestArticle,
+    DocumentClass: TestArticle,
     defaultTextType: 'paragraph',
     version: 1.0
   })
