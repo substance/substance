@@ -15,6 +15,7 @@ class MemoryDOMElement extends DOMElement {
     if (!type) throw new Error("'type' is mandatory")
 
     this.ownerDocument = args.ownerDocument
+    /* istanbul ignore next */
     if (type !== 'document' && !this.ownerDocument) {
       throw new Error("'ownerDocument' is mandatory")
     }
@@ -197,12 +198,6 @@ class MemoryDOMElement extends DOMElement {
     return this.attributes
   }
 
-  getProperties() {
-    if (this.properties) {
-      return this.properties
-    }
-  }
-
   getProperty(name) {
     if (this.properties) {
       return this.properties.get(name)
@@ -223,7 +218,6 @@ class MemoryDOMElement extends DOMElement {
     if (this.classes) {
       return this.classes.has(name)
     }
-    return false
   }
 
   addClass(name) {
@@ -423,7 +417,6 @@ class MemoryDOMElement extends DOMElement {
       if (!child) return this
       DomUtils.appendChild(this, child)
       child.ownerDocument = this.getOwnerDocument()
-      this._onAttach(child)
     }
     return this
   }
@@ -446,7 +439,6 @@ class MemoryDOMElement extends DOMElement {
         DomUtils.prepend(childNodes[pos], child)
       }
       child.ownerDocument = this.getOwnerDocument()
-      this._onAttach(child)
     }
     return this
   }
@@ -460,7 +452,6 @@ class MemoryDOMElement extends DOMElement {
       } else {
         throw new Error('insertBefore(): reference node is not a child of this element.')
       }
-      this._onAttach(newChild)
     }
     return this
   }
@@ -470,7 +461,6 @@ class MemoryDOMElement extends DOMElement {
     if (childNodes) {
       let child = childNodes[pos]
       child.remove()
-      this._onDetach(child)
     }
     return this
   }
@@ -480,7 +470,6 @@ class MemoryDOMElement extends DOMElement {
     if (childNodes) {
       childNodes.forEach((child) => {
         child.next = child.prev = child.parent = null
-        this._onDetach(child)
       })
       childNodes.length = 0
     }
@@ -488,11 +477,7 @@ class MemoryDOMElement extends DOMElement {
   }
 
   remove() {
-    let parent = this.parent
     DomUtils.removeElement(this)
-    if (parent) {
-      parent._onDetach(this)
-    }
     return this
   }
 
@@ -504,14 +489,9 @@ class MemoryDOMElement extends DOMElement {
   }
 
   replaceWith(newEl) {
-    let parent = this.parent
     newEl = this._normalizeChild(newEl)
     DomUtils.replaceElement(this, newEl)
     newEl.ownerDocument = this.getOwnerDocument()
-    if (parent) {
-      parent._onDetach(this)
-      parent._onAttach(newEl)
-    }
     return this
   }
 
@@ -546,10 +526,6 @@ class MemoryDOMElement extends DOMElement {
     return this
   }
 
-  get attribs() {
-    return this.attributes
-  }
-
   _assign(other) {
     if (other.name) this.name = other.name
     if (this.classes && other.classes) {
@@ -581,36 +557,20 @@ class MemoryDOMElement extends DOMElement {
         }
       })
     }
-    if (this.properties && other.properties) {
-      forEach(other.properties, (val, name) => {
-        this.properties.set(name, val)
-      })
-    }
     if (this.eventListeners && other.eventListeners) {
       this.eventListeners = this.eventListeners.concat(other.eventListeners)
     }
   }
 
-  _onAttach(child) {} // eslint-disable-line no-unused-vars
-
-  _onDetach(child) {} // eslint-disable-line no-unused-vars
-
   _normalizeChild(child) {
     if (isString(child)) {
       child = this.createTextNode(child)
     }
+    /* istanbul ignore next */
     if (!child || !child._isMemoryDOMElement) {
       throw new Error('Illegal argument: only String and MemoryDOMElement instances are valid.')
     }
     return child
-  }
-
-  _attach(child) {
-    child.parent = this
-  }
-
-  _detach(child) {
-    child.parent = null
   }
 
   _normalizeName(name) {
@@ -692,12 +652,18 @@ MemoryDOMElement.wrapNativeElement = function(el) {
       // return MemoryDOMElement.createDocument('html').createElement('div')
     }
   }
-  if (!el._isMemoryDOMElement) throw new Error('Illegal argument: expected MemoryDOMElement instance')
+  /* istanbul ignore next */
+  if (!el._isMemoryDOMElement) {
+    throw new Error('Illegal argument: expected MemoryDOMElement instance')
+  }
   return el
 }
 
 MemoryDOMElement.unwrap = function(el) {
-  if (!el._isMemoryDOMElement) throw new Error('Illegal argument: expected MemoryDOMElement instance')
+  /* istanbul ignore next */
+  if (!el._isMemoryDOMElement) {
+    throw new Error('Illegal argument: expected MemoryDOMElement instance')
+  }
   return el
 }
 

@@ -12,6 +12,7 @@ import MemoryDOMElement from './MemoryDOMElement'
 */
 export default function parseMarkup(markup, options) {
   let format = options.ownerDocument ? options.ownerDocument.format : options.format
+  /* istanbul ignore next */
   if (!format) {
     throw new Error("Either 'ownerDocument' or 'format' must be set.")
   }

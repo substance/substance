@@ -76,6 +76,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.TEXT_NODE`
    */
   isTextNode() {
+    /* istanbul ignore next */
     return false
   }
 
@@ -85,6 +86,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
    */
   isElementNode() {
+    /* istanbul ignore next */
     return false
   }
 
@@ -94,6 +96,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
    */
   isCommentNode() {
+    /* istanbul ignore next */
     return false
   }
 
@@ -103,6 +106,7 @@ class DOMElement {
     @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
    */
   isDocumentNode() {
+    /* istanbul ignore next */
     return false
   }
 
@@ -459,6 +463,7 @@ class DOMElement {
     @returns {this}
   */
   on(eventName, handler, context, options) {
+    /* istanbul ignore next */
     if (!isString(eventName)) {
       throw new Error('Illegal argument: "event" must be a String.')
     }
@@ -466,6 +471,7 @@ class DOMElement {
     if (context) {
       options.context = context
     }
+    /* istanbul ignore next */
     if (!handler || !isFunction(handler)) {
       throw new Error('Illegal argument: invalid handler function for event ' + eventName)
     }
@@ -860,6 +866,7 @@ class DOMElement {
 
   */
   focus() {
+    /* istanbul ignore next */
     return this
   }
 
@@ -867,6 +874,7 @@ class DOMElement {
     Blur this element.
   */
   blur() {
+    /* istanbul ignore next */
     return this
   }
 
@@ -874,16 +882,19 @@ class DOMElement {
     Trigger a click event on this element.
   */
   click() {
+    /* istanbul ignore next */
     return this
   }
 
   /* API to retrieve layout information */
 
   getWidth() {
+    /* istanbul ignore next */
     return 0
   }
 
   getHeight() {
+    /* istanbul ignore next */
     return 0
   }
 
@@ -891,6 +902,7 @@ class DOMElement {
     Outer height as provided by $.outerHeight(withMargin)
   */
   getOuterHeight(withMargin) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     return 0
   }
 
@@ -898,6 +910,7 @@ class DOMElement {
     Offset values as provided by $.offset()
   */
   getOffset() {
+    /* istanbul ignore next */
     return { top: 0, left: 0 }
   }
 
@@ -905,6 +918,7 @@ class DOMElement {
     Position values as provided by $.position()
   */
   getPosition() {
+    /* istanbul ignore next */
     return { top: 0, left: 0 }
   }
 
@@ -927,6 +941,7 @@ class DOMElement {
     @param {Object} data
   */
   emit(name, data) { // eslint-disable-line
+    /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 

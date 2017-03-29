@@ -7,6 +7,7 @@ export default
 class DOMEventListener {
 
   constructor(eventName, handler, options) {
+    /* istanbul ignore next */
     if (!isString(eventName) || !isFunction(handler)) {
       throw new Error("Illegal arguments: 'eventName' must be a String, and 'handler' must be a Function.")
     }

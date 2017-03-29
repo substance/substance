@@ -104,16 +104,6 @@ class BrowserDOMElement extends DOMElement {
     return this.el.attributes._mapAdapter
   }
 
-  getProperties() {
-    let properties = {}
-    if (this._changedProperties) {
-      this._changedProperties.forEach((name) => {
-        properties[name] = this.el[name]
-      })
-    }
-    return properties
-  }
-
   getProperty(name) {
     return this.el[name]
   }
@@ -281,6 +271,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getChildIndex(child) {
+    /* istanbul ignore next */
     if (!child._isBrowserDOMElement) {
       throw new Error('Expecting a BrowserDOMElement instance.')
     }
@@ -438,6 +429,7 @@ class BrowserDOMElement extends DOMElement {
     } else if (isString(child) || isNumber(child)) {
       child = this.createTextNode(child)
     }
+    /* istanbul ignore next */
     if (!child || !child._isBrowserDOMElement) {
       throw new Error('Illegal child type.')
     }
@@ -463,6 +455,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   insertBefore(child, before) {
+    /* istanbul ignore next */
     if (!before || !before._isBrowserDOMElement) {
       throw new Error('insertBefore(): Illegal arguments. "before" must be a BrowserDOMElement instance.')
     }
@@ -477,6 +470,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   removeChild(child) {
+    /* istanbul ignore next */
     if (!child || !child._isBrowserDOMElement) {
       throw new Error('removeChild(): Illegal arguments. Expecting a BrowserDOMElement instance.')
     }
@@ -485,6 +479,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   replaceChild(oldChild, newChild) {
+    /* istanbul ignore next */
     if (!newChild || !oldChild ||
         !newChild._isBrowserDOMElement || !oldChild._isBrowserDOMElement) {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
