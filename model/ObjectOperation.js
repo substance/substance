@@ -233,6 +233,7 @@ class ObjectOperation {
     return this.diff
   }
 
+  /* istanbul ignore next */
   toString() {
     switch (this.type) {
       case CREATE:
