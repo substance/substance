@@ -453,6 +453,14 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("find in XML with namespace tagnames", function(t) {
+    let xmlDoc = DefaultDOMElement.parseXML('<dummy xmlns:foo="foo"><foo:myNode></foo:myNode></dummy>')
+    let myNode = xmlDoc.find('myNode')
+    t.notNil(myNode, 'Should find a <foo:myNode> element')
+    t.equal(myNode.tagName, 'foo:myNode', 'tagName should be qualified')
+    t.end()
+  })
+
   test("insertAt", function(t) {
     let dummy = DefaultDOMElement.parseSnippet('<dummy><bla></bla></dummy>', 'xml')
     let doc = dummy.getOwnerDocument()
