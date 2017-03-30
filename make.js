@@ -267,8 +267,9 @@ b.task('docs', () => {
 b.task('vendor', buildVendor)
 .describe('pre-bundles vendor libraries')
 
+b.task('default', ['clean', 'lib'])
 
-b.task('default', ['clean', 'lib', 'docs'])
+b.task('publish', ['clean', 'lib', 'docs'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'lib:dev', 'docs', 'test:browser'])

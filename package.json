@@ -12,6 +12,7 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "dist/substance.es.js",
   "scripts": {
+    "prepublish": "node make publish",
     "lint": "eslint -c .eslintrc.js collab doc dom model packages test ui util index.es.js",
     "dev": "node make test:browser:pure -w -s",
     "test": "node make test",
