@@ -12,14 +12,14 @@ import PropertySelection from './PropertySelection'
   @example
 
   ```js
-  var containerSel = doc.createSelection({
+  let containerSel = doc.createSelection({
     type: 'container',
     containerId: 'body',
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
     endOffset: 4,
-  });
+  })
   ```
 */
 class ContainerSelection extends Selection {
@@ -41,16 +41,18 @@ class ContainerSelection extends Selection {
     /**
       @type {String}
     */
-    this.containerId = containerId;
-    if (!this.containerId) throw new Error('Invalid arguments: `containerId` is mandatory');
+    this.containerId = containerId
+    if (!this.containerId) throw new Error('Invalid arguments: `containerId` is mandatory')
 
     this.start = new Coordinate(startPath, startOffset)
     this.end = new Coordinate(isNil(endPath) ? startPath : endPath, isNil(endOffset) ? startOffset : endOffset)
 
-    this.reverse = Boolean(reverse);
+    this.reverse = Boolean(reverse)
 
-    this.surfaceId = surfaceId;
+    this.surfaceId = surfaceId
   }
+
+  /* istanbul ignore start */
 
   get startPath() {
     console.warn('DEPRECATED: use sel.start.path instead.')
@@ -72,6 +74,8 @@ class ContainerSelection extends Selection {
     return this.end.offset
   }
 
+  /* istanbul ignore end */
+
   toJSON() {
     return {
       type: 'container',
@@ -82,28 +86,27 @@ class ContainerSelection extends Selection {
       endOffset: this.end.offset,
       reverse: this.reverse,
       surfaceId: this.surfaceId
-    };
+    }
   }
 
-
   isContainerSelection() {
-    return true;
+    return true
   }
 
   getType() {
-    return 'container';
+    return 'container'
   }
 
   isNull() {
-    return false;
+    return false
   }
 
   isCollapsed() {
-    return this.start.equals(this.end);
+    return this.start.equals(this.end)
   }
 
   isReverse() {
-    return this.reverse;
+    return this.reverse
   }
 
   equals(other) {
@@ -111,7 +114,7 @@ class ContainerSelection extends Selection {
       Selection.prototype.equals.call(this, other) &&
       this.containerId === other.containerId &&
       (this.start.equals(other.start) && this.end.equals(other.end))
-    );
+    )
   }
 
   toString() {
@@ -125,7 +128,7 @@ class ContainerSelection extends Selection {
       (this.reverse?", reverse":""),
       (this.surfaceId?(", "+this.surfaceId):""),
       ")"
-    ].join('');
+    ].join('')
   }
 
   /**
@@ -133,31 +136,31 @@ class ContainerSelection extends Selection {
   */
   getContainer() {
     if (!this._internal.container) {
-      this._internal.container = this.getDocument().get(this.containerId);
+      this._internal.container = this.getDocument().get(this.containerId)
     }
-    return this._internal.container;
+    return this._internal.container
   }
 
   isInsideOf(other, strict) {
     // Note: this gets called from PropertySelection.contains()
     // because this implementation can deal with mixed selection types.
-    if (other.isNull()) return false;
-    strict = Boolean(strict);
-    var r1 = this._range(this);
-    var r2 = this._range(other);
+    if (other.isNull()) return false
+    strict = Boolean(strict)
+    let r1 = this._range(this)
+    let r2 = this._range(other)
     return (r2.start.isBefore(r1.start, strict) &&
-      r1.end.isBefore(r2.end, strict));
+      r1.end.isBefore(r2.end, strict))
   }
 
   contains(other, strict) {
     // Note: this gets called from PropertySelection.isInsideOf()
     // because this implementation can deal with mixed selection types.
-    if (other.isNull()) return false;
-    strict = Boolean(strict);
-    var r1 = this._range(this);
-    var r2 = this._range(other);
+    if (other.isNull()) return false
+    strict = Boolean(strict)
+    let r1 = this._range(this)
+    let r2 = this._range(other)
     return (r1.start.isBefore(r2.start, strict) &&
-      r2.end.isBefore(r1.end, strict));
+      r2.end.isBefore(r1.end, strict))
   }
 
   containsNode(nodeId, strict) {
@@ -166,7 +169,7 @@ class ContainerSelection extends Selection {
     const coor = new Coordinate([nodeId], 0)
     const address = container.getAddress(coor)
     const r = this._range(this)
-    // console.log('ContainerSelection.containsNode()', address, 'is within', r.start, '->', r.end, '?');
+    // console.log('ContainerSelection.containsNode()', address, 'is within', r.start, '->', r.end, '?')
     let contained = r.start.isBefore(address, strict)
     if (contained) {
       address.offset = 1
@@ -176,23 +179,23 @@ class ContainerSelection extends Selection {
   }
 
   overlaps(other) {
-    var r1 = this._range(this);
-    var r2 = this._range(other);
+    let r1 = this._range(this)
+    let r2 = this._range(other)
     // it overlaps if they are not disjunct
     return !(r1.end.isBefore(r2.start, false) ||
-      r2.end.isBefore(r1.start, false));
+      r2.end.isBefore(r1.start, false))
   }
 
   isLeftAlignedWith(other) {
-    var r1 = this._range(this);
-    var r2 = this._range(other);
-    return r1.start.isEqual(r2.start);
+    let r1 = this._range(this)
+    let r2 = this._range(other)
+    return r1.start.isEqual(r2.start)
   }
 
   isRightAlignedWith(other) {
-    var r1 = this._range(this);
-    var r2 = this._range(other);
-    return r1.end.isEqual(r2.end);
+    let r1 = this._range(this)
+    let r2 = this._range(other)
+    return r1.end.isEqual(r2.end)
   }
 
   /**
@@ -202,78 +205,78 @@ class ContainerSelection extends Selection {
     @returns {PropertySelection}
   */
   collapse(direction) {
-    var coor;
+    let coor
     if (direction === 'left') {
-      coor = this.start;
+      coor = this.start
     } else {
-      coor = this.end;
+      coor = this.end
     }
-    return _createNewSelection(this, coor, coor);
+    return _createNewSelection(this, coor, coor)
   }
 
   expand(other) {
-    var r1 = this._range(this);
-    var r2 = this._range(other);
-    var start;
-    var end;
+    let r1 = this._range(this)
+    let r2 = this._range(other)
+    let start
+    let end
 
     if (r1.start.isEqual(r2.start)) {
-      start = new Coordinate(this.start.path, Math.min(this.start.offset, other.start.offset));
+      start = new Coordinate(this.start.path, Math.min(this.start.offset, other.start.offset))
     } else if (r1.start.isAfter(r2.start)) {
-      start = new Coordinate(other.start.path, other.start.offset);
+      start = new Coordinate(other.start.path, other.start.offset)
     } else {
-      start = this.start;
+      start = this.start
     }
     if (r1.end.isEqual(r2.end)) {
-      end = new Coordinate(this.end.path, Math.max(this.end.offset, other.end.offset));
+      end = new Coordinate(this.end.path, Math.max(this.end.offset, other.end.offset))
     } else if (r1.end.isBefore(r2.end, false)) {
-      end = new Coordinate(other.end.path, other.end.offset);
+      end = new Coordinate(other.end.path, other.end.offset)
     } else {
-      end = this.end;
+      end = this.end
     }
 
-    return _createNewSelection(this, start, end);
+    return _createNewSelection(this, start, end)
   }
 
   truncateWith(other) {
     if (other.isInsideOf(this, 'strict')) {
       // the other selection should overlap only on one side
-      throw new Error('Can not truncate with a contained selections');
+      throw new Error('Can not truncate with a contained selections')
     }
     if (!this.overlaps(other)) {
-      return this;
+      return this
     }
-    var r1 = this._range(this);
-    var r2 = this._range(other);
-    var start, end;
+    let r1 = this._range(this)
+    let r2 = this._range(other)
+    let start, end
     if (r2.start.isBefore(r1.start, 'strict') && r2.end.isBefore(r1.end, 'strict')) {
-      start = other.end;
-      end = this.end;
+      start = other.end
+      end = this.end
     } else if (r1.start.isBefore(r2.start, 'strict') && r1.end.isBefore(r2.end, 'strict')) {
-      start = this.start;
-      end = other.start;
+      start = this.start
+      end = other.start
     } else if (r1.start.isEqual(r2.start)) {
       if (r2.end.isBefore(r1.end, 'strict')) {
-        start = other.end;
-        end = this.end;
+        start = other.end
+        end = this.end
       } else {
         // the other selection is larger which eliminates this one
-        return Selection.nullSelection;
+        return Selection.nullSelection
       }
     } else if (r1.end.isEqual(r2.end)) {
       if (r1.start.isBefore(r2.start, 'strict')) {
-        start = this.start;
-        end = other.start;
+        start = this.start
+        end = other.start
       } else {
         // the other selection is larger which eliminates this one
-        return Selection.nullSelection;
+        return Selection.nullSelection
       }
     } else if (this.isInsideOf(other)) {
-      return Selection.nullSelection;
+      return Selection.nullSelection
     } else {
-      throw new Error('Could not determine coordinates for truncate. Check input');
+      throw new Error('Could not determine coordinates for truncate. Check input')
     }
-    return _createNewSelection(this, start, end);
+    return _createNewSelection(this, start, end)
   }
 
   /**
@@ -294,21 +297,21 @@ class ContainerSelection extends Selection {
     @returns {PropertySelection[]}
   */
   splitIntoPropertySelections() {
-    var sels = [];
-    var fragments = this.getFragments();
+    let sels = []
+    let fragments = this.getFragments()
     fragments.forEach(function(fragment) {
       if (fragment instanceof Selection.Fragment) {
         sels.push(
           new PropertySelection(fragment.path, fragment.startOffset,
             fragment.endOffset, false, this.containerId, this.surfaceId)
-        );
+        )
       }
-    }.bind(this));
-    return sels;
+    }.bind(this))
+    return sels
   }
 
   _clone() {
-    return new ContainerSelection(this);
+    return new ContainerSelection(this)
   }
 
   _range(sel) {
@@ -316,29 +319,29 @@ class ContainerSelection extends Selection {
     // as we use it very often.
     // However, this is dangerous as this data can get invalid by a change
     if (sel._internal.addressRange) {
-      return sel._internal.addressRange;
+      return sel._internal.addressRange
     }
 
-    var container = this.getContainer();
-    var startAddress = container.getAddress(sel.start);
-    var endAddress;
+    let container = this.getContainer()
+    let startAddress = container.getAddress(sel.start)
+    let endAddress
     if (sel.isCollapsed()) {
-      endAddress = startAddress;
+      endAddress = startAddress
     } else {
-      endAddress = container.getAddress(sel.end);
+      endAddress = container.getAddress(sel.end)
     }
-    var addressRange = {
+    let addressRange = {
       start: startAddress,
       end: endAddress
-    };
-    if (sel._isContainerSelection) {
-      sel._internal.addressRange = addressRange;
     }
-    return addressRange;
+    if (sel._isContainerSelection) {
+      sel._internal.addressRange = addressRange
+    }
+    return addressRange
   }
 
   get path() {
-    throw new Error('ContainerSelection has no path property. Use startPath and endPath instead');
+    throw new Error('ContainerSelection has no path property. Use startPath and endPath instead')
   }
 
 }
@@ -346,8 +349,8 @@ class ContainerSelection extends Selection {
 ContainerSelection.prototype._isContainerSelection = true
 
 ContainerSelection.fromJSON = function(properties) {
-  var sel = new ContainerSelection(properties);
-  return sel;
+  let sel = new ContainerSelection(properties)
+  return sel
 }
 
 function _createNewSelection(containerSel, start, end) {
@@ -363,14 +366,14 @@ function _createNewSelection(containerSel, start, end) {
     })
   } else {
     newSel = new ContainerSelection(containerSel.containerId,
-    start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId);
+    start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId)
   }
   // we need to attach the new selection
-  const doc = containerSel._internal.doc;
+  const doc = containerSel._internal.doc
   if (doc) {
-    newSel.attach(doc);
+    newSel.attach(doc)
   }
-  return newSel;
+  return newSel
 }
 
 export default ContainerSelection
