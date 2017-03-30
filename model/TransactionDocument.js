@@ -52,7 +52,7 @@ class TransactionDocument extends Document {
     // ATTENTION: this must before loading the seed
     ParentNodeHook.register(this)
 
-    this.loadSeed(document.toJSON())
+    this.createFromDocument(document)
 
     // make sure that we mirror all changes that are done outside of transactions
     document.on('document:changed', this._onDocumentChanged, this)

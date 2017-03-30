@@ -41,6 +41,7 @@
   - `Selection.getFragments()`: implementation was overly complicated.
     If you want to iterate nodes of a container selection use `sel.getNodeIds()`
   - `documentHelpers.getAnnotationsForSelection()`: use `documentHelpers.getPropertyAnnotation()` instead
+  - `Document.fromSnapshot()`, `Document.loadSeed()`: both implementations were not reliable. Use `JSONConverter` instead.
 
 ## Beta 6
 

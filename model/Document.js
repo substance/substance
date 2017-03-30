@@ -450,12 +450,6 @@ class Document extends EventEmitter {
     return snippet
   }
 
-  fromSnapshot(data) {
-    var doc = this.newInstance()
-    doc.loadSeed(data)
-    return doc
-  }
-
   _apply(documentChange) {
     forEach(documentChange.ops, function(op) {
       this.data.apply(op)
@@ -476,20 +470,21 @@ class Document extends EventEmitter {
     }.bind(this))
   }
 
-  /**
-   * DEPRECATED: We will drop support as this should be done in a more
-   *             controlled fashion using an importer.
-   * @skip
-   */
-  loadSeed(seed) {
-    // clear all existing nodes (as they should be there in the seed)
-    forEach(this.data.nodes, function(node) {
-      this.delete(node.id)
-    }.bind(this))
-    // create nodes
-    forEach(seed.nodes, function(nodeData) {
-      this.create(nodeData)
-    }.bind(this))
+  createFromDocument(doc) {
+    let nodes = doc.getNodes()
+    let annotations = []
+    let contentNodes = []
+    let containers = []
+    forEach(nodes, (node) => {
+      if (node._isAnnotation) {
+        annotations.push(node)
+      } else if (node._isContainer) {
+        containers.push(node)
+      } else {
+        contentNodes.push(node)
+      }
+    })
+    contentNodes.concat(annotations).concat(containers).forEach(n=>this.create(n))
   }
 
   /**
