@@ -1,9 +1,8 @@
 import { filter, flatten, forEach, isArray, isArrayEqual } from '../util'
 import DocumentIndex from './DocumentIndex'
-import ObjectOperation from './ObjectOperation'
-import DocumentChange from './DocumentChange'
 import annotationHelpers from './annotationHelpers'
 import { isEntirelySelected } from './selectionHelpers'
+import ChangeRecorder from './ChangeRecorder'
 
 /**
   Some helpers for working with Documents.
@@ -136,26 +135,8 @@ function getMarkersForSelection(doc, sel) {
 }
 
 function getChangeFromDocument(doc) {
-  let nodes = doc.getNodes()
-  let annotations = []
-  let contentNodes = []
-  let containers = []
-
-  forEach(nodes, (node) => {
-    if (node._isAnnotation) {
-      annotations.push(node)
-    } else if (node._isContainer) {
-      containers.push(node)
-    } else {
-      contentNodes.push(node)
-    }
-  })
-
-  let ops = contentNodes.concat(containers).concat(annotations).map((node) => {
-    return ObjectOperation.Create([node.id], node.toJSON())
-  })
-
-  return new DocumentChange({ops: ops})
+  let recorder = new ChangeRecorder(doc)
+  return recorder.generateChange()
 }
 
 /*
