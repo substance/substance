@@ -1,10 +1,8 @@
 import { isArrayEqual, isString, last, uuid } from '../util'
 import annotationHelpers from './annotationHelpers'
 import documentHelpers from './documentHelpers'
-import * as selectionHelpers from './selectionHelpers'
+import { setCursor, isEntirelySelected, selectNode } from './selectionHelpers'
 import paste from './paste'
-
-const { setCursor, isEntirelySelected, selectNode } = selectionHelpers
 
 /**
   Core editing implementation, that controls meta behavior

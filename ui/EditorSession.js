@@ -1,6 +1,6 @@
 import { forEach, isPlainObject, isFunction, isString, EventEmitter } from '../util'
-import { DocumentChange, Selection, SelectionState, ChangeHistory,
-  Transaction } from '../model'
+import { Selection, SelectionState, ChangeHistory,
+  Transaction, operationHelpers } from '../model'
 import CommandManager from './CommandManager'
 import DragManager from './DragManager'
 import FileManager from './FileManager'
@@ -486,13 +486,13 @@ class EditorSession extends EventEmitter {
     var clone = {
       ops: externalChange.ops.map(function(op) { return op.clone(); })
     }
-    DocumentChange.transformInplace(clone, this._history.doneChanges)
-    DocumentChange.transformInplace(clone, this._history.undoneChanges)
+    operationHelpers.transformDocumentChange(clone, this._history.doneChanges)
+    operationHelpers.transformDocumentChange(clone, this._history.undoneChanges)
   }
 
   _transformSelection(change) {
     var oldSelection = this.getSelection()
-    var newSelection = DocumentChange.transformSelection(oldSelection, change)
+    var newSelection = operationHelpers.transformSelection(oldSelection, change)
     // console.log('Transformed selection', change, oldSelection.toString(), newSelection.toString())
     return newSelection
   }

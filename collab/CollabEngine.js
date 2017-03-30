@@ -1,5 +1,5 @@
 import { EventEmitter, forEach, map, SubstanceError as Err } from '../util'
-import { DocumentChange } from '../model'
+import { DocumentChange, operationHelpers } from '../model'
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of
@@ -210,7 +210,7 @@ class CollabEngine extends EventEmitter {
       let B = changes.map(this.deserializeChange)
       let a = this.deserializeChange(change)
       // transform changes
-      DocumentChange.transformInplace(a, B)
+      operationHelpers.transformDocumentChange(a, B)
       let ops = B.reduce(function(ops, change) {
         return ops.concat(change.ops)
       }, [])

@@ -1,6 +1,6 @@
 import { DefaultDOMElement } from '../dom'
 import { EventEmitter, platform, getDOMRangeFromEvent, isMouseInsideDOMSelection } from '../util'
-import { DocumentChange } from '../model'
+import { operationHelpers } from '../model'
 import Component from './Component'
 import DragAndDropHandler from './DragAndDropHandler'
 
@@ -420,7 +420,7 @@ class MoveInline extends DragAndDropHandler {
     tx.selection = sourceSel
     let snippet = tx.copySelection()
     tx.deleteSelection()
-    tx.selection = DocumentChange.transformSelection(targetSel, tx)
+    tx.selection = operationHelpers.transformSelection(targetSel, tx)
     tx.paste(snippet)
   }
 }
