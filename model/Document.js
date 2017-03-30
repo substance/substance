@@ -57,9 +57,7 @@ class Document extends EventEmitter {
 
     this.schema = schema
     this.nodeFactory = new DocumentNodeFactory(this)
-    this.data = new IncrementalData(schema, {
-      nodeFactory: this.nodeFactory
-    })
+    this.data = new IncrementalData(schema, this.nodeFactory)
 
     // all by type
     this.addIndex('type', new PropertyIndex('type'))

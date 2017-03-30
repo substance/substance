@@ -14,7 +14,10 @@
 - TextPropertyComponent allows to render markers passed via props (as opposed to markers provided by MarkersManager)
 - TextPropertyEditor emits 'enter' event
 - Improved re-rendering performance
-- **(!)** changed behavior of `DefaultDOMElement.parseHTML()` and `parseXML()`:
+
+These changes might break your current implementation and may need some migration:
+
+- changed behavior of `DefaultDOMElement.parseHTML()` and `parseXML()`:
   Now `DefaultDOMElement.parseHTML()` and `parseXML()` always return the DOM document, i.e., a `DOMElement` instance of type `document`.
   The former behavior was confusing and inconsistent.
   `parseHTML()` now always creates a 'full' HTML document, i.e. containing `<head>` and `<body>`
@@ -31,17 +34,22 @@
   ```
   Notice, that `parseSnippet` returns either one element, or an array of elements, depending on the input you provided.
 
-- **(!)** `DOMImporter` (`HTMLImporter`/`XMLImporter`) takes two mandatory configuration parameters: `schema` and `converters`
-
+- `DOMImporter` (`HTMLImporter`/`XMLImporter`) takes two mandatory configuration parameters: `schema` and `converters`
   If you have used the `Configurator` API to create importers and exporters, you should be good.
-- **(!)** DEPRECATIONS:
-  - `DocumentChange.isAffected()`: Use `DocumentChange.hasUpdated()` instead
-- **(!)** removed some API which we don't want to support anymore:
+
+- changed signature of `Data` and `InrementalData` constructor: The second argument is now a node factory
+  ```
+  new IncrementalData(schema, this.nodeFactory)
+  ```
+- removed some API which we don't want to support anymore:
   - `DOMElement.getRoot()`: use `el.getOwnerDocument()` instead
   - `Selection.getFragments()`: implementation was overly complicated.
     If you want to iterate nodes of a container selection use `sel.getNodeIds()`
   - `documentHelpers.getAnnotationsForSelection()`: use `documentHelpers.getPropertyAnnotation()` instead
   - `Document.fromSnapshot()`, `Document.loadSeed()`: both implementations were not reliable. Use `JSONConverter` instead.
+
+- DEPRECATIONS:
+  - `DocumentChange.isAffected()`: Use `DocumentChange.hasUpdated()` instead
 
 ## Beta 6
 

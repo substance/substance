@@ -34,9 +34,7 @@ class TransactionDocument extends Document {
 
     this.schema = document.schema
     this.nodeFactory = new DocumentNodeFactory(this)
-    this.data = new IncrementalData(this.schema, {
-      nodeFactory: this.nodeFactory
-    })
+    this.data = new IncrementalData(this.schema, this.nodeFactory)
 
     this.document = document
 

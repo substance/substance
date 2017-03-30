@@ -1,5 +1,4 @@
 import { isArray, isString, forEach, EventEmitter } from '../util'
-import NodeFactory from './NodeFactory'
 
 /*
   A data storage implemention that supports data defined via a {@link Schema},
@@ -13,16 +12,22 @@ class Data extends EventEmitter {
     @param {Schema} schema
     @param {Object} [options]
   */
-  constructor(schema, options) {
+  constructor(schema, nodeFactory) {
     super()
 
-    options = options || {}
+    /* istanbul ignore start */
+    if (!schema) {
+      throw new Error('schema is mandatory')
+    }
+    if (!nodeFactory) {
+      throw new Error('nodeFactory is mandatory')
+    }
+   /* istanbul ignore end */
+
     this.schema = schema
+    this.nodeFactory = nodeFactory
     this.nodes = {}
     this.indexes = {}
-    this.options = options || {}
-
-    this.nodeFactory = options.nodeFactory || new NodeFactory(schema.nodeRegistry)
 
     // Sometimes necessary to resolve issues with updating indexes in presence
     // of cyclic dependencies
