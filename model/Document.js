@@ -71,7 +71,6 @@ class Document extends EventEmitter {
     // in the schema
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
-    // this.addIndex('container-annotation-anchors', new AnchorIndex())
 
     // change event proxies are triggered after a document change has been applied
     // before the regular document:changed event is fired.

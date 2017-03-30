@@ -1,8 +1,6 @@
 import * as selectionHelpers from './selectionHelpers'
 import * as operationHelpers from './operationHelpers'
 
-export { default as Anchor } from './Anchor'
-export { default as AnchorIndex } from './AnchorIndex'
 export { default as Annotation } from './Annotation'
 export { default as annotationHelpers } from './annotationHelpers'
 export { default as AnnotationIndex } from './AnnotationIndex'
