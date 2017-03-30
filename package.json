@@ -32,7 +32,6 @@
   "devDependencies": {
     "codecov": "^1.0.1",
     "eslint": "^3.17.1",
-    "htmlparser2": "3.9.2",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
     "karma-coverage": "^1.1.1",
@@ -40,7 +39,7 @@
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "^0.17.2",
+    "substance-bundler": "^0.18.0",
     "substance-docgen": "0.5.2",
     "substance-test": "^0.9.4"
   }
