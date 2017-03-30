@@ -6,9 +6,9 @@ const test = module('ObjectOperation')
 function checkObjectOperationTransform(test, a, b, input, expected) {
   let ops = ObjectOperation.transform(a, b)
   let output = ops[1].apply(a.apply(cloneDeep(input)))
-  test.deepEqual(expected, output, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`)
+  test.deepEqual(output, expected, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`)
   output = ops[0].apply(b.apply(cloneDeep(input)))
-  test.deepEqual(expected, output, `(a' o b)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with b=${b.toString()}, a'=${ops[0].toString()}`)
+  test.deepEqual(output, expected, `(a' o b)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with b=${b.toString()}, a'=${ops[0].toString()}`)
 }
 
 test("Creating values.", (t) => {

@@ -3,6 +3,14 @@ import { ArrayOperation } from 'substance'
 
 const test = module('ArrayOperation')
 
+function checkArrayOperationTransform(t, a, b, input, expected) {
+  let ops = ArrayOperation.transform(a, b);
+  let output = ops[1].apply(a.apply(input.slice(0)));
+  t.deepEqual(output, expected, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`);
+  output = ops[0].apply(b.apply(input.slice(0)));
+  t.deepEqual(output, expected, `(a' o b)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with b=${b.toString()}, a'=${ops[0].toString()}`);
+}
+
 test("Insert element", (t) => {
   let arr = [1,2,4]
   let expected = [1,2,3,4]
@@ -282,11 +290,3 @@ test("Conflicts: when NOP involved", (t) => {
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), "NOPs should never conflict.")
   t.end()
 })
-
-function checkArrayOperationTransform(t, a, b, input, expected) {
-  const ops = ArrayOperation.transform(a, b)
-  let output = ops[1].apply(a.apply(input.slice(0)))
-  t.deepEqual(expected, output)
-  output = ops[0].apply(b.apply(input.slice(0)))
-  t.deepEqual(expected, output)
-}
