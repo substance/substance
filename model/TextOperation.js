@@ -82,7 +82,7 @@ class TextOperation {
   }
 
   hasConflict(other) {
-    return hasConflict(this, other)
+    return _hasConflict(this, other)
   }
 
   isEmpty() {
@@ -105,7 +105,7 @@ class TextOperation {
 TextOperation.prototype._isOperation = true
 TextOperation.prototype._isTextOperation = true
 
-function hasConflict(a, b) {
+function _hasConflict(a, b) {
   // Insert vs Insert:
   //
   // Insertions are conflicting iff their insert position is the same.
@@ -198,7 +198,7 @@ function transform_insert_delete(a, b) {
 
 function transform(a, b, options) {
   options = options || {}
-  if (options["no-conflict"] && hasConflict(a, b)) {
+  if (options["no-conflict"] && _hasConflict(a, b)) {
     throw new Conflict(a, b)
   }
   if (!options.inplace) {
