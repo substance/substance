@@ -1,6 +1,3 @@
-import { EventEmitter } from '../util'
-import Anchor from './Anchor'
-
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
 */
@@ -128,16 +125,6 @@ class Selection {
     throw new Error('This method is abstract.')
   }
 
-  /**
-    Get selection fragments for this selection.
-
-    A selection fragment is bound to a single property.
-    @returns {Selection.Fragment[]}
-  */
-  getFragments() {
-    return []
-  }
-
   createWith(update) {
     let SelectionClass = this.constructor
     let data = this.toJSON()
@@ -180,120 +167,5 @@ class NullSelection extends Selection {
 */
 
 Selection.nullSelection = Object.freeze(new NullSelection())
-
-/**
-  @internal
-*/
-class SelectionFragment extends EventEmitter {
-
-  constructor(path, startOffset, endOffset, full) {
-    super()
-
-    this.type = "selection-fragment"
-    this.path = path
-    this.startOffset = startOffset
-    this.endOffset = endOffset || startOffset
-    this.full = Boolean(full)
-  }
-
-  isAnchor() {
-    return false
-  }
-
-  isInline() {
-    return false
-  }
-
-  isPropertyFragment() {
-    return true
-  }
-
-  isNodeFragment() {
-    return false
-  }
-
-  isFull() {
-    return this.full
-  }
-
-  isPartial() {
-    return !this.full
-  }
-
-  getNodeId() {
-    return this.path[0]
-  }
-
-}
-
-Selection.Fragment = SelectionFragment
-
-
-class NodeFragment extends EventEmitter {
-
-  constructor(nodeId) {
-    super()
-
-    this.type = "node-fragment"
-    this.nodeId = nodeId
-    this.path = [nodeId]
-  }
-
-  isAnchor() {
-    return false
-  }
-
-  isInline() {
-    return false
-  }
-
-  isPropertyFragment() {
-    return false
-  }
-
-  isNodeFragment() {
-    return true
-  }
-
-  isFull() {
-    return true
-  }
-
-  isPartial() {
-    return false
-  }
-
-  getNodeId() {
-    return this.nodeId
-  }
-}
-
-Selection.NodeFragment = NodeFragment
-
-/**
-  Describe the cursor when creating selection fragments.
-  This is used for rendering selections.
-
-  @internal
-*/
-class Cursor extends Anchor {
-
-  constructor(path, offset) {
-    super(path, offset)
-
-    this.type = "cursor"
-  }
-
-  isPropertyFragment() {
-    return false
-  }
-
-  isNodeFragment() {
-    return false
-  }
-
-}
-
-Selection.Cursor = Cursor
 
 export default Selection

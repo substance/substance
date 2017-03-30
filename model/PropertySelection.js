@@ -354,28 +354,6 @@ class PropertySelection extends Selection {
     return sel
   }
 
-  /**
-    Return fragments for a given selection.
-
-    @returns {Selection.Fragment[]}
-  */
-  getFragments() {
-    if(this._internal.fragments) {
-      return this._internal.fragments
-    }
-
-    var fragments
-
-    if (this.isCollapsed()) {
-      fragments = [new Selection.Cursor(this.path, this.start.offset)];
-    } else {
-      fragments = [new Selection.Fragment(this.path, this.start.offset, this.end.offset)];
-    }
-
-    this._internal.fragments = fragments
-    return fragments
-  }
-
   _clone() {
     return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerId, this.surfaceId);
   }

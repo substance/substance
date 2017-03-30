@@ -35,6 +35,7 @@
 
   If you have used the `Configurator` API to create importers and exporters, you should be good.
 - **(!)** removed DOMElement.getRoot()
+- **(!)** removed Selection.getFragments()
 
 ## Beta 6
 
