@@ -25,6 +25,7 @@ class ClipboardImporter extends HTMLImporter {
     // ATTENTION: this is only here so we can enfore windows conversion
     // mode from within tests
     this._isWindows = platform.isWindows
+    this.editorOptions = config.editorOptions
   }
 
   /**
@@ -54,6 +55,10 @@ class ClipboardImporter extends HTMLImporter {
           // nothing
         }
       }
+    }
+
+    if (this.editorOptions && this.editorOptions['forcePlainTextPaste']) {
+      return null;
     }
 
     let htmlDoc = DefaultDOMElement.parseHTML(html)

@@ -32,7 +32,8 @@ class Surface extends Component {
     this._surfaceId = createSurfaceId(this)
 
     this.clipboard = new Clipboard(this.editorSession, {
-      converterRegistry: this.context.converterRegistry
+      converterRegistry: this.context.converterRegistry,
+      editorOptions: this.editorSession.getConfigurator().getEditorOptions()
     })
 
     this.domSelection = this.context.domSelection
