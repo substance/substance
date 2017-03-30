@@ -34,8 +34,11 @@
 - **(!)** `DOMImporter` (`HTMLImporter`/`XMLImporter`) takes two mandatory configuration parameters: `schema` and `converters`
 
   If you have used the `Configurator` API to create importers and exporters, you should be good.
-- **(!)** removed DOMElement.getRoot()
-- **(!)** removed Selection.getFragments()
+- **(!)** removed some API we don't want to support anymore:
+  - `DOMElement.getRoot()`: use `el.getOwnerDocument()` instead
+  - `Selection.getFragments()`: implementation was overly complicated.
+    If you want to iterate nodes of a container selection use `sel.getNodeIds()`
+  - `documentHelpers.getAnnotationsForSelection()`: use `documentHelpers.getPropertyAnnotation()` instead
 
 ## Beta 6
 

@@ -13,13 +13,12 @@ import { isEntirelySelected } from './selectionHelpers'
 
   ```js
   import { documentHelpers } from 'substance'
-  documentHelpers.getAnnotationsForSelection(doc, sel)
+  documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
   ```
 */
 export default {
   getPropertyAnnotationsForSelection,
   getContainerAnnotationsForSelection,
-  getAnnotationsForSelection,
   getTextForSelection,
   getMarkersForSelection,
   getChangeFromDocument,
@@ -66,6 +65,7 @@ function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
   // to properties which make it easy to lookup.
+  /* istanbul ignore next */
   if (!containerId) {
     throw new Error("'containerId' is required.")
   }
@@ -86,30 +86,6 @@ function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
 function isContainerAnnotation(doc, type) {
   let schema = doc.getSchema()
   return schema.isInstanceOf(type, 'container-annotation')
-}
-
-
-/**
-  For a given selection, get annotations of a certain type
-
-  @param {Document} doc
-  @param {Selection} sel
-  @param {string} annotationType
-  @param {string} containerId (only needed when type is a container annotation)
-  @return {array} all matching annotations
-*/
-function getAnnotationsForSelection(doc, sel, annotationType, containerId) {
-  let annos
-  let isContainerAnno = isContainerAnnotation(doc, annotationType)
-  if (isContainerAnno) {
-    let container = doc.get(containerId, 'strict')
-    annos = getContainerAnnotationsForSelection(doc, sel, container, {
-      type: annotationType
-    })
-  } else {
-    annos = getPropertyAnnotationsForSelection(doc, sel, { type: annotationType })
-  }
-  return annos
 }
 
 /**
@@ -187,6 +163,7 @@ function getChangeFromDocument(doc) {
   and removes it from a given container
 */
 function deleteNode(doc, node) {
+  /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
     return
