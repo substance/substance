@@ -1,6 +1,6 @@
 import { module } from 'substance-test'
+import { ChangeStore } from 'substance'
 import testChangeStore from './testChangeStore'
-import ChangeStore from '../../collab/ChangeStore'
 
 const test = module('collab/ChangeStore')
 

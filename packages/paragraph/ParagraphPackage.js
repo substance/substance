@@ -1,7 +1,6 @@
 import Paragraph from './Paragraph'
 import ParagraphComponent from './ParagraphComponent'
 import ParagraphHTMLConverter from './ParagraphHTMLConverter'
-import ParagraphXMLConverter from './ParagraphXMLConverter'
 
 export default {
   name: 'paragraph',
@@ -9,7 +8,7 @@ export default {
     config.addNode(Paragraph)
     config.addComponent(Paragraph.type, ParagraphComponent)
     config.addConverter('html', ParagraphHTMLConverter)
-    config.addConverter('xml', ParagraphXMLConverter)
+    config.addConverter('xml', ParagraphHTMLConverter)
     config.addTextType({
       name: 'paragraph',
       data: {type: 'paragraph'}

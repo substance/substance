@@ -1,7 +1,5 @@
 import { module } from 'substance-test'
-
-import annotationHelpers from '../model/annotationHelpers'
-import EditingInterface from '../model/EditingInterface'
+import { annotationHelpers, EditingInterface } from 'substance'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
 

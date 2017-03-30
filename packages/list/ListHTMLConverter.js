@@ -1,10 +1,7 @@
-import isString from '../../util/isString'
+import { isString } from '../../util'
 import renderListNode from './renderListNode'
 import getListTagName from './getListTagName'
 
-/*
-  HTML converter for Lists.
- */
 export default {
 
   type: "list",
@@ -19,6 +16,7 @@ export default {
     if (el.is('ol')) {
       node.ordered = true
     }
+    node.items = []
     let itemEls = el.findAll('li')
     itemEls.forEach(function(li) {
       // ATTENTION: pulling out nested list elements here on-the-fly

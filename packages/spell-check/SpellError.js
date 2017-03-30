@@ -1,4 +1,4 @@
-import Marker from '../../model/Marker'
+import { Marker } from '../../model'
 
 class SpellError extends Marker {
   invalidate() {

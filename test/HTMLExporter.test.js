@@ -1,8 +1,5 @@
 import { module } from 'substance-test'
-
-import inBrowser from '../util/inBrowser'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import XNode from '../dom/XNode'
+import { DefaultDOMElement, MemoryDOMElement, platform } from 'substance'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import getTestConfig from './fixture/getTestConfig'
@@ -11,7 +8,7 @@ const CONTENT = '0123456789'
 
 htmlExporterTests()
 
-if (inBrowser) {
+if (platform.inBrowser) {
   htmlExporterTests('memory')
 }
 
@@ -19,7 +16,7 @@ function htmlExporterTests(memory) {
 
   const test = module('HTMLExporter' + ( memory ? ' [memory]' : ''), {
     before: function(t) {
-      t.elementFactory = memory ? XNode.createDocument('html') : DefaultDOMElement.createDocument('html')
+      t.elementFactory = memory ? MemoryDOMElement.createDocument('html') : DefaultDOMElement.createDocument('html')
     }
   })
 

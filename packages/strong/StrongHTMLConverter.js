@@ -1,6 +1,3 @@
-/*
- * HTML converter for Strong.
- */
 export default {
 
   type: "strong",

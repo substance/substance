@@ -1,13 +1,11 @@
-import Document from '../model/Document'
-import HtmlExporter from '../model/HTMLExporter'
-import JSONConverter from '../model/JSONConverter'
+import { Document, HTMLExporter, JSONConverter } from '../model'
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
 
   @internal
 */
-class ClipboardExporter extends HtmlExporter {
+class ClipboardExporter extends HTMLExporter {
 
   /**
     Exports document in html format.

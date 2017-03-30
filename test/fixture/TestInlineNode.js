@@ -1,4 +1,4 @@
-import InlineNode from '../../model/InlineNode'
+import { InlineNode } from 'substance'
 
 class TestInlineNode extends InlineNode {}
 

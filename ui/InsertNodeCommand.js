@@ -1,5 +1,5 @@
+import { forEach } from '../util'
 import Command from './Command'
-import forEach from '../util/forEach'
 
 class InsertNodeCommand extends Command {
 

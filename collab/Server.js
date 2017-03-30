@@ -1,5 +1,4 @@
-import uuid from '../util/uuid'
-import EventEmitter from '../util/EventEmitter'
+import { EventEmitter, uuid } from '../util'
 import ServerRequest from './ServerRequest'
 import ServerResponse from './ServerResponse'
 

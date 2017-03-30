@@ -1,16 +1,13 @@
+import { AnnotationComponent, AnnotationCommand, AnnotationTool } from '../../ui'
 import Code from './Code'
 import CodeHTMLConverter from './CodeHTMLConverter'
-import CodeXMLConverter from './CodeXMLConverter'
-import AnnotationComponent from '../../ui/AnnotationComponent'
-import AnnotationCommand from '../../ui/AnnotationCommand'
-import AnnotationTool from '../../ui/AnnotationTool'
 
 export default {
   name: 'code',
   configure: function(config, {toolGroup, disableCollapsedCursor}) {
     config.addNode(Code);
     config.addConverter('html', CodeHTMLConverter)
-    config.addConverter('xml', CodeXMLConverter)
+    config.addConverter('xml', CodeHTMLConverter)
     config.addComponent('code', AnnotationComponent)
     config.addCommand('code', AnnotationCommand, {
       disableCollapsedCursor,
@@ -26,6 +23,5 @@ export default {
     })
   },
   Code: Code,
-  CodeHTMLConverter: CodeHTMLConverter,
-  CodeXMLConverter: CodeXMLConverter,
+  CodeHTMLConverter: CodeHTMLConverter
 }

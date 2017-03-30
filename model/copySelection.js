@@ -1,5 +1,4 @@
-import cloneDeep from '../util/cloneDeep'
-import forEach from '../util/forEach'
+import { cloneDeep, forEach } from '../util'
 import Document from './Document'
 import documentHelpers from './documentHelpers'
 import { isFirst, isLast } from './selectionHelpers'
@@ -11,7 +10,7 @@ import { isFirst, isLast } from './selectionHelpers'
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-function copySelection(doc, selection) {
+export default function copySelection(doc, selection) {
   if (!selection) throw new Error("'selection' is mandatory.")
   let copy = null
   if (!selection.isNull() && !selection.isCollapsed()) {
@@ -130,6 +129,3 @@ function _copyNodeSelection(doc, selection) {
   containerNode.show(node.id)
   return snippet
 }
-
-
-export default copySelection

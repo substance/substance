@@ -1,7 +1,6 @@
-import Component from '../../ui/Component'
-import forEach from '../../util/forEach'
-import DefaultDOMElement from '../../dom/DefaultDOMElement'
-import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import { DefaultDOMElement } from '../../dom'
+import { forEach, getRelativeBoundingRect } from '../../util'
+import { Component } from '../../ui'
 
 /**
   A rich scrollbar implementation that supports highlights.   Usually

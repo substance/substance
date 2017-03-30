@@ -1,3 +1,5 @@
+import { platform } from '../../util'
+import { Tool, InsertNodeCommand } from '../../ui'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 import GridPackage from '../grid/GridPackage'
@@ -13,13 +15,9 @@ import BodyScrollPanePackage from '../body-scroll-pane/BodyScrollPanePackage'
 import SplitPanePackage from '../split-pane/SplitPanePackage'
 import TabbedPanePackage from '../tabbed-pane/TabbedPanePackage'
 import FilePackage from '../file/FilePackage'
-import Tool from '../tools/Tool'
-import platform from '../../util/platform'
-
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 import SelectAllCommand from './SelectAllCommand'
-import InsertNodeCommand from '../../ui/InsertNodeCommand'
 
 export default {
   name: 'base',

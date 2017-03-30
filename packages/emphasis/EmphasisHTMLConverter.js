@@ -1,6 +1,3 @@
-/*
- * HTML converter for Blockquote.
- */
 export default {
 
   type: 'emphasis',

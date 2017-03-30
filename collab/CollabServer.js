@@ -1,7 +1,6 @@
+import { forEach, SubstanceError as Err } from '../util'
 import Server from './Server'
 import CollabEngine from './CollabEngine'
-import Err from '../util/SubstanceError'
-import forEach from '../util/forEach'
 
 /*
   Implements Substance CollabServer API.

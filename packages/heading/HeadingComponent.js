@@ -1,4 +1,4 @@
-import TextBlockComponent from '../../ui/TextBlockComponent'
+import { TextBlockComponent } from '../../ui'
 
 class HeadingComponent extends TextBlockComponent {
   render($$) {

@@ -1,7 +1,4 @@
-import isEqual from '../util/isEqual'
-import forEach from '../util/forEach'
-import isArray from '../util/isArray'
-import TreeIndex from '../util/TreeIndex'
+import { isEqual, forEach, isArray, TreeIndex } from '../util'
 
 class PathEventProxy {
 

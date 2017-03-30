@@ -10,7 +10,7 @@
     "node": ">=6"
   },
   "main": "dist/substance.cjs.js",
-  "jsnext:main": "index.es.js",
+  "jsnext:main": "dist/substance.es.js",
   "scripts": {
     "lint": "eslint -c .eslintrc.js collab doc dom model packages test ui util index.es.js",
     "dev": "node make test:browser:pure -w -s",
@@ -22,15 +22,16 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "lodash-es": "4.13.1"
+    "lodash-es": "4.13.1",
+    "boolbase": "1.0.0",
+    "css-what": "2.1.0",
+    "domelementtype": "1.3.0",
+    "entities": "1.1.1",
+    "nth-check": "1.0.1"
   },
   "devDependencies": {
     "codecov": "^1.0.1",
-    "css-select": "1.2.0",
-    "domelementtype": "1.3.0",
-    "domutils": "1.5.1",
     "eslint": "^3.17.1",
-    "htmlparser2": "3.9.2",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
     "karma-coverage": "^1.1.1",
@@ -38,23 +39,8 @@
     "karma-source-map-support": "1.1.0",
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
+    "substance-bundler": "^0.18.0",
     "substance-docgen": "0.5.2",
-    "substance-bundler": "^0.15.3",
-    "substance-test": "^0.9.3"
-  },
-  "files": [
-    "collab",
-    "dist",
-    "docs",
-    "dom",
-    "model",
-    "packages",
-    "test",
-    "ui",
-    "util",
-    "*.css",
-    "*.js",
-    "*.md",
-    "package.json"
-  ]
+    "substance-test": "^0.9.4"
+  }
 }

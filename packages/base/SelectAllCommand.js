@@ -1,5 +1,5 @@
-import Command from '../../ui/Command'
-import last from '../../util/last'
+import { last } from '../../util'
+import { Command } from '../../ui'
 
 class SelectAll extends Command {
 

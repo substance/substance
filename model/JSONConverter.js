@@ -1,4 +1,4 @@
-import forEach from '../util/forEach'
+import { forEach } from '../util'
 
 class JSONConverter {
 

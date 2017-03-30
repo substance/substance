@@ -1,5 +1,4 @@
-import Component from '../../ui/Component'
-import TextPropertyEditor from '../../ui/TextPropertyEditor'
+import { Component, TextPropertyEditor } from '../../ui'
 
 class TableCellComponent extends Component {
   render($$) {

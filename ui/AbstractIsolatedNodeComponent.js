@@ -1,6 +1,5 @@
-import keys from '../util/keys'
-import Component from '../ui/Component'
-import platform from '../util/platform'
+import { keys, platform } from '../util'
+import Component from './Component'
 
 class AbstractIsolatedNodeComponent extends Component {
 

@@ -1,13 +1,10 @@
-/*
- * HTML converter for Paragraphs.
- */
 export default {
 
   type: 'image',
   tagName: 'img',
 
   import: function(el, node, converter) {
-    let imageFile = converter.createNode({
+    let imageFile = converter.getDocument().create({
       id: 'file-'+node.id,
       type: 'file',
       fileType: 'image',

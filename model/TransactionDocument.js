@@ -1,7 +1,6 @@
-import forEach from '../util/forEach'
-import uuid from '../util/uuid'
+import { forEach, uuid } from '../util'
 import Document from './Document'
-import IncrementalData from './data/IncrementalData'
+import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
 import ParentNodeHook from './ParentNodeHook'
 
@@ -35,9 +34,7 @@ class TransactionDocument extends Document {
 
     this.schema = document.schema
     this.nodeFactory = new DocumentNodeFactory(this)
-    this.data = new IncrementalData(this.schema, {
-      nodeFactory: this.nodeFactory
-    })
+    this.data = new IncrementalData(this.schema, this.nodeFactory)
 
     this.document = document
 
@@ -53,7 +50,7 @@ class TransactionDocument extends Document {
     // ATTENTION: this must before loading the seed
     ParentNodeHook.register(this)
 
-    this.loadSeed(document.toJSON())
+    this.createFromDocument(document)
 
     // make sure that we mirror all changes that are done outside of transactions
     document.on('document:changed', this._onDocumentChanged, this)

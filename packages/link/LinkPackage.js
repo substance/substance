@@ -1,12 +1,10 @@
+import { platform } from '../../util'
+import { AnnotationTool, EditAnnotationCommand } from '../../ui'
 import Link from './Link'
 import LinkComponent from './LinkComponent'
 import LinkCommand from './LinkCommand'
 import LinkHTMLConverter from './LinkHTMLConverter'
-import LinkXMLConverter from './LinkXMLConverter'
-import AnnotationTool from '../../ui/AnnotationTool'
 import EditLinkTool from './EditLinkTool'
-import EditAnnotationCommand from '../../ui/EditAnnotationCommand'
-import platform from '../../util/platform'
 
 export default {
   name: 'link',
@@ -17,7 +15,7 @@ export default {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
     config.addConverter('html', LinkHTMLConverter)
-    config.addConverter('xml', LinkXMLConverter)
+    config.addConverter('xml', LinkHTMLConverter)
     config.addCommand('link', LinkCommand, {
       nodeType: 'link',
       disableCollapsedCursor: true
@@ -55,6 +53,5 @@ export default {
   LinkComponent,
   LinkCommand,
   LinkHTMLConverter,
-  LinkXMLConverter,
-  EditLinkTool,
+  EditLinkTool
 }

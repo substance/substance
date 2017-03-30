@@ -1,4 +1,4 @@
-import Tool from '../tools/Tool'
+import { Tool } from '../../ui'
 
 class InsertImageTool extends Tool {
 

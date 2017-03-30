@@ -9,27 +9,27 @@
     p4: '0123456789'
   ```
 */
-export default function simple(tx) {
-  let body = tx.get('body')
-  tx.create({
+export default function simple(doc) {
+  let body = doc.get('body')
+  doc.create({
     type: 'paragraph',
     id: 'p1',
     content: '0123456789'
   })
   body.show('p1')
-  tx.create({
+  doc.create({
     type: 'paragraph',
     id: 'p2',
     content: '0123456789'
   })
   body.show('p2')
-  tx.create({
+  doc.create({
     type: 'paragraph',
     id: 'p3',
     content: '0123456789'
   })
   body.show('p3')
-  tx.create({
+  doc.create({
     type: 'paragraph',
     id: 'p4',
     content: '0123456789'

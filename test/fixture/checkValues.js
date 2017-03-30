@@ -1,7 +1,4 @@
-import forEach from '../../util/forEach'
-import isPlainObject from '../../util/isPlainObject'
-import isArray from '../../util/isArray'
-import isObject from '../../util/isObject'
+import { forEach, isPlainObject, isArray, isObject } from 'substance'
 
 export default function checkValues(t, actual, expected) {
   if (!isObject(actual)) {

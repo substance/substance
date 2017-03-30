@@ -1,6 +1,4 @@
-import debounce from '../../util/debounce'
-import isString from '../../util/isString'
-import sendRequest from '../../util/sendRequest'
+import { debounce, isString, sendRequest } from '../../util'
 
 const DEFAULT_API_URL = 'http://localhost:4777/api/check'
 

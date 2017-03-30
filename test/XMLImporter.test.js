@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import DOMElement from '../dom/DefaultDOMElement'
+import { DefaultDOMElement } from 'substance'
 import checkValues from './fixture/checkValues'
 import getTestConfig from './fixture/getTestConfig'
 
@@ -10,7 +10,7 @@ const CONTENT = '0123456789'
 test("Importing paragraph", function(t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">' + CONTENT + '</p>'
-  let el = DOMElement.parseXML(xml)
+  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
     id: "p1",
@@ -23,7 +23,7 @@ test("Importing paragraph", function(t) {
 test("Importing paragraph with strong", function(t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">0123<strong id="s1">456</strong>789</p>'
-  let el = DOMElement.parseXML(xml)
+  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let p1 = importer.convertElement(el)
   let doc = p1.getDocument()
   let s1 = doc.get('s1')
@@ -35,7 +35,7 @@ test("Importing paragraph with strong", function(t) {
 test("Importing h1", function(t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h1 id="h1">' + CONTENT + '</h1>'
-  let el = DOMElement.parseXML(xml)
+  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
     id: "h1",
@@ -49,7 +49,7 @@ test("Importing h1", function(t) {
 test("Importing h2", function(t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h2 id="h2">' + CONTENT + '</h2>'
-  let el = DOMElement.parseXML(xml)
+  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
     id: "h2",
@@ -63,7 +63,7 @@ test("Importing h2", function(t) {
 test("Importing meta", function(t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<meta><title>' + CONTENT + '</title></meta>'
-  let el = DOMElement.parseXML(xml)
+  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
     id: 'meta',
@@ -77,7 +77,7 @@ test("Importing meta", function(t) {
 test("Importing image", function(t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<img id="img1" src="someimage.png"></img>'
-  let el = DOMElement.parseXML(xml)
+  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   t.equal(node.type, 'image', 'Created node should be of type "image"')
   t.equal(node.id, 'img1', '.. with correct id')

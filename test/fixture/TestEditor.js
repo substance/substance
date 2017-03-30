@@ -1,5 +1,4 @@
-import AbstractEditor from '../../ui/AbstractEditor'
-import ContainerEditor from '../../ui/ContainerEditor'
+import { AbstractEditor, ContainerEditor } from 'substance'
 
 class TestEditor extends AbstractEditor {
 

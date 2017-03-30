@@ -1,4 +1,4 @@
-import {keys, parseKeyEvent} from '../util/keyboardHelpers'
+import { keys, parseKeyEvent } from '../util'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
 class KeyboardManager {

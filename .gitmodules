@@ -1,0 +1,12 @@
+[submodule "vendor/css-select"]
+	path = vendor/css-select
+	url = https://github.com/substance/css-select
+	branch = substance
+[submodule "vendor/htmlparser2"]
+	path = vendor/htmlparser2
+	url = https://github.com/substance/htmlparser2
+	branch = substance
+[submodule "vendor/domutils"]
+	path = vendor/domutils
+	url = https://github.com/substance/domutils
+	branch = substance

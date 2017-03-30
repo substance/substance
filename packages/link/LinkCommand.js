@@ -1,4 +1,4 @@
-import AnnotationCommand from '../../ui/AnnotationCommand'
+import { AnnotationCommand } from '../../ui'
 
 class LinkCommand extends AnnotationCommand {
   canFuse() { return false }

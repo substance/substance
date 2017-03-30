@@ -1,9 +1,7 @@
-import platform from '../util/platform'
-import substanceGlobals from '../util/substanceGlobals'
-import copySelection from '../model/copySelection'
-import documentHelpers from '../model/documentHelpers'
-import ClipboardImporter from '../ui/ClipboardImporter'
-import ClipboardExporter from '../ui/ClipboardExporter'
+import { platform, substanceGlobals } from '../util'
+import { copySelection, documentHelpers } from '../model'
+import ClipboardImporter from './ClipboardImporter'
+import ClipboardExporter from './ClipboardExporter'
 
 /**
   The Clipboard is a Component which should be rendered as a sibling component
@@ -25,7 +23,7 @@ class Clipboard {
 
     let htmlConverters = []
     if (config.converterRegistry) {
-      htmlConverters = config.converterRegistry.get('html') || []
+      htmlConverters = config.converterRegistry.get('html').values() || []
     }
     let _config = {
       schema: schema,

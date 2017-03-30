@@ -1,6 +1,6 @@
 import { module } from 'substance-test'
+import { SnapshotStore } from 'substance'
 import testSnapshotStore from './testSnapshotStore'
-import SnapshotStore from '../../collab/SnapshotStore'
 
 const test = module('collab/SnapshotStore')
 

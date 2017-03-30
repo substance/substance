@@ -1,5 +1,4 @@
-import isEqual from '../util/isEqual'
-import forEach from '../util/forEach'
+import { isEqual, forEach } from '../util'
 import Annotation from './Annotation'
 import Selection from './Selection'
 

@@ -1,7 +1,6 @@
-import cloneDeep from '../util/cloneDeep'
-import Err from '../util/SubstanceError'
-import EditorSession from '../model/EditorSession'
-import DocumentChange from '../model/DocumentChange'
+import { cloneDeep, SubstanceError as Err } from '../util'
+import { DocumentChange } from '../model'
+import { EditorSession } from '../ui'
 
 /*
   Session that is connected to a Substance Hub allowing

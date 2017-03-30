@@ -1,6 +1,4 @@
-import extend from '../util/extend'
-import forEach from '../util/forEach'
-import Registry from '../util/Registry'
+import { forEach, Registry } from '../util'
 
 /*
   Listens to changes on the document and selection and updates the commandStates
@@ -17,7 +15,7 @@ class CommandManager {
 
     this.editorSession = context.editorSession
     this.doc = this.editorSession.getDocument()
-    this.context = extend({}, context, {
+    this.context = Object.assign({}, context, {
       // for convenienve we provide access to the doc directly
       doc: this.doc
     })
@@ -103,7 +101,7 @@ class CommandManager {
       return
     }
     let commandState = this.commandStates[commandName]
-    let params = extend(this._getCommandParams(), userParams, {
+    let params = Object.assign(this._getCommandParams(), userParams, {
       commandState: commandState
     })
 

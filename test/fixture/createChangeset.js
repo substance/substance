@@ -1,6 +1,4 @@
-import DocumentChange from '../../model/DocumentChange'
-import EditingInterface from '../../model/EditingInterface'
-import TransactionDocument from '../../model/TransactionDocument'
+import { DocumentChange, EditingInterface, TransactionDocument } from 'substance'
 
 /*
   Create a changeset

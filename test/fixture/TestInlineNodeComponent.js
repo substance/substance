@@ -1,4 +1,4 @@
-import { InlineNodeComponent } from '../substance'
+import { InlineNodeComponent } from 'substance'
 
 class TestInlineNodeComponent extends InlineNodeComponent {
   didMount() {

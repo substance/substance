@@ -1,4 +1,4 @@
-import Document from '../../model/Document'
+import { Document } from '../../model'
 
 class ProseArticle extends Document {
   constructor(schema) {

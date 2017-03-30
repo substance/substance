@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 import { module } from 'substance-test'
-import DocumentEngine from '../../collab/DocumentEngine'
+import { DocumentEngine } from 'substance'
 import makeStoresFixture from './makeStoresFixture'
 
 const test = module('collab/DocumentEngine')

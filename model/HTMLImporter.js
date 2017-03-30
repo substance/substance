@@ -1,5 +1,5 @@
+import { DefaultDOMElement } from '../dom'
 import DOMImporter from './DOMImporter'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 /*
   Base class for custom HTML importers. If you want to use XML as your
@@ -20,9 +20,7 @@ class HTMLImporter extends DOMImporter {
   importDocument(html) {
     this.reset()
     var parsed = DefaultDOMElement.parseHTML(html)
-    // creating all nodes
     this.convertDocument(parsed)
-    this.generateDocument()
     return this.state.doc
   }
 

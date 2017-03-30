@@ -1,7 +1,6 @@
-import platform from '../../util/platform'
+import { platform, getRelativeBoundingRect } from '../../util'
+import { AbstractScrollPane } from '../../ui'
 import Scrollbar from '../scrollbar/Scrollbar'
-import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
-import AbstractScrollPane from './AbstractScrollPane'
 
 /**
   Wraps content in a scroll pane.

@@ -42,6 +42,11 @@ class ArrayIterator {
     }
     return this
   }
+
+  peek() {
+    return this.arr[this.pos+1]
+  }
+
 }
 
 export default ArrayIterator

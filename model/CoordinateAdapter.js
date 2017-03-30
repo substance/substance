@@ -1,4 +1,4 @@
-import isArrayEqual from '../util/isArrayEqual'
+import { isArrayEqual } from '../util'
 import Coordinate from './Coordinate'
 
 /*

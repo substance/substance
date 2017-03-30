@@ -1,4 +1,4 @@
-import times from '../../util/times'
+import { times } from '../../util'
 
 export default {
 

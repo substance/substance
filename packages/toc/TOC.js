@@ -1,5 +1,4 @@
-import Component from '../../ui/Component'
-import Icon from '../../ui/FontAwesomeIcon'
+import { Component, FontAwesomeIcon as Icon } from '../../ui'
 
 class TOC extends Component {
 

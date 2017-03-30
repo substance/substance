@@ -1,5 +1,4 @@
-import isArrayEqual from '../util/isArrayEqual'
-import isNumber from '../util/isNumber'
+import { isArrayEqual, isNumber } from '../util'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 
@@ -353,28 +352,6 @@ class PropertySelection extends Selection {
       sel.attach(doc)
     }
     return sel
-  }
-
-  /**
-    Return fragments for a given selection.
-
-    @returns {Selection.Fragment[]}
-  */
-  getFragments() {
-    if(this._internal.fragments) {
-      return this._internal.fragments
-    }
-
-    var fragments
-
-    if (this.isCollapsed()) {
-      fragments = [new Selection.Cursor(this.path, this.start.offset)];
-    } else {
-      fragments = [new Selection.Fragment(this.path, this.start.offset, this.end.offset)];
-    }
-
-    this._internal.fragments = fragments
-    return fragments
   }
 
   _clone() {

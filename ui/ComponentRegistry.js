@@ -1,4 +1,4 @@
-import Registry from '../util/Registry'
+import { Registry } from '../util'
 
 class ComponentRegistry extends Registry {
   constructor(entries) {

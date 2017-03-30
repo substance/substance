@@ -1,5 +1,4 @@
-import isArray from '../util/isArray'
-import uuid from '../util/uuid'
+import { isArray, uuid } from '../util'
 
 
 // A collection of methods to update annotations

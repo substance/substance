@@ -1,4 +1,4 @@
-import EventEmitter from '../../util/EventEmitter'
+import { EventEmitter } from 'substance'
 
 /**
   Websocket server implementation for client-side development of protocols

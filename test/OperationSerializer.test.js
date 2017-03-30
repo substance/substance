@@ -1,9 +1,6 @@
 import { module } from 'substance-test'
-
-import OperationSerializer from '../model/data/OperationSerializer'
-import ObjectOperation from '../model/data/ObjectOperation'
-import TextOperation from '../model/data/TextOperation'
-import ArrayOperation from '../model/data/ArrayOperation'
+import { OperationSerializer, ObjectOperation, TextOperation,
+  ArrayOperation } from 'substance'
 
 const test = module('OperationSerializer')
 

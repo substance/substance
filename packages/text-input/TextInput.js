@@ -1,13 +1,7 @@
-// this package will be moved into substance core
-// then we need to use relative imports
-import TextNode from '../../model/TextNode'
-import Document from '../../model/Document'
-import EditorSession from '../../model/EditorSession'
-import AbstractEditor from '../../ui/AbstractEditor'
-import TextPropertyEditor from '../../ui/TextPropertyEditor'
-import Configurator from '../../util/Configurator'
-import platform from '../../util/platform'
-import BasePackage from '../base/BasePackage'
+import {
+  TextNode, Document, EditorSession, Configurator, platform,
+  AbstractEditor, TextPropertyEditor, BasePackage
+} from '../../index.es'
 
 const {UndoCommand, RedoCommand, SelectAllCommand} = BasePackage
 

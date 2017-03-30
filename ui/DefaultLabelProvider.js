@@ -1,7 +1,5 @@
-/**
+/*
  Default label provider implementation
-
- @internal
 */
 class DefaultLabelProvider {
   constructor(labels, lang) {

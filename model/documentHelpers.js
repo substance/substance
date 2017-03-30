@@ -1,13 +1,8 @@
-import filter from '../util/filter'
-import flatten from '../util/flatten'
-import forEach from '../util/forEach'
-import isArray from '../util/isArray'
-import isArrayEqual from '../util/isArrayEqual'
+import { filter, flatten, forEach, isArray, isArrayEqual } from '../util'
 import DocumentIndex from './DocumentIndex'
-import ObjectOperation from './data/ObjectOperation'
-import DocumentChange from './DocumentChange'
 import annotationHelpers from './annotationHelpers'
 import { isEntirelySelected } from './selectionHelpers'
+import ChangeRecorder from './ChangeRecorder'
 
 /**
   Some helpers for working with Documents.
@@ -17,14 +12,12 @@ import { isEntirelySelected } from './selectionHelpers'
 
   ```js
   import { documentHelpers } from 'substance'
-  documentHelpers.isContainerAnnotation(doc, 'comment')
+  documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
   ```
 */
 export default {
-  isContainerAnnotation,
   getPropertyAnnotationsForSelection,
   getContainerAnnotationsForSelection,
-  getAnnotationsForSelection,
   getTextForSelection,
   getMarkersForSelection,
   getChangeFromDocument,
@@ -32,17 +25,8 @@ export default {
   deleteNode,
   deleteTextRange,
   deleteListRange,
-  mergeListItems
-}
-
-/**
-  @param {Document} doc
-  @param {String} type
-  @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
-*/
-function isContainerAnnotation(doc, type) {
-  var schema = doc.getSchema();
-  return schema.isInstanceOf(type, 'container-annotation');
+  mergeListItems,
+  isContainerAnnotation
 }
 
 /**
@@ -54,16 +38,16 @@ function isContainerAnnotation(doc, type) {
           Returns an empty array when selection is a container selection.
 */
 function getPropertyAnnotationsForSelection(doc, sel, options) {
-  options = options || {};
+  options = options || {}
   if (!sel.isPropertySelection()) {
-    return [];
+    return []
   }
   let path = sel.getPath()
-  let annotations = doc.getIndex('annotations').get(path, sel.start.offset, sel.end.offset);
+  let annotations = doc.getIndex('annotations').get(path, sel.start.offset, sel.end.offset)
   if (options.type) {
-    annotations = filter(annotations, DocumentIndex.filterByType(options.type));
+    annotations = filter(annotations, DocumentIndex.filterByType(options.type))
   }
-  return annotations;
+  return annotations
 }
 
 /**
@@ -80,40 +64,27 @@ function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
   // to properties which make it easy to lookup.
+  /* istanbul ignore next */
   if (!containerId) {
-    throw new Error("'containerId' is required.");
+    throw new Error("'containerId' is required.")
   }
-  options = options || {};
-  var index = doc.getIndex('container-annotations');
-  var annotations = index.get(containerId, options.type);
+  options = options || {}
+  let index = doc.getIndex('container-annotations')
+  let annotations = index.get(containerId, options.type)
   annotations = filter(annotations, function(anno) {
-    return sel.overlaps(anno.getSelection());
-  });
-  return annotations;
+    return sel.overlaps(anno.getSelection())
+  })
+  return annotations
 }
 
 /**
-  For a given selection, get annotations of a certain type
-
   @param {Document} doc
-  @param {Selection} sel
-  @param {string} annotationType
-  @param {string} containerId (only needed when type is a container annotation)
-  @return {array} all matching annotations
+  @param {String} type
+  @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
 */
-function getAnnotationsForSelection(doc, sel, annotationType, containerId) {
-  var annos;
-  var isContainerAnno = isContainerAnnotation(doc, annotationType);
-
-  if (isContainerAnno) {
-    var container = doc.get(containerId, 'strict');
-    annos = getContainerAnnotationsForSelection(doc, sel, container, {
-      type: annotationType
-    });
-  } else {
-    annos = getPropertyAnnotationsForSelection(doc, sel, { type: annotationType });
-  }
-  return annos;
+function isContainerAnnotation(doc, type) {
+  let schema = doc.getSchema()
+  return schema.isInstanceOf(type, 'container-annotation')
 }
 
 /**
@@ -125,10 +96,10 @@ function getAnnotationsForSelection(doc, sel, annotationType, containerId) {
 */
 function getTextForSelection(doc, sel) {
   if (!sel || sel.isNull()) {
-    return "";
+    return ""
   } else if (sel.isPropertySelection()) {
-    let text = doc.get(sel.start.path);
-    return text.substring(sel.start.offset, sel.end.offset);
+    let text = doc.get(sel.start.path)
+    return text.substring(sel.start.offset, sel.end.offset)
   } else if (sel.isContainerSelection()) {
     let result = []
     let nodeIds = sel.getNodeIds()
@@ -147,7 +118,7 @@ function getTextForSelection(doc, sel) {
         result.push(text)
       }
     }
-    return result.join('\n');
+    return result.join('\n')
   }
 }
 
@@ -164,26 +135,8 @@ function getMarkersForSelection(doc, sel) {
 }
 
 function getChangeFromDocument(doc) {
-  let nodes = doc.getNodes()
-  let annotations = []
-  let contentNodes = []
-  let containers = []
-
-  forEach(nodes, (node) => {
-    if (node._isAnnotation) {
-      annotations.push(node)
-    } else if (node._isContainer) {
-      containers.push(node)
-    } else {
-      contentNodes.push(node)
-    }
-  })
-
-  let ops = contentNodes.concat(containers).concat(annotations).map((node) => {
-    return ObjectOperation.Create([node.id], node.toJSON())
-  })
-
-  return new DocumentChange({ops: ops})
+  let recorder = new ChangeRecorder(doc)
+  return recorder.generateChange()
 }
 
 /*
@@ -191,6 +144,7 @@ function getChangeFromDocument(doc) {
   and removes it from a given container
 */
 function deleteNode(doc, node) {
+  /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
     return
@@ -200,7 +154,7 @@ function deleteNode(doc, node) {
     // remove all associated annotations
     let annos = doc.getIndex('annotations').get(node.id)
     for (let i = 0; i < annos.length; i++) {
-      doc.delete(annos[i].id);
+      doc.delete(annos[i].id)
     }
   }
   // delete recursively
@@ -290,7 +244,10 @@ function deleteTextRange(doc, start, end) {
       offset: text.length
     }
   }
-  if (!isArrayEqual(start.path, end.path)) throw new Error('Unsupported state: selection should be on one property')
+  /* istanbul ignore next */
+  if (!isArrayEqual(start.path, end.path)) {
+    throw new Error('start and end must be on one property')
+  }
   let startOffset = start.offset
   let endOffset = end.offset
   doc.update(path, { type: 'delete', start: startOffset, end: endOffset })
@@ -363,7 +320,7 @@ function deleteListRange(doc, list, start, end) {
   if (startPos > endPos) {
     [start, end] = [end, start];
     [startPos, endPos] = [endPos, startPos];
-    [startId, endId] = [endId, startId]
+    [startId, endId] = [endId, startId];
   }
   let firstItem = doc.get(startId)
   let lastItem = doc.get(endId)

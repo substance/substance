@@ -1,4 +1,4 @@
-import HTMLImporter from '../../model/HTMLImporter'
+import { HTMLImporter } from 'substance'
 
 class TestHTMLImporter extends HTMLImporter {
 

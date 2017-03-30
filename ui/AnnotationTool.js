@@ -1,4 +1,4 @@
-import Tool from '../packages/tools/Tool'
+import Tool from './Tool'
 
 /**
 

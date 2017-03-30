@@ -1,15 +1,17 @@
 import { module } from 'substance-test'
+import {
+  DefaultDOMElement, Registry, Clipboard,
+  ParagraphPackage, HeadingPackage, StrongPackage,
+  EmphasisPackage, LinkPackage, CodeblockPackage,
+  platform
+} from 'substance'
 
-import inBrowser from '../util/inBrowser'
-import Clipboard from '../ui/Clipboard'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
-import Registry from '../util/Registry'
-import ParagraphHTMLConverter from '../packages/paragraph/ParagraphHTMLConverter'
-import HeadingHTMLConverter from '../packages/heading/HeadingHTMLConverter'
-import StrongHTMLConverter from '../packages/strong/StrongHTMLConverter'
-import EmphasisHTMLConverter from '../packages/emphasis/EmphasisHTMLConverter'
-import LinkHTMLConverter from '../packages/link/LinkHTMLConverter'
-import CodeblockHTMLConverter from '../packages/codeblock/CodeblockHTMLConverter'
+const ParagraphHTMLConverter = ParagraphPackage.ParagraphHTMLConverter
+const HeadingHTMLConverter = HeadingPackage.HeadingHTMLConverter
+const StrongHTMLConverter = StrongPackage.StrongHTMLConverter
+const EmphasisHTMLConverter = EmphasisPackage.EmphasisHTMLConverter
+const LinkHTMLConverter = LinkPackage.LinkHTMLConverter
+const CodeblockHTMLConverter = CodeblockPackage.CodeblockHTMLConverter
 
 import simple from './fixture/simple'
 import setupEditor from './fixture/setupEditor'
@@ -45,22 +47,20 @@ import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
 
-
 ClipboardTests()
 
-if (inBrowser) {
+if (platform.inBrowser) {
   ClipboardTests('memory')
 }
-
 
 function ClipboardTests(memory) {
 
   const test = module('Clipboard' + (memory ? ' [memory]' : ''), {
     before: function() {
-      if (memory) DefaultDOMElement._useXNode()
+      if (memory) platform.inBrowser = false
     },
     after: function() {
-      DefaultDOMElement._reset()
+      platform._reset()
     }
   })
 
@@ -90,11 +90,7 @@ function ClipboardTests(memory) {
 
     let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
     let body = htmlDoc.find('body')
-    let childNodes = body.getChildNodes()
-    t.equal(childNodes.length, 1, "There should be only one element")
-    let el = childNodes[0]
-    t.equal(el.nodeType, 'text', "HTML element should be a text node.")
-    t.equal(el.text(), TEXT, "HTML text should be correct.")
+    t.equal(body.text(), TEXT, "HTML text should be correct.")
     t.end()
   })
 

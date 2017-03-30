@@ -1,24 +1,14 @@
-import clone from '../util/clone'
-import extend from '../util/extend'
-import flattenOften from '../util/flattenOften'
-import isArray from '../util/isArray'
-import isFunction from '../util/isFunction'
-import isNumber from '../util/isNumber'
-import isBoolean from '../util/isBoolean'
-import isNil from '../util/isNil'
-import isPlainObject from '../util/isPlainObject'
-import isString from '../util/isString'
-import without from '../util/without'
-import map from '../util/map'
-import DOMElement from '../dom/DOMElement'
-import DOMEventListener from '../dom/DOMEventListener'
+import { clone, flattenOften, isArray, isFunction, isNumber, isBoolean, isNil,
+  isPlainObject, isString, without, map } from '../util'
+import { DOMElement } from '../dom'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
 
-  A VirtualElement is just a description of a DOM structure. It represents a virtual
-  DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
-  to actually create a real DOM element, which is done by {@link RenderingEngine}
+  A VirtualElement is just a description of a DOM structure. It represents a
+  virtual DOM mixed with Components. This virtual structure needs to be compiled
+  to a {@link Component} to actually create a real DOM element,
+  which is done by {@link RenderingEngine}
 */
 class VirtualElement extends DOMElement {
 
@@ -179,7 +169,7 @@ class VirtualHTMLElement extends VirtualElement {
     // in the same way as a native DOM element has it
     var attributes = {}
     if (this.attributes) {
-      extend(attributes, this.attributes)
+      Object.assign(attributes, this.attributes)
     }
     if (this.classNames) {
       attributes.class = this.classNames.join(' ')
@@ -379,31 +369,9 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  addEventListener(eventName, handler, options) {
-    var listener
-    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
-      listener = arguments[0]
-    } else {
-      options = options || {}
-      options.context = options.context || this._owner._comp
-      listener = new DOMEventListener(eventName, handler, options)
-    }
-    if (!this.eventListeners) {
-      this.eventListeners = []
-    }
-    this.eventListeners.push(listener)
-    return this
-  }
-
-  removeEventListener(eventName, handler) {
-    if (this.eventListeners) {
-      DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler)
-    }
-    return this
-  }
-
-  getEventListeners() {
-    return this.eventListeners
+  _createEventListener(eventName, handler, options) {
+    options.context = options.context || this._owner._comp
+    return super._createEventListener(eventName, handler, options)
   }
 
   getNodeType() {
@@ -489,19 +457,19 @@ class VirtualHTMLElement extends VirtualElement {
       if (!this.attributes) {
         this.attributes = {}
       }
-      extend(this.attributes, other.attributes)
+      Object.assign(this.attributes, other.attributes)
     }
     if (other.htmlProps) {
       if (!this.htmlProps) {
         this.htmlProps = {}
       }
-      extend(this.htmlProps, other.htmlProps)
+      Object.assign(this.htmlProps, other.htmlProps)
     }
     if (other.style) {
       if (!this.style) {
         this.style = {}
       }
-      extend(this.style, other.style)
+      Object.assign(this.style, other.style)
     }
     if (other.eventListeners) {
       if (!this.eventListeners) {

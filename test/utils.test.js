@@ -1,6 +1,5 @@
 import { module } from 'substance-test'
-import flattenOften from '../util/flattenOften'
-import isEqual from '../util/isEqual'
+import { flattenOften, isEqual } from 'substance'
 
 const test = module('utils')
 

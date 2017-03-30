@@ -1,10 +1,10 @@
-import diff from '../util/diff'
-import isNumber from '../util/isNumber'
-import Coordinate from '../model/Coordinate'
-import Component from '../ui/Component'
-import AnnotatedTextComponent from '../ui/AnnotatedTextComponent'
-import CursorComponent from '../ui/CursorComponent'
-import SelectionFragmentComponent from '../ui/SelectionFragmentComponent'
+import { diff, isNumber } from '../util'
+import { DefaultDOMElement } from '../dom'
+import { Coordinate } from '../model'
+import Component from './Component'
+import AnnotatedTextComponent from './AnnotatedTextComponent'
+import CursorComponent from './CursorComponent'
+import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 /**
   Renders a text property. Used internally by different components to render
@@ -108,7 +108,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   _onDomMutations(mutations) {
     // HACK: only detecting mutations that are coming from the native spell-correction
     if (mutations.length === 2 && mutations[0].target === mutations[1].target) {
-      let textEl = mutations[0].target._wrapper
+      let textEl = DefaultDOMElement.unwrap(mutations[0].target)
       if (textEl) {
         this._applyTextMutation(textEl, mutations[0].oldValue)
         return

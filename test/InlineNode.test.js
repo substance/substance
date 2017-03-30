@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import EditingInterface from '../model/EditingInterface'
+import { EditingInterface } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import twoParagraphs from './fixture/twoParagraphs'
 

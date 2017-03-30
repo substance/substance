@@ -1,4 +1,4 @@
-import AnnotationComponent from '../../ui/AnnotationComponent'
+import { AnnotationComponent } from '../../ui'
 
 class EmphasisComponent extends AnnotationComponent {
   getTagName() {

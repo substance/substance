@@ -1,5 +1,3 @@
-import inBrowser from './inBrowser'
-
 /**
   @module
 
@@ -11,9 +9,9 @@ import inBrowser from './inBrowser'
   import platform from 'substance/util/platform'
   ```
 */
-var platform = {
+const platform = {
 
-  inBrowser: inBrowser,
+  inBrowser: false,
 
   /**
     True if user agent is Internet Explorer or Microsoft Edge.
@@ -36,47 +34,69 @@ var platform = {
 
   // TODO: make sure that this is implemented correctly
 
-  isWindows: (inBrowser && window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf("Win") !== -1),
+  isWindows: false,
 
-  isMac: (inBrowser && window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
+  isMac: false,
 
+  // in tests we change the state of this to emulate execuatio under certain conditions
+  // to reset to defaults we call this function
+  _reset: detect
 }
 
-if (typeof window !== 'undefined') {
-  // Detect Internet Explorer / Edge
-  var ua = window.navigator.userAgent
-  var msie = ua.indexOf('MSIE ')
-  var trident = ua.indexOf('Trident/')
-  var edge = ua.indexOf('Edge/')
+function detect() {
 
-  if (msie > 0) {
-    // IE 10 or older => return version number
-    platform.isIE = true
-    platform.version = 10
-    // TODO: if we need someday, this would be the exact version number
-    // parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10)
-  } else if (trident > 0) {
-    // IE 11 => return version number
-    platform.isIE = true
-    platform.version = 11
-    platform.isTrident = true
-    // TODO: if we need someday, this would be the exact version number
-    // var rv = ua.indexOf('rv:')
-    // parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10)
-  } else if (edge > 0) {
-    // IE 12 => return version number
-    platform.isIE = true
-    platform.isEdge = true
-    platform.version = 12
-    // TODO: if we need someday, this would be the exact version number
-    parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10)
+  if (typeof window !== 'undefined') {
+    platform.inBrowser = true
+
+    // Detect Internet Explorer / Edge
+    const ua = window.navigator.userAgent
+    const msie = ua.indexOf('MSIE ')
+    const trident = ua.indexOf('Trident/')
+    const edge = ua.indexOf('Edge/')
+
+    if (msie > 0) {
+      // IE 10 or older => return version number
+      platform.isIE = true
+      platform.version = 10
+      // TODO: if we need someday, this would be the exact version number
+      // parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10)
+    } else if (trident > 0) {
+      // IE 11 => return version number
+      platform.isIE = true
+      platform.version = 11
+      platform.isTrident = true
+      // TODO: if we need someday, this would be the exact version number
+      // var rv = ua.indexOf('rv:')
+      // parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10)
+    } else if (edge > 0) {
+      // IE 12 => return version number
+      platform.isIE = true
+      platform.isEdge = true
+      platform.version = 12
+      // TODO: if we need someday, this would be the exact version number
+      parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10)
+    }
+
+    // Detect Firefox
+    platform.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+
+    // TODO: explicit detection of Webkit&/Blink
+    platform.isWebkit = !platform.isFF && !platform.isIE
+  } else {
+    platform.inBrowser = false
   }
 
-  // Detect Firefox
-  platform.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+  if (platform.inBrowser) {
+    platform.isWindows = (window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf("Win") !== -1)
+    platform.isMac = (window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
+  }
 
-  // TODO: explicit detection of Webkit&/Blink
-  platform.isWebkit = !platform.isFF && !platform.isIE
+  // TOOD: is there a more reliable way to detect NodeJS?
+  if (typeof process !== 'undefined') {
+    platform.inNodeJS = true
+  }
 }
+
+detect()
 
 export default platform

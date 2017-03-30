@@ -1,4 +1,4 @@
-import DocumentNode from '../../model/DocumentNode'
+import { DocumentNode } from '../../model'
 
 class ListNode extends DocumentNode {
 

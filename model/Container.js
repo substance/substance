@@ -1,5 +1,4 @@
-import isNumber from '../util/isNumber'
-import isString from '../util/isString'
+import { isNumber, isString } from '../util'
 import DocumentNode from './DocumentNode'
 import ContainerAddress from './ContainerAddress'
 
@@ -171,7 +170,7 @@ class Container extends DocumentNode {
   }
 
   _onDocumentChange(change) {
-    if (change.isUpdated(this.getContentPath())) {
+    if (change.hasUpdated(this.getContentPath())) {
       this._invalidateCache()
     }
   }

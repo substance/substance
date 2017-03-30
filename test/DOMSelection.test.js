@@ -1,6 +1,5 @@
 import { module } from 'substance-test'
-import setDOMSelection from '../util/setDOMSelection'
-import EditingInterface from '../model/EditingInterface'
+import { setDOMSelection, EditingInterface } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import checkValues from './fixture/checkValues'
 import { _p1, _empty } from './fixture/samples'

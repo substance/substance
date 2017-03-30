@@ -1,4 +1,4 @@
-import Command from '../../ui/Command'
+import { Command } from '../../ui'
 
 const LEFT_QUOTE = "\u201C"
 const RIGHT_QUOTE = "\u201D"

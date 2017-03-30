@@ -1,6 +1,3 @@
-/*
- * HTML converter for Lists.
- */
 export default {
 
   type: "list-item",

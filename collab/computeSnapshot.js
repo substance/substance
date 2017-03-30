@@ -1,5 +1,5 @@
-import cloneDeep from '../util/cloneDeep'
-import ObjectOperation from '../model/data/ObjectOperation'
+import { cloneDeep } from '../util'
+import { ObjectOperation } from '../model'
 
 /*
   Compute snapshot based on a given doc (JSON) and a set of changes

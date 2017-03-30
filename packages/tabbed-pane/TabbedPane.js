@@ -1,5 +1,5 @@
-import Component from '../../ui/Component'
-import forEach from '../../util/forEach'
+import { forEach } from '../../util'
+import { Component } from '../../ui'
 
 /*
   A tabbed pane layout component. The actual content is specified via append.

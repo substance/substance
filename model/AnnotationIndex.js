@@ -1,8 +1,4 @@
-import isString from '../util/isString'
-import isNumber from '../util/isNumber'
-import filter from '../util/filter'
-import map from '../util/map'
-import TreeIndex from '../util/TreeIndex'
+import { isString, isNumber, filter, map, TreeIndex } from '../util'
 import DocumentIndex from './DocumentIndex'
 
 /*

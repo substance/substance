@@ -1,12 +1,11 @@
-import HTMLImporter from '../../model/HTMLImporter'
+import { HTMLImporter } from '../../model'
 import ProseArticle from './ProseArticle'
-const schema = ProseArticle.schema
 
 // TODO: FIX this. Should be used together with configurator
 class ProseArticleImporter extends HTMLImporter {
   constructor() {
     super({
-      schema: schema,
+      schema: ProseArticle.schema,
       converters: ProseArticleImporter.converters,
       DocumentClass: ProseArticle
     })

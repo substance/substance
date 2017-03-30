@@ -1,4 +1,4 @@
-import { series } from '../../util/async'
+import { async } from 'substance'
 
 let EXAMPLE_CHANGE = {
   ops: [{some: 'operation'}],
@@ -33,7 +33,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Add a second change', (t) => {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
       changeStore.addChange('test-doc', EXAMPLE_CHANGE, (err, version) => {
@@ -50,7 +50,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Get all changes', (t) => {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
@@ -64,7 +64,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Get changes since version 1 (2 changes stored)', (t) => {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
@@ -78,7 +78,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Get changes since version 1 up to version 2 (3 changes stored)', (t) => {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
       _addChange(changeStore, EXAMPLE_CHANGE),
       _addChange(changeStore, EXAMPLE_CHANGE)
@@ -93,7 +93,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Should return no changes if sinceVersion = actual version', (t) => {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
     ], () => {
       changeStore.getChanges('test-doc', 1, (err, changes, version) => {
@@ -111,7 +111,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Return version of test-doc', function(t) {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
     ], () => {
       changeStore.getVersion('test-doc', (err, version) => {
@@ -137,7 +137,7 @@ function testChangeStore(createEmptyChangeStore, test) {
 
   test('Delete all changes', (t) => {
     let changeStore = createEmptyChangeStore()
-    series([
+    async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {

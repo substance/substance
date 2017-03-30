@@ -1,6 +1,5 @@
 import { module } from 'substance-test'
-import Fragmenter from '../model/Fragmenter'
-import Annotation from '../model/Annotation'
+import { Fragmenter, Annotation } from 'substance'
 
 const test = module('Fragmenter')
 
