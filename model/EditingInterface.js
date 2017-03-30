@@ -87,6 +87,7 @@ class EditingInterface {
       }
     }
     this._selection = sel
+    return sel
   }
 
   getSelection() {
