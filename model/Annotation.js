@@ -12,6 +12,8 @@ class Annotation extends DocumentNode {
     this.end = new Coordinate(this.end)
   }
 
+  /* istanbul ignore start */
+
   get startPath() {
     console.warn('DEPRECATED: use Annotation.start.path instead.')
     return this.start.path
@@ -51,6 +53,8 @@ class Annotation extends DocumentNode {
     console.warn('DEPRECATED: use Annotation.end.offset instead.')
     this.end.offset = offset
   }
+
+  /* istanbul ignore end */
 
   /**
     Get the plain text spanned by this annotation.
