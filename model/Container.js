@@ -170,7 +170,7 @@ class Container extends DocumentNode {
   }
 
   _onDocumentChange(change) {
-    if (change.isUpdated(this.getContentPath())) {
+    if (change.hasUpdated(this.getContentPath())) {
       this._invalidateCache()
     }
   }

@@ -149,22 +149,25 @@ class DocumentChange {
     return inverted
   }
 
-  // Inspection API used by DocumentChange listeners
-  // ===============================================
-
+  /* istanbul ignore start */
   isAffected(path) {
-    return this.updated[path]
+    console.error('DEPRECATED: use change.hasUpdated() instead')
+    return this.hasUpdated(path)
   }
 
   isUpdated(path) {
-    // TODO: decide which API we prefer
-    return this.isAffected(path)
+    console.error('DEPRECATED: use change.hasUpdated() instead')
+    return this.hasUpdated(path)
+  }
+  /* istanbul ignore end */
+
+  hasUpdated(path) {
+    return this.updated[path]
   }
 
-  /*
-    TODO serializers and deserializers should allow
-    for application data in 'after' and 'before'
-  */
+  hasDeleted(id) {
+    return this.deleted[id]
+  }
 
   serialize() {
     // TODO serializers and deserializers should allow
