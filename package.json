@@ -43,5 +43,20 @@
     "substance-bundler": "^0.18.0",
     "substance-docgen": "0.5.2",
     "substance-test": "^0.9.4"
-  }
+  },
+  "files": [
+    "dist",
+    "doc", "dom", "model", "packages", "test", "ui", "util",
+    "CHANGELOG.md",
+    "index.es.js",
+    "LICENSE.md",
+    "README.md",
+    "package.json",
+    "*.css",
+    "vendor/css-select.js",
+    "vendor/domutils.js",
+    "vendor/entities.js",
+    "vendor/htmlparser2.js",
+    "vendor/lodash-es.js"
+  ]
 }
