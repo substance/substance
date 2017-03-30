@@ -1,4 +1,4 @@
-import { isArray, isEqual, isNil, isPlainObject, isString, forEach,
+import { isEqual, isNil, isPlainObject, forEach,
   last, uuid, EventEmitter } from '../util'
 import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
@@ -13,8 +13,6 @@ import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
 import Coordinate from './Coordinate'
-import Range from './Range'
-import documentHelpers from './documentHelpers'
 import { createNodeSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
@@ -52,6 +50,7 @@ class Document extends EventEmitter {
 
     this.__id__ = uuid()
 
+    /* istanbul ignore next */
     if (!schema) {
       throw new Error('A document needs a schema for reflection.')
     }
@@ -358,7 +357,7 @@ class Document extends EventEmitter {
     let sel
     if (isNil(data)) return Selection.nullSelection
     if (arguments.length !== 1 || !isPlainObject(data)) {
-      sel = _createSelectionLegacy(this, arguments)
+      throw new Error('Illegal argument: call createSelection({ type: ... }')
     } else {
       switch (data.type) {
         case 'property': {
@@ -448,9 +447,6 @@ class Document extends EventEmitter {
     snippet.getContainer = function() {
       return snippetContainer
     }
-    snippet.show = function() {
-      snippetContainer.show.apply(snippetContainer, arguments)
-    }
     return snippet
   }
 
@@ -458,10 +454,6 @@ class Document extends EventEmitter {
     var doc = this.newInstance()
     doc.loadSeed(data)
     return doc
-  }
-
-  getDocumentMeta() {
-    return this.get('document')
   }
 
   _apply(documentChange) {
@@ -507,25 +499,6 @@ class Document extends EventEmitter {
   */
   toJSON() {
     return converter.exportDocument(this)
-  }
-
-  getTextForSelection(sel) {
-    console.warn('DEPRECATED: use documentHelpers.getTextForSelection() instead.')
-    return documentHelpers.getTextForSelection(this, sel)
-  }
-
-  setText(path, text, annotations) {
-    // TODO: this should go into document helpers.
-    var idx
-    var oldAnnos = this.getIndex('annotations').get(path)
-    // TODO: what to do with container annotations
-    for (idx = 0; idx < oldAnnos.length; idx++) {
-      this.delete(oldAnnos[idx].id)
-    }
-    this.set(path, text)
-    for (idx = 0; idx < annotations.length; idx++) {
-      this.create(annotations[idx])
-    }
   }
 
   getAnnotations(path) {
@@ -617,60 +590,5 @@ Document.SNIPPET_ID = "snippet"
 
 Document.TEXT_SNIPPET_ID = "text-snippet"
 
-
-/* Internals */
-
-// DEPRECATED legacy support
-function _createSelectionLegacy(doc, args) {
-  console.warn('DEPRECATED: use document.createSelection({ type: ... }) instead')
-  // createSelection(coor)
-  if (args[0] instanceof Coordinate) {
-    let coor = args[0]
-    if (coor.isNodeCoordinate()) {
-      return NodeSelection._createFromCoordinate(coor)
-    } else {
-      return doc.createSelection({
-        type: 'property',
-        path: coor.path,
-        startOffset: coor.offset,
-      })
-    }
-  }
-  // createSelection(range)
-  else if (args[0] instanceof Range) {
-    return doc._createSelectionFromRange(args[0])
-  }
-  // createSelection(startPath, startOffset)
-  else if (args.length === 2 && isArray(args[0])) {
-    return doc.createSelection({
-      type: 'property',
-      path: args[0],
-      startOffset: args[1]
-    })
-  }
-  // createSelection(startPath, startOffset, endOffset)
-  else if (args.length === 3 && isArray(args[0])) {
-    return doc.createSelection({
-      type: 'property',
-      path: args[0],
-      startOffset: args[1],
-      endOffset: args[2]
-    })
-  }
-  // createSelection(containerId, startPath, startOffset, endPath, endOffset)
-  else if (args.length === 5 && isString(args[0])) {
-    return doc.createSelection({
-      type: 'container',
-      containerId: args[0],
-      startPath: args[1],
-      startOffset: args[2],
-      endPath: args[3],
-      endOffset: args[4]
-    })
-  } else {
-    console.error('Illegal arguments for document.createSelection().', args)
-    return doc.createSelection(null)
-  }
-}
 
 export default Document
