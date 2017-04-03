@@ -54,7 +54,6 @@ export { operationHelpers }
 export { default as OperationSerializer } from './OperationSerializer'
 export { default as ParentNodeHook } from './ParentNodeHook'
 export { default as paste } from './paste'
-export { default as PathEventProxy } from './PathEventProxy'
 export { default as Property } from './Property'
 export { default as PropertyAnnotation } from './PropertyAnnotation'
 export { default as PropertyIndex } from './PropertyIndex'

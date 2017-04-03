@@ -4,7 +4,6 @@ import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import DocumentChange from './DocumentChange'
-import PathEventProxy from './PathEventProxy'
 import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
 import Selection from './Selection'
@@ -69,18 +68,6 @@ class Document extends EventEmitter {
     // in the schema
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
-
-    // change event proxies are triggered after a document change has been applied
-    // before the regular document:changed event is fired.
-    // They serve the purpose of making the event notification more efficient
-    // In earlier days all observers such as node views where listening on the same event 'operation:applied'.
-    // This did not scale with increasing number of nodes, as on every operation all listeners where notified.
-    // The proxies filter the document change by interest and then only notify a small set of observers.
-    // Example: NotifyByPath notifies only observers which are interested in changes to a certain path.
-    this.eventProxies = {
-      'path': new PathEventProxy(this),
-    }
-    this.on('document:changed', this._updateEventProxies, this)
     // TODO: maybe we want to have a generalized concept for such low-level hooks
     // e.g. indexes are similar
     ParentNodeHook.register(this)
@@ -425,10 +412,6 @@ class Document extends EventEmitter {
     return sel
   }
 
-  getEventProxy(name) {
-    return this.eventProxies[name]
-  }
-
   newInstance() {
     var DocumentClass = this.constructor
     return new DocumentClass(this.schema)
@@ -459,12 +442,6 @@ class Document extends EventEmitter {
   _notifyChangeListeners(change, info) {
     info = info || {}
     this.emit('document:changed', change, info, this)
-  }
-
-  _updateEventProxies(change, info) {
-    forEach(this.eventProxies, function(proxy) {
-      proxy.onDocumentChanged(change, info, this)
-    }.bind(this))
   }
 
   createFromDocument(doc) {
