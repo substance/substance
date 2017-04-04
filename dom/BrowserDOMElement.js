@@ -787,34 +787,30 @@ class AttributesMapAdapter {
     this.attributes.setNamedItem(name, value)
   }
 
-  keys() {
-    let keys = []
-    let S = this.size
+  forEach(fn) {
+    const S = this.size
     for (let i = 0; i < S; i++) {
       const item = this.attributes.item(i)
-      keys.push(item.name)
+      fn(item.value, item.name)
     }
-    return keys
+  }
+
+  map(fn) {
+    let result = []
+    this.forEach((val, key)=>{ result.push(fn(val, key)) })
+    return result
+  }
+
+  keys() {
+    return this.map((val, key)=>{ return key })
   }
 
   values() {
-    let values = []
-    let S = this.size
-    for (let i = 0; i < S; i++) {
-      const item = this.attributes.item(i)
-      values.push(item.value)
-    }
-    return values
+    return this.map((val)=>{ return val })
   }
 
   entries() {
-    let entries = []
-    let S = this.size
-    for (let i = 0; i < S; i++) {
-      const item = this.attributes.item(i)
-      entries.push([item.name, item.value])
-    }
-    return entries
+    return this.map((val, key)=>{ return [key, val] })
   }
 
 }
