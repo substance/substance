@@ -802,7 +802,7 @@ class AttributesMapAdapter {
     let S = this.size
     for (let i = 0; i < S; i++) {
       const item = this.attributes.item(i)
-      values.push(item.name)
+      values.push(item.value)
     }
     return values
   }

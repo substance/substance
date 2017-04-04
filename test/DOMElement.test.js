@@ -228,8 +228,10 @@ function DOMElementTests(impl) {
 
   test("getAttributes()", (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1" bar="2">TEST</div>', 'html')
-    const entries = Array.from(el.getAttributes().entries())
-    t.deepEqual(entries, [["foo", '1'], ["bar", '2']], 'should return all attributes')
+    const attributes = el.getAttributes()
+    t.deepEqual(Array.from(attributes.entries()), [["foo", '1'], ["bar", '2']], 'should return all attributes')
+    t.deepEqual(Array.from(attributes.keys()), ["foo", "bar"], '.. keys() are correct')
+    t.deepEqual(Array.from(attributes.values()), ['1', '2'], '.. values() are correct')
     t.end()
   })
 
