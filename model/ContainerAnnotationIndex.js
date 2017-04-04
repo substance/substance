@@ -12,9 +12,8 @@ class ContainerAnnotationIndex extends DocumentIndex {
     return Boolean(node._isContainerAnnotation)
   }
 
-  reset(data) {
+  clear() {
     this.byId.clear()
-    this._initialize(data)
   }
 
   get(containerId, type) {

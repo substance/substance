@@ -22,6 +22,8 @@ class EditingInterface {
     this._direction = null
   }
 
+  dispose() {}
+
   getDocument() {
     return this._document
   }

@@ -11,6 +11,7 @@ class DocumentNodeFactory {
     }
     return new NodeClass(this.doc, nodeData)
   }
+
 }
 
 export default DocumentNodeFactory

@@ -1,4 +1,3 @@
-import { EventEmitter } from '../util'
 import DataNode from './Node'
 
 /**
@@ -25,6 +24,7 @@ import DataNode from './Node'
   - `bool` boolean values
   - `id` a node id referencing another node in the document
 */
+export default
 class DocumentNode extends DataNode {
 
   /**
@@ -119,54 +119,6 @@ class DocumentNode extends DataNode {
     return 0
   }
 
-  // TODO: should this really be here?
-  // volatile property necessary to render highlighted node differently
-  // TODO: We should get this out here
-  setHighlighted(highlighted, scope) {
-    if (this.highlighted !== highlighted) {
-      this.highlightedScope = scope
-      this.highlighted = highlighted
-      this.emit('highlighted', highlighted)
-    }
-  }
-
-  // Experimental: we are working on a simpler API replacing the
-  // rather inconvenient EventProxy API.
-  on(eventName, handler, ctx) {
-    var match = _matchPropertyEvent(eventName)
-    if (match) {
-      var propertyName = match[1]
-      if (this.constructor.schema[propertyName]) {
-        var doc = this.getDocument()
-        doc.getEventProxy('path')
-          .on([this.id, propertyName], handler, ctx)
-      }
-    }
-    EventEmitter.prototype.on.apply(this, arguments)
-  }
-
-  off(ctx, eventName, handler) {
-    var doc = this.getDocument()
-    var match = false
-    if (!eventName) {
-      doc.getEventProxy('path').off(ctx)
-    } else {
-      match = _matchPropertyEvent(eventName)
-    }
-    if (match) {
-      var propertyName = match[1]
-      doc.getEventProxy('path')
-        .off(ctx, [this.id, propertyName], handler)
-    }
-    EventEmitter.prototype.off.apply(this, arguments)
-  }
-
-  _onPropertyChange(propertyName) {
-    var args = [propertyName + ':changed']
-      .concat(Array.prototype.slice.call(arguments, 1))
-    this.emit.apply(this, args)
-  }
-
   // Node categories
   // --------------------
 
@@ -238,9 +190,3 @@ DocumentNode.isContainerAnnotation = false
   @type {Boolean} default: false
 */
 DocumentNode.isInline = false
-
-function _matchPropertyEvent(eventName) {
-  return /([a-zA-Z_0-9]+):changed/.exec(eventName)
-}
-
-export default DocumentNode

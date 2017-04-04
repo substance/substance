@@ -154,7 +154,6 @@ class Container extends DocumentNode {
 
   _enableCaching() {
     // this hook is used to invalidate cached positions
-    // caching is done only in the 'real' document, not in a TransactionDocument
     if (this.document) {
       this.document.data.on('operation:applied', this._onOperationApplied, this)
       this._isCaching = true

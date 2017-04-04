@@ -24,6 +24,9 @@ class EditorSession extends EventEmitter {
     this.configurator = options.configurator
 
     this._transaction = new Transaction(doc, this)
+    // HACK: we want `tx.setSelection()` to add surfaceId to the selection
+    // automatically, so that tx is easier to use.
+    _patchTxSetSelection(this._transaction, this)
 
     this._history = new ChangeHistory()
     // used for change accumulation (in a collab environment)
@@ -241,6 +244,7 @@ class EditorSession extends EventEmitter {
         sel.surfaceId = fs.id
       }
     }
+    _addSurfaceId(sel, this)
     if (this._setSelection(sel) && !skipFlow) {
       this.startFlow()
     }
@@ -312,8 +316,10 @@ class EditorSession extends EventEmitter {
     ```
   */
   transaction(transformation, info) {
+    const t = this._transaction
     info = info || {}
-    let change = this._transaction._recordChange(transformation, this.getSelection(), this.getFocusedSurface())
+    t._sync()
+    let change = t._recordChange(transformation, this.getSelection(), this.getFocusedSurface())
     if (change) {
       this._commit(change, info)
     } else {
@@ -774,6 +780,27 @@ class EditorSession extends EventEmitter {
     return Boolean(this._blurred)
   }
 
+}
+
+function _patchTxSetSelection(tx, editorSession) {
+  tx.setSelection = function(sel) {
+    sel = Transaction.prototype.setSelection.call(tx, sel)
+    _addSurfaceId(sel, editorSession)
+    return sel
+  }
+}
+
+function _addSurfaceId(sel, editorSession) {
+  if (sel && !sel.isNull() && !sel.surfaceId) {
+    // TODO: We could check if the selection is valid within the given surface
+    let surface = editorSession.getFocusedSurface()
+    if (surface) {
+      sel.surfaceId = surface.id
+    } else {
+      // TODO: instead of warning we could try to 'find' a suitable surface. However, this would also be a bit 'magical'
+      console.warn('No focused surface. Selection will not be rendered.')
+    }
+  }
 }
 
 export default EditorSession
