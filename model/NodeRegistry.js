@@ -22,7 +22,7 @@ class NodeRegistry extends Registry {
     }
     if (this.contains(type)) {
       // throw new Error('Node class is already registered: ' + type)
-      console.error('Node class is already registered. Overriding. ', type)
+      console.info('Overriding node type', type)
       this.remove(type)
     }
     this.add(type, nodeClazz)

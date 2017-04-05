@@ -182,9 +182,9 @@ class DOMImporter {
       this.state.pushContext(el.tagName, converter)
       // Note: special treatment for property annotations and inline nodes
       // i.e. if someone calls `importer.convertElement(annoEl)`
-      // usually, annotations are imported in the course of `importer.annotatedText(..)`
+      // usually, annotations are imported via `importer.annotatedText(..)`
       // The peculiarity here is that in such a case, it is not
-      // not clear, which property the annotation is attached to
+      // not clear, which property the annotation should be attached to.
       if (NodeClass.isInline) {
         nodeData = this._convertInlineNode(el, nodeData, converter)
       }
