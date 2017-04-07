@@ -1,6 +1,6 @@
 export default {
 
-  appliesTo: ['paragraph'],
+  appliesTo: ['paragraph','heading'],
 
   execute: function(props) {
     if (this.appliesTo.indexOf(props.node.type) === -1) {
@@ -9,7 +9,7 @@ export default {
     if (props.action !== 'type') {
       return false
     }
-    let match = /^#\s/.exec(props.text)
+    let match = /^([#]{1,4})\s/.exec(props.text)
     if (match) {
       // console.log('Applying HeadingMacro')
       let editorSession = props.editorSession
@@ -24,10 +24,8 @@ export default {
           endOffset: match[0].length
         })
         tx.deleteSelection()
-        let node = tx.switchTextType({
-          type: 'heading',
-          level: 1
-        })
+        let newType = (match[1].length < 4 ? {type:'heading',level:match[1].length} : {type:'paragraph'})
+        let node = tx.switchTextType(newType)
         tx.setSelection({
           type: 'property',
           path: node.getTextPath(),
