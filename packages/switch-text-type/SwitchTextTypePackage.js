@@ -7,5 +7,6 @@ export default {
     config.addToolGroup('text')
     config.addCommand('switch-text-type', SwitchTextTypeCommand)
     config.addTool('switch-text-type', SwitchTextTypeTool, {toolGroup: options.toolGroup || 'text'})
-  }
+  },
+  SwitchTextTypeCommand
 }

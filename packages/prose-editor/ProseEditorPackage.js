@@ -14,6 +14,7 @@ import QuoteMarksPackage from '../quote-marks/QuoteMarksPackage'
 import ListPackage from '../list/ListPackage'
 import TablePackage from '../table/TablePackage'
 import ProseArticle from './ProseArticle'
+import ProseEditor from './ProseEditor'
 
 export default {
   name: 'prose-editor',
@@ -39,5 +40,6 @@ export default {
     config.import(QuoteMarksPackage)
     config.import(ListPackage)
     config.import(TablePackage)
-  }
+  },
+  ProseEditor
 }
