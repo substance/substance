@@ -3,4 +3,5 @@
   such as fonts and colors for links etc.
 */
 @import './_variables.css';
+@import './ui/styles/_index.css';
 @import './packages/_index.css';

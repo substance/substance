@@ -3,6 +3,20 @@ import TextProperty from './TextPropertyComponent'
 
 class TextBlockComponent extends NodeComponent {
 
+  didMount(...args) {
+    super.didMount(...args)
+
+    let node = this.props.node
+    this.context.editorSession.onRender('document', this.rerender, this, {
+      path: [node.id, 'textAlign']
+    })
+  }
+
+  dispose(...args) {
+    super.dispose(...args)
+    this.context.editorSession.off(this)
+  }
+
   render($$) {
     let el = super.render($$)
     el.addClass('sc-text-block')
@@ -13,6 +27,9 @@ class TextBlockComponent extends NodeComponent {
     if (node.direction) {
       // el.attr('data-direction', node.direction)
       el.attr('dir', node.direction)
+    }
+    if (node.textAlign) {
+      el.addClass('sm-align-'+node.textAlign)
     }
     el.append($$(TextProperty, {
       path: node.getTextPath(),

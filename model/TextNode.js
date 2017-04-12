@@ -35,7 +35,8 @@ TextNode.isText = true
 TextNode.schema = {
   type: "text",
   content: "text",
-  direction: { type: "string", optional: true }
+  direction: { type: "string", optional: true },
+  textAlign: { type: "string", optional: true }
 }
 
 export default TextNode
