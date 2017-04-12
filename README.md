@@ -1,5 +1,7 @@
 # Substance [![Build Status](https://travis-ci.org/substance/substance.svg?branch=devel)](https://travis-ci.org/substance/substance)
 
+[![Join the chat at https://gitter.im/substance/substance](https://badges.gitter.im/substance/substance.svg)](https://gitter.im/substance/substance?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing systems.
 
 Check the [project website](http://substance.io) and the [documentation](http://substance.io/docs).
