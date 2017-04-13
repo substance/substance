@@ -18,8 +18,7 @@ import Command from './Command'
   config.addCommand('strong', AnnotationCommand, {nodeType: 'strong'})
   // Disable, when cursor is collapsed
   config.addCommand('strong', AnnotationCommand, {
-    nodeType: 'strong',
-    disableCollapsedCursor: true
+    nodeType: 'strong'
   })
   ```
 */
@@ -68,12 +67,15 @@ class AnnotationCommand extends Command {
         sel.isNodeSelection() || sel.isContainerSelection() || selectionState.isInlineNodeSelection()) {
       return true
     }
-
-    if (this.config.disableCollapsedCursor && sel.isCollapsed()) {
-      return true
-    }
-
     return false
+  }
+
+  /*
+    When cursor is not collapsed tool may be displayed in context (e.g. in an
+    overlay)
+  */
+  showInContext(sel/*, params*/) {
+    return !sel.isCollapsed()
   }
 
   /**
@@ -163,7 +165,6 @@ class AnnotationCommand extends Command {
     @returns {Object} info object with command details.
   */
   getCommandState(params) { // eslint-disable-line
-
     let sel = this._getSelection(params)
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
@@ -194,6 +195,7 @@ class AnnotationCommand extends Command {
     } else {
       newState.disabled = true
     }
+    newState.showInContext = this.showInContext(sel, params)
     return newState
   }
 

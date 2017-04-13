@@ -108,8 +108,7 @@ class BodyComponent extends Component {
       $$(ContainerEditor, {
         disabled: this.props.disabled,
         node: node,
-        commands: this.props.commands,
-        textTypes: this.props.textTypes
+        commands: this.props.commands
       }).ref('body')
     )
     return el;
@@ -262,8 +261,7 @@ class SimpleWriter extends AbstractEditor {
       $$(Body, {
         disabled: this.props.disabled,
         node: this.doc.get('body'),
-        commands: configurator.getSurfaceCommandNames(),
-        textTypes: configurator.getTextTypes()
+        commands: configurator.getSurfaceCommandNames()
       }).ref('body'),
       $$(Overlay),
       $$(ContextMenu),

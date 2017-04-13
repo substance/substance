@@ -45,6 +45,7 @@ export default {
     config.addToolGroup('context-menu-primary')
     config.addToolGroup('context-menu-document')
     config.addToolGroup('insert')
+    config.addToolGroup('text-types')
 
     // Commands
     config.addCommand('undo', UndoCommand)

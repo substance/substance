@@ -43,8 +43,6 @@ class ContainerEditor extends Surface {
       throw new Error('Container with id ' + this.containerId + ' does not exist.')
     }
 
-    this.textTypes = this.props.textTypes || []
-
     this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
     this._deriveInternalState(this.props)
@@ -259,23 +257,6 @@ class ContainerEditor extends Surface {
 
   isEditable() {
     return super.isEditable.call(this) && !this.isEmpty()
-  }
-
-  getTextTypes() {
-    return this.textTypes || []
-  }
-
-  // Used by SwitchTextTypeTool
-  // TODO: Filter by enabled commands for this Surface
-  // TODO: rethink
-  getTextCommands() {
-    var textCommands = {}
-    this.commandRegistry.each(function(cmd) {
-      if (cmd.constructor.textTypeName) {
-        textCommands[cmd.getName()] = cmd
-      }
-    });
-    return textCommands
   }
 
   // called by flow when subscribed resources have been updated

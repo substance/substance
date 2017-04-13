@@ -84,7 +84,9 @@ class Toolbox extends Component {
         }
       )
 
-      if (!toolProps.disabled || this.showDisabled()) {
+      // NOTE: showInContext must be set by commands explicitly in order to have
+      // the tool show up in the overlay.
+      if ((!toolProps.disabled || this.showDisabled()) && toolProps.showInContext) {
         activeTools.set(tool.name, {
           name: tool.name,
           Class: tool.Class,

@@ -71,8 +71,7 @@ class ProseEditor extends AbstractEditor {
       disabled: this.props.disabled,
       editorSession: this.editorSession,
       node: this.doc.get('body'),
-      commands: configurator.getSurfaceCommandNames(),
-      textTypes: configurator.getTextTypes()
+      commands: configurator.getSurfaceCommandNames()
     }).ref('body')
   }
 }

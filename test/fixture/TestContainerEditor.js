@@ -10,8 +10,7 @@ class TestContainerEditor extends Component {
     return $$('div').append(
       $$(ContainerEditor, {
         node: this.props.node,
-        commands: [],
-        textTypes: []
+        commands: []
       }).ref('editor')
     )
   }

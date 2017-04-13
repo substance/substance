@@ -61,7 +61,6 @@ class Configurator {
       commands: {},
       tools: new Map(),
       toolGroups: new Map(),
-      textTypes: [],
       editingBehaviors: [],
       macros: [],
       dropHandlers: [],
@@ -357,13 +356,6 @@ class Configurator {
     this.config.seed = seed
   }
 
-  addTextType(textType, options) {
-    this.config.textTypes.push({
-      spec: textType,
-      options: options || {}
-    })
-  }
-
   /**
     Adds an editing behavior to this configuration. {@link EditingBehavior}
     for more.
@@ -531,12 +523,6 @@ class Configurator {
 
   getSeed() {
     return this.config.seed
-  }
-
-  getTextTypes() {
-    return this.config.textTypes.map(function(t) {
-      return t.spec
-    })
   }
 
   getIconProvider() {
