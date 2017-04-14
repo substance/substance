@@ -5,28 +5,36 @@ class TextAlignCommand extends Command {
     let sel = this._getSelection(params)
     let selectionState = params.editorSession.getSelectionState()
     let doc = params.editorSession.getDocument()
-    let commandState = { disabled: false }
-    let _disabledCollapsedCursor = this.config.disableCollapsedCursor && sel.isCollapsed()
-    if (_disabledCollapsedCursor || !sel.isPropertySelection() || selectionState.isInlineNodeSelection()) {
-      commandState.disabled = true
-    } else {
+    let commandState = { disabled: true }
+
+
+    if (sel.isPropertySelection() && !selectionState.isInlineNodeSelection()) {
       let path = sel.getPath()
       let node = doc.get(path[0])
       if (node && node.isText() && node.isBlock()) {
-        commandState.node = node
-      } else {
-        commandState.disabled = true
+        commandState.nodeId = node.id
+        commandState.disabled = false
+        if (node.textAlign === this.config.textAlign) {
+          commandState.active = true
+        }
+        // When cursor is at beginning of a non-empty text block we signal
+        // that we want the tool to appear contextually (e.g. in an overlay)
+        let showInContext = false
+        if (sel.start.offset === 0 && sel.end.offset === 0) {
+          let content = doc.get(sel.getPath())
+          if (content.length > 0) showInContext = true
+        }
+        commandState.showInContext = showInContext
       }
     }
-
     return commandState
   }
+
   execute (params) {
-    let node = params.commandState.node
-    let textAlign = params.textAlign
+    let nodeId = params.commandState.nodeId
     let editorSession = params.editorSession
     editorSession.transaction((tx) => {
-      tx.set([node.id, 'textAlign'], textAlign)
+      tx.set([nodeId, 'textAlign'], this.config.textAlign)
     })
   }
 }

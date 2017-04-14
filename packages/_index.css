@@ -57,8 +57,6 @@
 @import './superscript/_superscript.css';
 /* surface */
 @import './surface/_surface.css';
-/* switch-text-type */
-@import './switch-text-type/_switch-text-type.css';
 /* tabbed-pane */
 @import './tabbed-pane/_tabbed-pane.css';
 /* table */
