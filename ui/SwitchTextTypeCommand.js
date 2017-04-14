@@ -16,7 +16,7 @@ class SwitchTextTypeCommand extends Command {
     let doc = params.editorSession.getDocument()
     let sel = params.selection
 
-    let newState = {
+    let commandState = {
       disabled: false
     }
 
@@ -24,24 +24,19 @@ class SwitchTextTypeCommand extends Command {
       let path = sel.getPath()
       let node = doc.get(path[0])
       if (node && node.isText() && node.isBlock()) {
-        newState.active = isMatch(node, this.config.spec)
-        // When cursor is at beginning of a non-empty text block we signal
+        commandState.active = isMatch(node, this.config.spec)
+        // When cursor is at beginning of a text block we signal
         // that we want the tool to appear contextually (e.g. in an overlay)
-        let showInContext = false
-        if (sel.start.offset === 0 && sel.end.offset === 0) {
-          let content = doc.get(sel.getPath())
-          if (content.length > 0) showInContext = true
-        }
-        newState.showInContext = showInContext
+        commandState.showInContext = sel.start.offset === 0 && sel.end.offset === 0
       } else {
-        newState.disabled = true
+        commandState.disabled = true
       }
     } else {
       // TODO: Allow Container Selections too, to switch multiple paragraphs
-      newState.disabled = true
+      commandState.disabled = true
     }
 
-    return newState
+    return commandState
   }
 
   /**

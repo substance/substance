@@ -7,7 +7,6 @@ class TextAlignCommand extends Command {
     let doc = params.editorSession.getDocument()
     let commandState = { disabled: true }
 
-
     if (sel.isPropertySelection() && !selectionState.isInlineNodeSelection()) {
       let path = sel.getPath()
       let node = doc.get(path[0])
@@ -17,14 +16,9 @@ class TextAlignCommand extends Command {
         if (node.textAlign === this.config.textAlign) {
           commandState.active = true
         }
-        // When cursor is at beginning of a non-empty text block we signal
+        // When cursor is at beginning of a text block we signal
         // that we want the tool to appear contextually (e.g. in an overlay)
-        let showInContext = false
-        if (sel.start.offset === 0 && sel.end.offset === 0) {
-          let content = doc.get(sel.getPath())
-          if (content.length > 0) showInContext = true
-        }
-        commandState.showInContext = showInContext
+        commandState.showInContext = sel.start.offset === 0 && sel.end.offset === 0
       }
     }
     return commandState
