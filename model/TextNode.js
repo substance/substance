@@ -36,7 +36,7 @@ TextNode.schema = {
   type: "text",
   content: "text",
   direction: { type: "string", optional: true },
-  textAlign: { type: "string", optional: true }
+  textAlign: { type: "string", default: 'left' }
 }
 
 export default TextNode
