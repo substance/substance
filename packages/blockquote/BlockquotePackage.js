@@ -2,7 +2,7 @@ import { platform } from '../../util'
 import Blockquote from './Blockquote'
 import BlockquoteComponent from './BlockquoteComponent'
 import BlockquoteHTMLConverter from './BlockquoteHTMLConverter'
-import { SwitchTextTypeCommand, Tool } from '../../ui'
+import { SwitchTextTypeCommand } from '../../ui'
 
 export default {
   name: 'blockquote',
@@ -11,8 +11,10 @@ export default {
     config.addComponent(Blockquote.type, BlockquoteComponent)
     config.addConverter('html', BlockquoteHTMLConverter)
     config.addConverter('xml', BlockquoteHTMLConverter)
-    config.addCommand('blockquote', SwitchTextTypeCommand, { spec: { type: 'blockquote' }})
-    config.addTool('blockquote', Tool, { toolGroup: 'text-types' })
+    config.addCommand('blockquote', SwitchTextTypeCommand, {
+      spec: { type: 'blockquote' },
+      commandGroup: 'text-types'
+    })
     config.addIcon('blockquote', { 'fontawesome': 'fa-quote-right' })
     config.addLabel('blockquote', {
       en: 'Blockquote',

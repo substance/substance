@@ -38,26 +38,11 @@ export default {
     config.import(DropzonesPackage)
     config.import(GutterPackage)
 
-    // Setup base toolgroups
-    config.addToolGroup('document')
-    config.addToolGroup('annotations')
-    config.addToolGroup('default')
-    config.addToolGroup('context-menu-primary')
-    config.addToolGroup('context-menu-document')
-    config.addToolGroup('insert')
-    config.addToolGroup('text-types')
-
     // Commands
-    config.addCommand('undo', UndoCommand)
-    config.addCommand('redo', RedoCommand)
-    config.addCommand('select-all', SelectAllCommand)
-
-    config.addCommand('insert-node', InsertNodeCommand)
-
-    // Tools
-    config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
-    config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})
-    config.addTool('select-all', Tool, {toolGroup: ['context-menu-document']})
+    config.addCommand('undo', UndoCommand, { commandGroup: 'undo-redo' })
+    config.addCommand('redo', RedoCommand, { commandGroup: 'undo-redo' })
+    config.addCommand('select-all', SelectAllCommand, { commandGroup: 'selection' })
+    config.addCommand('insert-node', InsertNodeCommand, { commandGroup: 'insert' })
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })

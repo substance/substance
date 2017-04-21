@@ -3,7 +3,7 @@ import {
   AbstractEditor, TextPropertyEditor, BasePackage
 } from '../../index.es'
 
-const {UndoCommand, RedoCommand, SelectAllCommand} = BasePackage
+const { UndoCommand, RedoCommand, SelectAllCommand } = BasePackage
 
 // TODO: maybe AbstractEditor is too heavy?
 // still we need to do almost the same, so that nothing
@@ -36,7 +36,6 @@ class TextInput extends AbstractEditor {
 
   dispose() {
     super.dispose()
-
     this.doc.dispose()
     this.editorSession.dispose()
   }
@@ -73,8 +72,6 @@ class TextInput extends AbstractEditor {
 function _createEditorSession(props) {
   let config = new Configurator()
   config.addNode(TextNode)
-  config.addToolGroup('annotations')
-  config.addToolGroup('default')
   config.addCommand('undo', UndoCommand)
   config.addCommand('redo', RedoCommand)
   config.addCommand('select-all', SelectAllCommand)

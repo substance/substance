@@ -24,17 +24,12 @@ const { InlineWrapper, InlineWrapperComponent } = InlineWrapperPackage
 
 export default function getTestConfig() {
   let config = new Configurator()
-  config.addToolGroup('default')
-  config.addToolGroup('annotations')
-  config.addToolGroup('overlay')
-  config.addToolGroup('insert')
   config.defineSchema({
     name: 'test-article',
     DocumentClass: TestArticle,
     defaultTextType: 'paragraph',
     version: 1.0
   })
-
   config.import(ParagraphPackage)
   config.import(HeadingPackage)
   config.import(StrongPackage)

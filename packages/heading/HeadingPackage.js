@@ -12,10 +12,18 @@ export default {
     config.addConverter('html', HeadingHTMLConverter)
     config.addConverter('xml', HeadingHTMLConverter)
 
-    config.addCommand('heading1', SwitchTextTypeCommand, { spec: { type: 'heading', level: 1 }})
-    config.addCommand('heading2', SwitchTextTypeCommand, { spec: { type: 'heading', level: 2 }})
-    config.addCommand('heading3', SwitchTextTypeCommand, { spec: { type: 'heading', level: 3 }})
-
+    config.addCommand('heading1', SwitchTextTypeCommand, {
+      spec: { type: 'heading', level: 1 },
+      commandGroup: 'text-types'
+    })
+    config.addCommand('heading2', SwitchTextTypeCommand, {
+      spec: { type: 'heading', level: 2 },
+      commandGroup: 'text-types'
+    })
+    config.addCommand('heading3', SwitchTextTypeCommand, {
+      spec: { type: 'heading', level: 3 },
+      commandGroup: 'text-types'
+    })
     if (platform.isMac) {
       config.addKeyboardShortcut('cmd+alt+1', { command: 'heading1' })
       config.addKeyboardShortcut('cmd+alt+2', { command: 'heading2' })
@@ -25,9 +33,6 @@ export default {
       config.addKeyboardShortcut('ctrl+alt+2', { command: 'heading2' })
       config.addKeyboardShortcut('ctrl+alt+3', { command: 'heading3' })
     }
-    config.addTool('heading1', Tool, { toolGroup: 'text-types' })
-    config.addTool('heading2', Tool, { toolGroup: 'text-types' })
-    config.addTool('heading3', Tool, { toolGroup: 'text-types' })
 
     config.addLabel('heading1', {
       en: 'Heading 1',
@@ -41,10 +46,9 @@ export default {
       en: 'Heading 3',
       de: 'Überschrift 3'
     })
-
-    config.addIcon('heading1', { 'text': 'H1' })
-    config.addIcon('heading2', { 'text': 'H2' })
-    config.addIcon('heading3', { 'text': 'H3' })
+    config.addIcon('heading1', { 'fontawesome': 'fa-header' })
+    config.addIcon('heading2', { 'fontawesome': 'fa-header' })
+    config.addIcon('heading3', { 'fontawesome': 'fa-header' })
   },
   Heading,
   HeadingComponent,

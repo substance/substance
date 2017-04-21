@@ -3,7 +3,6 @@ import { DocumentSchema, EditingBehavior } from '../model'
 import ComponentRegistry from './ComponentRegistry'
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'
 import LabelProvider from './DefaultLabelProvider'
-import ToolGroup from '../packages/toolbar/ToolGroup'
 import SaveHandlerStub from '../packages/persistence/SaveHandlerStub'
 
 /**
@@ -59,8 +58,8 @@ class Configurator {
       exporters: {},
       fileProxies: [],
       commands: {},
-      tools: new Map(),
-      toolGroups: new Map(),
+      commandGroups: {},
+      toolPanels: {},
       editingBehaviors: [],
       macros: [],
       dropHandlers: [],
@@ -97,16 +96,14 @@ class Configurator {
     if (!option.key) {
       throw new Error('An option key must be defined')
     }
-
     if (!option.value) {
       throw new Error('An option value must be defined')
     }
-
-    this.config.editorOptions[option.key] = option.value;
+    this.config.editorOptions[option.key] = option.value
   }
 
   getEditorOptions() {
-    return this.config.editorOptions;
+    return this.config.editorOptions
   }
 
     /**
@@ -207,37 +204,16 @@ class Configurator {
       CommandClass: CommandClass,
       options: options || {}
     }
+
+    // Register commandGroup entry
+    let commandGroup = options.commandGroup
+    if (!this.config.commandGroups[commandGroup]) {
+      this.config.commandGroups[commandGroup] = []
+    }
+    this.config.commandGroups[commandGroup].push(name)
   }
 
-  addToolGroup(name, ToolGroupClass, options) {
-    options = options || {}
-    ToolGroupClass = ToolGroupClass || ToolGroup
-
-    this.config.toolGroups.set(name, {
-      name: name,
-      tools: new Map(),
-      Class: ToolGroupClass,
-      options: options
-    })
-  }
-
-  addTool(name, ToolClass, options) {
-    options = options || {}
-
-    if (options.target) {
-      console.warn('DEPRECATED: please use `toolGroup` instead of `target`', name)
-    }
-    let toolGroupNames = options.toolGroup || options.target
-    if (isString(toolGroupNames)) {
-      toolGroupNames = [ toolGroupNames ]
-    }
-
-    if (!toolGroupNames && options.overlay) {
-      toolGroupNames = [ 'overlay' ]
-    } else if (!toolGroupNames) {
-      toolGroupNames = [ 'default' ]
-    }
-
+  addTool(name, ToolClass) {
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
     }
@@ -247,19 +223,14 @@ class Configurator {
     if (!ToolClass || !ToolClass.prototype._isTool) {
       throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:")
     }
+  }
 
-    toolGroupNames.forEach((toolGroupName) => {
-      let toolGroup = this.config.toolGroups.get(toolGroupName)
-      if (!toolGroup) {
-        console.error(`No toolGroup registered with name: ${toolGroupName}`)
-        return
-      }
-      toolGroup.tools.set(name, {
-        name: name,
-        Class: ToolClass,
-        options: options || {}
-      })
-    })
+  addToolPanel(name, spec) {
+    this.config.toolPanels[name] = spec
+  }
+
+  getToolPanel(name) {
+    return this.config.toolPanels[name]
   }
 
   /**
@@ -470,12 +441,12 @@ class Configurator {
     return new ExporterClass(config, context)
   }
 
-  getToolGroups() {
-    return this.config.toolGroups
+  getcommandGroups() {
+    return this.config.commandGroups
   }
 
-  getTools(toolGroupName) {
-    return this.config.toolGroups.get(toolGroupName).tools
+  getTools(commandGroupName) {
+    return this.config.commandGroups.get(commandGroupName).tools
   }
 
   getComponentRegistry() {

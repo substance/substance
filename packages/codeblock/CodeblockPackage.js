@@ -2,7 +2,7 @@ import { platform } from '../../util'
 import Codeblock from './Codeblock'
 import CodeblockComponent from './CodeblockComponent'
 import CodeblockHTMLConverter from './CodeblockHTMLConverter'
-import { SwitchTextTypeCommand, Tool } from '../../ui'
+import { SwitchTextTypeCommand } from '../../ui'
 
 export default {
   name: 'codeblock',
@@ -11,9 +11,10 @@ export default {
     config.addComponent('codeblock', CodeblockComponent)
     config.addConverter('html', CodeblockHTMLConverter)
     config.addConverter('xml', CodeblockHTMLConverter)
-
-    config.addCommand('codeblock', SwitchTextTypeCommand, { spec: { type: 'codeblock' }})
-    config.addTool('codeblock', Tool, { toolGroup: 'text-types' })
+    config.addCommand('codeblock', SwitchTextTypeCommand, {
+      spec: { type: 'codeblock' },
+      commandGroup: 'text-types'
+    })
     config.addIcon('codeblock', { 'fontawesome': 'fa-quote-right' })
     config.addLabel('codeblock', {
       en: 'Codeblock',

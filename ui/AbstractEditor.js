@@ -31,7 +31,7 @@ class AbstractEditor extends Component {
 
     let configurator = this.editorSession.getConfigurator()
     this.componentRegistry = configurator.getComponentRegistry()
-    this.toolGroups = configurator.getToolGroups()
+    this.commandGroups = configurator.getcommandGroups()
     this.labelProvider = configurator.getLabelProvider()
     this.iconProvider = configurator.getIconProvider()
 
@@ -89,9 +89,7 @@ class AbstractEditor extends Component {
       iconProvider: this.iconProvider,
       labelProvider: this.labelProvider,
       resourceManager: this.resourceManager,
-      // ATTENTION: this is a map of tool target names to maps of tool names to tools
-      // i.e. a declarative way to map tools to tool groups
-      toolGroups: this.toolGroups,
+      commandGroups: this.commandGroups
     }
   }
 

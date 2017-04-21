@@ -1,20 +1,38 @@
+import { platform } from '../../util'
 import TextAlignCommand from './TextAlignCommand'
-import { Tool } from '../../ui'
 
 export default {
   name: 'text-align',
   configure: function(config) {
-    config.addToolGroup('text-align')
-    config.addCommand('align-left', TextAlignCommand, { textAlign: 'left' })
-    config.addCommand('align-center', TextAlignCommand, { textAlign: 'center' })
-    config.addCommand('align-right', TextAlignCommand, { textAlign: 'right' })
+    config.addCommand('align-left', TextAlignCommand, {
+      textAlign: 'left',
+      commandGroup: 'text-align'
+    })
+    config.addCommand('align-center', TextAlignCommand, {
+      textAlign: 'center',
+      commandGroup: 'text-align'
+    })
+    config.addCommand('align-right', TextAlignCommand, {
+      textAlign: 'right',
+      commandGroup: 'text-align'
+    })
 
-    config.addTool('align-left', Tool, { toolGroup: 'text-align' })
-    config.addTool('align-center', Tool, { toolGroup: 'text-align' })
-    config.addTool('align-right', Tool, { toolGroup: 'text-align' })
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+shift+l', { command: 'align-left' })
+      config.addKeyboardShortcut('cmd+shift+e', { command: 'align-center' })
+      config.addKeyboardShortcut('cmd+shift+r', { command: 'align-right' })
+    } else {
+      config.addKeyboardShortcut('ctrl+shift+l', { command: 'align-left' })
+      config.addKeyboardShortcut('ctrl+shift+e', { command: 'align-center' })
+      config.addKeyboardShortcut('ctrl+shift+r', { command: 'align-right' })
+    }
 
     config.addIcon('align-left', { 'fontawesome': 'fa-align-left' })
     config.addIcon('align-center', { 'fontawesome': 'fa-align-center' })
     config.addIcon('align-right', { 'fontawesome': 'fa-align-right' })
+
+    config.addLabel('align-left', 'Left')
+    config.addLabel('align-center', 'Center')
+    config.addLabel('align-right', 'Right')
   }
 }

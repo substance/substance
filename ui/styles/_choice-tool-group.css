@@ -1,0 +1,10 @@
+.sc-choice-tool-group {
+  display: inline-block;
+}
+
+.sc-choice-tool-group > .se-choices {
+  background: var(--dark-bg-color);
+  position: absolute;
+  top: 40px;
+  left: 0px;
+}

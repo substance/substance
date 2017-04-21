@@ -8,7 +8,7 @@ class Toolbox extends Component {
     }
   }
 
-  // NOTE: We disable this, as its premature optimization and can cause
+  // NOTE: We disable this, as it is premature optimization and can cause
   // side effects. Rendering the toolbox always is not a big performance
   // issue atm.
   // shouldRerender(newProps, newState) {
@@ -32,9 +32,10 @@ class Toolbox extends Component {
   }
 
   _onCommandStatesChanged(editorSession) {
+    let activeToolGroups = this.getActiveToolGroups()
     if (editorSession.hasChanged('commandStates')) {
       this.setState({
-        activeToolGroups: this.getActiveToolGroups()
+        activeToolGroups: activeToolGroups
       })
     }
   }
