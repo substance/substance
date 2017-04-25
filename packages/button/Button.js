@@ -24,9 +24,10 @@ class Button extends Component {
     if (this.props.active) {
       el.addClass('sm-active')
     }
-    if (this.props.style) {
-      el.addClass('sm-style-'+this.props.style)
+    if (this.props.theme) {
+      el.addClass('sm-theme-'+this.props.theme)
     }
+
     if (this.props.disabled) {
       // make button inaccessible
       el.attr('tabindex', -1)

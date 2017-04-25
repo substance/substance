@@ -1,9 +1,9 @@
-import Toolbox from './Toolbox'
+import ToolPanel from './ToolPanel'
 
 /*
   A default implementation to render the content for the overlay (aka popup) tools.
 */
-class Overlay extends Toolbox {
+class Overlay extends ToolPanel {
 
   didMount() {
     super.didMount()
@@ -19,23 +19,14 @@ class Overlay extends Toolbox {
   }
 
   render($$) {
-    let el = $$('div').addClass(this.getClassNames())
-    el.addClass('sm-hidden')
+    let el = $$('div').addClass('sc-overlay')
+    // el.addClass('sm-hidden')
     el.addClass('sm-theme-'+this.getTheme())
-    let activeToolGroups = this.state.activeToolGroups
-    let activeToolsEl = $$('div').addClass('se-active-tools')
-
-    activeToolGroups.forEach((toolGroup) => {
-      let toolGroupProps = Object.assign({}, toolGroup, {
-        toolStyle: this.getToolStyle(),
-        showIcons: true
-      })
-      activeToolsEl.append(
-        $$(toolGroup.Class, toolGroupProps).ref(toolGroup.name)
+    el.append(
+      $$('div').addClass('se-active-tools').append(
+        this.renderEntries($$)
       )
-    })
-
-    el.append(activeToolsEl)
+    )
     return el
   }
 
@@ -72,16 +63,8 @@ class Overlay extends Toolbox {
     }
   }
 
-  getClassNames() {
-    return 'sc-overlay'
-  }
-
   getTheme() {
     return 'dark'
-  }
-
-  getActiveToolGroupNames() {
-    return this.props.toolGroups || ['overlay']
   }
 
 }

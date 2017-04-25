@@ -1,6 +1,6 @@
-import { Toolbox } from '../../ui'
+import { ToolPanel } from '../../ui'
 
-class ContextMenu extends Toolbox {
+class ContextMenu extends ToolPanel {
 
   didMount() {
     super.didMount()

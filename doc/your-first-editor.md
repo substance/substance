@@ -185,7 +185,6 @@ export default {
 
     // Tool to insert a new comment
     config.addCommand('comment', CommentCommand, {nodeType: 'comment'})
-    config.addTool('comment', AnnotationTool, {target: options.toolTarget || 'annotations'})
     // Tool to edit an existing comment, should be displayed as an overlay
     config.addCommand('edit-comment', EditAnnotationCommand, {nodeType: 'comment'})
     config.addTool('edit-comment', EditCommentTool, { target: 'overlay' })
@@ -214,7 +213,7 @@ export default {
       defaultTextType: 'paragraph'
     })
 
-    // BasePackage provides core functionaliy, such as undo/redo
+    // BasePackage provides core functionality, such as undo/redo
     // and the SwitchTextTypeTool. However, you could import those
     // functionalities individually if you need more control
     config.import(BasePackage)

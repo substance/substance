@@ -2,7 +2,7 @@ import { platform } from '../../util'
 import Paragraph from './Paragraph'
 import ParagraphComponent from './ParagraphComponent'
 import ParagraphHTMLConverter from './ParagraphHTMLConverter'
-import { SwitchTextTypeCommand, Tool } from '../../ui'
+import { SwitchTextTypeCommand } from '../../ui'
 
 export default {
   name: 'paragraph',
@@ -11,8 +11,10 @@ export default {
     config.addComponent(Paragraph.type, ParagraphComponent)
     config.addConverter('html', ParagraphHTMLConverter)
     config.addConverter('xml', ParagraphHTMLConverter)
-    config.addCommand('paragraph', SwitchTextTypeCommand, { spec: { type: 'paragraph' }})
-    config.addTool('paragraph', Tool, { toolGroup: 'text-types' })
+    config.addCommand('paragraph', SwitchTextTypeCommand, {
+      spec: { type: 'paragraph' },
+      commandGroup: 'text-types'
+    })
     config.addIcon('paragraph', { 'fontawesome': 'fa-paragraph' })
     config.addLabel('paragraph', {
       en: 'Paragraph',

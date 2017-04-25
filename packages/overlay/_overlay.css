@@ -18,7 +18,7 @@
 .sc-overlay.sm-theme-dark > .se-active-tools {
   border-radius: 5px;
   background: var(--dark-bg-color);
-  padding: 5px;
+  padding: 3px;
 }
 
 .sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group {
@@ -27,4 +27,5 @@
 
 .sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group > .se-tool {
   display: inline-block;
+  /*margin: 0px 1px;*/
 }

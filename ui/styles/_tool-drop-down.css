@@ -1,8 +1,8 @@
-.sc-choice-tool-group {
+.sc-tool-dropdown {
   display: inline-block;
 }
 
-.sc-choice-tool-group > .se-choices {
+.sc-tool-dropdown > .se-choices {
   background: var(--dark-bg-color);
   position: absolute;
   top: 40px;

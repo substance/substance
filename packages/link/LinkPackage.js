@@ -1,5 +1,5 @@
 import { platform } from '../../util'
-import { AnnotationTool, EditAnnotationCommand } from '../../ui'
+import { EditAnnotationCommand } from '../../ui'
 import Link from './Link'
 import LinkComponent from './LinkComponent'
 import LinkCommand from './LinkCommand'

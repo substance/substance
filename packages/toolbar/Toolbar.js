@@ -1,6 +1,6 @@
-import { Toolbox } from '../../ui'
+import { ToolPanel } from '../../ui'
 
-class Toolbar extends Toolbox {
+class Toolbar extends ToolPanel {
 
   render($$) {
     let el = $$('div').addClass(this.getClassNames())

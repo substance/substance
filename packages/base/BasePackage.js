@@ -1,5 +1,5 @@
 import { platform } from '../../util'
-import { Tool, InsertNodeCommand } from '../../ui'
+import { InsertNodeCommand } from '../../ui'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 import GridPackage from '../grid/GridPackage'
@@ -18,6 +18,7 @@ import FilePackage from '../file/FilePackage'
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 import SelectAllCommand from './SelectAllCommand'
+import ToolPanelPackage from '../tool-panel/ToolPanelPackage'
 
 export default {
   name: 'base',
@@ -37,6 +38,7 @@ export default {
     config.import(OverlayPackage)
     config.import(DropzonesPackage)
     config.import(GutterPackage)
+    config.import(ToolPanelPackage)
 
     // Commands
     config.addCommand('undo', UndoCommand, { commandGroup: 'undo-redo' })

@@ -1,4 +1,4 @@
-import { capitalize } from '../util'
+// import { capitalize } from '../util'
 import Component from './Component'
 
 /**
@@ -24,16 +24,8 @@ import Component from './Component'
     disabled: false
   })
   ```
-
-
-  ```
-  config.addCommand('strong', AnnotationCommand, { nodeType: 'strong' })
-  config.addTool('strong', AnnotationTool, {
-    target: 'annotations'
-  })
-  ```
 */
-class Tool extends Component {
+class ToggleTool extends Component {
 
   get _isTool() {
     return true
@@ -51,11 +43,11 @@ class Tool extends Component {
       el.addClass(customClassNames)
     }
 
-    let title = this.getTitle()
-    if (title) {
-      el.attr('title', title)
-      el.attr('aria-label', title)
-    }
+    // let title = this.getTitle()
+    // if (title) {
+    //   el.attr('title', title)
+    //   el.attr('aria-label', title)
+    // }
 
     el.append(
       this.renderButton($$)
@@ -64,14 +56,13 @@ class Tool extends Component {
   }
 
   renderButton($$) {
+    let commandState = this.props.commandState
     let Button = this.getComponent('button')
     let btn = $$(Button, {
-      icon: this.props.showIcon ? this.props.name : null,
-      label: this.props.showLabel ? this.props.name : null,
-      hint: this.props.showHint ? this.props.name : null,
-      active: this.props.active,
-      disabled: this.props.disabled,
-      style: this.props.style
+      icon: this.props.name,
+      active: commandState.active,
+      disabled: commandState.disabled,
+      theme: 'dark' // TODO: use property
     }).on('click', this.onClick)
     return btn
   }
@@ -80,15 +71,15 @@ class Tool extends Component {
     return ''
   }
 
-  getTitle() {
-    let labelProvider = this.context.labelProvider
-    let title = this.props.title || labelProvider.getLabel(this.getName())
-    // Used only by annotation tool so far
-    if (this.props.mode) {
-      title = [capitalize(this.props.mode), title].join(' ')
-    }
-    return title
-  }
+  // getTitle() {
+  //   let labelProvider = this.context.labelProvider
+  //   let title = this.props.title || labelProvider.getLabel(this.getName())
+  //   // Used only by annotation tool so far
+  //   if (this.props.mode) {
+  //     title = [capitalize(this.props.mode), title].join(' ')
+  //   }
+  //   return title
+  // }
 
   /*
     For now always same as tool name
@@ -111,9 +102,10 @@ class Tool extends Component {
     Executes the associated command
   */
   executeCommand(props) {
+    console.log('props', props)
     props = Object.assign({ mode: this.props.mode }, props)
     this.context.commandManager.executeCommand(this.getCommandName(), props)
   }
 }
 
-export default Tool
+export default ToggleTool

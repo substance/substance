@@ -1,9 +1,9 @@
-import { Toolbox } from '../../ui'
+import { ToolPanel } from '../../ui'
 
 /*
   A default implementation to render the content for the overlay (aka popup) tools.
 */
-class Gutter extends Toolbox {
+class Gutter extends ToolPanel {
 
   render($$) {
     let el = $$('div').addClass(this.getClassNames())

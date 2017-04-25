@@ -65,7 +65,5 @@
 @import './text-property/_text-property.css';
 /* toc */
 @import './toc/_toc.css';
-/* toolbar */
-@import './toolbar/_index.css';
 /* text-align */
 @import './text-align/_text-align.css';
