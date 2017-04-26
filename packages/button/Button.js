@@ -21,6 +21,11 @@ class Button extends Component {
     if (this.props.label) {
       el.append(this.renderLabel($$))
     }
+
+    if (this.props.dropdown) {
+      el.append(this.renderDropdownIcon($$))
+    }
+
     if (this.props.active) {
       el.addClass('sm-active')
     }
@@ -44,6 +49,12 @@ class Button extends Component {
 
   renderIcon($$) {
     let iconEl = this.context.iconProvider.renderIcon($$, this.props.icon)
+    return iconEl
+  }
+
+  renderDropdownIcon($$) {
+    let iconEl = this.context.iconProvider.renderIcon($$, 'dropdown')
+    iconEl.addClass('se-dropdown')
     return iconEl
   }
 

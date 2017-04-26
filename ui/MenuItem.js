@@ -5,7 +5,6 @@ import Component from './Component'
   ```
   $$(MenuItem, {
     name: 'strong',
-    active: false,
     commandState: { active, disabled }
   })
   ```
@@ -18,7 +17,7 @@ class MenuItem extends Component {
       .addClass('sc-menu-item')
       .append(
         this._renderIcon($$),
-        this._renderLabel($$),
+        this._getLabel(),
         this._renderKeyboardShortcut($$)
       )
       .on('click', this._onClick)
@@ -29,7 +28,6 @@ class MenuItem extends Component {
     if (commandState.active) {
       el.addClass('sm-active')
     }
-
     if (commandState.disabled) {
       // make button inaccessible
       el.attr('tabindex', -1)
@@ -38,17 +36,12 @@ class MenuItem extends Component {
       // make button accessible for tab-navigation
       el.attr('tabindex', 1)
     }
-
     return el
   }
 
   _renderIcon($$) {
-    return this.context.iconProvider.renderIcon($$, this.props.icon)
-  }
-
-  _renderLabel($$) {
-    return $$('div').addClass('se-label').append(
-      this._getLabel()
+    return $$('div').addClass('se-icon').append(
+      this.context.iconProvider.renderIcon($$, this.props.name)
     )
   }
 

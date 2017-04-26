@@ -16,7 +16,7 @@
 }
 
 .sc-overlay.sm-theme-dark > .se-active-tools {
-  border-radius: 5px;
+  border-radius: 3px;
   background: var(--dark-bg-color);
   padding: 3px;
 }

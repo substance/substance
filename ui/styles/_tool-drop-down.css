@@ -1,9 +1,9 @@
 .sc-tool-dropdown {
   display: inline-block;
+  position: relative;
 }
 
 .sc-tool-dropdown > .se-choices {
-  background: var(--dark-bg-color);
   position: absolute;
   top: 40px;
   left: 0px;

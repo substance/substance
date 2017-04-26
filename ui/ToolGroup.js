@@ -30,6 +30,19 @@ class ToolGroup extends Component {
     return show
   }
 
+  /*
+    Returns true if at least one command is enabled
+  */
+  _isVisible(commandStates) {
+    let isVisible
+    forEach(commandStates, (commandState, commandName) => {
+      if (this._isToolVisible(commandName, commandState)) {
+        isVisible = true
+      }
+    })
+    return isVisible
+  }
+
   render($$) {
     let commandStates = this._getCommandStates()
     let el = $$('div').addClass('sc-tool-group')

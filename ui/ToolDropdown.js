@@ -1,5 +1,5 @@
 import ToolGroup from './ToolGroup'
-import MenuItem from './MenuItem'
+import Menu from './Menu'
 import { forEach } from '../util'
 
 /*
@@ -33,41 +33,36 @@ class ToolDropdown extends ToolGroup {
       // TODO: render arrow indicating a dropdown
       let toggleButton = $$(Button, {
         icon: activeCommandName,
+        dropdown: true,
         active: this.state.showChoices,
         theme: 'dark' // TODO: use property
       }).on('click', this._toggleChoices)
       el.append(toggleButton)
-
       if (this.state.showChoices) {
-        let choices = $$('div').addClass('se-choices')
-        forEach(commandStates, (commandState, commandName) => {
-          if (this._isToolVisible(commandName, commandState)) {
-            choices.append(
-              $$(MenuItem, {
-                name: commandName,
-                commandState: commandState
-              }).ref(commandName)
-            )
-          }
-        })
-        el.append(choices)
+        el.append(
+          $$('div').addClass('se-choices').append(
+            $$(Menu, {
+              commandStates: commandStates,
+              items: this._getMenuItems(commandStates)
+            })
+          )
+        )
       }
     }
-
     return el
   }
 
   /*
-    Dropdown is only visible if at least one option is present
+    Turn commandStates into menu items
   */
-  _isVisible(commandStates) {
-    let isVisible
+  _getMenuItems(commandStates) {
+    let menuItems = []
     forEach(commandStates, (commandState, commandName) => {
-      if (this._isToolVisible(commandName, commandState)) {
-        isVisible = true
-      }
+      menuItems.push({
+        command: commandName
+      })
     })
-    return isVisible
+    return menuItems
   }
 
   _getActiveCommandName(commandStates) {

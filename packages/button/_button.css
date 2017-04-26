@@ -18,6 +18,10 @@
   padding-right: 7px;
 }
 
+.sc-button > .se-dropdown {
+  padding-left: 5px;
+}
+
 .sc-button.sm-theme-dark[disabled=true] {
   opacity: 0.4;
   cursor: default;
