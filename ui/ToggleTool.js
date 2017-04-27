@@ -1,5 +1,6 @@
 // import { capitalize } from '../util'
 import Component from './Component'
+import Tooltip from './Tooltip'
 
 /**
   Default Tool implementation
@@ -43,14 +44,15 @@ class ToggleTool extends Component {
       el.addClass(customClassNames)
     }
 
-    // let title = this.getTitle()
-    // if (title) {
-    //   el.attr('title', title)
-    //   el.attr('aria-label', title)
-    // }
-
     el.append(
       this.renderButton($$)
+    )
+
+    // Append tooltip
+    el.append(
+      $$(Tooltip, {
+        name: this.props.name
+      })
     )
     return el
   }
@@ -70,16 +72,6 @@ class ToggleTool extends Component {
   getClassNames() {
     return ''
   }
-
-  // getTitle() {
-  //   let labelProvider = this.context.labelProvider
-  //   let title = this.props.title || labelProvider.getLabel(this.getName())
-  //   // Used only by annotation tool so far
-  //   if (this.props.mode) {
-  //     title = [capitalize(this.props.mode), title].join(' ')
-  //   }
-  //   return title
-  // }
 
   /*
     For now always same as tool name
