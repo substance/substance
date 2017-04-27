@@ -28,9 +28,16 @@ class ToolPanel extends Component {
     return els
   }
 
-  hasActiveTools() {
-    // return Boolean(this._hasActiveTools)
-    return true
+  hasEnabledTools() {
+    let entriesContainer = this.refs.entriesContainer
+    let entries = entriesContainer.childNodes
+    let hasEnabledTools = false
+    entries.forEach((entry) => {
+      if (entry.hasEnabledTools()) {
+        hasEnabledTools = true
+      }
+    })
+    return hasEnabledTools
   }
 
   getActiveToolGroupNames() {
@@ -39,10 +46,6 @@ class ToolPanel extends Component {
 
   showDisabled() {
     return false
-  }
-
-  hide() {
-    // Optional hook for hiding the toolbox component
   }
 
   /*

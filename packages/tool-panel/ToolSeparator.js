@@ -6,7 +6,7 @@ class ToolSeparator extends Component {
     return el
   }
 
-  hasActiveTools() {
+  hasEnabledTools() {
     return false
   }
 }

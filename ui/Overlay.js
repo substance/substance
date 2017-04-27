@@ -25,7 +25,7 @@ class Overlay extends ToolPanel {
     el.append(
       $$('div').addClass('se-active-tools').append(
         this.renderEntries($$)
-      )
+      ).ref('entriesContainer')
     )
     return el
   }
@@ -44,7 +44,7 @@ class Overlay extends ToolPanel {
   }
 
   _onSelectionPositioned(hints) {
-    if (this.hasActiveTools()) {
+    if (this.hasEnabledTools()) {
       this.el.removeClass('sm-hidden')
       let overlayWidth = this.el.htmlProp('offsetWidth')
       let selRect = hints.selectionRect

@@ -29,8 +29,7 @@ class ToolDropdown extends ToolGroup {
     let activeCommandName = this._getActiveCommandName(commandStates)
     let Button = this.getComponent('button')
 
-    if (this._isVisible(commandStates)) {
-      // TODO: render arrow indicating a dropdown
+    if (this.hasEnabledTools(commandStates)) {
       let toggleButton = $$(Button, {
         icon: activeCommandName,
         dropdown: true,

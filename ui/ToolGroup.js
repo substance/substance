@@ -19,28 +19,31 @@ class ToolGroup extends Component {
   /*
     Determine wether a tool should be shown or not
   */
-  _isToolVisible(commandName, commandState) {
-    let show = true
+  isToolEnabled(commandName, commandState) {
+    let enabled = true
     if (this.props.contextual && !commandState.showInContext) {
-      show = false
+      enabled = false
     }
     if (commandState.disabled) {
-      show = false
+      enabled = false
     }
-    return show
+    return enabled
   }
 
   /*
     Returns true if at least one command is enabled
   */
-  _isVisible(commandStates) {
-    let isVisible
+  hasEnabledTools(commandStates) {
+    if (!commandStates) {
+      commandStates = this._getCommandStates()
+    }
+    let hasEnabledTools
     forEach(commandStates, (commandState, commandName) => {
-      if (this._isToolVisible(commandName, commandState)) {
-        isVisible = true
+      if (this.isToolEnabled(commandName, commandState)) {
+        hasEnabledTools = true
       }
     })
-    return isVisible
+    return hasEnabledTools
   }
 
   render($$) {
@@ -48,7 +51,7 @@ class ToolGroup extends Component {
     let el = $$('div').addClass('sc-tool-group')
     el.addClass('sm-'+this.props.name)
     forEach(commandStates, (commandState, commandName) => {
-      if (this._isToolVisible(commandName, commandState)) {
+      if (this.isToolEnabled(commandName, commandState)) {
         el.append(
           $$(ToggleTool, {
             name: commandName,
