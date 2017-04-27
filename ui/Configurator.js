@@ -52,6 +52,7 @@ class Configurator {
     this.config = {
       schema: {},
       nodes: {},
+      tools: {},
       components: {},
       converters: {},
       importers: {},
@@ -221,8 +222,14 @@ class Configurator {
       throw new Error('Provided nil for tool '+name)
     }
     if (!ToolClass || !ToolClass.prototype._isTool) {
-      throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:")
+      throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:", name)
     }
+
+    this.config.tools[name] = ToolClass
+  }
+
+  getTools() {
+    return this.config.tools
   }
 
   addToolPanel(name, spec) {
@@ -443,10 +450,6 @@ class Configurator {
 
   getcommandGroups() {
     return this.config.commandGroups
-  }
-
-  getTools(commandGroupName) {
-    return this.config.commandGroups.get(commandGroupName).tools
   }
 
   getComponentRegistry() {

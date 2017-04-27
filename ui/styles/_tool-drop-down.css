@@ -5,6 +5,6 @@
 
 .sc-tool-dropdown > .se-choices {
   position: absolute;
-  top: 40px;
-  left: 0px;
+  top: 30px;
+  left: -3px;
 }

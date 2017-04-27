@@ -32,6 +32,7 @@ class AbstractEditor extends Component {
     let configurator = this.editorSession.getConfigurator()
     this.componentRegistry = configurator.getComponentRegistry()
     this.commandGroups = configurator.getcommandGroups()
+    this.tools = configurator.getTools()
     this.labelProvider = configurator.getLabelProvider()
     this.iconProvider = configurator.getIconProvider()
 
@@ -89,7 +90,8 @@ class AbstractEditor extends Component {
       iconProvider: this.iconProvider,
       labelProvider: this.labelProvider,
       resourceManager: this.resourceManager,
-      commandGroups: this.commandGroups
+      commandGroups: this.commandGroups,
+      tools: this.tools
     }
   }
 

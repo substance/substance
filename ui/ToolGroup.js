@@ -48,12 +48,14 @@ class ToolGroup extends Component {
 
   render($$) {
     let commandStates = this._getCommandStates()
+    let tools = this.context.tools
     let el = $$('div').addClass('sc-tool-group')
     el.addClass('sm-'+this.props.name)
     forEach(commandStates, (commandState, commandName) => {
       if (this.isToolEnabled(commandName, commandState)) {
+        let ToolClass = tools[commandName] || ToggleTool
         el.append(
-          $$(ToggleTool, {
+          $$(ToolClass, {
             name: commandName,
             commandState: commandState,
             style: this.props.style

@@ -20,12 +20,3 @@
   background: var(--dark-bg-color);
   padding: 3px;
 }
-
-.sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group {
-  display: inline-block;
-}
-
-.sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group > .se-tool {
-  display: inline-block;
-  /*margin: 0px 1px;*/
-}

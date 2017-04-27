@@ -1,18 +1,23 @@
-import { Tool } from '../../ui'
+import { ToggleTool } from '../../ui'
 
 /**
-  Tool to edit an existing link.
+  Tool for editing an existing link.
 
   Designed so that it can be used either in a toolbar, or within
   an overlay on the Surface.
 
   @component
 */
-class EditLinkTool extends Tool {
+
+class EditLinkTool extends ToggleTool {
 
   getUrlPath() {
     let propPath = this.constructor.urlPropertyPath
-    return [this.props.node.id].concat(propPath)
+    return [this.getNodeId()].concat(propPath)
+  }
+
+  getNodeId() {
+    return this.props.commandState.nodeId
   }
 
   _openLink() {
@@ -23,10 +28,11 @@ class EditLinkTool extends Tool {
   render($$) {
     let Input = this.getComponent('input')
     let Button = this.getComponent('button')
+    let commandState = this.props.commandState
     let el = $$('div').addClass('sc-edit-link-tool')
 
     // GUARD: Return if tool is disabled
-    if (this.props.disabled) {
+    if (commandState.disabled) {
       console.warn('Tried to render EditLinkTool while disabled.')
       return el
     }
@@ -41,13 +47,13 @@ class EditLinkTool extends Tool {
       }),
       $$(Button, {
         icon: 'open-link',
-        style: this.props.style
+        theme: 'dark',
       }).attr('title', this.getLabel('open-link'))
         .on('click', this._openLink),
 
       $$(Button, {
         icon: 'delete',
-        style: this.props.style
+        theme: 'dark',
       }).attr('title', this.getLabel('delete-link'))
         .on('click', this.onDelete)
     )
@@ -56,7 +62,7 @@ class EditLinkTool extends Tool {
 
   onDelete(e) {
     e.preventDefault();
-    let node = this.props.node
+    let nodeId = this.getNodeId()
     let sm = this.context.surfaceManager
     let surface = sm.getFocusedSurface()
     if (!surface) {
@@ -65,7 +71,7 @@ class EditLinkTool extends Tool {
     }
     let editorSession = this.context.editorSession
     editorSession.transaction(function(tx, args) {
-      tx.delete(node.id)
+      tx.delete(nodeId)
       return args
     })
   }

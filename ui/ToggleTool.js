@@ -36,7 +36,7 @@ class ToggleTool extends Component {
   */
   render($$) {
     let el = $$('div')
-      .addClass('se-tool')
+      .addClass('sc-toggle-tool')
 
     let customClassNames = this.getClassNames()
     if (customClassNames) {
@@ -102,7 +102,6 @@ class ToggleTool extends Component {
     Executes the associated command
   */
   executeCommand(props) {
-    console.log('props', props)
     props = Object.assign({ mode: this.props.mode }, props)
     this.context.commandManager.executeCommand(this.getCommandName(), props)
   }
