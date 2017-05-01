@@ -26,7 +26,7 @@ class AnnotationIndex extends DocumentIndex {
   }
 
   select(node) {
-    return Boolean(node._isPropertyAnnotation)
+    return node.isPropertyAnnotation()
   }
 
   clear() {

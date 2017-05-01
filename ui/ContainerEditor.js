@@ -131,7 +131,8 @@ class ContainerEditor extends Surface {
   _selectNextIsolatedNode(direction) {
     let selState = this.getEditorSession().getSelectionState()
     let node = (direction === 'left') ? selState.getPreviousNode() : selState.getNextNode()
-    if (!node || !node.isIsolatedNode()) return false
+    let isIsolatedNode = !node.isText() && !node.isList()
+    if (!node || !isIsolatedNode) return false
     if (
       (direction === 'left' && selState.isFirst()) ||
       (direction === 'right' && selState.isLast())

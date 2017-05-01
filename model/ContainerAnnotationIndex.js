@@ -9,7 +9,7 @@ class ContainerAnnotationIndex extends DocumentIndex {
   }
 
   select(node) {
-    return Boolean(node._isContainerAnnotation)
+    return node.isContainerAnnotation()
   }
 
   clear() {

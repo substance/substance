@@ -26,6 +26,7 @@ class Editing {
     let end = sel.end
     let containerId = sel.containerId
     let nodeData = { start, end, containerId }
+    // TODO: we need to generalize how node category can be derived statically
     /* istanbul ignore else  */
     if (sel.isPropertySelection()) {
       if (!AnnotationClass.prototype._isAnnotation) {

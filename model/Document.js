@@ -466,9 +466,9 @@ class Document extends EventEmitter {
     let contentNodes = []
     let containers = []
     forEach(nodes, (node) => {
-      if (node._isAnnotation) {
+      if (node.isAnnotation()) {
         annotations.push(node)
-      } else if (node._isContainer) {
+      } else if (node.isContainer()) {
         containers.push(node)
       } else {
         contentNodes.push(node)

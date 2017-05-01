@@ -122,6 +122,8 @@ class DocumentNode extends DataNode {
   // Node categories
   // --------------------
 
+  // TODO: we should use the same approach everywhere, either as prototype property or as class property
+
   /**
     @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
   */
@@ -136,19 +138,33 @@ class DocumentNode extends DataNode {
     return Boolean(this.constructor.isText)
   }
 
+  isList() {
+    return Boolean(this.constructor.isList)
+  }
+
+  isContainer() {
+    return Boolean(this._isContainer)
+  }
+
+  // annotation categories
+
+  isAnnotation() {
+    return Boolean(this._isAnnotation)
+  }
+
+  isPropertyAnnotation() {
+    return Boolean(this._isPropertyAnnotation)
+  }
+
+  isContainerAnnotation() {
+    return Boolean(this._isContainerAnnotation)
+  }
+
   /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
   isInline() {
     return Boolean(this.constructor.isInline)
-  }
-
-  isList() {
-    return Boolean(this.constructor.isList)
-  }
-
-  isIsolatedNode() {
-    return !this.isText() && !this.isList()
   }
 
 }

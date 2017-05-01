@@ -67,9 +67,9 @@ class DocumentChange {
           // HACK: detecting annotation changes in an opportunistic way
           let node = doc.get(op.path[0])
           if (node) {
-            if (node._isPropertyAnnotation) {
+            if (node.isPropertyAnnotation()) {
               updated[node.start.path] = true
-            } else if (node._isContainerAnnotation) {
+            } else if (node.isContainerAnnotation()) {
               affectedContainerAnnos.push(node)
             }
           }
