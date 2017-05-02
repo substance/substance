@@ -523,6 +523,21 @@ class Configurator {
     return this.config.keyboardShortcuts
   }
 
+  /*
+    Allows lookup of a keyboard shortcut by command name
+  */
+  getKeyboardShortcutsByCommand() {
+    let keyboardShortcuts = {}
+    this.config.keyboardShortcuts.forEach((entry) => {
+      if (entry.spec.command) {
+        let shortcut = entry.key.toUpperCase()
+        shortcut = shortcut.replace('CMD', '⌘')
+        keyboardShortcuts[entry.spec.command] = shortcut
+      }
+    })
+    return keyboardShortcuts
+  }
+
   setDefaultLanguage(lang) {
     this.config.lang = lang
   }

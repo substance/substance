@@ -1,5 +1,6 @@
 import ToolGroup from './ToolGroup'
 import Menu from './Menu'
+import Tooltip from './tooltip'
 import { forEach } from '../util'
 
 /*
@@ -23,11 +24,11 @@ class ToolDropdown extends ToolGroup {
   }
 
   render($$) {
+    let Button = this.getComponent('button')
     let commandStates = this._getCommandStates()
     let el = $$('div').addClass('sc-tool-dropdown')
     el.addClass('sm-'+this.props.name)
     let activeCommandName = this._getActiveCommandName(commandStates)
-    let Button = this.getComponent('button')
 
     if (this.hasEnabledTools(commandStates)) {
       let toggleButton = $$(Button, {
@@ -46,9 +47,22 @@ class ToolDropdown extends ToolGroup {
             })
           )
         )
+      } else {
+        let tooltipText = this._getTooltipText()
+        if (tooltipText) {
+          el.append(
+            $$(Tooltip, {
+              name: tooltipText
+            })
+          )
+        }
       }
     }
     return el
+  }
+
+  _getTooltipText() {
+    return this.context.labelProvider.getLabel(this.props.name)
   }
 
   /*

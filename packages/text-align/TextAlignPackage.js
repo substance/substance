@@ -34,5 +34,7 @@ export default {
     config.addLabel('align-left', 'Left')
     config.addLabel('align-center', 'Center')
     config.addLabel('align-right', 'Right')
+
+    config.addLabel('text-align', 'Text Align')
   }
 }

@@ -2,7 +2,7 @@ import { platform } from '../../util'
 import Heading from './Heading'
 import HeadingComponent from './HeadingComponent'
 import HeadingHTMLConverter from './HeadingHTMLConverter'
-import { SwitchTextTypeCommand, Tool } from '../../ui'
+import { SwitchTextTypeCommand } from '../../ui'
 
 export default {
   name: 'heading',

@@ -8,7 +8,6 @@
   display: none;
   position: absolute;
   top: 30px;
-  left: 0px;
 }
 
 .sc-toggle-tool:hover > .sc-tooltip {

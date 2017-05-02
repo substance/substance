@@ -51,11 +51,12 @@ class ToggleTool extends Component {
     // Append tooltip
     el.append(
       $$(Tooltip, {
-        name: this.props.name
+        name: this._getTooltipText()
       })
     )
     return el
   }
+
 
   renderButton($$) {
     let commandState = this.props.commandState
@@ -88,6 +89,17 @@ class ToggleTool extends Component {
     e.preventDefault()
     e.stopPropagation()
     if (!this.props.disabled) this.executeCommand()
+  }
+
+  _getTooltipText() {
+    let name = this.props.name
+    let label = this.context.labelProvider.getLabel(name)
+    let keyboardShortcuts = this.context.keyboardShortcuts
+    if (keyboardShortcuts[name]) {
+      return [label, ' (', keyboardShortcuts[name], ')'].join('')
+    } else {
+      return label
+    }
   }
 
   /**

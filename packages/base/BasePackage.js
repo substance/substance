@@ -67,6 +67,10 @@ export default {
       en: 'Select All',
       de: 'Alles Auswählen'
     })
+    config.addLabel('text-types', {
+      en: 'Text Types',
+      de: 'Texttypen'
+    })
     config.addLabel('container-selection', {
       en: 'Container',
       de: 'Container'
