@@ -57,8 +57,13 @@ class MenuItem extends Component {
   }
 
   _getKeyboardShortcut() {
-    // TODO: find keyboard shortcut for the provided name
-    return 'CTRL+ALT+0'
+    let name = this.props.name
+    let keyboardShortcuts = this.context.keyboardShortcuts
+    if (keyboardShortcuts[name]) {
+      return keyboardShortcuts[name]
+    } else {
+      return ''
+    }
   }
 
   _onClick(e) {

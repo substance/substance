@@ -59,14 +59,8 @@ class Button extends Component {
   }
 
   renderLabel($$) {
-    return $$('div').addClass('se-label').append(
+    return $$('span').addClass('se-label').append(
       this.getLabel(this.props.label)
-    )
-  }
-
-  renderHint($$) {
-    return $$('div').addClass('se-hint').append(
-      this.getLabel(this.props.hint+'-hint')
     )
   }
 

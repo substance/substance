@@ -20,6 +20,7 @@ class Overlay extends ToolPanel {
 
   render($$) {
     let el = $$('div').addClass('sc-overlay')
+    el.addClass('sm-hidden')
     el.addClass('sm-theme-'+this.getTheme())
     el.append(
       $$('div').addClass('se-active-tools').append(

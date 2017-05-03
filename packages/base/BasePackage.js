@@ -44,7 +44,6 @@ export default {
     config.addCommand('undo', UndoCommand, { commandGroup: 'undo-redo' })
     config.addCommand('redo', RedoCommand, { commandGroup: 'undo-redo' })
     config.addCommand('select-all', SelectAllCommand, { commandGroup: 'selection' })
-    config.addCommand('insert-node', InsertNodeCommand, { commandGroup: 'insert' })
 
     // Icons
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })
@@ -68,8 +67,8 @@ export default {
       de: 'Alles Auswählen'
     })
     config.addLabel('text-types', {
-      en: 'Text Types',
-      de: 'Texttypen'
+      en: 'Text Type',
+      de: 'Texttyp'
     })
     config.addLabel('container-selection', {
       en: 'Container',

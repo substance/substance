@@ -62,6 +62,13 @@ export default {
         showDisabled: true,
         style: 'minimal',
         commandGroups: ['annotations']
+      },
+      {
+        name: 'annotations',
+        type: 'tool-group',
+        showDisabled: true,
+        style: 'minimal',
+        commandGroups: ['insert']
       }
     ])
   },

@@ -31,12 +31,25 @@ class ToolDropdown extends ToolGroup {
     let activeCommandName = this._getActiveCommandName(commandStates)
 
     if (this.hasEnabledTools(commandStates)) {
-      let toggleButton = $$(Button, {
-        icon: activeCommandName,
-        dropdown: true,
-        active: this.state.showChoices,
-        theme: 'dark' // TODO: use property
-      }).on('click', this._toggleChoices)
+      let toggleButton
+      if (this.props.style === 'minimal') {
+        toggleButton = $$(Button, {
+          icon: activeCommandName,
+          dropdown: true,
+          active: this.state.showChoices,
+          theme: this.props.theme
+        }).on('click', this._toggleChoices)
+      } else if (this.props.style === 'descriptive') {
+        toggleButton = $$(Button, {
+          label: activeCommandName,
+          dropdown: true,
+          active: this.state.showChoices,
+          theme: this.props.theme
+        }).on('click', this._toggleChoices)
+      } else {
+        throw new Error('Style '+this.props.style+' not supported')
+      }
+
       el.append(toggleButton)
       if (this.state.showChoices) {
         el.append(
