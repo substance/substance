@@ -9,7 +9,9 @@ import { forEach } from '../util'
     name: 'annotations',
     type: 'tool-group',
     contextual: true,
+    showDisabled: true,
     style: 'minimal', // icon only display
+    theme: 'light',
     commandGroups: ['text-types']
   })
   ```
@@ -52,13 +54,14 @@ class ToolGroup extends Component {
     let el = $$('div').addClass('sc-tool-group')
     el.addClass('sm-'+this.props.name)
     forEach(commandStates, (commandState, commandName) => {
-      if (this.isToolEnabled(commandName, commandState)) {
+      if (this.isToolEnabled(commandName, commandState) || this.props.showDisabled) {
         let ToolClass = tools[commandName] || ToggleTool
         el.append(
           $$(ToolClass, {
             name: commandName,
             commandState: commandState,
-            style: this.props.style
+            style: this.props.style,
+            theme: this.props.theme
           }).ref(commandName)
         )
       }

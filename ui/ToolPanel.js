@@ -21,8 +21,9 @@ class ToolPanel extends Component {
     this.props.toolPanel.forEach((entry) => {
       let ComponentClass = this.getComponent(entry.type)
       if (!ComponentClass) throw new Error('Toolpanel entry type not found')
+      let props = Object.assign({}, entry, { theme: this.getTheme() })
       els.push(
-        $$(ComponentClass, entry)
+        $$(ComponentClass, props)
       )
     })
     return els
@@ -53,6 +54,10 @@ class ToolPanel extends Component {
   */
   getToolStyle() {
     throw new Error('Abstract method')
+  }
+
+  getTheme() {
+    return this.props.theme || 'dark'
   }
 
   _getCommandStates() {

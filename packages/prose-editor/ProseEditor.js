@@ -29,6 +29,7 @@ class ProseEditor extends AbstractEditor {
     let el = $$('div').addClass('sc-prose-editor')
     let toolbar = this._renderToolbar($$)
     let editor = this._renderEditor($$)
+    let configurator = this.getConfigurator()
 
     let ScrollPane = this.componentRegistry.get('scroll-pane')
     let Overlay = this.componentRegistry.get('overlay')
@@ -39,10 +40,12 @@ class ProseEditor extends AbstractEditor {
       name: 'contentPanel',
       contextMenu: this.props.contextMenu || 'native',
       scrollbarPosition: 'right',
-      scrollbarType: this.props.scrollbarType,
+      scrollbarType: this.props.scrollbarType
     }).append(
       editor,
-      $$(Overlay),
+      $$(Overlay, {
+        toolPanel: configurator.getToolPanel('main-overlay')
+      }),
       $$(ContextMenu),
       $$(Dropzones)
     ).ref('contentPanel')
@@ -57,10 +60,10 @@ class ProseEditor extends AbstractEditor {
   }
 
   _renderToolbar($$) {
-    let commandStates = this.commandManager.getCommandStates()
+    let configurator = this.getConfigurator()
     return $$('div').addClass('se-toolbar-wrapper').append(
       $$(Toolbar, {
-        commandStates: commandStates
+        toolPanel: configurator.getToolPanel('toolbar')
       }).ref('toolbar')
     )
   }

@@ -38,6 +38,32 @@ export default {
     config.import(QuoteMarksPackage)
     config.import(ListPackage)
     config.import(TablePackage)
+
+    // Configure overlay
+    config.addToolPanel('main-overlay', [
+      {
+        type: 'tool-group',
+        commandGroups: ['prompt']
+      }
+    ])
+
+    // Configure toolbar
+    config.addToolPanel('toolbar', [
+      {
+        name: 'text-types',
+        type: 'tool-dropdown',
+        showDisabled: true,
+        style: 'descriptive',
+        commandGroups: ['text-types']
+      },
+      {
+        name: 'annotations',
+        type: 'tool-group',
+        showDisabled: true,
+        style: 'minimal',
+        commandGroups: ['annotations']
+      }
+    ])
   },
   ProseEditor
 }

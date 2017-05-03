@@ -9,11 +9,13 @@ import ImageFileProxy from './ImageFileProxy'
 export default {
   name: 'image',
   configure: function(config) {
-    config.addNode(ImageNode);
+    config.addNode(ImageNode)
     config.addComponent('image', ImageComponent)
     config.addConverter('html', ImageHTMLConverter)
     config.addConverter('xml', ImageHTMLConverter)
-    config.addCommand('insert-image', InsertImageCommand)
+    config.addCommand('insert-image', InsertImageCommand, {
+      commandGroup: 'insert'
+    })
     config.addTool('insert-image', InsertImageTool)
     config.addIcon('insert-image', { 'fontawesome': 'fa-image' })
     config.addLabel('image', {
@@ -24,7 +26,6 @@ export default {
       en: 'Insert image',
       de: 'Bild einfügen'
     })
-
     config.addDropHandler(DropImage)
     config.addFileProxy(ImageFileProxy)
   },

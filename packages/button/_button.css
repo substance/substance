@@ -18,7 +18,7 @@
   padding-right: 7px;
 }
 
-.sc-button > .se-dropdown {
+.sc-button.sm-theme-dark > .se-dropdown {
   padding-left: 5px;
 }
 
@@ -38,6 +38,50 @@
 }
 
 .sc-button.sm-theme-dark.sm-active:focus {
+  /*border-color: #444;
+  background: #444;*/
+}
+
+
+/*
+  Light Theme - when used on white background
+  =============================================================
+*/
+
+.sc-button.sm-theme-light {
+  position: relative;
+  height: 24px;
+  min-width: 24px;
+  line-height: 24px;
+  text-align: center;
+  /*color: #444;*/
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.sc-button.sm-theme-light > .se-dropdown {
+  padding-left: 5px;
+}
+
+.sc-button.sm-theme-light[disabled=true] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sc-button.sm-theme-light.sm-active {
+  border-color: #ddd;
+  background: white;
+}
+
+.sc-button.sm-theme-light:focus {
+  background: white;
+}
+
+.sc-button.sm-theme-light.sm-active:focus {
   /*border-color: #444;
   background: #444;*/
 }

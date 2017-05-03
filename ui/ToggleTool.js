@@ -1,4 +1,3 @@
-// import { capitalize } from '../util'
 import Component from './Component'
 import Tooltip from './Tooltip'
 
@@ -57,7 +56,6 @@ class ToggleTool extends Component {
     return el
   }
 
-
   renderButton($$) {
     let commandState = this.props.commandState
     let Button = this.getComponent('button')
@@ -65,7 +63,7 @@ class ToggleTool extends Component {
       icon: this.props.name,
       active: commandState.active,
       disabled: commandState.disabled,
-      theme: 'dark' // TODO: use property
+      theme: this.props.theme
     }).on('click', this.onClick)
     return btn
   }
