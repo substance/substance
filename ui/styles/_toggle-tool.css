@@ -7,7 +7,7 @@
 .sc-toggle-tool > .sc-tooltip {
   display: none;
   position: absolute;
-  top: 30px;
+  top: 35px;
 }
 
 .sc-toggle-tool:hover > .sc-tooltip {

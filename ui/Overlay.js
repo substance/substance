@@ -60,7 +60,7 @@ class Overlay extends ToolPanel {
   }
 
   getTheme() {
-    return 'dark'
+    return this.props.theme || 'dark'
   }
 
 }

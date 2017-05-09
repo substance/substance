@@ -44,7 +44,8 @@ class ProseEditor extends AbstractEditor {
     }).append(
       editor,
       $$(Overlay, {
-        toolPanel: configurator.getToolPanel('main-overlay')
+        toolPanel: configurator.getToolPanel('main-overlay'),
+        theme: 'dark'
       }),
       $$(ContextMenu),
       $$(Dropzones)
