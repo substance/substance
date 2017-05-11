@@ -78,6 +78,10 @@ export default {
       en: 'Container',
       de: 'Container'
     })
+    config.addLabel('insert', {
+      en: 'Insert',
+      de: 'Einfügen'
+    })
     config.addLabel('insert-container', {
       en: 'Insert Container',
       de: 'Container einfügen'

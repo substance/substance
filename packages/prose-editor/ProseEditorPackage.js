@@ -64,10 +64,10 @@ export default {
         commandGroups: ['annotations']
       },
       {
-        name: 'annotations',
-        type: 'tool-group',
+        name: 'insert',
+        type: 'tool-dropdown',
         showDisabled: true,
-        style: 'minimal',
+        style: 'descriptive',
         commandGroups: ['insert']
       }
     ])

@@ -20,8 +20,8 @@ export default {
     })
     config.addIcon('insert-table', { 'fontawesome': 'fa-table' })
     config.addLabel('insert-table', {
-      en: 'Insert Table',
-      de: 'Tabelle einfügen'
+      en: 'Table',
+      de: 'Tabelle'
     })
     config.addLabel('table', {
       en: 'Table',

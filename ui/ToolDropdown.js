@@ -28,20 +28,26 @@ class ToolDropdown extends ToolGroup {
     let commandStates = this._getCommandStates()
     let el = $$('div').addClass('sc-tool-dropdown')
     el.addClass('sm-'+this.props.name)
-    let activeCommandName = this._getActiveCommandName(commandStates)
+
+    // Used to resolve icon / label
+    let toggleName = this._getActiveCommandName(commandStates)
+    if (!toggleName) {
+      toggleName = this.props.name
+    }
+
 
     if (this.hasEnabledTools(commandStates)) {
       let toggleButton
       if (this.props.style === 'minimal') {
         toggleButton = $$(Button, {
-          icon: activeCommandName,
+          icon: toggleName,
           dropdown: true,
           active: this.state.showChoices,
           theme: this.props.theme
         }).on('click', this._toggleChoices)
       } else if (this.props.style === 'descriptive') {
         toggleButton = $$(Button, {
-          label: activeCommandName,
+          label: toggleName,
           dropdown: true,
           active: this.state.showChoices,
           theme: this.props.theme
