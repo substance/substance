@@ -1,6 +1,7 @@
 import { platform } from '../../util'
 import Heading from './Heading'
 import HeadingComponent from './HeadingComponent'
+import HeadingMacro from './HeadingMacro'
 import HeadingHTMLConverter from './HeadingHTMLConverter'
 import { SwitchTextTypeCommand } from '../../ui'
 
@@ -52,5 +53,6 @@ export default {
   },
   Heading,
   HeadingComponent,
-  HeadingHTMLConverter
+  HeadingHTMLConverter,
+  HeadingMacro
 }
