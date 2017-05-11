@@ -272,7 +272,7 @@ b.task('default', ['clean', 'lib'])
 b.task('publish', ['clean', 'lib', 'docs'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'lib:dev', 'docs', 'test:browser'])
+b.task('dev', ['clean', 'test:browser'])
 
 b.task('test', ['test:node'])
 .describe('runs the test suite')
