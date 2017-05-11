@@ -147,6 +147,7 @@ class ClipboardImporter extends HTMLImporter {
 }
 
 function _withCatchAllConverter(config) {
+  config = Object.assign({}, config)
   let defaultTextType = config.schema.getDefaultTextType()
   config.converters = config.converters.concat([{
     type: defaultTextType,
