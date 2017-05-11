@@ -1,5 +1,4 @@
 import { platform } from '../../util'
-import { InsertNodeCommand } from '../../ui'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 import GridPackage from '../grid/GridPackage'
