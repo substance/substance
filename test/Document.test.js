@@ -49,6 +49,6 @@ test("Node.toJSON() should not export undefined optional properties", function(t
     id: 'p',
     content: ''
   })
-  t.deepEqual(p.toJSON(), { type: 'paragraph', id: 'p', content: '' }, 'JSON should be correct.')
+  t.deepEqual(p.toJSON(), { type: 'paragraph', id: 'p', content: '', textAlign: 'left' }, 'JSON should be correct.')
   t.end()
 })
