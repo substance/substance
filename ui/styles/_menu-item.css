@@ -1,0 +1,35 @@
+.sc-menu-item {
+  background: none;
+  border: none;
+  display: block;
+  color: #fff;
+  overflow: hidden;
+  display: block;
+  text-align: left;
+  line-height: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0px 5px;
+}
+
+.sc-menu-item.sm-active {
+  background: #000;
+  border: 1px solid #fff;
+}
+
+.sc-menu-item .se-icon {
+  display: inline-block;
+  width: 20px;
+}
+
+.sc-menu-item .se-keyboard-shortcut {
+  font-weight: normal;
+  font-size: 10px;
+  padding-left: 20px;
+  color: rgba(255,255,255,0.4);
+  float: right;
+  text-align: right;
+}

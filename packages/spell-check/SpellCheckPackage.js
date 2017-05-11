@@ -6,7 +6,9 @@ export default {
   name: 'spell-check',
   configure: function(config) {
     config.addNode(SpellError)
-    config.addCommand('correction', SpellCheckCommand)
-    config.addTool('correction', CorrectionTool, {toolGroup: 'context-menu-primary'})
+    config.addCommand('correction', SpellCheckCommand, {
+      commandGroup: 'spell-check'
+    })
+    config.addTool('correction', CorrectionTool)
   }
 }

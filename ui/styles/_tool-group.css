@@ -1,0 +1,7 @@
+.sc-tool-group {
+  display: inline-block;
+}
+
+.sc-tool-group .sc-button {
+  margin: 0px 1px;
+}

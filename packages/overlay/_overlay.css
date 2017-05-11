@@ -16,15 +16,7 @@
 }
 
 .sc-overlay.sm-theme-dark > .se-active-tools {
-  border-radius: 5px;
+  border-radius: 3px;
   background: var(--dark-bg-color);
-  padding: 5px;
-}
-
-.sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group {
-  display: inline-block;
-}
-
-.sc-overlay.sm-theme-dark > .se-active-tools > .sc-tool-group > .se-tool {
-  display: inline-block;
+  padding: 3px;
 }

@@ -108,8 +108,7 @@ class BodyComponent extends Component {
       $$(ContainerEditor, {
         disabled: this.props.disabled,
         node: node,
-        commands: this.props.commands,
-        textTypes: this.props.textTypes
+        commands: this.props.commands
       }).ref('body')
     )
     return el;
@@ -186,7 +185,6 @@ export default {
 
     // Tool to insert a new comment
     config.addCommand('comment', CommentCommand, {nodeType: 'comment'})
-    config.addTool('comment', AnnotationTool, {target: options.toolTarget || 'annotations'})
     // Tool to edit an existing comment, should be displayed as an overlay
     config.addCommand('edit-comment', EditAnnotationCommand, {nodeType: 'comment'})
     config.addTool('edit-comment', EditCommentTool, { target: 'overlay' })
@@ -215,7 +213,7 @@ export default {
       defaultTextType: 'paragraph'
     })
 
-    // BasePackage provides core functionaliy, such as undo/redo
+    // BasePackage provides core functionality, such as undo/redo
     // and the SwitchTextTypeTool. However, you could import those
     // functionalities individually if you need more control
     config.import(BasePackage)
@@ -262,8 +260,7 @@ class SimpleWriter extends AbstractEditor {
       $$(Body, {
         disabled: this.props.disabled,
         node: this.doc.get('body'),
-        commands: configurator.getSurfaceCommandNames(),
-        textTypes: configurator.getTextTypes()
+        commands: configurator.getSurfaceCommandNames()
       }).ref('body'),
       $$(Overlay),
       $$(ContextMenu),

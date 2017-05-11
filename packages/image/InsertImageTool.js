@@ -1,6 +1,6 @@
-import { Tool } from '../../ui'
+import { ToggleTool } from '../../ui'
 
-class InsertImageTool extends Tool {
+class InsertImageTool extends ToggleTool {
 
   getClassNames() {
     return 'sc-insert-image-tool'

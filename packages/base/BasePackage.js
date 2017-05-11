@@ -1,5 +1,4 @@
 import { platform } from '../../util'
-import { Tool, InsertNodeCommand } from '../../ui'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 import GridPackage from '../grid/GridPackage'
@@ -18,6 +17,7 @@ import FilePackage from '../file/FilePackage'
 import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 import SelectAllCommand from './SelectAllCommand'
+import ToolPanelPackage from '../tool-panel/ToolPanelPackage'
 
 export default {
   name: 'base',
@@ -37,28 +37,15 @@ export default {
     config.import(OverlayPackage)
     config.import(DropzonesPackage)
     config.import(GutterPackage)
-
-    // Setup base toolgroups
-    config.addToolGroup('document')
-    config.addToolGroup('annotations')
-    config.addToolGroup('default')
-    config.addToolGroup('context-menu-primary')
-    config.addToolGroup('context-menu-document')
-    config.addToolGroup('insert')
+    config.import(ToolPanelPackage)
 
     // Commands
-    config.addCommand('undo', UndoCommand)
-    config.addCommand('redo', RedoCommand)
-    config.addCommand('select-all', SelectAllCommand)
-
-    config.addCommand('insert-node', InsertNodeCommand)
-
-    // Tools
-    config.addTool('undo', Tool, {toolGroup: ['document', 'context-menu-document']})
-    config.addTool('redo', Tool, {toolGroup: ['document', 'context-menu-document']})
-    config.addTool('select-all', Tool, {toolGroup: ['context-menu-document']})
+    config.addCommand('undo', UndoCommand, { commandGroup: 'undo-redo' })
+    config.addCommand('redo', RedoCommand, { commandGroup: 'undo-redo' })
+    config.addCommand('select-all', SelectAllCommand, { commandGroup: 'selection' })
 
     // Icons
+    config.addIcon('insert', { 'fontawesome': 'fa-plus' })
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })
     config.addIcon('redo', { 'fontawesome': 'fa-repeat' })
     config.addIcon('edit', { 'fontawesome': 'fa-cog' })
@@ -79,6 +66,10 @@ export default {
       en: 'Select All',
       de: 'Alles Auswählen'
     })
+    config.addLabel('text-types', {
+      en: 'Text Type',
+      de: 'Texttyp'
+    })
     config.addLabel('container-selection', {
       en: 'Container',
       de: 'Container'
@@ -86,6 +77,10 @@ export default {
     config.addLabel('container', {
       en: 'Container',
       de: 'Container'
+    })
+    config.addLabel('insert', {
+      en: 'Insert',
+      de: 'Einfügen'
     })
     config.addLabel('insert-container', {
       en: 'Insert Container',

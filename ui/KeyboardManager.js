@@ -5,9 +5,7 @@ class KeyboardManager {
 
   constructor(editorSession, bindings, options) {
     this.editorSession = editorSession
-
     this.context = options.context || {}
-
     this.keydownBindings = {}
     this.textinputBindings = {}
 

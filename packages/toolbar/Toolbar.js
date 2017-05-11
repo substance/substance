@@ -1,38 +1,19 @@
-import { Toolbox } from '../../ui'
+import { ToolPanel } from '../../ui'
 
-class Toolbar extends Toolbox {
+class Toolbar extends ToolPanel {
 
   render($$) {
-    let el = $$('div').addClass(this.getClassNames())
-    let activeToolGroups = this.state.activeToolGroups
-
-    activeToolGroups.forEach((toolGroup) => {
-      let toolGroupProps = Object.assign({}, toolGroup, {
-        toolStyle: this.getToolStyle(),
-        layout: 'horizontal',
-        showIcons: true
-      })
-      el.append(
-        $$(toolGroup.Class, toolGroupProps)
-      )
-    })
+    let el = $$('div').addClass('sc-toolbar')
+    el.append(
+      $$('div').addClass('se-active-tools').append(
+        this.renderEntries($$)
+      ).ref('entriesContainer')
+    )
     return el
   }
 
-  getActiveToolGroupNames() {
-    return this.props.toolGroups || ['text', 'document', 'annotations', 'default']
-  }
-
-  getClassNames() {
-    return 'sc-toolbar';
-  }
-
-  getToolStyle() {
-    return 'outline'
-  }
-
-  showDisabled() {
-    return true
+  getTheme() {
+    return this.props.theme || 'light'
   }
 }
 

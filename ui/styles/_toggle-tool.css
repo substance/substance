@@ -1,0 +1,15 @@
+.sc-toggle-tool {
+  display: inline-block;
+  position: relative;
+}
+
+/* Position tooltip */
+.sc-toggle-tool > .sc-tooltip {
+  display: none;
+  position: absolute;
+  top: 35px;
+}
+
+.sc-toggle-tool:hover > .sc-tooltip {
+  display: block;
+}

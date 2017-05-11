@@ -1,23 +1,19 @@
 import { platform } from '../../util'
-import { AnnotationCommand, AnnotationTool } from '../../ui'
+import { AnnotationCommand } from '../../ui'
 import Strong from './Strong'
 import StrongHTMLConverter from './StrongHTMLConverter'
 import StrongComponent from './StrongComponent'
 
 export default {
   name: 'strong',
-  configure: function(config, {toolGroup, disableCollapsedCursor}) {
+  configure: function(config) {
     config.addNode(Strong)
     config.addConverter('html', StrongHTMLConverter)
     config.addConverter('xml', StrongHTMLConverter)
     config.addComponent('strong', StrongComponent)
-
     config.addCommand('strong', AnnotationCommand, {
       nodeType: 'strong',
-      disableCollapsedCursor
-    })
-    config.addTool('strong', AnnotationTool, {
-      toolGroup: toolGroup || 'annotations'
+      commandGroup: 'annotations'
     })
     config.addIcon('strong', { 'fontawesome': 'fa-bold' })
     config.addLabel('strong', {

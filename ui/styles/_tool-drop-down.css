@@ -1,0 +1,21 @@
+.sc-tool-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.sc-tool-dropdown > .se-choices {
+  position: absolute;
+  top: 30px;
+  left: -3px;
+}
+
+/* Position tooltip */
+.sc-tool-dropdown > .sc-tooltip {
+  display: none;
+  position: absolute;
+  top: 30px;
+}
+
+.sc-tool-dropdown:hover > .sc-tooltip {
+  display: block;
+}

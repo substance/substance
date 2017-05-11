@@ -34,13 +34,13 @@ class ListComponent extends Component {
 
   _onChange(change) {
     const node = this.props.node
-    if (change.isAffected(node.id)) {
+    if (change.hasUpdated(node.id)) {
       return this.rerender()
     }
     // check if any of the list items are affected
     let itemIds = node.items
     for (let i = 0; i < itemIds.length; i++) {
-      if (change.isAffected([itemIds[i], 'level'])) {
+      if (change.hasUpdated([itemIds[i], 'level'])) {
         return this.rerender()
       }
     }

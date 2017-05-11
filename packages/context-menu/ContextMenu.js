@@ -1,6 +1,6 @@
-import { Toolbox } from '../../ui'
+import { ToolPanel } from '../../ui'
 
-class ContextMenu extends Toolbox {
+class ContextMenu extends ToolPanel {
 
   didMount() {
     super.didMount()
@@ -20,20 +20,6 @@ class ContextMenu extends Toolbox {
   */
   render($$) {
     let el = $$('div').addClass('sc-context-menu sm-hidden')
-    let activeToolGroups = this.state.activeToolGroups
-
-    activeToolGroups.forEach((toolGroup) => {
-      let toolGroupProps = Object.assign({}, toolGroup, {
-        toolStyle: this.getToolStyle(),
-        showLabels: true,
-        // showHints: true
-      })
-
-      if (toolGroupProps.tools.size > 0) {
-        let toolGroupEl = $$(toolGroup.Class, toolGroupProps)
-        el.append(toolGroupEl)
-      }
-    })
     return el
   }
 

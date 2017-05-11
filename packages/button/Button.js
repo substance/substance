@@ -21,12 +21,18 @@ class Button extends Component {
     if (this.props.label) {
       el.append(this.renderLabel($$))
     }
+
+    if (this.props.dropdown) {
+      el.append(this.renderDropdownIcon($$))
+    }
+
     if (this.props.active) {
       el.addClass('sm-active')
     }
-    if (this.props.style) {
-      el.addClass('sm-style-'+this.props.style)
+    if (this.props.theme) {
+      el.addClass('sm-theme-'+this.props.theme)
     }
+
     if (this.props.disabled) {
       // make button inaccessible
       el.attr('tabindex', -1)
@@ -46,15 +52,15 @@ class Button extends Component {
     return iconEl
   }
 
-  renderLabel($$) {
-    return $$('div').addClass('se-label').append(
-      this.getLabel(this.props.label)
-    )
+  renderDropdownIcon($$) {
+    let iconEl = this.context.iconProvider.renderIcon($$, 'dropdown')
+    iconEl.addClass('se-dropdown')
+    return iconEl
   }
 
-  renderHint($$) {
-    return $$('div').addClass('se-hint').append(
-      this.getLabel(this.props.hint+'-hint')
+  renderLabel($$) {
+    return $$('span').addClass('se-label').append(
+      this.getLabel(this.props.label)
     )
   }
 

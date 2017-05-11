@@ -1,5 +1,5 @@
 import { platform } from '../../util'
-import { AnnotationTool, EditAnnotationCommand } from '../../ui'
+import { EditAnnotationCommand } from '../../ui'
 import Link from './Link'
 import LinkComponent from './LinkComponent'
 import LinkCommand from './LinkCommand'
@@ -8,27 +8,20 @@ import EditLinkTool from './EditLinkTool'
 
 export default {
   name: 'link',
-  configure: function(config, {
-    toolGroup,
-    editLinkToolGroup
-  }) {
+  configure: function(config) {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
     config.addConverter('html', LinkHTMLConverter)
     config.addConverter('xml', LinkHTMLConverter)
     config.addCommand('link', LinkCommand, {
       nodeType: 'link',
-      disableCollapsedCursor: true
+      commandGroup: 'annotations'
     })
     config.addCommand('edit-link', EditAnnotationCommand, {
-      nodeType: 'link'
+      nodeType: 'link',
+      commandGroup: 'prompt'
     })
-    config.addTool('link', AnnotationTool, {
-      toolGroup: toolGroup || 'annotations'
-    })
-    config.addTool('edit-link', EditLinkTool, {
-      toolGroup: editLinkToolGroup || 'overlay'
-    })
+    config.addTool('edit-link', EditLinkTool)
     config.addIcon('link', { 'fontawesome': 'fa-link'})
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' })
     config.addLabel('link', {

@@ -1,6 +1,9 @@
+import { platform } from '../../util'
 import Heading from './Heading'
 import HeadingComponent from './HeadingComponent'
+import HeadingMacro from './HeadingMacro'
 import HeadingHTMLConverter from './HeadingHTMLConverter'
+import { SwitchTextTypeCommand } from '../../ui'
 
 export default {
   name: 'heading',
@@ -9,18 +12,29 @@ export default {
     config.addComponent(Heading.type, HeadingComponent)
     config.addConverter('html', HeadingHTMLConverter)
     config.addConverter('xml', HeadingHTMLConverter)
-    config.addTextType({
-      name: 'heading1',
-      data: {type: 'heading', level: 1}
+
+    config.addCommand('heading1', SwitchTextTypeCommand, {
+      spec: { type: 'heading', level: 1 },
+      commandGroup: 'text-types'
     })
-    config.addTextType({
-      name: 'heading2',
-      data: {type: 'heading', level: 2}
+    config.addCommand('heading2', SwitchTextTypeCommand, {
+      spec: { type: 'heading', level: 2 },
+      commandGroup: 'text-types'
     })
-    config.addTextType({
-      name: 'heading3',
-      data: {type: 'heading', level: 3}
+    config.addCommand('heading3', SwitchTextTypeCommand, {
+      spec: { type: 'heading', level: 3 },
+      commandGroup: 'text-types'
     })
+    if (platform.isMac) {
+      config.addKeyboardShortcut('cmd+alt+1', { command: 'heading1' })
+      config.addKeyboardShortcut('cmd+alt+2', { command: 'heading2' })
+      config.addKeyboardShortcut('cmd+alt+3', { command: 'heading3' })
+    } else {
+      config.addKeyboardShortcut('ctrl+alt+1', { command: 'heading1' })
+      config.addKeyboardShortcut('ctrl+alt+2', { command: 'heading2' })
+      config.addKeyboardShortcut('ctrl+alt+3', { command: 'heading3' })
+    }
+
     config.addLabel('heading1', {
       en: 'Heading 1',
       de: 'Überschrift 1'
@@ -33,8 +47,12 @@ export default {
       en: 'Heading 3',
       de: 'Überschrift 3'
     })
+    config.addIcon('heading1', { 'fontawesome': 'fa-header' })
+    config.addIcon('heading2', { 'fontawesome': 'fa-header' })
+    config.addIcon('heading3', { 'fontawesome': 'fa-header' })
   },
   Heading,
   HeadingComponent,
-  HeadingHTMLConverter
+  HeadingHTMLConverter,
+  HeadingMacro
 }

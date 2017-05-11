@@ -1,6 +1,6 @@
 .sc-inline-node {
   cursor: default;
   /* webkit disables selection for draggable elements */
-  /*-webkit-user-select: text;*/
+  -webkit-user-select: text;
   position: relative;
 }

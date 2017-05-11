@@ -3,7 +3,6 @@ import { DocumentSchema, EditingBehavior } from '../model'
 import ComponentRegistry from './ComponentRegistry'
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'
 import LabelProvider from './DefaultLabelProvider'
-import ToolGroup from '../packages/toolbar/ToolGroup'
 import SaveHandlerStub from '../packages/persistence/SaveHandlerStub'
 
 /**
@@ -53,15 +52,15 @@ class Configurator {
     this.config = {
       schema: {},
       nodes: {},
+      tools: {},
       components: {},
       converters: {},
       importers: {},
       exporters: {},
       fileProxies: [],
       commands: {},
-      tools: new Map(),
-      toolGroups: new Map(),
-      textTypes: [],
+      commandGroups: {},
+      toolPanels: {},
       editingBehaviors: [],
       macros: [],
       dropHandlers: [],
@@ -98,16 +97,14 @@ class Configurator {
     if (!option.key) {
       throw new Error('An option key must be defined')
     }
-
     if (!option.value) {
       throw new Error('An option value must be defined')
     }
-
-    this.config.editorOptions[option.key] = option.value;
+    this.config.editorOptions[option.key] = option.value
   }
 
   getEditorOptions() {
-    return this.config.editorOptions;
+    return this.config.editorOptions
   }
 
     /**
@@ -208,37 +205,16 @@ class Configurator {
       CommandClass: CommandClass,
       options: options || {}
     }
+
+    // Register commandGroup entry
+    let commandGroup = options.commandGroup
+    if (!this.config.commandGroups[commandGroup]) {
+      this.config.commandGroups[commandGroup] = []
+    }
+    this.config.commandGroups[commandGroup].push(name)
   }
 
-  addToolGroup(name, ToolGroupClass, options) {
-    options = options || {}
-    ToolGroupClass = ToolGroupClass || ToolGroup
-
-    this.config.toolGroups.set(name, {
-      name: name,
-      tools: new Map(),
-      Class: ToolGroupClass,
-      options: options
-    })
-  }
-
-  addTool(name, ToolClass, options) {
-    options = options || {}
-
-    if (options.target) {
-      console.warn('DEPRECATED: please use `toolGroup` instead of `target`', name)
-    }
-    let toolGroupNames = options.toolGroup || options.target
-    if (isString(toolGroupNames)) {
-      toolGroupNames = [ toolGroupNames ]
-    }
-
-    if (!toolGroupNames && options.overlay) {
-      toolGroupNames = [ 'overlay' ]
-    } else if (!toolGroupNames) {
-      toolGroupNames = [ 'default' ]
-    }
-
+  addTool(name, ToolClass) {
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
     }
@@ -246,21 +222,22 @@ class Configurator {
       throw new Error('Provided nil for tool '+name)
     }
     if (!ToolClass || !ToolClass.prototype._isTool) {
-      throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:")
+      throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:", name)
     }
 
-    toolGroupNames.forEach((toolGroupName) => {
-      let toolGroup = this.config.toolGroups.get(toolGroupName)
-      if (!toolGroup) {
-        console.error(`No toolGroup registered with name: ${toolGroupName}`)
-        return
-      }
-      toolGroup.tools.set(name, {
-        name: name,
-        Class: ToolClass,
-        options: options || {}
-      })
-    })
+    this.config.tools[name] = ToolClass
+  }
+
+  getTools() {
+    return this.config.tools
+  }
+
+  addToolPanel(name, spec) {
+    this.config.toolPanels[name] = spec
+  }
+
+  getToolPanel(name) {
+    return this.config.toolPanels[name]
   }
 
   /**
@@ -355,13 +332,6 @@ class Configurator {
   */
   addSeed(seed) {
     this.config.seed = seed
-  }
-
-  addTextType(textType, options) {
-    this.config.textTypes.push({
-      spec: textType,
-      options: options || {}
-    })
   }
 
   /**
@@ -478,12 +448,8 @@ class Configurator {
     return new ExporterClass(config, context)
   }
 
-  getToolGroups() {
-    return this.config.toolGroups
-  }
-
-  getTools(toolGroupName) {
-    return this.config.toolGroups.get(toolGroupName).tools
+  getcommandGroups() {
+    return this.config.commandGroups
   }
 
   getComponentRegistry() {
@@ -503,7 +469,7 @@ class Configurator {
   getSurfaceCommandNames() {
     var commands = this.getCommands()
     var commandNames = commands.map(function(C) {
-      return C.type
+      return C.name
     })
     return commandNames
   }
@@ -533,12 +499,6 @@ class Configurator {
     return this.config.seed
   }
 
-  getTextTypes() {
-    return this.config.textTypes.map(function(t) {
-      return t.spec
-    })
-  }
-
   getIconProvider() {
     return new FontAwesomeIconProvider(this.config.icons)
   }
@@ -561,6 +521,21 @@ class Configurator {
 
   getKeyboardShortcuts() {
     return this.config.keyboardShortcuts
+  }
+
+  /*
+    Allows lookup of a keyboard shortcut by command name
+  */
+  getKeyboardShortcutsByCommand() {
+    let keyboardShortcuts = {}
+    this.config.keyboardShortcuts.forEach((entry) => {
+      if (entry.spec.command) {
+        let shortcut = entry.key.toUpperCase()
+        shortcut = shortcut.replace('CMD', '⌘')
+        keyboardShortcuts[entry.spec.command] = shortcut
+      }
+    })
+    return keyboardShortcuts
   }
 
   setDefaultLanguage(lang) {

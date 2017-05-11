@@ -705,12 +705,12 @@ class BrowserWindow {
 }
 
 BrowserWindow.prototype.on = BrowserDOMElement.prototype.on
-
 BrowserWindow.prototype.off = BrowserDOMElement.prototype.off
-
 BrowserWindow.prototype.addEventListener = BrowserDOMElement.prototype.addEventListener
-
 BrowserWindow.prototype.removeEventListener = BrowserDOMElement.prototype.removeEventListener
+BrowserWindow.prototype._createEventListener = BrowserDOMElement.prototype._createEventListener
+BrowserWindow.prototype._addEventListenerNative = BrowserDOMElement.prototype._addEventListenerNative
+BrowserWindow.prototype._removeEventListenerNative = BrowserDOMElement.prototype._removeEventListenerNative
 
 BrowserWindow.prototype.getEventListeners = BrowserDOMElement.prototype.getEventListeners
 

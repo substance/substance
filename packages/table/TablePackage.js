@@ -1,4 +1,3 @@
-import { Tool } from '../../ui'
 import Table from './Table'
 import TableCell from './TableCell'
 import TableComponent from './TableComponent'
@@ -16,12 +15,13 @@ export default {
     config.addConverter('html', TableCellHTMLConverter)
     config.addConverter('xml', TableHTMLConverter)
     config.addConverter('xml', TableCellHTMLConverter)
-    config.addCommand('insert-table', InsertTableCommand)
-    config.addTool('insert-table', Tool, { toolGroup: 'insert' })
+    config.addCommand('insert-table', InsertTableCommand, {
+      commandGroup: 'insert'
+    })
     config.addIcon('insert-table', { 'fontawesome': 'fa-table' })
     config.addLabel('insert-table', {
-      en: 'Insert Table',
-      de: 'Tabelle einfügen'
+      en: 'Table',
+      de: 'Tabelle'
     })
     config.addLabel('table', {
       en: 'Table',

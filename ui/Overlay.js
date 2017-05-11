@@ -1,9 +1,9 @@
-import Toolbox from './Toolbox'
+import ToolPanel from './ToolPanel'
 
 /*
   A default implementation to render the content for the overlay (aka popup) tools.
 */
-class Overlay extends Toolbox {
+class Overlay extends ToolPanel {
 
   didMount() {
     super.didMount()
@@ -19,28 +19,15 @@ class Overlay extends Toolbox {
   }
 
   render($$) {
-    let el = $$('div').addClass(this.getClassNames())
+    let el = $$('div').addClass('sc-overlay')
     el.addClass('sm-hidden')
     el.addClass('sm-theme-'+this.getTheme())
-    let activeToolGroups = this.state.activeToolGroups
-    let activeToolsEl = $$('div').addClass('se-active-tools')
-
-    activeToolGroups.forEach((toolGroup) => {
-      let toolGroupProps = Object.assign({}, toolGroup, {
-        toolStyle: this.getToolStyle(),
-        showIcons: true
-      })
-      activeToolsEl.append(
-        $$(toolGroup.Class, toolGroupProps).ref(toolGroup.name)
-      )
-    })
-
-    el.append(activeToolsEl)
+    el.append(
+      $$('div').addClass('se-active-tools').append(
+        this.renderEntries($$)
+      ).ref('entriesContainer')
+    )
     return el
-  }
-
-  getToolStyle() {
-    return this.props.theme || 'plain-dark'
   }
 
   show(hints) {
@@ -53,7 +40,7 @@ class Overlay extends Toolbox {
   }
 
   _onSelectionPositioned(hints) {
-    if (this.hasActiveTools()) {
+    if (this.hasEnabledTools()) {
       this.el.removeClass('sm-hidden')
       let overlayWidth = this.el.htmlProp('offsetWidth')
       let selRect = hints.selectionRect
@@ -72,16 +59,8 @@ class Overlay extends Toolbox {
     }
   }
 
-  getClassNames() {
-    return 'sc-overlay'
-  }
-
   getTheme() {
-    return 'dark'
-  }
-
-  getActiveToolGroupNames() {
-    return this.props.toolGroups || ['overlay']
+    return this.props.theme || 'dark'
   }
 
 }

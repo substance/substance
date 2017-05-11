@@ -17,7 +17,7 @@ class EditInlineNodeCommand extends Command {
     let annos = this._getAnnotationsForSelection(params)
     if (annos.length === 1 && annos[0].getSelection().equals(sel)) {
       newState.disabled = false
-      newState.node = annos[0]
+      newState.nodeId = annos[0].id
     }
     return newState
   }

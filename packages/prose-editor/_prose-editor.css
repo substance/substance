@@ -4,12 +4,15 @@
   margin: 0 auto;
   max-width: 800px;
 }
+
 /* Add padding to each child except last one */
 .sc-prose-editor .sc-container-editor > * {
   margin: 10px 0;
 }
 .sc-prose-editor .se-toolbar-wrapper {
   border-bottom: 1px solid  var(--border-color);
+  background: #fafbfc;
+  z-index: 200;
 }
 
 .sc-prose-editor .se-toolbar-wrapper .sc-toolbar {

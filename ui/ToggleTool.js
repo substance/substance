@@ -1,5 +1,5 @@
-import { capitalize } from '../util'
 import Component from './Component'
+import Tooltip from './Tooltip'
 
 /**
   Default Tool implementation
@@ -24,16 +24,8 @@ import Component from './Component'
     disabled: false
   })
   ```
-
-
-  ```
-  config.addCommand('strong', AnnotationCommand, { nodeType: 'strong' })
-  config.addTool('strong', AnnotationTool, {
-    target: 'annotations'
-  })
-  ```
 */
-class Tool extends Component {
+class ToggleTool extends Component {
 
   get _isTool() {
     return true
@@ -44,50 +36,40 @@ class Tool extends Component {
   */
   render($$) {
     let el = $$('div')
-      .addClass('se-tool')
+      .addClass('sc-toggle-tool')
 
     let customClassNames = this.getClassNames()
     if (customClassNames) {
       el.addClass(customClassNames)
     }
 
-    let title = this.getTitle()
-    if (title) {
-      el.attr('title', title)
-      el.attr('aria-label', title)
-    }
-
     el.append(
       this.renderButton($$)
+    )
+
+    // Append tooltip
+    el.append(
+      $$(Tooltip, {
+        name: this._getTooltipText()
+      })
     )
     return el
   }
 
   renderButton($$) {
+    let commandState = this.props.commandState
     let Button = this.getComponent('button')
     let btn = $$(Button, {
-      icon: this.props.showIcon ? this.props.name : null,
-      label: this.props.showLabel ? this.props.name : null,
-      hint: this.props.showHint ? this.props.name : null,
-      active: this.props.active,
-      disabled: this.props.disabled,
-      style: this.props.style
+      icon: this.props.name,
+      active: commandState.active,
+      disabled: commandState.disabled,
+      theme: this.props.theme
     }).on('click', this.onClick)
     return btn
   }
 
   getClassNames() {
     return ''
-  }
-
-  getTitle() {
-    let labelProvider = this.context.labelProvider
-    let title = this.props.title || labelProvider.getLabel(this.getName())
-    // Used only by annotation tool so far
-    if (this.props.mode) {
-      title = [capitalize(this.props.mode), title].join(' ')
-    }
-    return title
   }
 
   /*
@@ -107,6 +89,17 @@ class Tool extends Component {
     if (!this.props.disabled) this.executeCommand()
   }
 
+  _getTooltipText() {
+    let name = this.props.name
+    let label = this.context.labelProvider.getLabel(name)
+    let keyboardShortcuts = this.context.keyboardShortcuts
+    if (keyboardShortcuts[name]) {
+      return [label, ' (', keyboardShortcuts[name], ')'].join('')
+    } else {
+      return label
+    }
+  }
+
   /**
     Executes the associated command
   */
@@ -116,4 +109,4 @@ class Tool extends Component {
   }
 }
 
-export default Tool
+export default ToggleTool

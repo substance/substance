@@ -1,5 +1,4 @@
 import BasePackage from '../base/BasePackage'
-import SwitchTextTypePackage from '../switch-text-type/SwitchTextTypePackage'
 import ParagraphPackage from '../paragraph/ParagraphPackage'
 import HeadingPackage from '../heading/HeadingPackage'
 import CodeblockPackage from '../codeblock/CodeblockPackage'
@@ -14,6 +13,7 @@ import QuoteMarksPackage from '../quote-marks/QuoteMarksPackage'
 import ListPackage from '../list/ListPackage'
 import TablePackage from '../table/TablePackage'
 import ProseArticle from './ProseArticle'
+import ProseEditor from './ProseEditor'
 
 export default {
   name: 'prose-editor',
@@ -23,9 +23,8 @@ export default {
       ArticleClass: ProseArticle,
       defaultTextType: 'paragraph'
     })
-    // SwitchTextType, Undo/Redo etc.
+    // Undo/Redo etc.
     config.import(BasePackage)
-    config.import(SwitchTextTypePackage)
     config.import(ParagraphPackage)
     config.import(HeadingPackage)
     config.import(CodeblockPackage)
@@ -39,5 +38,39 @@ export default {
     config.import(QuoteMarksPackage)
     config.import(ListPackage)
     config.import(TablePackage)
-  }
+
+    // Configure overlay
+    config.addToolPanel('main-overlay', [
+      {
+        type: 'tool-group',
+        commandGroups: ['prompt']
+      }
+    ])
+
+    // Configure toolbar
+    config.addToolPanel('toolbar', [
+      {
+        name: 'text-types',
+        type: 'tool-dropdown',
+        showDisabled: true,
+        style: 'descriptive',
+        commandGroups: ['text-types']
+      },
+      {
+        name: 'annotations',
+        type: 'tool-group',
+        showDisabled: true,
+        style: 'minimal',
+        commandGroups: ['annotations']
+      },
+      {
+        name: 'insert',
+        type: 'tool-dropdown',
+        showDisabled: true,
+        style: 'descriptive',
+        commandGroups: ['insert']
+      }
+    ])
+  },
+  ProseEditor
 }

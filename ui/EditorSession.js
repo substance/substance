@@ -721,7 +721,7 @@ class EditorSession extends EventEmitter {
         const path = o.options.path
         if (!path) {
           o.handler.call(o.context, change, info, this)
-        } else if (change.isAffected(path)) {
+        } else if (change.hasUpdated(path)) {
           o.handler.call(o.context, change, info, this)
         }
       } else {

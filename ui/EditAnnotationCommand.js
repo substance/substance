@@ -28,7 +28,8 @@ class EditAnnotationCommand extends Command {
     }
     if (annos.length === 1 && sel.isPropertySelection() && sel.isCollapsed()) {
       newState.disabled = false
-      newState.node = annos[0]
+      newState.showInContext = true
+      newState.nodeId = annos[0].id
     }
     return newState
   }
