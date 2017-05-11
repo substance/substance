@@ -45,6 +45,7 @@ export default {
     config.addCommand('select-all', SelectAllCommand, { commandGroup: 'selection' })
 
     // Icons
+    config.addIcon('insert', { 'fontawesome': 'fa-plus' })
     config.addIcon('undo', { 'fontawesome': 'fa-undo' })
     config.addIcon('redo', { 'fontawesome': 'fa-repeat' })
     config.addIcon('edit', { 'fontawesome': 'fa-cog' })

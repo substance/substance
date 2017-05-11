@@ -12,7 +12,13 @@ class InsertNodeCommand extends Command {
     if (sel && !sel.isNull() && !sel.isCustomSelection() && sel.containerId) {
       newState.disabled = false
     }
+    newState.showInContext = this.showInContext(sel, params)
     return newState
+  }
+
+  showInContext(sel, params) {
+    let selectionState = params.selectionState
+    return sel.isCollapsed() && selectionState.isFirst() && selectionState.isLast()
   }
 
   execute(params, context) {
