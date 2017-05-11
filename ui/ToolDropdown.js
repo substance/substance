@@ -1,6 +1,6 @@
 import ToolGroup from './ToolGroup'
 import Menu from './Menu'
-import Tooltip from './tooltip'
+import Tooltip from './Tooltip'
 import { forEach } from '../util'
 
 /*
