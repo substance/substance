@@ -237,6 +237,10 @@ b.task('lib:browser:dev', ['css'], () => {
   buildLib('browser')
 })
 
+b.task('lib:dev', ['css'], () => {
+  buildLib('all')
+})
+
 b.task('lib', () => {
   buildLib('all', 'production')
 })
