@@ -1,10 +1,10 @@
 .sc-menu-item {
+  display: flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   background: none;
   border: none;
-  display: block;
   color: #fff;
-  overflow: hidden;
-  display: block;
   text-align: left;
   line-height: 24px;
   font-size: 11px;
@@ -21,15 +21,19 @@
 }
 
 .sc-menu-item .se-icon {
-  display: inline-block;
-  width: 20px;
+  flex: 0 0 0;
+  padding-right: 7px;
+}
+
+.sc-menu-item .se-label {
+  flex: 0 0 0;
 }
 
 .sc-menu-item .se-keyboard-shortcut {
+  flex: 100 0 0;
   font-weight: normal;
   font-size: 10px;
   padding-left: 20px;
   color: rgba(255,255,255,0.4);
-  float: right;
   text-align: right;
 }

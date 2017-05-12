@@ -17,7 +17,7 @@ class MenuItem extends Component {
       .addClass('sc-menu-item')
       .append(
         this._renderIcon($$),
-        this._getLabel(),
+        this._renderLabel($$),
         this._renderKeyboardShortcut($$)
       )
       .on('click', this._onClick)
@@ -37,6 +37,12 @@ class MenuItem extends Component {
       el.attr('tabindex', 1)
     }
     return el
+  }
+
+  _renderLabel($$) {
+    return $$('div').addClass('se-label').append(
+      this._getLabel()
+    )
   }
 
   _renderIcon($$) {
