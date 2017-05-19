@@ -1,4 +1,4 @@
-import { AbstractEditor, ContainerEditor } from '../../ui'
+import { AbstractEditor, ContainerEditor, WorkflowPane } from '../../ui'
 import Toolbar from '../toolbar/Toolbar'
 
 /**
@@ -30,7 +30,6 @@ class ProseEditor extends AbstractEditor {
     let toolbar = this._renderToolbar($$)
     let editor = this._renderEditor($$)
     let configurator = this.getConfigurator()
-
     let ScrollPane = this.componentRegistry.get('scroll-pane')
     let Overlay = this.componentRegistry.get('overlay')
     let ContextMenu = this.componentRegistry.get('context-menu')
@@ -54,7 +53,12 @@ class ProseEditor extends AbstractEditor {
     el.append(
       $$(SplitPane, {splitType: 'horizontal'}).append(
         toolbar,
-        contentPanel
+        $$(SplitPane, {splitType: 'horizontal', sizeB: 'inherit'}).append(
+          contentPanel,
+          $$(WorkflowPane, {
+            toolPanel: configurator.getToolPanel('workflow')
+          })
+        )
       )
     )
     return el
