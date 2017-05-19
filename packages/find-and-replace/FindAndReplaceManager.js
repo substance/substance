@@ -14,7 +14,7 @@ class FindAndReplaceManager {
     })
 
     this._state = {
-      active: false,
+      disabled: false,
       findString: '',
       replaceString: '',
       matches: []
@@ -35,6 +35,19 @@ class FindAndReplaceManager {
 
   getState() {
     return this._state
+  }
+
+  enable() {
+    this._state.disabled = false
+  }
+
+  disable() {
+    this._state.disabled = true
+  }
+
+  toggle() {
+    this._state.disabled = !this._state.disabled
+    this._propagateUpdate()
   }
 
   /*
@@ -63,6 +76,12 @@ class FindAndReplaceManager {
 
   replaceAll() {
 
+  }
+
+  _propagateUpdate() {
+    // HACK: we make commandStates dirty in order to trigger re-evaluation
+    this.editorSession._setDirty('commandStates')
+    this.editorSession.startFlow()
   }
 
 }

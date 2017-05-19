@@ -2,3 +2,11 @@
   margin-top: 5px;
   margin-bottom: 5px;
 }
+
+.sc-toolbar .sc-tool-group {
+  display: inline-block;
+}
+
+.sc-toolbar .sc-tool-group .sc-button {
+  margin: 0px 1px;
+}

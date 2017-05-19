@@ -21,9 +21,7 @@ export default {
       commandGroup: 'find-and-replace'
     })
     config.addTool('find-and-replace', FindAndReplaceTool)
-
-    // Experimental API: This adds a custom manager
-    config.addManager('find-and-replace', FindAndReplaceManager)
     config.addKeyboardShortcut('cmd+alt+f', { command: 'toggle-find-and-replace' })
+    config.addManager('find-and-replace', FindAndReplaceManager)
   }
 }

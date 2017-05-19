@@ -62,6 +62,7 @@ class FindAndReplaceTool extends ToggleTool {
           )
       )
     )
+    return el
   }
 }
 
