@@ -17,3 +17,11 @@
 .sc-toolbar > .se-active-tools .sc-tool-dropdown .sc-button {
   margin: 2px;
 }
+
+.sc-toolbar .sc-tool-group {
+  display: inline-block;
+}
+
+.sc-toolbar .sc-tool-group .sc-button {
+  margin: 0px 1px;
+}

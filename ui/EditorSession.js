@@ -96,9 +96,7 @@ class EditorSession extends EventEmitter {
     })
 
     // The command manager keeps the commandStates up-to-date
-    console.log('BEFORE_COMMAND_MANAGER')
     this.commandManager = new CommandManager(this._context, commands)
-    console.log('AFTER_COMMAND_MANAGER')
 
     // The drag manager dispatches drag requests to registered drag handlers
     // TODO: after consolidating the API of this class, we probably need a less diverse context
@@ -116,8 +114,6 @@ class EditorSession extends EventEmitter {
     // TODO: see how we want to expose these
     this.converterRegistry = converterRegistry
     this.editingBehavior = editingBehavior
-
-    console.log('YAY ay')
   }
 
   dispose() {

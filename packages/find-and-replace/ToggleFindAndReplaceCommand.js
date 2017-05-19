@@ -2,15 +2,15 @@ import { Command } from '../../ui'
 
 class ToggleFindAndReplaceCommand extends Command {
 
-  getCommandState({editorSession}) {
-    let findAndReplaceState = editorSession.getState('find-and-replace')
-    return findAndReplaceState
+  getCommandState() {
+    return {
+      disabled: false
+    }
   }
 
   execute({editorSession}) {
-    editorSession.updateState('find-and-replace', {
-      active: true
-    })
+    let findAndReplaceManager = editorSession.getManager('find-and-replace')
+    findAndReplaceManager.toggle()
   }
 }
 
