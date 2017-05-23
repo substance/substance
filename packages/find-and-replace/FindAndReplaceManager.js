@@ -17,24 +17,26 @@ class FindAndReplaceManager {
       disabled: false,
       findString: '',
       replaceString: '',
-      matches: []
+      // Consists a sequence of property selections
+      matches: [],
+      selectedMatch: undefined
     }
   }
 
   /*
-    Used to display 4 of 10
-
-    TODO: implement based on this._state.matches
+    Derive command state for FindAndReplaceTool
   */
-  getResultCounter() {
-    return {
-      total: 10,
-      selected: 4
+  getCommandState() {
+    let state = this._state
+    let commandState = {
+      disabled: state.disabled,
+      findString: state.findString,
+      replaceString: state.replaceString,
+      // Used to display '4 of 10' etc.
+      totalMatches: state.matches.length,
+      selectedMatch: state.selectedMatch + 1
     }
-  }
-
-  getState() {
-    return this._state
+    return commandState
   }
 
   enable() {
@@ -45,7 +47,7 @@ class FindAndReplaceManager {
     this._state.disabled = true
   }
 
-  toggle() {
+  toggleEnabled() {
     this._state.disabled = !this._state.disabled
     this._propagateUpdate()
   }
@@ -56,26 +58,44 @@ class FindAndReplaceManager {
   startFind(findString, replaceString) {
     this._state.findString = findString
     this._state.replaceString = replaceString
+    // TODO: Replace with real implementation
+    this._state.matches = [{}, {}]
+    this._state.selectedMatch = 0
+    this._propagateUpdate()
   }
 
+  /*
+    Find next match
+  */
   findNext() {
-
+    let index = this._state.selectedMatch
+    let totalMatches = this._state.matches.length
+    this._state.selectedMatch = (index + 1) % totalMatches
+    this._propagateUpdate()
   }
 
+  /*
+    Find previous match
+  */
   findPrevious() {
-
+    let index = this._state.selectedMatch
+    let totalMatches = this._state.matches.length
+    this._state.selectedMatch = (index - 1) % totalMatches
+    this._propagateUpdate()
   }
 
-  findAll() {
-
-  }
-
+  /*
+    Replace next occurence
+  */
   replaceNext() {
-
+    throw new Error('Not implemented')
   }
 
+  /*
+    Replace all occurences
+  */
   replaceAll() {
-
+    throw new Error('Not implemented')
   }
 
   _propagateUpdate() {

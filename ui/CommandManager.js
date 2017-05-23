@@ -37,7 +37,7 @@ class CommandManager {
   }
 
   onSessionUpdate(editorSession) {
-    if (editorSession.hasChanged('change') || editorSession.hasChanged('selection')) {
+    if (editorSession.hasChanged('change') || editorSession.hasChanged('selection') || editorSession.hasChanged('commandStates')) {
       this.updateCommandStates(editorSession)
     }
   }

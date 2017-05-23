@@ -4,7 +4,7 @@ class FindPreviousCommand extends Command {
 
   getCommandState({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
-    let findAndReplaceState = findAndReplaceManager.getState()
+    let findAndReplaceState = findAndReplaceManager.getCommandState()
     return findAndReplaceState
   }
 

@@ -14,8 +14,8 @@ class ImageComponent extends NodeComponent {
 
   // TODO: verify if this check is correct and efficient
   _onDocumentChange(change) {
-    if (change.isAffected(this.props.node.id) ||
-      change.isAffected(this.props.node.imageFile)) {
+    if (change.hasUpdated(this.props.node.id) ||
+      change.hasUpdated(this.props.node.imageFile)) {
       this.rerender()
     }
   }
