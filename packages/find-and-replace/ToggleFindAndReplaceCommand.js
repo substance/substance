@@ -10,7 +10,7 @@ class ToggleFindAndReplaceCommand extends Command {
 
   execute({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
-    findAndReplaceManager.toggle()
+    findAndReplaceManager.toggleEnabled()
   }
 }
 

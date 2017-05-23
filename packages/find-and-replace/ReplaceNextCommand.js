@@ -1,6 +1,6 @@
 import { Command } from '../../ui'
 
-class FindAndReplaceCommand extends Command {
+class ReplaceNextCommand extends Command {
 
   getCommandState({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
@@ -8,9 +8,10 @@ class FindAndReplaceCommand extends Command {
     return findAndReplaceState
   }
 
-  execute() {
-    // Do nothing
+  execute({editorSession}) {
+    let findAndReplaceManager = editorSession.getManager('find-and-replace')
+    findAndReplaceManager.replaceNext()
   }
 }
 
-export default FindAndReplaceCommand
+export default ReplaceNextCommand
