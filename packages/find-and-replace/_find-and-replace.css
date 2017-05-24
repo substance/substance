@@ -1,5 +1,6 @@
 .sc-find-and-replace-tool {
-  background: #eee;
+  background: #fafbfc;
+  border-top: 1px solid var(--border-color);
   padding: 5px;
 }
 
