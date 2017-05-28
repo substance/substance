@@ -58,8 +58,11 @@ class FindAndReplaceManager {
   startFind(findString, replaceString) {
     this._state.findString = findString
     this._state.replaceString = replaceString
-    // TODO: Replace with real implementation
-    this._state.matches = [{}, {}]
+
+    this.editorSession.transaction((tx, args) => {
+      this._state.matches = this._findAllMatches(tx)
+      return args
+    })
     this._state.selectedMatch = 0
     this._propagateUpdate()
   }
@@ -95,10 +98,60 @@ class FindAndReplaceManager {
     Replace all occurences
   */
   replaceAll() {
+    // TODO: We should get matches in reverse order, 
+    // so the replace operations later are side effect free. 
     throw new Error('Not implemented')
   }
 
+  /*
+    Returns all matches
+  */
+  _findAllMatches(tx) {
+    let matches = []
+    const nodes = this.doc.getNodes()
+
+    Object.keys(nodes).forEach((nodeId) => {
+      let node = this.doc.get(nodeId)
+      if(node.isText()) {
+        let found = this._findInTextProperty(tx, {path: [node.id, 'content'], findString: this._state.findString})
+        matches = matches.concat(found)
+      }
+    })
+
+    return matches
+  }
+
+  /*
+    Find all matches for a given search string in a text property
+    Method returns an array of matches, each match is represented as
+    a PropertySelection
+  */
+  _findInTextProperty(tx, args) {
+    const text = tx.get(args.path)
+
+    // Case-insensitive search for multiple matches
+    let matcher = new RegExp(args.findString, 'ig')
+    let matches = []
+    let match
+
+    while ((match = matcher.exec(text))) {
+      let sel = tx.createSelection({
+        type: 'property',
+        path: args.path,
+        startOffset: match.index,
+        endOffset: matcher.lastIndex
+      })
+      matches.push(sel)
+    }
+    return matches
+  }
+
   _propagateUpdate() {
+    let selectedMatch = this._state.selectedMatch
+    this.editorSession.transaction((tx, args) => {
+      tx.setSelection(this._state.matches[selectedMatch])
+      return args
+    })
     // HACK: we make commandStates dirty in order to trigger re-evaluation
     this.editorSession._setDirty('commandStates')
     this.editorSession.startFlow()
