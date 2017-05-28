@@ -48,7 +48,6 @@ class EditorSession extends EventEmitter {
     this._flowStages = ['update', 'pre-render', 'render', 'post-render', 'position', 'finalize']
     // to get something executed directly after a flow
     this._postponed = []
-
     this._observers = {}
 
     this._lang = options.lang || this.configurator.getDefaultLanguage()
@@ -90,8 +89,15 @@ class EditorSession extends EventEmitter {
       this.saveHandler = configurator.getSaveHandler()
     }
 
+    // Custom Managers (registered via configurator e.g. FindAndReplaceManager)
+    this._managers = {}
+    forEach(configurator.getManagers(), (ManagerClass, name) => {
+      this._managers[name] = new ManagerClass(this._context)
+    })
+
     // The command manager keeps the commandStates up-to-date
     this.commandManager = new CommandManager(this._context, commands)
+
     // The drag manager dispatches drag requests to registered drag handlers
     // TODO: after consolidating the API of this class, we probably need a less diverse context
     this.dragManager = new DragManager(dropHandlers, Object.assign({}, this._context, {
@@ -170,6 +176,10 @@ class EditorSession extends EventEmitter {
 
   getDocument() {
     return this.document
+  }
+
+  getManager(name) {
+    return this._managers[name]
   }
 
   getSelection() {
@@ -743,6 +753,8 @@ class EditorSession extends EventEmitter {
     this._change = null
     this._info = null
   }
+
+
 }
 
 export default EditorSession

@@ -2,9 +2,4 @@
   background: #2E2E2E;
   padding: 3px;
   border-radius: 3px;
-  /*
-    HACK We need to set a min-width, otherwise menu items will break and split
-    into two lines
-  */
-  min-width: 200px;
 }

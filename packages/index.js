@@ -8,6 +8,7 @@ export { default as ContextMenuPackage } from './context-menu/ContextMenuPackage
 export { default as DropzonesPackage } from './dropzones/DropzonesPackage'
 export { default as EmphasisPackage } from './emphasis/EmphasisPackage'
 export { default as FilePackage } from './file/FilePackage'
+export { default as FindAndReplacePackage } from './find-and-replace/FindAndReplacePackage'
 export { default as GridPackage } from './grid/GridPackage'
 export { default as GutterPackage } from './gutter/GutterPackage'
 export { default as HeadingPackage } from './heading/HeadingPackage'
