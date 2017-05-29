@@ -88,7 +88,20 @@ class FindAndReplaceManager {
     Replace next occurence
   */
   replaceNext() {
-    throw new Error('Not implemented')
+    let index = this._state.selectedMatch
+    let totalMatches = this._state.matches.length
+    let match = this._state.matches[index]
+    let next = (index + 1) % totalMatches
+    let nextMatch = this._state.matches[next]
+
+    this.editorSession.transaction((tx, args) => {
+      tx.setSelection(match)
+      tx.insertText(this._state.replaceString)
+      tx.setSelection(nextMatch)
+      return args
+    })
+
+    this._computeMatches()
   }
 
   /*
@@ -106,13 +119,27 @@ class FindAndReplaceManager {
       })
       return args
     })
+
+    this._computeMatches()
   }
 
   _computeMatches() {
+    let currentMatches = this._state.matches
+    let currentTotal = currentMatches === undefined ? 0 : currentMatches.length
+
     this.editorSession.transaction((tx, args) => {
       this._state.matches = this._findAllMatches(tx)
       return args
     })
+
+    // Preserve selection in case of the same number of matches
+    // If the number of matches did changed we will set first selection
+    // If there are no matches we should remove index
+    let newMatches = this._state.matches
+
+    if(newMatches.length !== currentTotal) {
+      this._state.selectedMatch = newMatches.length > 0 ? 0 : undefined
+    }
   }
 
   /*
@@ -161,7 +188,9 @@ class FindAndReplaceManager {
   _propagateUpdate() {
     let selectedMatch = this._state.selectedMatch
     this.editorSession.transaction((tx, args) => {
-      tx.setSelection(this._state.matches[selectedMatch])
+      let selection = this._state.matches[selectedMatch]
+      tx.setSelection(selection)
+      args.selection = selection
       return args
     })
     // HACK: we make commandStates dirty in order to trigger re-evaluation
