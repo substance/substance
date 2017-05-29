@@ -1,4 +1,24 @@
-.sc-toolbar .sc-button {
+/*.sc-toolbar .sc-button {
   margin-top: 5px;
   margin-bottom: 5px;
+}*/
+
+.sc-toolbar > .se-active-tools {
+  display: flex;
+  /*flex-wrap: nowrap;*/
+  padding: 2px;
+}
+
+.sc-toolbar > .se-active-tools .sc-tool-group {
+  flex: 0 0 0;
+  display: flex;
+}
+
+.sc-toolbar > .se-active-tools .sc-tool-group .sc-button {
+  flex: 0 0 0;
+  margin: 2px;
+}
+
+.sc-toolbar > .se-active-tools .sc-tool-dropdown .sc-button {
+  margin: 2px;
 }

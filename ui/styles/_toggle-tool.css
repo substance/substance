@@ -1,5 +1,4 @@
 .sc-toggle-tool {
-  display: inline-block;
   position: relative;
 }
 
@@ -8,6 +7,8 @@
   display: none;
   position: absolute;
   top: 35px;
+  left: 50%;
+  transform: translate(-50%);
 }
 
 .sc-toggle-tool:hover > .sc-tooltip {

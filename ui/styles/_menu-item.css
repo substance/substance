@@ -16,8 +16,12 @@
 }
 
 .sc-menu-item.sm-active {
-  background: #000;
-  border: 1px solid #fff;
+  background: white;
+  color: inherit;
+}
+
+.sc-menu-item.sm-active .se-keyboard-shortcut {
+  color: rgba(0,0,0,0.4);
 }
 
 .sc-menu-item .se-icon {

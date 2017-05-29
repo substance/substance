@@ -13,7 +13,6 @@
   font-size: 12px;
   font-weight: 600;
   border-radius: 3px;
-  border: 1px solid transparent;
   padding-left: 7px;
   padding-right: 7px;
 }
@@ -27,19 +26,10 @@
   cursor: default;
 }
 
-.sc-button.sm-theme-dark.sm-active {
-  border-color: white;
-  background: black;
-  color: rgba(255,255,255, 1);
-}
-
+.sc-button.sm-theme-dark.sm-active,
 .sc-button.sm-theme-dark:focus {
-  background: black;
-}
-
-.sc-button.sm-theme-dark.sm-active:focus {
-  /*border-color: #444;
-  background: #444;*/
+  background: #e4e4e4;
+  color: inherit;
 }
 
 
@@ -54,11 +44,9 @@
   min-width: 24px;
   line-height: 24px;
   text-align: center;
-  /*color: #444;*/
   font-size: 12px;
   font-weight: 600;
   border-radius: 3px;
-  border: 1px solid transparent;
   padding-left: 7px;
   padding-right: 7px;
 }
@@ -73,15 +61,11 @@
 }
 
 .sc-button.sm-theme-light.sm-active {
-  border-color: #666;
-  background: white;
+  background: #2E2E2E;
+  color: white;
 }
 
+.sc-button.sm-theme-light:hover:not(.sm-active),
 .sc-button.sm-theme-light:focus {
-  background: white;
-}
-
-.sc-button.sm-theme-light.sm-active:focus {
-  /*border-color: #444;
-  background: #444;*/
+  background: #e4e4e4;
 }
