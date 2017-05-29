@@ -3,6 +3,7 @@ import ToggleFindAndReplaceCommand from './ToggleFindAndReplaceCommand'
 import FindNextCommand from './FindNextCommand'
 import FindPreviousCommand from './FindPreviousCommand'
 import ReplaceNextCommand from './ReplaceNextCommand'
+import ReplaceAllCommand from './ReplaceAllCommand'
 import FindAndReplaceTool from './FindAndReplaceTool'
 import FindAndReplaceManager from './FindAndReplaceManager'
 
@@ -22,6 +23,9 @@ export default {
       commandGroup: 'find-and-replace'
     })
     config.addCommand('replace-next', ReplaceNextCommand, {
+      commandGroup: 'find-and-replace'
+    })
+    config.addCommand('replace-all', ReplaceAllCommand, {
       commandGroup: 'find-and-replace'
     })
     config.addTool('find-and-replace', FindAndReplaceTool)
