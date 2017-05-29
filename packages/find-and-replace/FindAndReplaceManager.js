@@ -59,10 +59,7 @@ class FindAndReplaceManager {
     this._state.findString = findString
     this._state.replaceString = replaceString
 
-    this.editorSession.transaction((tx, args) => {
-      this._state.matches = this._findAllMatches(tx)
-      return args
-    })
+    this._computeMatches()
     this._state.selectedMatch = 0
     this._propagateUpdate()
   }
@@ -83,7 +80,7 @@ class FindAndReplaceManager {
   findPrevious() {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
-    this._state.selectedMatch = (index - 1) % totalMatches
+    this._state.selectedMatch = index > 0 ? index - 1 : totalMatches - 1
     this._propagateUpdate()
   }
 
@@ -98,9 +95,24 @@ class FindAndReplaceManager {
     Replace all occurences
   */
   replaceAll() {
-    // TODO: We should get matches in reverse order, 
+    // Reverse matches order, 
     // so the replace operations later are side effect free. 
-    throw new Error('Not implemented')
+    let matches = this._state.matches.reverse()
+
+    this.editorSession.transaction((tx, args) => {
+      matches.forEach(match => {
+        tx.setSelection(match)
+        tx.insertText(this._state.replaceString)
+      })
+      return args
+    })
+  }
+
+  _computeMatches() {
+    this.editorSession.transaction((tx, args) => {
+      this._state.matches = this._findAllMatches(tx)
+      return args
+    })
   }
 
   /*
