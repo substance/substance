@@ -12,6 +12,11 @@ class DefaultLabelProvider {
     if (!labels) return name
     return labels[name] || name
   }
+
+  hasLabel(name) {
+    let labels = this.labels[this.lang]
+    return Boolean(labels[name])
+  }
 }
 
 export default DefaultLabelProvider

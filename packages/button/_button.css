@@ -65,7 +65,7 @@
   color: white;
 }
 
-.sc-button.sm-theme-light:hover:not(.sm-active),
+.sc-button.sm-theme-light:hover:not(.sm-active):not([disabled]),
 .sc-button.sm-theme-light:focus {
   background: #e4e4e4;
 }

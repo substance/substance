@@ -42,6 +42,7 @@ export default {
     // Configure overlay
     config.addToolPanel('main-overlay', [
       {
+        name: 'prompt',
         type: 'tool-group',
         commandGroups: ['prompt']
       }

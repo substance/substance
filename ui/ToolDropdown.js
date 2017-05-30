@@ -66,22 +66,21 @@ class ToolDropdown extends ToolGroup {
             })
           )
         )
-      } else {
-        let tooltipText = this._getTooltipText()
-        if (tooltipText) {
-          el.append(
-            $$(Tooltip, {
-              name: tooltipText
-            })
-          )
-        }
+      } else if (this.props.style === 'minimal' || toggleName !== this.props.name) {
+        // NOTE: tooltips are only rendered when explanation is needed
+        el.append(
+          this._renderToolTip($$)
+        )
       }
     }
     return el
   }
 
-  _getTooltipText() {
-    return this.context.labelProvider.getLabel(this.props.name)
+  _renderToolTip($$) {
+    let labelProvider = this.context.labelProvider
+    return $$(Tooltip, {
+      text: labelProvider.getLabel(this.props.name)
+    })
   }
 
   /*

@@ -50,7 +50,7 @@ class ToggleTool extends Component {
     // Append tooltip
     el.append(
       $$(Tooltip, {
-        name: this._getTooltipText()
+        text: this._getTooltipText()
       })
     )
     return el
