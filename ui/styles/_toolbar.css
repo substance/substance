@@ -1,8 +1,3 @@
-/*.sc-toolbar .sc-button {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}*/
-
 .sc-toolbar > .se-active-tools {
   display: flex;
   /*flex-wrap: nowrap;*/

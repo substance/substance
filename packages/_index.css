@@ -25,8 +25,6 @@
 @import './inline-node/_inline-node.css';
 /* inline-wrapper */
 @import './inline-wrapper/_inline-wrapper.css';
-/* input */
-@import './input/_input.css';
 /* isolated-node */
 @import './isolated-node/_isolated-node.css';
 /* modal */
@@ -35,6 +33,7 @@
 @import './layout/_layout.css';
 /* link */
 @import './link/_link.css';
+@import './link/_edit-link-tool.css';
 /* overlay */
 @import './overlay/_overlay.css';
 /* paragraph */

@@ -12,7 +12,9 @@
 .sc-tool-dropdown > .sc-tooltip {
   display: none;
   position: absolute;
-  top: 30px;
+  top: 35px;
+  left: 50%;
+  transform: translate(-50%);
 }
 
 .sc-tool-dropdown:hover > .sc-tooltip {
