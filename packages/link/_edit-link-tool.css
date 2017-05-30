@@ -1,0 +1,19 @@
+.sc-edit-link-tool {
+  display: flex;
+}
+
+.sc-edit-link-tool > * {
+  flex: 0 0 0;
+}
+
+.sc-edit-link-tool .sc-input {
+  height: 24px;
+  font-size: 11px;
+  color: white;
+  min-width: 200px;
+  font-family: Monaco, 'Courier New';
+  padding: 5px;
+  background: transparent;
+  border: none;
+  margin: 2px;
+}
