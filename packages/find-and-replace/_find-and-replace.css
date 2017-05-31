@@ -68,3 +68,11 @@
 .sc-find-and-replace-tool .se-status-options button {
   margin-left: 3px;
 }
+
+.sc-selected-match {
+  background-color: #ffbf00;
+}
+
+.sc-match {
+  outline: 1px solid #ccc;
+}

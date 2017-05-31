@@ -202,9 +202,22 @@ class FindAndReplaceManager {
   }
 
   _propagateUpdate() {
+    const state = this._state
+    const editorSession = this.editorSession
+    const markersManager = editorSession.markersManager
+    const markers = state.matches.map((m, idx) => {
+      const type = (idx === state.selectedMatch) ? 'selected-match' : 'match'
+      return {
+        type,
+        start: m.start,
+        end: m.end
+      }
+    })
+    console.log('setting find-and-replace markers', markers)
+    markersManager.setMarkers('find-and-replace', markers)
     // HACK: we make commandStates dirty in order to trigger re-evaluation
-    this.editorSession._setDirty('commandStates')
-    this.editorSession.startFlow()
+    editorSession._setDirty('commandStates')
+    editorSession.startFlow()
   }
 
 }
