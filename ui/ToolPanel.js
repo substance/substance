@@ -23,7 +23,7 @@ class ToolPanel extends Component {
       if (!ComponentClass) throw new Error('Toolpanel entry type not found')
       let props = Object.assign({}, entry, { theme: this.getTheme() })
       els.push(
-        $$(ComponentClass, props)
+        $$(ComponentClass, props).ref(entry.name)
       )
     })
     return els

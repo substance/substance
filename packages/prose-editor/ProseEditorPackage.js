@@ -52,6 +52,7 @@ export default {
 
     config.addToolPanel('workflow', [
       {
+        name: 'workflow',
         type: 'tool-group',
         commandGroups: ['workflows']
       }

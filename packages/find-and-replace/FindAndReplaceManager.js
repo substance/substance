@@ -57,27 +57,37 @@ class FindAndReplaceManager {
   */
   startFind(findString) {
     this._state.findString = findString
-    // this._state.replaceString = replaceString
-
     this._computeMatches()
     this._state.selectedMatch = 0
     this._propagateUpdate()
   }
 
   setReplaceString(replaceString) {
-    // NOTE: we don't trigger any updates here
+    // NOTE: We don't trigger any updates here
     this._state.replaceString = replaceString
-    console.log('this._state', this._state)
   }
 
   /*
-    Find next match
+    Find next match. We also update the native selection here unless skipped.
+    NOTE: We want to skip the selection update when hitting ENTER in the
+    searchString input field. Then we just want to highlight it but keep the
+    cursor in the input field.
   */
-  findNext() {
+  findNext(skipSelectionUpdate) {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
     this._state.selectedMatch = (index + 1) % totalMatches
+
+    if (!skipSelectionUpdate) {
+      this._renderSelectionForSelectedMatch()
+    }
+
     this._propagateUpdate()
+  }
+
+  _renderSelectionForSelectedMatch() {
+    let selection = this._state.matches[this._state.selectedMatch]
+    this.editorSession.setSelection(selection)
   }
 
   /*
@@ -192,14 +202,6 @@ class FindAndReplaceManager {
   }
 
   _propagateUpdate() {
-    // let selectedMatch = this._state.selectedMatch
-
-    // this.editorSession.transaction((tx, args) => {
-    //   let selection = this._state.matches[selectedMatch]
-    //   tx.setSelection(selection)
-    //   args.selection = selection
-    //   return args
-    // })
     // HACK: we make commandStates dirty in order to trigger re-evaluation
     this.editorSession._setDirty('commandStates')
     this.editorSession.startFlow()
