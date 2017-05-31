@@ -2,6 +2,14 @@ import { ToggleTool } from '../../ui'
 
 class FindAndReplaceTool extends ToggleTool {
 
+  didMount() {
+    console.log('FindAndReplaceTool.didMount')
+  }
+
+  dispose() {
+    console.log('disposed find and replace tool')
+  }
+
   render($$) {
     let commandState = this.props.commandState
     let el = $$('div').addClass('sc-find-and-replace-tool')
@@ -29,7 +37,7 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('type', 'text')
               .attr('placeholder', 'Find in body')
               .val(commandState.findString)
-              .on('change', this._startFind)
+              .on('keyup', this._triggerFind)
           ),
         $$('div')
           .addClass('se-section-item')
@@ -54,6 +62,7 @@ class FindAndReplaceTool extends ToggleTool {
               .val(commandState.replaceString)
               .attr('type', 'text')
               .attr('placeholder', 'Replace in body')
+              .on('keyup', this._triggerReplace)
           ),
         $$('div')
           .addClass('se-section-item')
@@ -112,11 +121,54 @@ class FindAndReplaceTool extends ToggleTool {
     this.context.commandManager.executeCommand('replace-all')
   }
 
+  /*
+    Either starts a new find (when a new character is inserted) or finds the
+    next match (when ENTER is hit)
+
+    TODO: it would be good to debounce this (trigger new find only every 500ms
+    of inactivity)
+  */
+  _triggerFind(e) {
+    if (e.keyCode === 13) {
+      this._findNext()
+    } else {
+      this._startFind()
+    }
+  }
+
+  /*
+    Starts a new find operations.
+
+    All matches are highlighted in the document and the first one is selected.
+  */
   _startFind() {
     let findString = this.refs.findString.val()
+    let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
+    findAndReplaceManager.startFind(findString)
+  }
+
+  /*
+    Either updates the replaceString (when a new character is inserted) or
+    starts a replace action (when ENTER is hit)
+
+    TODO: it would be good to debounce this (trigger new find only every 500ms
+    of inactivity)
+  */
+  _triggerReplace(e) {
+    if (e.keyCode === 13) {
+      this._replaceNext()
+    } else {
+      this._setReplaceString()
+    }
+  }
+
+  /*
+    Just sets the replace string in findAndReplaceManager state
+  */
+  _setReplaceString() {
     let replaceString = this.refs.replaceString.val()
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
-    findAndReplaceManager.startFind(findString, replaceString)
+    findAndReplaceManager.setReplaceString(replaceString)
   }
 
 }

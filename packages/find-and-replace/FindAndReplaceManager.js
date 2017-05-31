@@ -14,7 +14,7 @@ class FindAndReplaceManager {
     })
 
     this._state = {
-      disabled: false,
+      disabled: true,
       findString: '',
       replaceString: '',
       // Consists a sequence of property selections
@@ -55,13 +55,19 @@ class FindAndReplaceManager {
   /*
     Start find and replace workflow
   */
-  startFind(findString, replaceString) {
+  startFind(findString) {
     this._state.findString = findString
-    this._state.replaceString = replaceString
+    // this._state.replaceString = replaceString
 
     this._computeMatches()
     this._state.selectedMatch = 0
     this._propagateUpdate()
+  }
+
+  setReplaceString(replaceString) {
+    // NOTE: we don't trigger any updates here
+    this._state.replaceString = replaceString
+    console.log('this._state', this._state)
   }
 
   /*
@@ -108,8 +114,8 @@ class FindAndReplaceManager {
     Replace all occurences
   */
   replaceAll() {
-    // Reverse matches order, 
-    // so the replace operations later are side effect free. 
+    // Reverse matches order,
+    // so the replace operations later are side effect free.
     let matches = this._state.matches.reverse()
 
     this.editorSession.transaction((tx, args) => {
@@ -186,13 +192,14 @@ class FindAndReplaceManager {
   }
 
   _propagateUpdate() {
-    let selectedMatch = this._state.selectedMatch
-    this.editorSession.transaction((tx, args) => {
-      let selection = this._state.matches[selectedMatch]
-      tx.setSelection(selection)
-      args.selection = selection
-      return args
-    })
+    // let selectedMatch = this._state.selectedMatch
+
+    // this.editorSession.transaction((tx, args) => {
+    //   let selection = this._state.matches[selectedMatch]
+    //   tx.setSelection(selection)
+    //   args.selection = selection
+    //   return args
+    // })
     // HACK: we make commandStates dirty in order to trigger re-evaluation
     this.editorSession._setDirty('commandStates')
     this.editorSession.startFlow()

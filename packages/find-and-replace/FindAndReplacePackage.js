@@ -29,6 +29,7 @@ export default {
       commandGroup: 'find-and-replace'
     })
     config.addTool('find-and-replace', FindAndReplaceTool)
+    config.addKeyboardShortcut('cmd+f', { command: 'toggle-find-and-replace' })
     config.addKeyboardShortcut('cmd+alt+f', { command: 'toggle-find-and-replace' })
     config.addKeyboardShortcut('cmd+g', { command: 'find-next' })
     config.addKeyboardShortcut('cmd+shift+g', { command: 'find-previous' })
