@@ -110,7 +110,7 @@ class MarkersManager {
     Trigger rerendering of all dirty text properties.
   */
   _updateProperties() {
-    console.log('MarkersManager._updateProperties()')
+    // console.log('MarkersManager._updateProperties()')
     Object.keys(this._dirtyProps).forEach((path) => {
       let textProperties = this._textProperties[path]
       if (textProperties) {
@@ -129,7 +129,7 @@ class MarkersManager {
       surfaceId: textPropertyComponent.getSurfaceId(),
       containerId: textPropertyComponent.getContainerId()
     })
-    console.log('## providing %s markers for %s', markers.length, path)
+    // console.log('## providing %s markers for %s', markers.length, path)
     textPropertyComponent.setState({
       markers: markers
     })
@@ -189,7 +189,7 @@ class MarkersIndex {
     switch (scope) {
       case 'document': {
         const path = marker.start.path
-        console.log('Adding marker for path', path, marker)
+        // console.log('Adding marker for path', path, marker)
         dirtyProps[path] = true
         this._documentMarkers.add(path, marker)
         break
