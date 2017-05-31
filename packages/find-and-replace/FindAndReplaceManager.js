@@ -1,3 +1,4 @@
+import { Marker } from '../../model'
 
 class FindAndReplaceManager {
 
@@ -86,8 +87,8 @@ class FindAndReplaceManager {
   }
 
   _renderSelectionForSelectedMatch() {
-    let selection = this._state.matches[this._state.selectedMatch]
-    this.editorSession.setSelection(selection)
+    let match = this._state.matches[this._state.selectedMatch]
+    this.editorSession.setSelection(match.getSelection())
   }
 
   /*
@@ -143,10 +144,7 @@ class FindAndReplaceManager {
     let currentMatches = this._state.matches
     let currentTotal = currentMatches === undefined ? 0 : currentMatches.length
 
-    this.editorSession.transaction((tx, args) => {
-      this._state.matches = this._findAllMatches(tx)
-      return args
-    })
+    this._state.matches = this._findAllMatches()
 
     // Preserve selection in case of the same number of matches
     // If the number of matches did changed we will set first selection
@@ -161,16 +159,17 @@ class FindAndReplaceManager {
   /*
     Returns all matches
   */
-  _findAllMatches(tx) {
-    let matches = []
-    const nodes = this.doc.getNodes()
+  _findAllMatches() {
+    const doc = this.doc
+    const nodes = doc.getNodes()
     const pattern = this._state.findString
 
+    let matches = []
     if (pattern) {
       Object.keys(nodes).forEach((nodeId) => {
-        let node = this.doc.get(nodeId)
+        let node = doc.get(nodeId)
         if(node.isText()) {
-          let found = this._findInTextProperty(tx, {
+          let found = this._findInTextProperty({
             path: [node.id, 'content'],
             findString: pattern
           })
@@ -187,22 +186,27 @@ class FindAndReplaceManager {
     Method returns an array of matches, each match is represented as
     a PropertySelection
   */
-  _findInTextProperty(tx, args) {
-    const text = tx.get(args.path)
+  _findInTextProperty({path, findString}) {
+    const doc = this.doc
+    const text = doc.get(path)
 
     // Case-insensitive search for multiple matches
-    let matcher = new RegExp(args.findString, 'ig')
+    let matcher = new RegExp(findString, 'ig')
     let matches = []
     let match
 
     while ((match = matcher.exec(text))) {
-      let sel = tx.createSelection({
-        type: 'property',
-        path: args.path,
-        startOffset: match.index,
-        endOffset: matcher.lastIndex
+      let marker = new Marker(doc, {
+        type: 'match',
+        start: {
+          path,
+          offset: match.index
+        },
+        end: {
+          offset: matcher.lastIndex
+        }
       })
-      matches.push(sel)
+      matches.push(marker)
     }
     return matches
   }
@@ -211,16 +215,11 @@ class FindAndReplaceManager {
     const state = this._state
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
-    const markers = state.matches.map((m, idx) => {
-      const type = (idx === state.selectedMatch) ? 'selected-match' : 'match'
-      return {
-        type,
-        start: m.start,
-        end: m.end
-      }
+    state.matches.forEach((m, idx) => {
+      m.type = (idx === state.selectedMatch) ? 'selected-match' : 'match'
     })
-    console.log('setting find-and-replace markers', markers)
-    markersManager.setMarkers('find-and-replace', markers)
+    console.log('setting find-and-replace markers', state.matches)
+    markersManager.setMarkers('find-and-replace', state.matches)
     // HACK: we make commandStates dirty in order to trigger re-evaluation
     editorSession._setDirty('commandStates')
     editorSession.startFlow()
