@@ -164,14 +164,20 @@ class FindAndReplaceManager {
   _findAllMatches(tx) {
     let matches = []
     const nodes = this.doc.getNodes()
+    const pattern = this._state.findString
 
-    Object.keys(nodes).forEach((nodeId) => {
-      let node = this.doc.get(nodeId)
-      if(node.isText()) {
-        let found = this._findInTextProperty(tx, {path: [node.id, 'content'], findString: this._state.findString})
-        matches = matches.concat(found)
-      }
-    })
+    if (pattern) {
+      Object.keys(nodes).forEach((nodeId) => {
+        let node = this.doc.get(nodeId)
+        if(node.isText()) {
+          let found = this._findInTextProperty(tx, {
+            path: [node.id, 'content'],
+            findString: pattern
+          })
+          matches = matches.concat(found)
+        }
+      })
+    }
 
     return matches
   }
