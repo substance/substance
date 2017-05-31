@@ -89,19 +89,19 @@ class FindAndReplaceManager {
   */
   replaceNext() {
     let index = this._state.selectedMatch
-    let totalMatches = this._state.matches.length
     let match = this._state.matches[index]
-    let next = (index + 1) % totalMatches
-    let nextMatch = this._state.matches[next]
 
     this.editorSession.transaction((tx, args) => {
       tx.setSelection(match)
       tx.insertText(this._state.replaceString)
-      tx.setSelection(nextMatch)
       return args
     })
 
+    // Compute matches again and set selection on the same index
+    // as number of matches reduced by one
     this._computeMatches()
+    let nextMatch = this._state.matches[index]
+    this.editorSession.setSelection(nextMatch)
   }
 
   /*
