@@ -45,7 +45,9 @@ class MarkersManager {
 
   addMarker(key, marker) {
     marker._key = key
-    marker = new Marker(this.editorSession.getDocument(), marker)
+    if (!marker._isMarker) {
+      marker = new Marker(this.editorSession.getDocument(), marker)
+    }
     this._markers.add(marker)
   }
 
