@@ -1,12 +1,11 @@
 import { Document } from '../../model'
 
+export default
 class ProseArticle extends Document {
-  constructor(schema) {
-    super(schema)
-    this._initialize()
-  }
 
   _initialize() {
+    super._initialize()
+
     this.create({
       type: 'container',
       id: 'body',
@@ -15,5 +14,3 @@ class ProseArticle extends Document {
   }
 
 }
-
-export default ProseArticle
