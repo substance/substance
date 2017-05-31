@@ -77,11 +77,12 @@ class SpellCheckManager {
     Removes all spell errors on the given path first.
   */
   _addSpellErrors(path, data) {
-    let doc = this.editorSession.getDocument()
-    let oldErrors = doc.getIndex('markers').get(path).filter((marker) => {
-      return marker.type === 'spell-error'
-    })
-    let newErrors = data.map(function(m) {
+    const editorSession = this.editorSession
+    const markersManager = editorSession.markersManager
+    // NOTE: we have one set of markers for each text property
+    // as we analyze each text block one by one
+    const key = 'spell-error:'+path.join('.')
+    const markers = data.map((m) => {
       return {
         type: 'spell-error',
         start: {
@@ -94,16 +95,8 @@ class SpellCheckManager {
         suggestions: m.suggestions
       }
     })
-    this.editorSession.transaction((tx) => {
-      // remove the old markers first
-      oldErrors.forEach((spellError) => {
-        tx.delete(spellError.id)
-      })
-      // then add the new ones
-      newErrors.forEach((spellError) => {
-        tx.create(spellError)
-      })
-    }, { history: false, spellcheck: true })
+    markersManager.setMarkers(key, markers)
+    editorSession.startFlow()
   }
 }
 
