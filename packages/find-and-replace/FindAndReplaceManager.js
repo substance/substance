@@ -15,10 +15,7 @@ class FindAndReplaceManager {
       // for convenienve we provide access to the doc directly
       doc: this.doc
     })
-    this._resetState()
-  }
 
-  _resetState() {
     this._state = {
       disabled: true,
       findString: '',
@@ -27,6 +24,16 @@ class FindAndReplaceManager {
       matches: [],
       selectedMatch: undefined
     }
+
+  }
+
+  /*
+    NOTE: We remember findString and replaceString for the next search action
+  */
+  _resetState() {
+    this._state.disabled = true
+    this._state.matches = []
+    this._state.selectedMatch = undefined
   }
 
   /*

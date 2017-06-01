@@ -1,5 +1,6 @@
 import FindAndReplaceCommand from './FindAndReplaceCommand'
 import ToggleFindAndReplaceCommand from './ToggleFindAndReplaceCommand'
+import CloseFindAndReplaceCommand from './CloseFindAndReplaceCommand'
 import FindNextCommand from './FindNextCommand'
 import FindPreviousCommand from './FindPreviousCommand'
 import ReplaceNextCommand from './ReplaceNextCommand'
@@ -14,6 +15,9 @@ export default {
       commandGroup: 'workflows'
     })
     config.addCommand('toggle-find-and-replace', ToggleFindAndReplaceCommand, {
+      commandGroup: 'find-and-replace'
+    })
+    config.addCommand('close-find-and-replace', CloseFindAndReplaceCommand, {
       commandGroup: 'find-and-replace'
     })
     config.addCommand('find-next', FindNextCommand, {
@@ -34,6 +38,8 @@ export default {
     config.addKeyboardShortcut('cmd+g', { command: 'find-next' })
     config.addKeyboardShortcut('cmd+shift+g', { command: 'find-previous' })
     config.addKeyboardShortcut('cmd+alt+e', { command: 'replace-next' })
+    // TODO: we want to bind this to the ESC button instead
+    config.addKeyboardShortcut('cmd+alt+c', { command: 'close-find-and-replace' })
     config.addManager('find-and-replace', FindAndReplaceManager)
   },
   FindAndReplaceCommand,
