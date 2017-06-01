@@ -329,7 +329,7 @@ class MarkersIndex {
         }
         // TODO: we should do something special when the change occurred inside the marker
         if (start !== end && newStart === newEnd) {
-          marker.remove()
+          this._remove(marker)
           return
         }
         if (start !== newStart) {
