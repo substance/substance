@@ -1,7 +1,9 @@
 import { module } from 'substance-test'
+import { FindAndReplacePackage } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import simple from './fixture/simple'
-import FindAndReplaceManager from '../packages/find-and-replace/FindAndReplaceManager'
+
+const { FindAndReplaceManager } = FindAndReplacePackage
 
 /*
 
