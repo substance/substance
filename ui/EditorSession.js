@@ -755,11 +755,13 @@ class EditorSession extends EventEmitter {
   }
 
   /*
-    Skips the next selection rerender. Can be set by tools to keep the
-    focus after triggering a flow.
+    When set to true puts the editor into a blurred state, which means that
+    surface selections are not recovered until blurred state is set to false
+    again.
   */
-  skipNextSelectionRerender() {
-    this._skipSelectionRerender = true
+
+  setBlurred(blurred) {
+    this._blurred = blurred
   }
 
 }

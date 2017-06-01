@@ -96,8 +96,7 @@ class SurfaceManager {
     and displays the right DOM selection
   */
   _recoverDOMSelection() {
-    if (this.editorSession._skipSelectionRerender) {
-      this.editorSession._skipSelectionRerender = false
+    if (this.editorSession._blurred) {
       return
     }
 

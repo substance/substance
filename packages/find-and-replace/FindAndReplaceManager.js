@@ -223,9 +223,10 @@ class FindAndReplaceManager {
     this._updateMarkers()
     this.editorSession._setDirty('commandStates')
     if (!renderSelection) {
-      this.editorSession.skipNextSelectionRerender()
+      this.editorSession.setBlurred(true)
     }
     this.editorSession.startFlow()
+    this.editorSession.setBlurred(false)
   }
 
   _updateMarkers() {
