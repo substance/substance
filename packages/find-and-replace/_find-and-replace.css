@@ -1,5 +1,5 @@
 .sc-find-and-replace-tool {
-  background: #fafbfc;
+  background: #fafafa;
   border-top: 1px solid var(--border-color);
   padding: 5px;
 }
@@ -17,22 +17,28 @@
 .sc-find-and-replace-tool .se-section-item input {
   width: 100%;
   height: 25px;
-  border: 1px solid #bbb;
+  border: 1px solid #cbcbcb;
   border-radius: 3px;
   font-size: 13px;
   padding: 5px;
 }
 
+.sc-find-and-replace-tool .se-section-item input:focus {
+  border: 1px solid #50a1ff;
+}
+
 .sc-find-and-replace-tool button {
   border-radius: 3px;
-  border: 1px solid #bbb;
+  border: 1px solid #cbcbcb;
   background: white;
   height: 25px;
+  font-size: 13px;
+  text-align: center;
 }
 
 .sc-find-and-replace-tool .se-section-item button {
   width: 100%;
-  border: 1px solid #bbb;
+  border: 1px solid #cbcbcb;
   background: white;
   height: 25px;
 }
