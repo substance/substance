@@ -75,7 +75,8 @@ test("Select previous match", function(t) {
 test("Replace first match", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new FindAndReplaceManager({editorSession})
-  manager.startFind('123', 'XXX')
+  manager.startFind('123')
+  manager.setReplaceString('XXX')
   manager.replaceNext()
   t.equal(manager._state.matches.length, 3, 'Should have 3 matches selected')
   t.equal(manager._state.selectedMatch, 0, '1st match should be selected')
@@ -92,13 +93,14 @@ test("Replace first match", function(t) {
 test("Replace third match", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new FindAndReplaceManager({editorSession})
-  manager.startFind('123', 'XXX')
+  manager.startFind('123')
+  manager.setReplaceString('XXX')
   manager.findNext()
   manager.replaceNext()
   t.equal(manager._state.matches.length, 3, 'Should have 3 matches selected')
-  t.equal(manager._state.selectedMatch, 2, '3st match should be selected')
+  t.equal(manager._state.selectedMatch, 1, '2nd match should be selected')
   let sel = editorSession.getSelection()
-  let content = doc.get(['p3', 'content'])
+  let content = doc.get(['p2', 'content'])
   t.ok(sel.isPropertySelection(), 'Should be property selection')
   t.deepEqual(sel.start.path, ['p3', 'content'], 'Cursor should be after inserted text')
   t.equal(sel.start.offset, 1, 'Start offset should be 1')
@@ -110,7 +112,8 @@ test("Replace third match", function(t) {
 test("Replace match with longer string", function(t) {
   let { editorSession } = setupEditor(t, simple)
   let manager = new FindAndReplaceManager({editorSession})
-  manager.startFind('123', 'XXXX')
+  manager.startFind('123')
+  manager.setReplaceString('XXXX')
   manager.replaceNext()
   t.equal(manager._state.matches.length, 3, 'Should have 3 matches selected')
   t.equal(manager._state.selectedMatch, 0, '1st match should be selected')
@@ -123,13 +126,21 @@ test("Replace match with longer string", function(t) {
 })
 
 test("Replace all matches", function(t) {
-  let { editorSession } = setupEditor(t, simple)
+  let { doc, editorSession } = setupEditor(t, simple)
   let manager = new FindAndReplaceManager({editorSession})
-  manager.startFind('123', 'XXX')
+  manager.startFind('123')
+  manager.setReplaceString('XXX')
   t.equal(manager._state.matches.length, 4, 'Should have 4 matches selected')
   manager.replaceAll()
   t.equal(manager._state.matches.length, 0, 'There should be no matches remaining')
   t.equal(manager._state.selectedMatch, undefined, 'selectedMatch should be undefined')
+  let nodes = doc.getNodes()
+  for(let nodeId in nodes){
+    if(nodes[nodeId].isText()) {
+      let content = doc.get([nodeId, 'content'])
+      t.equal(content, '0XXX456789', nodeId + ' content should be 0XXX456789')
+    }
+  }
   // TODO: Test if all paragraphs are '0XXX456789'
   t.end()
 })
