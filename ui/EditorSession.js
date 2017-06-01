@@ -754,6 +754,13 @@ class EditorSession extends EventEmitter {
     this._info = null
   }
 
+  /*
+    Skips the next selection rerender. Can be set by tools to keep the
+    focus after triggering a flow.
+  */
+  skipNextSelectionRerender() {
+    this._skipSelectionRerender = true
+  }
 
 }
 
