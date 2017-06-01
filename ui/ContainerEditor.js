@@ -253,7 +253,7 @@ class ContainerEditor extends Surface {
 
   isEmpty() {
     let containerNode = this.getContainer()
-    return (containerNode && containerNode.nodes.length === 0)
+    return (containerNode && containerNode.length === 0)
   }
 
   isEditable() {
