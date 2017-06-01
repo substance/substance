@@ -30,7 +30,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
 
   getInitialState() {
     const markersManager = this.context.markersManager
-    let path = this.props.path
+    let path = this.getPath()
     let markers
     if (markersManager) {
       // register and get initial set of markers
@@ -137,18 +137,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         }
       })
     })
-  }
-
-  getPath() {
-    return this.props.path
-  }
-
-  getText() {
-    return this.getDocument().get(this.getPath())
-  }
-
-  getDocument() {
-    return this.props.doc ||this.context.doc
   }
 
   getSurface() {

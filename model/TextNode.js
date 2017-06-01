@@ -28,6 +28,10 @@ class TextNode extends DocumentNode {
     return this.content.length
   }
 
+  getAnnotations() {
+    return this.getDocument().getIndex('annotations').get(this.getPath())
+  }
+
 }
 
 TextNode.isText = true

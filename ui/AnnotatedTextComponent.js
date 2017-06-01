@@ -22,12 +22,20 @@ class AnnotatedTextComponent extends Component {
     return el
   }
 
+  getPath() {
+    return this.props.path
+  }
+
   getText() {
     return this.getDocument().get(this.props.path) || ''
   }
 
   getAnnotations() {
     return this.getDocument().getIndex('annotations').get(this.props.path)
+  }
+
+  getDocument() {
+    return this.props.doc || this.context.doc
   }
 
   _getTagName() {
@@ -93,15 +101,6 @@ class AnnotatedTextComponent extends Component {
 
   _finishFragment(fragment, context, parentContext) {
     parentContext.append(context)
-  }
-
-  /**
-    Gets document instance.
-
-    @return {Document} The document instance
-   */
-  getDocument() {
-    return this.props.doc || this.context.doc
   }
 
 }
