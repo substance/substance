@@ -32,6 +32,7 @@ class FindAndReplaceTool extends ToggleTool {
               .ref('findString')
               .attr('type', 'text')
               .attr('placeholder', 'Find in body')
+              .attr('tabindex', 500)
               .val(commandState.findString)
               .on('keyup', this._triggerFind)
           ),
@@ -40,6 +41,7 @@ class FindAndReplaceTool extends ToggleTool {
           .append(
             $$('button')
               .append('Find')
+              .attr('tabindex', 502)
               .on('click', this._findNext)
           ),
         $$('div')
@@ -57,6 +59,7 @@ class FindAndReplaceTool extends ToggleTool {
               .ref('replaceString')
               .val(commandState.replaceString)
               .attr('type', 'text')
+              .attr('tabindex', 501)
               .attr('placeholder', 'Replace in body')
               .on('keyup', this._triggerReplace)
           ),
@@ -65,6 +68,7 @@ class FindAndReplaceTool extends ToggleTool {
           .append(
             $$('button')
               .append('Replace')
+              .attr('tabindex', 503)
               .on('click', this._replaceNext)
           ),
         $$('div')
@@ -72,6 +76,7 @@ class FindAndReplaceTool extends ToggleTool {
           .append(
             $$('button')
               .append('Replace All')
+              .attr('tabindex', 504)
               .on('click', this._replaceAll)
           )
       )
