@@ -116,11 +116,13 @@ class FindAndReplaceTool extends ToggleTool {
   }
 
   _replaceNext() {
-    this.context.commandManager.executeCommand('replace-next')
+    let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
+    findAndReplaceManager.replaceNext()
   }
 
   _replaceAll() {
-    this.context.commandManager.executeCommand('replace-all')
+    let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
+    findAndReplaceManager.replaceAll()
   }
 
   /*
