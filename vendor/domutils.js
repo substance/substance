@@ -1,12 +1,9 @@
-import require$$0 from 'domelementtype';
+import domelementtype from 'domelementtype';
 import entities from 'entities';
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
 }
-
-var ElementType$1 = require$$0;
-var entities$1 = entities;
 
 const booleanAttributes = {
   __proto__: null,
@@ -77,7 +74,7 @@ function formatAttribs(el, opts) {
     if (!value && booleanAttributes[key]) {
       output.push(key);
     } else {
-      output.push(key + '="' + (opts.decodeEntities ? entities$1.encodeXML(value) : value) + '"');
+      output.push(key + '="' + (opts.decodeEntities ? entities.encodeXML(value) : value) + '"');
     }
   });
   return output.join(' ')
@@ -94,13 +91,13 @@ function render(dom, opts) {
 
     if (elem.type === 'root') {
       output.push(render(elem.childNodes, opts));
-    } else if (ElementType$1.isTag(elem)) {
+    } else if (domelementtype.isTag(elem)) {
       output.push(renderTag(elem, opts));
-    } else if (elem.type === ElementType$1.Directive) {
+    } else if (elem.type === domelementtype.Directive) {
       output.push(renderDirective(elem));
-    } else if (elem.type === ElementType$1.Comment) {
+    } else if (elem.type === domelementtype.Comment) {
       output.push(renderComment(elem));
-    } else if (elem.type === ElementType$1.CDATA) {
+    } else if (elem.type === domelementtype.CDATA) {
       output.push(renderCdata(elem));
     } else {
       output.push(renderText(elem, opts));
@@ -148,7 +145,7 @@ function renderText(elem, opts) {
   var data = elem.data || '';
   
   if (opts.decodeEntities && !(elem.parent && elem.parent.name in unencodedElements)) {
-    data = entities$1.encodeXML(data);
+    data = entities.encodeXML(data);
   }
   return data
 }
@@ -161,10 +158,8 @@ function renderComment(elem) {
   return '<!--' + elem.data + '-->'
 }
 
-var serialize$1 = render;
+var serialize = render;
 
-let ElementType = require$$0;
-let serialize = serialize$1;
 var stringify = {
 	getInnerHTML: getInnerHTML,
 	getOuterHTML: serialize,
@@ -180,13 +175,13 @@ function getInnerHTML(elem, opts){
 function getText(elem){
 	if(Array.isArray(elem)) return elem.map(getText).join("");
 	switch(elem.type) {
-		case ElementType.Tag:
-		case ElementType.Script:
-		case ElementType.Style:
+		case domelementtype.Tag:
+		case domelementtype.Script:
+		case domelementtype.Style:
 			return getText(elem.childNodes)
-		case ElementType.Text:
-		case ElementType.Comment:
-		case ElementType.CDATA:
+		case domelementtype.Text:
+		case domelementtype.Comment:
+		case domelementtype.CDATA:
 			return elem.data
 		default:
 			return ""
@@ -320,7 +315,7 @@ exports.append = append;
 exports.prepend = prepend;
 });
 
-var isTag$1 = require$$0.isTag;
+var isTag$1 = domelementtype.isTag;
 
 var querying = {
 	filter: filter,
@@ -417,8 +412,7 @@ function findAll(test, elems){
 }
 
 var legacy = createCommonjsModule(function (module, exports) {
-var ElementType = require$$0;
-var isTag = exports.isTag = ElementType.isTag;
+var isTag = exports.isTag = domelementtype.isTag;
 
 exports.testElement = function(options, element){
 	for(var key in options){

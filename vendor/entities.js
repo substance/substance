@@ -6517,9 +6517,7 @@ var decode$1 = Object.freeze({
 	default: decode
 });
 
-var require$$0$1 = ( decode$1 && decode ) || decode$1;
-
-var decodeMap = require$$0$1;
+var decodeMap = ( decode$1 && decode ) || decode$1;
 
 var decode_codepoint = decodeCodePoint;
 
