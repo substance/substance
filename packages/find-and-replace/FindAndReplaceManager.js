@@ -106,6 +106,7 @@ class FindAndReplaceManager {
 
   _setSelection() {
     let match = this._state.matches[this._state.selectedMatch]
+    if (!match) return
     this.editorSession.setSelection(match.getSelection())
   }
 
@@ -128,17 +129,16 @@ class FindAndReplaceManager {
   */
   replaceNext() {
     let index = this._state.selectedMatch
-    let totalMatches = this._state.matches.length
     let match = this._state.matches[index]
-    let next = (index + 1) % totalMatches
-    let nextMatch = this._state.matches[next]
     this.editorSession.transaction((tx, args) => {
       tx.setSelection(match.getSelection())
       tx.insertText(this._state.replaceString)
-      tx.setSelection(nextMatch.getSelection())
       return args
     })
     this._computeMatches()
+    let nextMatch = this._state.matches[index]
+    this._state.selectedMatch = index
+    this.editorSession.setSelection(nextMatch.getSelection())
   }
 
   /*
