@@ -15,7 +15,10 @@ class FindAndReplaceManager {
       // for convenienve we provide access to the doc directly
       doc: this.doc
     })
+    this._resetState()
+  }
 
+  _resetState() {
     this._state = {
       disabled: true,
       findString: '',
@@ -44,15 +47,13 @@ class FindAndReplaceManager {
 
   enable() {
     this._state.disabled = false
+    this._propagateUpdate()
   }
 
   disable() {
     this._state.disabled = true
-  }
-
-  toggleEnabled() {
-    this._state.disabled = !this._state.disabled
-    this._propagateUpdate()
+    this._resetState()
+    this._propagateUpdate('renderSelection')
   }
 
   _onDocumentChanged() {

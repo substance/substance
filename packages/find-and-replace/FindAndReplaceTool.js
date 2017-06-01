@@ -163,6 +163,7 @@ class FindAndReplaceTool extends ToggleTool {
     let findString = this.refs.findString.val()
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.startFind(findString)
+    // TODO: scroll to selected match
   }
 
   /*
