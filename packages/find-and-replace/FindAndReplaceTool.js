@@ -113,11 +113,13 @@ class FindAndReplaceTool extends ToggleTool {
   _findNext() {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.findNext()
+    this._scrollToSelectedMatch()
   }
 
   _replaceNext() {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.replaceNext()
+    this._scrollToSelectedMatch()
   }
 
   _replaceAll() {
@@ -161,9 +163,16 @@ class FindAndReplaceTool extends ToggleTool {
   */
   _startFind() {
     let findString = this.refs.findString.val()
+
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.startFind(findString)
-    // TODO: scroll to selected match
+    this._scrollToSelectedMatch()
+  }
+
+  _scrollToSelectedMatch() {
+    let editorSession = this.context.editorSession
+    let surface = editorSession.getFocusedSurface()
+    surface.context.scrollPane.scrollTo('.sc-selected-match', 'onlyIfNotVisible')
   }
 
   /*
