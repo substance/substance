@@ -74,19 +74,18 @@ class FindAndReplaceManager {
     searchString input field. Then we just want to highlight it but keep the
     cursor in the input field.
   */
-  findNext(skipSelectionUpdate) {
+  findNext(renderSelection) {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
+    if (totalMatches === 0) return
     this._state.selectedMatch = (index + 1) % totalMatches
-
-    if (!skipSelectionUpdate) {
-      this._renderSelectionForSelectedMatch()
+    if (renderSelection) {
+      this._setSelection()
     }
-
-    this._propagateUpdate()
+    this._propagateUpdate(renderSelection)
   }
 
-  _renderSelectionForSelectedMatch() {
+  _setSelection() {
     let match = this._state.matches[this._state.selectedMatch]
     this.editorSession.setSelection(match.getSelection())
   }
@@ -97,6 +96,7 @@ class FindAndReplaceManager {
   findPrevious() {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
+    if (totalMatches === 0) return
     this._state.selectedMatch = index > 0 ? index - 1 : totalMatches - 1
     this._propagateUpdate()
   }
@@ -110,14 +110,12 @@ class FindAndReplaceManager {
     let match = this._state.matches[index]
     let next = (index + 1) % totalMatches
     let nextMatch = this._state.matches[next]
-
     this.editorSession.transaction((tx, args) => {
-      tx.setSelection(match)
+      tx.setSelection(match.getSelection())
       tx.insertText(this._state.replaceString)
-      tx.setSelection(nextMatch)
+      tx.setSelection(nextMatch.getSelection())
       return args
     })
-
     this._computeMatches()
   }
 
@@ -131,7 +129,7 @@ class FindAndReplaceManager {
 
     this.editorSession.transaction((tx, args) => {
       matches.forEach(match => {
-        tx.setSelection(match)
+        tx.setSelection(match.getSelection())
         tx.insertText(this._state.replaceString)
       })
       return args
@@ -177,7 +175,6 @@ class FindAndReplaceManager {
         }
       })
     }
-
     return matches
   }
 
@@ -211,7 +208,7 @@ class FindAndReplaceManager {
     return matches
   }
 
-  _propagateUpdate() {
+  _propagateUpdate(renderSelection) {
     const state = this._state
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
@@ -221,8 +218,11 @@ class FindAndReplaceManager {
     console.log('setting find-and-replace markers', state.matches)
     markersManager.setMarkers('find-and-replace', state.matches)
     // HACK: we make commandStates dirty in order to trigger re-evaluation
-    editorSession._setDirty('commandStates')
-    editorSession.startFlow()
+    this.editorSession._setDirty('commandStates')
+    if (!renderSelection) {
+      this.editorSession.skipNextSelectionRerender()
+    }
+    this.editorSession.startFlow()
   }
 
 }

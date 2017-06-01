@@ -4,6 +4,7 @@ class FindAndReplaceTool extends ToggleTool {
 
   didMount() {
     console.log('FindAndReplaceTool.didMount')
+    this.refs.findString.el.focus()
   }
 
   dispose() {
@@ -110,7 +111,8 @@ class FindAndReplaceTool extends ToggleTool {
   }
 
   _findNext() {
-    this.context.commandManager.executeCommand('find-next')
+    let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
+    findAndReplaceManager.findNext()
   }
 
   _replaceNext() {
@@ -129,11 +131,25 @@ class FindAndReplaceTool extends ToggleTool {
     of inactivity)
   */
   _triggerFind(e) {
-    if (e.keyCode === 13) {
-      this._findNext()
-    } else {
+    if (this.findStringHasChanged()) {
       this._startFind()
+    } else if (e.keyCode === 13) {
+      this._findNext()
     }
+  }
+
+  /*
+    Returns true if keyboard event is a text input
+  */
+  _isInput(e) {
+    return e.keyCode >= 65 || e.keyCode === 32
+  }
+
+  findStringHasChanged() {
+    let findString = this.refs.findString.val()
+    let previousFindString = this._previousFindString
+    this._previousFindString = findString
+    return findString !== previousFindString
   }
 
   /*
@@ -150,9 +166,6 @@ class FindAndReplaceTool extends ToggleTool {
   /*
     Either updates the replaceString (when a new character is inserted) or
     starts a replace action (when ENTER is hit)
-
-    TODO: it would be good to debounce this (trigger new find only every 500ms
-    of inactivity)
   */
   _triggerReplace(e) {
     if (e.keyCode === 13) {
@@ -164,6 +177,8 @@ class FindAndReplaceTool extends ToggleTool {
 
   /*
     Just sets the replace string in findAndReplaceManager state
+
+    NOTE: no flow is triggered here
   */
   _setReplaceString() {
     let replaceString = this.refs.replaceString.val()
