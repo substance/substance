@@ -79,6 +79,7 @@ class FindAndReplaceManager {
     this._computeMatches()
     this._state.selectedMatch = 0
     this._propagateUpdate()
+    this._setSelection()
   }
 
   setReplaceString(replaceString) {
@@ -111,12 +112,15 @@ class FindAndReplaceManager {
   /*
     Find previous match
   */
-  findPrevious() {
+  findPrevious(renderSelection) {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = index > 0 ? index - 1 : totalMatches - 1
-    this._propagateUpdate()
+    if (renderSelection) {
+      this._setSelection()
+    }
+    this._propagateUpdate(renderSelection)
   }
 
   /*

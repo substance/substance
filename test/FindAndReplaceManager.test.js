@@ -43,7 +43,7 @@ test("Select next match", function(t) {
   let manager = new FindAndReplaceManager({editorSession})
 
   manager.startFind('123')
-  manager.findNext()
+  manager.findNext('renderSelection')
 
   t.equal(manager._state.matches.length, 4, 'Should have 4 matches selected')
   t.equal(manager._state.selectedMatch, 1, '2nd match should be selected')
@@ -61,7 +61,7 @@ test("Select previous match", function(t) {
   let { editorSession } = setupEditor(t, simple)
   let manager = new FindAndReplaceManager({editorSession})
   manager.startFind('123')
-  manager.findPrevious()
+  manager.findPrevious('renderSelection')
   t.equal(manager._state.matches.length, 4, 'Should have 4 matches selected')
   t.equal(manager._state.selectedMatch, 3, '3rd match should be selected')
   let sel = editorSession.getSelection()
