@@ -8,6 +8,8 @@ class FindAndReplaceManager {
     }
 
     this.editorSession = context.editorSession
+    this.editorSession.onRender('document', this._onDocumentChanged, this)
+
     this.doc = this.editorSession.getDocument()
     this.context = Object.assign({}, context, {
       // for convenienve we provide access to the doc directly
@@ -51,6 +53,14 @@ class FindAndReplaceManager {
   toggleEnabled() {
     this._state.disabled = !this._state.disabled
     this._propagateUpdate()
+  }
+
+  _onDocumentChanged() {
+    if (!this._state.disabled) {
+      this._computeMatches()
+      this._state.selectedMatch = 0
+      this._updateMarkers()
+    }
   }
 
   /*
@@ -209,20 +219,24 @@ class FindAndReplaceManager {
   }
 
   _propagateUpdate(renderSelection) {
+    // HACK: we make commandStates dirty in order to trigger re-evaluation
+    this._updateMarkers()
+    this.editorSession._setDirty('commandStates')
+    if (!renderSelection) {
+      this.editorSession.skipNextSelectionRerender()
+    }
+    this.editorSession.startFlow()
+  }
+
+  _updateMarkers() {
     const state = this._state
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
     state.matches.forEach((m, idx) => {
       m.type = (idx === state.selectedMatch) ? 'selected-match' : 'match'
     })
-    console.log('setting find-and-replace markers', state.matches)
+    // console.log('setting find-and-replace markers', state.matches)
     markersManager.setMarkers('find-and-replace', state.matches)
-    // HACK: we make commandStates dirty in order to trigger re-evaluation
-    this.editorSession._setDirty('commandStates')
-    if (!renderSelection) {
-      this.editorSession.skipNextSelectionRerender()
-    }
-    this.editorSession.startFlow()
   }
 
 }

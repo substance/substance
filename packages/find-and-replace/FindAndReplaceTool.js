@@ -3,12 +3,7 @@ import { ToggleTool } from '../../ui'
 class FindAndReplaceTool extends ToggleTool {
 
   didMount() {
-    console.log('FindAndReplaceTool.didMount')
     this.refs.findString.el.focus()
-  }
-
-  dispose() {
-    console.log('disposed find and replace tool')
   }
 
   render($$) {
