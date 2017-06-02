@@ -136,6 +136,7 @@ class FindAndReplaceManager {
   replaceNext() {
     let index = this._state.selectedMatch
     let match = this._state.matches[index]
+    let totalMatches = this._state.matches.length
     if(match !== undefined) {
       this.editorSession.transaction((tx, args) => {
         tx.setSelection(match.getSelection())
@@ -143,7 +144,9 @@ class FindAndReplaceManager {
         return args
       })
       this._computeMatches()
-      this._state.selectedMatch = index
+      if(index + 1 < totalMatches) {
+        this._state.selectedMatch = index
+      }
       this._setSelection()
       this._propagateUpdate('renderSelection')
     }
