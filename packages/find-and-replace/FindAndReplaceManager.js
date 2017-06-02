@@ -79,7 +79,6 @@ class FindAndReplaceManager {
     this._computeMatches()
     this._state.selectedMatch = 0
     this._propagateUpdate()
-    this._setSelection()
   }
 
   setReplaceString(replaceString) {
