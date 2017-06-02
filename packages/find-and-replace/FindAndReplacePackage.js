@@ -39,10 +39,10 @@ export default {
     config.addKeyboardShortcut('cmd+shift+g', { command: 'find-previous' })
     config.addKeyboardShortcut('cmd+alt+e', { command: 'replace-next' })
     // TODO: we want to bind this to the ESC button instead
-    config.addKeyboardShortcut('cmd+alt+c', { command: 'close-find-and-replace' })
+    config.addKeyboardShortcut('esc', { command: 'close-find-and-replace' })
     config.addManager('find-and-replace', FindAndReplaceManager)
     config.addLabel('find-and-replace-title', {
-      en: 'Find and replace', 
+      en: 'Find and replace',
       de: 'Suchen und Ersetzen'
     })
   },
