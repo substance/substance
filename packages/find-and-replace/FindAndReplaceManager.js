@@ -265,15 +265,11 @@ class FindAndReplaceManager {
     return matches
   }
 
-  _propagateUpdate(renderSelection) {
+  _propagateUpdate() {
     // HACK: we make commandStates dirty in order to trigger re-evaluation
     this._updateMarkers()
     this.editorSession._setDirty('commandStates')
-    if (!renderSelection) {
-      this.editorSession.setBlurred(true)
-    }
     this.editorSession.startFlow()
-    this.editorSession.setBlurred(false)
   }
 
   _updateMarkers() {

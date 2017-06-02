@@ -34,7 +34,9 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('placeholder', 'Find in body')
               .attr('tabindex', 500)
               .val(commandState.findString)
-              .on('keyup', this._triggerFind),
+              .on('keyup', this._triggerFind)
+              .on('focus', this._onFocus)
+              .on('blur', this._onBlur),
             this._renderStatusCounter($$)
           ),
         $$('div')
@@ -62,6 +64,8 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('type', 'text')
               .attr('tabindex', 501)
               .attr('placeholder', 'Replace in body')
+              .on('focus', this._onFocus)
+              .on('blur', this._onBlur)
               .on('keyup', this._triggerReplace)
           ),
         $$('div')
@@ -116,6 +120,22 @@ class FindAndReplaceTool extends ToggleTool {
       )
     }
     return statusDescriptionEl
+  }
+
+  /*
+    We disable selection rendering in the surface, while our tool has the focus
+  */
+  _onFocus() {
+    let editorSession = this.context.editorSession
+    editorSession.setBlurred(true)
+  }
+
+  /*
+    Re-enable selection rendering in surface
+  */
+  _onBlur() {
+    let editorSession = this.context.editorSession
+    editorSession.setBlurred(false)
   }
 
   _renderStatusCounter($$) {
