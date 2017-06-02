@@ -78,6 +78,7 @@ class FindAndReplaceManager {
     this._state.findString = findString
     this._computeMatches()
     this._state.selectedMatch = this._getClosestMatch() || 0
+    this._setSelection()
     this._propagateUpdate()
   }
 
@@ -97,9 +98,7 @@ class FindAndReplaceManager {
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = (index + 1) % totalMatches
-    if (renderSelection) {
-      this._setSelection()
-    }
+    this._setSelection()
     this._propagateUpdate(renderSelection)
   }
 
@@ -117,9 +116,7 @@ class FindAndReplaceManager {
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = index > 0 ? index - 1 : totalMatches - 1
-    if (renderSelection) {
-      this._setSelection()
-    }
+    this._setSelection()
     this._propagateUpdate(renderSelection)
   }
 
@@ -136,9 +133,8 @@ class FindAndReplaceManager {
         return args
       })
       this._computeMatches()
-      let nextMatch = this._state.matches[index]
       this._state.selectedMatch = index
-      if(index > 0) this.editorSession.setSelection(nextMatch.getSelection())
+      this._setSelection()
       this._propagateUpdate('renderSelection')
     }
   }

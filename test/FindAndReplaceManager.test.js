@@ -32,7 +32,7 @@ test("Find matches and select first after current selection", function(t) {
   let selectedMatch = manager._state.selectedMatch
   t.equal(matches.length, 4, 'Should have 4 matches selected')
   t.equal(selectedMatch, 1, 'Second match should be selected')
-  let sel = matches[selectedMatch].getSelection()
+  let sel = editorSession.getSelection()
   t.ok(sel.isPropertySelection(), 'Should be property selection')
   t.deepEqual(sel.start.path, ['p2', 'content'], 'Cursor should be after inserted text')
   t.equal(sel.start.offset, 1, 'Start offset should be 1')
@@ -77,6 +77,7 @@ test("Select previous match", function(t) {
 test("Replace first match", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new FindAndReplaceManager({editorSession})
+  editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 1, endOffset: 1 })
   manager.startFind('123')
   manager.setReplaceString('XXX')
   manager.replaceNext()
