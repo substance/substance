@@ -77,7 +77,7 @@ class FindAndReplaceManager {
   startFind(findString) {
     this._state.findString = findString
     this._computeMatches()
-    this._state.selectedMatch = 0
+    this._state.selectedMatch = this._getClosestMatch() || 0
     this._propagateUpdate()
   }
 
@@ -129,15 +129,18 @@ class FindAndReplaceManager {
   replaceNext() {
     let index = this._state.selectedMatch
     let match = this._state.matches[index]
-    this.editorSession.transaction((tx, args) => {
-      tx.setSelection(match.getSelection())
-      tx.insertText(this._state.replaceString)
-      return args
-    })
-    this._computeMatches()
-    let nextMatch = this._state.matches[index]
-    this._state.selectedMatch = index
-    this.editorSession.setSelection(nextMatch.getSelection())
+    if(match !== undefined) {
+      this.editorSession.transaction((tx, args) => {
+        tx.setSelection(match.getSelection())
+        tx.insertText(this._state.replaceString)
+        return args
+      })
+      this._computeMatches()
+      let nextMatch = this._state.matches[index]
+      this._state.selectedMatch = index
+      if(index > 0) this.editorSession.setSelection(nextMatch.getSelection())
+      this._propagateUpdate('renderSelection')
+    }
   }
 
   /*
@@ -157,6 +160,39 @@ class FindAndReplaceManager {
     })
 
     this._computeMatches()
+  }
+
+  /*
+    Get closest match to current cursor position
+  */
+  _getClosestMatch() {
+    let doc = this.editorSession.getDocument()
+    let nodeIds = Object.keys(doc.getNodes())
+    let sel = this.editorSession.getSelection()
+    let startOffset = sel.start.offset
+    let selStartNode = sel.start.path[0]
+    let selStartNodePos = nodeIds.indexOf(selStartNode)
+    let matches = this._state.matches
+
+    let closest = matches.findIndex(match => {
+      let markerSel = match.getSelection()
+      let markerStartOffset = markerSel.start.offset
+      let markerStartNode = markerSel.start.path[0]
+      let markerStartNodePos = nodeIds.indexOf(markerStartNode)
+      if(selStartNodePos > markerStartNodePos) {
+        return false
+      } else if (selStartNodePos < markerStartNodePos) {
+        return true
+      } else {
+        if(startOffset <= markerStartOffset) {
+          return true
+        } else {
+          return false
+        }
+      }
+    })
+
+    return closest
   }
 
   _computeMatches() {
