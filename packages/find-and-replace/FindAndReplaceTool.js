@@ -4,6 +4,15 @@ class FindAndReplaceTool extends ToggleTool {
 
   didMount() {
     this.refs.findString.el.focus()
+    this.context.editorSession.onPostRender(this._onPostRender, this)
+  }
+
+  dispose() {
+    this.context.editorSession.off(this)
+  }
+
+  _onPostRender() {
+    this._scrollToSelectedMatch()
   }
 
   render($$) {
@@ -154,13 +163,11 @@ class FindAndReplaceTool extends ToggleTool {
   _findNext() {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.findNext()
-    this._scrollToSelectedMatch()
   }
 
   _replaceNext() {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.replaceNext()
-    this._scrollToSelectedMatch()
   }
 
   _replaceAll() {
@@ -207,7 +214,6 @@ class FindAndReplaceTool extends ToggleTool {
 
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.startFind(findString)
-    this._scrollToSelectedMatch()
   }
 
   _scrollToSelectedMatch() {

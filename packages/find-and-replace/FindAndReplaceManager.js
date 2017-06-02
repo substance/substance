@@ -27,6 +27,10 @@ class FindAndReplaceManager {
 
   }
 
+  dispose() {
+    this.editorSession.off(this)
+  }
+
   /*
     NOTE: We remember findString and replaceString for the next search action
   */
