@@ -25,7 +25,7 @@ class FindAndReplaceTool extends ToggleTool {
       // $$('button').append('A')
       $$('div').addClass('se-section').append(
         $$('div')
-          .addClass('se-section-item')
+          .addClass('se-section-item se-find-input')
           .addClass('sm-flex')
           .append(
             $$('input')
@@ -34,10 +34,11 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('placeholder', 'Find in body')
               .attr('tabindex', 500)
               .val(commandState.findString)
-              .on('keyup', this._triggerFind)
+              .on('keyup', this._triggerFind),
+            this._renderStatusCounter($$)
           ),
         $$('div')
-          .addClass('se-section-item')
+          .addClass('se-section-item se-replace-input')
           .append(
             $$('button')
               .append('Find')
@@ -86,28 +87,48 @@ class FindAndReplaceTool extends ToggleTool {
 
   _renderStatusDescription($$) {
     let commandState = this.props.commandState
-    let statusDescriptionEl
+    let statusDescriptionEl = $$('div').addClass('se-status').append(
+      $$('div').addClass('se-status-title').append(
+        this.getLabel('find-and-replace-title')
+      )
+    )
 
     if (commandState.totalMatches > 0) {
-      statusDescriptionEl = $$('div').addClass('se-status-description').append(
-        commandState.totalMatches,
-        ' results found for ',
-        '"'+ commandState.findString +'"',
-        '(',
-        [commandState.selectedMatch, commandState.totalMatches].join('/'),
-        ')'
+      statusDescriptionEl.append(
+        $$('div').addClass('se-status-description').append(
+          commandState.totalMatches,
+          ' results found for ',
+          '"'+ commandState.findString +'"'
+        )
       )
     } else if (commandState.findString !== '') {
-      statusDescriptionEl = $$('div').addClass('se-status-description').append(
-        'No results found for ',
-        '"'+ commandState.findString +'"'
+      statusDescriptionEl.append(
+        $$('div').addClass('se-status-description').append(
+          'No results found for ',
+          '"'+ commandState.findString +'"'
+        )
       )
     } else {
-      statusDescriptionEl = $$('div').addClass('se-status-description').append(
-        'Find and replace'
+      statusDescriptionEl.append(
+        $$('div').addClass('se-status-description').append(
+          'Close this panel with ESC key'
+        )
       )
     }
     return statusDescriptionEl
+  }
+
+  _renderStatusCounter($$) {
+    let commandState = this.props.commandState
+    let statusCounterEl
+
+    if (commandState.totalMatches > 0) {
+      statusCounterEl = $$('span').addClass('se-status-counter').append(
+        [commandState.selectedMatch, commandState.totalMatches].join(' of ')
+      )
+    }
+
+    return statusCounterEl
   }
 
   _findNext() {

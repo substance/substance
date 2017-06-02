@@ -27,6 +27,37 @@
   border: 1px solid #50a1ff;
 }
 
+.sc-find-and-replace-tool .se-find-input {
+  position: relative;
+}
+
+.sc-find-and-replace-tool .se-find-input input {
+  padding: 5px 30px 5px 5px;
+  -webkit-transition: border .3s ease;
+  transition: border .3s ease;
+}
+
+.sc-find-and-replace-tool .se-find-input .se-status-counter {
+  cursor: default;
+  position: absolute;
+  font-size: 12px;
+  line-height: 26px;
+  text-align: center;
+  padding: 6px 12px;
+  top: 0;
+  right: 0;
+  margin: 0;
+  height: 100%;
+  opacity: .5;
+  -webkit-transition: opacity .3s ease;
+  transition: opacity .3s ease;
+}
+
+.sc-find-and-replace-tool .se-section-item input:focus + .se-status-counter {
+  color: #50a1ff;
+  opacity: 1;
+}
+
 .sc-find-and-replace-tool button {
   border-radius: 3px;
   border: 1px solid #cbcbcb;
@@ -53,10 +84,17 @@
   line-height: 25px;
 }
 
-.sc-find-and-replace-tool .se-status-description {
-  flex: 100 0 300px;
+.sc-find-and-replace-tool .se-status-title {
   white-space: nowrap;
   padding: 5px;
+}
+
+.sc-find-and-replace-tool .se-status-description {
+  color: #939393;
+  font-weight: 300;
+  white-space: nowrap;
+  padding: 5px;
+  margin-left: 50px;
 }
 
 .sc-find-and-replace-tool .se-status-options-description {

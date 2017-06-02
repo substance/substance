@@ -41,6 +41,10 @@ export default {
     // TODO: we want to bind this to the ESC button instead
     config.addKeyboardShortcut('cmd+alt+c', { command: 'close-find-and-replace' })
     config.addManager('find-and-replace', FindAndReplaceManager)
+    config.addLabel('find-and-replace-title', {
+      en: 'Find and replace', 
+      de: 'Suchen und Ersetzen'
+    })
   },
   FindAndReplaceCommand,
   ToggleFindAndReplaceCommand,
