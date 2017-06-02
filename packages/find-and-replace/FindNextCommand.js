@@ -10,7 +10,7 @@ class FindNextCommand extends Command {
 
   execute({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
-    findAndReplaceManager.findNext('renderSelection')
+    findAndReplaceManager.findNext()
   }
 }
 

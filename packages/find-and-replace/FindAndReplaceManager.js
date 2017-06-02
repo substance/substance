@@ -60,7 +60,7 @@ class FindAndReplaceManager {
   disable() {
     this._state.disabled = true
     this._resetState()
-    this._propagateUpdate('renderSelection')
+    this._propagateUpdate()
   }
 
   _onDocumentChanged() {
@@ -92,15 +92,13 @@ class FindAndReplaceManager {
     searchString input field. Then we just want to highlight it but keep the
     cursor in the input field.
   */
-  findNext(renderSelection) {
+  findNext() {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = (index + 1) % totalMatches
-    if (renderSelection) {
-      this._setSelection()
-    }
-    this._propagateUpdate(renderSelection)
+    this._setSelection()
+    this._propagateUpdate()
   }
 
   _setSelection() {
@@ -112,15 +110,13 @@ class FindAndReplaceManager {
   /*
     Find previous match
   */
-  findPrevious(renderSelection) {
+  findPrevious() {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = index > 0 ? index - 1 : totalMatches - 1
-    if (renderSelection) {
-      this._setSelection()
-    }
-    this._propagateUpdate(renderSelection)
+    this._setSelection()
+    this._propagateUpdate()
   }
 
   /*
