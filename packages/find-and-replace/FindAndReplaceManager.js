@@ -25,6 +25,8 @@ class FindAndReplaceManager {
       selectedMatch: undefined
     }
 
+    // Set to indicate the desire to scroll to the selected match
+    this._requestLookupMatch = false
   }
 
   dispose() {
@@ -82,8 +84,10 @@ class FindAndReplaceManager {
     this._state.findString = findString
     this._computeMatches()
     this._state.selectedMatch = this._getClosestMatch() || 0
+    this._requestLookupMatch = true
     this._setSelection()
     this._propagateUpdate()
+
   }
 
   setReplaceString(replaceString) {
@@ -102,14 +106,9 @@ class FindAndReplaceManager {
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = (index + 1) % totalMatches
+    this._requestLookupMatch = true
     this._setSelection()
     this._propagateUpdate()
-  }
-
-  _setSelection() {
-    let match = this._state.matches[this._state.selectedMatch]
-    if (!match) return
-    this.editorSession.setSelection(match.getSelection())
   }
 
   /*
@@ -120,8 +119,15 @@ class FindAndReplaceManager {
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
     this._state.selectedMatch = index > 0 ? index - 1 : totalMatches - 1
+    this._requestLookupMatch = true
     this._setSelection()
     this._propagateUpdate()
+  }
+
+  _setSelection() {
+    let match = this._state.matches[this._state.selectedMatch]
+    if (!match) return
+    this.editorSession.setSelection(match.getSelection())
   }
 
   /*

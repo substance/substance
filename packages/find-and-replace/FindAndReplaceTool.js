@@ -12,7 +12,14 @@ class FindAndReplaceTool extends ToggleTool {
   }
 
   _onPostRender() {
-    this._scrollToSelectedMatch()
+    let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
+    // After each operation, such as start find or find next,
+    // findAndReplaceManager leaves a flag `_requestLookupMatch` to indicate we
+    // should scroll to the desired position
+    if (findAndReplaceManager._requestLookupMatch) {
+      this._scrollToSelectedMatch()
+      findAndReplaceManager._requestLookupMatch = false
+    }
   }
 
   render($$) {
