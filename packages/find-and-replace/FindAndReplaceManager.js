@@ -83,7 +83,8 @@ class FindAndReplaceManager {
   startFind(findString) {
     this._state.findString = findString
     this._computeMatches()
-    this._state.selectedMatch = this._getClosestMatch() || 0
+    let closestMatch = this._getClosestMatch()
+    this._state.selectedMatch = closestMatch > 0 ? closestMatch : 0
     this._requestLookupMatch = true
     this._setSelection()
     this._propagateUpdate()
@@ -178,28 +179,32 @@ class FindAndReplaceManager {
     let doc = this.editorSession.getDocument()
     let nodeIds = Object.keys(doc.getNodes())
     let sel = this.editorSession.getSelection()
-    let startOffset = sel.start.offset
-    let selStartNode = sel.start.path[0]
-    let selStartNodePos = nodeIds.indexOf(selStartNode)
-    let matches = this._state.matches
+    let closest = 0
 
-    let closest = matches.findIndex(match => {
-      let markerSel = match.getSelection()
-      let markerStartOffset = markerSel.start.offset
-      let markerStartNode = markerSel.start.path[0]
-      let markerStartNodePos = nodeIds.indexOf(markerStartNode)
-      if(selStartNodePos > markerStartNodePos) {
-        return false
-      } else if (selStartNodePos < markerStartNodePos) {
-        return true
-      } else {
-        if(startOffset <= markerStartOffset) {
+    if(!sel.isNull()) {
+      let startOffset = sel.start.offset
+      let selStartNode = sel.start.path[0]
+      let selStartNodePos = nodeIds.indexOf(selStartNode)
+      let matches = this._state.matches
+
+      closest = matches.findIndex(match => {
+        let markerSel = match.getSelection()
+        let markerStartOffset = markerSel.start.offset
+        let markerStartNode = markerSel.start.path[0]
+        let markerStartNodePos = nodeIds.indexOf(markerStartNode)
+        if(selStartNodePos > markerStartNodePos) {
+          return false
+        } else if (selStartNodePos < markerStartNodePos) {
           return true
         } else {
-          return false
+          if(startOffset <= markerStartOffset) {
+            return true
+          } else {
+            return false
+          }
         }
-      }
-    })
+      })
+    }
 
     return closest
   }
