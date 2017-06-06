@@ -23,6 +23,8 @@
 - Improved API for commands and tools
 - `Container.show(nodeId, pos)` is deprecated.
   Use either `Container.show(nodeId)` or `Container.showAt(pos, nodeId)`
+- `el.appendChild(null)` does not throw
+- `el.insertBefore(child, null)` is equivalent to `el.appendChild(child)`
 
 These changes might break your current implementation and may need some migration:
 

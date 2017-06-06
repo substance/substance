@@ -438,7 +438,9 @@ class MemoryDOMElement extends DOMElement {
   }
 
   insertBefore(newChild, before) {
-    if (this.childNodes) {
+    if (isNil(before)) {
+      return this.appendChild(newChild)
+    } else if (this.childNodes) {
       var pos = this.childNodes.indexOf(before)
       if (pos > -1) {
         DomUtils.prepend(before, newChild)
@@ -557,6 +559,8 @@ class MemoryDOMElement extends DOMElement {
   }
 
   _normalizeChild(child) {
+    if (isNil(child)) return
+
     if (isString(child)) {
       child = this.createTextNode(child)
     }
