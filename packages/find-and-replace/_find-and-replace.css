@@ -23,7 +23,8 @@
   padding: 5px;
 }
 
-.sc-find-and-replace-tool .se-section-item input:focus {
+.sc-find-and-replace-tool .se-section-item input:focus,
+.sc-find-and-replace-tool .se-section-item button:focus {
   border: 1px solid #50a1ff;
 }
 
@@ -114,9 +115,11 @@
 }
 
 .sc-selected-match {
-  background-color: #ffbf00;
+  background: rgba(42, 140, 255, 0.5);
+  outline: 1px solid var(--local-selection-color);
 }
 
 .sc-match {
-  outline: 1px solid #ccc;
+  background: rgba(42, 140, 255, 0.3)
 }
+

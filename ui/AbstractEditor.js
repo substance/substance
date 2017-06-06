@@ -109,7 +109,6 @@ class AbstractEditor extends Component {
     if ( event.key === 'Dead' ) return
     // keyboard shortcuts
     let custom = this.editorSession.keyboardManager.onKeydown(event)
-    console.log('custom event handled', custom)
   }
 
   getDocument() {

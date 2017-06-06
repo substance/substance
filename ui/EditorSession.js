@@ -230,7 +230,7 @@ class EditorSession extends EventEmitter {
     this.commandManager.executeCommand(...args)
   }
 
-  setSelection(sel) {
+  setSelection(sel, skipFlow) {
     // console.log('EditorSession.setSelection()', sel)
     if (sel && isPlainObject(sel)) {
       sel = this.getDocument().createSelection(sel)
@@ -241,7 +241,7 @@ class EditorSession extends EventEmitter {
         sel.surfaceId = fs.id
       }
     }
-    if (this._setSelection(sel)) {
+    if (this._setSelection(sel) && !skipFlow) {
       this.startFlow()
     }
     return sel
@@ -758,10 +758,20 @@ class EditorSession extends EventEmitter {
     When set to true puts the editor into a blurred state, which means that
     surface selections are not recovered until blurred state is set to false
     again.
+
+    TODO: There are cases where a flow needs to be triggered manually after setting
+    the blurred states in order to rerender the tools (see FindAndReplaceTool._onFocus)
   */
 
   setBlurred(blurred) {
     this._blurred = blurred
+    // NOTE: We need to re-evaluate command states when blurred state is changed
+    this.commandManager.updateCommandStates(this)
+    this._setDirty('commandStates')
+  }
+
+  isBlurred() {
+    return Boolean(this._blurred)
   }
 
 }

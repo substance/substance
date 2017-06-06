@@ -3,15 +3,14 @@ import { ToggleTool } from '../../ui'
 class FindAndReplaceTool extends ToggleTool {
 
   didMount() {
-    this.refs.findString.el.focus()
-    this.context.editorSession.onPostRender(this._onPostRender, this)
+    this.context.editorSession.onPosition(this._onPosition, this)
   }
 
   dispose() {
     this.context.editorSession.off(this)
   }
 
-  _onPostRender() {
+  _onPosition() {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     // After each operation, such as start find or find next,
     // findAndReplaceManager leaves a flag `_requestLookupMatch` to indicate we
@@ -19,6 +18,14 @@ class FindAndReplaceTool extends ToggleTool {
     if (findAndReplaceManager._requestLookupMatch) {
       this._scrollToSelectedMatch()
       findAndReplaceManager._requestLookupMatch = false
+    }
+
+    if (findAndReplaceManager._requestFocusSearchString) {
+      setTimeout(() => {
+        this.refs.findString.el.focus()
+        this.refs.findString.el.select()
+        findAndReplaceManager._requestFocusSearchString = false
+      },0)
     }
   }
 
@@ -50,7 +57,8 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('placeholder', 'Find in body')
               .attr('tabindex', 500)
               .val(commandState.findString)
-              .on('keyup', this._triggerFind)
+              .on('input', this._startFind)
+              .on('keypress', this._triggerFindNext)
               .on('focus', this._onFocus)
               .on('blur', this._onBlur),
             this._renderStatusCounter($$)
@@ -82,7 +90,8 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('placeholder', 'Replace in body')
               .on('focus', this._onFocus)
               .on('blur', this._onBlur)
-              .on('keyup', this._triggerReplace)
+              .on('input', this._setReplaceString)
+              .on('keypress', this._triggerReplace)
           ),
         $$('div')
           .addClass('se-section-item')
@@ -144,6 +153,8 @@ class FindAndReplaceTool extends ToggleTool {
   _onFocus() {
     let editorSession = this.context.editorSession
     editorSession.setBlurred(true)
+    // HACK: we need to manually start a flow, otherwise tools would not update visually
+    editorSession.startFlow()
   }
 
   /*
@@ -182,27 +193,10 @@ class FindAndReplaceTool extends ToggleTool {
     findAndReplaceManager.replaceAll()
   }
 
-  /*
-    Either starts a new find (when a new character is inserted) or finds the
-    next match (when ENTER is hit)
-
-    TODO: it would be good to debounce this (trigger new find only every 500ms
-    of inactivity)
-  */
-  _triggerFind(e) {
-    if (this.findStringHasChanged()) {
-      this._startFind()
-    } else if (e.keyCode === 13) {
-      this._findNext()
-    }
-  }
 
   /*
     Returns true if keyboard event is a text input
   */
-  _isInput(e) {
-    return e.keyCode >= 65 || e.keyCode === 32
-  }
 
   findStringHasChanged() {
     let findString = this.refs.findString.val()
@@ -217,27 +211,28 @@ class FindAndReplaceTool extends ToggleTool {
     All matches are highlighted in the document and the first one is selected.
   */
   _startFind() {
+    let editorSession = this.context.editorSession
     let findString = this.refs.findString.val()
-
-    let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
+    let findAndReplaceManager = editorSession.getManager('find-and-replace')
     findAndReplaceManager.startFind(findString)
   }
 
   _scrollToSelectedMatch() {
+    console.log('scrolling to selected match ...')
     let editorSession = this.context.editorSession
     let surface = editorSession.getFocusedSurface()
     surface.context.scrollPane.scrollTo('.sc-selected-match', 'onlyIfNotVisible')
   }
 
-  /*
-    Either updates the replaceString (when a new character is inserted) or
-    starts a replace action (when ENTER is hit)
-  */
+  _triggerFindNext(e) {
+    if (e.keyCode === 13) {
+      this._findNext()
+    }
+  }
+
   _triggerReplace(e) {
     if (e.keyCode === 13) {
       this._replaceNext()
-    } else {
-      this._setReplaceString()
     }
   }
 

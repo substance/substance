@@ -27,6 +27,8 @@ class FindAndReplaceManager {
 
     // Set to indicate the desire to scroll to the selected match
     this._requestLookupMatch = false
+    // Set to indicate the desire to focus and select the search string
+    this._requestFocusSearchString = false
   }
 
   dispose() {
@@ -60,7 +62,9 @@ class FindAndReplaceManager {
 
   enable() {
     this._state.disabled = false
-    this._propagateUpdate()
+    this._requestFocusSearchString = true
+    // Attempts to start a find immediately
+    this.startFind(this._state.findString)
   }
 
   disable() {
@@ -97,10 +101,7 @@ class FindAndReplaceManager {
   }
 
   /*
-    Find next match. We also update the native selection here unless skipped.
-    NOTE: We want to skip the selection update when hitting ENTER in the
-    searchString input field. Then we just want to highlight it but keep the
-    cursor in the input field.
+    Find next match.
   */
   findNext() {
     let index = this._state.selectedMatch
@@ -128,7 +129,13 @@ class FindAndReplaceManager {
   _setSelection() {
     let match = this._state.matches[this._state.selectedMatch]
     if (!match) return
-    this.editorSession.setSelection(match.getSelection())
+    // NOTE: We need to make sure no additional flow is triggered when
+    // setting the selection. We trigger a flow at the very end (_propagateUpdate)
+    let sel = match.getSelection()
+    // HACK: we need to manually set the container id for now
+    let surface = this.editorSession.getFocusedSurface()
+    sel.containerId = surface.getContainerId()
+    this.editorSession.setSelection(sel, 'skipFlow')
   }
 
   /*
@@ -148,8 +155,9 @@ class FindAndReplaceManager {
       if(index + 1 < totalMatches) {
         this._state.selectedMatch = index
       }
+      this._requestLookupMatch = true
       this._setSelection()
-      this._propagateUpdate('renderSelection')
+      this._propagateUpdate()
     }
   }
 
