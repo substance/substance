@@ -541,6 +541,12 @@ class BrowserDOMElement extends DOMElement {
     return this
   }
 
+  select() {
+    this.el.select()
+    return this
+  }
+
+
   blur() {
     this.el.focus()
     return this
