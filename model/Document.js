@@ -576,7 +576,7 @@ class Document extends EventEmitter {
   _normalizeCoor({ path, offset }) {
     // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
     if (path.length === 1) {
-      let node = this.get(path[0]).getRoot()
+      let node = this.get(path[0]).getContainerRoot()
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         return new Coordinate(node.getTextPath(), offset === 0 ? 0 : node.getLength())

@@ -83,6 +83,17 @@ class DocumentNode extends DataNode {
     return node
   }
 
+  getContainerRoot() {
+    let node = this
+    while(node.parent) {
+      // stop if node is immediate child of a container
+      if (node.parent.isContainer()) return node
+      // oherwise traverse up
+      node = node.parent
+    }
+    return node
+  }
+
   /**
     Checks whether this node has children.
 

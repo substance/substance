@@ -115,7 +115,7 @@ class Editing {
         // ATTENTION: deviation from standard implementation
         // for list items: Word and GDoc toggle a list item
         // when doing a BACKSPACE at the first position
-        let root = node.getRoot()
+        let root = node.getContainerRoot()
         if (root.isList() && offset === 0 && direction === 'left') {
           return this.toggleList(tx)
         } else {
@@ -239,7 +239,7 @@ class Editing {
     // special case: selection within one node
     if (startPos === endPos) {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = tx.get(startId).getRoot()
+      let node = tx.get(startId).getContainerRoot()
       /* istanbul ignore else  */
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, start, end)
@@ -265,7 +265,7 @@ class Editing {
       documentHelpers.deleteNode(tx, lastNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = lastNode.getRoot()
+      let node = lastNode.getContainerRoot()
       /* istanbul ignore else  */
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, null, end)
@@ -289,7 +289,7 @@ class Editing {
       documentHelpers.deleteNode(tx, firstNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = firstNode.getRoot()
+      let node = firstNode.getContainerRoot()
       /* istanbul ignore else  */
       if (node.isText()) {
         documentHelpers.deleteTextRange(tx, start, null)
@@ -573,7 +573,7 @@ class Editing {
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.path[0]
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = tx.get(nodeId).getRoot()
+      let node = tx.get(nodeId).getContainerRoot()
       let nodePos = container.getPosition(node.id, 'strict')
       /* istanbul ignore else  */
       if (node.isText()) {
@@ -648,7 +648,7 @@ class Editing {
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.getNodeId()
       // ATTENTION: we need the root node here, e.g. the list, not the list items
-      let node = tx.get(nodeId).getRoot()
+      let node = tx.get(nodeId).getContainerRoot()
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
@@ -667,7 +667,7 @@ class Editing {
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.getNodeId()
       // ATTENTION: we need the root node here, e.g. the list, not the list items
-      let node = tx.get(nodeId).getRoot()
+      let node = tx.get(nodeId).getContainerRoot()
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
@@ -776,7 +776,7 @@ class Editing {
 
   _breakNode(tx, node, coor, container) {
     // ATTENTION: we need the root here, e.g. a list, not the list-item
-    node = node.getRoot()
+    node = node.getContainerRoot()
     /* istanbul ignore else  */
     if (node.isText()) {
       this._breakTextNode(tx, node, coor, container)

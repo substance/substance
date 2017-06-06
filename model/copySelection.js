@@ -99,7 +99,7 @@ function _copyContainerSelection(tx, sel) {
   }
   if (!skippedFirst) {
     // ATTENTION: we need the root node here, e.g. the list, not the list items
-    let startNode = snippet.get(start.getNodeId()).getRoot()
+    let startNode = snippet.get(start.getNodeId()).getContainerRoot()
     if (startNode.isText()) {
       documentHelpers.deleteTextRange(snippet, null, start)
     } else if (startNode.isList()) {
@@ -108,7 +108,7 @@ function _copyContainerSelection(tx, sel) {
   }
   if (!skippedLast) {
     // ATTENTION: we need the root node here, e.g. the list, not the list items
-    let endNode = snippet.get(end.getNodeId()).getRoot()
+    let endNode = snippet.get(end.getNodeId()).getContainerRoot()
     if (endNode.isText()) {
       documentHelpers.deleteTextRange(snippet, end, null)
     } else if (endNode.isList()) {

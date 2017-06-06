@@ -147,7 +147,7 @@ class Container extends DocumentNode {
 
   _lookupPosition(node) {
     if (node.hasParent()) {
-      node = node.getRoot()
+      node = node.getContainerRoot()
     }
     return this.getContent().indexOf(node.id)
   }
