@@ -30,13 +30,16 @@ class KeyboardManager {
     let key = parseKeyEvent(event)
     let hook = this.keydownBindings[key]
     if (hook) {
-      event.preventDefault()
-      event.stopPropagation()
       let params = this._getParams()
-      hook(params, this.context)
-      return true
+      const hasExecuted = hook(params, this.context)
+      if (hasExecuted) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      return hasExecuted
     }
   }
+
 
   onTextInput(text) {
     let hook = this.textinputBindings[text]
