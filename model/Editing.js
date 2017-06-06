@@ -50,10 +50,10 @@ class Editing {
       let nodePos = container.getPosition(nodeId, 'strict')
       let textNode = tx.createDefaultTextNode()
       if (sel.isBefore()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
+        container.showAt(nodePos, textNode.id)
         // leave selection as is
       } else {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: textNode.id })
+        container.showAt(nodePos+1, textNode.id)
         setCursor(tx, textNode, containerId, 'before')
       }
     }
@@ -158,11 +158,10 @@ class Editing {
         sel.isBefore() && direction === 'right' ||
         sel.isAfter() && direction === 'left' ) {
       // replace the node with default text node
-      let contentPath = container.getContentPath()
-      tx.update(contentPath, { type: 'delete', pos: nodePos })
+      container.hideAt(nodePos)
       documentHelpers.deleteNode(tx, tx.get(nodeId))
       let newNode = tx.createDefaultTextNode()
-      tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
+      container.showAt(nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
         path: newNode.getTextPath(),
@@ -261,7 +260,7 @@ class Editing {
 
     // delete or truncate last node
     if (lastEntirelySelected) {
-      tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
+      container.hideAt(endPos)
       documentHelpers.deleteNode(tx, lastNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
@@ -279,13 +278,13 @@ class Editing {
     // delete inner nodes
     for (let i = endPos-1; i > startPos; i--) {
       let nodeId = container.nodes[i]
-      tx.update([container.id, 'nodes'], { type: 'delete', pos: i })
+      container.hideAt(i)
       documentHelpers.deleteNode(tx, tx.get(nodeId))
     }
 
     // delete or truncate the first node
     if (firstEntirelySelected) {
-      tx.update([container.id, 'nodes'], { type: 'delete', pos: startPos })
+      container.hideAt(startPos)
       documentHelpers.deleteNode(tx, firstNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
@@ -304,7 +303,7 @@ class Editing {
     if (firstEntirelySelected && lastEntirelySelected) {
       // insert a new paragraph
       let textNode = tx.createDefaultTextNode()
-      tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: textNode.id })
+      container.showAt(startPos, textNode.id)
       tx.setSelection({
         type: 'property',
         path: textNode.getTextPath(),
@@ -360,11 +359,11 @@ class Editing {
       let nodePos = container.getPosition(nodeId, 'strict')
       // insert before
       if (sel.isBefore()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
+        container.showAt(nodePos, blockNode.id)
       }
       // insert after
       else if (sel.isAfter()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+        container.showAt(nodePos+1, blockNode.id)
         tx.setSelection({
           type: 'node',
           containerId: containerId,
@@ -372,9 +371,9 @@ class Editing {
           mode: 'after'
         })
       } else {
-        tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
+        container.hideAt(nodePos)
         documentHelpers.deleteNode(tx, tx.get(nodeId))
-        tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
+        container.showAt(nodePos, blockNode.id)
         tx.setSelection({
           type: 'node',
           containerId: containerId,
@@ -399,24 +398,24 @@ class Editing {
         let text = node.getText()
         // replace node
         if (text.length === 0) {
-          tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
+          container.hideAt(nodePos)
           documentHelpers.deleteNode(tx, node)
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
+          container.showAt(nodePos, blockNode.id)
           setCursor(tx, blockNode, container.id, 'after')
         }
         // insert before
         else if (sel.start.offset === 0) {
-          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
+          container.showAt(nodePos, blockNode.id)
         }
         // insert after
         else if (sel.start.offset === text.length) {
-          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+          container.showAt(nodePos+1, blockNode.id)
           setCursor(tx, blockNode, container.id, 'before')
         }
         // break
         else {
           this.break(tx)
-          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+          container.showAt(nodePos+1, blockNode.id)
           setCursor(tx, blockNode, container.id, 'after')
         }
       } else {
@@ -577,7 +576,7 @@ class Editing {
       let nodePos = container.getPosition(node.id, 'strict')
       /* istanbul ignore else  */
       if (node.isText()) {
-        tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
+        container.hideAt(nodePos)
         // TODO: what if this should create a different list-item type?
         let newItem = tx.create({
           type: 'list-item',
@@ -589,7 +588,7 @@ class Editing {
           items: [newItem.id]
         }, params))
         documentHelpers.deleteNode(tx, node)
-        tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newList.id })
+        container.showAt(nodePos, newList.id)
         tx.setSelection({
           type: 'property',
           path: newItem.getTextPath(),
@@ -605,13 +604,13 @@ class Editing {
         // take the item out of the list
         node.removeItemAt(itemPos)
         if (node.isEmpty()) {
-          tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
+          container.hideAt(nodePos)
           documentHelpers.deleteNode(tx, node)
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
+          container.showAt(nodePos, newTextNode.id)
         } else if (itemPos === 0) {
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
+          container.showAt(nodePos, newTextNode.id)
         } else if (node.getLength() <= itemPos){
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
+          container.showAt(nodePos+1, newTextNode.id)
         } else {
           //split the
           let tail = []
@@ -626,8 +625,8 @@ class Editing {
             items: tail,
             ordered: node.ordered
           })
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+2, value: newList.id })
+          container.showAt(nodePos+1, newTextNode.id)
+          container.showAt(nodePos+2, newList.id)
         }
         tx.setSelection({
           type: 'property',
