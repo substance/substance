@@ -178,23 +178,23 @@ class Container extends DocumentNode {
   // TODO: try to get rid of this
 
   hasChildren() {
-    return this.nodes.length > 0
+    return this.getContent().length > 0
   }
 
   getChildIndex(child) {
-    return this.nodes.indexOf(child.id)
+    return this.getContent().indexOf(child.id)
   }
 
   getChildren() {
     var doc = this.getDocument()
-    var childrenIds = this.nodes
+    var childrenIds = this.getContent()
     return childrenIds.map(function(id) {
       return doc.get(id)
     })
   }
 
   getChildAt(idx) {
-    var childrenIds = this.nodes
+    var childrenIds = this.getContent()
     if (idx < 0 || idx >= childrenIds.length) {
       throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
     }
@@ -202,7 +202,7 @@ class Container extends DocumentNode {
   }
 
   getChildCount() {
-    return this.nodes.length
+    return this.getContent().length
   }
 
 }
