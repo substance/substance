@@ -117,7 +117,7 @@ class Transaction extends EditingInterface {
 
   _rollback() {
     const stage = this.stage
-    let ops = this._stage._ops
+    let ops = stage._ops
     for (let i = ops.length - 1; i >= 0; i--) {
       stage._applyOp(ops[i].invert())
     }
