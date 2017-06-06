@@ -62,24 +62,43 @@ class Container extends DocumentNode {
   }
 
   show(nodeId, pos) {
-    var doc = this.getDocument()
-    var arg1 = arguments[0]
+    // allow to provide a node instance instead of nodeId
+    const arg1 = arguments[0]
     if (!isString(arg1)) {
       if (arg1._isNode) {
         nodeId = arg1.id
       }
     }
-    if (!isNumber(pos)) {
+    if (arguments.length > 1) {
+      console.error('DEPRECATED: use container.showAt(pos, nodeId) instead')
+    } else {
       pos = this.getLength()
     }
-    doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
+    return this.showAt(pos, nodeId)
+  }
+
+  showAt(pos, nodeId) {
+    const doc = this.getDocument()
+    const length = this.getLength()
+    if (!isNumber(pos) || pos < 0 || pos > length) {
+      throw new Error('Index out of bounds')
+    } else {
+      doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
+    }
   }
 
   hide(nodeId) {
-    var doc = this.getDocument()
-    var pos = this.getPosition(nodeId)
-    if (pos >= 0) {
+    const pos = this.getPosition(nodeId)
+    this.hideAt(pos)
+  }
+
+  hideAt(pos) {
+    const length = this.getLength()
+    if (pos >= 0 && pos < length) {
+      const doc = this.getDocument()
       doc.update(this.getContentPath(), { type: 'delete', pos: pos })
+    } else {
+      throw new Error('Index out of bounds.')
     }
   }
 
