@@ -219,7 +219,6 @@ class FindAndReplaceTool extends ToggleTool {
   }
 
   _scrollToSelectedMatch() {
-    console.log('scrolling to selected match ...')
     let editorSession = this.context.editorSession
     let surface = editorSession.getFocusedSurface()
     surface.context.scrollPane.scrollTo('.sc-selected-match', 'onlyIfNotVisible')

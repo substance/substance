@@ -4,7 +4,7 @@ class FindNextCommand extends Command {
 
   getCommandState() {
     return {
-    	disabled: false
+      disabled: false
     }
   }
 
