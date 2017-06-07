@@ -2,6 +2,7 @@ import Component from './Component'
 import ResourceManager from './ResourceManager'
 import DOMSelection from './DOMSelection'
 import { DefaultDOMElement } from '../dom'
+import { platform } from '../util'
 
 /**
   Reusable abstract editor implementation.
@@ -52,8 +53,10 @@ class AbstractEditor extends Component {
 
     this.domSelection = new DOMSelection(this)
 
-    this.documentEl = DefaultDOMElement.wrapNativeElement(document)
-    this.documentEl.on('keydown', this.onKeyDown, this)
+    if (platform.inBrowser) {
+      this.documentEl = DefaultDOMElement.wrapNativeElement(document)
+      this.documentEl.on('keydown', this.onKeyDown, this)
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -76,6 +79,9 @@ class AbstractEditor extends Component {
     // not necessary
     // this.domSelection.dispose()
     this.resourceManager.dispose()
+    if (platform.inBrowser) {
+      this.documentEl.off(this)
+    }
   }
 
   getChildContext() {
