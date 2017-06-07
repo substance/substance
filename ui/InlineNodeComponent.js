@@ -1,5 +1,6 @@
 import { isEqual } from '../util'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
+import Component from './Component'
 
 class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
@@ -75,6 +76,22 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
+  _getContentClass(node) {
+    let ComponentClass
+    // first try to get the component registered for this node
+    ComponentClass = this.getComponent(node.type, true)
+    // then try to find a generic a component registered
+    // for "inline-node"
+    if (!ComponentClass) {
+      ComponentClass = this.getComponent('unsupported-inline-node', true)
+    }
+    if (!ComponentClass) {
+      console.error(`No component registered for inline node '${node.type}'.`)
+      ComponentClass = StubInlineNodeComponent
+    }
+    return ComponentClass
+  }
+
   // TODO: this is almost the same as in InlineNodeComponent
   // We should try to consolidate this
   _deriveStateFromSelectionState(selState) {
@@ -109,5 +126,12 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 }
 
 InlineNodeComponent.prototype._isInlineNodeComponent = true
+
+class StubInlineNodeComponent extends Component {
+  render($$) {
+    const node = this.props.node
+    return $$('span').text('???').attr('data-id', node.id).attr('data-type', node.type)
+  }
+}
 
 export default InlineNodeComponent
