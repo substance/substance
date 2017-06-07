@@ -1,4 +1,5 @@
 import { ToggleTool } from '../../ui'
+import { debounce } from '../../util'
 
 class FindAndReplaceTool extends ToggleTool {
 
@@ -57,7 +58,7 @@ class FindAndReplaceTool extends ToggleTool {
               .attr('placeholder', 'Find in body')
               .attr('tabindex', 500)
               .val(commandState.findString)
-              .on('input', this._startFind)
+              .on('input', debounce(this._startFind, 300))
               .on('keypress', this._triggerFindNext)
               .on('focus', this._onFocus)
               .on('blur', this._onBlur),
