@@ -77,6 +77,9 @@ class ToolGroup extends Component {
     let commandGroups = this.context.commandGroups
     let filteredCommandStates = {} // command states objects of that group
     this.props.commandGroups.forEach((commandGroup) => {
+      if (!commandGroups[commandGroup]) {
+        throw new Error('commandGroup "'+commandGroup+'" not found')
+      }
       commandGroups[commandGroup].forEach((commandName) => {
         filteredCommandStates[commandName] = commandStates[commandName]
       })

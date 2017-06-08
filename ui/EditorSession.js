@@ -48,7 +48,6 @@ class EditorSession extends EventEmitter {
     this._flowStages = ['update', 'pre-render', 'render', 'post-render', 'position', 'finalize']
     // to get something executed directly after a flow
     this._postponed = []
-
     this._observers = {}
 
     this._lang = options.lang || this.configurator.getDefaultLanguage()
@@ -90,8 +89,15 @@ class EditorSession extends EventEmitter {
       this.saveHandler = configurator.getSaveHandler()
     }
 
+    // Custom Managers (registered via configurator e.g. FindAndReplaceManager)
+    this._managers = {}
+    forEach(configurator.getManagers(), (ManagerClass, name) => {
+      this._managers[name] = new ManagerClass(this._context)
+    })
+
     // The command manager keeps the commandStates up-to-date
     this.commandManager = new CommandManager(this._context, commands)
+
     // The drag manager dispatches drag requests to registered drag handlers
     // TODO: after consolidating the API of this class, we probably need a less diverse context
     this.dragManager = new DragManager(dropHandlers, Object.assign({}, this._context, {
@@ -172,6 +178,10 @@ class EditorSession extends EventEmitter {
     return this.document
   }
 
+  getManager(name) {
+    return this._managers[name]
+  }
+
   getSelection() {
     return this.getSelectionState().getSelection()
   }
@@ -220,7 +230,7 @@ class EditorSession extends EventEmitter {
     this.commandManager.executeCommand(...args)
   }
 
-  setSelection(sel) {
+  setSelection(sel, skipFlow) {
     // console.log('EditorSession.setSelection()', sel)
     if (sel && isPlainObject(sel)) {
       sel = this.getDocument().createSelection(sel)
@@ -231,7 +241,7 @@ class EditorSession extends EventEmitter {
         sel.surfaceId = fs.id
       }
     }
-    if (this._setSelection(sel)) {
+    if (this._setSelection(sel) && !skipFlow) {
       this.startFlow()
     }
     return sel
@@ -743,6 +753,27 @@ class EditorSession extends EventEmitter {
     this._change = null
     this._info = null
   }
+
+  /*
+    When set to true puts the editor into a blurred state, which means that
+    surface selections are not recovered until blurred state is set to false
+    again.
+
+    TODO: There are cases where a flow needs to be triggered manually after setting
+    the blurred states in order to rerender the tools (see FindAndReplaceTool._onFocus)
+  */
+
+  setBlurred(blurred) {
+    this._blurred = blurred
+    // NOTE: We need to re-evaluate command states when blurred state is changed
+    this.commandManager.updateCommandStates(this)
+    this._setDirty('commandStates')
+  }
+
+  isBlurred() {
+    return Boolean(this._blurred)
+  }
+
 }
 
 export default EditorSession

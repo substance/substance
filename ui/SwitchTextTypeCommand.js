@@ -15,12 +15,13 @@ class SwitchTextTypeCommand extends Command {
   getCommandState(params) {
     let doc = params.editorSession.getDocument()
     let sel = params.selection
+    let isBlurred = params.editorSession.isBlurred()
 
     let commandState = {
       disabled: false
     }
 
-    if (sel.isPropertySelection()) {
+    if (sel.isPropertySelection() && !isBlurred) {
       let path = sel.getPath()
       let node = doc.get(path[0])
       if (node && node.isText() && node.isBlock()) {

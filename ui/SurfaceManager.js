@@ -91,11 +91,14 @@ class SurfaceManager {
     }
   }
 
+  /*
+    At the end of the update flow, make sure the surface is focused
+    and displays the right DOM selection
+  */
   _recoverDOMSelection() {
-    // at the end of the update flow, make sure the surface is focused
-    // and displays the right DOM selection.
-    let info = this.editorSession.getChangeInfo() || {}
-    if (info.skipSelectionRerender) return
+    if (this.editorSession._blurred) {
+      return
+    }
 
     let focusedSurface = this.getFocusedSurface()
     if (focusedSurface && !focusedSurface.isDisabled()) {

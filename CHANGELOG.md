@@ -1,5 +1,11 @@
 ## Beta 7
 
+- Refactored MarkersManager:
+  + generalized and streamlined API (no custom Node necessary anymore)
+  + Markers are added cleared using `MarkersManager.setMarkers(key, markers)`
+    and  `MarkersManager.clearMarkers(key)`
+  + EditorSession.startFlow() must be called to roll-out changes of markers
+  + SpellChecker has been updated accordingly
 - Introduced `DOMElement.emit(event, data)` for custom events
 - Improved several Commands (new option `disableCollapsedCursor`, disable when cursor on InlineNode)
 - Surface allows to override core key event handlers via KeyboardManager

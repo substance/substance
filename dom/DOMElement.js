@@ -859,6 +859,14 @@ class DOMElement {
   }
 
   /**
+    Selects this element.
+  */
+  select() {
+    /* istanbul ignore next */
+    return this
+  }
+
+  /**
     Blur this element.
   */
   blur() {

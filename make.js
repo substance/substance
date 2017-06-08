@@ -256,7 +256,7 @@ b.task('cover', () => {
   buildLib('coverage')
   buildTestsBrowser()
   karma(b, {
-    browsers: process.env.TRAVIS?['ChromeTravis']:['Chrome']
+    browsers: process.env.TRAVIS?['ChromeTravis', 'Firefox']:['Chrome']
   })
 })
 
@@ -274,5 +274,5 @@ b.task('publish', ['clean', 'lib', 'docs'])
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'test:browser'])
 
-b.task('test', ['test:node'])
+b.task('test', ['test:node', 'cover'])
 .describe('runs the test suite')

@@ -61,9 +61,10 @@ class AnnotationCommand extends Command {
    */
   isDisabled(sel, params) {
     let selectionState = params.selectionState
+    let isBlurred = params.editorSession.isBlurred()
     // TODO: Container selections should be valid if the annotation type
     // is a container annotation. Currently we only allow property selections.
-    if (!sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()||
+    if (isBlurred || !sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()||
         sel.isNodeSelection() || sel.isContainerSelection() || selectionState.isInlineNodeSelection()) {
       return true
     }

@@ -7,7 +7,7 @@ module.exports = function(config) {
       'node_modules/substance-test/dist/test.browser.js',
       'tmp/tests.js',
     ],
-    browsers: ['Chrome'],
+    browsers: ['Firefox', 'Chrome'],
     customLaunchers: {
       ChromeTravis: {
         base: 'Chrome',

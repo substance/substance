@@ -96,9 +96,9 @@ class AbstractScrollPane extends Component {
     throw new Error('Abstract method')
   }
 
-  // /**
-  //   Get the `.se-scrollable` element
-  // */
+  /**
+    Get the `.se-scrollable` element
+  */
   getScrollableElement() {
     throw new Error('Abstract method')
   }

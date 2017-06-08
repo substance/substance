@@ -10,6 +10,7 @@ import CodePackage from '../code/CodePackage'
 import SubscriptPackage from '../subscript/SubscriptPackage'
 import SuperscriptPackage from '../superscript/SuperscriptPackage'
 import QuoteMarksPackage from '../quote-marks/QuoteMarksPackage'
+import FindAndReplacePackage from '../find-and-replace/FindAndReplacePackage'
 import ListPackage from '../list/ListPackage'
 import TablePackage from '../table/TablePackage'
 import ProseArticle from './ProseArticle'
@@ -25,15 +26,16 @@ export default {
     })
     // Undo/Redo etc.
     config.import(BasePackage)
+    config.import(BlockquotePackage)
     config.import(ParagraphPackage)
     config.import(HeadingPackage)
     config.import(CodeblockPackage)
-    config.import(BlockquotePackage)
+    config.import(CodePackage)
     config.import(EmphasisPackage)
+    config.import(FindAndReplacePackage)
     config.import(StrongPackage)
     config.import(SubscriptPackage)
     config.import(SuperscriptPackage)
-    config.import(CodePackage)
     config.import(LinkPackage)
     config.import(QuoteMarksPackage)
     config.import(ListPackage)
@@ -45,6 +47,14 @@ export default {
         name: 'prompt',
         type: 'tool-group',
         commandGroups: ['prompt']
+      }
+    ])
+
+    config.addToolPanel('workflow', [
+      {
+        name: 'workflow',
+        type: 'tool-group',
+        commandGroups: ['workflows']
       }
     ])
 

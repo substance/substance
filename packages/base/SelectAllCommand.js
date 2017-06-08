@@ -5,8 +5,9 @@ class SelectAll extends Command {
 
   getCommandState(params) {
     let editorSession = params.editorSession
+    let isBlurred = editorSession.isBlurred()
     return {
-      disabled: editorSession.getSelection().isNull()
+      disabled: editorSession.getSelection().isNull() || isBlurred
     }
   }
 

@@ -63,6 +63,7 @@ class Configurator {
       toolPanels: {},
       editingBehaviors: [],
       macros: [],
+      managers: {},
       dropHandlers: [],
       keyboardShortcuts: [],
       icons: {},
@@ -238,6 +239,14 @@ class Configurator {
 
   getToolPanel(name) {
     return this.config.toolPanels[name]
+  }
+
+  addManager(name, ManagerClass) {
+    this.config.managers[name] = ManagerClass
+  }
+
+  getManagers() {
+    return this.config.managers
   }
 
   /**

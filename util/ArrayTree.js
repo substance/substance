@@ -13,6 +13,9 @@ class ArrayTree {
       deleteFromArray(this[path], val)
     }
   }
+  get(path) {
+    return this[path] || []
+  }
 }
 
 export default ArrayTree

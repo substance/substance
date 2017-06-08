@@ -203,9 +203,9 @@ class ScrollPane extends AbstractScrollPane {
 
     @param {String} componentId component id, must be present in data-id attribute
   */
-  scrollTo(componentId, onlyIfNotVisible) {
+  scrollTo(selector, onlyIfNotVisible) {
     let scrollableEl = this.getScrollableElement()
-    let targetNode = scrollableEl.find('*[data-id="'+componentId+'"]')
+    let targetNode = scrollableEl.find(selector)
     if (targetNode) {
       const offset = this.getPanelOffsetForElement(targetNode)
       let shouldScroll = true
@@ -218,7 +218,7 @@ class ScrollPane extends AbstractScrollPane {
         this.setScrollPosition(offset)
       }
     } else {
-      console.warn(componentId, 'not found in scrollable container')
+      console.warn('No match found for selector in scrollable container')
     }
   }
 

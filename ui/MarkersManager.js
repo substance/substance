@@ -1,5 +1,19 @@
 import { forEach, deleteFromArray, ArrayTree } from '../util'
+import { Marker } from '../model'
 
+/*
+  MarkersManager keeps track of any Markers, which are annotations
+  owned by the application, as opposed to real annotations part
+  of the document.
+
+  In addition to that, MarkersManager tracks changes to any text properties
+  scheduling rerenderings of dirty properties together with any changed
+  annotations.
+  NOTE: this functionality is somewhat misplaced, but still here it
+  is the best place we have so far. In a flux way of thinking, this instance
+  derives the app state regarding text property states
+  and dispatches them to all relevant components.
+*/
 class MarkersManager {
 
   constructor(editorSession) {
@@ -9,9 +23,13 @@ class MarkersManager {
     this._textProperties = {}
     this._dirtyProps = {}
 
-    this._markers = new MarkersIndex(editorSession)
+    this._markers = new MarkersIndex(this)
 
+    // keep markers up-to-date, and record which text properties
+    // are affected by a change
     editorSession.onUpdate(this._onChange, this)
+
+    // trigger rerendering of 'dirty' text properties
     editorSession.onRender(this._updateProperties, this)
   }
 
@@ -20,6 +38,26 @@ class MarkersManager {
     this._markers.dispose()
   }
 
+  setMarkers(key, markers) {
+    this.clearMarkers(key)
+    markers.forEach(m => this.addMarker(key, m))
+  }
+
+  addMarker(key, marker) {
+    marker._key = key
+    if (!marker._isMarker) {
+      marker = new Marker(this.editorSession.getDocument(), marker)
+    }
+    this._markers.add(marker)
+  }
+
+  clearMarkers(key) {
+    this._markers.clear(key)
+  }
+
+  /*
+    Used internally by TextPropertyComponent to register for updates.
+  */
   register(textProperyComponent) {
     let path = String(textProperyComponent.getPath())
     // console.log('registering property', path)
@@ -29,6 +67,7 @@ class MarkersManager {
     }
     textProperties.push(textProperyComponent)
   }
+
 
   deregister(textProperyComponent) {
     let path = String(textProperyComponent.getPath())
@@ -54,18 +93,24 @@ class MarkersManager {
 
   _onChange(editorSession) {
     if (editorSession.hasDocumentChanged()) {
-      // mark all updated props per se as dirty
-      if (editorSession.hasDocumentChanged()) {
-        let change = editorSession.getChange()
-        forEach(change.updated, (val, id) => {
-          this._dirtyProps[id] = true
-        })
-      }
-      Object.assign(this._dirtyProps, this._markers._collectDirtyProps())
+      const change = editorSession.getChange()
+      this._markers._onDocumentChange(change)
+      this._recordDirtyTextProperties(change)
     }
   }
 
+  _recordDirtyTextProperties(change) {
+    // mark all updated props per se as dirty
+    forEach(change.updated, (val, id) => {
+      this._dirtyProps[id] = true
+    })
+  }
+
+  /*
+    Trigger rerendering of all dirty text properties.
+  */
   _updateProperties() {
+    // console.log('MarkersManager._updateProperties()')
     Object.keys(this._dirtyProps).forEach((path) => {
       let textProperties = this._textProperties[path]
       if (textProperties) {
@@ -75,6 +120,9 @@ class MarkersManager {
     this._dirtyProps = {}
   }
 
+  /*
+    Here a dirty text property is rerendered via calling setState()
+  */
   _updateTextProperty(textPropertyComponent) {
     let path = textPropertyComponent.getPath()
     let markers = this.getMarkers(path, {
@@ -94,89 +142,13 @@ class MarkersManager {
 */
 class MarkersIndex {
 
-  constructor(editorSession) {
-    this.editorSession = editorSession
-    this.document = editorSession.getDocument()
+  constructor(manager) {
+    this._manager = manager
+
+    this._byKey = new ArrayTree()
     this._documentMarkers = new ArrayTree()
     this._surfaceMarkers = {}
     this._containerMarkers = {}
-
-    this._dirtyProps = {}
-
-    this.document.addIndex('markers', this)
-    editorSession.onUpdate('document', this._onDocumentChange, this)
-  }
-
-  dispose() {
-    // TODO: add an API to remove a custom index
-    // and we should add a test which disposes the editor session
-    delete this.document.data.indexes['markers']
-    this.editorSession.off(this)
-  }
-
-  reset() {
-    this._documentMarkers = new ArrayTree()
-    this._surfaceMarkers = {}
-    this._containerMarkers = {}
-    let doc = this.document
-    forEach(doc.getNodes(), (node) => {
-      if (this.select(node)) {
-        this.create(node)
-      }
-    })
-  }
-
-  select(node) {
-    return node._isMarker
-  }
-
-  create(marker) {
-    // console.log('Indexing marker', marker)
-    switch (marker.constructor.scope) {
-      case 'document': {
-        this._dirtyProps[marker.path] = true
-        this._documentMarkers.add(marker.path, marker)
-        break
-      }
-      case 'surface': {
-        if (!this._surfaceMarkers[marker.surfaceId]) {
-          this._surfaceMarkers[marker.surfaceId] = new ArrayTree()
-        }
-        this._dirtyProps[marker.path] = true
-        this._surfaceMarkers[marker.surfaceId].add(marker.path, marker)
-        break
-      }
-      case 'container': {
-        console.warn('Container scoped markers are not supported yet')
-        break
-      }
-      default:
-        console.error('Invalid marker scope.')
-    }
-  }
-
-  delete(marker) {
-    switch (marker.constructor.scope) {
-      case 'document': {
-        this._dirtyProps[marker.path] = true
-        this._documentMarkers.remove(marker.path, marker)
-        break
-      }
-      case 'surface': {
-        if (!this._surfaceMarkers[marker.surfaceId]) {
-          this._surfaceMarkers[marker.surfaceId] = new ArrayTree()
-        }
-        this._dirtyProps[marker.path] = true
-        this._surfaceMarkers[marker.surfaceId].remove(marker.path, marker)
-        break
-      }
-      case 'container': {
-        console.warn('Container scoped markers are not supported yet')
-        break
-      }
-      default:
-        console.error('Invalid marker scope.')
-    }
   }
 
   get(path, surfaceId) {
@@ -189,10 +161,83 @@ class MarkersIndex {
     return markers
   }
 
-  _collectDirtyProps() {
-    let dirtyProps = this._dirtyProps
-    this._dirtyProps = {}
-    return dirtyProps
+  add(marker) {
+    const key = marker._key
+    this._byKey.add(key, marker)
+    this._add(marker)
+  }
+
+  // used to remove a single marker when invalidated
+  remove(marker) {
+    const key = marker._key
+    this._byKey.remove(key, marker)
+    this._remove(marker)
+  }
+
+  // remove all markers for a given key
+  clear(key) {
+    let markers = this._byKey.get(key)
+    markers.forEach((marker) => {
+      this._remove(marker)
+    })
+  }
+
+  _add(marker) {
+    const dirtyProps = this._manager._dirtyProps
+    // console.log('Indexing marker', marker)
+    const scope = marker.scope || 'document'
+    switch (scope) {
+      case 'document': {
+        const path = marker.start.path
+        // console.log('Adding marker for path', path, marker)
+        dirtyProps[path] = true
+        this._documentMarkers.add(path, marker)
+        break
+      }
+      case 'surface': {
+        if (!this._surfaceMarkers[marker.surfaceId]) {
+          this._surfaceMarkers[marker.surfaceId] = new ArrayTree()
+        }
+        const path = marker.start.path
+        dirtyProps[path] = true
+        this._surfaceMarkers[marker.surfaceId].add(path, marker)
+        break
+      }
+      case 'container': {
+        console.warn('Container scoped markers are not supported yet')
+        break
+      }
+      default:
+        console.error('Invalid marker scope.')
+    }
+  }
+
+  _remove(marker) {
+    const dirtyProps = this._manager._dirtyProps
+    const scope = marker.scope || 'document'
+    switch (scope) {
+      case 'document': {
+        const path = marker.start.path
+        dirtyProps[path] = true
+        this._documentMarkers.remove(path, marker)
+        break
+      }
+      case 'surface': {
+        if (!this._surfaceMarkers[marker.surfaceId]) {
+          this._surfaceMarkers[marker.surfaceId] = new ArrayTree()
+        }
+        const path = marker.start.path
+        dirtyProps[path] = true
+        this._surfaceMarkers[marker.surfaceId].remove(path, marker)
+        break
+      }
+      case 'container': {
+        console.warn('Container scoped markers are not supported yet')
+        break
+      }
+      default:
+        console.error('Invalid marker scope.')
+    }
   }
 
   // used for applying transformations
@@ -208,17 +253,16 @@ class MarkersIndex {
   }
 
   _onDocumentChange(change) {
-    let doc = this.doc
     change.ops.forEach((op) => {
-      let markers = this._getAllCustomMarkers(op.path)
       if (op.type === 'update' && op.diff._isTextOperation) {
+        let markers = this._getAllCustomMarkers(op.path)
         let diff = op.diff
         switch (diff.type) {
           case 'insert':
-            this._transformInsert(doc, markers, diff)
+            this._transformInsert(markers, diff)
             break
           case 'delete':
-            this._transformDelete(doc, markers, diff)
+            this._transformDelete(markers, diff)
             break
           default:
             //
@@ -227,11 +271,11 @@ class MarkersIndex {
     })
   }
 
-  _transformInsert(doc, markers, op) {
+  _transformInsert(markers, op) {
     const pos = op.pos
     const length = op.str.length
     if (length === 0) return
-    markers.forEach(function(marker) {
+    markers.forEach((marker) => {
       // console.log('Transforming marker after insert')
       var start = marker.start.offset;
       var end = marker.end.offset;
@@ -248,12 +292,15 @@ class MarkersIndex {
       if (pos < end) {
         newEnd += length;
         marker.end.offset = newEnd
-        if (marker.invalidate) marker.invalidate()
+        // NOTE: right now, any change inside a marker
+        // removes the marker, as opposed to changes before
+        // which shift the marker
+        this._remove(marker)
       }
     })
   }
 
-  _transformDelete(doc, markers, op) {
+  _transformDelete(markers, op) {
     const pos1 = op.pos
     const length = op.str.length
     const pos2 = pos1 + length
@@ -282,7 +329,7 @@ class MarkersIndex {
         }
         // TODO: we should do something special when the change occurred inside the marker
         if (start !== end && newStart === newEnd) {
-          marker.remove()
+          this._remove(marker)
           return
         }
         if (start !== newStart) {
@@ -291,7 +338,7 @@ class MarkersIndex {
         if (end !== newEnd) {
           marker.end.offset = newEnd
         }
-        if (marker.invalidate) marker.invalidate()
+        this._remove(marker)
       }
     })
   }

@@ -1,5 +1,8 @@
 .sc-overlay { z-index: 200; position: absolute; }
 
+.sc-overlay .sc-tool-group { display: inline-block; }
+.sc-overlay .sc-tool-group .sc-button { margin: 0px 1px; }
+
 .sc-overlay.sm-hidden { visibility: hidden; left: 0px; top: 0px; }
 
 .sc-overlay.sm-theme-dark {}

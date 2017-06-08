@@ -12,6 +12,8 @@
 @import './dropzones/_dropzones.css';
 /* emphasis */
 @import './emphasis/_emphasis.css';
+/* find-and-replace */
+@import './find-and-replace/_find-and-replace.css';
 /* grid */
 @import './grid/_grid.css';
 /* gutter */

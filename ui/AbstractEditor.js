@@ -1,6 +1,8 @@
 import Component from './Component'
 import ResourceManager from './ResourceManager'
 import DOMSelection from './DOMSelection'
+import { DefaultDOMElement } from '../dom'
+import { platform } from '../util'
 
 /**
   Reusable abstract editor implementation.
@@ -50,6 +52,11 @@ class AbstractEditor extends Component {
     this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
 
     this.domSelection = new DOMSelection(this)
+
+    if (platform.inBrowser) {
+      this.documentEl = DefaultDOMElement.wrapNativeElement(document)
+      this.documentEl.on('keydown', this.onKeyDown, this)
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -72,6 +79,9 @@ class AbstractEditor extends Component {
     // not necessary
     // this.domSelection.dispose()
     this.resourceManager.dispose()
+    if (platform.inBrowser) {
+      this.documentEl.off(this)
+    }
   }
 
   getChildContext() {
@@ -95,6 +105,14 @@ class AbstractEditor extends Component {
       tools: this.tools,
       keyboardShortcuts: this.keyboardShortcuts
     }
+  }
+
+  /*
+    Handle document key down events.
+  */
+  onKeyDown(event) {
+    // ignore fake IME events (emitted in IE and Chromium)
+    if ( event.key === 'Dead' ) return
   }
 
   getDocument() {
