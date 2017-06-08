@@ -649,7 +649,7 @@ BrowserDOMElement.parseMarkup = function(str, format, options={}) {
   } else if (format === 'xml') {
     doc = BrowserDOMElement.wrap(
       _check(
-        parser.parseFromString(str, 'text/xml')
+        parser.parseFromString(str, 'application/xml')
       )
     )
   }
