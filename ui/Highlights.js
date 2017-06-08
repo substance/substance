@@ -63,14 +63,22 @@ class Highlights extends EventEmitter {
         let node = doc.get(nodeId)
         // Node could have been deleted in the meanwhile
         if (node) {
-          node.setHighlighted(false, scope)
+          if (node.setHighlighted) {
+            node.setHighlighted(false, scope)
+          } else {
+            console.warn('setHighlighted is not defined on target node')
+          }
         }
-      });
+      })
 
       forEach(toBeAdded, function(nodeId) {
         let node = doc.get(nodeId)
         if (node) {
-          node.setHighlighted(true, scope)
+          if (node.setHighlighted) {
+            node.setHighlighted(true, scope)
+          } else {
+            console.warn('setHighlighted is not defined on target node')
+          }
         }
       })
     })
