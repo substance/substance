@@ -19,19 +19,16 @@ import EditingInterface from './EditingInterface'
 
 */
 export default
-class Transaction extends EditingInterface {
+class Transaction {
 
   /*
     @param {Document} doc
   */
-  constructor(doc, editorSession) {
-    super(doc.newInstance())
-
+  constructor(master) {
     // using a different name internally
-    this.master = doc
-    this.stage = this._document
-    this._editorSession = editorSession
-
+    this.master = master
+    this.stage = master.newInstance()
+    this.tx = new EditingInterface(this.stage)
     // internal state
     this._isTransacting = false
     this._surface = null
@@ -49,6 +46,14 @@ class Transaction extends EditingInterface {
 
   set ops(ops) {
     this.stage._ops = ops
+  }
+
+  getSelection() {
+    return this.tx.getSelection()
+  }
+
+  setSelection(sel) {
+    this.tx.setSelection(sel)
   }
 
   _reset() {
@@ -84,16 +89,17 @@ class Transaction extends EditingInterface {
     this._reset()
     let change
     try {
-      this.setSelection(selection)
-      let selBefore = this.getSelection()
-      transformation(this, {
+      const tx = this.tx
+      tx.setSelection(selection)
+      let selBefore = tx.getSelection()
+      transformation(tx, {
         selection: selBefore
       })
       let ops = this.ops
       if (ops.length > 0) {
-        change = new DocumentChange(ops, this._before, this._after)
+        change = new DocumentChange(ops, tx._before, tx._after)
         change.before = { selection: selBefore }
-        change.after = { selection: this.getSelection() }
+        change.after = { selection: tx.getSelection() }
       }
       hasFinished = true
     } finally {
