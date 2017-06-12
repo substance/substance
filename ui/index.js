@@ -64,8 +64,6 @@ export { default as Button } from '../packages/button/Button'
 export { default as Layout } from '../packages/layout/Layout'
 export { default as ScrollPane } from '../packages/scroll-pane/ScrollPane'
 export { default as SplitPane } from '../packages/split-pane/SplitPane'
-export { default as TOC } from '../packages/toc/TOC'
-export { default as TOCProvider } from '../packages/toc/TOCProvider'
 export { default as Toolbar } from '../packages/toolbar/Toolbar'
 // TODO: Remove Tool export (legacy)
 export { default as Tool } from './ToggleTool'
