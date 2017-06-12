@@ -72,7 +72,7 @@ function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   let index = doc.getIndex('container-annotations')
   let annotations = []
   if (index) {
-    let annotations = index.get(containerId, options.type)
+    annotations = index.get(containerId, options.type)
     annotations = filter(annotations, function(anno) {
       return sel.overlaps(anno.getSelection())
     })
