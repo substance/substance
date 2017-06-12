@@ -155,7 +155,7 @@ function _pasteDocument(tx, pasteDoc) {
     let newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
     // get the node in the targetDocument
     node = tx.get(newId)
-    container.show(newId, insertPos++)
+    container.showAt(insertPos++, newId)
     insertedNodes.push(node)
   }
 

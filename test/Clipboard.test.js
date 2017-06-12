@@ -191,7 +191,7 @@ function ClipboardTests(memory) {
         "}"
       ].join("\n")
     })
-    body.show(cb, body.getPosition('p1')+1)
+    body.showAt(body.getPosition('p1')+1, cb)
     editorSession.setSelection(doc.createSelection({
       type: 'container',
       startPath: ['p1', 'content'],
