@@ -1,6 +1,5 @@
 import { isFunction } from '../util'
 import DocumentChange from './DocumentChange'
-import EditingInterface from './EditingInterface'
 
 /*
   A transaction for editing a document in an EditorSession.
@@ -28,7 +27,7 @@ class Transaction {
     // using a different name internally
     this.master = master
     this.stage = master.newInstance()
-    this.tx = new EditingInterface(this.stage)
+    this.tx = this.stage.createEditingInterface()
     // internal state
     this._isTransacting = false
     this._surface = null
