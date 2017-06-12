@@ -3,15 +3,12 @@ import XMLTextNodeConverter from './XMLTextNodeConverter'
 import XMLElementNode from './XMLElementNode'
 import XMLElementNodeConverter from './XMLElementNodeConverter'
 import XMLAnnotationNode from './XMLAnnotationNode'
-import XMLAnnotationNodeConverter from './XMLAnnotationNodeConverter'
 import XMLAnchorNode from './XMLAnchorNode'
-import XMLAnchorNodeConverter from './XMLAnchorNodeConverter'
 import XMLInlineElementNode from './XMLInlineElementNode'
-import XMLInlineElementNodeConverter from './XMLInlineElementNodeConverter'
 import XMLExternalNode from './XMLExternalNode'
 import XMLExternalNodeConverter from './XMLExternalNodeConverter'
 import XMLContainerNode from './XMLContainerNode'
-import XMLContainerNodeConverter from './XMLContainerNodeConverter'
+import XMLNodeConverter from './XMLNodeConverter'
 
 export default function registerSchema(config, xmlSchema, DocumentClass) {
   const schemaName = xmlSchema.getName()
@@ -43,17 +40,17 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
       }
       case 'annotation': {
         NodeClass = XMLAnnotationNode
-        ConverterClass = XMLAnnotationNodeConverter
+        ConverterClass = XMLNodeConverter
         break
       }
       case 'anchor': {
         NodeClass = XMLAnchorNode
-        ConverterClass = XMLAnchorNodeConverter
+        ConverterClass = XMLNodeConverter
         break
       }
       case 'inline-element': {
         NodeClass = XMLInlineElementNode
-        ConverterClass = XMLInlineElementNodeConverter
+        ConverterClass = XMLNodeConverter
         break
       }
       case 'external': {
@@ -63,7 +60,7 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
       }
       case 'container': {
         NodeClass = XMLContainerNode
-        ConverterClass = XMLContainerNodeConverter
+        ConverterClass = XMLElementNodeConverter
         break
       }
       default:

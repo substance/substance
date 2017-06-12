@@ -1,8 +1,5 @@
 import XMLNodeConverter from './XMLNodeConverter'
 
-/*
-  ElementNodes have attributes and children.
-*/
 export default
 class ElementNodeConverter extends XMLNodeConverter {
 

@@ -1,8 +1,5 @@
 import XMLNodeConverter from './XMLNodeConverter'
 
-/*
-  TextNodes contain text and annotations (i.e. in XSD `mixed=true`)
-*/
 export default
 class TextNodeConverter extends XMLNodeConverter {
 

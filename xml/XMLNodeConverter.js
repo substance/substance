@@ -17,6 +17,7 @@ class XMLNodeConverter {
   }
 
   export(node, el, converter) {
+    el.tagName = this.tagNameNS
     el.setAttributes(node.attributes)
   }
 
