@@ -1,26 +1,26 @@
-const TextNodeMixin = (superclass) => class extends superclass {
+export default function(SuperClass) {
+  class TextNodeMixin extends SuperClass {
+    getTextPath() {
+      // TODO: deprecate this
+      // console.warn('DEPRECATED: use node.getPath()')
+      return this.getPath()
+    }
 
-  getTextPath() {
-    // TODO: deprecate this
-    // console.warn('DEPRECATED: use node.getPath()')
-    return this.getPath()
-  }
+    getText() {
+      return this.content
+    }
 
-  getText() {
-    return this.content
-  }
+    isEmpty() {
+      return !this.getText()
+    }
 
-  isEmpty() {
-    return !this.getText()
-  }
+    getLength() {
+      return this.getText().length
+    }
 
-  getLength() {
-    return this.getText().length
+    getAnnotations() {
+      return this.getDocument().getIndex('annotations').get(this.getPath())
+    }
   }
-
-  getAnnotations() {
-    return this.getDocument().getIndex('annotations').get(this.getPath())
-  }
+  return TextNodeMixin
 }
-
-export default TextNodeMixin
