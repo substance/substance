@@ -1,3 +1,4 @@
+export { default as camelCase } from 'lodash-es/camelCase'
 export { default as capitalize } from 'lodash-es/capitalize'
 export { default as debounce } from 'lodash-es/debounce'
 export { default as get } from 'lodash-es/get'

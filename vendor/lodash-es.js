@@ -150,6 +150,146 @@ function capitalize(string) {
   return upperFirst(toString(string).toLowerCase());
 }
 
+function arrayReduce(array, iteratee, accumulator, initAccum) {
+  var index = -1,
+      length = array ? array.length : 0;
+
+  if (initAccum && length) {
+    accumulator = array[++index];
+  }
+  while (++index < length) {
+    accumulator = iteratee(accumulator, array[index], index, array);
+  }
+  return accumulator;
+}
+
+var deburredLetters = {
+  '\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
+  '\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',
+  '\xc7': 'C',  '\xe7': 'c',
+  '\xd0': 'D',  '\xf0': 'd',
+  '\xc8': 'E',  '\xc9': 'E', '\xca': 'E', '\xcb': 'E',
+  '\xe8': 'e',  '\xe9': 'e', '\xea': 'e', '\xeb': 'e',
+  '\xcC': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
+  '\xeC': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
+  '\xd1': 'N',  '\xf1': 'n',
+  '\xd2': 'O',  '\xd3': 'O', '\xd4': 'O', '\xd5': 'O', '\xd6': 'O', '\xd8': 'O',
+  '\xf2': 'o',  '\xf3': 'o', '\xf4': 'o', '\xf5': 'o', '\xf6': 'o', '\xf8': 'o',
+  '\xd9': 'U',  '\xda': 'U', '\xdb': 'U', '\xdc': 'U',
+  '\xf9': 'u',  '\xfa': 'u', '\xfb': 'u', '\xfc': 'u',
+  '\xdd': 'Y',  '\xfd': 'y', '\xff': 'y',
+  '\xc6': 'Ae', '\xe6': 'ae',
+  '\xde': 'Th', '\xfe': 'th',
+  '\xdf': 'ss'
+};
+
+
+function deburrLetter(letter) {
+  return deburredLetters[letter];
+}
+
+var reLatin1 = /[\xc0-\xd6\xd8-\xde\xdf-\xf6\xf8-\xff]/g;
+
+
+var rsComboMarksRange$2 = '\\u0300-\\u036f\\ufe20-\\ufe23';
+var rsComboSymbolsRange$2 = '\\u20d0-\\u20f0';
+
+
+var rsCombo$1 = '[' + rsComboMarksRange$2 + rsComboSymbolsRange$2 + ']';
+
+
+var reComboMark = RegExp(rsCombo$1, 'g');
+
+
+function deburr(string) {
+  string = toString(string);
+  return string && string.replace(reLatin1, deburrLetter).replace(reComboMark, '');
+}
+
+var reBasicWord = /[a-zA-Z0-9]+/g;
+
+
+var rsAstralRange$2 = '\\ud800-\\udfff';
+var rsComboMarksRange$3 = '\\u0300-\\u036f\\ufe20-\\ufe23';
+var rsComboSymbolsRange$3 = '\\u20d0-\\u20f0';
+var rsDingbatRange = '\\u2700-\\u27bf';
+var rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff';
+var rsMathOpRange = '\\xac\\xb1\\xd7\\xf7';
+var rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf';
+var rsPunctuationRange = '\\u2000-\\u206f';
+var rsSpaceRange = ' \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000';
+var rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde';
+var rsVarRange$2 = '\\ufe0e\\ufe0f';
+var rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+
+
+var rsApos$1 = "['\u2019]";
+var rsBreak = '[' + rsBreakRange + ']';
+var rsCombo$2 = '[' + rsComboMarksRange$3 + rsComboSymbolsRange$3 + ']';
+var rsDigits = '\\d+';
+var rsDingbat = '[' + rsDingbatRange + ']';
+var rsLower = '[' + rsLowerRange + ']';
+var rsMisc = '[^' + rsAstralRange$2 + rsBreakRange + rsDigits + rsDingbatRange + rsLowerRange + rsUpperRange + ']';
+var rsFitz$1 = '\\ud83c[\\udffb-\\udfff]';
+var rsModifier$1 = '(?:' + rsCombo$2 + '|' + rsFitz$1 + ')';
+var rsNonAstral$1 = '[^' + rsAstralRange$2 + ']';
+var rsRegional$1 = '(?:\\ud83c[\\udde6-\\uddff]){2}';
+var rsSurrPair$1 = '[\\ud800-\\udbff][\\udc00-\\udfff]';
+var rsUpper = '[' + rsUpperRange + ']';
+var rsZWJ$2 = '\\u200d';
+
+
+var rsLowerMisc = '(?:' + rsLower + '|' + rsMisc + ')';
+var rsUpperMisc = '(?:' + rsUpper + '|' + rsMisc + ')';
+var rsOptLowerContr = '(?:' + rsApos$1 + '(?:d|ll|m|re|s|t|ve))?';
+var rsOptUpperContr = '(?:' + rsApos$1 + '(?:D|LL|M|RE|S|T|VE))?';
+var reOptMod$1 = rsModifier$1 + '?';
+var rsOptVar$1 = '[' + rsVarRange$2 + ']?';
+var rsOptJoin$1 = '(?:' + rsZWJ$2 + '(?:' + [rsNonAstral$1, rsRegional$1, rsSurrPair$1].join('|') + ')' + rsOptVar$1 + reOptMod$1 + ')*';
+var rsSeq$1 = rsOptVar$1 + reOptMod$1 + rsOptJoin$1;
+var rsEmoji = '(?:' + [rsDingbat, rsRegional$1, rsSurrPair$1].join('|') + ')' + rsSeq$1;
+
+
+var reComplexWord = RegExp([
+  rsUpper + '?' + rsLower + '+' + rsOptLowerContr + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
+  rsUpperMisc + '+' + rsOptUpperContr + '(?=' + [rsBreak, rsUpper + rsLowerMisc, '$'].join('|') + ')',
+  rsUpper + '?' + rsLowerMisc + '+' + rsOptLowerContr,
+  rsUpper + '+' + rsOptUpperContr,
+  rsDigits,
+  rsEmoji
+].join('|'), 'g');
+
+
+var reHasComplexWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+
+
+function words(string, pattern, guard) {
+  string = toString(string);
+  pattern = guard ? undefined : pattern;
+
+  if (pattern === undefined) {
+    pattern = reHasComplexWord.test(string) ? reComplexWord : reBasicWord;
+  }
+  return string.match(pattern) || [];
+}
+
+var rsApos = "['\u2019]";
+
+
+var reApos = RegExp(rsApos, 'g');
+
+
+function createCompounder(callback) {
+  return function(string) {
+    return arrayReduce(words(deburr(string).replace(reApos, '')), callback, '');
+  };
+}
+
+var camelCase = createCompounder(function(result, word, index) {
+  word = word.toLowerCase();
+  return result + (index ? capitalize(word) : word);
+});
+
 function isObject(value) {
   var type = typeof value;
   return !!value && (type == 'object' || type == 'function');
@@ -1754,19 +1894,6 @@ function addMapEntry(map, pair) {
   return map;
 }
 
-function arrayReduce(array, iteratee, accumulator, initAccum) {
-  var index = -1,
-      length = array ? array.length : 0;
-
-  if (initAccum && length) {
-    accumulator = array[++index];
-  }
-  while (++index < length) {
-    accumulator = iteratee(accumulator, array[index], index, array);
-  }
-  return accumulator;
-}
-
 function cloneMap(map, isDeep, cloneFunc) {
   var array = isDeep ? cloneFunc(mapToArray(map), true) : mapToArray(map);
   return arrayReduce(array, addMapEntry, new map.constructor);
@@ -2678,4 +2805,4 @@ function orderBy(collection, iteratees, orders, guard) {
   return baseOrderBy(collection, iteratees, orders);
 }
 
-export { capitalize, debounce, get, find, isMatch, merge, mergeWith, setWith, uniq, unset, without, orderBy };
+export { camelCase, capitalize, debounce, get, find, isMatch, merge, mergeWith, setWith, uniq, unset, without, orderBy };

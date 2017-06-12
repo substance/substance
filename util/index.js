@@ -2,6 +2,7 @@ import * as async from './async'
 export { default as ArrayIterator } from './ArrayIterator'
 export { default as ArrayTree } from './ArrayTree'
 export { async }
+export { default as camelCase } from './camelCase'
 export { default as capitalize } from './capitalize'
 export { default as clone } from './clone'
 export { default as cloneDeep } from './cloneDeep'
