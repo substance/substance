@@ -4,7 +4,7 @@ const TEXT = DFA.TEXT
 const START = DFA.START
 
 export default
-class Validator {
+class XMLValidator {
 
   constructor(xmlSchema) {
     this.schema = xmlSchema

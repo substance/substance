@@ -1,10 +1,6 @@
-import deserializeXMLSchema from './deserializeXMLSchema'
-import serializeXMLSchema from './deserializeXMLSchema'
 import XMLAnchorNode from './XMLAnchorNode'
-import XMLAnchorNodeConverter from './XMLAnchorNodeConverter'
 import XMLAnnotationNode from './XMLAnnotationNode'
 import XMLContainerNode from './XMLContainerNode'
-import XMLContainerNodeConverter from './XMLContainerNodeConverter'
 import XMLDocument from './XMLDocument'
 import XMLElementNode from './XMLElementNode'
 import XMLElementNodeConverter from './XMLElementNodeConverter'
@@ -13,23 +9,19 @@ import XMLExternalNodeConverter from './XMLExternalNodeConverter'
 import XMLSchema from './XMLSchema'
 import XMLTextNode from './XMLTextNode'
 import XMLTextNodeConverter from './XMLTextNodeConverter'
-import Validator from './Validator'
+import XMLValidator from './XMLValidator'
 import analyzeSchema from './analyzeSchema'
 import checkSchema from './checkSchema'
 import prettyPrint from './prettyPrint'
 import compileRNG from './compileRNG'
+import deserializeXMLSchema from './deserializeXMLSchema'
+import serializeXMLSchema from './serializeXMLSchema'
+import registerSchema from './registerSchema'
 
 export {
-  analyzeSchema,
-  checkSchema,
-  serializeXMLSchema,
-  deserializeXMLSchema,
   XMLAnchorNode,
-  XMLAnchorNodeConverter,
   XMLAnnotationNode,
-  XMLAnchorNodeConverter,
   XMLContainerNode,
-  XMLContainerNodeConverter,
   XMLDocument,
   XMLElementNode,
   XMLElementNodeConverter,
@@ -38,9 +30,12 @@ export {
   XMLSchema,
   XMLTextNode,
   XMLTextNodeConverter,
-  Validator,
+  XMLValidator,
   analyzeSchema,
   checkSchema,
   prettyPrint as prettyPrintXML,
+  serializeXMLSchema,
+  deserializeXMLSchema,
   compileRNG,
+  registerSchema
 }

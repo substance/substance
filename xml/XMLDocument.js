@@ -5,6 +5,7 @@ import {
 } from '../model'
 
 import ParentNodeHook from './ParentNodeHook'
+import XMLEditingInterface from './XMLEditingInterface'
 
 export default
 class XMLDocument extends Document {
@@ -21,8 +22,16 @@ class XMLDocument extends Document {
   }
 
   getXMLSchema() {
-    // XMLDocument should have an XMLSchema instance which
-    // is provided here
-    throw new Error('Not implemented yet')
+    // should provide an XMLSchema instance
+    throw new Error('This method is abstract')
+  }
+
+  getRootNode() {
+    // should provide the root-element
+    throw new Error('This method is abstract')
+  }
+
+  createEditingInterface() {
+    return new XMLEditingInterface(this)
   }
 }

@@ -1,7 +1,7 @@
 import { DefaultDOMElement as DOM } from '../dom'
 import Validator from './Validator'
 
-export default function validate(xmlSchema, dom) {
+export default function validateXML(xmlSchema, dom) {
   let validator = new Validator(xmlSchema)
   // TODO: for sake of generality we should take the start element from the schema
   let root = dom.find('article')

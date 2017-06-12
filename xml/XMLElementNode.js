@@ -1,5 +1,5 @@
 import { DocumentNode } from '../model'
-import { cssSelect } from '../vendor/css-select'
+import cssSelect from '../vendor/css-select'
 import node2element from './node2element'
 import cssSelectAdapter from './cssSelectAdapter'
 

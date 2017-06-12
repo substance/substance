@@ -1,4 +1,5 @@
-import { DomUtils, map } from '../util'
+import { map } from '../util'
+import DomUtils from '../vendor/domutils'
 import nameWithoutNS from './nameWithoutNS'
 
 class Adapter extends DomUtils.DomUtils {
