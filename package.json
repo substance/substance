@@ -16,7 +16,7 @@
     "lint": "eslint -c .eslintrc.js collab dom model packages test ui util index.es.js",
     "dev": "node make test:browser:pure -w -s",
     "test": "npm run lint && node make test",
-    "cover": "node make cover && codecov",
+    "test-and-cover": "npm run lint && node make test && node make cover && codecov",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },

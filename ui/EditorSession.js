@@ -23,7 +23,7 @@ class EditorSession extends EventEmitter {
     }
     this.configurator = options.configurator
 
-    this._transaction = new Transaction(doc, this)
+    this._transaction = new Transaction(doc)
     // HACK: we want `tx.setSelection()` to add surfaceId to the selection
     // automatically, so that tx is easier to use.
     _patchTxSetSelection(this._transaction, this)
@@ -238,13 +238,18 @@ class EditorSession extends EventEmitter {
     if (sel && isPlainObject(sel)) {
       sel = this.getDocument().createSelection(sel)
     }
-    if (sel && !sel.isNull() && !sel.surfaceId) {
-      let fs = this.getFocusedSurface()
-      if (fs) {
-        sel.surfaceId = fs.id
+    if (sel && !sel.isNull()) {
+      if (!sel.surfaceId) {
+        let fs = this.getFocusedSurface()
+        if (fs) {
+          sel.surfaceId = fs.id
+        }
       }
     }
+
     _addSurfaceId(sel, this)
+    _addContainerId(sel, this)
+
     if (this._setSelection(sel) && !skipFlow) {
       this.startFlow()
     }
@@ -522,7 +527,6 @@ class EditorSession extends EventEmitter {
 
   _commitChange(change, info) {
     change.timestamp = Date.now()
-    this._transaction._document._skipNextDocumentChange = true
     this._applyChange(change, info)
     if (info['history'] !== false && !info['hidden']) {
       this._history.push(change.invert())
@@ -786,10 +790,15 @@ function _patchTxSetSelection(tx, editorSession) {
   tx.setSelection = function(sel) {
     sel = Transaction.prototype.setSelection.call(tx, sel)
     _addSurfaceId(sel, editorSession)
+    _addContainerId(sel, editorSession)
     return sel
   }
 }
 
+/*
+  Complements selection data according to the given Editor state.
+  I.e., if no
+*/
 function _addSurfaceId(sel, editorSession) {
   if (sel && !sel.isNull() && !sel.surfaceId) {
     // TODO: We could check if the selection is valid within the given surface
@@ -799,6 +808,18 @@ function _addSurfaceId(sel, editorSession) {
     } else {
       // TODO: instead of warning we could try to 'find' a suitable surface. However, this would also be a bit 'magical'
       console.warn('No focused surface. Selection will not be rendered.')
+    }
+  }
+}
+
+function _addContainerId(sel, editorSession) {
+  if (sel && !sel.isNull() && sel.surfaceId && !sel.containerId) {
+    let surface = editorSession.getSurface(sel.surfaceId)
+    if (surface) {
+      let containerId = surface.getContainerId()
+      if (containerId) {
+        sel.containerId = containerId
+      }
     }
   }
 }

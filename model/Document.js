@@ -6,6 +6,7 @@ import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import DocumentChange from './DocumentChange'
 import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
+import EditingInterface from './EditingInterface'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
@@ -497,6 +498,14 @@ class Document extends EventEmitter {
   clear() {
     this.data.clear()
     this._ops.length = 0
+  }
+
+  /*
+    Provides a high-level turtle-graphics style interface
+    to this document
+  */
+  createEditingInterface() {
+    return new EditingInterface(this)
   }
 
   _apply(documentChange) {

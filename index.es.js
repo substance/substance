@@ -13,6 +13,9 @@ export * from './ui/index'
 // util
 export * from './util/index'
 
+// util
+export * from './xml/index'
+
 // packages
 export * from './packages/index'
 

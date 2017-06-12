@@ -21,7 +21,7 @@ export default {
   configure: function(config) {
     config.defineSchema({
       name: 'prose-article',
-      ArticleClass: ProseArticle,
+      DocumentClass: ProseArticle,
       defaultTextType: 'paragraph'
     })
     // Undo/Redo etc.

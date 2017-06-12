@@ -82,9 +82,15 @@ class Container extends DocumentNode {
     const length = this.getLength()
     if (!isNumber(pos) || pos < 0 || pos > length) {
       throw new Error('Index out of bounds')
-    } else {
-      doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
     }
+    if (!isString(nodeId)) {
+      if (nodeId._isNode) {
+        nodeId = nodeId.id
+      } else {
+        throw new Error('Invalid argument.')
+      }
+    }
+    doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
   }
 
   hide(nodeId) {

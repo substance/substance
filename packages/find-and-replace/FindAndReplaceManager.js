@@ -132,9 +132,6 @@ class FindAndReplaceManager {
     // NOTE: We need to make sure no additional flow is triggered when
     // setting the selection. We trigger a flow at the very end (_propagateUpdate)
     let sel = match.getSelection()
-    // HACK: we need to manually set the container id for now
-    let surface = this.editorSession.getFocusedSurface()
-    sel.containerId = surface.getContainerId()
     this.editorSession.setSelection(sel, 'skipFlow')
   }
 

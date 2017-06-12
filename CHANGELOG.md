@@ -1,5 +1,8 @@
 ## Beta 7
 
+- `editorSession.setSelection()` does not require explicit specification of
+  `containerId` in most cases. Instead the information is derived from the
+  surface if a `surfaceId` is given.
 - Refactored MarkersManager:
   + generalized and streamlined API (no custom Node necessary anymore)
   + Markers are added cleared using `MarkersManager.setMarkers(key, markers)`

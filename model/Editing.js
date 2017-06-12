@@ -463,13 +463,13 @@ class Editing {
       let nodePos = container.getPosition(nodeId, 'strict')
       let textNode = tx.createDefaultTextNode(text)
       if (sel.isBefore()) {
-        container.show(textNode, nodePos)
+        container.showAt(nodePos, textNode)
       } else if (sel.isAfter()) {
-        container.show(textNode, nodePos+1)
+        container.showAt(nodePos+1, textNode)
       } else {
         container.hide(nodeId)
         documentHelpers.deleteNode(tx, tx.get(nodeId))
-        container.show(textNode, nodePos)
+        container.showAt(nodePos, textNode)
       }
       setCursor(tx, textNode, sel.containerId, 'after')
     } else if (sel.isCustomSelection()) {
@@ -549,7 +549,7 @@ class Editing {
     let pos = container.getPosition(nodeId, 'strict')
     container.hide(nodeId)
     documentHelpers.deleteNode(tx, node)
-    container.show(newNode.id, pos)
+    container.showAt(pos, newNode.id)
 
     tx.setSelection({
       type: 'property',
@@ -800,7 +800,7 @@ class Editing {
         content: ""
       })
       // show the new node
-      container.show(newNode.id, nodePos)
+      container.showAt(nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
         path: path,
@@ -826,7 +826,7 @@ class Editing {
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
       // show the new node
-      container.show(newNode.id, nodePos+1)
+      container.showAt(nodePos+1, newNode.id)
       // update the selection
       tx.setSelection({
         type: 'property',
@@ -858,19 +858,19 @@ class Editing {
         if (L < 2) {
           container.hide(node.id)
           documentHelpers.deleteNode(tx, node)
-          container.show(newTextNode.id, nodePos)
+          container.showAt(nodePos, newTextNode.id)
         }
         // if at the first list item, remove the item
         else if (itemPos === 0) {
           node.remove(listItem.id)
           documentHelpers.deleteNode(tx, listItem)
-          container.show(newTextNode.id, nodePos)
+          container.showAt(nodePos, newTextNode.id)
         }
         // if at the last list item, remove the item and append the paragraph
         else if (itemPos >= L-1) {
           node.remove(listItem.id)
           documentHelpers.deleteNode(tx, listItem)
-          container.show(newTextNode.id, nodePos+1)
+          container.showAt(nodePos+1, newTextNode.id)
         }
         // otherwise create a new list
         else {
@@ -886,8 +886,8 @@ class Editing {
             items: tail,
             ordered: node.ordered
           })
-          container.show(newTextNode.id, nodePos+1)
-          container.show(newList.id, nodePos+2)
+          container.showAt(nodePos+1, newTextNode.id)
+          container.showAt(nodePos+2, newList.id)
         }
         tx.setSelection({
           type: 'property',
