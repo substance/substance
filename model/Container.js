@@ -62,24 +62,43 @@ class Container extends DocumentNode {
   }
 
   show(nodeId, pos) {
-    var doc = this.getDocument()
-    var arg1 = arguments[0]
+    // allow to provide a node instance instead of nodeId
+    const arg1 = arguments[0]
     if (!isString(arg1)) {
       if (arg1._isNode) {
         nodeId = arg1.id
       }
     }
-    if (!isNumber(pos)) {
+    if (arguments.length > 1) {
+      console.error('DEPRECATED: use container.showAt(pos, nodeId) instead')
+    } else {
       pos = this.getLength()
     }
-    doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
+    return this.showAt(pos, nodeId)
+  }
+
+  showAt(pos, nodeId) {
+    const doc = this.getDocument()
+    const length = this.getLength()
+    if (!isNumber(pos) || pos < 0 || pos > length) {
+      throw new Error('Index out of bounds')
+    } else {
+      doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
+    }
   }
 
   hide(nodeId) {
-    var doc = this.getDocument()
-    var pos = this.getPosition(nodeId)
-    if (pos >= 0) {
+    const pos = this.getPosition(nodeId)
+    this.hideAt(pos)
+  }
+
+  hideAt(pos) {
+    const length = this.getLength()
+    if (pos >= 0 && pos < length) {
+      const doc = this.getDocument()
       doc.update(this.getContentPath(), { type: 'delete', pos: pos })
+    } else {
+      throw new Error('Index out of bounds.')
     }
   }
 
@@ -147,14 +166,13 @@ class Container extends DocumentNode {
 
   _lookupPosition(node) {
     if (node.hasParent()) {
-      node = node.getRoot()
+      node = node.getContainerRoot()
     }
     return this.getContent().indexOf(node.id)
   }
 
   _enableCaching() {
     // this hook is used to invalidate cached positions
-    // caching is done only in the 'real' document, not in a TransactionDocument
     if (this.document) {
       this.document.data.on('operation:applied', this._onOperationApplied, this)
       this._isCaching = true
@@ -179,23 +197,23 @@ class Container extends DocumentNode {
   // TODO: try to get rid of this
 
   hasChildren() {
-    return this.nodes.length > 0
+    return this.getContent().length > 0
   }
 
   getChildIndex(child) {
-    return this.nodes.indexOf(child.id)
+    return this.getContent().indexOf(child.id)
   }
 
   getChildren() {
     var doc = this.getDocument()
-    var childrenIds = this.nodes
+    var childrenIds = this.getContent()
     return childrenIds.map(function(id) {
       return doc.get(id)
     })
   }
 
   getChildAt(idx) {
-    var childrenIds = this.nodes
+    var childrenIds = this.getContent()
     if (idx < 0 || idx >= childrenIds.length) {
       throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
     }
@@ -203,7 +221,7 @@ class Container extends DocumentNode {
   }
 
   getChildCount() {
-    return this.nodes.length
+    return this.getContent().length
   }
 
 }

@@ -28,7 +28,7 @@ export function fromJSON(json) {
 */
 export function isFirst(doc, coor) {
   if (coor.isNodeCoordinate() && coor.offset === 0) return true
-  let node = doc.get(coor.path[0]).getRoot()
+  let node = doc.get(coor.path[0]).getContainerRoot()
   if (node.isText() && coor.offset === 0) return true
   if (node.isList()) {
     let itemId = coor.path[0]
@@ -41,7 +41,7 @@ export function isFirst(doc, coor) {
 */
 export function isLast(doc, coor) {
   if (coor.isNodeCoordinate() && coor.offset > 0) return true
-  let node = doc.get(coor.path[0]).getRoot()
+  let node = doc.get(coor.path[0]).getContainerRoot()
   if (node.isText() && coor.offset >= node.getLength()) return true
   if (node.isList()) {
     let itemId = coor.path[0]
@@ -125,7 +125,7 @@ export function selectNode(tx, nodeId, containerId) {
 export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, surfaceId}) {
   let node = doc.get(nodeId)
   if (!node) return Selection.nullSelection
-  node = node.getRoot()
+  node = node.getContainerRoot()
   if (node.isText()) {
     return new PropertySelection({
       path: node.getTextPath(),

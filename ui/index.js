@@ -51,11 +51,19 @@ export { default as TextBlockComponent } from './TextBlockComponent'
 export { default as TextPropertyComponent } from './TextPropertyComponent'
 export { default as TextPropertyEditor } from './TextPropertyEditor'
 export { default as ToggleTool } from './ToggleTool'
-// TODO: Remote Tool export (legacy)
-export { default as Tool } from './ToggleTool'
 export { default as ToolDropdown } from './ToolDropdown'
 export { default as ToolGroup } from './ToolGroup'
 export { default as ToolPanel } from './ToolPanel'
 export { default as UnsupportedNodeComponent } from './UnsupportedNodeComponent'
 export { default as VirtualElement } from './VirtualElement'
 export { default as WorkflowPane } from './WorkflowPane'
+
+// these are in packages, but actually are so core'ish that we export them
+// here
+export { default as Button } from '../packages/button/Button'
+export { default as Layout } from '../packages/layout/Layout'
+export { default as ScrollPane } from '../packages/scroll-pane/ScrollPane'
+export { default as SplitPane } from '../packages/split-pane/SplitPane'
+export { default as Toolbar } from '../packages/toolbar/Toolbar'
+// TODO: Remove Tool export (legacy)
+export { default as Tool } from './ToggleTool'

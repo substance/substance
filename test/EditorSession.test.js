@@ -1,4 +1,4 @@
-import { module, spy } from 'substance-test'
+import { module } from 'substance-test'
 import setupEditor from './fixture/setupEditor'
 import simple from './fixture/simple'
 
@@ -6,13 +6,12 @@ const test = module('EditorSession')
 
 test("Keeping TransactionDocument up-to-date.", function(t) {
   let { editorSession, doc } = setupEditor(t, simple)
-  let stageDoc = editorSession._transaction._stageDoc
-  stageDoc._apply = spy(stageDoc, '_apply')
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
-  var p = stageDoc.get('foo')
-  t.equal(stageDoc._apply.callCount, 1, "Stage should have been updated.")
-  t.notNil(p, "Stage should contain new paragraph node.")
-  t.equal(p.content, "foo")
+  editorSession.transaction((tx) => {
+    const p = tx.get('foo')
+    t.notNil(p, "Stage should contain new paragraph node.")
+    t.equal(p.content, "foo")
+  })
   t.end()
 })
 

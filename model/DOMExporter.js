@@ -89,7 +89,7 @@ class DOMExporter {
     var converter = this.getNodeConverter(node)
     // special treatment for annotations, i.e. if someone calls
     // `exporter.convertNode(anno)`
-    if (node._isPropertyAnnotation && (!converter || !converter.export)) {
+    if (node.isPropertyAnnotation() && (!converter || !converter.export)) {
       return this._convertPropertyAnnotation(node)
     }
     if (!converter) {

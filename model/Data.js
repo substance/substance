@@ -327,13 +327,18 @@ class Data extends EventEmitter {
     }
   }
 
+  reset() {
+    this.clear()
+  }
+
   /**
     Clear nodes.
 
     @internal
    */
-  reset() {
-    this.nodes.clear()
+  clear() {
+    this.nodes = {}
+    forEach(this.indexes, index => index.clear())
   }
 
   /**

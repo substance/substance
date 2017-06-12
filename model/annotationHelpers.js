@@ -228,7 +228,7 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
 */
 function truncateAnnotation(tx, anno, sel) {
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
-  if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.')
+  if (!anno || !anno.isAnnotation()) throw new Error('Argument "anno" is required and must be an annotation.')
   let annoSel = anno.getSelection()
   let newAnnoSel = annoSel.truncateWith(sel)
   anno._updateRange(tx, newAnnoSel)
@@ -242,7 +242,7 @@ function truncateAnnotation(tx, anno, sel) {
 */
 function expandAnnotation(tx, anno, sel) {
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
-  if (!anno || !anno._isAnnotation) throw new Error('Argument "anno" is required.')
+  if (!anno || !anno.isAnnotation()) throw new Error('Argument "anno" is required and must be an annotation.')
   let annoSel = anno.getSelection()
   let newAnnoSel = annoSel.expand(sel)
   anno._updateRange(tx, newAnnoSel)

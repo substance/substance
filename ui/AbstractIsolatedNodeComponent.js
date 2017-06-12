@@ -13,7 +13,7 @@ class AbstractIsolatedNodeComponent extends Component {
     }
 
     this.handleAction('escape', this.escape)
-    this.ContentClass = this._getContentClass(this.props.node) || Component
+    this.ContentClass = this._getContentClass(this.props.node)
 
     // NOTE: FF does not allow to navigate contenteditable isles
     let useBlocker = platform.isFF || !this.ContentClass.noBlocker
@@ -134,8 +134,13 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   _getContentClass(node) {
-    let componentRegistry = this.context.componentRegistry
-    let ComponentClass = componentRegistry.get(node.type)
+    let ComponentClass
+    // first try to get the component registered for this node
+    ComponentClass = this.getComponent(node.type, true)
+    // otherwise just use an empty Component
+    if (!ComponentClass) {
+      ComponentClass = Component
+    }
     return ComponentClass
   }
 

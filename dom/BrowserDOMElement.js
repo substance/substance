@@ -1,4 +1,4 @@
-import { isString, isNumber, uuid } from '../util'
+import { isString, isNumber, isNil, uuid } from '../util'
 import DOMElement from './DOMElement'
 
 // using a dynamic signature to store the wrapper on the native element
@@ -414,6 +414,8 @@ class BrowserDOMElement extends DOMElement {
   }
 
   _normalizeChild(child) {
+    if (isNil(child)) return child
+
     if (child instanceof window.Node) {
       child = BrowserDOMElement.wrap(child)
     }
@@ -435,7 +437,9 @@ class BrowserDOMElement extends DOMElement {
 
   appendChild(child) {
     let nativeChild = this._normalizeChild(child)
-    this.el.appendChild(nativeChild)
+    if (nativeChild) {
+      this.el.appendChild(nativeChild)
+    }
     return this
   }
 
@@ -452,11 +456,16 @@ class BrowserDOMElement extends DOMElement {
 
   insertBefore(child, before) {
     /* istanbul ignore next */
-    if (!before || !before._isBrowserDOMElement) {
+    if (isNil(before)) {
+      return this.appendChild(child)
+    }
+    if (!before._isBrowserDOMElement) {
       throw new Error('insertBefore(): Illegal arguments. "before" must be a BrowserDOMElement instance.')
     }
     var nativeChild = this._normalizeChild(child)
-    this.el.insertBefore(nativeChild, before.el)
+    if (nativeChild) {
+      this.el.insertBefore(nativeChild, before.el)
+    }
     return this
   }
 
@@ -783,17 +792,34 @@ class AttributesMapAdapter {
     }
   }
 
-  entries() {
-    let entries = []
-    let S = this.size
-    for (let i = 0; i < S; i++) {
-      const item = this.attributes.item(i)
-      entries.push([item.name, item.value])
-    }
-    return entries
+  set(name, value) {
+    this.attributes.setNamedItem(name, value)
   }
 
-  set() {
-    throw new Error('This is a read-only map.')
+  forEach(fn) {
+    const S = this.size
+    for (let i = 0; i < S; i++) {
+      const item = this.attributes.item(i)
+      fn(item.value, item.name)
+    }
   }
+
+  map(fn) {
+    let result = []
+    this.forEach((val, key)=>{ result.push(fn(val, key)) })
+    return result
+  }
+
+  keys() {
+    return this.map((val, key)=>{ return key })
+  }
+
+  values() {
+    return this.map((val)=>{ return val })
+  }
+
+  entries() {
+    return this.map((val, key)=>{ return [key, val] })
+  }
+
 }

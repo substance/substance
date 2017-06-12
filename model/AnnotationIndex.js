@@ -26,13 +26,12 @@ class AnnotationIndex extends DocumentIndex {
   }
 
   select(node) {
-    return Boolean(node._isPropertyAnnotation)
+    return node.isPropertyAnnotation()
   }
 
-  reset(data) {
+  clear() {
     this.byPath.clear()
     this.byType.clear()
-    this._initialize(data)
   }
 
   // TODO: use object interface? so we can combine filters (path and type)

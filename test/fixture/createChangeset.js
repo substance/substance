@@ -1,4 +1,4 @@
-import { DocumentChange, EditingInterface, TransactionDocument } from 'substance'
+import { ChangeRecorder } from 'substance'
 
 /*
   Create a changeset
@@ -13,18 +13,12 @@ export default function createChangeset(doc, fns) {
   if (!Array.isArray(fns)) {
     fns = [ fns ]
   }
-
-  let txDoc = new TransactionDocument(doc)
-  let tx = new EditingInterface(txDoc)
-  let opCount = 0
+  let tx = new ChangeRecorder(doc)
   let changes = []
-
   fns.forEach((fn) => {
     fn(tx)
-    let opsForChange = txDoc.ops.slice(opCount)
-    changes.push(new DocumentChange(opsForChange, {}, {}).toJSON())
-    opCount = txDoc.ops.length
+    changes.push(tx.generateChange())
   })
-  txDoc.dispose()
+  tx.dispose()
   return changes
 }

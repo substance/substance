@@ -11,17 +11,20 @@ import { forEach } from '../util'
  */
 class NodeIndex {
 
-  /**
+  /*
     Check if a node should be indexed.
 
-    Used internally only. Override this in subclasses to achieve a custom behavior.
+    Override this in subclasses to achieve a custom behavior.
 
-    @private
     @param {Node}
     @returns {Boolean} true if the given node should be added to the index.
    */
   select(node) { // eslint-disable-line no-unused-vars
     throw new Error('This method is abstract.')
+  }
+
+  clear() {
+    throw new Error('This method is abstract')
   }
 
   /**
@@ -62,7 +65,7 @@ class NodeIndex {
     @private
    */
   reset(data) {
-    this._clear()
+    this.clear()
     this._initialize(data)
   }
 
@@ -75,10 +78,6 @@ class NodeIndex {
     var NodeIndexClass = this.constructor
     var clone = new NodeIndexClass()
     return clone
-  }
-
-  _clear() {
-    throw new Error('This method is abstract')
   }
 
   _initialize(data) {

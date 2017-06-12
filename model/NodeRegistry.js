@@ -15,14 +15,15 @@ class NodeRegistry extends Registry {
   register(nodeClazz) {
     var type = nodeClazz.prototype.type
     if ( typeof type !== 'string' || type === '' ) {
-      console.error('#### nodeClazz', nodeClazz)
       throw new Error( 'Node names must be strings and must not be empty')
     }
-    if ( !( nodeClazz.prototype._isNode) ) {
+    if (!( nodeClazz.prototype._isNode)) {
       throw new Error( 'Nodes must be subclasses of Substance.Data.Node' )
     }
     if (this.contains(type)) {
-      throw new Error('Node class is already registered: ' + type)
+      // throw new Error('Node class is already registered: ' + type)
+      console.info('Overriding node type', type)
+      this.remove(type)
     }
     this.add(type, nodeClazz)
   }

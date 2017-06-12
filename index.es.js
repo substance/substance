@@ -10,9 +10,14 @@ export * from './model/index'
 // ui
 export * from './ui/index'
 
-
 // util
 export * from './util/index'
 
 // packages
 export * from './packages/index'
+
+// patched cssSelect
+export { default as cssSelect } from './vendor/css-select'
+
+// patched DomUtils
+export { default as DomUtils } from './vendor/domutils'

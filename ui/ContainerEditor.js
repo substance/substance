@@ -65,7 +65,7 @@ class ContainerEditor extends Surface {
     super.didMount.apply(this, arguments)
     let editorSession = this.getEditorSession()
     editorSession.onUpdate('document', this._onContainerChanged, this, {
-      path: [this.getContainerId(), 'nodes']
+      path:  this.container.getContentPath()
     })
 
   }
@@ -131,7 +131,8 @@ class ContainerEditor extends Surface {
   _selectNextIsolatedNode(direction) {
     let selState = this.getEditorSession().getSelectionState()
     let node = (direction === 'left') ? selState.getPreviousNode() : selState.getNextNode()
-    if (!node || !node.isIsolatedNode()) return false
+    let isIsolatedNode = !node.isText() && !node.isList()
+    if (!node || !isIsolatedNode) return false
     if (
       (direction === 'left' && selState.isFirst()) ||
       (direction === 'right' && selState.isLast())
@@ -252,7 +253,7 @@ class ContainerEditor extends Surface {
 
   isEmpty() {
     let containerNode = this.getContainer()
-    return (containerNode && containerNode.nodes.length === 0)
+    return (containerNode && containerNode.length === 0)
   }
 
   isEditable() {

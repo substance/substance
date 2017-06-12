@@ -41,6 +41,7 @@ class PropertyAnnotation extends Annotation {
     return this.start.path
   }
 
+  // TODO: deprecate this
   getPath() {
     return this.start.path
   }
@@ -71,13 +72,6 @@ class PropertyAnnotation extends Annotation {
     }
   }
 
-  get startPath() {
-    return this.path
-  }
-
-  get endPath() {
-    return this.path
-  }
 }
 
 PropertyAnnotation.prototype._isAnnotation = true

@@ -182,9 +182,9 @@ class DOMImporter {
       this.state.pushContext(el.tagName, converter)
       // Note: special treatment for property annotations and inline nodes
       // i.e. if someone calls `importer.convertElement(annoEl)`
-      // usually, annotations are imported in the course of `importer.annotatedText(..)`
+      // usually, annotations are imported via `importer.annotatedText(..)`
       // The peculiarity here is that in such a case, it is not
-      // not clear, which property the annotation is attached to
+      // not clear, which property the annotation should be attached to.
       if (NodeClass.isInline) {
         nodeData = this._convertInlineNode(el, nodeData, converter)
       }
@@ -251,7 +251,7 @@ class DOMImporter {
     // annotated text property. This feature is mainly used to eat up
     // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
     this.state.lastChar = ''
-    const iterator = el.getChildNodeIterator()
+    const iterator = this.getChildNodeIterator(el)
     const text = this._annotatedText(iterator)
     // now we can create all annotations which have been created during this
     // call of annotatedText
@@ -386,6 +386,10 @@ class DOMImporter {
     return doc.create(nodeData)
   }
 
+  getChildNodeIterator(el) {
+    return el.getChildNodeIterator()
+  }
+
   _defaultElementMatcher(el) {
     return el.is(this.tagName)
   }
@@ -426,7 +430,7 @@ class DOMImporter {
           }
           // this descends into children elements without introducing a new stack frame
           // and without creating an element.
-          const iterator = el.getChildNodeIterator()
+          const iterator = this.getChildNodeIterator(el)
           this._annotatedText(iterator)
           continue
         }
@@ -461,7 +465,7 @@ class DOMImporter {
           // We call this to descent into the element
           // which could be 'forgotten' otherwise.
           // TODO: what if the converter has processed the element already?
-          const iterator = el.getChildNodeIterator()
+          const iterator = this.getChildNodeIterator(el)
           this._annotatedText(iterator)
         }
         // ... and transfer the result into the current context

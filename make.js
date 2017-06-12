@@ -237,6 +237,10 @@ b.task('lib:browser:dev', ['css'], () => {
   buildLib('browser')
 })
 
+b.task('lib:dev', ['css'], () => {
+  buildLib('all')
+})
+
 b.task('lib', () => {
   buildLib('all', 'production')
 })
@@ -272,7 +276,7 @@ b.task('default', ['clean', 'lib'])
 b.task('publish', ['clean', 'lib', 'docs'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'test:browser'])
+b.task('dev', ['clean', 'lib:browser:dev', 'docs', 'test:browser'])
 
 b.task('test', ['test:node', 'cover'])
 .describe('runs the test suite')

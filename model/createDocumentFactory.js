@@ -1,5 +1,4 @@
-import { EditingInterface, DocumentChange } from '../model'
-import TransactionDocument from './TransactionDocument'
+import ChangeRecorder from './ChangeRecorder'
 
 /*
   Creates a factory for documents and the correspondent initial changeset
@@ -24,6 +23,7 @@ import TransactionDocument from './TransactionDocument'
   myDocFactory.createArticle();
   myDocFactory.createChangeset();
 */
+export default
 function createDocumentFactory(ArticleClass, create) {
   return {
     ArticleClass: ArticleClass,
@@ -38,13 +38,10 @@ function createDocumentFactory(ArticleClass, create) {
     },
     createChangeset: function() {
       const doc = new ArticleClass()
-      const txDoc = new TransactionDocument(doc)
-      const tx = new EditingInterface(txDoc)
+      const tx = new ChangeRecorder(doc)
       create(tx)
-      const change = new DocumentChange(txDoc.ops)
+      const change = tx.generateChange()
       return [change.toJSON()]
     }
   }
 }
-
-export default createDocumentFactory

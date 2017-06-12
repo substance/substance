@@ -105,7 +105,7 @@ class SelectionState {
       state.container = container
       let startId = sel.start.getNodeId()
       let endId = sel.end.getNodeId()
-      let startNode = doc.get(startId).getRoot()
+      let startNode = doc.get(startId).getContainerRoot()
       let startPos = container.getPosition(startNode)
       if (startPos > 0) {
         state.previousNode = container.getNodeAt(startPos-1)
@@ -116,7 +116,7 @@ class SelectionState {
         endNode = startNode
         endPos = startPos
       } else {
-        endNode = doc.get(endId).getRoot()
+        endNode = doc.get(endId).getContainerRoot()
         endPos = container.getPosition(endNode)
       }
       if (endPos < container.getLength()-1) {

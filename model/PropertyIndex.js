@@ -29,6 +29,10 @@ class PropertyIndex extends NodeIndex {
     return this.index.getAll(path)
   }
 
+  clear() {
+    this.index.clear()
+  }
+
   /**
     Check if a node should be indexed.
 
@@ -106,10 +110,6 @@ class PropertyIndex extends NodeIndex {
 
   set(node, path, newValue, oldValue) {
     this.update(node, path, newValue, oldValue)
-  }
-
-  _clear() {
-    this.index.clear()
   }
 
   _initialize(data) {
