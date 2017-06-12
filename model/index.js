@@ -65,6 +65,7 @@ export { selectionHelpers }
 export { default as SelectionState } from './SelectionState'
 export { default as TextBlock } from './TextBlock'
 export { default as TextNode } from './TextNode'
+export { default as TextNodeMixin } from './TextNodeMixin'
 export { default as TextOperation } from './TextOperation'
 export { default as Transaction } from './Transaction'
 export { default as XMLExporter } from './XMLExporter'
