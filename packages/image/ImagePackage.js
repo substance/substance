@@ -14,6 +14,7 @@ export default {
     config.addConverter('html', ImageHTMLConverter)
     config.addConverter('xml', ImageHTMLConverter)
     config.addCommand('insert-image', InsertImageCommand, {
+      nodeType: 'image',
       commandGroup: 'insert'
     })
     config.addTool('insert-image', InsertImageTool)
