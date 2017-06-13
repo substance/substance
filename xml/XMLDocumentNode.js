@@ -1,4 +1,5 @@
 import { DocumentNode, documentHelpers } from '../model'
+import { DOMElement } from '../dom'
 import node2element from './node2element'
 import cssSelect from '../vendor/css-select'
 import cssSelectAdapter from './cssSelectAdapter'
@@ -83,7 +84,17 @@ class XMLDocumentNode extends DocumentNode {
     return this.attributes[name]
   }
 
+  getElementSchema() {
+    return this.getDocument().getElementSchema(this.type)
+  }
+
+  get tagName() {
+    return this.type
+  }
+
 }
+
+XMLDocumentNode.prototype.attr = DOMElement.prototype.attr
 
 XMLDocumentNode.schema = {
   attributes: { type: 'object', default: {} }

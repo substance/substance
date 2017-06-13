@@ -1,7 +1,7 @@
-import { forEach } from '../util'
+import { forEach, last } from '../util'
 import DFA from './DFA'
 
-const { TEXT, EPSILON } = DFA
+const { TEXT, EPSILON, START } = DFA
 
 export default class XMLSchema {
 
@@ -54,4 +54,34 @@ class ElementSchema {
     return Boolean(this._allowedChildren[tagName])
   }
 
+  // EXPERIMENTAL:
+  // we want to provide a high-level API `node.append()`
+  // which looks for the last valid position according to the element schema
+  findLastValidPos(el, tagName) {
+    let candidates = _findInsertPosCandidates(this.dfa, el, tagName)
+    if (candidates.length > 0) {
+      return last(candidates)
+    } else {
+      return -1
+    }
+  }
+
+}
+
+function _findInsertPosCandidates(dfa, el, newType) {
+  let candidates = []
+  let state = START
+  let children = el.getChildren()
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i]
+    if (dfa.canConsume(newType)) {
+      candidates.push(i)
+    }
+    let nextState = dfa.consume(state, child.tagName)
+    if (nextState === -1) {
+      throw new Error('Element is invalid:', el.toXML())
+    }
+    state = nextState
+  }
+  return candidates
 }

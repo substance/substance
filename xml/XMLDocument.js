@@ -3,6 +3,7 @@ import {
   PropertyIndex, AnnotationIndex,
   DocumentNodeFactory
 } from '../model'
+import { uuid } from '../util'
 
 import ParentNodeHook from './ParentNodeHook'
 import XMLEditingInterface from './XMLEditingInterface'
@@ -34,4 +35,25 @@ class XMLDocument extends Document {
   createEditingInterface() {
     return new XMLEditingInterface(this)
   }
+
+  find(cssSelector) {
+    return this.getRootNode().find(cssSelector)
+  }
+
+  findAll(cssSelector) {
+    return this.getRootNode().findAll(cssSelector)
+  }
+
+  getElementSchema(type) {
+    return this.getXMLSchema().getElementSchema(type)
+  }
+
+  createElement(tagName) {
+    let node = this.create({
+      id: uuid(tagName),
+      type: tagName
+    })
+    return node
+  }
+
 }
