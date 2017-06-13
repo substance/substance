@@ -61,7 +61,7 @@ class ToolPanel extends Component {
   }
 
   _getCommandStates() {
-    return this.context.commandManager.getCommandStates()
+    return this.context.editorSession.getCommandStates()
   }
 
 }
