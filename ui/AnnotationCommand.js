@@ -297,6 +297,10 @@ class AnnotationCommand extends Command {
     }
   }
 
+  isAnnotationCommand() {
+    return true
+  }
+
   _checkPrecondition(params, annos, checker) {
     let sel = this._getSelection(params)
     if (!checker.call(this, annos, sel)) {

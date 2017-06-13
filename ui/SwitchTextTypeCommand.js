@@ -54,6 +54,11 @@ class SwitchTextTypeCommand extends Command {
       return tx.switchTextType(this.config.spec)
     })
   }
+
+  isSwitchTypeCommand() {
+    return true
+  }
+
 }
 
 export default SwitchTextTypeCommand
