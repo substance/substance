@@ -15,8 +15,8 @@ import { Component } from '../../ui'
   ```js
   $$(TabbedPane, {
     tabs: [
-      {id: 'tabA', 'A'},
-      {id: 'tabB', 'B'},
+      {id: 'tabA', name: 'A'},
+      {id: 'tabB', name: 'B'},
     ],
     activeTab: 'tabA'
   }).ref('tabbedPane').append(
