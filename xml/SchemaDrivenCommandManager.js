@@ -33,6 +33,14 @@ export default class SchemaDrivenCommandManager extends CommandManager {
     this.otherCommands = otherCommands
   }
 
+  _getCommand(commandName) {
+    let cmd = this.annotationCommands.get(commandName) ||
+      this.insertCommands.get(commandName) ||
+      this.switchTypeCommands.get(commandName) ||
+      this.otherCommands.get(commandName)
+    return cmd
+  }
+
   _updateCommandStates(editorSession) {
     const commandStates = {}
     const annotationCommands = this.annotationCommands

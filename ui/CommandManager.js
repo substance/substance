@@ -46,12 +46,13 @@ export default class CommandManager {
     Commands are run async if cmd.isAsync() returns true.
   */
   executeCommand(commandName, userParams, cb) {
-    let cmd = this.commandRegistry.get(commandName)
+    let cmd = this._getCommand(commandName)
     if (!cmd) {
       console.warn('command', commandName, 'not registered')
       return
     }
-    let commandState = this.commandStates[commandName]
+    let commandStates = this.editorSession.getCommandStates()
+    let commandState = commandStates[commandName]
     let params = Object.assign(this._getCommandParams(), userParams, {
       commandState: commandState
     })
@@ -72,7 +73,7 @@ export default class CommandManager {
         this.editorSession.unlock()
       })
     } else {
-      let info = cmd.execute(params, this.getCommandContext())
+      let info = cmd.execute(params, this._getCommandContext())
       return info
     }
   }
@@ -82,6 +83,10 @@ export default class CommandManager {
     forEach(this.commands, (command) => {
       this.commandRegistry.add(command.name, command)
     })
+  }
+
+  _getCommand(commandName) {
+    return this.commandRegistry.get(commandName)
   }
 
   /*
