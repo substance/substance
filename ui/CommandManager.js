@@ -4,49 +4,91 @@ import { forEach, Registry } from '../util'
   Listens to changes on the document and selection and updates the commandStates
   accordingly.
 
-  @class CommandManager
+  The contract is that the CommandManager maintains a state for each
+  command contributing to the global application state.
 */
-class CommandManager {
+export default class CommandManager {
 
   constructor(context, commands) {
-    if (!context.editorSession) {
+    const editorSession = context.editorSession
+    if (!editorSession) {
       throw new Error('EditorSession required.')
     }
-
     this.editorSession = context.editorSession
-    this.doc = this.editorSession.getDocument()
+    // commands by name
+    this.commands = commands
+
+    // a context which is provided to the commands
+    // for evaluation of state and for execution
     this.context = Object.assign({}, context, {
       // for convenienve we provide access to the doc directly
-      doc: this.doc
+      doc: this.editorSession.getDocument()
     })
-    // Set up command registry
-    this.commandRegistry = new Registry()
-    forEach(commands, function(command) {
-      if(!command._isCommand) {
-        throw new Error("Expecting instances of ui/Command.")
-      }
-      this.commandRegistry.add(command.name, command)
-    }.bind(this))
 
-    this.editorSession.onUpdate(this.onSessionUpdate, this)
-    this.updateCommandStates(this.editorSession)
+    // some initializations such as setting up a registry
+    this._initialize()
+
+    // on any update we will recompute
+    this.editorSession.onUpdate(this._onSessionUpdate, this)
+
+    // compute initial command states and
+    // promote to editorSession
+    this._updateCommandStates(this.editorSession)
   }
 
   dispose() {
     this.editorSession.off(this)
   }
 
-  onSessionUpdate(editorSession) {
-    if (editorSession.hasChanged('change') || editorSession.hasChanged('selection') || editorSession.hasChanged('commandStates')) {
-      this.updateCommandStates(editorSession)
+  /*
+    Execute a command, given a context and arguments.
+
+    Commands are run async if cmd.isAsync() returns true.
+  */
+  executeCommand(commandName, userParams, cb) {
+    let cmd = this.commandRegistry.get(commandName)
+    if (!cmd) {
+      console.warn('command', commandName, 'not registered')
+      return
     }
+    let commandState = this.commandStates[commandName]
+    let params = Object.assign(this._getCommandParams(), userParams, {
+      commandState: commandState
+    })
+
+    if (cmd.isAsync) {
+      // TODO: Request UI lock here
+      this.editorSession.lock()
+      cmd.execute(params, this._getCommandContext(), (err, info) => {
+        if (err) {
+          if (cb) {
+            cb(err)
+          } else {
+            console.error(err)
+          }
+        } else {
+          if (cb) cb(null, info)
+        }
+        this.editorSession.unlock()
+      })
+    } else {
+      let info = cmd.execute(params, this.getCommandContext())
+      return info
+    }
+  }
+
+  _initialize() {
+    this.commandRegistry = new Registry()
+    forEach(this.commands, (command) => {
+      this.commandRegistry.add(command.name, command)
+    })
   }
 
   /*
     Compute new command states object
   */
-  updateCommandStates(editorSession) {
-    const commandContext = this.getCommandContext()
+  _updateCommandStates(editorSession) {
+    const commandContext = this._getCommandContext()
     const params = this._getCommandParams()
     const surface = params.surface
     const commandRegistry = this.commandRegistry
@@ -89,55 +131,16 @@ class CommandManager {
     editorSession.setCommandStates(commandStates)
   }
 
-  /*
-    Execute a command, given a context and arguments.
-
-    Commands are run async if cmd.isAsync() returns true.
-  */
-  executeCommand(commandName, userParams, cb) {
-    let cmd = this.commandRegistry.get(commandName)
-    if (!cmd) {
-      console.warn('command', commandName, 'not registered')
-      return
-    }
-    let commandState = this.commandStates[commandName]
-    let params = Object.assign(this._getCommandParams(), userParams, {
-      commandState: commandState
-    })
-
-    if (cmd.isAsync) {
-      // TODO: Request UI lock here
-      this.editorSession.lock()
-      cmd.execute(params, this.getCommandContext(), (err, info) => {
-        if (err) {
-          if (cb) {
-            cb(err)
-          } else {
-            console.error(err)
-          }
-        } else {
-          if (cb) cb(null, info)
-        }
-        this.editorSession.unlock()
-      })
-    } else {
-      let info = cmd.execute(params, this.getCommandContext())
-      return info
+  _onSessionUpdate(editorSession) {
+    if (editorSession.hasChanged('change') || editorSession.hasChanged('selection') || editorSession.hasChanged('commandStates')) {
+      this._updateCommandStates(editorSession)
     }
   }
 
-  /*
-    Exposes the current commandStates object
-  */
-  getCommandStates() {
-    return this.commandStates
-  }
-
-  getCommandContext() {
+  _getCommandContext() {
     return this.context
   }
 
-  // TODO: while we need it here this should go into the flow thingie later
   _getCommandParams() {
     let editorSession = this.context.editorSession
     let selectionState = editorSession.getSelectionState()
@@ -151,5 +154,3 @@ class CommandManager {
     }
   }
 }
-
-export default CommandManager

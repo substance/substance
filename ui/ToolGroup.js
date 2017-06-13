@@ -73,7 +73,7 @@ class ToolGroup extends Component {
     We map an array of command groups to array command states
   */
   _getCommandStates() {
-    let commandStates = this.context.commandManager.getCommandStates()
+    let commandStates = this.context.editorSession.getCommandStates()
     let commandGroups = this.context.commandGroups
     let filteredCommandStates = {} // command states objects of that group
     this.props.commandGroups.forEach((commandGroup) => {

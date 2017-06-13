@@ -1,5 +1,6 @@
 ## Beta 7
 
+- `InsertNodeCommand` should be provided with `config.nodeType` (similar to AnnotationCommand). While old code should still work right now, this will probably break in future.
 - `editorSession.setSelection()` does not require explicit specification of
   `containerId` in most cases. Instead the information is derived from the
   surface if a `surfaceId` is given.

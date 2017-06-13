@@ -1,7 +1,7 @@
 import { InsertNodeCommand } from '../../ui'
 import insertImage from './insertImage'
 
-class ImageCommand extends InsertNodeCommand {
+export default class InsertImageCommand extends InsertNodeCommand {
 
   /*
     Inserts file and image nodes
@@ -17,5 +17,3 @@ class ImageCommand extends InsertNodeCommand {
   }
 
 }
-
-export default ImageCommand

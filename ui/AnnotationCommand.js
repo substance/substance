@@ -42,6 +42,10 @@ class AnnotationCommand extends Command {
     return this.config.nodeType
   }
 
+  getType() {
+    return this.getAnnotationType()
+  }
+
   /**
     Get the annotation's data.
 
@@ -295,6 +299,10 @@ class AnnotationCommand extends Command {
       mode: 'delete',
       annoId: anno.id
     }
+  }
+
+  isAnnotationCommand() {
+    return true
   }
 
   _checkPrecondition(params, annos, checker) {

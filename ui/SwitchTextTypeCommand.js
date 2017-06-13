@@ -12,6 +12,20 @@ import { Command } from '.'
 */
 class SwitchTextTypeCommand extends Command {
 
+  constructor(config) {
+    super(config)
+    if (!config.spec) {
+      throw new Error("'config.spec' is mandatory")
+    }
+    if (!config.spec.type) {
+      throw new Error("'config.spec.type' is mandatory")
+    }
+  }
+
+  getType() {
+    return this.config.spec.type
+  }
+
   getCommandState(params) {
     let doc = params.editorSession.getDocument()
     let sel = params.selection
@@ -54,6 +68,11 @@ class SwitchTextTypeCommand extends Command {
       return tx.switchTextType(this.config.spec)
     })
   }
+
+  isSwitchTypeCommand() {
+    return true
+  }
+
 }
 
 export default SwitchTextTypeCommand

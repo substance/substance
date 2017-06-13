@@ -101,7 +101,7 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     if (surface === this.context.surface) {
       let sel = selState.getSelection()
       let node = this.props.node
-      if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.path, node.path)) {
+      if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.start.path, node.start.path)) {
         let nodeSel = node.getSelection()
         if(nodeSel.equals(sel)) {
           return { mode: 'selected' }

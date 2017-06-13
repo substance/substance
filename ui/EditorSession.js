@@ -1,14 +1,6 @@
 import { forEach, isPlainObject, isFunction, isString, EventEmitter } from '../util'
 import { Selection, SelectionState, ChangeHistory,
   Transaction, operationHelpers } from '../model'
-import CommandManager from './CommandManager'
-import DragManager from './DragManager'
-import FileManager from './FileManager'
-import GlobalEventHandler from './GlobalEventHandler'
-import KeyboardManager from './KeyboardManager'
-import MacroManager from './MacroManager'
-import MarkersManager from './MarkersManager'
-import SurfaceManager from './SurfaceManager'
 
 class EditorSession extends EventEmitter {
 
@@ -18,10 +10,11 @@ class EditorSession extends EventEmitter {
     options = options || {}
 
     this.document = doc
-    if (!options.configurator) {
+    const configurator = options.configurator
+    if (!configurator) {
       throw new Error('No configurator provided.')
     }
-    this.configurator = options.configurator
+    this.configurator = configurator
 
     this._transaction = new Transaction(doc)
     // HACK: we want `tx.setSelection()` to add surfaceId to the selection
@@ -58,6 +51,15 @@ class EditorSession extends EventEmitter {
 
     // Managers
     // --------
+    const CommandManager = configurator.getCommandManagerClass()
+    const DragManager = configurator.getDragManagerClass()
+    const FileManager = configurator.getFileManagerClass()
+    const GlobalEventHandler = configurator.getGlobalEventHandlerClass()
+    const KeyboardManager = configurator.getKeyboardManagerClass()
+    const MacroManager = configurator.getMacroManagerClass()
+    const MarkersManager = configurator.getMarkersManagerClass()
+    const SurfaceManager = configurator.getSurfaceManagerClass()
+
 
     // surface manager takes care of surfaces, keeps track of the currently focused surface
     // and makes sure the DOM selection is rendered properly at the end of a flow
@@ -73,7 +75,6 @@ class EditorSession extends EventEmitter {
       Object.assign(this._context, options.context)
     }
 
-    let configurator = this.configurator
     let commands = configurator.getCommands()
     let dropHandlers = configurator.getDropHandlers()
     let macros = configurator.getMacros()

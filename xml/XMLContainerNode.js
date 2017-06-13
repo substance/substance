@@ -11,6 +11,10 @@ export default class XMLContainerNode extends ContainerMixin(XMLElementNode) {
     return this.childNodes
   }
 
+  isContainer() {
+    return true
+  }
+
 }
 
 XMLContainerNode.prototype._elementType = 'container'

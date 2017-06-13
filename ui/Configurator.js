@@ -1,9 +1,19 @@
 import { forEach, map, isString, Registry } from '../util'
 import { DocumentSchema, EditingBehavior } from '../model'
 import ComponentRegistry from './ComponentRegistry'
+
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'
 import LabelProvider from './DefaultLabelProvider'
-import SaveHandlerStub from '../packages/persistence/SaveHandlerStub'
+
+import DefaultCommandManager from './CommandManager'
+import DefaultDragManager from './DragManager'
+import DefaultFileManager from './FileManager'
+import DefaultGlobalEventHandler from './GlobalEventHandler'
+import DefaultKeyboardManager from './KeyboardManager'
+import DefaultMacroManager from './MacroManager'
+import DefaultMarkersManager from './MarkersManager'
+import DefaultSurfaceManager from './SurfaceManager'
+import DefaultSaveHandler from '../packages/persistence/SaveHandlerStub'
 
 /**
   Default Configurator for Substance editors. It provides an API for
@@ -69,8 +79,10 @@ class Configurator {
       icons: {},
       labels: {},
       lang: 'en_US',
+      editorOptions: [],
+      CommandManagerClass: DefaultCommandManager,
+      DragManagerClass: DefaultDragManager,
       SaveHandlerClass: null,
-      editorOptions: []
     }
   }
 
@@ -555,14 +567,81 @@ class Configurator {
     return this.config.lang || 'en_US'
   }
 
+  /* This is used for DependencyInjection of core implementations */
+
+  setCommandManagerClass(CommandManagerClass) {
+    this.config.CommandManagerClass = CommandManagerClass
+  }
+
+  getCommandManagerClass() {
+    return this.config.CommandManagerClass || DefaultCommandManager
+  }
+
+  setDragManagerClass(DragManagerClass) {
+    this.config.DragManagerClass = DragManagerClass
+  }
+
+  getDragManagerClass() {
+    return this.config.DragManagerClass || DefaultDragManager
+  }
+
+  setFileManagerClass(FileManagerClass) {
+    this.config.FileManagerClass = FileManagerClass
+  }
+
+  getFileManagerClass() {
+    return this.config.FileManagerClass || DefaultFileManager
+  }
+
+  setGlobalEventHandlerClass(GlobalEventHandlerClass) {
+    this.config.GlobalEventHandlerClass = GlobalEventHandlerClass
+  }
+
+  getGlobalEventHandlerClass() {
+    return this.config.GlobalEventHandlerClass || DefaultGlobalEventHandler
+  }
+
+  setKeyboardManagerClass(KeyboardManagerClass) {
+    this.config.KeyboardManagerClass = KeyboardManagerClass
+  }
+
+  getKeyboardManagerClass() {
+    return this.config.KeyboardManagerClass || DefaultKeyboardManager
+  }
+
+  setMacroManagerClass(MacroManagerClass) {
+    this.config.MacroManagerClass = MacroManagerClass
+  }
+
+  getMacroManagerClass() {
+    return this.config.MacroManagerClass || DefaultMacroManager
+  }
+
+  setMarkersManagerClass(MarkersManagerClass) {
+    this.config.MarkersManagerClass = MarkersManagerClass
+  }
+
+  getMarkersManagerClass() {
+    return this.config.MarkersManagerClass || DefaultMarkersManager
+  }
+
+  setSurfaceManagerClass(SurfaceManagerClass) {
+    this.config.SurfaceManagerClass = SurfaceManagerClass
+  }
+
+  getSurfaceManagerClass() {
+    return this.config.SurfaceManagerClass || DefaultSurfaceManager
+  }
+
   setSaveHandlerClass(SaveHandlerClass) {
     this.config.SaveHandlerClass = SaveHandlerClass
   }
 
   getSaveHandler() {
-    let SaveHandler = this.config.SaveHandlerClass || SaveHandlerStub
+    let SaveHandler = this.config.SaveHandlerClass || DefaultSaveHandler
     return new SaveHandler()
   }
+
 
 }
 

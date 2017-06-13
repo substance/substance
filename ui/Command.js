@@ -95,6 +95,27 @@ class Command {
     throw new Error('Command.execute() is abstract.')
   }
 
+  /*
+    @returns true if this command is creating or editing an annotation
+  */
+  isAnnotationCommand() {
+    return false
+  }
+
+  /*
+    @returns true if this command is inserting a node into a container
+  */
+  isInsertCommand() {
+    return false
+  }
+
+  /*
+    @returns true if this command is switching the type of a block-level text node
+  */
+  isSwitchTypeCommand() {
+    return false
+  }
+
   _getEditorSession(params, context) {
     let editorSession = params.editorSession || context.editorSession
     if (!editorSession) {
