@@ -23,6 +23,7 @@ class ParentNodeHook {
           case 'container': {
             _setParent(node, node.childNodes)
             _setRegisteredParent(node)
+            break
           }
           default: {
             _setRegisteredParent(node)
@@ -69,14 +70,14 @@ class ParentNodeHook {
         parents[id] = parent
         let child = doc.get(id)
         if (child) {
-          child.parent = parent
+          child.parentNode = parent
         }
       }
     }
     function _setRegisteredParent(child) {
       let parent = parents[child.id]
       if (parent) {
-        child.parent = parent
+        child.parentNode = parent
       }
     }
   }

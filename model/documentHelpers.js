@@ -26,7 +26,8 @@ export default {
   deleteTextRange,
   deleteListRange,
   mergeListItems,
-  isContainerAnnotation
+  isContainerAnnotation,
+  getNodes
 }
 
 /**
@@ -375,3 +376,8 @@ function mergeListItems(doc, listId, itemPos) {
   doc.delete(source.id)
 }
 
+function getNodes(doc, ids) {
+  return ids.map((id) => {
+    return doc.get(id, 'strict')
+  })
+}

@@ -10,23 +10,19 @@ class Adapter extends DomUtils.DomUtils {
   }
 
   getChildren(elem){
-    if (elem.getChildren) {
-      return elem.getChildren()
-    } else {
-      return []
-    }
+    return elem.getChildren() || []
   }
 
   getAttributeValue(elem, name){
-    return elem.attributes[name]
+    return elem.getAttribute(name)
   }
 
   getAttributes(elem) {
-    return map(elem.attributes, (val, key) => { return [key,val] })
+    return ['id', elem.id].concat(map(elem.attributes, (val, key) => { return [key,val] }))
   }
 
   hasAttrib(elem, name){
-    return elem.attributes.hasOwnProperty(name)
+    return name === 'id' || elem.attributes.hasOwnProperty(name)
   }
 
   getName(elem){

@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import { Fragmenter, Annotation } from 'substance'
+import { Fragmenter, PropertyAnnotation } from 'substance'
 
 const test = module('Fragmenter')
 
@@ -129,7 +129,7 @@ test("Anchors should not fragment other annotations.", function(t) {
   t.end()
 })
 
-class Anno extends Annotation {
+class Anno extends PropertyAnnotation {
 
   constructor(tagName, id, startOffset, endOffset, opts) {
     super(null, {

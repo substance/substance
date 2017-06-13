@@ -1,3 +1,4 @@
+import { forEach, camelCase } from '../util'
 import XMLTextNode from './XMLTextNode'
 import XMLTextNodeConverter from './XMLTextNodeConverter'
 import XMLElementNode from './XMLElementNode'
@@ -24,9 +25,10 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
   const tagNames = xmlSchema.getTagNames()
   // add node definitions and converters
   tagNames.forEach((tagName) => {
-    const element = xmlSchema.getElementSchema(tagName)
+    const elementSchema = xmlSchema.getElementSchema(tagName)
+    const name = elementSchema.name
     let NodeClass, ConverterClass
-    switch (element.type) {
+    switch (elementSchema.type) {
       case 'element':
       case 'hybrid': {
         NodeClass = XMLElementNode
@@ -68,9 +70,36 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     }
     // anonymous class definition
     class Node extends NodeClass {}
-    Node.type = element.name
+    Node.type = name
+
+    // defining property getters and setter for attributes
+    const attributes = elementSchema.attributes
+    forEach(attributes, (spec, name) => {
+      _defineAttribute(Node, name, spec)
+    })
+
     config.addNode(Node)
-    let converter = new ConverterClass(element.name)
+    let converter = new ConverterClass(name)
     config.addConverter(schemaName, converter)
+  })
+}
+
+const BUILTIN_ATTRS = ['id', 'type', 'attributes', 'childNodes']
+
+function _defineAttribute(Node, attributeName) {
+  let name = attributeName.replace(':', '_')
+  name = camelCase(name)
+  if (BUILTIN_ATTRS.indexOf(name) >= 0) {
+    // console.error(`attribute '${attributeName}' is internal and can not be overridden`)
+    return
+  }
+  Object.defineProperty(Node.prototype, name, {
+    get() {
+      return this.getAttribute(attributeName)
+    },
+    set(val) {
+      this.setAttribute(attributeName, val)
+      return this
+    }
   })
 }

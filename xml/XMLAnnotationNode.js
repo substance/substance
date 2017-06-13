@@ -1,21 +1,29 @@
-import { PropertyAnnotation } from '../model'
+import { AnnotationMixin } from '../model'
+import XMLDocumentNode from './XMLDocumentNode'
 
 export default
-class AnnotationNode extends PropertyAnnotation {
+class XMLAnnotationNode extends AnnotationMixin(XMLDocumentNode) {
 
-  get parent() {
-    const path = this.path
+  /*
+    The parent of an Annotation is implicitly given by its path.
+  */
+  get parentNode() {
+    const path = this.start.path
     const doc = this.getDocument()
     return doc.get(path[0])
   }
 
+  isPropertyAnnotation() {
+    return true
+  }
+
 }
 
-AnnotationNode.prototype._elementType = 'annotation'
+XMLAnnotationNode.prototype._elementType = 'annotation'
 
-AnnotationNode.type = 'annotation'
+XMLAnnotationNode.type = 'annotation'
 
-
-AnnotationNode.schema = {
-  attributes: { type: 'object', default: {} }
+XMLAnnotationNode.schema = {
+  start: "coordinate",
+  end: "coordinate"
 }

@@ -37,13 +37,14 @@ function _node2element(dom, node) {
 
 function _createElement(dom, node) {
   let el = dom.createElement(node.type)
+  el.attr('id', node.id)
   el.attr(node.attributes)
   return el
 }
 
 function _renderElementNode(dom, node) {
   let el = _createElement(dom, node)
-  el.attr(node.attributes)
+  el.append(el.getChildren().map(child => _node2element(dom, child)))
   return el
 }
 

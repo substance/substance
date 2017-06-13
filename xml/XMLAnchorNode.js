@@ -1,25 +1,23 @@
-import { DocumentNode } from '../model'
+import XMLDocumentNode from './XMLDocumentNode'
 
 export default
-class AnchorNode extends DocumentNode {
+class XMLAnchorNode extends XMLDocumentNode {
 
-  get path() {
-    return this.coor.start.path
-  }
-
-  get parent() {
-    const path = this.path
+  /*
+    The parent of an Annotation is implicitly given by its path.
+  */
+  get parentNode() {
+    const path = this.coor.start.path
     const doc = this.getDocument()
     return doc.get(path[0])
   }
 
 }
 
-AnchorNode.prototype._elementType = 'anchor'
+XMLAnchorNode.prototype._elementType = 'anchor'
 
-AnchorNode.type = 'anchor'
+XMLAnchorNode.type = 'anchor'
 
-AnchorNode.schema = {
-  attributes: { type: 'object', default: {} },
+XMLAnchorNode.schema = {
   coor: { type: "coordinate", optional: true }
 }

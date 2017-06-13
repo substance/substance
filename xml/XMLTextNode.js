@@ -1,17 +1,11 @@
-import { DocumentNode } from '../model'
-import node2element from './node2element'
+import { TextNodeMixin } from '../model'
+import XMLDocumentNode from './XMLDocumentNode'
 
 /*
   Note: this is slightly different to Substance TextNode
   thus this does not extend Substance.TextNode.
 */
-export default class TextNode extends DocumentNode {
-
-  getTextPath() {
-    // TODO: deprecate this
-    // console.warn('DEPRECATED: use node.getPath()')
-    return this.getPath()
-  }
+export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
 
   getPath() {
     return [this.id, 'content']
@@ -19,22 +13,6 @@ export default class TextNode extends DocumentNode {
 
   getText() {
     return this.content
-  }
-
-  isEmpty() {
-    return !this.content
-  }
-
-  getLength() {
-    return this.content.length
-  }
-
-  toXML() {
-    return node2element(this)
-  }
-
-  getAnnotations() {
-    return this.getDocument().getIndex('annotations').get(this.getPath())
   }
 
   /*
@@ -49,15 +27,13 @@ export default class TextNode extends DocumentNode {
 
 }
 
-TextNode.prototype._elementType = 'text'
+XMLTextNode.prototype._elementType = 'text'
 
-TextNode.isText = true
-TextNode.isBlock = true
+XMLTextNode.isText = true
+XMLTextNode.isBlock = true
 
+XMLTextNode.type = 'text'
 
-TextNode.type = 'text'
-
-TextNode.schema = {
-  attributes: { type: 'object', default: {} },
+XMLTextNode.schema = {
   content: "text"
 }
