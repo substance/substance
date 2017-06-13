@@ -3,9 +3,9 @@ import documentHelpers from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 
-export default function(SuperClass) {
+export default function(DocumentNode) {
 
-  class AnnotationMixin extends SuperClass {
+  class AbstractAnnotation extends DocumentNode {
 
     constructor(doc, props) {
       super(doc, _normalizedProps(props))
@@ -18,7 +18,7 @@ export default function(SuperClass) {
     /* istanbul ignore start */
 
     get path() {
-      console.error('DEPRECATED: use annotation.start.path instead')
+      console.warn('DEPRECATED: use annotation.start.path instead')
       return this.start.path
     }
 
@@ -172,10 +172,14 @@ export default function(SuperClass) {
         throw new Error('Invalid selection.')
       }
     }
-
   }
 
-  return AnnotationMixin
+  AbstractAnnotation.schema = {
+    start: "coordinate",
+    end: "coordinate"
+  }
+
+  return AbstractAnnotation
 }
 
 function _normalizedProps(props) {

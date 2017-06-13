@@ -1,8 +1,10 @@
 import { isNumber, isString } from '../util'
 import ContainerAddress from './ContainerAddress'
+import documentHelpers from './documentHelpers'
 
-export default function (SuperClass) {
-  class ContainerMixin extends SuperClass {
+export default function (DocumentNode) {
+
+  class AbstractContainer extends DocumentNode {
 
     contains(nodeId) {
       return this.getPosition(nodeId) >= 0
@@ -183,11 +185,7 @@ export default function (SuperClass) {
     }
 
     getChildren() {
-      var doc = this.getDocument()
-      var childrenIds = this.getContent()
-      return childrenIds.map(function(id) {
-        return doc.get(id)
-      })
+      return documentHelpers.getNodes(this.getDocument(), this.getContent())
     }
 
     getChildAt(idx) {
@@ -195,7 +193,7 @@ export default function (SuperClass) {
       if (idx < 0 || idx >= childrenIds.length) {
         throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
       }
-      return this.getDocument().get(childrenIds[idx])
+      return this.getDocument().get(childrenIds[idx], 'strict')
     }
 
     getChildCount() {
@@ -203,5 +201,6 @@ export default function (SuperClass) {
     }
 
   }
-  return ContainerMixin
+  return AbstractContainer
+
 }
