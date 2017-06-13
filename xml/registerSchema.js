@@ -72,6 +72,7 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     class Node extends NodeClass {}
     Node.type = name
 
+    // defining property getters and setter for attributes
     const attributes = elementSchema.attributes
     forEach(attributes, (spec, name) => {
       _defineAttribute(Node, name, spec)
@@ -94,11 +95,11 @@ function _defineAttribute(Node, attributeName) {
   }
   Object.defineProperty(Node.prototype, name, {
     get() {
-      return this.attributes[attributeName]
+      return this.getAttribute(attributeName)
     },
     set(val) {
-      const doc = this.getDocument()
-      doc.set([this.id, 'attributes', attributeName], val)
+      this.setAttribute(attributeName, val)
+      return this
     }
   })
 }

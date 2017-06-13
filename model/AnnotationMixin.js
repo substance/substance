@@ -135,7 +135,7 @@ export default function(DocumentNode) {
       } else {
         return this.getDocument().createSelection({
           type: 'property',
-          path: this.path,
+          path: this.start.path,
           startOffset: this.start.offset,
           endOffset: this.end.offset
         })
@@ -173,6 +173,8 @@ export default function(DocumentNode) {
       }
     }
   }
+
+  AbstractAnnotation.prototype._isAnnotation = true
 
   AbstractAnnotation.schema = {
     start: "coordinate",

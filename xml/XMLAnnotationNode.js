@@ -13,6 +13,10 @@ class XMLAnnotationNode extends AnnotationMixin(XMLDocumentNode) {
     return doc.get(path[0])
   }
 
+  isPropertyAnnotation() {
+    return true
+  }
+
 }
 
 XMLAnnotationNode.prototype._elementType = 'annotation'
