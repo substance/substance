@@ -3,6 +3,21 @@ import Command from './Command'
 
 class InsertNodeCommand extends Command {
 
+  constructor(config) {
+    super(config)
+
+    // Note: we want to know about the node which this command is producing
+    // For example we will inhibit commands, that produce a node type
+    // not allowed in the current position
+    if (!this.config.nodeType) {
+      console.error("'config.nodeType' should be provided for InsertNodeCommand")
+    }
+  }
+
+  getType() {
+    return this.config.nodeType
+  }
+
   getCommandState(params) {
     let sel = params.selection
     let newState = {

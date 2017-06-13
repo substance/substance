@@ -42,6 +42,10 @@ class AnnotationCommand extends Command {
     return this.config.nodeType
   }
 
+  getType() {
+    return this.getAnnotationType()
+  }
+
   /**
     Get the annotation's data.
 
