@@ -1,9 +1,9 @@
 import * as selectionHelpers from './selectionHelpers'
 import * as operationHelpers from './operationHelpers'
 
-export { default as Annotation } from './Annotation'
 export { default as annotationHelpers } from './annotationHelpers'
 export { default as AnnotationIndex } from './AnnotationIndex'
+export { default as AnnotationMixin } from './AnnotationMixin'
 export { default as ArrayOperation } from './ArrayOperation'
 export { default as BlockNode } from './BlockNode'
 export { default as ChangeHistory } from './ChangeHistory'

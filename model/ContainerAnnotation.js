@@ -1,6 +1,6 @@
-import { isEqual, forEach } from '../util'
-import Annotation from './Annotation'
-import Selection from './Selection'
+import { forEach } from '../util'
+import DocumentNode from './DocumentNode'
+import AnnotationMixin from './AnnotationMixin'
 
 /*
   Describes an annotation sticking on a container that can span over multiple
@@ -27,29 +27,7 @@ import Selection from './Selection'
   ```
  */
 
-class ContainerAnnotation extends Annotation {
-
-  /**
-    Provides a selection which has the same range as this annotation.
-
-    @return {model/ContainerSelection}
-  */
-  getSelection() {
-    var doc = this.getDocument()
-    // Guard: when this is called while this node has been detached already.
-    if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
-      return Selection.nullSelection()
-    }
-    return doc.createSelection({
-      type: "container",
-      containerId: this.containerId,
-      startPath: this.start.path,
-      startOffset: this.start.offset,
-      endPath: this.end.path,
-      endOffset: this.end.offset
-    })
-  }
+class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
 
   setHighlighted(highlighted, scope) {
     if (this.highlighted !== highlighted) {
@@ -62,31 +40,16 @@ class ContainerAnnotation extends Annotation {
     }
   }
 
-  _updateRange(tx, sel) {
-    if (!sel.isContainerSelection()) {
-      throw new Error('Invalid argument.')
-    }
-    // TODO: use coordinate ops
-    if (!isEqual(this.start.path, sel.start.path)) {
-      tx.set([this.id, 'start', 'path'], sel.start.path)
-    }
-    if (this.start.offset !== sel.start.offset) {
-      tx.set([this.id, 'start', 'offset'], sel.start.offset)
-    }
-    if (!isEqual(this.end.path, sel.end.path)) {
-      tx.set([this.id, 'end', 'path'], sel.end.path)
-    }
-    if (this.end.offset !== sel.end.offset) {
-      tx.set([this.id, 'end', 'offset'], sel.end.offset)
-    }
-  }
 }
 
 ContainerAnnotation.schema = {
   type: "container-annotation",
-  containerId: "string"
+  containerId: "string",
+  start: "coordinate",
+  end: "coordinate"
 }
 
+ContainerAnnotation.prototype._isAnnotation = true
 ContainerAnnotation.prototype._isContainerAnnotation = true
 
 export default ContainerAnnotation
