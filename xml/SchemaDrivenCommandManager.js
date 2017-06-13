@@ -43,7 +43,6 @@ export default class SchemaDrivenCommandManager extends CommandManager {
     const doc = editorSession.getDocument()
     const selectionState = params.selectionState
     const sel = params.selection
-    const surface = params.surface
     const isBlurred = params.editorSession.isBlurred()
     const noSelection = !sel || sel.isNull() || !sel.isAttached()
 
@@ -67,34 +66,36 @@ export default class SchemaDrivenCommandManager extends CommandManager {
       }
 
       const isInsideText = node.isText()
-      const isBlockNode = node.isBlock()
       const xmlSchema = doc.getXMLSchema()
-      const elementSchema = xmlSchema.getElementSchema(node.type)
 
       // annotations can only be applied on PropertySelections inside
       // text, and not on an inline-node
       if (isInsideText && sel.isPropertySelection() && !selectionState.isInlineNodeSelection()) {
+        const elementSchema = xmlSchema.getElementSchema(node.type)
         _evaluateTyped(this.annotationCommands, elementSchema)
       } else {
         _disable(this.annotationCommands)
       }
 
       // for InsertCommands the selection must be inside a ContainerEditor
-      if (!surface || !surface.isContainerEditor()) {
+      let parentNode = node.parentNode
+      if (!parentNode || !parentNode.isContainer()) {
         _disable(this.insertCommands)
       } else {
         // TODO: disable all commands with types that are not allowed
         // at the current position
+        const elementSchema = xmlSchema.getElementSchema(parentNode.type)
         _evaluateTyped(this.insertCommands, elementSchema)
       }
 
       // SwitchTypeCommands can only be applied to
       // block-level text nodes
-      if (!sel.containerId || !isInsideText || !isBlockNode) {
+      if (!sel.containerId || !isInsideText || !parentNode.isContainer()) {
         _disable(this.switchTypeCommands)
       } else {
         // TODO: disable all commands with types that are not allowed
         // at the current position
+        const elementSchema = xmlSchema.getElementSchema(parentNode.type)
         _evaluateTyped(this.switchTypeCommands, elementSchema)
       }
     }
