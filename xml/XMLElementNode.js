@@ -5,9 +5,8 @@ export default
 class XMLElementNode extends XMLDocumentNode {
 
   appendChild(child) {
-    const doc = this.getDocument()
     let schema = this.getElementSchema()
-    let pos = schema.findLastValidPos(child.type)
+    let pos = schema.findLastValidPos(this, child.type)
       // element can not be inserted without violating the schema
     if (pos < 0) {
       throw new Error(`'${child.type}' can not be inserted without violating the schema.`)
@@ -16,6 +15,7 @@ class XMLElementNode extends XMLDocumentNode {
   }
 
   insertAt(pos, child) {
+    const doc = this.getDocument()
     doc.update([this.id, 'childNodes'], { type: 'insert', pos: pos, value: child.id })
   }
 

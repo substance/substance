@@ -10,5 +10,8 @@ export default class XMLEditingInterface extends EditingInterface {
     return this.getDocument().findAll(cssSelector)
   }
 
+  createElement(...args) {
+    return this.getDocument().createElement(...args)
+  }
 
 }
