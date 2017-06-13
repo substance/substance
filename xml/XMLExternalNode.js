@@ -1,15 +1,14 @@
-import { DocumentNode } from '../model'
+import XMLDocumentNode from './XMLDocumentNode'
 
 export default
-class ExternalNode extends DocumentNode {}
+class XMLExternalNode extends XMLDocumentNode {}
 
-ExternalNode.prototype._elementType = 'external'
+XMLExternalNode.prototype._elementType = 'external'
 
-ExternalNode.type = 'external'
+XMLExternalNode.type = 'external'
 
-ExternalNode.schema = {
-  attributes: { type: 'object', default: {} },
+XMLExternalNode.schema = {
   xml: { type: 'string', default: ''}
 }
 
-ExternalNode.isBlock = true
+XMLExternalNode.isBlock = true

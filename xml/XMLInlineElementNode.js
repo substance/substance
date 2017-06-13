@@ -1,42 +1,42 @@
-import { InlineNode } from '../model'
-import node2element from './node2element'
+import XMLAnnotationNode from './XMLAnnotationNode'
 
 export default
-class InlineElementNode extends InlineNode {
+class XMLInlineElementNode extends XMLAnnotationNode {
 
   /*
     Note: InlineElements can be used in structured context,
     If path is specified, parent is implicitly given.
     Otherwise it is set explictly by ParentNodeHook.
   */
-  get parent() {
-    const path = this.path
+  get parentNode() {
+    const path = this.start.path
     if (path[0]) {
       const doc = this.getDocument()
       return doc.get(path[0])
     }
-    return this._parent
+    return this._parentNode
   }
 
-  set parent(parent) {
-    const path = this.path
+  set parentNode(parent) {
+    const path = this.start.path
     if (path[0]) {
       throw new Error('parent of inline-element is implicitly given')
     }
-    this._parent = parent
-  }
-
-  toXML() {
-    return node2element(this)
+    this._parentNode = parent
   }
 
 }
 
-InlineElementNode.prototype._elementType = 'inline-element'
+XMLInlineElementNode.prototype._elementType = 'inline-element'
 
-InlineElementNode.type = 'inline-element'
+// TODO: figure out which of these flags are really necessary
+// and try to stream-line
+XMLInlineElementNode.prototype._isInlineNode = true
+XMLInlineElementNode.isInline = true
 
-InlineElementNode.schema = {
-  attributes: { type: 'object', default: {} },
+
+XMLInlineElementNode.type = 'inline-element'
+
+XMLInlineElementNode.schema = {
   childNodes: { type: ['array', 'id'], default: [], owned: true},
 }

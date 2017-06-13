@@ -1,51 +1,14 @@
-import { DocumentNode } from '../model'
-import cssSelect from '../vendor/css-select'
-import node2element from './node2element'
-import cssSelectAdapter from './cssSelectAdapter'
+import XMLDocumentNode from './XMLDocumentNode'
 
 export default
-class ElementNode extends DocumentNode {
+class XMLElementNode extends XMLDocumentNode {}
 
-  /*
-    Get child with given tag name
-  */
-  get(tagName) {
-    const doc = this.getDocument()
-    const childNodes = this.childNodes
-    for (let i = 0; i < childNodes.length; i++) {
-      const child = doc.get(childNodes[i])
-      if (child.type === tagName) return child
-    }
-  }
+XMLElementNode.prototype._elementType = 'element'
 
-  getChildren() {
-    const doc = this.getDocument()
-    return this.childNodes.map((id) => {
-      return doc.get(id, 'strict')
-    })
-  }
+XMLElementNode.type = 'element'
 
-  toXML() {
-    return node2element(this)
-  }
-
-  find(cssSelector) {
-    return cssSelect.selectOne(cssSelector, this, { xmlMode: true, adapter: cssSelectAdapter })
-  }
-
-  findAll(cssSelector) {
-    return cssSelect.selectAll(cssSelector, this, { xmlMode: true, adapter: cssSelectAdapter })
-  }
-
-}
-
-ElementNode.prototype._elementType = 'element'
-
-ElementNode.type = 'element'
-
-ElementNode.schema = {
-  attributes: { type: 'object', default: {} },
+XMLElementNode.schema = {
   childNodes: { type: ['array', 'id'], default: [], owned: true}
 }
 
-ElementNode.isBlock = true
+XMLElementNode.isBlock = true

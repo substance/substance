@@ -118,7 +118,10 @@ class ValidatingChildNodeIterator {
     }
     if (error) {
       if (next.isTextNode()) {
-        console.error(`TEXT is invalid within <${this._validator.spec.name}>. Skipping.`, next.textContent)
+        const text = next.textContent
+        if (!/^\s*$/.exec(text)) {
+          console.error(`TEXT is invalid within <${this._validator.spec.name}>. Skipping.`, next.textContent)
+        }
       } else if (next.isElementNode()) {
         console.error(`<${next.tagName}> is invalid within <${this._validator.spec.name}>. Skipping.`, next)
       }

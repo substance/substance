@@ -83,13 +83,13 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
   })
 }
 
-const BUILTIN_ATTRS = ['type', 'attributes', 'childNodes']
+const BUILTIN_ATTRS = ['id', 'type', 'attributes', 'childNodes']
 
 function _defineAttribute(Node, attributeName) {
   let name = attributeName.replace(':', '_')
   name = camelCase(name)
   if (BUILTIN_ATTRS.indexOf(name) >= 0) {
-    console.error(`attribute '${attributeName}' is internal and can not be overridden`)
+    // console.error(`attribute '${attributeName}' is internal and can not be overridden`)
     return
   }
   Object.defineProperty(Node.prototype, name, {
