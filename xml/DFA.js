@@ -32,6 +32,11 @@ class DFA {
     return -1
   }
 
+  canConsume(state, id) {
+    let nextState = this.consume(state, id)
+    return (nextState !== -1)
+  }
+
   isFinished(state) {
     const T = this.transitions
     if (state === 'END') return true
