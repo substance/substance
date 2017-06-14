@@ -137,7 +137,7 @@ function buildDocs(mode='site') {
       './ui/*.js',
       './util/*.js',
     ],
-    dest: 'doc/',
+    dest: 'dist/doc/',
     config: './.docgenrc.js',
     mode: mode // one of: 'source', 'json', 'site' (default: 'json')
   })

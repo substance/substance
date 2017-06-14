@@ -44,9 +44,3 @@ experiment.html
 # Overriding karma.conf.js
 karma.conf.local.js
 
-# documentation is generated into the doc folder
-/doc/index.html
-/doc/*.js
-/doc/*.css
-/doc/reader.*
-/doc/substance
