@@ -21,6 +21,9 @@ class XMLAnnotationNode extends AnnotationMixin(XMLDocumentNode) {
 
 XMLAnnotationNode.prototype._elementType = 'annotation'
 
+// HACK: this is necessary so that DOMImporter registers convertes as annotation converters
+XMLAnnotationNode.prototype._isPropertyAnnotation = true
+
 XMLAnnotationNode.type = 'annotation'
 
 XMLAnnotationNode.schema = {
