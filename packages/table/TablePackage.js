@@ -16,6 +16,7 @@ export default {
     config.addConverter('xml', TableHTMLConverter)
     config.addConverter('xml', TableCellHTMLConverter)
     config.addCommand('insert-table', InsertTableCommand, {
+      nodeType: 'table',
       commandGroup: 'insert'
     })
     config.addIcon('insert-table', { 'fontawesome': 'fa-table' })
