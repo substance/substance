@@ -25,9 +25,11 @@ export default function (DocumentNode) {
     getNodeAt(idx) {
       let content = this.getContent()
       if (idx < 0 || idx >= content.length) {
-        throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
+        // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
+        return undefined
+      } else {
+        return this.getDocument().get(content[idx])
       }
-      return this.getDocument().get(content[idx])
     }
 
     getNodes() {
