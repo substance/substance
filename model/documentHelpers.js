@@ -253,7 +253,10 @@ function deleteTextRange(doc, start, end) {
     throw new Error('start and end must be on one property')
   }
   let startOffset = start.offset
+  if (startOffset < 0) throw new Error("start offset must be >= 0")
   let endOffset = end.offset
+  if (endOffset > text.length) throw new Error("end offset must be smaller than the text length")
+
   doc.update(path, { type: 'delete', start: startOffset, end: endOffset })
   // update annotations
   let annos = doc.getAnnotations(path)
