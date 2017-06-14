@@ -120,6 +120,15 @@ class Transaction {
     ops.length = 0
   }
 
+  // HACK: we are not doing well with updating the stage
+  __applyChange__(change) {
+    const stage = this.stage
+    const ops = change.ops
+    for (let i = 0; i < ops.length; i++) {
+      stage._applyOp(ops[i])
+    }
+  }
+
   _rollback() {
     const stage = this.stage
     let ops = stage._ops

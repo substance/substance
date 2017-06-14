@@ -487,6 +487,7 @@ class EditorSession extends EventEmitter {
     var change = from.pop()
     if (change) {
       this._applyChange(change, {})
+      this._transaction.__applyChange__(change)
       // move change to the opposite change list (undo <-> redo)
       to.push(change.invert())
       // use selection from change
