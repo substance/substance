@@ -123,6 +123,11 @@ class Editing {
           this._merge(tx, root, sel.start, direction, container)
         }
       } else {
+        // if we are not in a merge scenario, we stop at the boundaries
+        if ((offset === 0 && direction === 'left') ||
+          (offset === text.length && direction === 'right')) {
+          return
+        }
         let startOffset = (direction === 'left') ? offset-1 : offset
         let endOffset = startOffset+1
         let start = { path: path, offset: startOffset }

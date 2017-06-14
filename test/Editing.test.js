@@ -1281,6 +1281,50 @@ test("DEL32: Merging an empty List into previous TextNode using DELETE", (t) => 
   t.end()
 })
 
+test("DEL33: Deleting using BACKSPACE at the start of a text property editor", (t) => {
+  let { editorSession, doc } = setupEditor(t)
+  let p = doc.create({
+    id: 'p',
+    type: 'paragraph',
+    content: 'foo'
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: p.getTextPath(),
+    startOffset: 0,
+    endOffset: 0
+  })
+  t.doesNotThrow(() => {
+    editorSession.transaction((tx) => {
+      tx.deleteCharacter('left')
+    })
+  }, 'Should not throw an exception')
+  t.equal(p.getText(), 'foo', '.. and the text should be untouched')
+  t.end()
+})
+
+test("DEL44: Deleting using DEL at the end of a text property editor", (t) => {
+  let { editorSession, doc } = setupEditor(t)
+  let p = doc.create({
+    id: 'p',
+    type: 'paragraph',
+    content: 'foo'
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: p.getTextPath(),
+    startOffset: 3,
+    endOffset: 3
+  })
+  t.doesNotThrow(() => {
+    editorSession.transaction((tx) => {
+      tx.deleteCharacter('right')
+    })
+  }, 'Should not throw an exception')
+  t.equal(p.getText(), 'foo', '.. and the text should be untouched')
+  t.end()
+})
+
 test("BR1: Breaking without selection", (t) => {
   let { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection(null)
