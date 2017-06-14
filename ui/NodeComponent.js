@@ -2,6 +2,14 @@ import Component from './Component'
 
 class NodeComponent extends Component {
 
+  didMount() {
+    this.context.editorSession.onRender('document', this.rerender, this, { path: [this.props.node.id]})
+  }
+
+  dispose() {
+    this.context.editorSession.off(this)
+  }
+
   render($$) {
     let tagName = this.getTagName()
     let el = $$(tagName)
