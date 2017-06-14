@@ -51,7 +51,7 @@ class ToolGroup extends Component {
   render($$) {
     let commandStates = this._getCommandStates()
     let tools = this.context.tools
-    let el = $$('div').addClass('sc-tool-group')
+    let el = $$('div').addClass(this._getClassNames())
     el.addClass('sm-'+this.props.name)
     forEach(commandStates, (commandState, commandName) => {
       if (this.isToolEnabled(commandName, commandState) || this.props.showDisabled) {
@@ -85,6 +85,10 @@ class ToolGroup extends Component {
       })
     })
     return filteredCommandStates
+  }
+
+  _getClassNames() {
+    return 'sc-tool-group'
   }
 }
 
