@@ -72,20 +72,21 @@ function _findInsertPosCandidates(dfa, el, newType) {
   let candidates = []
   let state = START
   let children = el.getChildren()
-  if (children.length === 0 && dfa.canConsume(state, newType)) {
-    candidates.push(0)
-  } else {
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i]
-      if (dfa.canConsume(state, newType)) {
-        candidates.push(i)
-      }
-      let nextState = dfa.consume(state, child.tagName)
-      if (nextState === -1) {
-        throw new Error('Element is invalid:', el.toXML())
-      }
-      state = nextState
+  let pos = 0
+  for (;pos < children.length; pos++) {
+    const child = children[pos]
+    if (dfa.canConsume(state, newType)) {
+      candidates.push(pos)
     }
+    let nextState = dfa.consume(state, child.tagName)
+    if (nextState === -1) {
+      throw new Error('Element is invalid:', el.toXML())
+    }
+    state = nextState
+  }
+  // also consider the position after all previous siblings
+  if (dfa.canConsume(state, newType)) {
+    candidates.push(pos)
   }
   return candidates
 }
