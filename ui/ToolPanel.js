@@ -60,10 +60,6 @@ class ToolPanel extends Component {
     return this.props.theme || 'dark'
   }
 
-  _getCommandStates() {
-    return this.context.editorSession.getCommandStates()
-  }
-
 }
 
 export default ToolPanel
