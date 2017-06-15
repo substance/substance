@@ -35,10 +35,6 @@ class InsertInlineNodeCommand extends Command {
   */
   constructor(...args) {
     super(...args)
-
-    if (!this.config.nodeType) {
-      throw new Error('Every InlineInlineNodeCommand must have a nodeType')
-    }
   }
 
   /**
@@ -85,9 +81,7 @@ class InsertInlineNodeCommand extends Command {
   }
 
   createNodeData(tx) { // eslint-disable-line
-    return {
-      type: this.config.nodeType
-    }
+    throw new Error('This method is abstract')
   }
 
 }
