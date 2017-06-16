@@ -1,4 +1,7 @@
-import { forEach, isPlainObject, isFunction, isString, EventEmitter } from '../util'
+import {
+  forEach, isPlainObject, isFunction, isString,
+  EventEmitter, uuid
+} from '../util'
 import { Selection, SelectionState, ChangeHistory,
   Transaction, operationHelpers } from '../model'
 
@@ -6,9 +9,9 @@ class EditorSession extends EventEmitter {
 
   constructor(doc, options) {
     super()
-
     options = options || {}
 
+    this.__id__ = uuid()
     this.document = doc
     const configurator = options.configurator
     if (!configurator) {
@@ -365,7 +368,17 @@ class EditorSession extends EventEmitter {
 
   off(...args) {
     if (args.length === 1) {
+      let observer = args[0]
       super.off(...args)
+      // Note: we have stored all registered hooks
+      // on the observer itself
+      if (observer[this.__id__]) {
+        const records = observer[this.__id__]
+        delete observer[this.__id__]
+        records.forEach((record) => {
+          this.__deregisterObserver(record)
+        })
+      }
     } else {
       const stage = args[0]
       const method = args[1]
@@ -647,7 +660,7 @@ class EditorSession extends EventEmitter {
   }
 
   _parseObserverArgs(args) {
-    let params = { resource: null, handler: null, context: null, options: {} }
+    let params = { stage: null, resource: null, handler: null, context: null, options: {} }
     // first can be a string
     let idx = 0
     let arg = args[idx]
@@ -676,15 +689,34 @@ class EditorSession extends EventEmitter {
     return params
   }
 
+  // TODO: this needs to be refactored
+
   _registerObserver(stage, args) {
-    let observer = this._parseObserverArgs(args)
+    // this produces a record containing:
+    // { resource, handler, context, options }
+    let record = this._parseObserverArgs(args)
+    record.stage = stage
+    this.__registerObserver(stage, record)
+  }
+
+  __registerObserver(stage, record) {
+    // HACK: storing the observer record information
+    // in the observer itself
+    if (record.context) {
+      const observer = record.context
+      if (!observer[this.__id__]) {
+        observer[this.__id__] = []
+      }
+      observer[this.__id__].push(record)
+    }
     let observers = this._observers[stage]
     if (!observers) {
       observers = this._observers[stage] = []
     }
-    observers.push(observer)
+    observers.push(record)
   }
 
+  // TODO: this needs to be revisited
   _deregisterObserver(stage, method, observer) {
     let self = this // eslint-disable-line no-invalid-this
     if (arguments.length === 1) {
@@ -717,6 +749,20 @@ class EditorSession extends EventEmitter {
     }
   }
 
+  __deregisterObserver(record) {
+    const stage = record.stage
+    const observers = this._observers[stage]
+    const observer = record.context
+    const method = record.handler
+    for (let i = observers.length-1; i >= 0; i--) {
+      let o = observers[i]
+      if (o.handler === method && o.context === observer) {
+        observers.splice(i, 1)
+        o._deregistered = true
+      }
+    }
+  }
+
   _notifyObservers(stage) {
     // TODO: this is not hierarchical anymore
     // i.e. probably we have to expect degradation of performance
@@ -731,8 +777,7 @@ class EditorSession extends EventEmitter {
     // manipulation during iteration
     let observers = _observers.slice()
     for (let i = 0; i < observers.length; i++) {
-      let o = observers[i]
-      // an observer might have been deregistered while this iteration was going on
+      let o = observers[i]      // an observer might have been deregistered while this iteration was going on
       if (o._deregistered) continue
       if (!o.resource) {
         o.handler.call(o.context, this)
