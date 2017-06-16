@@ -68,15 +68,17 @@ class MultiSelect extends Component {
 
     let collapseLabelEl = $$('div').addClass('se-multi-collapse-label')
 
-    if(collapsed) {
-      let leftItems = options.length - limit
-      collapseLabelEl.append(
-        this.getLabel('expand-options') + ' (' + leftItems + ')'
-      ).on('click', this._onToggleExpand)
-    } else {
-      collapseLabelEl.append(
-        this.getLabel('collapse-options')
-      ).on('click', this._onToggleExpand)
+    if(options.length > maxItems) {
+      if(collapsed) {
+        let leftItems = options.length - limit
+        collapseLabelEl.append(
+          this.getLabel('expand-options') + ' (' + leftItems + ')'
+        ).on('click', this._onToggleExpand)
+      } else {
+        collapseLabelEl.append(
+          this.getLabel('collapse-options')
+        ).on('click', this._onToggleExpand)
+      }
     }
 
     el.append(collapseLabelEl)
