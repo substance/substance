@@ -1,3 +1,7 @@
+.sc-multi-select .se-select-option {
+  cursor: pointer;
+}
+
 .sc-multi-select .se-option-icon {
   width: 20px;
 }
