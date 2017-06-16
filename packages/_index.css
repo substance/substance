@@ -29,13 +29,15 @@
 @import './inline-wrapper/_inline-wrapper.css';
 /* isolated-node */
 @import './isolated-node/_isolated-node.css';
-/* modal */
-@import './modal/_modal.css';
 /* layout */
 @import './layout/_layout.css';
 /* link */
 @import './link/_link.css';
 @import './link/_edit-link-tool.css';
+/* modal */
+@import './modal/_modal.css';
+/* multi select */
+@import './multi-select/_multi-select.css';
 /* overlay */
 @import './overlay/_overlay.css';
 /* paragraph */
