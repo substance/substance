@@ -378,6 +378,27 @@ function ComponentTests(debug, memory) {
     t.end()
   })
 
+  test("Not re-rendering an attribute should remove the attribute from the rendered element", (t) => {
+    class TestComponent extends Component {
+      getInitialState() {
+        return { mode: 0 }
+      }
+      render($$) {
+        let el = $$('div')
+        if (this.state.mode === 0) {
+          el.attr('contenteditable', true)
+        }
+        return el
+      }
+    }
+    let comp = TestComponent.render()
+    t.equal(comp.el.getAttribute('contenteditable'), 'true', 'element should be contenteditable')
+    comp.setState({ mode: 1})
+    t.isNil(comp.el.getAttribute('contenteditable'), 'the attribute should have been removed')
+    t.end()
+  })
+
+
   /* ##################### Nested Elements/Components ##########################*/
 
   test("Render children elements", function(t) {
