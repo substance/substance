@@ -20,11 +20,10 @@ class SelectAll extends Command {
       // TODO: we should move the logic out of the surfaces
       if (surface._isContainerEditor) {
         let container = surface.getContainer()
-        if (container.nodes.length === 0) {
-          return false
-        }
-        let firstNodeId = container.nodes[0]
-        let lastNodeId = last(container.nodes)
+        let nodeIds = container.getContent()
+        if (nodeIds.length === 0) return false
+        let firstNodeId = nodeIds[0]
+        let lastNodeId = last(nodeIds)
         sel = editorSession.createSelection({
           type: 'container',
           startPath: [firstNodeId],
