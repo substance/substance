@@ -5,8 +5,9 @@ import Component from './Component'
 class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
   render($$) {
-    let node = this.props.node
-    let ContentClass = this.ContentClass
+    const node = this.props.node
+    const ContentClass = this.ContentClass
+    const state = this.state
 
     let el = $$('span')
     el.addClass(this.getClassNames())
@@ -17,8 +18,8 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
     let disabled = this.isDisabled()
 
-    if (this.state.mode) {
-      el.addClass('sm-'+this.state.mode)
+    if (state.mode) {
+      el.addClass('sm-'+state.mode)
     } else {
       el.addClass('sm-not-selected')
     }
@@ -44,8 +45,17 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
          .on('click', this.onClick)
     }
 
+    // TODO: Chrome et al. does not display selections
+    // for `draggable=true`
+    // We should only enable draggable if the parent
+    // surface is actually focused
+    // However, there is some weird behavior:
+    // rerendering with `draggable=false` does
+    // not remove the attribute
     el.attr('draggable', true)
+
     return el
+
   }
 
   isDisabled() {
@@ -57,7 +67,9 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
   }
 
   onClick(event) {
-    if (!this._shouldConsumeEvent(event)) return
+    if (!this._shouldConsumeEvent(event)) {
+      return
+    }
     this.selectNode()
   }
 
