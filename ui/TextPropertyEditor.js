@@ -55,7 +55,7 @@ class TextPropertyEditor extends Surface {
         path: this.props.path,
         markers: this.props.markers,
         withoutBreak: this.props.withoutBreak
-      })
+      }).ref('property')
     )
 
     return el
