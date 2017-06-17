@@ -1,4 +1,5 @@
 import { TextNodeMixin } from '../model'
+import { DOMElement } from '../dom'
 import XMLDocumentNode from './XMLDocumentNode'
 
 /*
@@ -25,7 +26,39 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
     return this.getAnnotations()
   }
 
+  setText(text) {
+    const doc = this.getDocument()
+    const path = this.getPath()
+    const oldText = this.getText()
+    // delete old text first
+    if (oldText.length > 0) {
+      doc.update(path, { type: 'delete', start: 0, end: oldText.length })
+    }
+    doc.update(path, { type: 'insert', start: 0, text })
+    return this
+  }
+
+  // DOMElement API (partial)
+
+  getTextContent() {
+    return this.getText()
+  }
+
+  setTextContent(text) {
+    return this.setText(text)
+  }
+
+  get textContent() {
+    return this.getText()
+  }
+
+  set textContent(text) {
+    this.setText(text)
+  }
+
 }
+
+XMLTextNode.prototype.text = DOMElement.prototype.text
 
 XMLTextNode.prototype._elementType = 'text'
 
