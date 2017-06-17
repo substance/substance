@@ -358,7 +358,6 @@ function _render(state, vel) {
 
       // ATTENTION: relocating a component does not update its context
       if (state.isRelocated(newComp)) {
-        console.log('COMPONENT IS RELOCATED')
         newComp._setParent(comp)
       }
 
@@ -620,12 +619,13 @@ function _updateHash(args) {
   }
   // HACK: we have a horrible mixture of Objects and
   // Maps here
-  if (isFunction(oldHash.keys)) {
-    for (let key of oldHash.keys()) {
+  if (isFunction(oldHash.keys) && oldHash.size > 0) {
+    let keys = Array.from(oldHash.keys())
+    keys.forEach((key) => {
       if (!updatedKeys[key]) {
         remove(key)
       }
-    }
+    })
   } else {
     for (let key in oldHash) {
       if (oldHash.hasOwnProperty(key) && !updatedKeys[key]) {
