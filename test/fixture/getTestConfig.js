@@ -1,7 +1,8 @@
 import {
   ImagePackage, Component, Configurator,
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
-  ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage, InlineWrapperPackage,
+  ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage,
+  //InlineWrapperPackage,
 } from 'substance'
 
 import TestNode from './TestNode'
@@ -20,7 +21,7 @@ import TestHTMLExporter from './TestHTMLExporter'
 import TestXMLExporter from './TestXMLExporter'
 import TestArticle from './TestArticle'
 
-const { InlineWrapper, InlineWrapperComponent } = InlineWrapperPackage
+// const { InlineWrapper, InlineWrapperComponent } = InlineWrapperPackage
 
 export default function getTestConfig() {
   let config = new Configurator()
@@ -59,8 +60,8 @@ export default function getTestConfig() {
   config.addNode(TestMetaNode)
   config.addConverter('xml', TestMetaNodeXMLConverter)
 
-  config.addNode(InlineWrapper)
-  config.addComponent(InlineWrapper.type, InlineWrapperComponent)
+  // config.addNode(InlineWrapper)
+  // config.addComponent(InlineWrapper.type, InlineWrapperComponent)
 
 
   config.addImporter('html', TestHTMLImporter)

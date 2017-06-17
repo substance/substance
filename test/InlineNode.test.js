@@ -80,36 +80,14 @@ test("InlineNode should be 'focused' when having the selection", function(t) {
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
-    path: ['p1', 'content'],
+    path: ['in1', 'content'],
     startOffset: 1,
-    endOffset: 4,
-    surfaceId: 'body/in1/sn1.title'
+    endOffset: 2,
+    surfaceId: 'body/in1/in1.content'
   })
   var expected = {
     'body/in1': 'focused',
     'body/in2': undefined,
-  }
-  nodes.forEach(function(node){
-    var id = node.getId()
-    t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected') )
-  })
-  t.end()
-})
-
-// Similar to the previous but with another inline node being focused
-test("InlineNode should be 'focused' when having the selection (II)", function(t) {
-  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let nodes = editor.findAll('.sc-inline-node')
-  editorSession.setSelection({
-    type: 'property',
-    path: ['c_p', 'content'],
-    startOffset: 1,
-    endOffset: 4,
-    surfaceId: 'body/in2/c'
-  })
-  var expected = {
-    'body/in1': undefined,
-    'body/in2': 'focused',
   }
   nodes.forEach(function(node){
     var id = node.getId()
@@ -123,13 +101,13 @@ test("InlineNode should be 'co-focused' when a nested inline node has the select
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
-    path: ['sn2', 'title'],
+    path: ['in2', 'content'],
     startOffset: 2,
-    surfaceId: 'body/in1/sn1.title/in2/sn2.title'
+    surfaceId: 'body/in1/in1.content/in2/in2.content'
   })
   var expected = {
     'body/in1': 'co-focused',
-    'body/in1/sn1.title/in2': 'focused',
+    'body/in1/in1.content/in2': 'focused',
   }
   nodes.forEach(function(node){
     var id = node.getId()
@@ -143,40 +121,25 @@ test("InlineNode should be 'co-focused' when a nested inline node has the select
 function paragraphsWithInlineNodes(doc) {
   var tx = new EditingInterface(doc)
   twoParagraphs(tx)
-  var sn1 = tx.create({
-    type: "structured-node",
-    id: "sn1",
-    title: "ABCDEFG"
-  })
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 2
   })
   tx.insertInlineNode({
-    type: 'inline-wrapper',
+    type: 'test-inline-node',
     id: 'in1',
-    wrappedNode: sn1.id
+    content: 'XXX'
   })
-  var c = tx.create({
-    type: "container",
-    id: "c"
-  })
-  var c_p = tx.create({
-    type: 'paragraph',
-    id: "c_p",
-    content: "ABCDEFG"
-  })
-  c.show(c_p)
   tx.setSelection({
     type: 'property',
     path: ['p2', 'content'],
     startOffset: 2
   })
   tx.insertInlineNode({
-    type: 'inline-wrapper',
+    type: 'test-inline-node',
     id: 'in2',
-    wrappedNode: c.id
+    content: 'YYY'
   })
 }
 
@@ -185,34 +148,24 @@ function paragraphsWithInlineNodes(doc) {
 function nestedInlineNode(doc) {
   let tx = new EditingInterface(doc)
   twoParagraphs(tx)
-  let sn1 = tx.create({
-    type: "structured-node",
-    id: "sn1",
-    title: "ABCDEFG"
-  })
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 2
   })
   tx.insertInlineNode({
-    type: 'inline-wrapper',
-    id: 'in1',
-    wrappedNode: sn1.id
-  })
-  let sn2 = doc.create({
-    type: "structured-node",
-    id: "sn2",
-    title: "ABCDEFG"
+    type: "test-inline-node",
+    id: "in1",
+    content: "XXXXXX",
   })
   tx.setSelection({
     type: 'property',
-    path: ['sn1', 'title'],
-    startOffset: 4
+    path: ['in1', 'content'],
+    startOffset: 3
   })
   tx.insertInlineNode({
-    type: 'inline-wrapper',
+    type: 'test-inline-node',
     id: 'in2',
-    wrappedNode: sn2.id
+    content: 'YYY'
   })
 }

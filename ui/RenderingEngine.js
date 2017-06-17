@@ -1,4 +1,4 @@
-import { forEach, uuid, substanceGlobals } from '../util'
+import { isFunction, forEach, uuid, substanceGlobals } from '../util'
 import { DefaultDOMElement } from '../dom'
 import VirtualElement from './VirtualElement'
 import Component from './Component'
@@ -602,13 +602,12 @@ function _updateElement(comp, vel) {
 }
 
 function _updateHash(args) {
-  var newHash = args.newHash
-  var oldHash = args.oldHash || {}
-  var updatedKeys = {}
-  var update = args.update
-  var remove = args.remove
-  var key
-  for (key in newHash) {
+  const newHash = args.newHash
+  const oldHash = args.oldHash || {}
+  const update = args.update
+  const remove = args.remove
+  let updatedKeys = {}
+  for (let key in newHash) {
     if (newHash.hasOwnProperty(key)) {
       var oldVal = oldHash[key]
       var newVal = newHash[key]
@@ -618,9 +617,20 @@ function _updateHash(args) {
       }
     }
   }
-  for (key in oldHash) {
-    if (oldHash.hasOwnProperty(key) && !updatedKeys[key]) {
-      remove(key)
+  // HACK: we have a horrible mixture of Objects and
+  // Maps here
+  if (isFunction(oldHash.keys) && oldHash.size > 0) {
+    let keys = Array.from(oldHash.keys())
+    keys.forEach((key) => {
+      if (!updatedKeys[key]) {
+        remove(key)
+      }
+    })
+  } else {
+    for (let key in oldHash) {
+      if (oldHash.hasOwnProperty(key) && !updatedKeys[key]) {
+        remove(key)
+      }
     }
   }
 }

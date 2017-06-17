@@ -178,7 +178,18 @@ class AbstractIsolatedNodeComponent extends Component {
 
   _shouldConsumeEvent(event) {
     let comp = Component.unwrap(event.target)
-    return (comp && (comp === this || comp.context.isolatedNodeComponent === this))
+    let isolatedNodeComponent = this._getIsolatedNode(comp)
+    return (isolatedNodeComponent === this)
+  }
+
+  _getIsolatedNode(comp) {
+    if (comp._isAbstractIsolatedNodeComponent) {
+      return this
+    } else if (comp.context.isolatedNodeComponent) {
+      return comp.context.isolatedNodeComponent
+    } else if (comp.context.surface) {
+      return comp.context.surface.context.isolatedNodeComponent
+    }
   }
 
 }
