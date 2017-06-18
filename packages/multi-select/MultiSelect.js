@@ -117,6 +117,7 @@ class MultiSelect extends Component {
     }
 
     this.extendState({selectedOptions: selectedOptions})
+    this.el.emit('change')
   }
 
   _onToggleExpand() {
