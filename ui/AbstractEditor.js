@@ -113,6 +113,9 @@ class AbstractEditor extends Component {
   onKeyDown(event) {
     // ignore fake IME events (emitted in IE and Chromium)
     if ( event.key === 'Dead' ) return
+    // Handle custom keyboard shortcuts globally
+    let custom = this.editorSession.keyboardManager.onKeydown(event)
+    return custom
   }
 
   getDocument() {
