@@ -48,7 +48,11 @@ class Node extends EventEmitter {
   }
 
   dispose() {
-    // nothing by default
+    this._disposed = true
+  }
+
+  isDisposed() {
+    return Boolean(this._disposed)
   }
 
   /**
