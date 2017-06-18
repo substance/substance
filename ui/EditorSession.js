@@ -823,7 +823,7 @@ class EditorSession extends EventEmitter {
   setBlurred(blurred) {
     this._blurred = blurred
     // NOTE: We need to re-evaluate command states when blurred state is changed
-    this.commandManager.updateCommandStates(this)
+    this.commandManager._updateCommandStates(this)
     this._setDirty('commandStates')
   }
 
