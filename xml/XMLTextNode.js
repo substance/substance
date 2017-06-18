@@ -56,6 +56,22 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
     this.setText(text)
   }
 
+  appendChild(child) {
+    // TODO: children of TextNodes are special in our case.
+    // A TextNode can only have annotations, inline-elements,
+    // and anchors as children, which are implicitly bound
+    // to the TextNode via their path property
+    // I.e. an annotation is added in the old
+    // way via doc.create(anno), and removed via doc.delete(anno.id)
+    // Until further discussion, we leave this unimplemented
+    throw new Error('This is not implemented yet.')
+  }
+
+  removeChild(child) {
+    // ditto
+    throw new Error('This is not implemented yet.')
+  }
+
 }
 
 XMLTextNode.prototype.text = DOMElement.prototype.text

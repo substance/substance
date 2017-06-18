@@ -14,9 +14,37 @@ class XMLElementNode extends XMLDocumentNode {
     this.insertAt(pos, child)
   }
 
+  removeChild(child) {
+    const childId = child.id
+    const childPos = this.childNodes.indexOf(childId)
+    if (childPos >= 0) {
+      this.removeAt(childPos)
+    } else {
+      throw new Error(`node ${childId} is not a child of ${this.id}`)
+    }
+    return this
+  }
+
   insertAt(pos, child) {
-    const doc = this.getDocument()
-    doc.update([this.id, 'childNodes'], { type: 'insert', pos: pos, value: child.id })
+    const length = this.childNodes.length
+    if (pos >= 0 && pos <= length) {
+      const doc = this.getDocument()
+      doc.update([this.id, 'childNodes'], { type: 'insert', pos, value: child.id })
+    } else {
+      throw new Error('Index out of bounds.')
+    }
+    return this
+  }
+
+  removeAt(pos) {
+    const length = this.childNodes.length
+    if (pos >= 0 && pos < length) {
+      const doc = this.getDocument()
+      doc.update([this.id, 'childNodes'], { type: 'delete', pos: pos })
+    } else {
+      throw new Error('Index out of bounds.')
+    }
+    return this
   }
 
 }
