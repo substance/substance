@@ -65,6 +65,10 @@ class XMLDocumentNode extends DocumentNode {
     }
   }
 
+  get tagName() {
+    return this.type
+  }
+
   /*
     Used internally only, by cssSelectAdapter (aka customized DomUtils).
   */
@@ -86,10 +90,6 @@ class XMLDocumentNode extends DocumentNode {
 
   getElementSchema() {
     return this.getDocument().getElementSchema(this.type)
-  }
-
-  get tagName() {
-    return this.type
   }
 
 }

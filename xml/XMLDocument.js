@@ -44,16 +44,16 @@ class XMLDocument extends Document {
     return this.getRootNode().findAll(cssSelector)
   }
 
-  getElementSchema(type) {
-    return this.getXMLSchema().getElementSchema(type)
-  }
-
   createElement(tagName) {
     let node = this.create({
       id: uuid(tagName),
       type: tagName
     })
     return node
+  }
+
+  getElementSchema(type) {
+    return this.getXMLSchema().getElementSchema(type)
   }
 
 }
