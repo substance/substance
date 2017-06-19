@@ -21,7 +21,8 @@ class FindAndReplaceManager {
       findString: '',
       replaceString: '',
       // Consists a sequence of property selections
-      matches: [],
+      matches: {},
+      matchedNodes: [],
       selectedMatch: undefined
     }
 
@@ -40,7 +41,7 @@ class FindAndReplaceManager {
   */
   _resetState() {
     this._state.disabled = true
-    this._state.matches = []
+    this._state.matches = {}
     this._state.selectedMatch = undefined
   }
 
@@ -87,12 +88,13 @@ class FindAndReplaceManager {
   startFind(findString) {
     this._state.findString = findString
     this._computeMatches()
-    let closestMatch = this._getClosestMatch()
-    this._state.selectedMatch = closestMatch > 0 ? closestMatch : 0
+    let closestMatch = [0, 0] //this._getClosestMatch()
+    this._state.selectedMatch = closestMatch //closestMatch > 0 ? closestMatch : 0
     this._requestLookupMatch = true
-    this._setSelection()
-    this._propagateUpdate()
-
+    if(this._state.matchedNodes.length > 0) {
+      this._setSelection()
+      this._propagateUpdate()
+    }
   }
 
   setReplaceString(replaceString) {
@@ -127,11 +129,24 @@ class FindAndReplaceManager {
   }
 
   _setSelection() {
-    let match = this._state.matches[this._state.selectedMatch]
+    let matchedNodes = this._state.matchedNodes
+    let selectedMatch = this._state.selectedMatch
+    let nodeIndex = selectedMatch[0]
+    let matchIndex = selectedMatch[1]
+    let matchedNode = matchedNodes[nodeIndex]
+    let match = this._state.matches[matchedNode]
+    let coord = match.matches[matchIndex]
     if (!match) return
     // NOTE: We need to make sure no additional flow is triggered when
     // setting the selection. We trigger a flow at the very end (_propagateUpdate)
-    let sel = match.getSelection()
+    let sel = {
+      type: 'property',
+      path: match.path,
+      startOffset: coord.start,
+      endOffset: coord.end,
+      surfaceId: match.containerId,
+      containerId: match.containerId
+    }
     this.editorSession.setSelection(sel, 'skipFlow')
   }
 
@@ -218,16 +233,17 @@ class FindAndReplaceManager {
     let currentMatches = this._state.matches
     let currentTotal = currentMatches === undefined ? 0 : currentMatches.length
 
-    this._state.matches = this._findAllMatches()
-
+    let newMatches = this._findAllMatches()
+    this._state.matches = newMatches
+    this._state.matchedNodes = Object.keys(newMatches)
+    this._state.selectedMatch = [0, 0]
     // Preserve selection in case of the same number of matches
     // If the number of matches did changed we will set first selection
     // If there are no matches we should remove index
-    let newMatches = this._state.matches
 
-    if(newMatches.length !== currentTotal) {
-      this._state.selectedMatch = newMatches.length > 0 ? 0 : undefined
-    }
+    // if(newMatches.length !== currentTotal) {
+    //   this._state.selectedMatch = newMatches.length > 0 ? 0 : undefined
+    // }
   }
 
   /*
