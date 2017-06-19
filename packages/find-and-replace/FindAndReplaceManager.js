@@ -91,9 +91,9 @@ class FindAndReplaceManager {
     let closestMatch = [0, 0] //this._getClosestMatch()
     this._state.selectedMatch = closestMatch //closestMatch > 0 ? closestMatch : 0
     this._requestLookupMatch = true
+    this._propagateUpdate(true)
     if(this._state.matchedNodes.length > 0) {
       this._setSelection()
-      this._propagateUpdate()
     }
   }
 
@@ -295,22 +295,49 @@ class FindAndReplaceManager {
     return matches
   }
 
-  _propagateUpdate() {
+  _propagateUpdate(start) {    
+    if(start) {
+      this._createMarkers()
+    } else {
+      this._updateMarkers()
+    }
     // HACK: we make commandStates dirty in order to trigger re-evaluation
-    this._updateMarkers()
     this.editorSession._setDirty('commandStates')
     this.editorSession.startFlow()
   }
 
-  _updateMarkers() {
+  _createMarkers() {
     const state = this._state
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
-    state.matches.forEach((m, idx) => {
-      m.type = (idx === state.selectedMatch) ? 'selected-match' : 'match'
-    })
-    // console.log('setting find-and-replace markers', state.matches)
-    markersManager.setMarkers('find-and-replace', state.matches)
+    let matchesMarkers = []
+
+    for(let nodeId in state.matches) {
+      if (state.matches[nodeId].hasOwnProperty('matches')) {
+        let node = state.matches[nodeId]
+        node.matches.forEach(m => {
+          let marker = {
+            type: 'match',
+            surfaceId: node.surfaceId,
+            start: {
+              path: node.path,
+              offset: m.start
+            },
+            end: {
+              offset: m.end
+            }
+          }
+          matchesMarkers.push(marker)
+        })
+      }
+    }
+    
+    console.log('setting find-and-replace markers', matchesMarkers)
+    markersManager.setMarkers('find-and-replace', matchesMarkers)
+  }
+
+  _updateMarkers() {
+    
   }
 
 }
