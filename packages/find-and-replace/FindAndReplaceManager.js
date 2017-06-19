@@ -234,53 +234,48 @@ class FindAndReplaceManager {
     Returns all matches
   */
   _findAllMatches() {
-    const doc = this.doc
-    const nodes = doc.getNodes()
-    const pattern = this._state.findString
+    let pattern = this._state.findString
 
-    let matches = []
+    let matches = {}
     if (pattern) {
-      Object.keys(nodes).forEach((nodeId) => {
-        let node = doc.get(nodeId)
-        if(node.isText()) {
-          let found = this._findInTextProperty({
-            path: [node.id, 'content'],
-            findString: pattern
-          })
-          matches = matches.concat(found)
-        }
+      let surfaceManager = this.context.surfaceManager
+      let surfaces = surfaceManager.getSurfaces()
+
+      surfaces.forEach(surface => {
+        let nodes = surface.getChildNodes()
+
+        nodes.forEach((node) => {
+          let content = node.getTextContent()
+          let dataNode = node.props.node
+          let path = []
+          if(dataNode.getPath) {
+            path = dataNode.getPath()
+          } else {
+            path.push(surface.id, dataNode.id)
+          }
+          let matcher = new RegExp(pattern, 'ig')
+          let nodeMatches = []
+          let match
+
+          while ((match = matcher.exec(content))) {
+            nodeMatches.push({
+              start: match.index,
+              end: matcher.lastIndex
+            })
+          }
+
+          if(nodeMatches.length > 0) {
+            matches[path.join('/')] = {
+              path: path,
+              surfaceId: surface.id,
+              containerId: surface.containerId,
+              matches: nodeMatches
+            }
+          }
+        })
       })
     }
-    return matches
-  }
 
-  /*
-    Find all matches for a given search string in a text property
-    Method returns an array of matches, each match is represented as
-    a PropertySelection
-  */
-  _findInTextProperty({path, findString}) {
-    const doc = this.doc
-    const text = doc.get(path)
-
-    // Case-insensitive search for multiple matches
-    let matcher = new RegExp(findString, 'ig')
-    let matches = []
-    let match
-
-    while ((match = matcher.exec(text))) {
-      let marker = new Marker(doc, {
-        type: 'match',
-        start: {
-          path,
-          offset: match.index
-        },
-        end: {
-          offset: matcher.lastIndex
-        }
-      })
-      matches.push(marker)
-    }
     return matches
   }
 
