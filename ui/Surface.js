@@ -203,22 +203,20 @@ class Surface extends Component {
     return null
   }
 
-  blur() {
-    if (this.el) {
-      this.el.blur()
+  focus() {
+    if (this.editorSession.getFocusedSurface() !== this) {
+      this.selectFirst()
     }
   }
 
-  focus() {
-    if (this.isDisabled()) return
-    // console.log('Focusing surface %s explicitly with Surface.focus()', this.getId());
-    // NOTE: FF is causing problems with dynamically activated contenteditables
-    // and focusing
-    if (platform.isFF) {
-      this.domSelection.clear()
-      this.el.getNativeElement().blur()
+  blur() {
+    if (this.editorSession.getFocusedSurface() === this) {
+      this.editorSession.setSelection(null)
     }
-    this._focus()
+  }
+
+  selectFirst() {
+    throw new Error('This method is abstract.')
   }
 
   // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
@@ -496,7 +494,25 @@ class Surface extends Component {
     }
   }
 
+  _blur() {
+    if (this.el) {
+      this.el.blur()
+    }
+  }
+
   _focus() {
+    if (this.isDisabled()) return
+    // console.log('Focusing surface %s explicitly with Surface.focus()', this.getId());
+    // NOTE: FF is causing problems with dynamically activated contenteditables
+    // and focusing
+    if (platform.isFF) {
+      this.domSelection.clear()
+      this.el.getNativeElement().blur()
+    }
+    this._focusElement()
+  }
+
+  _focusElement() {
     this._state.hasNativeFocus = true
     // HACK: we must not focus explicitly in Chrome/Safari
     // as otherwise we get a crazy auto-scroll
@@ -606,7 +622,7 @@ class Surface extends Component {
     // until the next native blur.
     // TODO: check if this is still necessary
     if (!sel.isNull() && sel.surfaceId === this.id && platform.isFF) {
-      this._focus()
+      this._focusElement()
     }
     this.editorSession.setSelection(sel)
   }

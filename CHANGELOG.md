@@ -29,6 +29,7 @@
   Use either `Container.show(nodeId)` or `Container.showAt(pos, nodeId)`
 - `el.appendChild(null)` does not throw
 - `el.insertBefore(child, null)` is equivalent to `el.appendChild(child)`
+- `surface.focus()` now behaves similar to a HTML input element, i.e. setting the cursor to the first position
 
 These changes might break your current implementation and may need some migration:
 

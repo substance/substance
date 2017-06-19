@@ -61,6 +61,15 @@ class TextPropertyEditor extends Surface {
     return el
   }
 
+  selectFirst() {
+    this.editorSession.setSelection({
+      type: "property",
+      path: this.getPath(),
+      startOffset: 0,
+      surfaceId: this.id
+    })
+  }
+
   _handleEnterKey(event) {
     event.preventDefault()
     event.stopPropagation()
