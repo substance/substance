@@ -15,6 +15,9 @@ class DFA {
 
   consume(state, id) {
     const T = this.transitions
+    // e.g. this happens, if the state is already END
+    // and more tokens are coming
+    if (!T[state]) return -1
     let nextState = T[state][id]
     if (nextState !== undefined) {
       return nextState
