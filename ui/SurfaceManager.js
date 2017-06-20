@@ -6,8 +6,7 @@ class SurfaceManager {
     this.editorSession = editorSession
     this.surfaces = {}
     this._state = {
-      focusedSurfaceId: null,
-      selection: null,
+      selection: null
     }
     editorSession.onUpdate('selection', this._onSelectionChanged, this)
     editorSession.onPostRender(this._recoverDOMSelection, this)
@@ -35,8 +34,9 @@ class SurfaceManager {
    * @return {ui/Surface} Surface instance
    */
   getFocusedSurface() {
-    if (this._state.focusedSurfaceId) {
-      return this.getSurface(this._state.focusedSurfaceId)
+    const sel = this._state.selection
+    if (sel && sel.surfaceId) {
+      return this.getSurface(sel.surfaceId)
     }
   }
 
@@ -52,7 +52,11 @@ class SurfaceManager {
    * @param surface {ui/Surface} A new surface instance to register
    */
   registerSurface(surface) {
-    this.surfaces[surface.getId()] = surface
+    const id = surface.getId()
+    if (this.surfaces[id]) {
+      console.error(`A surface with id ${id} has already been registered.`)
+    }
+    this.surfaces[id] = surface
   }
 
   /**
@@ -70,18 +74,13 @@ class SurfaceManager {
     // }
     let registeredSurface = this.surfaces[surfaceId]
     if (registeredSurface === surface) {
-      let focusedSurface = this.getFocusedSurface()
       delete this.surfaces[surfaceId]
-      if (surface && focusedSurface === surface) {
-        this._state.focusedSurfaceId = null
-      }
     }
   }
 
   _onSelectionChanged(selection) {
     const state = this._state
     state.selection = selection
-    state.focusedSurfaceId = selection.surfaceId
     // HACK: removing DOM selection *and* blurring when having a CustomSelection
     // otherwise we will receive events on the wrong surface
     // instead of bubbling up to GlobalEventManager
@@ -96,11 +95,13 @@ class SurfaceManager {
     and displays the right DOM selection
   */
   _recoverDOMSelection() {
-    if (this.editorSession._blurred) {
-      return
-    }
+    // do not rerender the selection if the editorSession has
+    // been blurred, e.g., while some component, such as Find-And-Replace
+    // dialog has the focus
+    if (this.editorSession._blurred) return
 
     let focusedSurface = this.getFocusedSurface()
+    // console.log('focusedSurface', focusedSurface)
     if (focusedSurface && !focusedSurface.isDisabled()) {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorSession.getSelection().toString());
       focusedSurface._focus()
