@@ -57,8 +57,8 @@ class FindAndReplaceManager {
       findString: state.findString,
       replaceString: state.replaceString,
       // Used to display '4 of 10' etc.
-      totalMatches: state.matches.length,
-      selectedMatch: state.selectedMatch + 1
+      totalMatches: this._getMatchesLength(),
+      selectedMatch: this._getSelectedMatchIndex()
     }
     return commandState
   }
@@ -444,22 +444,6 @@ class FindAndReplaceManager {
     markersManager.setMarkers('find-and-replace:' + path, matchesMarkers)
   }
 
-  // _switchActiveMarker() {
-  //   const state = this._state
-  //   const editorSession = this.editorSession
-  //   const markersManager = editorSession.markersManager
-  //   let selectedIndex = state.selectedMatch[0]
-  //   let selectedNodeIndex = state.matchedNodes[selectedIndex]
-  //   let matchIndex = state.selectedMatch[1]
-  //   let activeNode = state.matches[selectedNodeIndex]
-  //   //let activeMatch = activeNode.matches[matchIndex]
-    
-  //   let activeNodeMarkers = markersManager._markers.get(activeNode.path, activeNode.surfaceId)
-  //   let marker = activeNodeMarkers[matchIndex]
-  //   marker._type = 'selected-match'
-  //   markersManager._dirtyProps[activeNode.path] = true
-  // }
-
   _getMatchesLength() {
     const state = this._state
     let length = 0
@@ -480,6 +464,27 @@ class FindAndReplaceManager {
     let nodeMatch = state.matches[nodeId]
     if(!nodeMatch) return 0
     return nodeMatch.matches.length
+  }
+
+  _getSelectedMatchIndex() {
+    let selectedMatch = this._state.selectedMatch
+    let matches = this._state.matches
+    let index = 0
+    if(!selectedMatch.propertyPath) return index
+
+    for(let nodeId in matches) {
+      if(matches[nodeId]) {
+        if(selectedMatch.propertyPath === nodeId) break
+
+        let node = matches[nodeId]
+        let nodeMatches = node.matches
+        index += nodeMatches.length
+      }
+    }
+
+    index += selectedMatch.matchIndex + 1
+
+    return index
   }
 }
 
