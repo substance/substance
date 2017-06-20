@@ -16,6 +16,8 @@ class FindAndReplaceManager {
       doc: this.doc
     })
 
+    this._dirtyNodes = []
+
     this._state = {
       disabled: true,
       findString: '',
@@ -88,8 +90,7 @@ class FindAndReplaceManager {
   startFind(findString) {
     this._state.findString = findString
     this._computeMatches()
-    // let closestMatch = this._getClosestMatch()
-    // this._state.selectedMatch = closestMatch > 0 ? closestMatch : 0
+    this._state.selectedMatch = this._getClosestMatch()
     this._requestLookupMatch = true
     this._propagateUpdate(true)
     if(this._state.matchedNodes.length > 0) {
@@ -120,16 +121,21 @@ class FindAndReplaceManager {
         propertyPath: selectedNodeId,
         matchIndex: selectedMatch.matchIndex + 1
       }
+      this._dirtyNodes.push(selectedNodeId)
     } else if (totalNodes - 1 > selectedMatchIndex) {
+      let nextNodeId = matchesIndex[selectedMatchIndex + 1]
       this._state.selectedMatch = {
-        propertyPath: matchesIndex[selectedMatchIndex + 1],
+        propertyPath: nextNodeId,
         matchIndex: 0
       }
-    } else { 
+      this._dirtyNodes.push(selectedNodeId, nextNodeId)
+    } else {
+      let firstNodeId = matchesIndex[0]
       this._state.selectedMatch = {
         propertyPath: matchesIndex[0],
         matchIndex: 0
       }
+      this._dirtyNodes.push(selectedNodeId, firstNodeId)
     }
     this._requestLookupMatch = true
     this._setSelection()
@@ -152,18 +158,21 @@ class FindAndReplaceManager {
         propertyPath: selectedNodeId,
         matchIndex: selectedMatch.matchIndex - 1
       }
+      this._dirtyNodes.push(selectedNodeId)
     } else if (selectedMatchIndex > 0) {
       let prevNodeId = matchesIndex[selectedMatchIndex - 1]
       this._state.selectedMatch = {
         propertyPath: prevNodeId,
         matchIndex: this._getNodeMatchesLength(prevNodeId) - 1
       }
+      this._dirtyNodes.push(selectedNodeId, prevNodeId)
     } else {
       let lastNodeId = matchesIndex[matchesIndex.length - 1]
       this._state.selectedMatch = {
         propertyPath: lastNodeId,
         matchIndex: this._getNodeMatchesLength(lastNodeId) - 1
       }
+      this._dirtyNodes.push(selectedNodeId, lastNodeId)
     }
     this._requestLookupMatch = true
     this._setSelection()
@@ -236,34 +245,72 @@ class FindAndReplaceManager {
     Get closest match to current cursor position
   */
   _getClosestMatch() {
-    let doc = this.editorSession.getDocument()
-    let nodeIds = Object.keys(doc.getNodes())
+    let surface = this.editorSession.getFocusedSurface()
+    let matches = this._state.matches
+    let matchesIds = Object.keys(matches)
+    let nodes = surface.getChildNodes()
+    let nodeIds = nodes.map(node => {
+      let dataNode = node.props.node
+      if(dataNode.getTextPath) {
+        let path = dataNode.getTextPath()
+        return path.join('/')
+      } else {
+        return ''
+      }
+    })
     let sel = this.editorSession.getSelection()
-    let closest = 0
+    let closest = {}
+
+    if(matchesIds.length > 0) {
+      closest = {
+        propertyPath: matchesIds[0],
+        matchIndex: 0
+      }
+    }
 
     if(!sel.isNull()) {
-      let startOffset = sel.start.offset
-      let selStartNode = sel.start.path[0]
-      let selStartNodePos = nodeIds.indexOf(selStartNode)
-      let matches = this._state.matches
-
-      closest = matches.findIndex(match => {
-        let markerSel = match.getSelection()
-        let markerStartOffset = markerSel.start.offset
-        let markerStartNode = markerSel.start.path[0]
-        let markerStartNodePos = nodeIds.indexOf(markerStartNode)
-        if(selStartNodePos > markerStartNodePos) {
-          return false
-        } else if (selStartNodePos < markerStartNodePos) {
-          return true
-        } else {
-          if(startOffset <= markerStartOffset) {
-            return true
-          } else {
-            return false
+      let selNodePath = sel.start.path
+      let selNodeId = selNodePath.join('/')
+      let selNodeIdIndex = matchesIds.indexOf(selNodeId)
+      let selStart = sel.start.offset
+      
+      // There are matches inside selected node
+      if(selNodeIdIndex > -1) {
+        let closestNode = matches[selNodeId]
+        let pos = closestNode.matches.findIndex(match => {
+          return match.start > selStart
+        })
+        // There are matches inside selected node after selection
+        if(pos > -1) {
+          closest = {
+            propertyPath: selNodeId,
+            matchIndex: pos
+          }
+        // If there are no matches after selection in selected node,
+        // then we should get first match from next matched node (if it is exists)
+        } else if (matchesIds.length > selNodeIdIndex + 1) {
+          let nodeId = matchesIds[selNodeIdIndex + 1]
+          //let node = matches[nodeId]
+          closest = {
+            propertyPath: nodeId,
+            matchIndex: 0
           }
         }
-      })
+      // There are no matches inside selected node
+      // We should try to find next matched nodes in the same container
+      } else {
+        let selNodeIndex = nodeIds.indexOf(selNodeId)
+        for (let i = selNodeIndex; i < nodeIds.length; i++) {
+          let nodeId = nodeIds[i]
+          if(matchesIds[nodeId]) {
+            closest = {
+              propertyPath: nodeId,
+              matchIndex: 0
+            }
+            break
+          }
+        }
+      }
     }
 
     return closest
@@ -340,7 +387,7 @@ class FindAndReplaceManager {
     return matches
   }
 
-  _propagateUpdate(start) {    
+  _propagateUpdate(start) { 
     if(start) {
       this._createMarkers()
     } else {
@@ -362,8 +409,11 @@ class FindAndReplaceManager {
   }
 
   _updateMarkers() {
-    let selectedMatch = this._state.selectedMatch
-    this._updateNodeMarkers(selectedMatch.propertyPath)
+    let dirtyNodes = this._dirtyNodes
+    dirtyNodes.forEach(node => {
+      this._updateNodeMarkers(node)
+    })
+    this._dirtyNodes = []
   }
 
   _updateNodeMarkers(path) {
@@ -431,8 +481,6 @@ class FindAndReplaceManager {
     if(!nodeMatch) return 0
     return nodeMatch.matches.length
   }
-
-
 }
 
 export default FindAndReplaceManager
