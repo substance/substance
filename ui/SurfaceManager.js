@@ -103,7 +103,7 @@ class SurfaceManager {
     let focusedSurface = this.getFocusedSurface()
     if (focusedSurface && !focusedSurface.isDisabled()) {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorSession.getSelection().toString());
-      focusedSurface.focus()
+      focusedSurface._focus()
       focusedSurface.rerenderDOMSelection()
     }
   }

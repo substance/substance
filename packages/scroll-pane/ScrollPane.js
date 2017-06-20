@@ -218,7 +218,7 @@ class ScrollPane extends AbstractScrollPane {
         this.setScrollPosition(offset)
       }
     } else {
-      console.warn('No match found for selector in scrollable container')
+      console.warn(`No match found for selector '${selector}' in scrollable container`)
     }
   }
 

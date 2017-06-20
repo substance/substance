@@ -104,6 +104,15 @@ class ContainerEditor extends Surface {
     return el
   }
 
+  selectFirst() {
+    const container = this.getContainer()
+    if (container.getLength() > 0) {
+      const editorSession = this.getEditorSession()
+      const first = container.getChildAt(0)
+      selectionHelpers.setCursor(editorSession, first, container.id, 'before')
+    }
+  }
+
   _renderNode($$, node) {
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
