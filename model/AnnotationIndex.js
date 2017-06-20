@@ -53,8 +53,11 @@ class AnnotationIndex extends DocumentIndex {
   }
 
   create(anno) {
+    const path = anno.start.path
     this.byType.set([anno.type, anno.id], anno)
-    this.byPath.set(anno.start.path.concat([anno.id]), anno)
+    if (path && path.length > 0) {
+      this.byPath.set(anno.start.path.concat([anno.id]), anno)
+    }
   }
 
   delete(anno) {
@@ -63,7 +66,9 @@ class AnnotationIndex extends DocumentIndex {
 
   _delete(type, id, path) {
     this.byType.delete([type, id])
-    this.byPath.delete(path.concat([id]))
+    if (path && path.length > 0) {
+      this.byPath.delete(path.concat([id]))
+    }
   }
 
   update(node, path, newValue, oldValue) {
