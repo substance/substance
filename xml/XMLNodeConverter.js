@@ -13,10 +13,10 @@ class XMLNodeConverter {
   }
 
   matchElement(el) {
-    return el.is(this.tagName)
+    return (el.tagName === this.tagNameNS)
   }
 
-  export(node, el, converter) {
+  export(node, el) {
     el.tagName = this.tagNameNS
     el.setAttributes(node.attributes)
   }
