@@ -1,5 +1,3 @@
-import { Marker } from '../../model'
-
 class FindAndReplaceManager {
 
   constructor(context) {
@@ -203,19 +201,29 @@ class FindAndReplaceManager {
     Replace next occurence
   */
   replaceNext() {
-    let index = this._state.selectedMatch
-    let match = this._state.matches[index]
-    let totalMatches = this._state.matches.length
-    if(match !== undefined) {
+    let selectedMatch = this._state.selectedMatch
+    let matchedNode = this._state.matches[selectedMatch.propertyPath]
+    let totalMatches = this._getMatchesLength()
+    if(matchedNode !== undefined) {
+      let match = matchedNode.matches[selectedMatch.matchIndex]
+      let sel = {
+        type: 'property',
+        path: matchedNode.path,
+        startOffset: match.start,
+        endOffset: match.end,
+        surfaceId: matchedNode.containerId,
+        containerId: matchedNode.containerId
+      }
       this.editorSession.transaction((tx, args) => {
-        tx.setSelection(match.getSelection())
+        tx.setSelection(sel)
         tx.insertText(this._state.replaceString)
         return args
       })
-      this._computeMatches()
-      if(index + 1 < totalMatches) {
-        this._state.selectedMatch = index
-      }
+      this._dirtyNodes.push(selectedMatch.propertyPath)
+      //this._computeMatches()
+      // if(index + 1 < totalMatches) {
+      //   this._state.selectedMatch = index
+      // }
       this._requestLookupMatch = true
       this._setSelection()
       this._propagateUpdate()
