@@ -41,6 +41,8 @@
 }
 
 .sc-isolated-node.sm-no-blocker > .se-bracket {
-  /*display:none;*/
+  /* ATTENTION: do not make this hidden, otherwise Chrome's DOM selection
+     'leaks' into the previous/next line
   visibility: hidden;
+  */
 }

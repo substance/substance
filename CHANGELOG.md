@@ -30,6 +30,7 @@
 - `el.appendChild(null)` does not throw
 - `el.insertBefore(child, null)` is equivalent to `el.appendChild(child)`
 - `surface.focus()` now behaves similar to a HTML input element, i.e. setting the cursor to the first position
+- fixed selection rendering for IsolatedNodes
 
 These changes might break your current implementation and may need some migration:
 
