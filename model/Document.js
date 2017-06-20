@@ -478,6 +478,8 @@ class Document extends EventEmitter {
     contentNodes.concat(annotations).concat(containers).forEach(n=>{
       this.create(n)
     })
+
+    return this
   }
 
   /**
