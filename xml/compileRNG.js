@@ -3,7 +3,7 @@ import { isArray, forEach } from '../util'
 import DFA from './DFA'
 import DFABuilder from './DFABuilder'
 import XMLSchema from './XMLSchema'
-import analyzeSchema from './analyzeSchema'
+import analyzeSchema from './_analyzeSchema'
 
 const TEXT = DFA.TEXT
 const singleToken = DFABuilder.singleToken

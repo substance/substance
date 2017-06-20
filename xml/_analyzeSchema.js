@@ -3,17 +3,6 @@ import DFA from './DFA'
 
 const { START, END, TEXT, EPSILON } = DFA
 
-/*
-  Element types:
-
-  - text: all 'paths' must allow text
-  - element: no 'paths' allow text
-  - hybrid: mixed
-  - annotation: text element used only in text elements
-  - inline: element used only in text elements
-  - anchor: inline element/annotation without content
-
-*/
 export default
 function analyze(xmlSchema) {
   const tagNames = xmlSchema.getTagNames()
