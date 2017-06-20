@@ -26,11 +26,15 @@ class Transaction {
   constructor(master) {
     // using a different name internally
     this.master = master
-    this.stage = master.newInstance()
+    this.stage = master.newInstance().createFromDocument(master)
     this.tx = this.stage.createEditingInterface()
     // internal state
     this._isTransacting = false
     this._surface = null
+
+    // HACK: need to wipe the ops from master as otherwise the next
+    // sync would fail
+    master._ops.length = 0
   }
 
   dispose() {
