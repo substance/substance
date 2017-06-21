@@ -47,6 +47,12 @@ class XMLElementNode extends XMLDocumentNode {
     return this
   }
 
+  getInnerXML() {
+    return this.getChildren().map((child) => {
+      return child.toXML().outerHTML
+    }).join('')
+  }
+
 }
 
 XMLElementNode.prototype.append = DOMElement.prototype.append
