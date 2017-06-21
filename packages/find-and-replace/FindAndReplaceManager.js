@@ -6,7 +6,7 @@ class FindAndReplaceManager {
     }
 
     this.editorSession = context.editorSession
-    this.editorSession.onRender('document', this._onDocumentChanged, this)
+    this.editorSession.onUpdate('document', this._onDocumentChanged, this)
 
     this.doc = this.editorSession.getDocument()
     this.context = Object.assign({}, context, {
@@ -74,13 +74,24 @@ class FindAndReplaceManager {
     this._propagateUpdate()
   }
 
-  _onDocumentChanged() {
+  _onDocumentChanged(change) {
     if (!this._state.disabled) {
-      this._computeMatches()
-      this._state.selectedMatch = 0
-      this._updateMarkers()
+      let ops = change.ops
+      ops.forEach(op => {
+        let path = op.path
+        this._dirtyNodes.push(path.join('/'))
+      })
+      this._updateMatchesAndMarkers()
     }
   }
+
+  setReplaceString(replaceString) {
+    // NOTE: We don't trigger any updates here
+    this._state.replaceString = replaceString
+  }
+
+  // FIND ACTIONS
+  // ============
 
   /*
     Start find and replace workflow
@@ -96,13 +107,8 @@ class FindAndReplaceManager {
     }
   }
 
-  setReplaceString(replaceString) {
-    // NOTE: We don't trigger any updates here
-    this._state.replaceString = replaceString
-  }
-
   /*
-    Find next match.
+    Find next match
   */
   findNext() {
     let selectedMatch = this._state.selectedMatch
@@ -177,25 +183,8 @@ class FindAndReplaceManager {
     this._propagateUpdate()
   }
 
-  _setSelection() {
-    let selectedMatch = this._state.selectedMatch
-    let selectedPath = selectedMatch.propertyPath
-    let matchIndex = selectedMatch.matchIndex
-    let match = this._state.matches[selectedPath]
-    let coord = match.matches[matchIndex]
-    if (!match) return
-    // NOTE: We need to make sure no additional flow is triggered when
-    // setting the selection. We trigger a flow at the very end (_propagateUpdate)
-    let sel = {
-      type: 'property',
-      path: match.path,
-      startOffset: coord.start,
-      endOffset: coord.end,
-      surfaceId: match.containerId,
-      containerId: match.containerId
-    }
-    this.editorSession.setSelection(sel, 'skipFlow')
-  }
+  // REPLACE ACTIONS
+  // ===============
 
   /*
     Replace next occurence
@@ -203,7 +192,7 @@ class FindAndReplaceManager {
   replaceNext() {
     let selectedMatch = this._state.selectedMatch
     let matchedNode = this._state.matches[selectedMatch.propertyPath]
-    let totalMatches = this._getMatchesLength()
+    let matchedNodeLength = this._getNodeMatchesLength(selectedMatch.propertyPath)
     if(matchedNode !== undefined) {
       let match = matchedNode.matches[selectedMatch.matchIndex]
       let sel = {
@@ -221,12 +210,20 @@ class FindAndReplaceManager {
       })
       this._dirtyNodes.push(selectedMatch.propertyPath)
       //this._computeMatches()
-      // if(index + 1 < totalMatches) {
-      //   this._state.selectedMatch = index
-      // }
+      if(selectedMatch.matchIndex < matchedNodeLength - 1) {
+        //this._state.selectedMatch.matchIndex
+      } else {
+        let nextMatchedNodeId = this._getNextMatchedNodeId(selectedMatch.propertyPath)
+        if(nextMatchedNodeId) {
+          this._state.selectedMatch = {
+            propertyPath: nextMatchedNodeId,
+            matchIndex: 0
+          }
+        }
+      }
       this._requestLookupMatch = true
-      this._setSelection()
       this._propagateUpdate()
+      this._setSelection()
     }
   }
 
@@ -236,17 +233,221 @@ class FindAndReplaceManager {
   replaceAll() {
     // Reverse matches order,
     // so the replace operations later are side effect free.
-    let matches = this._state.matches.reverse()
+    let matches = this._state.matches
+    let matchedNodes = Object.keys(matches).reverse()
 
     this.editorSession.transaction((tx, args) => {
-      matches.forEach(match => {
-        tx.setSelection(match.getSelection())
-        tx.insertText(this._state.replaceString)
+      matchedNodes.forEach(nodeId => {
+        let match = matches[nodeId]
+        let matchesLength = match.matches.length
+        let i = matchesLength
+        
+        while(i !== 0) {
+          i--
+          let coord = match.matches[i]
+          let sel = {
+            type: 'property',
+            path: match.path,
+            startOffset: coord.start,
+            endOffset: coord.end,
+            surfaceId: match.containerId,
+            containerId: match.containerId
+          }
+          tx.setSelection(sel)
+          tx.insertText(this._state.replaceString)
+        }
+
+        this._dirtyNodes.push(nodeId)
       })
       return args
     })
 
-    this._computeMatches()
+    this._propagateUpdate()
+  }
+
+  // MARKERS HANDLING
+  // ================
+
+  _createMarkers() {
+    const state = this._state
+
+    for(let nodeId in state.matches) {
+      if (state.matches[nodeId].hasOwnProperty('matches')) {
+        this._updateMarkers(nodeId)
+      }
+    }
+  }
+
+  _updateMarkers(path) {
+    const state = this._state
+    const editorSession = this.editorSession
+    const markersManager = editorSession.markersManager
+    const selectedMatch = state.selectedMatch
+    const node = state.matches[path]
+    let matchesMarkers = []
+
+    if(node) {
+      node.matches.forEach((m, idx) => {
+        let type = path === selectedMatch.propertyPath && selectedMatch.matchIndex === idx ? 'selected-match' : 'match'
+        let marker = {
+          type: type,
+          surfaceId: node.surfaceId,
+          start: {
+            path: node.path,
+            offset: m.start
+          },
+          end: {
+            offset: m.end
+          }
+        }
+        matchesMarkers.push(marker)
+      })
+
+      console.log('setting find-and-replace markers for path:', path, matchesMarkers)
+      markersManager.setMarkers('find-and-replace:' + path, matchesMarkers)
+    }
+  }
+
+  // MATCHES COMPUTATION
+  // ===================
+
+  _computeMatches() {
+    // let currentMatches = this._state.matches
+    // let currentTotal = currentMatches === undefined ? 0 : Object.keys(currentMatches).length
+
+    let newMatches = this._findAllMatches()
+    this._state.matches = newMatches
+    let matches = Object.keys(newMatches)
+    if(matches.length > 0) {
+      this._state.selectedMatch = {
+        propertyPath: matches[0],
+        matchIndex: 0
+      }
+    }
+    // Preserve selection in case of the same number of matches
+    // If the number of matches did changed we will set first selection
+    // If there are no matches we should remove index
+
+    // if(matches.length !== currentTotal) {
+    //   this._state.selectedMatch = matches.length > 0 ? 0 : {}
+    // }
+  }
+
+  /*
+    Returns all matches
+  */
+  _findAllMatches() {
+    let matches = {}
+    let pattern = this._state.findString
+
+    if (pattern) {
+      let surfaceManager = this.context.surfaceManager
+      let surfaces = surfaceManager.getSurfaces()
+
+      surfaces.forEach(surface => {
+        let nodes = surface.getChildNodes()
+
+        nodes.forEach((node) => {
+          let matchedNode = this._findNodeMatches(node, surface)
+          if(matchedNode) {
+            let path = matchedNode.path
+            matches[path.join('/')] = matchedNode
+          }
+        })
+      })
+    }
+
+    return matches
+  }
+
+  /*
+    Compute matches for a given node and surface
+  */
+  _findNodeMatches(node, surface) {
+    let pattern = this._state.findString
+    let content = node.getTextContent()
+    let dataNode = node.props.node
+    if(dataNode.isText()) {
+      if(!surface) surface = node.context.surface
+      let path = dataNode.getTextPath()
+      let matcher = new RegExp(pattern, 'ig')
+      let nodeMatches = []
+      let match
+
+      while ((match = matcher.exec(content))) {
+        nodeMatches.push({
+          start: match.index,
+          end: matcher.lastIndex
+        })
+      }
+
+      if(nodeMatches.length > 0) {
+        return {
+          path: path,
+          surfaceId: surface.id,
+          containerId: surface.containerId,
+          matches: nodeMatches
+        }
+      }
+    }
+
+    return false
+  }
+
+  // HELPERS
+  // =======
+
+  _propagateUpdate(start) { 
+    if(start) {
+      this._createMarkers()
+    } else {
+      this._updateMatchesAndMarkers()
+    }
+    // HACK: we make commandStates dirty in order to trigger re-evaluation
+    this.editorSession._setDirty('commandStates')
+    this.editorSession.startFlow()
+  }
+
+  _updateMatchesAndMarkers() {
+    let surfaceManager = this.editorSession.surfaceManager
+    let matches = this._state.matches
+    let dirtyNodes = this._dirtyNodes
+    dirtyNodes.forEach(nodeId => {
+      let matchedNode = matches[nodeId]
+      let surface = surfaceManager.getSurface(matchedNode.surfaceId)
+      let node = surface.refs[matchedNode.path[0]]
+      let nodeMatches = this._findNodeMatches(node)
+      if(nodeMatches) {
+        matches[nodeId] = nodeMatches
+      } else {
+        delete matches[nodeId]
+      }
+      this._updateMarkers(nodeId)
+    })
+    this._dirtyNodes = []
+  }
+
+  /*
+    Set selection on selected match
+  */
+  _setSelection() {
+    let selectedMatch = this._state.selectedMatch
+    let selectedPath = selectedMatch.propertyPath
+    let matchIndex = selectedMatch.matchIndex
+    let match = this._state.matches[selectedPath]
+    if (!match) return
+    let coord = match.matches[matchIndex]
+    // NOTE: We need to make sure no additional flow is triggered when
+    // setting the selection. We trigger a flow at the very end (_propagateUpdate)
+    let sel = {
+      type: 'property',
+      path: match.path,
+      startOffset: coord.start,
+      endOffset: coord.end,
+      surfaceId: match.containerId,
+      containerId: match.containerId
+    }
+    this.editorSession.setSelection(sel, 'skipFlow')
   }
 
   /*
@@ -286,7 +487,7 @@ class FindAndReplaceManager {
       if(selNodeIdIndex > -1) {
         let closestNode = matches[selNodeId]
         let pos = closestNode.matches.findIndex(match => {
-          return match.start > selStart
+          return match.start >= selStart
         })
         // There are matches inside selected node after selection
         if(pos > -1) {
@@ -297,7 +498,7 @@ class FindAndReplaceManager {
         // If there are no matches after selection in selected node,
         // then we should get first match from next matched node (if it is exists)
         } else if (matchesIds.length > selNodeIdIndex + 1) {
-          let nodeId = matchesIds[selNodeIdIndex + 1]
+          let nodeId = this._getNextMatchedNodeId(selNodeId)
           //let node = matches[nodeId]
           closest = {
             propertyPath: nodeId,
@@ -324,134 +525,9 @@ class FindAndReplaceManager {
     return closest
   }
 
-  _computeMatches() {
-    // let currentMatches = this._state.matches
-    // let currentTotal = currentMatches === undefined ? 0 : Object.keys(currentMatches).length
-
-    let newMatches = this._findAllMatches()
-    this._state.matches = newMatches
-    let matches = Object.keys(newMatches)
-    if(matches.length > 0) {
-      this._state.selectedMatch = {
-        propertyPath: matches[0],
-        matchIndex: 0
-      }
-    }
-    // Preserve selection in case of the same number of matches
-    // If the number of matches did changed we will set first selection
-    // If there are no matches we should remove index
-
-    // if(matches.length !== currentTotal) {
-    //   this._state.selectedMatch = matches.length > 0 ? 0 : {}
-    // }
-  }
-
   /*
-    Returns all matches
+    Returns number of all matches
   */
-  _findAllMatches() {
-    let pattern = this._state.findString
-
-    let matches = {}
-    if (pattern) {
-      let surfaceManager = this.context.surfaceManager
-      let surfaces = surfaceManager.getSurfaces()
-
-      surfaces.forEach(surface => {
-        let nodes = surface.getChildNodes()
-
-        nodes.forEach((node) => {
-          let content = node.getTextContent()
-          let dataNode = node.props.node
-          let path = []
-          if(dataNode.getPath) {
-            path = dataNode.getPath()
-          } else {
-            path.push(surface.id, dataNode.id)
-          }
-          let matcher = new RegExp(pattern, 'ig')
-          let nodeMatches = []
-          let match
-
-          while ((match = matcher.exec(content))) {
-            nodeMatches.push({
-              start: match.index,
-              end: matcher.lastIndex
-            })
-          }
-
-          if(nodeMatches.length > 0) {
-            matches[path.join('/')] = {
-              path: path,
-              surfaceId: surface.id,
-              containerId: surface.containerId,
-              matches: nodeMatches
-            }
-          }
-        })
-      })
-    }
-
-    return matches
-  }
-
-  _propagateUpdate(start) { 
-    if(start) {
-      this._createMarkers()
-    } else {
-      this._updateMarkers()
-    }
-    // HACK: we make commandStates dirty in order to trigger re-evaluation
-    this.editorSession._setDirty('commandStates')
-    this.editorSession.startFlow()
-  }
-
-  _createMarkers() {
-    const state = this._state
-
-    for(let nodeId in state.matches) {
-      if (state.matches[nodeId].hasOwnProperty('matches')) {
-        this._updateNodeMarkers(nodeId)
-      }
-    }
-  }
-
-  _updateMarkers() {
-    let dirtyNodes = this._dirtyNodes
-    dirtyNodes.forEach(node => {
-      this._updateNodeMarkers(node)
-    })
-    this._dirtyNodes = []
-  }
-
-  _updateNodeMarkers(path) {
-    const state = this._state
-    const editorSession = this.editorSession
-    const markersManager = editorSession.markersManager
-    const selectedMatch = state.selectedMatch
-    const node = state.matches[path]
-    let matchesMarkers = []
-
-    node.matches.forEach((m, idx) => {
-      let type = path === selectedMatch.propertyPath && selectedMatch.matchIndex === idx ? 'selected-match' : 'match'
-      let marker = {
-        type: type,
-        surfaceId: node.surfaceId,
-        start: {
-          path: node.path,
-          offset: m.start
-        },
-        end: {
-          offset: m.end
-        }
-      }
-      matchesMarkers.push(marker)
-    })
-
-    console.log('setting find-and-replace markers for path:', path, matchesMarkers)
-    markersManager.setMarkers('find-and-replace:' + path, matchesMarkers)
-  }
-
   _getMatchesLength() {
     const state = this._state
     let length = 0
@@ -467,6 +543,9 @@ class FindAndReplaceManager {
     return length
   }
 
+  /*
+    Returns number of matches for a given property path
+  */
   _getNodeMatchesLength(nodeId) {
     const state = this._state
     let nodeMatch = state.matches[nodeId]
@@ -474,6 +553,9 @@ class FindAndReplaceManager {
     return nodeMatch.matches.length
   }
 
+  /*
+    Returns index of currently selected match
+  */
   _getSelectedMatchIndex() {
     let selectedMatch = this._state.selectedMatch
     let matches = this._state.matches
@@ -494,6 +576,27 @@ class FindAndReplaceManager {
 
     return index
   }
+
+  /*
+    Returns id of next node with matches or false if there is no one
+  */
+  _getNextMatchedNodeId(propertyPath) {
+    let matches = this._state.matches
+    let matchesKeys = Object.keys(matches)
+    let currentIndex = matchesKeys.indexOf(propertyPath)
+
+    if(matchesKeys.length === currentIndex + 1) {
+      if(matchesKeys.length > 1) {
+        return matchesKeys[0]
+      } else {
+        return false
+      }
+    }
+
+    let nextNodeId = matchesKeys[currentIndex + 1]
+    return nextNodeId
+  }
+
 }
 
 export default FindAndReplaceManager
