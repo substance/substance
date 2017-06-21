@@ -44,7 +44,7 @@ function _createElement(dom, node) {
 
 function _renderElementNode(dom, node) {
   let el = _createElement(dom, node)
-  el.append(el.getChildren().map(child => _node2element(dom, child)))
+  el.append(node.getChildren().map(child => _node2element(dom, child)))
   return el
 }
 
