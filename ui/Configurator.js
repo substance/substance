@@ -544,6 +544,14 @@ class Configurator {
     return this.config.keyboardShortcuts
   }
 
+  getFindAndReplaceConfig() {
+    return this.config.findAndReplace
+  }
+
+  setFindAndReplaceConfig(config) {
+    this.config.findAndReplace = config
+  }
+
   /*
     Allows lookup of a keyboard shortcut by command name
   */

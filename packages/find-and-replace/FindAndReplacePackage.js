@@ -10,7 +10,7 @@ import FindAndReplaceManager from './FindAndReplaceManager'
 
 export default {
   name: 'find-and-replace',
-  configure: function(config) {
+  configure: function(config, userConfig) {
     config.addCommand('find-and-replace', FindAndReplaceCommand, {
       commandGroup: 'workflows'
     })
@@ -45,6 +45,7 @@ export default {
       en: 'Find and replace',
       de: 'Suchen und Ersetzen'
     })
+    config.setFindAndReplaceConfig(userConfig)
   },
   FindAndReplaceCommand,
   ToggleFindAndReplaceCommand,

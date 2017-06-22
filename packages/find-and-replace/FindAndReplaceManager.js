@@ -230,28 +230,47 @@ class FindAndReplaceManager {
     }
   }
 
+
   /*
     Returns all matches
   */
   _findAllMatches() {
-    const doc = this.doc
-    const nodes = doc.getNodes()
+    let textProperties = this._getAllAffectedTextPropertiesInOrder()
     const pattern = this._state.findString
-
     let matches = []
     if (pattern) {
-      Object.keys(nodes).forEach((nodeId) => {
-        let node = doc.get(nodeId)
-        if(node.isText()) {
-          let found = this._findInTextProperty({
-            path: [node.id, 'content'],
-            findString: pattern
-          })
-          matches = matches.concat(found)
-        }
+      textProperties.forEach((textProperty) => {
+        let found = this._findInTextProperty({
+          path: textProperty.path,
+          findString: pattern
+        })
+        matches = matches.concat(found)
       })
     }
     return matches
+  }
+
+  /*
+    We just look up text properties visually for each provided surface
+
+    NOTE: by doing this on the DOM we also get child surfaces
+    (e.g. FigureCaptionEditor). Moreover visual order is reflected, which
+    is important for a seamless UX.
+  */
+  _getAllAffectedTextPropertiesInOrder() {
+    let textProperties = []
+    const targetSurfaces = this._getTargetSurfaces()
+    targetSurfaces.forEach((surfaceId) => {
+      let surface = this.editorSession.getSurface(surfaceId)
+      textProperties = textProperties.concat(
+        surface.findAll('.sc-text-property').map((tpc) => {
+          return {
+            path: tpc.props.path
+          }
+        })
+      )
+    })
+    return textProperties
   }
 
   /*
@@ -300,6 +319,22 @@ class FindAndReplaceManager {
     })
     // console.log('setting find-and-replace markers', state.matches)
     markersManager.setMarkers('find-and-replace', state.matches)
+  }
+
+  /*
+    Get surfaces which are relevant for the search
+
+    For instance if you have a titleEditor (TextPropertyEditor) and a bodyEditor
+    (ContainerEditor) you use the following configuration
+
+    config.import(FindAndReplacePackage, {
+      targetSurfaces: ['title-editor', 'body']
+    })
+  */
+  _getTargetSurfaces() {
+    let configurator = this.editorSession.getConfigurator()
+    let config = configurator.getFindAndReplaceConfig()
+    return config.targetSurfaces
   }
 
 }

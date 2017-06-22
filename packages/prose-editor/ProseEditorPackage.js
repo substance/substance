@@ -32,7 +32,9 @@ export default {
     config.import(CodeblockPackage)
     config.import(CodePackage)
     config.import(EmphasisPackage)
-    config.import(FindAndReplacePackage)
+    config.import(FindAndReplacePackage, {
+      targetSurfaces: ['body']
+    })
     config.import(StrongPackage)
     config.import(SubscriptPackage)
     config.import(SuperscriptPackage)
