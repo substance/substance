@@ -102,7 +102,7 @@ class FindAndReplaceManager {
     this._state.selectedMatch = this._getClosestMatch()
     this._requestLookupMatch = true
     this._propagateUpdate(true)
-    if(this._state.matchedNodes.length > 0) {
+    if(this._getMatchesLength() > 0) {
       this._setSelection()
     }
   }
@@ -262,6 +262,7 @@ class FindAndReplaceManager {
       return args
     })
 
+    this._state.selectedMatch = {}
     this._propagateUpdate()
   }
 
@@ -303,7 +304,6 @@ class FindAndReplaceManager {
         matchesMarkers.push(marker)
       })
 
-      console.log('setting find-and-replace markers for path:', path, matchesMarkers)
       markersManager.setMarkers('find-and-replace:' + path, matchesMarkers)
     }
   }
@@ -312,9 +312,6 @@ class FindAndReplaceManager {
   // ===================
 
   _computeMatches() {
-    // let currentMatches = this._state.matches
-    // let currentTotal = currentMatches === undefined ? 0 : Object.keys(currentMatches).length
-
     let newMatches = this._findAllMatches()
     this._state.matches = newMatches
     let matches = Object.keys(newMatches)
@@ -323,14 +320,9 @@ class FindAndReplaceManager {
         propertyPath: matches[0],
         matchIndex: 0
       }
+    } else {
+      this._state.selectedMatch = {}
     }
-    // Preserve selection in case of the same number of matches
-    // If the number of matches did changed we will set first selection
-    // If there are no matches we should remove index
-
-    // if(matches.length !== currentTotal) {
-    //   this._state.selectedMatch = matches.length > 0 ? 0 : {}
-    // }
   }
 
   /*
@@ -341,7 +333,7 @@ class FindAndReplaceManager {
     let pattern = this._state.findString
 
     if (pattern) {
-      let surfaceManager = this.context.surfaceManager
+      let surfaceManager = this.editorSession.surfaceManager
       let surfaces = surfaceManager.getSurfaces()
 
       surfaces.forEach(surface => {
@@ -560,7 +552,7 @@ class FindAndReplaceManager {
     let selectedMatch = this._state.selectedMatch
     let matches = this._state.matches
     let index = 0
-    if(!selectedMatch.propertyPath) return index
+    if(!selectedMatch.propertyPath) return undefined
 
     for(let nodeId in matches) {
       if(matches[nodeId]) {
@@ -572,7 +564,7 @@ class FindAndReplaceManager {
       }
     }
 
-    index += selectedMatch.matchIndex + 1
+    index += selectedMatch.matchIndex
 
     return index
   }
