@@ -251,7 +251,7 @@ class FindAndReplaceManager {
   }
 
   /*
-    We just look up text properties visually for each provided surface
+    We just look up text properties visually for a given rootElement
 
     NOTE: by doing this on the DOM we also get child surfaces
     (e.g. FigureCaptionEditor). Moreover visual order is reflected, which
@@ -259,14 +259,11 @@ class FindAndReplaceManager {
   */
   _getAllAffectedTextPropertiesInOrder() {
     let textProperties = []
-    const targetSurfaces = this._getTargetSurfaces()
-    targetSurfaces.forEach((surfaceId) => {
-      let surface = this.editorSession.getSurface(surfaceId)
-      textProperties = textProperties.concat(
-        surface.findAll('.sc-text-property').map((tpc) => {
-          return tpc.props.path
-        })
-      )
+    const editor = this.editorSession.getEditor()
+    // Where to look for text properties?
+    const rootElement = editor.find(this.getRootElementSelector()) || editor
+    textProperties = rootElement.findAll('.sc-text-property').map((tpc) => {
+      return tpc.props.path
     })
     return textProperties
   }
@@ -320,19 +317,16 @@ class FindAndReplaceManager {
   }
 
   /*
-    Get surfaces which are relevant for the search
-
-    For instance if you have a titleEditor (TextPropertyEditor) and a bodyEditor
-    (ContainerEditor) you use the following configuration
+    Get root element in which the search should be performed
 
     config.import(FindAndReplacePackage, {
-      targetSurfaces: ['title-editor', 'body']
+      rootElement: '.sc-article'
     })
   */
-  _getTargetSurfaces() {
+  getRootElementSelector() {
     let configurator = this.editorSession.getConfigurator()
     let config = configurator.getFindAndReplaceConfig()
-    return config.targetSurfaces
+    return config.rootElement
   }
 
 }

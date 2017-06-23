@@ -237,6 +237,21 @@ class EditorSession extends EventEmitter {
     this.commandManager.executeCommand(...args)
   }
 
+  /*
+    Set EditorComponent associated with this editorSession
+  */
+  attachEditor(editor) {
+    this.editor = editor
+  }
+
+  detachEditor() {
+    this.editor = undefined
+  }
+
+  getEditor() {
+    return this.editor
+  }
+
   setSelection(sel, skipFlow) {
     // console.log('EditorSession.setSelection()', sel)
     if (sel && isPlainObject(sel)) {

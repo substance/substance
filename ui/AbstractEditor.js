@@ -24,6 +24,15 @@ class AbstractEditor extends Component {
     this._initialize(this.props)
   }
 
+  didMount() {
+    // Connect editorSession with editor component
+    this.getEditorSession().attachEditor(this)
+  }
+
+  dispose() {
+    this.getEditorSession().detachEditor(this)
+  }
+
   _initialize(props) {
     if (!props.editorSession) {
       throw new Error('EditorSession instance required');
