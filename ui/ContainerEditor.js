@@ -67,7 +67,7 @@ class ContainerEditor extends Surface {
     editorSession.onUpdate('document', this._onContainerChanged, this, {
       path:  this.container.getContentPath()
     })
-
+    this._attachPlaceholder()
   }
 
   dispose() {
@@ -91,8 +91,8 @@ class ContainerEditor extends Surface {
     // native spellcheck
     el.attr('spellcheck', this.props.spellcheck === 'native')
 
-    containerNode.getNodes().forEach(function(node) {
-      el.append(this._renderNode($$, node))
+    containerNode.getNodes().forEach(function(node, index) {
+      el.append(this._renderNode($$, node, index))
     }.bind(this))
 
     // No editing if disabled by user or container is empty
@@ -113,17 +113,18 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _renderNode($$, node) {
+  _renderNode($$, node, nodeIndex) {
+    let props = { node }
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
-      return super.renderNode($$, node)
+      return super.renderNode($$, node, nodeIndex)
     } else {
       let componentRegistry = this.context.componentRegistry
       let ComponentClass = componentRegistry.get(node.type)
       if (ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
-        return $$(ComponentClass, { node: node }).ref(node.id)
+        return $$(ComponentClass, props).ref(node.id)
       } else {
-        return $$(IsolatedNodeComponent, { node: node }).ref(node.id)
+        return $$(IsolatedNodeComponent, props).ref(node.id)
       }
     }
   }
@@ -265,6 +266,26 @@ class ContainerEditor extends Surface {
     return (containerNode && containerNode.length === 0)
   }
 
+  /*
+    Adds a placeholder if needed
+  */
+  _attachPlaceholder() {
+    let firstNode = this.childNodes[0]
+    // Remove old placeholder if necessary
+    if (this.placeholderNode) {
+      this.placeholderNode.extendProps({
+        placeholder: undefined
+      })
+    }
+
+    if (this.childNodes.length === 1 && this.props.placeholder) {
+      firstNode.extendProps({
+        placeholder: this.props.placeholder
+      })
+      this.placeholderNode = firstNode
+    }
+  }
+
   isEditable() {
     return super.isEditable.call(this) && !this.isEmpty()
   }
@@ -299,7 +320,9 @@ class ContainerEditor extends Surface {
         }
       }
     }
+    this._attachPlaceholder()
   }
+
 }
 
 ContainerEditor.prototype._isContainerEditor = true

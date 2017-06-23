@@ -30,6 +30,10 @@ class AnnotatedTextComponent extends Component {
     return this.getDocument().get(this.props.path) || ''
   }
 
+  isEmpty() {
+    return !(this.getText())
+  }
+
   getAnnotations() {
     return this.getDocument().getIndex('annotations').get(this.props.path)
   }

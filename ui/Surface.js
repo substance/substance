@@ -142,6 +142,7 @@ class Surface extends Component {
       ComponentClass = UnsupportedNode
     }
     return $$(ComponentClass, {
+      placeholder: this.props.placeholder,
       doc: doc,
       node: node
     }).ref(node.id)

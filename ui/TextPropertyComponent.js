@@ -64,6 +64,8 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   render($$) {
     let path = this.getPath()
 
+
+
     let el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
@@ -73,9 +75,21 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         'white-space': 'pre-wrap'
       })
 
+    if (this.isEmpty()) {
+      el.addClass('sm-empty')
+      if (this.props.placeholder) {
+        el.append(
+          $$('span').addClass('se-placeholder').append(
+            this.props.placeholder
+          )
+        )
+      }
+    }
+
     if (!this.props.withoutBreak) {
       el.append($$('br'))
     }
+
     return el
   }
 
@@ -242,10 +256,17 @@ TextPropertyComponent.getCoordinate = function(root, el, offset) {
   if (!context) {
     return null
   }
-  // in some cases we need to normalize the DOM coordinate
-  // before we can use it for retrieving charPos
-  // E.g. observed with #273
-  let charPos = _getCharPos(context.node, context.offset)
+  // EXPERIMENTAL: trying to detect
+  // TODO: add tests and remove this comment when mature
+  let charPos
+  if (el.parentNode && el.parentNode.is('.se-placeholder')) {
+    charPos = 0
+  } else {
+    // in some cases we need to normalize the DOM coordinate
+    // before we can use it for retrieving charPos
+    // E.g. observed with #273
+    charPos = _getCharPos(context.node, context.offset)
+  }
   if (isNumber(charPos)) {
     let coor = new Coordinate(context.path, charPos)
     coor._comp = context.comp
