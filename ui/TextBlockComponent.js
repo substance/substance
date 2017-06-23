@@ -32,6 +32,7 @@ class TextBlockComponent extends NodeComponent {
       el.addClass('sm-align-'+node.textAlign)
     }
     el.append($$(TextProperty, {
+      placeholder: this.props.placeholder,
       path: node.getTextPath(),
       direction: node.direction
     }))
