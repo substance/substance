@@ -10,7 +10,6 @@ function analyze(xmlSchema) {
   const elementSchemas = tagNames.map((name) => {
     const elementSchema = xmlSchema.getElementSchema(name)
     Object.assign(elementSchema, {
-      type: 'element',
       children: {},
       parents: {},
     })
@@ -51,7 +50,10 @@ function analyze(xmlSchema) {
 
 function _analyzeElementSchema(elementSchema, xmlSchema) {
   const dfa = elementSchema.dfa
-  if (!dfa.transitions) return
+  if (!dfa.transitions) {
+    if (elementSchema.type === 'implicit') elementSchema.type = 'element'
+    return
+  }
   const name = elementSchema.name
   // group start edges by follow state
   let first = {}
@@ -126,10 +128,14 @@ function _analyzeElementSchema(elementSchema, xmlSchema) {
   if (hasText) {
     elementSchema.isText = true
   }
-  // automatic classification
-  if (hasElements && hasText) {
-    elementSchema.type = 'hybrid'
-  } else if (hasText) {
-    elementSchema.type = 'text'
+  if (elementSchema.type === 'implicit') {
+    // automatic classification
+    if (hasElements && hasText) {
+      elementSchema.type = 'hybrid'
+    } else if (hasText) {
+      elementSchema.type = 'text'
+    } else {
+      elementSchema.type = 'element'
+    }
   }
 }
