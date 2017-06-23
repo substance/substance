@@ -30,7 +30,7 @@ class AbstractEditor extends Component {
   }
 
   dispose() {
-    this.getEditorSession().detachEditor(this)
+    this._dispose()
   }
 
   _initialize(props) {
@@ -77,11 +77,8 @@ class AbstractEditor extends Component {
     }
   }
 
-  dispose() {
-    this._dispose()
-  }
-
   _dispose() {
+    this.getEditorSession().detachEditor(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
