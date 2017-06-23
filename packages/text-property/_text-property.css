@@ -1,4 +1,4 @@
-.sc-text-property { white-space: pre-wrap; }
+.sc-text-property { white-space: pre-wrap; position: relative; }
 .sc-text-property .se-cursor { position: relative; }
 .sc-text-property .se-cursor .se-cursor-inner {
   position: absolute;
@@ -8,6 +8,16 @@
   width: 1px;
   background: #999;
 }
+
+.sc-text-property.sm-empty .se-placeholder {
+  position: absolute;
+  color: #aaa;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 /* Cursor */
 .sc-text-property .se-cursor.sm-collaborator-1  .se-cursor-inner { background: var(--collaborator-color-1); }
 .sc-text-property .se-cursor.sm-collaborator-2  .se-cursor-inner { background: var(--collaborator-color-2); }

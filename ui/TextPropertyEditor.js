@@ -51,6 +51,7 @@ class TextPropertyEditor extends Surface {
 
     el.append(
       $$(TextPropertyComponent, {
+        placeholder: this.props.placeholder,
         tagName: this.props.tagName || "div",
         path: this.props.path,
         markers: this.props.markers,

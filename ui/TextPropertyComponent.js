@@ -64,6 +64,8 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   render($$) {
     let path = this.getPath()
 
+
+
     let el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
@@ -73,9 +75,21 @@ class TextPropertyComponent extends AnnotatedTextComponent {
         'white-space': 'pre-wrap'
       })
 
+    if (this.isEmpty()) {
+      el.addClass('sm-empty')
+      if (this.props.placeholder) {
+        el.append(
+          $$('span').addClass('se-placeholder').append(
+            this.props.placeholder
+          )
+        )
+      }
+    }
+
     if (!this.props.withoutBreak) {
       el.append($$('br'))
     }
+
     return el
   }
 
