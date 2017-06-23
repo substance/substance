@@ -1,12 +1,9 @@
 import { module } from 'substance-test'
-import { FindAndReplacePackage } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import simple from './fixture/simple'
-
-const { FindAndReplaceManager } = FindAndReplacePackage
+import TestFindAndReplaceManager from './fixture/TestFindAndReplaceManager'
 
 /*
-
 Priorities:
 
   [ ] implement search and replace functionality on model level
@@ -25,7 +22,7 @@ const test = module('FindAndReplaceManager')
 
 test("Find matches and select first after current selection", function(t) {
   let { editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 7, endOffset: 7 })
   manager.startFind('123')
   let matches = manager._state.matches
@@ -42,7 +39,7 @@ test("Find matches and select first after current selection", function(t) {
 
 test("Select next match", function(t) {
   let { editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
 
   manager.startFind('123')
   manager.findNext()
@@ -61,7 +58,7 @@ test("Select next match", function(t) {
 
 test("Select previous match", function(t) {
   let { editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
   manager.findPrevious()
   t.equal(manager._state.matches.length, 4, 'Should have 4 matches selected')
@@ -76,7 +73,7 @@ test("Select previous match", function(t) {
 
 test("Replace first match", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 1, endOffset: 1 })
   manager.startFind('123')
   manager.setReplaceString('XXX')
@@ -95,7 +92,7 @@ test("Replace first match", function(t) {
 
 test("Replace second match", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
   manager.setReplaceString('XXX')
   manager.findNext()
@@ -114,7 +111,7 @@ test("Replace second match", function(t) {
 
 test("Replace match with longer string", function(t) {
   let { editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
   manager.setReplaceString('XXXX')
   manager.replaceNext()
@@ -130,7 +127,7 @@ test("Replace match with longer string", function(t) {
 
 test("Replace all one by one from third match", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   editorSession.setSelection({ type: 'property', path: ['p3', 'content'], startOffset: 1, endOffset: 1 })
   manager.startFind('123')
   manager.setReplaceString('XXX')
@@ -159,7 +156,7 @@ test("Replace all one by one from third match", function(t) {
 
 test("Replace all matches", function(t) {
   let { doc, editorSession } = setupEditor(t, simple)
-  let manager = new FindAndReplaceManager({editorSession})
+  let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
   manager.setReplaceString('XXX')
   t.equal(manager._state.matches.length, 4, 'Should have 4 matches selected')
