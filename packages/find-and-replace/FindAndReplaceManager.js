@@ -239,9 +239,9 @@ class FindAndReplaceManager {
     const pattern = this._state.findString
     let matches = []
     if (pattern) {
-      textProperties.forEach((textProperty) => {
+      textProperties.forEach((textPropertyPath) => {
         let found = this._findInTextProperty({
-          path: textProperty.path,
+          path: textPropertyPath,
           findString: pattern
         })
         matches = matches.concat(found)
@@ -264,9 +264,7 @@ class FindAndReplaceManager {
       let surface = this.editorSession.getSurface(surfaceId)
       textProperties = textProperties.concat(
         surface.findAll('.sc-text-property').map((tpc) => {
-          return {
-            path: tpc.props.path
-          }
+          return tpc.props.path
         })
       )
     })
