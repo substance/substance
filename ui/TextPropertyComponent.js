@@ -256,10 +256,17 @@ TextPropertyComponent.getCoordinate = function(root, el, offset) {
   if (!context) {
     return null
   }
-  // in some cases we need to normalize the DOM coordinate
-  // before we can use it for retrieving charPos
-  // E.g. observed with #273
-  let charPos = _getCharPos(context.node, context.offset)
+  // EXPERIMENTAL: trying to detect
+  // TODO: add tests and remove this comment when mature
+  let charPos
+  if (el.parentNode && el.parentNode.is('.se-placeholder')) {
+    charPos = 0
+  } else {
+    // in some cases we need to normalize the DOM coordinate
+    // before we can use it for retrieving charPos
+    // E.g. observed with #273
+    charPos = _getCharPos(context.node, context.offset)
+  }
   if (isNumber(charPos)) {
     let coor = new Coordinate(context.path, charPos)
     coor._comp = context.comp
