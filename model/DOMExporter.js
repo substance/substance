@@ -68,14 +68,14 @@ class DOMExporter {
     if (!container) {
       throw new Error('Illegal arguments: container is mandatory.')
     }
-    var doc = container.getDocument()
+    const doc = container.getDocument()
     this.state.doc = doc
-    var elements = []
-    container.nodes.forEach(function(id) {
-      var node = doc.get(id)
-      var nodeEl = this.convertNode(node)
+    let elements = []
+    container.getContent().forEach((id) => {
+      const node = doc.get(id)
+      const nodeEl = this.convertNode(node)
       elements.push(nodeEl)
-    }.bind(this))
+    })
     return elements
   }
 

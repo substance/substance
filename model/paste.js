@@ -36,18 +36,18 @@ function paste(tx, args) {
   if (!sel.isCollapsed()) {
     tx.deleteSelection()
   }
-  let nodes = pasteDoc.get(Document.SNIPPET_ID).nodes
-  let schema = tx.getSchema()
-  if (nodes.length > 0) {
-    let first = pasteDoc.get(nodes[0])
-    if (schema.isInstanceOf(first.type, 'text')) {
+  let snippet = pasteDoc.get(Document.SNIPPET_ID)
+  if (snippet.getLength() > 0) {
+    let first = snippet.getChildAt(0)
+    if (first.isText()) {
       _pasteAnnotatedText(tx, pasteDoc)
-      // HACK: this changes the container's nodes array.
-      // We do this, to be able to call _pasteDocument inserting the remaining nodes
-      nodes.shift()
+      // now we remove the first node from the snippet,
+      // so that we can call _pasteDocument for the remaining
+      // content
+      snippet.hideAt(0)
     }
     // if still nodes left > 0
-    if (nodes.length > 0) {
+    if (snippet.getLength() > 0) {
       _pasteDocument(tx, pasteDoc)
     }
   }
@@ -208,7 +208,12 @@ function _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited) {
     }
     // Look for text properties and create annotations in the target doc accordingly
     else if (prop.isText()) {
-      let _annos = annotationIndex.get([node.id])
+      // This is really difficult in general
+      // as we don't know where to look for.
+      // TODO: ATM we only look for annotations.
+      // We should also consider anchors / container-annotations
+      // Probably we need a different approach, may
+      let _annos = annotationIndex.get([oldId, prop.name])
       for (let i = 0; i < _annos.length; i++) {
         let anno = _annos[i]
         if (anno.start.path[0] === oldId) {

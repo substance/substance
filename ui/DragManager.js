@@ -380,15 +380,15 @@ class MoveBlockNode extends DragAndDropHandler {
     let containerId = dragState.targetSurface.getContainerId()
     let surfaceId = dragState.targetSurface.getName()
     let container = tx.get(containerId)
-    let targetNode = container.nodes[insertPos]
+    let targetNodeId = container.getNodeIdAt(insertPos)
     let insertMode = 'before'
-    if (!targetNode) {
-      targetNode = container.nodes[insertPos-1]
+    if (!targetNodeId) {
+      targetNodeId = container.getNodeIdAt(insertPos-1)
       insertMode = 'after'
     }
     tx.setSelection({
       type: 'node',
-      nodeId: targetNode,
+      nodeId: targetNodeId,
       mode: insertMode,
       containerId: containerId,
       surfaceId: surfaceId
@@ -443,10 +443,10 @@ class InsertNodes extends DragAndDropHandler {
     let containerId = dragState.targetSurface.getContainerId()
     let surfaceId = dragState.targetSurface.id
     let container = tx.get(containerId)
-    let targetNode = container.nodes[insertPos]
+    let targetNode = container.getNodeIdAt(insertPos)
     let insertMode = 'before'
     if (!targetNode) {
-      targetNode = container.nodes[insertPos-1]
+      targetNode = container.getNodeIdAt(insertPos-1)
       insertMode = 'after'
     }
     tx.setSelection({

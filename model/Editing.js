@@ -282,7 +282,7 @@ class Editing {
 
     // delete inner nodes
     for (let i = endPos-1; i > startPos; i--) {
-      let nodeId = container.nodes[i]
+      let nodeId = container.getNodeIdAt(i)
       container.hideAt(i)
       documentHelpers.deleteNode(tx, tx.get(nodeId))
     }
