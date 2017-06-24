@@ -280,3 +280,6 @@ b.task('dev', ['clean', 'lib:browser:dev', 'docs', 'test:browser'])
 
 b.task('test', ['test:node', 'cover'])
 .describe('runs the test suite')
+
+b.setServerPort(4001)
+b.serve({ static: true, route: '/', folder: '.' })
