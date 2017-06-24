@@ -267,7 +267,7 @@ class DomUtils {
     let output = [];
     for(var i = 0; i < dom.length; i++){
       let elem = dom[i];
-      if (elem.type === 'root') {
+      if (elem.type === 'root' || elem.type === 'document') {
         output.push(this.render(this.getChildren(elem), opts));
       } else if (ElementType.isTag(elem)) {
         output.push(this.renderTag(elem, opts));
