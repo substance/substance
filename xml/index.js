@@ -19,6 +19,7 @@ import serializeXMLSchema from './serializeXMLSchema'
 import registerSchema from './registerSchema'
 import SchemaDrivenCommandManager from './SchemaDrivenCommandManager'
 import loadRNG from './_loadRNG'
+import validateXMLSchema from './validateXML'
 
 export {
   XMLAnchorNode,
@@ -41,5 +42,6 @@ export {
   compileRNG,
   registerSchema,
   SchemaDrivenCommandManager,
-  loadRNG
+  loadRNG,
+  validateXMLSchema
 }

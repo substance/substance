@@ -19,6 +19,12 @@ export default class XMLSchema {
   getElementSchema(name) {
     return this._elementSchemas[name]
   }
+
+  getStartElement() {
+    // TODO: we should extract this from RNG
+    // for now you must override this method
+    throw new Error('This method is abstract')
+  }
 }
 
 class ElementSchema {
