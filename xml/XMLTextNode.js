@@ -23,7 +23,11 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
     i.e., annotations are not stored hierarchically.
   */
   getChildren() {
-    return this.getAnnotations()
+    const annos = this.getAnnotations()
+    // sorting here by start.offset so that
+    // childNodes appear in natural order
+    annos.sort(_byStartOffset)
+    return annos
   }
 
   setText(text) {
@@ -85,4 +89,8 @@ XMLTextNode.type = 'text'
 
 XMLTextNode.schema = {
   content: "text"
+}
+
+function _byStartOffset(a,b) {
+  return a.start.offset - b.start.offset
 }
