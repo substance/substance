@@ -87,11 +87,14 @@ class ToolDropdown extends ToolGroup {
     Turn commandStates into menu items
   */
   _getMenuItems(commandStates) {
+    const showDisabled = (this.props.showDisabled !== false)
     let menuItems = []
     forEach(commandStates, (commandState, commandName) => {
-      menuItems.push({
-        command: commandName
-      })
+      if (!commandState.disabled || showDisabled) {
+        menuItems.push({
+          command: commandName
+        })
+      }
     })
     return menuItems
   }
