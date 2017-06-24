@@ -350,18 +350,21 @@ function _render(state, vel) {
         continue
       }
 
+      // deep-render the virtual component if not yet done
       if (!state.isRendered(virtualComp)) {
         _render(state, virtualComp)
       }
 
       newComp = virtualComp._comp
 
+      // update the parent for relocated components
       // ATTENTION: relocating a component does not update its context
       if (state.isRelocated(newComp)) {
         newComp._setParent(comp)
       }
 
       console.assert(newComp, 'Component instance should now be available.')
+
       // append remaining new ones if no old one is left
       if (virtualComp && !oldComp) {
         _appendChild(state, comp, newComp)
@@ -372,9 +375,14 @@ function _render(state, vel) {
         // identity
         if (newComp === oldComp) {
           // no structural change
-        } else {
+        } else if (state.isMapped(oldComp)) {
           // the order of elements with ref has changed
           state.setDetached(oldComp)
+          _removeChild(state, comp, oldComp)
+          pos2--
+        }
+        // the old one could not be mapped, thus can be removed
+        else {
           _removeChild(state, comp, oldComp)
           pos2--
         }
@@ -804,6 +812,8 @@ class RenderingState {
     return Boolean(this.get(c, 'mapped'))
   }
 
+  // 'relocated' means a node with ref
+  // has been attached to a new parent node
   setRelocated(c) {
     this.set(c, 'relocated', true)
   }

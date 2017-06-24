@@ -1332,4 +1332,38 @@ function ComponentTests(debug, memory) {
     t.equal(simple.textContent, 'Child 1', '.. with correct text content')
     t.end()
   })
+
+  test("#1070 Disposing nested components", (t) => {
+    let registry = {}
+
+    class Surface extends TestComponent {
+      didMount() {
+        registry[this.props.id] = this
+      }
+      dispose() {
+        delete registry[this.props.id]
+      }
+      render($$) {
+        return $$('div').addClass('surface')
+      }
+    }
+    class Parent extends TestComponent {
+      render($$) {
+        let el = $$('div')
+        this.props.ids.forEach((id) => {
+          el.append($$('div').append(
+            $$(Surface, { id }).ref(id)
+          ))
+        })
+        return el
+      }
+    }
+    let comp = Parent.mount({ ids: ['foo', 'bar'] }, getMountPoint(t))
+    t.equal(Object.keys(registry).length, 2, 'There should be 2 surfaces registered.')
+    comp.setProps({ ids: ['bar'] })
+    t.isNil(registry['foo'], 'Surface "foo" should have been disposed.')
+    t.ok(registry['bar'], '.. and surface "bar" should still be there.')
+    t.end()
+  })
+
 }
