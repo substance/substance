@@ -288,7 +288,7 @@ class ContainerSelection extends Selection {
     const container = this.getContainer()
     const startPos = container.getPosition(this.start.path[0])
     const endPos = container.getPosition(this.end.path[0])
-    return container.nodes.slice(startPos, endPos+1)
+    return container.getContent().slice(startPos, endPos+1)
   }
 
   /**

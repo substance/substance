@@ -26,15 +26,15 @@ class MoveNode extends DragAndDropHandler {
     let surfaceId = dragState.sourceSelection.surfaceId
     let container = tx.get(containerId)
 
-    let targetNode = container.nodes[insertPos]
+    let targetNodeId = container.getNodeIdAt(insertPos)
     let insertMode = 'before'
-    if (!targetNode) {
-      targetNode = container.nodes[insertPos-1]
+    if (!targetNodeId) {
+      targetNodeId = container.getNodeIdAt(insertPos-1)
       insertMode = 'after'
     }
     tx.setSelection({
       type: 'node',
-      nodeId: targetNode,
+      nodeId: targetNodeId,
       mode: insertMode,
       containerId: containerId,
       surfaceId: surfaceId
