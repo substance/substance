@@ -86,7 +86,7 @@ function _findInsertPosCandidates(dfa, el, newType) {
     }
     let nextState = dfa.consume(state, child.tagName)
     if (nextState === -1) {
-      throw new Error('Element is invalid:', el.toXML())
+      throw new Error('Element is invalid:' + el.serialize())
     }
     state = nextState
   }

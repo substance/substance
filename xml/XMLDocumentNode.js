@@ -92,6 +92,10 @@ class XMLDocumentNode extends DocumentNode {
     return this.getDocument().getElementSchema(this.type)
   }
 
+  serialize() {
+    return this.toXML()
+  }
+
 }
 
 XMLDocumentNode.prototype.attr = DOMElement.prototype.attr
