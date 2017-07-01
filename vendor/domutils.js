@@ -245,10 +245,23 @@ class DomUtils {
   }
 
   getAttributes(el) {
-    return Array.from(el.attributes)
+    let attribs = el.getAttributes();
+    
+    
+    if (attribs instanceof Map) {
+      return Array.from(attribs)
+    } else if (attribs && attribs.forEach) {
+      let res = [];
+      attribs.forEach((val, key) => {
+        res.push([key, val]);
+      });
+      return res
+    } else {
+      return []
+    }
   }
 
-  formatAttribs(el, opts) {
+  formatAttribs(el, opts = {}) {
     let output = [];
     const attributes = this.getAttributes(el);
     attributes.forEach(([key, value]) => {
