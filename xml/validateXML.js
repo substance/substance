@@ -4,18 +4,22 @@ import XMLValidator from './XMLValidator'
 export default function validateXML(xmlSchema, dom) {
   let validator = new XMLValidator(xmlSchema)
   let root = dom.find(xmlSchema.getStartElement())
+  let errors
   if (!root) {
-    return  {
-      errors: ['Start element is missing.']
-    }
+    errors = [{
+      msg: 'Start element is missing.',
+      el: dom
+    }]
   } else {
     if (!validator.isValid(root)) {
-      return {
-        errors: validator.errors,
-        elements: validator.errorElements.map(el => el.getNativeElement())
-      }
-    } else {
-      return {}
+      errors = validator.errors
     }
+  }
+  if (errors) {
+    return {
+      errors
+    }
+  } else {
+    return { ok: true }
   }
 }
