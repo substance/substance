@@ -72,8 +72,7 @@ class ElementSchema {
   // EXPERIMENTAL:
   // can be used for a 'prependChild' or for displaying helpful validator error messages
   findFirstValidPos(el, newTag) {
-    let tags = el.getChildren().map(c => c.tagName)
-    let candidates = this._findInsertPosCandidates(tags, newTag)
+    let candidates = this._findInsertPosCandidates(el, newTag)
     if (candidates.length > 0) {
       return candidates[0]
     } else {
@@ -85,8 +84,7 @@ class ElementSchema {
   // we want to provide a high-level API `node.append()`
   // which looks for the last valid position according to the element schema
   findLastValidPos(el, newTag) {
-    let tags = el.getChildren().map(c => c.tagName)
-    let candidates = this._findInsertPosCandidates(tags, newTag)
+    let candidates = this._findInsertPosCandidates(el, newTag)
     if (candidates.length > 0) {
       return last(candidates)
     } else {
@@ -94,20 +92,33 @@ class ElementSchema {
     }
   }
 
-  _findInsertPosCandidates(tags, newTag) {
+  _findInsertPosCandidates(el, newTag) {
+    const childNodes = el.childNodes
     const tagName = this.name
     const dfa = this.dfa
     let candidates = []
     let state = START
     let pos = 0
-    for (;pos < tags.length; pos++) {
-      const tag = tags[pos]
+    for (;pos < childNodes.length; pos++) {
       if (dfa.canConsume(state, newTag)) {
         candidates.push(pos)
       }
-      let nextState = dfa.consume(state, tag)
+      const child = childNodes[pos]
+      let token
+      if (child.isTextNode()) {
+        if (/^\s*$/.exec(child.textContent)) {
+          continue
+        }
+        token = TEXT
+      } else if (child.isElementNode()) {
+        token = child.tagName
+      } else {
+        continue
+      }
+      let nextState = dfa.consume(state, token)
       if (nextState === -1) {
-        throw new Error(`Element <${tagName}> is invalid. ${tags.join(',')}`)
+        console.error('Element is invalid:', el)
+        throw new Error(`Element <${tagName}> is invalid.`)
       }
       state = nextState
     }

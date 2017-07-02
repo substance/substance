@@ -36,7 +36,7 @@ class XMLValidator {
       }
     }
 
-    return valid ? { ok: true } : this.errors
+    if (!valid) return this.errors.slice()
   }
 
   getValidatingChildNodeIterator(el) {
