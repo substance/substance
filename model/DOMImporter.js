@@ -1,7 +1,8 @@
 import { last, createCountingIdGenerator, ArrayIterator } from '../util'
 
 const WS_LEFT = /^\s+/g
-const WS_LEFT_ALL = /^\s*/g
+// TODO: this is probably incorrect, /^\s*/ would always be a match
+// const WS_LEFT_ALL = /^\s*/g
 const WS_RIGHT = /\s+$/g
 const WS_ALL = /\s+/g
 // var ALL_WS_NOTSPACE_LEFT = /^[\t\n]+/g
@@ -461,6 +462,10 @@ class DOMImporter {
         // TODO: we should make sure to throw when the user tries to
         if (AnnoClass.isInline) {
           this._customText(INVISIBLE_CHARACTER)
+          // TODO: check if this is correct; after reading an inline,
+          // we need to reset the lastChar, so that the next whitespace
+          // does not get skipped
+          state.lastChar = ''
         } else {
           // We call this to descent into the element
           // which could be 'forgotten' otherwise.
@@ -558,6 +563,9 @@ class DOMImporter {
   }
 
   // TODO: this needs to be tested and documented
+  // TODO: after recent work with XML we found that
+  // doing white-space handling here is not optimal
+  // instead it should be done as a preprocessing step
   _prepareText(text) {
     const state = this.state
     if (state.preserveWhitespace) {
@@ -569,8 +577,11 @@ class DOMImporter {
     // TODO: the last char handling is only necessary for for nested calls
     // i.e., when processing the content of an annotation, for instance
     // we need to work out how we could control this with an inner state
+    // TODO: this is incorrect: replacing /\s*/ will insert a space
+    // even if there is not one present
     if (state.lastChar === SPACE) {
-      text = text.replace(WS_LEFT_ALL, repl)
+      // replace any double space, even if it is across element boundary
+      text = text.replace(WS_LEFT, '')
     } else {
       text = text.replace(WS_LEFT, repl)
     }
