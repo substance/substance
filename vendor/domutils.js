@@ -245,10 +245,23 @@ class DomUtils {
   }
 
   getAttributes(el) {
-    return Array.from(el.attributes)
+    let attribs = el.getAttributes();
+    
+    
+    if (attribs instanceof Map) {
+      return Array.from(attribs)
+    } else if (attribs && attribs.forEach) {
+      let res = [];
+      attribs.forEach((val, key) => {
+        res.push([key, val]);
+      });
+      return res
+    } else {
+      return []
+    }
   }
 
-  formatAttribs(el, opts) {
+  formatAttribs(el, opts = {}) {
     let output = [];
     const attributes = this.getAttributes(el);
     attributes.forEach(([key, value]) => {
@@ -267,7 +280,7 @@ class DomUtils {
     let output = [];
     for(var i = 0; i < dom.length; i++){
       let elem = dom[i];
-      if (elem.type === 'root') {
+      if (elem.type === 'root' || elem.type === 'document') {
         output.push(this.render(this.getChildren(elem), opts));
       } else if (ElementType.isTag(elem)) {
         output.push(this.renderTag(elem, opts));

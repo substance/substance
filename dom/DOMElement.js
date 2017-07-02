@@ -714,6 +714,14 @@ class DOMElement {
     throw new Error(NOT_IMPLEMENTED)
   }
 
+  /*
+    @returns {DOMElement} the doctype element `<!DOCTYPE <name> PUBLIC "<publicId>" "<systemId>" >`; null if not present
+  */
+  getDoctype() {
+    /* istanbul ignore next */
+    throw new Error('NOT_IMPLEMENTED')
+  }
+
   /**
     Find the first descendant element matching the given CSS selector.
     Note this differs from jQuery.find() that it returns only one element.

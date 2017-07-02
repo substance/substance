@@ -1,18 +1,25 @@
 import { DefaultDOMElement as DOM } from '../dom'
-import Validator from './Validator'
+import XMLValidator from './XMLValidator'
 
 export default function validateXML(xmlSchema, dom) {
-  let validator = new Validator(xmlSchema)
-  // TODO: for sake of generality we should take the start element from the schema
-  let root = dom.find('article')
+  let validator = new XMLValidator(xmlSchema)
+  let root = dom.find(xmlSchema.getStartElement())
+  let errors
   if (!root) {
-    return 'Start element is missing.'
+    errors = [{
+      msg: 'Start element is missing.',
+      el: dom
+    }]
   } else {
-    if (!validator.isValid(root)) {
-      return {
-        errors: validator.errors,
-        elements: validator.errorElements.map(el => el.getNativeElement())
-      }
+    if (!validator.validate(root)) {
+      errors = validator.errors
     }
+  }
+  if (errors) {
+    return {
+      errors
+    }
+  } else {
+    return { ok: true }
   }
 }

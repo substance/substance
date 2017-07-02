@@ -1,24 +1,17 @@
-import { DefaultDOMElement } from '../dom'
-import { isArray, forEach } from '../util'
 import DFA from './DFA'
 import DFABuilder from './DFABuilder'
 import XMLSchema from './XMLSchema'
 import analyzeSchema from './_analyzeSchema'
+import _loadRNG from './_loadRNG'
+import nameWithoutNS from './nameWithoutNS'
 
 const TEXT = DFA.TEXT
 const singleToken = DFABuilder.singleToken
 
 export default
-function compileRNG(fs, searchDirs, entry, manualClassification) {
-  if (!isArray(searchDirs)) searchDirs = [searchDirs]
-  let rngPath = _lookupRNG(fs, searchDirs, entry)
-  let rngStr = fs.readFileSync(rngPath, 'utf8')
-  const rng = DefaultDOMElement.parseXML(rngStr, 'full-doc')
+function compileRNG(fs, searchDirs, entry) {
+  const rng = _loadRNG(fs, searchDirs, entry)
 
-  // first pull in all includes (recursively)
-  while(_expandIncludes(fs, searchDirs, rng)) {
-    //
-  }
   const grammar = rng.find('grammar')
   if (!grammar) throw new Error('<grammar> not found.')
   // collect all definitions, supporting to override
@@ -32,55 +25,28 @@ function compileRNG(fs, searchDirs, entry, manualClassification) {
   // turn the RNG schema into our internal data structure
   _compile(grammar)
 
-  const elementSchemas = grammar.schemas
   let xmlSchema = new XMLSchema(grammar.schemas)
+
+  // this adds some reflection info and derives the type
   analyzeSchema(xmlSchema)
 
-  if (manualClassification) {
-    forEach(manualClassification, (type, name) => {
-      const elementSchema = xmlSchema.getElementSchema(name)
-      elementSchema.type = type
-    })
-  }
+  // type overrides
+  const elementTypes = rng.findAll('elementType')
+  elementTypes.forEach((el) => {
+    const elementSchema = xmlSchema.getElementSchema(el.attr('name'))
+    let type = el.attr('s:type') || el.attr('type')
+    if (!type) throw new Error('Invalid elementType definition')
+    elementSchema.type = type
+  })
 
   return xmlSchema
-}
-
-function _lookupRNG(fs, searchDirs, file) {
-  for (let i = 0; i < searchDirs.length; i++) {
-    let absPath = searchDirs[i] + '/' + file
-    if (fs.existsSync(absPath)) {
-      return absPath
-    }
-  }
-}
-
-function _expandIncludes(fs, searchDirs, root) {
-  let includes = root.findAll('include')
-  if (includes.length === 0) return false
-
-  includes.forEach((include) => {
-    const parent = include.parentNode
-    const href = include.attr('href')
-    const rngPath = _lookupRNG(fs, searchDirs, href)
-    if (!rngPath) throw new Error(`Could not find ${href}`)
-    const rngStr = fs.readFileSync(rngPath, 'utf8')
-    const rng = DefaultDOMElement.parseXML(rngStr, 'full-doc')
-    const grammar = rng.find('grammar')
-    if (!grammar) throw new Error('No grammar element found')
-    grammar.children.forEach((child) => {
-      parent.insertBefore(child, include)
-    })
-    include.remove()
-  })
-  return true
 }
 
 function _registerDefinitions(grammar) {
   let defs = {}
   let start = null
   grammar.children.forEach((child) => {
-    const tagName = child.tagName
+    const tagName = nameWithoutNS(child.tagName)
     switch (tagName) {
       /*
         TODO: in theory there are pretty complex merges
@@ -107,7 +73,7 @@ function _registerDefinitions(grammar) {
         break
       }
       default:
-        throw new Error('Illegal state.')
+        // nothing
     }
   })
   grammar.defs = defs
@@ -126,12 +92,17 @@ function _compile(grammar) {
   for (let i = 0; i < elements.length; i++) {
     const el = elements[i]
     const name = el.attr('name')
+    const type = el.attr('type') || el.attr('s:type') || 'implicit'
     // console.log('processing <%s>', name)
     let dfa = _processSequence(el, grammar)
     let schema = {
       name,
       attributes: _collectAttributes(el, grammar),
       dfa
+    }
+    // manually set type
+    if (type) {
+      schema.type = type
     }
     schemas[name] = schema
   }

@@ -171,7 +171,7 @@ function _checkAnnotation(elementSchema) {
   const issues = []
   // must not be used as structured content
   if (!_usedInlineOnly(elementSchema)) {
-    issues.push(`[3]: annotation <${elementSchema.name}> is used in structured content by ${Object.keys(elementSchema.usedStructuredBy).join(',')}`)
+    issues.push(`[3]: annotation <${elementSchema.name}> is used in structured content by ${_usedStructuredBy(elementSchema).join(',')}`)
   }
   if (!elementSchema.isText) {
     issues.push(`[8]: annotation <${elementSchema.name}> does not allow text content`)
@@ -188,7 +188,7 @@ function _checkAnnotation(elementSchema) {
 function _checkInlineElement(elementSchema) {
   const issues = []
   if (!_usedInlineOnly(elementSchema)) {
-    issues.push(`[3]: inline-element <${elementSchema.name}> is used in structured content by ${Object.keys(elementSchema.usedStructuredBy).join(',')}`)
+    issues.push(`[3]: inline-element <${elementSchema.name}> is used in structured content by ${_usedStructuredBy(elementSchema).join(',')}`)
   }
   return issues
 }
@@ -196,15 +196,21 @@ function _checkInlineElement(elementSchema) {
 function _checkAnchor(elementSchema) {
   const issues = []
   if (!_usedInlineOnly(elementSchema)) {
-    issues.push(`[3]: anchor <${elementSchema.name}> is used in structured content by ${Object.keys(elementSchema.usedStructuredBy).join(',')}`)
+    issues.push(`[3]: anchor <${elementSchema.name}> is used in structured content by ${_usedStructuredBy(elementSchema).join(',')}`)
   }
   return issues
 }
 
 function _usedInlineOnly(elementSchema) {
-  let p1 = elementSchema.usedInlineBy ? Object.keys(elementSchema.usedInlineBy) : []
-  let p2 = Object.keys(elementSchema.parents)
-  p1.sort()
-  p2.sort()
-  return isArrayEqual(p1, p2)
+  let usedStructuredBy = _usedStructuredBy(elementSchema)
+  return (usedStructuredBy.length === 0)
+}
+
+function _usedStructuredBy(elementSchema) {
+  let usedInlineBy = elementSchema.usedInlineBy || {}
+  let parents = Object.keys(elementSchema.parents)
+  let usedStructuredBy = parents.filter((name) => {
+    return !(usedInlineBy[name])
+  })
+  return usedStructuredBy
 }
