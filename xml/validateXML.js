@@ -11,7 +11,7 @@ export default function validateXML(xmlSchema, dom) {
       el: dom
     }]
   } else {
-    if (!validator.isValid(root)) {
+    if (!validator.validate(root)) {
       errors = validator.errors
     }
   }

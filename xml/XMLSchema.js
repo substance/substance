@@ -8,7 +8,7 @@ export default class XMLSchema {
   constructor(elementSchemas) {
     this._elementSchemas = {}
     forEach(elementSchemas, (spec, name) => {
-      this._elementSchemas[name] = new ElementSchema(spec)
+      this._elementSchemas[name] = new ElementSchema(this, spec)
     })
   }
 
@@ -29,7 +29,8 @@ export default class XMLSchema {
 
 class ElementSchema {
 
-  constructor({name, type, attributes, dfa}) {
+  constructor(xmlSchema, { name, type, attributes, dfa}) {
+    this.xmlSchema = xmlSchema
     this.name = name
     this.type = type
     this.attributes = attributes

@@ -1,3 +1,4 @@
+import { last } from '../util'
 import DFA from './DFA'
 
 const TEXT = DFA.TEXT
@@ -11,26 +12,78 @@ class XMLValidator {
     this.errors = []
   }
 
-  getElementValidator(tagName) {
+  getElementValidator(el) {
+    const tagName = el.tagName
     let elementSchema = this.schema.getElementSchema(tagName)
     if (!elementSchema) throw new Error(`Unsupported element: ${tagName}`)
-    return new ElementValidator(elementSchema)
+    return new ElementValidator(el, elementSchema)
   }
 
-  isValid(el) {
-    const name = el.tagName
-    const elValidator = this.getElementValidator(name)
-    const errors = elValidator.checkAttributes(el)
-    if (errors) {
-      this.errors = this.errors.concat(errors)
+  validate(el) {
+    this.errors = []
+
+    let valid = true
+    let q = [el]
+    while(q.length>0) {
+      let next = q.shift()
+      const elValidator = this.getElementValidator(next)
+      if (!elValidator.isValid()) {
+        this.errors = this.errors.concat(elValidator.errors)
+        valid = false
+      }
+      if (next.isElementNode()) {
+        q = q.concat(next.getChildren())
+      }
     }
-    if (elValidator.elementSchema.type === 'external') {
+
+    return valid ? { ok: true } : this.errors
+  }
+
+  getValidatingChildNodeIterator(el) {
+    return new ValidatingChildNodeIterator(el.getChildNodeIterator(), this.getElementValidator(el))
+  }
+}
+
+class ElementValidator {
+
+  constructor(el, elementSchema) {
+    this.el = el
+    this.elementSchema = elementSchema
+    this.dfa = elementSchema.dfa
+
+    this.state = START
+    this.pos = 0
+    this.errors = []
+
+    this.reset()
+  }
+
+  reset() {
+    this.state = START
+    this.trace = []
+    this.errors = []
+  }
+
+  /*
+    Checks if the element is valid.
+
+    Not recursively.
+  */
+  isValid() {
+    this.reset()
+
+    const el = this.el
+    this.checkAttributes()
+
+    // Don't validate external nodes
+    // TODO: maybe we should do this too?
+    if (this.elementSchema.type === 'external') {
       return true
     }
+
     const iterator = el.getChildNodeIterator()
-    let valid = true
+    let valid = (this.errors.length === 0)
     while (valid && iterator.hasNext()) {
-      let error = null
       const childEl = iterator.next()
       let token
       if (childEl.isTextNode()) {
@@ -43,46 +96,18 @@ class XMLValidator {
       } else {
         continue
       }
-      error = elValidator.consume(token)
-      if (error) {
-        this.errors.push({
-          msg: error,
-          el
-        })
+      if (!this.consume(token)) {
         valid = false
       }
     }
-    if (valid && !elValidator.isFinished()) {
+    if (valid && !this.isFinished()) {
       this.errors.push({
-        msg: `<${el.tagName}> is incomplete`,
+        msg: `<${el.tagName}> is incomplete.`,
         el
       })
       valid = false
     }
-    el.children.forEach((child) => {
-      valid &= this.isValid(child)
-    })
     return valid
-  }
-
-  getValidatingChildNodeIterator(el) {
-    return new ValidatingChildNodeIterator(el.getChildNodeIterator(), this.getElementValidator(el.tagName))
-  }
-}
-
-class ElementValidator {
-
-  constructor(elementSchema) {
-    this.elementSchema = elementSchema
-    this.dfa = elementSchema.dfa
-    this.state = START
-    this.trace = []
-    this.reset()
-  }
-
-  reset() {
-    this.state = START
-    this.trace = []
   }
 
   checkAttributes() {
@@ -94,9 +119,14 @@ class ElementValidator {
     let newState = this.dfa.consume(oldState, token)
     this.state = newState
     if (newState === -1) {
-      return this._describeError(token)
+      this.errors.push({
+        msg: this._describeError(token),
+        el: this.el
+      })
+      return false
     } else {
       this.trace.push(token)
+      return true
     }
   }
 
@@ -111,7 +141,7 @@ class ElementValidator {
         msg.push(`<${token}> is not a valid child element of <${this.elementSchema.name}>`)
       } else {
         // otherwise just the position is wrong
-        msg.push(`<${token}> is not allowed at the current position.`)
+        msg.push(`<${token}> is not allowed at the current position in <${this.elementSchema.name}>.`)
         // TODO: try to find a suitable alternative position
         // we need to refactor this, as here we do not have access to the actual element
         // so we can't tell, if there is a valid position
@@ -136,22 +166,23 @@ class ValidatingChildNodeIterator {
   }
 
   next() {
-    let error
     let next = this._it.next()
     let oldState = this._validator.state
+    let ok
     if (next.isTextNode()) {
-      error = this._validator.consume(TEXT)
+      ok = this._validator.consume(TEXT)
     } else if (next.isElementNode()) {
-      error = this._validator.consume(next.tagName)
+      ok = this._validator.consume(next.tagName)
     }
-    if (error) {
+    if (!ok) {
       if (next.isTextNode()) {
         const text = next.textContent
         if (!/^\s*$/.exec(text)) {
           console.error(`TEXT is invalid within <${this._validator.elementSchema.name}>. Skipping.`, next.textContent)
         }
       } else if (next.isElementNode()) {
-        console.error(`<${next.tagName}> is invalid within <${this._validator.elementSchema.name}>. Skipping.`, next)
+        let error = last(this._validator.errors)
+        console.error(error.msg, error.el.getNativeElement())
       }
       this._validator.state = oldState
       return next.createComment(next.outerHTML)
