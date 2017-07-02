@@ -53,6 +53,14 @@ class BrowserDOMElement extends DOMElement {
     }
   }
 
+  getDoctype() {
+    if (this.isDocumentNode()) {
+      return this.el.doctype
+    } else {
+      return this.getOwnerDocument().getDoctype()
+    }
+  }
+
   isTextNode() {
     return (this.el.nodeType === window.Node.TEXT_NODE)
   }
