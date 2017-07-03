@@ -53,6 +53,10 @@ class XMLElementNode extends XMLDocumentNode {
     }).join('')
   }
 
+  isElementNode() {
+    return true
+  }
+
 }
 
 XMLElementNode.prototype.append = DOMElement.prototype.append

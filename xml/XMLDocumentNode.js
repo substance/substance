@@ -58,12 +58,18 @@ class XMLDocumentNode extends DocumentNode {
   }
 
   getChildren() {
+    // TODO: shouldn't we filter ElementNodes?
+    return this.getChildNodes()
+  }
+
+  getChildNodes() {
     if (this.childNodes) {
       return documentHelpers.getNodes(this.getDocument(), this.childNodes)
     } else {
       return []
     }
   }
+
 
   get tagName() {
     return this.type
@@ -94,6 +100,14 @@ class XMLDocumentNode extends DocumentNode {
 
   serialize() {
     return this.toXML()
+  }
+
+  isTextNode() {
+    return false
+  }
+
+  isElementNode() {
+    return false
   }
 
 }

@@ -93,7 +93,7 @@ class ElementSchema {
   }
 
   _findInsertPosCandidates(el, newTag) {
-    const childNodes = el.childNodes
+    const childNodes = el.getChildNodes()
     const tagName = this.name
     const dfa = this.dfa
     let candidates = []
