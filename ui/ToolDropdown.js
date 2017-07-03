@@ -35,7 +35,6 @@ class ToolDropdown extends ToolGroup {
       toggleName = this.props.name
     }
 
-
     if (this.hasEnabledTools(commandStates)) {
       let toggleButton
       if (this.props.style === 'minimal') {
@@ -87,10 +86,9 @@ class ToolDropdown extends ToolGroup {
     Turn commandStates into menu items
   */
   _getMenuItems(commandStates) {
-    const showDisabled = (this.props.showDisabled !== false)
     let menuItems = []
     forEach(commandStates, (commandState, commandName) => {
-      if (!commandState.disabled || showDisabled) {
+      if (this.isToolEnabled(commandName, commandState)) {
         menuItems.push({
           command: commandName
         })
