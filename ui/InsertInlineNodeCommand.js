@@ -42,20 +42,27 @@ class InsertInlineNodeCommand extends Command {
     if selection is a property selection.
   */
   getCommandState(params) {
+    let sel = params.selection
     let newState = {
       disabled: this.isDisabled(params),
-      active: false
+      active: false,
+      showInContext: this.showInContext(sel, params)
     }
     return newState
+  }
+
+  /*
+    When cursor is not collapsed tool may be displayed in context (e.g. in an
+    overlay)
+  */
+  showInContext(sel) {
+    return !sel.isCollapsed()
   }
 
   isDisabled(params) {
     let sel = params.selection
     let selectionState = params.editorSession.getSelectionState()
     if (!sel.isPropertySelection()) {
-      return true
-    }
-    if (this.config.disableCollapsedCursor && sel.isCollapsed()) {
       return true
     }
 
