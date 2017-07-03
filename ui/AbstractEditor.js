@@ -59,7 +59,6 @@ class AbstractEditor extends Component {
     this.markersManager = this.editorSession.markersManager
 
     this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
-
     this.domSelection = new DOMSelection(this)
 
     if (platform.inBrowser) {
@@ -94,7 +93,8 @@ class AbstractEditor extends Component {
     return {
       editor: this,
       editorSession: this.editorSession,
-      doc: this.doc, // TODO: remove in favor of editorSession
+      doc: this.doc, // NOTE: deprecated, use document
+      document: this.doc,
       componentRegistry: this.componentRegistry,
       surfaceManager: this.surfaceManager,
       domSelection: this.domSelection,
