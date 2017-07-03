@@ -81,7 +81,14 @@ class ToolGroup extends Component {
         throw new Error('commandGroup "'+commandGroup+'" not found')
       }
       commandGroups[commandGroup].forEach((commandName) => {
-        filteredCommandStates[commandName] = commandStates[commandName]
+        // in Stencila we are having mulitple EditorSessions
+        // with different set of commands. As we have only one definition
+        // for the toolgroup we need to make sure the command state is available
+        // TODO: Solve this. In Texture this is working because there are always all command states
+        // defined, only disabled contextually.
+        if (commandStates[commandName]) {
+          filteredCommandStates[commandName] = commandStates[commandName]
+        }
       })
     })
     return filteredCommandStates
