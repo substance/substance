@@ -41,6 +41,13 @@ function buildLib(target, production) {
       dest: DIST+'substance.js',
       format: 'umd', moduleName: 'substance',
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
+    })
+  }
+  if (target === 'browser:legacy') {
+    targets.push({
+      dest: DIST+'substance.es5.js',
+      format: 'umd', moduleName: 'substance',
+      sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
       useStrict
     })
   }
@@ -93,8 +100,10 @@ function buildLib(target, production) {
       ]
     }
   }
-  if (production) {
+  if (target === 'legacy') {
     config.buble = true
+  }
+  if (production) {
     config.cleanup = true
   }
   b.js('./index.es.js', config)
@@ -233,6 +242,10 @@ b.task('lib:browser', ['css'], () => {
   buildLib('browser', 'production')
 })
 
+b.task('lib:browser:legacy', ['css'], () => {
+  buildLib('browser:legacy', 'production')
+})
+
 b.task('lib:browser:dev', ['css'], () => {
   buildLib('browser')
 })
@@ -241,8 +254,10 @@ b.task('lib:dev', ['css'], () => {
   buildLib('all')
 })
 
-b.task('lib', () => {
+b.task('lib', ['css'], () => {
   buildLib('all', 'production')
+  // Note: legacy build can not be mixed with the other builds
+  buildLib('browser:legacy', 'production')
 })
 
 b.task('test:browser', ['lib:browser:dev'], buildTestsBrowser)
