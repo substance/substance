@@ -196,6 +196,10 @@ class Surface extends Component {
     return false
   }
 
+  isCustomEditor() {
+    return false
+  }
+
   hasNativeSpellcheck() {
     return this.props.spellcheck === 'native'
   }

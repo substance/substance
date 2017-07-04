@@ -170,6 +170,7 @@ export function stepIntoIsolatedNode(editorSession, comp) {
   // otherwise we try to find the first surface
   let surface = comp.find('.sc-surface')
   if (surface) {
+    // TODO: what about CustomSurfaces?
     if (surface._isTextPropertyEditor) {
       const doc = editorSession.getDocument()
       const path = surface.getPath()
@@ -191,4 +192,13 @@ export function stepIntoIsolatedNode(editorSession, comp) {
     }
   }
   return false
+}
+
+export function augmentSelection(selData, oldSel) {
+  // don't do magically if a surfaceId is present
+  if (selData && oldSel && !selData.surfaceId && !oldSel.isNull()) {
+    selData.containerId = selData.containerId || oldSel.containerId
+    selData.surfaceId = selData.surfaceId || oldSel.surfaceId
+  }
+  return selData
 }
