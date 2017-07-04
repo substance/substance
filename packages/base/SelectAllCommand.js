@@ -17,7 +17,7 @@ class SelectAll extends Command {
     let surface = params.surface || editorSession.getFocusedSurface()
     if (surface) {
       let sel
-      // TODO: we should move the logic out of the surfaces
+      // TODO: what about CustomSurfaces?
       if (surface._isContainerEditor) {
         let container = surface.getContainer()
         let nodeIds = container.getContent()

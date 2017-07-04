@@ -2,6 +2,7 @@ import { isPlainObject } from '../util'
 import copySelection from './copySelection'
 import Editing from './Editing'
 import Selection from './Selection'
+import { augmentSelection } from './selectionHelpers'
 
 /*
   Abstract base class for document editor APIs such as Transaction.
@@ -61,32 +62,24 @@ class EditingInterface {
   /* Selection API */
 
   createSelection(selData) {
-    // TODO: this is questionable
-    // I'd like to convenience first for the 99% use cases
-    // which means that I copy over containerId and surfaceId
-    // if possible and not explicitly set
-    const oldSel = this._selection
-    if (selData && oldSel) {
-      if (!selData.containerId && oldSel.containerId) {
-        selData.containerId = oldSel.containerId
-      }
-      if (!selData.surfaceId && oldSel.surfaceId) {
-        selData.surfaceId = oldSel.surfaceId
-      }
-    }
+    // TODO: we need to rethink this
+    // I'd like to make it convenient for the 99% use cases
+    // which means reusing containerId and surfaceId
+    // However, it does not work well for cases
+    // where the surface changes
+    // Even better would be just to have surfaceId, and derive
+    // containerId dynamically
+    selData = augmentSelection(selData, this._selection)
     return this._document.createSelection(selData)
   }
 
   setSelection(sel) {
-    if (!sel) sel = Selection.nullSelection
-    else if (isPlainObject(sel)) {
+    if (!sel) {
+      sel = Selection.nullSelection
+    } else if (isPlainObject(sel)) {
       sel = this.createSelection(sel)
-    }
-    let oldSel = this._selection
-    if (oldSel && sel && !sel.isNull()) {
-      if (!sel.containerId) {
-        sel.containerId = oldSel.containerId
-      }
+    } else {
+      sel = augmentSelection(sel, this._selection)
     }
     this._selection = sel
     return sel
