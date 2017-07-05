@@ -27,6 +27,9 @@ class Transaction {
     // using a different name internally
     this.master = master
     this.stage = master.newInstance().createFromDocument(master)
+    // HACK: some code is relying on this
+    this.stage._isTransactionDocument = true
+
     this.tx = this.stage.createEditingInterface()
     // internal state
     this._isTransacting = false
