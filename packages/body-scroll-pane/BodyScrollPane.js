@@ -1,5 +1,6 @@
 import { DefaultDOMElement } from '../../dom'
 import { AbstractScrollPane } from '../../ui'
+import { platform } from '../../util'
 
 /**
   Wraps content in a scroll pane.
@@ -50,36 +51,58 @@ class BodyScrollPane extends AbstractScrollPane {
     Returns the height of scrollPane (inner content overflows)
   */
   getHeight() {
-    return window.innerHeight
+    if (platform.inBrowser) {
+      return window.innerHeight
+    } else {
+      return 0
+    }
   }
 
   /**
     Returns the cumulated height of a panel's content
   */
   getContentHeight() {
-    return document.body.scrollHeight
+    if (platform.inBrowser) {
+      return document.body.scrollHeight
+    } else {
+      return 0
+    }
   }
 
   getContentElement() {
-    return DefaultDOMElement.wrapNativeElement(window.document.body)
+    if (platform.inBrowser) {
+      return DefaultDOMElement.wrapNativeElement(window.document.body)
+    } else {
+      return null
+    }
   }
 
   // /**
   //   Get the `.se-scrollable` element
   // */
   getScrollableElement() {
-    return document.body
+    if (platform.inBrowser) {
+      return document.body
+    } else {
+      return null
+    }
   }
 
   /**
     Get current scroll position (scrollTop) of `.se-scrollable` element
   */
   getScrollPosition() {
-    return document.body.scrollTop
+    if (platform.inBrowser) {
+      return document.body.scrollTop
+    } else {
+      return 0
+    }
   }
 
   setScrollPosition(scrollPos) {
-    document.body.scrollTop = scrollPos
+    if (platform.inBrowser) {
+      document.body.scrollTop = scrollPos
+    }
   }
 
   /**

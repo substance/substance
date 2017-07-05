@@ -492,7 +492,7 @@ class MemoryDOMElement extends DOMElement {
   }
 
   getEventListeners() {
-    return this.eventListeners
+    return this.eventListeners || []
   }
 
   click() {
@@ -662,6 +662,16 @@ MemoryDOMElement.unwrap = function(el) {
 /* istanbul ignore next */
 MemoryDOMElement.isReverse = function() {
   return false
+}
+
+// Stub
+let _browserWindowStub
+MemoryDOMElement.getBrowserWindow = function() {
+  // HACK: this is a bit awkward
+  if (!_browserWindowStub) {
+    _browserWindowStub = MemoryDOMElement.createDocument('html')
+  }
+  return _browserWindowStub
 }
 
 function parseClasses(classes, classStr) {

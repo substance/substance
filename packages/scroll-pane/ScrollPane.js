@@ -33,13 +33,15 @@ class ScrollPane extends AbstractScrollPane {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this)
     }
     if (this.refs.scrollbar) {
-      this.domObserver = new window.MutationObserver(this._onContentChanged.bind(this))
-      this.domObserver.observe(this.el.getNativeElement(), {
-        subtree: true,
-        attributes: true,
-        characterData: true,
-        childList: true,
-      })
+      if (platform.inBrowser) {
+        this.domObserver = new window.MutationObserver(this._onContentChanged.bind(this))
+        this.domObserver.observe(this.el.getNativeElement(), {
+          subtree: true,
+          attributes: true,
+          characterData: true,
+          childList: true,
+        })
+      }
       this.context.editorSession.onPosition(this._onPosition, this)
     }
   }
@@ -51,6 +53,9 @@ class ScrollPane extends AbstractScrollPane {
     }
     this.context.editorSession.off(this)
     this.context.dragManager.off(this)
+    if (this.domObserver) {
+      this.domObserver.disconnect()
+    }
   }
 
   render($$) {
