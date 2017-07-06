@@ -51,6 +51,9 @@ These changes might break your current implementation and may need some migratio
   ```
   Notice, that `parseSnippet` returns either one element, or an array of elements, depending on the input you provided.
 
+-  `MemoryDOMElement` now always encodes and decodes entities. If you had
+   your own workarounds in place, you might need to disable them now.
+
 - `DOMImporter` (`HTMLImporter`/`XMLImporter`) takes two mandatory configuration parameters: `schema` and `converters`
   If you have used the `Configurator` API to create importers and exporters, you should be good.
 
