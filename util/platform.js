@@ -13,6 +13,10 @@ const platform = {
 
   inBrowser: false,
 
+  inNodeJS: false,
+
+  inElectron: false,
+
   /**
     True if user agent is Internet Explorer or Microsoft Edge.
   */
@@ -93,8 +97,13 @@ function detect() {
 
   // TOOD: is there a more reliable way to detect NodeJS?
   if (typeof process !== 'undefined') {
-    platform.inNodeJS = true
+    if (platform.inBrowser) {
+      platform.inElectron = true
+    } else {
+      platform.inNodeJS = true
+    }
   }
+
 }
 
 detect()

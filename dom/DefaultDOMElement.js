@@ -71,7 +71,8 @@ DefaultDOMElement.isReverse = function(anchorNode, anchorOffset, focusNode, focu
 }
 
 function _getDefaultImpl() {
-  if (platform.inBrowser && !platform.inNodeJS) {
+  // ATTENTION: in Browsers as well as in Elect
+  if (platform.inBrowser || platform.inElectron) {
     return BrowserDOMElement
   } else {
     return MemoryDOMElement
