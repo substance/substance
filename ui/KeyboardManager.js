@@ -1,4 +1,4 @@
-import { keys, parseKeyEvent } from '../util'
+import { keys, parseKeyEvent, platform } from '../util'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
 class KeyboardManager {
@@ -87,6 +87,14 @@ function parseCombo(combo) {
       }
       case 'CTRL': {
         data.ctrlKey = true
+        break
+      }
+      case 'COMMANDORCONTROL': {
+        if (platform.isMac) {
+          data.metaKey = true
+        } else {
+          data.ctrlKey = true
+        }
         break
       }
       case 'SHIFT': {

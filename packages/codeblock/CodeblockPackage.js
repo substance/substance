@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import Codeblock from './Codeblock'
 import CodeblockComponent from './CodeblockComponent'
 import CodeblockHTMLConverter from './CodeblockHTMLConverter'
@@ -20,11 +19,7 @@ export default {
       en: 'Codeblock',
       de: 'Codeblock'
     })
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+alt+c', { command: 'codeblock' })
-    } else {
-      config.addKeyboardShortcut('ctrl+alt+c', { command: 'codeblock' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+alt+c', { command: 'codeblock' })
   },
   Codeblock: Codeblock,
   CodeblockComponent: CodeblockComponent,

@@ -84,9 +84,9 @@ These changes might break your current implementation and may need some migratio
       spec: { type: 'heading', level: 3 },
       commandGroup: 'text-types'
     })
-    config.addKeyboardShortcut('cmd+alt+1', { command: 'heading1' })
-    config.addKeyboardShortcut('cmd+alt+2', { command: 'heading2' })
-    config.addKeyboardShortcut('cmd+alt+3', { command: 'heading3' })
+    config.addKeyboardShortcut('CommandOrControl+alt+1', { command: 'heading1' })
+    config.addKeyboardShortcut('CommandOrControl+alt+2', { command: 'heading2' })
+    config.addKeyboardShortcut('CommandOrControl+alt+3', { command: 'heading3' })
     ```
   - Toolbars, overlays, context menus are now configured explicitly via `config.addToolPane`
 

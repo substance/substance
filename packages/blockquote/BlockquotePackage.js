@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import Blockquote from './Blockquote'
 import BlockquoteComponent from './BlockquoteComponent'
 import BlockquoteHTMLConverter from './BlockquoteHTMLConverter'
@@ -20,11 +19,7 @@ export default {
       en: 'Blockquote',
       de: 'Blockzitat'
     })
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+alt+b', { command: 'blockquote' })
-    } else {
-      config.addKeyboardShortcut('ctrl+alt+b', { command: 'blockquote' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+alt+b', { command: 'blockquote' })
   },
   Blockquote: Blockquote,
   BlockquoteComponent: BlockquoteComponent,

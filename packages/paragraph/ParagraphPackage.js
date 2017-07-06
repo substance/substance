@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import Paragraph from './Paragraph'
 import ParagraphComponent from './ParagraphComponent'
 import ParagraphHTMLConverter from './ParagraphHTMLConverter'
@@ -20,11 +19,7 @@ export default {
       en: 'Paragraph',
       de: 'Paragraph'
     })
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+alt+0', { command: 'paragraph' })
-    } else {
-      config.addKeyboardShortcut('ctrl+alt+0', { command: 'paragraph' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+alt+0', { command: 'paragraph' })
   },
   Paragraph: Paragraph,
   ParagraphComponent: ParagraphComponent,

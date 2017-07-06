@@ -1,4 +1,4 @@
-import { forEach, map, isString, Registry } from '../util'
+import { forEach, map, isString, Registry, platform } from '../util'
 import { DocumentSchema, EditingBehavior } from '../model'
 import ComponentRegistry from './ComponentRegistry'
 
@@ -560,7 +560,16 @@ class Configurator {
     this.config.keyboardShortcuts.forEach((entry) => {
       if (entry.spec.command) {
         let shortcut = entry.key.toUpperCase()
-        shortcut = shortcut.replace('CMD', '⌘')
+
+        if (platform.isMac) {
+          shortcut = shortcut.replace(/CommandOrControl/i, '⌘')
+          shortcut = shortcut.replace(/Ctrl/i, '^')
+          shortcut = shortcut.replace(/Alt/i, '⌥')
+          shortcut = shortcut.replace(/\+/g, '')
+        } else {
+          shortcut = shortcut.replace(/CommandOrControl/i, 'Ctrl')
+        }
+
         keyboardShortcuts[entry.spec.command] = shortcut
       }
     })
