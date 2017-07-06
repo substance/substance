@@ -239,7 +239,7 @@ class MemoryDOMElement extends DOMElement {
   }
 
   getInnerHTML() {
-    return DomUtils.getInnerHTML(this)
+    return DomUtils.getInnerHTML(this, { decodeEntities: true })
   }
 
   // TODO: parse html using settings from el,
@@ -247,7 +247,8 @@ class MemoryDOMElement extends DOMElement {
   setInnerHTML(html) {
     if (this.childNodes) {
       let _doc = parseMarkup(html, {
-        ownerDocument: this.getOwnerDocument()
+        ownerDocument: this.getOwnerDocument(),
+        decodeEntities: true
       })
       this.empty()
       // ATTENTION: important to copy the childNodes array first
@@ -260,7 +261,7 @@ class MemoryDOMElement extends DOMElement {
   }
 
   getOuterHTML() {
-    return DomUtils.getOuterHTML(this, { xmlMode: this._isXML() })
+    return DomUtils.getOuterHTML(this, { xmlMode: this._isXML(), decodeEntities: true })
   }
 
   getTextContent() {
@@ -608,10 +609,10 @@ MemoryDOMElement.parseMarkup = function(str, format, options={}) {
   }
   let doc
   if (format === 'html') {
-    doc = parseMarkup(str, { format: format })
+    doc = parseMarkup(str, { format: format, decodeEntities: true })
     _sanitizeHTMLStructure(doc)
   } else if (format === 'xml') {
-    doc = parseMarkup(str, { format: format })
+    doc = parseMarkup(str, { format: format, decodeEntities: true })
   }
   if (options.snippet) {
     let childNodes = doc.find('__snippet__').childNodes

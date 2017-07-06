@@ -16,9 +16,9 @@ export default function parseMarkup(markup, options) {
   if (!format) {
     throw new Error("Either 'ownerDocument' or 'format' must be set.")
   }
-  let parserOptions = {
-    xmlMode : (format === 'xml')
-  }
+  let parserOptions = Object.assign({}, options, {
+    xmlMode : (format === 'xml'),
+  })
   let handler = new DomHandler({ format })
   let parser = new Parser(handler, parserOptions)
   parser.end(markup)

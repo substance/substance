@@ -569,4 +569,22 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test('#1075: HTML encoding', function (t) {
+    let el = DefaultDOMElement.createDocument('html').createElement('pre')
+
+    el.text('Less than < char')
+    t.equal(el.text(), 'Less than < char')
+
+    el.html('Less than < char')
+    t.equal(el.html(), 'Less than &lt; char')
+
+    el.text('Less than &lt; char')
+    t.equal(el.text(), 'Less than &lt; char')
+
+    el.html('Less than &lt; char')
+    t.equal(el.html(), 'Less than &lt; char')
+
+    t.end()
+  })
+
 }
