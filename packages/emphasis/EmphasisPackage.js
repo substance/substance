@@ -19,7 +19,7 @@ export default {
       en: 'Emphasis',
       de: 'Betonung'
     })
-    config.addKeyboardShortcut('CommandOrControl+i', { command: 'emphasis' })
+    config.addKeyboardShortcut('CommandOrControl+I', { command: 'emphasis' })
   },
   Emphasis,
   EmphasisComponent,

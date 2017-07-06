@@ -33,11 +33,11 @@ export default {
       commandGroup: 'find-and-replace'
     })
     config.addTool('find-and-replace', FindAndReplaceTool)
-    config.addKeyboardShortcut('CommandOrControl+f', { command: 'toggle-find-and-replace' })
-    config.addKeyboardShortcut('CommandOrControl+alt+f', { command: 'toggle-find-and-replace' })
-    config.addKeyboardShortcut('CommandOrControl+g', { command: 'find-next' })
-    config.addKeyboardShortcut('CommandOrControl+shift+g', { command: 'find-previous' })
-    config.addKeyboardShortcut('CommandOrControl+alt+e', { command: 'replace-next' })
+    config.addKeyboardShortcut('CommandOrControl+F', { command: 'toggle-find-and-replace' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+F', { command: 'toggle-find-and-replace' })
+    config.addKeyboardShortcut('CommandOrControl+G', { command: 'find-next' })
+    config.addKeyboardShortcut('CommandOrControl+Shift+G', { command: 'find-previous' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+E', { command: 'replace-next' })
     // TODO: we want to bind this to the ESC button instead
     config.addKeyboardShortcut('esc', { command: 'close-find-and-replace' })
     config.addManager('find-and-replace', FindAndReplaceManager)

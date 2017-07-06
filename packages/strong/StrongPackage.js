@@ -19,7 +19,7 @@ export default {
       en: 'Strong',
       de: 'Fett'
     })
-    config.addKeyboardShortcut('CommandOrControl+b', { command: 'strong' })
+    config.addKeyboardShortcut('CommandOrControl+B', { command: 'strong' })
   },
   Strong,
   StrongComponent,

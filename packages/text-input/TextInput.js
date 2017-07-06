@@ -75,9 +75,9 @@ function _createEditorSession(props) {
   config.addCommand('undo', UndoCommand)
   config.addCommand('redo', RedoCommand)
   config.addCommand('select-all', SelectAllCommand)
-  config.addKeyboardShortcut('CommandOrControl+z', { command: 'undo' })
-  config.addKeyboardShortcut('CommandOrControl+shift+z', { command: 'redo' })
-  config.addKeyboardShortcut('CommandOrControl+a', { command: 'select-all' })
+  config.addKeyboardShortcut('CommandOrControl+Z', { command: 'undo' })
+  config.addKeyboardShortcut('CommandOrControl+Shift+Z', { command: 'redo' })
+  config.addKeyboardShortcut('CommandOrControl+A', { command: 'select-all' })
 
   config.defineSchema({
     name: 'text-input',

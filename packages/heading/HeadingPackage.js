@@ -24,9 +24,9 @@ export default {
       spec: { type: 'heading', level: 3 },
       commandGroup: 'text-types'
     })
-    config.addKeyboardShortcut('CommandOrControl+alt+1', { command: 'heading1' })
-    config.addKeyboardShortcut('CommandOrControl+alt+2', { command: 'heading2' })
-    config.addKeyboardShortcut('CommandOrControl+alt+3', { command: 'heading3' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+1', { command: 'heading1' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+2', { command: 'heading2' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+3', { command: 'heading3' })
 
     config.addLabel('heading1', {
       en: 'Heading 1',

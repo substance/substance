@@ -86,9 +86,9 @@ export default {
       de: 'Container einfügen'
     })
 
-    config.addKeyboardShortcut('CommandOrControl+z', { command: 'undo' })
-    config.addKeyboardShortcut('CommandOrControl+shift+z', { command: 'redo' })
-    config.addKeyboardShortcut('CommandOrControl+a', { command: 'select-all' })
+    config.addKeyboardShortcut('CommandOrControl+Z', { command: 'undo' })
+    config.addKeyboardShortcut('CommandOrControl+Shift+Z', { command: 'redo' })
+    config.addKeyboardShortcut('CommandOrControl+A', { command: 'select-all' })
   },
   UndoCommand,
   RedoCommand,

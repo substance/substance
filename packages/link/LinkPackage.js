@@ -35,7 +35,7 @@ export default {
       en: 'Remove Link',
       de: 'Link löschen'
     })
-    config.addKeyboardShortcut('CommandOrControl+k', { command: 'link' })
+    config.addKeyboardShortcut('CommandOrControl+K', { command: 'link' })
   },
   Link,
   LinkComponent,
