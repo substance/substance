@@ -1,4 +1,4 @@
-import { forEach, Registry } from '../util'
+import { forEach, Registry, without } from '../util'
 
 /*
   Listens to changes on the document and selection and updates the commandStates
@@ -111,14 +111,7 @@ export default class CommandManager {
       if (included) {
         commandNames = included
       } else if (excluded) {
-        excluded = excluded.slice(0)
-        for (let i = commandNames.length - 1; i >= 0; i--) {
-          let idx = excluded.indexOf(commandNames[i])
-          if (idx >= 0) {
-            excluded.splice(idx, 1)
-            commandNames.splice(i, 1)
-          }
-        }
+        commandNames = without(commandRegistry.names, ...excluded)
       }
     }
     const commands = commandNames.map(name => commandRegistry.get(name))

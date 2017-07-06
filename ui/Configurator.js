@@ -469,7 +469,7 @@ class Configurator {
     return new ExporterClass(config, context)
   }
 
-  getcommandGroups() {
+  getCommandGroups() {
     return this.config.commandGroups
   }
 
