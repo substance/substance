@@ -173,7 +173,7 @@ class EditingInterface {
 
   paste(content) {
     const sel = this._selection
-    if (sel && !sel.isNull()) {
+    if (sel && !sel.isNull() && !sel.isCustomSelection()) {
       return this._impl.paste(this, content)
     }
   }

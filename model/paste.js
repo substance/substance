@@ -13,8 +13,8 @@ import { setCursor } from './selectionHelpers'
 
 function paste(tx, args) {
   let sel = tx.selection
-  if (!sel || sel.isNull()) {
-    throw new Error("Can not paste, without selection.")
+  if (!sel || sel.isNull() || sel.isCustomSelection()) {
+    throw new Error("Can not paste, without selection or a custom selection.")
   }
   args = args || {}
   args.text = args.text || ''
