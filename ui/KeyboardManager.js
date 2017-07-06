@@ -117,6 +117,10 @@ function parseCombo(combo) {
         data.shiftKey = true
         break
       }
+      case 'SUPER': {
+        data.metaKey = true
+        break
+      }
       default:
         if (frag.length === 1) {
           data.keyCode = frag.charCodeAt(0)
