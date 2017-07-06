@@ -42,7 +42,7 @@ class AbstractEditor extends Component {
 
     let configurator = this.editorSession.getConfigurator()
     this.componentRegistry = configurator.getComponentRegistry()
-    this.commandGroups = configurator.getcommandGroups()
+    this.commandGroups = configurator.getCommandGroups()
     this.keyboardShortcuts = configurator.getKeyboardShortcutsByCommand()
     this.tools = configurator.getTools()
     this.labelProvider = configurator.getLabelProvider()
