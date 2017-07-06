@@ -285,6 +285,8 @@ class Surface extends Component {
         case keys.BACKSPACE:
         case keys.DELETE:
           return this._handleDeleteKey(event)
+        case keys.ESCAPE:
+          return this._handleEscapeKey(event)
         default:
           break
       }
@@ -603,6 +605,8 @@ class Surface extends Component {
       tx.break()
     }, { action: 'break' })
   }
+
+  _handleEscapeKey() {}
 
   _handleDeleteKey(event) {
     event.preventDefault()

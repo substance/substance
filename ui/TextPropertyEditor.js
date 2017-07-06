@@ -86,6 +86,18 @@ class TextPropertyEditor extends Surface {
     })
   }
 
+  // TODO: this is somewhat manually, maybe we find a better way to
+
+  _handleEscapeKey(event) {
+    this.el.emit('escape', {
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
+      code: event.code
+    })
+  }
+
   getPath() {
     return this.props.path
   }
