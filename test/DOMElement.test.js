@@ -1,5 +1,5 @@
 import { module, spy } from 'substance-test'
-import { DefaultDOMElement, platform } from 'substance'
+import { DefaultDOMElement, platform, BrowserDOMElement, MemoryDOMElement } from 'substance'
 
 if (platform.inBrowser) {
   DOMElementTests('BrowserDOMElement')
@@ -569,7 +569,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test('#1075: HTML encoding', function (t) {
+  test('#1075: HTML encoding', (t) => {
     let el = DefaultDOMElement.createDocument('html').createElement('pre')
 
     el.text('Less than < char')
@@ -584,6 +584,50 @@ function DOMElementTests(impl) {
     el.html('Less than &lt; char')
     t.equal(el.html(), 'Less than &lt; char')
 
+    t.end()
+  })
+
+}
+
+if (platform.inBrowser) {
+
+  const test = module('DOMElement (comparison)')
+
+  /*
+    We found that DomUtils does too much.
+    So we make sure that the behavior is the same
+    in the Browser and in memory for a whole character range
+  */
+  test('#1075: HTML encoding (Part2)', (t) => {
+    let bDoc = BrowserDOMElement.createDocument('html')
+    let mDoc = MemoryDOMElement.createDocument('html')
+
+    const MIN = 33
+    const MAX = 127
+    for (var i = MIN; i < MAX; i++) {
+      let c = String.fromCharCode(i)
+      let rawStr = `XXX ${c} XXX`
+
+      let bEl = bDoc.createElement('pre')
+      let mEl = mDoc.createElement('pre')
+
+      bEl.text(rawStr)
+      mEl.text(rawStr)
+      t.equal(mEl.text(), bEl.text(), `.. raw ${i}=${c}: text() should be equal`)
+
+      bEl.html(rawStr)
+      mEl.html(rawStr)
+      let encodedStr = bEl.html()
+      t.equal(mEl.html(), bEl.html(), `.. raw ${i}=${c}: html() should be equal`)
+
+      bEl.text(encodedStr)
+      mEl.text(encodedStr)
+      t.equal(mEl.text(), bEl.text(), `.. encoded ${i}=${c}: text() should be equal`)
+
+      bEl.html(encodedStr)
+      mEl.html(encodedStr)
+      t.equal(mEl.html(), bEl.html(), `.. encoded ${i}=${c}: html() should be equal`)
+    }
     t.end()
   })
 
