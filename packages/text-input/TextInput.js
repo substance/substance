@@ -1,5 +1,5 @@
 import {
-  TextNode, Document, EditorSession, Configurator, platform,
+  TextNode, Document, EditorSession, Configurator,
   AbstractEditor, TextPropertyEditor, BasePackage
 } from '../../index.es'
 
@@ -75,15 +75,9 @@ function _createEditorSession(props) {
   config.addCommand('undo', UndoCommand)
   config.addCommand('redo', RedoCommand)
   config.addCommand('select-all', SelectAllCommand)
-  if (platform.isMac) {
-    config.addKeyboardShortcut('cmd+z', { command: 'undo' })
-    config.addKeyboardShortcut('cmd+shift+z', { command: 'redo' })
-    config.addKeyboardShortcut('cmd+a', { command: 'select-all' })
-  } else {
-    config.addKeyboardShortcut('ctrl+z', { command: 'undo' })
-    config.addKeyboardShortcut('ctrl+shift+z', { command: 'redo' })
-    config.addKeyboardShortcut('ctrl+a', { command: 'select-all' })
-  }
+  config.addKeyboardShortcut('CommandOrControl+z', { command: 'undo' })
+  config.addKeyboardShortcut('CommandOrControl+shift+z', { command: 'redo' })
+  config.addKeyboardShortcut('CommandOrControl+a', { command: 'select-all' })
 
   config.defineSchema({
     name: 'text-input',

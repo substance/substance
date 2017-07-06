@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import Heading from './Heading'
 import HeadingComponent from './HeadingComponent'
 import HeadingMacro from './HeadingMacro'
@@ -25,15 +24,9 @@ export default {
       spec: { type: 'heading', level: 3 },
       commandGroup: 'text-types'
     })
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+alt+1', { command: 'heading1' })
-      config.addKeyboardShortcut('cmd+alt+2', { command: 'heading2' })
-      config.addKeyboardShortcut('cmd+alt+3', { command: 'heading3' })
-    } else {
-      config.addKeyboardShortcut('ctrl+alt+1', { command: 'heading1' })
-      config.addKeyboardShortcut('ctrl+alt+2', { command: 'heading2' })
-      config.addKeyboardShortcut('ctrl+alt+3', { command: 'heading3' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+alt+1', { command: 'heading1' })
+    config.addKeyboardShortcut('CommandOrControl+alt+2', { command: 'heading2' })
+    config.addKeyboardShortcut('CommandOrControl+alt+3', { command: 'heading3' })
 
     config.addLabel('heading1', {
       en: 'Heading 1',

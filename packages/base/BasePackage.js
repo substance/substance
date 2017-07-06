@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
 import GridPackage from '../grid/GridPackage'
@@ -87,15 +86,9 @@ export default {
       de: 'Container einfügen'
     })
 
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+z', { command: 'undo' })
-      config.addKeyboardShortcut('cmd+shift+z', { command: 'redo' })
-      config.addKeyboardShortcut('cmd+a', { command: 'select-all' })
-    } else {
-      config.addKeyboardShortcut('ctrl+z', { command: 'undo' })
-      config.addKeyboardShortcut('ctrl+shift+z', { command: 'redo' })
-      config.addKeyboardShortcut('ctrl+a', { command: 'select-all' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+z', { command: 'undo' })
+    config.addKeyboardShortcut('CommandOrControl+shift+z', { command: 'redo' })
+    config.addKeyboardShortcut('CommandOrControl+a', { command: 'select-all' })
   },
   UndoCommand,
   RedoCommand,

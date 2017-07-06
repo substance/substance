@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import TextAlignCommand from './TextAlignCommand'
 
 export default {
@@ -17,15 +16,9 @@ export default {
       commandGroup: 'text-align'
     })
 
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+shift+l', { command: 'align-left' })
-      config.addKeyboardShortcut('cmd+shift+e', { command: 'align-center' })
-      config.addKeyboardShortcut('cmd+shift+r', { command: 'align-right' })
-    } else {
-      config.addKeyboardShortcut('ctrl+shift+l', { command: 'align-left' })
-      config.addKeyboardShortcut('ctrl+shift+e', { command: 'align-center' })
-      config.addKeyboardShortcut('ctrl+shift+r', { command: 'align-right' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+shift+l', { command: 'align-left' })
+    config.addKeyboardShortcut('CommandOrControl+shift+e', { command: 'align-center' })
+    config.addKeyboardShortcut('CommandOrControl+shift+r', { command: 'align-right' })
 
     config.addIcon('align-left', { 'fontawesome': 'fa-align-left' })
     config.addIcon('align-center', { 'fontawesome': 'fa-align-center' })

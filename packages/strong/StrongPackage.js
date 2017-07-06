@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import { AnnotationCommand } from '../../ui'
 import Strong from './Strong'
 import StrongHTMLConverter from './StrongHTMLConverter'
@@ -20,11 +19,7 @@ export default {
       en: 'Strong',
       de: 'Fett'
     })
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+b', { command: 'strong' })
-    } else {
-      config.addKeyboardShortcut('ctrl+b', { command: 'strong' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+b', { command: 'strong' })
   },
   Strong,
   StrongComponent,

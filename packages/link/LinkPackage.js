@@ -1,4 +1,3 @@
-import { platform } from '../../util'
 import { EditAnnotationCommand } from '../../ui'
 import Link from './Link'
 import LinkComponent from './LinkComponent'
@@ -36,11 +35,7 @@ export default {
       en: 'Remove Link',
       de: 'Link löschen'
     })
-    if (platform.isMac) {
-      config.addKeyboardShortcut('cmd+k', { command: 'link' })
-    } else {
-      config.addKeyboardShortcut('ctrl+k', { command: 'link' })
-    }
+    config.addKeyboardShortcut('CommandOrControl+k', { command: 'link' })
   },
   Link,
   LinkComponent,
