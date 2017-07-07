@@ -19,7 +19,7 @@ export default {
       en: 'Codeblock',
       de: 'Codeblock'
     })
-    config.addKeyboardShortcut('CommandOrControl+alt+c', { command: 'codeblock' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+C', { command: 'codeblock' })
   },
   Codeblock: Codeblock,
   CodeblockComponent: CodeblockComponent,

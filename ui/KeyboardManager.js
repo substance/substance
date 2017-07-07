@@ -97,8 +97,28 @@ function parseCombo(combo) {
         }
         break
       }
+      case 'MEDIANEXTTRACK': {
+        data.code = 'MediaTrackNext'
+        break
+      }
+      case 'MEDIAPLAYPAUSE': {
+        data.code = 'MediaPlayPause'
+        break
+      }
+      case 'MEDIAPREVIOUSTRACK': {
+        data.code = 'MediaPreviousTrack'
+        break
+      }
+      case 'MEDIASTOP': {
+        data.code = 'MediaStop'
+        break
+      }
       case 'SHIFT': {
         data.shiftKey = true
+        break
+      }
+      case 'SUPER': {
+        data.metaKey = true
         break
       }
       default:

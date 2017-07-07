@@ -19,7 +19,7 @@ export default {
       en: 'Paragraph',
       de: 'Paragraph'
     })
-    config.addKeyboardShortcut('CommandOrControl+alt+0', { command: 'paragraph' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+0', { command: 'paragraph' })
   },
   Paragraph: Paragraph,
   ParagraphComponent: ParagraphComponent,

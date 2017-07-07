@@ -19,7 +19,7 @@ export default {
       en: 'Blockquote',
       de: 'Blockzitat'
     })
-    config.addKeyboardShortcut('CommandOrControl+alt+b', { command: 'blockquote' })
+    config.addKeyboardShortcut('CommandOrControl+Alt+B', { command: 'blockquote' })
   },
   Blockquote: Blockquote,
   BlockquoteComponent: BlockquoteComponent,

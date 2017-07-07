@@ -16,9 +16,9 @@ export default {
       commandGroup: 'text-align'
     })
 
-    config.addKeyboardShortcut('CommandOrControl+shift+l', { command: 'align-left' })
-    config.addKeyboardShortcut('CommandOrControl+shift+e', { command: 'align-center' })
-    config.addKeyboardShortcut('CommandOrControl+shift+r', { command: 'align-right' })
+    config.addKeyboardShortcut('CommandOrControl+Shift+L', { command: 'align-left' })
+    config.addKeyboardShortcut('CommandOrControl+Shift+E', { command: 'align-center' })
+    config.addKeyboardShortcut('CommandOrControl+Shift+R', { command: 'align-right' })
 
     config.addIcon('align-left', { 'fontawesome': 'fa-align-left' })
     config.addIcon('align-center', { 'fontawesome': 'fa-align-center' })
