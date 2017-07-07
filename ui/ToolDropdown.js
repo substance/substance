@@ -30,12 +30,11 @@ class ToolDropdown extends ToolGroup {
     el.addClass('sm-'+this.props.name)
 
     // Used to resolve icon / label
-    let toggleName = this._getActiveCommandName(commandStates)
-    if (!toggleName) {
-      toggleName = this.props.name
-    }
+    const toggleName = this._getToggleName(commandStates) || this.props.name
 
-    if (this.hasEnabledTools(commandStates)) {
+    // Only render this if there are enabled tools
+    // except if the user decided to show disabled commands
+    if (this.props.showDisabled || this.hasEnabledTools(commandStates)) {
       let toggleButton
       if (this.props.style === 'minimal') {
         toggleButton = $$(Button, {
@@ -54,8 +53,8 @@ class ToolDropdown extends ToolGroup {
       } else {
         throw new Error('Style '+this.props.style+' not supported')
       }
-
       el.append(toggleButton)
+
       if (this.state.showChoices) {
         el.append(
           $$('div').addClass('se-choices').append(
@@ -83,12 +82,22 @@ class ToolDropdown extends ToolGroup {
   }
 
   /*
+    This can be overridden to control the label
+  */
+  _getToggleName(commandStates) {
+    return this._getActiveCommandName(commandStates)
+  }
+
+  /*
     Turn commandStates into menu items
   */
   _getMenuItems(commandStates) {
+    const showDisabled = this.props.showDisabled
     let menuItems = []
     forEach(commandStates, (commandState, commandName) => {
-      if (this.isToolEnabled(commandName, commandState)) {
+      // ATTENTION: not showing the disabled ones is violating the users choice
+      // given via configuration 'showDisabled'
+      if (showDisabled || this.isToolEnabled(commandName, commandState)) {
         menuItems.push({
           command: commandName
         })
@@ -99,6 +108,7 @@ class ToolDropdown extends ToolGroup {
 
   _getActiveCommandName(commandStates) {
     let activeCommand
+
     forEach(commandStates, (commandState, commandName) => {
       if (commandState.active && !activeCommand) {
         activeCommand = commandName
