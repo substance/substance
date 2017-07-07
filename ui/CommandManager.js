@@ -98,24 +98,27 @@ export default class CommandManager {
     const surface = params.surface
     const commandRegistry = this.commandRegistry
 
-    // EXPERIMENTAL:
-    // We want to control which commands are available
-    // in each surface
-    // Trying out a white-list and a black list
     // TODO: discuss, and maybe think about optimizing this
     // by caching the result...
+    let commandStates = {}
     let commandNames = commandRegistry.names.slice()
+    // first assume that all of the commands are disabled
+    commandNames.forEach((name) => {
+      commandStates[name] = { disabled: true }
+    })
+    // EXPERIMENTAL: white-list and black-list support via Surface props
     if (surface) {
       let included = surface.props.commands
       let excluded = surface.props.excludedCommands
       if (included) {
-        commandNames = included
+        commandNames = included.map((name) => {
+          return commandRegistry.contains(name)
+        })
       } else if (excluded) {
-        commandNames = without(commandRegistry.names, ...excluded)
+        commandNames = without(commandNames, ...excluded)
       }
     }
     const commands = commandNames.map(name => commandRegistry.get(name))
-    let commandStates = {}
     commands.forEach((cmd) => {
       if (cmd) {
         commandStates[cmd.getName()] = cmd.getCommandState(params, commandContext)
