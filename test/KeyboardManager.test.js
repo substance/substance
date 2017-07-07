@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import { KeyboardManager, parseKeyEvent } from 'substance'
+import { KeyboardManager } from 'substance'
 
 const test = module('KeyboardManager')
 
