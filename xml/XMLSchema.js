@@ -29,45 +29,27 @@ export default class XMLSchema {
 
 class ElementSchema {
 
-  constructor(xmlSchema, { name, type, attributes, dfa}) {
+  constructor(xmlSchema, { name, type, attributes, expr}) {
     this.xmlSchema = xmlSchema
     this.name = name
     this.type = type
     this.attributes = attributes
-    this.dfa = dfa
-
-    this._initialize()
-  }
-
-  // EXPERIMENTAL: reflection API which is used
-  // to inhibit commands considering the current
-  // selection state
-  // This works only for ContainerNodes and TextNodes
-  // where order on the children is not restricted
-
-  _initialize() {
-    // Note: collecting all children
-    const children = {}
-    forEach(this.dfa.transitions, (T) => {
-      Object.keys(T).forEach((tagName) => {
-        if (tagName === TEXT) {
-          this._canContainText = true
-          return
-        }
-        if (tagName === EPSILON) return
-        children[tagName] = true
-      })
-    })
-    this._allowedChildren = children
+    this.expr = expr
   }
 
   isAllowed(tagName) {
-    return Boolean(this._allowedChildren[tagName])
+    return this.expr.isAllowed(tagName)
   }
 
   isTextAllowed() {
-    return Boolean(this._canContainText)
+    return this.expr.isAllowed(TEXT)
   }
+
+  printStructure() {
+    return `${this.name} ::= ${this.expr.toString()}`
+  }
+
+  // TODO: these things should go into Expression land
 
   // EXPERIMENTAL:
   // can be used for a 'prependChild' or for displaying helpful validator error messages
@@ -95,36 +77,38 @@ class ElementSchema {
   _findInsertPosCandidates(el, newTag) {
     const childNodes = el.getChildNodes()
     const tagName = this.name
-    const dfa = this.dfa
+    const dfa = this.expr.dfa
     let candidates = []
-    let state = START
-    let pos = 0
-    for (;pos < childNodes.length; pos++) {
+    if (dfa) {
+      let state = START
+      let pos = 0
+      for (;pos < childNodes.length; pos++) {
+        if (dfa.canConsume(state, newTag)) {
+          candidates.push(pos)
+        }
+        const child = childNodes[pos]
+        let token
+        if (child.isTextNode()) {
+          if (/^\s*$/.exec(child.textContent)) {
+            continue
+          }
+          token = TEXT
+        } else if (child.isElementNode()) {
+          token = child.tagName
+        } else {
+          continue
+        }
+        let nextState = dfa.consume(state, token)
+        if (nextState === -1) {
+          console.error('Element is invalid:', el)
+          throw new Error(`Element <${tagName}> is invalid.`)
+        }
+        state = nextState
+      }
+      // also consider the position after all previous siblings
       if (dfa.canConsume(state, newTag)) {
         candidates.push(pos)
       }
-      const child = childNodes[pos]
-      let token
-      if (child.isTextNode()) {
-        if (/^\s*$/.exec(child.textContent)) {
-          continue
-        }
-        token = TEXT
-      } else if (child.isElementNode()) {
-        token = child.tagName
-      } else {
-        continue
-      }
-      let nextState = dfa.consume(state, token)
-      if (nextState === -1) {
-        console.error('Element is invalid:', el)
-        throw new Error(`Element <${tagName}> is invalid.`)
-      }
-      state = nextState
-    }
-    // also consider the position after all previous siblings
-    if (dfa.canConsume(state, newTag)) {
-      candidates.push(pos)
     }
     return candidates
   }

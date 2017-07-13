@@ -49,7 +49,9 @@ function analyze(xmlSchema) {
 }
 
 function _analyzeElementSchema(elementSchema, xmlSchema) {
-  const dfa = elementSchema.dfa
+  const dfa = elementSchema.expr.dfa
+  // TODO: analyze InterleaveExpr
+  if (!dfa) return
   if (!dfa.transitions) {
     if (elementSchema.type === 'implicit') elementSchema.type = 'element'
     return
