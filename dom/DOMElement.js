@@ -722,6 +722,10 @@ class DOMElement {
     throw new Error('NOT_IMPLEMENTED')
   }
 
+  setDocType(qualifiedNameStr, publicId, systemId) { // eslint-disable-line
+    throw new Error('NOT_IMPLEMENTED')
+  }
+
   /**
     Find the first descendant element matching the given CSS selector.
     Note this differs from jQuery.find() that it returns only one element.

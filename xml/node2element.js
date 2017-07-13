@@ -1,10 +1,12 @@
 import { DefaultDOMElement as DOM } from '../dom'
 import { Fragmenter } from '../model'
 
-// converts a node into a DOM node
+// converts a node into an XML DOM node
 export default function node2element(node) {
-  let dom = DOM.createDocument()
-  return _node2element(dom, node)
+  // It is important to specify 'xml' as the document type
+  let dom = DOM.createDocument('xml')
+  let el = _node2element(dom, node)
+  return el
 }
 
 function _node2element(dom, node) {

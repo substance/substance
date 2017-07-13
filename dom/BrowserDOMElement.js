@@ -61,6 +61,19 @@ class BrowserDOMElement extends DOMElement {
     }
   }
 
+  setDocType(qualifiedNameStr, publicId, systemId) {
+    let ownerDocument = this._getNativeOwnerDocument()
+    let oldDocType = ownerDocument.doctype
+    let newDocType = ownerDocument.implementation.createDocumentType(
+     qualifiedNameStr, publicId, systemId
+    )
+    if (oldDocType) {
+      oldDocType.parentNode.replaceChild(newDocType, oldDocType)
+    } else {
+      ownerDocument.appendChild(newDocType)
+    }
+  }
+
   isTextNode() {
     return (this.el.nodeType === window.Node.TEXT_NODE)
   }

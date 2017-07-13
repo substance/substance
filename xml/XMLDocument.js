@@ -4,6 +4,7 @@ import {
   DocumentNodeFactory
 } from '../model'
 import { uuid } from '../util'
+import { DefaultDOMElement } from '../dom'
 
 import ParentNodeHook from './ParentNodeHook'
 import XMLEditingInterface from './XMLEditingInterface'
@@ -18,8 +19,20 @@ class XMLDocument extends Document {
     this.addIndex('type', new PropertyIndex('type'))
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
-
     ParentNodeHook.register(this)
+  }
+
+  toXML() {
+    let dom = DefaultDOMElement.createDocument('xml')
+    dom.setDocType(...this.getDocTypeParams())
+    let rootElement = this.getRootNode().toXML()
+    dom.append(rootElement)
+    return dom
+  }
+
+  getDocTypeParams() {
+    // return [qualifiedNameStr, publicId, systemId]
+    throw new Error('This method is abstract')
   }
 
   getXMLSchema() {
@@ -30,6 +43,13 @@ class XMLDocument extends Document {
   getRootNode() {
     // should provide the root-element
     throw new Error('This method is abstract')
+  }
+
+  /*
+    Provide a <!DOCTYPE ...> element as a string here
+  */
+  getDocTypeAsString() {
+    return new Error('This method is abstract')
   }
 
   createEditingInterface() {
