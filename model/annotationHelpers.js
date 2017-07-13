@@ -27,7 +27,7 @@ export function updateAnnotationsAfterInsert(doc, path, startOffset, endOffset, 
     let annoEnd = anno.end.offset
     // I anno is before
     if (annoEnd<startOffset) {
-      return
+      continue
     }
     // II anno is after
     else if (annoStart>=endOffset) {
@@ -94,7 +94,7 @@ export function updateAnnotationsAfterDelete(doc, path, startOffset, endOffset) 
     let annoEnd = anno.end.offset
     // I anno is before
     if (annoEnd<=startOffset) {
-      return
+      continue
     }
     // II anno is after
     else if (annoStart>=endOffset) {
