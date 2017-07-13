@@ -11,6 +11,8 @@ export default {
       en: 'Save',
       de: 'Speichern'
     })
+    config.addKeyboardShortcut('CommandOrControl+S', { command: 'save' })
+
   },
   SaveCommand: SaveCommand
 }
