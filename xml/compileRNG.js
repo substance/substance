@@ -1,16 +1,23 @@
-import DFA from './DFA'
-import DFABuilder from './DFABuilder'
+import { isString } from '../util'
+import { DefaultDOMElement } from '../dom'
 import XMLSchema from './XMLSchema'
-import analyzeSchema from './_analyzeSchema'
+// import analyzeSchema from './_analyzeSchema'
+import DFA from './DFA'
 import _loadRNG from './_loadRNG'
-import nameWithoutNS from './nameWithoutNS'
+import _registerDefinitions from './_registerDefinitions'
+import { createExpression, Token, Choice, Sequence, Optional, Plus, Kleene } from './RegularLanguage'
 
 const TEXT = DFA.TEXT
-const singleToken = DFABuilder.singleToken
 
 export default
 function compileRNG(fs, searchDirs, entry) {
-  const rng = _loadRNG(fs, searchDirs, entry)
+  let rng
+  // used for testing
+  if (arguments.length === 1 && isString(arguments[0])) {
+    rng = DefaultDOMElement.parseXML(arguments[0])
+  } else {
+    rng = _loadRNG(fs, searchDirs, entry)
+  }
 
   const grammar = rng.find('grammar')
   if (!grammar) throw new Error('<grammar> not found.')
@@ -27,63 +34,25 @@ function compileRNG(fs, searchDirs, entry) {
 
   let xmlSchema = new XMLSchema(grammar.schemas)
 
-  // this adds some reflection info and derives the type
-  analyzeSchema(xmlSchema)
+  debugger
 
-  // type overrides
-  const elementTypes = rng.findAll('elementType')
-  elementTypes.forEach((el) => {
-    const elementSchema = xmlSchema.getElementSchema(el.attr('name'))
-    let type = el.attr('s:type') || el.attr('type')
-    if (!type) throw new Error('Invalid elementType definition')
-    elementSchema.type = type
-  })
+  // this adds some reflection info and derives the type
+  // analyzeSchema(xmlSchema)
+
+  // // type overrides
+  // const elementTypes = rng.findAll('elementType')
+  // elementTypes.forEach((el) => {
+  //   const elementSchema = xmlSchema.getElementSchema(el.attr('name'))
+  //   let type = el.attr('s:type') || el.attr('type')
+  //   if (!type) throw new Error('Invalid elementType definition')
+  //   elementSchema.type = type
+  // })
 
   return xmlSchema
 }
 
-function _registerDefinitions(grammar) {
-  let defs = {}
-  let start = null
-  grammar.children.forEach((child) => {
-    const tagName = nameWithoutNS(child.tagName)
-    switch (tagName) {
-      /*
-        TODO: in theory there are pretty complex merges
-        possible using 'combine'
-        In JATS, defines are used either to join attributes
-        or to override a definition
-      */
-      case 'define': {
-        const name = child.attr('name')
-        const combine = child.attr('combine')
-        if (defs[name]) {
-          if (combine === 'interleave') {
-            defs[name].append(child.children)
-            break
-          } else {
-            console.error('Overriding definition', name)
-          }
-        }
-        defs[name] = child
-        break
-      }
-      case 'start': {
-        start = child
-        break
-      }
-      default:
-        // nothing
-    }
-  })
-  grammar.defs = defs
-  grammar.start = start
-}
-
 /*
- TODO:
-  compile attributes separatedly. RNG has a so much different
-  semantics for attributes.
+  TODO: compile attributes separatedly.
 */
 function _compile(grammar) {
   const elements = grammar.findAll('element')
@@ -94,11 +63,12 @@ function _compile(grammar) {
     const name = el.attr('name')
     const type = el.attr('type') || el.attr('s:type') || 'implicit'
     // console.log('processing <%s>', name)
-    let dfa = _processSequence(el, grammar)
+    let block = _processSequence(el, grammar)
+    let expr = createExpression(name, block)
     let schema = {
       name,
       attributes: _collectAttributes(el, grammar),
-      dfa
+      expr
     }
     // manually set type
     if (type) {
@@ -119,132 +89,101 @@ function _extractStart(grammar) {
   return grammar.schemas[name]
 }
 
-function _processSequence(el, grammar) {
-  if (el.dfa) return el.dfa.copy()
-  const dfa = new DFABuilder()
-  const children = el.children
+function _processChildren(el, grammar) {
+  let blocks = _processBlocks(el.children, grammar)
+  if (blocks.length === 1) {
+    return blocks[0]
+  } else {
+    return new Sequence(blocks)
+  }
+}
+
+function _processBlocks(children, grammar) {
+  const blocks = []
   for (var i = 0; i < children.length; i++) {
     const child = children[i]
     // const name = child.attr('name')
     switch(child.tagName) {
-      case 'attribute': {
-        // TODO: we should compile the attribute into
-        // an internal format
-        // const attr = _transformAttribute(child)
-        // dfa.addAttribute(attr.name, attr)
+      // skip these
+      case 'attribute':
+      case 'empty':
+      case 'notAllowed': {
         break
       }
       case 'element': {
         const elName = child.attr('name')
-        dfa.append(singleToken(elName))
+        blocks.push(new Token(elName))
         break
       }
-      case 'empty':
-        break
-      // TODO: need to rethink this
-      // RNG is a bit difficult to interpret as the meaning
-      // of elements is very contextual (e.g. from where a ref is used)
-      case 'notAllowed':
-        break
       case 'text': {
-        dfa.append(singleToken(TEXT))
+        blocks.push(new Token(TEXT))
         break
       }
       case 'ref': {
-        const childDFA = _processReference(child, grammar)
-        dfa.append(childDFA)
+        const block = _processReference(child, grammar)
+        blocks.push(block)
+        break
+      }
+      case 'group': {
+        blocks.push(_processSequence(child, grammar))
         break
       }
       case 'choice': {
-        const childDFA = _transformChoice(child, grammar)
-        dfa.append(childDFA)
+        const block = _processChoice(child, grammar)
+        blocks.push(block)
         break
       }
       case 'optional': {
-        let childDFA = _processSequence(child, grammar)
-        childDFA = childDFA.optional()
-        dfa.append(childDFA)
+        const block = new Optional(_processChildren(child, grammar))
+        blocks.push(block)
         break
       }
       case 'oneOrMore': {
-        let childDFA = _processSequence(child, grammar)
-        childDFA = childDFA.plus()
-        dfa.append(childDFA)
+        const block = new Plus(_processChildren(child, grammar))
+        blocks.push(block)
         break
       }
       case 'zeroOrMore': {
-        let childDFA = _processSequence(child, grammar)
-        childDFA = childDFA.kleene()
-        dfa.append(childDFA)
+        const block = new Kleene(_processChildren(child, grammar))
+        blocks.push(block)
         break
       }
       default:
-        throw new Error('Not supported yet')
+        throw new Error('Not supported yet: ' + child.tagName)
     }
   }
-  el.dfa = dfa
-  return dfa
+  return blocks
+}
+
+function _processSequence(el, grammar) {
+  if (el.expr) return el.expr.copy()
+  const blocks = _processBlocks(el.children, grammar)
+  el.expr = new Sequence(blocks)
+  return el.expr
+}
+
+function _processChoice(el, grammar) {
+  if (el.expr) return el.expr.copy()
+  let blocks = _processBlocks(el.children, grammar)
+  el.expr = new Choice(blocks)
+  return el.expr
 }
 
 function _processReference(ref, grammar) {
   const name = ref.attr('name')
   const def = grammar.defs[name]
   if (!def) throw new Error(`Illegal ref: ${name} is not defined.`)
-  if (def.dfa) return def.dfa.copy()
+  if (def.expr) return def.expr.copy()
   // Guard for cyclic references
   // TODO: what to do with cyclic refs?
   if (grammar._visiting[name]) {
     throw new Error('Cyclic references are not supported yet')
   }
   grammar._visiting[name] = true
-  const dfa = _processSequence(def, grammar)
-  def.dfa = dfa
+  const block = _processChildren(def, grammar)
+  def.expr = block
   delete grammar._visiting[name]
-  return dfa
-}
-
-function _transformChoice(choice, grammar) {
-  let children = choice.children
-  let dfa = new DFABuilder()
-  let L = children.length
-  for (let i = 0; i < L; i++) {
-    let child = children[i]
-    switch(child.tagName) {
-      case 'ref': {
-        dfa.merge(_processReference(child, grammar))
-        break
-      }
-      case 'empty':
-        break
-      case 'text': {
-        dfa.merge(singleToken(TEXT))
-        break
-      }
-      case 'group': {
-        dfa.merge(_processSequence(child, grammar))
-        break
-      }
-      case 'choice': {
-        dfa.merge(_transformChoice(child, grammar))
-        break
-      }
-      case 'optional': {
-        dfa.merge(_processSequence(child, grammar).optional())
-        break
-      }
-      case 'oneOrMore': {
-        dfa.merge(_processSequence(child, grammar).plus())
-        break
-      }
-      case 'zeroOrMore': {
-        dfa.merge(_processSequence(child, grammar).kleene())
-        break
-      }
-      default:
-        throw new Error('Not supported yet')
-    }
-  }
-  return dfa
+  return def.expr
 }
 
 function _collectAttributes(el, grammar, attributes = {}) {
@@ -294,65 +233,4 @@ function _transformAttribute(el) {
   return {
     name
   }
-}
-
-function _expand(grammar) { // eslint-disable-line no-unused-vars
-  const elements = grammar.findAll('element')
-  let expanded = grammar.createElement('grammar')
-  grammar._visiting = {}
-  for (let i = 0; i < elements.length; i++) {
-    const el = elements[i]
-    const expandedEl = _expandElement(el, grammar)
-    // flatten nested choices
-    let nestedChoice
-    while( (nestedChoice = expandedEl.find('choice > choice')) ) {
-      let parentNode = nestedChoice.parentNode
-      let children = nestedChoice.children
-      for (let j = 0; j < children.length; j++) {
-        const child = children[j]
-        parentNode.insertBefore(child, nestedChoice)
-      }
-      nestedChoice.remove()
-    }
-    expanded.append(expandedEl)
-  }
-  return expanded
-}
-
-function _expandElement(el, grammar) {
-  el = el.clone()
-  const children = el.children
-  for (var i = 0; i < children.length; i++) {
-    const child = children[i]
-    const parentNode = child.parentNode
-    // const name = child.attr('name')
-    switch(child.tagName) {
-      case 'element': {
-        parentNode.replaceChild(child, el.createElement('element').attr('name', child.attr('name')))
-        break
-      }
-      case 'ref': {
-        const name = child.attr('name')
-        const def = grammar.defs[name]
-        if (!def) throw new Error('Illegal ref')
-        // Guard for cyclic references
-        // TODO: what to do with cyclic refs?
-        if (grammar._visiting[name]) {
-          throw new Error('Cyclic references are not supported yet')
-        }
-        grammar._visiting[name] = true
-        let expandedDef = _expandElement(def, grammar)
-        expandedDef.children.forEach((_child) => {
-          parentNode.insertBefore(_child, child)
-        })
-        child.remove()
-        delete grammar._visiting[name]
-        break
-      }
-      default: {
-        parentNode.replaceChild(child, _expandElement(child, grammar))
-      }
-    }
-  }
-  return el
 }
