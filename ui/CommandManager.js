@@ -115,6 +115,7 @@ export default class CommandManager {
           if (commandRegistry.contains(name)){
             return name
           }
+          return null
         })
       } else if (excluded) {
         commandNames = without(commandNames, ...excluded)
