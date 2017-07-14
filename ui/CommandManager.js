@@ -112,7 +112,10 @@ export default class CommandManager {
       let excluded = surface.props.excludedCommands
       if (included) {
         commandNames = included.map((name) => {
-          return commandRegistry.contains(name)
+          if (commandRegistry.contains(name)){
+            return name
+          }
+          return null
         })
       } else if (excluded) {
         commandNames = without(commandNames, ...excluded)
