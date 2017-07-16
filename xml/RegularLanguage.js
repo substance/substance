@@ -452,7 +452,7 @@ export class Optional {
   }
 
   copy() {
-    return new Interleave(this.block.copy())
+    return new Optional(this.block.copy())
   }
 
   _compile() {
@@ -493,7 +493,7 @@ export class Kleene {
   }
 
   copy() {
-    return new Interleave(this.block.copy())
+    return new Kleene(this.block.copy())
   }
 
   _compile() {
@@ -534,7 +534,7 @@ export class Plus {
   }
 
   copy() {
-    return new Interleave(this.block.copy())
+    return new Plus(this.block.copy())
   }
 
   _compile() {

@@ -5,8 +5,13 @@ const { TEXT, EPSILON, START } = DFA
 
 export default class XMLSchema {
 
-  constructor(elementSchemas) {
+  constructor(elementSchemas, startElement) {
+    if (!elementSchemas[startElement]) {
+      throw new Error('startElement must be a valid element.')
+    }
     this._elementSchemas = {}
+    this.startElement = startElement
+    // wrap schemas into ElementSchemas
     forEach(elementSchemas, (spec, name) => {
       this._elementSchemas[name] = new ElementSchema(this, spec)
     })
@@ -21,9 +26,7 @@ export default class XMLSchema {
   }
 
   getStartElement() {
-    // TODO: we should extract this from RNG
-    // for now you must override this method
-    throw new Error('This method is abstract')
+    return this.startElement
   }
 }
 

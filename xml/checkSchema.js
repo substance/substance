@@ -129,8 +129,8 @@ export default function checkSchema(xmlSchema) {
 function _checkTextElement(elementSchema) {
   const issues = []
   // should not be used inline
-  if (elementSchema.usedInlineBy) {
-    issues.push(`[1]: text element <${elementSchema.name}> is used inline by ${Object.keys(elementSchema.usedInlineBy).join(',')}`)
+  if (_usedInline(elementSchema)) {
+    issues.push(`[1]: text element <${elementSchema.name}> is used inline by ${_usedInlineBy(elementSchema).join(',')}`)
   }
   // should have text
   if (!elementSchema.isText) {
@@ -145,8 +145,8 @@ function _checkTextElement(elementSchema) {
 
 function _checkElement(elementSchema) {
   const issues = []
-  if (elementSchema.usedInlineBy) {
-    issues.push(`[2]: element <${elementSchema.name}> is used inline by ${Object.keys(elementSchema.usedInlineBy).join(',')}`)
+  if (_usedInline(elementSchema)) {
+    issues.push(`[2]: element <${elementSchema.name}> is used inline by ${_usedInlineBy(elementSchema).join(',')}`)
   }
   // should not have text
   if (elementSchema.isText) {
@@ -157,8 +157,8 @@ function _checkElement(elementSchema) {
 
 function _checkHybridElement(elementSchema) {
   const issues = []
-  if (elementSchema.usedInlineBy) {
-    issues.push(`[2]: hybrid element <${elementSchema.name}> is used inline by ${Object.keys(elementSchema.usedInlineBy).join(',')}`)
+  if (_usedInlineOnly(elementSchema)) {
+    issues.push(`[2.2]: hybrid element <${elementSchema.name}> is used inline by ${_usedInlineBy(elementSchema).join(',')}`)
   }
   // should have text
   if (!elementSchema.isText || !elementSchema.isStructured) {
@@ -200,6 +200,17 @@ function _checkAnchor(elementSchema) {
   }
   return issues
 }
+
+function _usedInline(elementSchema) {
+  let usedInlineBy = elementSchema.usedInlineBy || {}
+  return Object.keys(usedInlineBy).length > 0
+}
+
+function _usedInlineBy(elementSchema) {
+  let usedInlineBy = elementSchema.usedInlineBy || {}
+  return Object.keys(usedInlineBy)
+}
+
 
 function _usedInlineOnly(elementSchema) {
   let usedStructuredBy = _usedStructuredBy(elementSchema)

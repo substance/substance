@@ -643,7 +643,7 @@ class DOMElement {
 
     @returns {DOMElement} A clone of this element.
   */
-  clone() {
+  clone(deep) { // eslint-disable-line
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }

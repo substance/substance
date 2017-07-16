@@ -59,6 +59,7 @@ function analyze(xmlSchema) {
 */
 function _analyzeElementSchema(elementSchema, xmlSchema) {
   const expr = elementSchema.expr
+  const name = elementSchema.name
   if (!expr) return
   let _siblings = []
   if (expr instanceof DFAExpr) {
@@ -78,7 +79,6 @@ function _analyzeElementSchema(elementSchema, xmlSchema) {
     if (elementSchema.type === 'implicit') elementSchema.type = 'element'
   }
 
-  const name = elementSchema.name
   let hasText = false
   let hasElements = false
   _siblings.forEach((tagNames) => {
@@ -110,10 +110,7 @@ function _analyzeElementSchema(elementSchema, xmlSchema) {
     elementSchema.isText = true
   }
   if (elementSchema.type === 'implicit') {
-    // automatic classification
-    if (hasElements && hasText) {
-      elementSchema.type = 'hybrid'
-    } else if (hasText) {
+    if (hasText) {
       elementSchema.type = 'text'
     } else {
       elementSchema.type = 'element'

@@ -75,7 +75,12 @@ class DFA {
       // and collect all tokens
       // we consider them as potential siblings, as they
       // can co-occur at the same level
-      let _siblings = array2table(tokens)
+      let _siblings = {}
+      tokens.forEach((t) => {
+        if (t !== EPSILON) {
+          _siblings[t] = true
+        }
+      })
       let stack = [state]
       while(stack.length > 0) {
         let from = stack.pop()
@@ -93,7 +98,10 @@ class DFA {
           }
         }
       }
-      result.push(Object.keys(_siblings))
+      let _siblingTokens = Object.keys(_siblings)
+      if (_siblingTokens.length > 0) {
+        result.push(_siblingTokens)
+      }
     })
     return result
   }

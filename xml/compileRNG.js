@@ -1,14 +1,18 @@
 import { isString } from '../util'
 import { DefaultDOMElement } from '../dom'
+import nameWithoutNS from './nameWithoutNS'
 import XMLSchema from './XMLSchema'
-import analyzeSchema from './_analyzeSchema'
 import DFA from './DFA'
-import _loadRNG from './_loadRNG'
-import _registerDefinitions from './_registerDefinitions'
 import { createExpression, Token, Choice, Sequence, Optional, Plus, Kleene, Interleave } from './RegularLanguage'
+import _loadRNG from './_loadRNG'
+import _analyzeSchema from './_analyzeSchema'
 
 const TEXT = DFA.TEXT
 
+/*
+  We use regular RNG, with slight restrictions plus custom extensions,
+  and compile it into our internal format.
+*/
 export default
 function compileRNG(fs, searchDirs, entry) {
   let rng
@@ -19,68 +23,193 @@ function compileRNG(fs, searchDirs, entry) {
     rng = _loadRNG(fs, searchDirs, entry)
   }
 
-  const grammar = rng.find('grammar')
+  let grammar = rng.find('grammar')
   if (!grammar) throw new Error('<grammar> not found.')
-  // collect all definitions, supporting to override
-  // for customizations
+
+  // collect all definitions, allowing for custom overrides
   _registerDefinitions(grammar)
 
-  // for debugging/analysis create an expanded representation
-  // let expanded = _expand(grammar)
-  // console.info("Expanded grammar:", expanded.getNativeElement())
-
   // turn the RNG schema into our internal data structure
-  _compile(grammar)
+  let transformedGrammar = _transformRNG(grammar)
 
-  let xmlSchema = new XMLSchema(grammar.schemas)
+  // console.log(grammar.getNativeElement())
+
+  let xmlSchema = _compile(transformedGrammar)
+
   // this adds some reflection info and derives the type
-  analyzeSchema(xmlSchema)
-  // // type overrides
-  const elementTypes = rng.findAll('elementType')
-  elementTypes.forEach((el) => {
-    const elementSchema = xmlSchema.getElementSchema(el.attr('name'))
-    let type = el.attr('s:type') || el.attr('type')
-    if (!type) throw new Error('Invalid elementType definition')
-    elementSchema.type = type
-  })
+  _analyzeSchema(xmlSchema)
+
+  debugger
 
   return xmlSchema
 }
 
-/*
-  TODO: compile attributes separatedly.
-*/
-function _compile(grammar) {
-  const elements = grammar.findAll('element')
-  grammar._visiting = {}
-  const schemas = {}
-  for (let i = 0; i < elements.length; i++) {
-    const el = elements[i]
-    const name = el.attr('name')
-    const type = el.attr('type') || el.attr('s:type') || 'implicit'
-    // console.log('processing <%s>', name)
-    let block = _processChildren(el, grammar)
-    let expr = createExpression(name, block)
-    // simplify the expression structure
-    // which is helpful when using pre-defined
-    // groups or choices
-    expr._normalize()
 
-    let schema = {
-      name,
-      attributes: _collectAttributes(el, grammar),
-      expr
+/* Registration of <define> elements */
+
+function _registerDefinitions(grammar) {
+  let defs = {}
+  // NOTE: definitions are only considered on the top level
+  grammar.children.forEach((child) => {
+    const tagName = nameWithoutNS(child.tagName)
+    if (tagName === 'define') {
+      _processDefine(child, defs)
     }
-    // manually set type
-    if (type) {
-      schema.type = type
+  })
+  grammar.defs = defs
+}
+
+function _processDefine(el, defs) {
+  const name = el.attr('name')
+  const combine = el.attr('combine')
+  if (combine === 'interleave') {
+    if (defs[name]) {
+      defs[name].append(el.children)
+    } else {
+      defs[name] = el
     }
-    schemas[name] = schema
+  } else {
+    if (defs[name]) {
+      console.info(`Overwriting definition ${name}`, el)
+    }
+    defs[name] = el
   }
-  grammar.schemas = schemas
+}
+
+
+/* Transformation of RNG into internal representation */
+
+function _transformRNG(grammar) { // eslint-disable-line no-unused-vars
+  // expanding all element definitions
+  const elements = {}
+  const defs = grammar.defs
+  const elementDefinitions = grammar.findAll('define > element')
+  const doc = DefaultDOMElement.createDocument('xml')
+  const newGrammar = doc.createElement('grammar')
+  elementDefinitions.forEach((el) => {
+    const name = el.attr('name')
+    if (!name) throw new Error("'name' is mandatory.")
+    const transformed = _transformElementDefinition(doc, name, el, defs)
+    elements[name] = transformed
+    newGrammar.appendChild(transformed)
+  })
+
+  // transfer element types
+  const elementTypes = grammar.findAll('elementType')
+  elementTypes.forEach((typeEl) => {
+    const name = typeEl.attr('name')
+    const type = typeEl.attr('s:type') || typeEl.attr('type')
+    if (!name || !type) throw new Error('Attributes name and type are mandatory.')
+    const element = elements[name]
+    if (!element) throw new Error(`Unknown element ${name}.`)
+    element.attr('type', type)
+  })
 
   // start element
-  grammar.start = _extractStart(grammar)
+  const startElement = _extractStart(grammar)
+  if (!startElement) throw new Error('<start> is mandatory.')
+  newGrammar.appendChild(doc.createElement('start').attr('name', startElement))
+
+  return newGrammar
+}
+
+function _transformElementDefinition(doc, name, orig, defs) {
+  let el = doc.createElement('element').attr('name', name)
+  // NOTE: setting type to implicit by default
+  // this is refined when calling analyzeSchema
+  el.attr('type', 'implicit')
+  // TODO: try to separate attributes from children
+  // now go through all children and wrap them into attributes and children
+  let attributes = doc.createElement('attributes')
+  let children = doc.createElement('children')
+  orig.children.forEach((child) => {
+    let block = _transformBlock(doc, child, defs, {})
+    block.forEach((el) => {
+      if (el.find('attribute') || el.is('attribute')) {
+        attributes.appendChild(el)
+      } else {
+        children.appendChild(el)
+      }
+    })
+  })
+  el.appendChild(attributes)
+  el.appendChild(children)
+
+  /*
+    Pruning (this is probably very slow!)
+    - choice > choice
+    - choice with one element
+  */
+
+  let hasPruned = true
+  while (hasPruned) {
+    let nestedChoice = children.find('choice > choice')
+    if (nestedChoice) {
+      let parentNode = nestedChoice.parentNode
+      parentNode.parentNode.replaceChild(parentNode, nestedChoice)
+      continue
+    }
+    let choices = children.findAll('choice')
+    for (let i = 0; i < choices.length; i++) {
+      let choice = choices[i]
+      let children = choice.children
+      if (children.length === 1) {
+        choice.parentNode.replaceChild(choice, children[0])
+      }
+      continue
+    }
+    hasPruned = false
+  }
+
+  return el
+}
+
+function _transformBlock(doc, block, defs, visiting={}) {
+  // if a block is a <ref> return the expanded children
+  // otherwise clone the block and descend recursively
+  const tagName = block.tagName
+  switch (tagName) {
+    case 'element': {
+      return [doc.createElement('element').attr('name',block.attr('name'))]
+    }
+    case 'ref': {
+      return _expandRef(doc, block, defs, visiting)
+    }
+    case 'empty':
+    case 'notAllowed': {
+      return []
+    }
+    default: {
+      let clone = block.clone(false)
+      block.children.forEach((child) => {
+        clone.append(_transformBlock(doc, child, defs, visiting))
+      })
+      return [clone]
+    }
+  }
+}
+
+function _expandRef(doc, ref, defs, visiting={}) {
+  const name = ref.attr('name')
+  // Acquire semaphore against cyclic refs
+  if (visiting[name]) {
+    throw new Error('Cyclic references are not supported.')
+  }
+  visiting[name] = true
+
+  const def = defs[name]
+  if (!def) throw new Error(`Unknown definition ${name}`)
+
+  let expanded = []
+  let children = def.children
+  children.forEach((child) => {
+    let transformed = _transformBlock(doc, child, defs, visiting)
+    expanded = expanded.concat(transformed)
+  })
+
+  // Releasing semaphore against cyclic refs
+  delete visiting[name]
+  return expanded
 }
 
 function _extractStart(grammar) {
@@ -97,11 +226,30 @@ function _extractStart(grammar) {
     throw new Error('Expecting one <ref> inside of <start>.')
   }
   const name = startRef.attr('name')
-  let startElement = grammar.schemas[name]
-  if (!startElement) {
-    throw new Error(`Could not find element schema for start element ${name}.`)
+  return name
+}
+
+function _compile(grammar) {
+  const schemas = {}
+  const elements = grammar.children.filter(el=>el.tagName==='element')
+  elements.forEach((element) => {
+    const name = element.attr('name')
+    const attributes = _collectAttributes(element.find('attributes'))
+    const children = element.find('children')
+    let block = _processChildren(children, grammar)
+    let expr = createExpression(name, block)
+    let schema = { name, attributes, expr }
+    schemas[name] = schema
+  })
+  const start = grammar.find('start')
+  if (!start) {
+    throw new Error('<start> is mandatory')
   }
-  return startElement
+  const startElement = start.attr('name')
+  if (!startElement) {
+    throw new Error('<start> must have "name" set')
+  }
+  return new XMLSchema(schemas, startElement)
 }
 
 function _processChildren(el, grammar) {
@@ -216,20 +364,6 @@ function _collectAttributes(el, grammar, attributes = {}) {
       case 'attribute': {
         const attr = _transformAttribute(child)
         attributes[attr.name] = attr
-        break
-      }
-      case 'ref': {
-        const name = child.attr('name')
-        const def = grammar.defs[name]
-        if (!def) throw new Error('Illegal ref')
-        // Guard for cyclic references
-        // TODO: what to do with cyclic refs?
-        if (grammar._visiting[name]) {
-          throw new Error('Cyclic references are not supported yet')
-        }
-        grammar._visiting[name] = true
-        _collectAttributes(def, grammar, attributes)
-        delete grammar._visiting[name]
         break
       }
       case 'group':
