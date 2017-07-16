@@ -49,67 +49,12 @@ class ElementSchema {
     return `${this.name} ::= ${this.expr.toString()}`
   }
 
-  // TODO: these things should go into Expression land
-
-  // EXPERIMENTAL:
-  // can be used for a 'prependChild' or for displaying helpful validator error messages
   findFirstValidPos(el, newTag) {
-    let candidates = this._findInsertPosCandidates(el, newTag)
-    if (candidates.length > 0) {
-      return candidates[0]
-    } else {
-      return -1
-    }
+    return this.expr._findInsertPos(el, newTag, 'first')
   }
 
-  // EXPERIMENTAL:
-  // we want to provide a high-level API `node.append()`
-  // which looks for the last valid position according to the element schema
   findLastValidPos(el, newTag) {
-    let candidates = this._findInsertPosCandidates(el, newTag)
-    if (candidates.length > 0) {
-      return last(candidates)
-    } else {
-      return -1
-    }
+    return this.expr._findInsertPos(el, newTag, 'last')
   }
 
-  _findInsertPosCandidates(el, newTag) {
-    const childNodes = el.getChildNodes()
-    const tagName = this.name
-    const dfa = this.expr.dfa
-    let candidates = []
-    if (dfa) {
-      let state = START
-      let pos = 0
-      for (;pos < childNodes.length; pos++) {
-        if (dfa.canConsume(state, newTag)) {
-          candidates.push(pos)
-        }
-        const child = childNodes[pos]
-        let token
-        if (child.isTextNode()) {
-          if (/^\s*$/.exec(child.textContent)) {
-            continue
-          }
-          token = TEXT
-        } else if (child.isElementNode()) {
-          token = child.tagName
-        } else {
-          continue
-        }
-        let nextState = dfa.consume(state, token)
-        if (nextState === -1) {
-          console.error('Element is invalid:', el)
-          throw new Error(`Element <${tagName}> is invalid.`)
-        }
-        state = nextState
-      }
-      // also consider the position after all previous siblings
-      if (dfa.canConsume(state, newTag)) {
-        candidates.push(pos)
-      }
-    }
-    return candidates
-  }
 }

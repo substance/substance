@@ -1,11 +1,11 @@
 import { isString } from '../util'
 import { DefaultDOMElement } from '../dom'
 import XMLSchema from './XMLSchema'
-// import analyzeSchema from './_analyzeSchema'
+import analyzeSchema from './_analyzeSchema'
 import DFA from './DFA'
 import _loadRNG from './_loadRNG'
 import _registerDefinitions from './_registerDefinitions'
-import { createExpression, Token, Choice, Sequence, Optional, Plus, Kleene } from './RegularLanguage'
+import { createExpression, Token, Choice, Sequence, Optional, Plus, Kleene, Interleave } from './RegularLanguage'
 
 const TEXT = DFA.TEXT
 
@@ -33,20 +33,16 @@ function compileRNG(fs, searchDirs, entry) {
   _compile(grammar)
 
   let xmlSchema = new XMLSchema(grammar.schemas)
-
-  debugger
-
   // this adds some reflection info and derives the type
-  // analyzeSchema(xmlSchema)
-
+  analyzeSchema(xmlSchema)
   // // type overrides
-  // const elementTypes = rng.findAll('elementType')
-  // elementTypes.forEach((el) => {
-  //   const elementSchema = xmlSchema.getElementSchema(el.attr('name'))
-  //   let type = el.attr('s:type') || el.attr('type')
-  //   if (!type) throw new Error('Invalid elementType definition')
-  //   elementSchema.type = type
-  // })
+  const elementTypes = rng.findAll('elementType')
+  elementTypes.forEach((el) => {
+    const elementSchema = xmlSchema.getElementSchema(el.attr('name'))
+    let type = el.attr('s:type') || el.attr('type')
+    if (!type) throw new Error('Invalid elementType definition')
+    elementSchema.type = type
+  })
 
   return xmlSchema
 }
@@ -63,8 +59,13 @@ function _compile(grammar) {
     const name = el.attr('name')
     const type = el.attr('type') || el.attr('s:type') || 'implicit'
     // console.log('processing <%s>', name)
-    let block = _processSequence(el, grammar)
+    let block = _processChildren(el, grammar)
     let expr = createExpression(name, block)
+    // simplify the expression structure
+    // which is helpful when using pre-defined
+    // groups or choices
+    expr._normalize()
+
     let schema = {
       name,
       attributes: _collectAttributes(el, grammar),
@@ -85,8 +86,22 @@ function _compile(grammar) {
 function _extractStart(grammar) {
   // for now this is hard wired to work with the start
   // element as defined in JATS 1.1
-  let name = grammar.start.find('ref').attr('name')
-  return grammar.schemas[name]
+  const start = grammar.find('start')
+  if (!start) {
+    throw new Error('<grammar> must have a <start> element')
+  }
+  // HACK: we assume that there is exactly one ref to
+  // an element definition
+  const startRef = start.find('ref')
+  if (!startRef) {
+    throw new Error('Expecting one <ref> inside of <start>.')
+  }
+  const name = startRef.attr('name')
+  let startElement = grammar.schemas[name]
+  if (!startElement) {
+    throw new Error(`Could not find element schema for start element ${name}.`)
+  }
+  return startElement
 }
 
 function _processChildren(el, grammar) {
@@ -145,6 +160,11 @@ function _processBlocks(children, grammar) {
       }
       case 'zeroOrMore': {
         const block = new Kleene(_processChildren(child, grammar))
+        blocks.push(block)
+        break
+      }
+      case 'interleave': {
+        const block = new Interleave(_processBlocks(child.children, grammar))
         blocks.push(block)
         break
       }

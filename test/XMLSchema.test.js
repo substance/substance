@@ -79,6 +79,9 @@ test('Interleaving', (t) => {
           </interleave>
         </element>
       </define>
+      <start>
+        <ref name="foo"/>
+      </start>
     </grammar>
   `
   let xmlSchema = _compileRNG(RNG, 'foo')
