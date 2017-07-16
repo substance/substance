@@ -339,8 +339,8 @@ class BrowserDOMElement extends DOMElement {
     }
   }
 
-  clone() {
-    let clone = this.el.cloneNode(true)
+  clone(deep) {
+    let clone = this.el.cloneNode(deep)
     return BrowserDOMElement.wrap(clone)
   }
 
