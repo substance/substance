@@ -40,7 +40,6 @@ function validateElement(xmlSchema, el) {
   }
 }
 
-
 function _validateElement(elementSchema, el) {
   let errors = []
   let valid = true
@@ -82,6 +81,7 @@ function _checkChildren(elementSchema, el) {
     const childEl = iterator.next()
     let token
     if (childEl.isTextNode()) {
+      // Note: skipping empty TextNodes
       if (/^\s*$/.exec(childEl.textContent)) {
         continue
       }

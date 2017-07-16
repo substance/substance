@@ -21,7 +21,7 @@ export default class ValidatingChildNodeIterator {
     const state = this.state
     const expr = this.expr
     let next = this.it.next()
-    let oldState = state.dfaState
+    let oldState = cloneDeep(this.state)
     let ok
     if (next.isTextNode()) {
       ok = expr.consume(state, TEXT)
@@ -38,17 +38,18 @@ export default class ValidatingChildNodeIterator {
         let error = last(state.errors)
         console.error(error.msg, this.el.getNativeElement())
       }
-      state.dfaState = oldState
+      // recover the old state
+      this.state = oldState
       return next.createComment(next.outerHTML)
     } else {
-      this._oldStates.push(state.dfaState)
+      this._oldStates.push(oldState)
       return next
     }
   }
 
   back() {
     this.it.back()
-    this.state.dfaState = this._oldStates.pop()
+    this.state = this._oldStates.pop()
     return this
   }
 

@@ -52,18 +52,7 @@ export function createExpression(name, root) {
   }
 }
 
-class DFAExpr extends Expression {
-
-  _initialize() {
-    super._initialize()
-
-    this._computeAllowedChildren()
-  }
-
-  _compile() {
-    super._compile()
-    this.dfa = new DFA(this.root.dfa.transitions)
-  }
+export class DFAExpr extends Expression {
 
   // validation API
   getInitialState() {
@@ -101,6 +90,21 @@ class DFAExpr extends Expression {
     return this.dfa.isFinished(state.dfaState)
   }
 
+  isAllowed(tagName) {
+    return Boolean(this._allowedChildren[tagName])
+  }
+
+  _initialize() {
+    super._initialize()
+
+    this._computeAllowedChildren()
+  }
+
+  _compile() {
+    super._compile()
+    this.dfa = new DFA(this.root.dfa.transitions)
+  }
+
   _describeError(state, token) {
     let msg = []
     if (token !== TEXT) {
@@ -120,31 +124,174 @@ class DFAExpr extends Expression {
   }
 
   _computeAllowedChildren() {
-    const dfa = this.dfa
-    // Note: collecting all children
-    const children = {}
-    if (dfa.transitions) {
-      forEach(dfa.transitions, (T) => {
-        Object.keys(T).forEach((tagName) => {
-          if (tagName === TEXT) {
-            this._canContainText = true
-            return
-          }
-          if (tagName === EPSILON) return
-          children[tagName] = true
-        })
-      })
-    }
-    this._allowedChildren = children
+    this._allowedChildren = _collectAllTokensFromDFA(this.dfa)
   }
 
-  isAllowed(tagName) {
-    return Boolean(this._allowedChildren[tagName])
+  _findInsertPos(el, newTag, mode) {
+    const root = this.root
+    if (root instanceof Sequence) {
+      return this._findInsertPosInSequence(el, newTag, mode)
+    } else if (root instanceof Plus || root instanceof Kleene) {
+      if (mode === 'first') {
+        return 0
+      } else {
+        return el.childNodes.length
+      }
+    }
+  }
+
+  _findInsertPosInSequence(el, newTag, mode) {
+    const childNodes = el.getChildNodes()
+    const tagName = this.name
+    const dfa = this.dfa
+    let candidates = []
+    if (dfa) {
+      let state = START
+      let pos = 0
+      for (;pos < childNodes.length; pos++) {
+        if (dfa.canConsume(state, newTag)) {
+          if (mode === 'first') {
+            return pos
+          } else {
+            candidates.push(pos)
+          }
+        }
+        const child = childNodes[pos]
+        let token
+        if (child.isTextNode()) {
+          if (/^\s*$/.exec(child.textContent)) {
+            continue
+          }
+          token = TEXT
+        } else if (child.isElementNode()) {
+          token = child.tagName
+        } else {
+          continue
+        }
+        let nextState = dfa.consume(state, token)
+        if (nextState === -1) {
+          console.error('Element is invalid:', el)
+          throw new Error(`Element <${tagName}> is invalid.`)
+        }
+        state = nextState
+      }
+      // also consider the position after all previous siblings
+      if (dfa.canConsume(state, newTag)) {
+        if (mode === 'first') {
+          return pos
+        } else {
+          candidates.push(pos)
+        }
+      }
+    }
+    if (mode === 'first') {
+      return candidates[0]
+    } else {
+      return last(candidates)
+    }
   }
 
 }
 
-class InterleaveExpr extends Expression {
+function _collectAllTokensFromDFA(dfa) {
+  // Note: collecting all children
+  const children = {}
+  if (dfa.transitions) {
+    forEach(dfa.transitions, (T) => {
+      Object.keys(T).forEach((tagName) => {
+        if (tagName === EPSILON) return
+        children[tagName] = true
+      })
+    })
+  }
+  return children
+}
+
+export class InterleaveExpr extends Expression {
+
+  getInitialState() {
+    const dfas = this.dfas
+    const dfaStates = new Array(dfas.length)
+    dfaStates.fill(START)
+    return {
+      dfaStates,
+      errors: [],
+      trace: [],
+      // maintain the index of the dfa which has been consumed the last token
+      lastDFA: 0,
+    }
+  }
+
+  canConsume(state, token) {
+    return (this._findNextDFA(state, token) >= 0)
+  }
+
+  consume(state, token) {
+    const idx = this._findNextDFA(state, token)
+    if (idx < 0) {
+      state.errors.push({
+        msg: this._describeError(state, token),
+      })
+      return false
+    } else {
+      const dfa = this.dfas[idx]
+      const oldState = state.dfaStates[idx]
+      const newState = dfa.consume(oldState, token)
+      state.dfaStates[idx] = newState
+      state.trace.push(token)
+      return true
+    }
+  }
+
+  isFinished(state) {
+    const dfas = this.dfas
+    for (let i = 0; i < dfas.length; i++) {
+      const dfa = dfas[i]
+      const dfaState = state.dfaStates[i]
+      if (!dfa.isFinished(dfaState)) {
+        return false
+      }
+    }
+    return true
+  }
+
+
+  _initialize() {
+    super._initialize()
+
+    this._computeAllowedChildren()
+  }
+
+  _compile() {
+    super._compile()
+
+    this.blocks = this.root.blocks
+    this.dfas = this.blocks.map(b=>new DFA(b.dfa.transitions))
+  }
+
+  _computeAllowedChildren() {
+    this._allowedChildren = Object.assign(...this.blocks.map((block) => {
+      return _collectAllTokensFromDFA(block.dfa)
+    }))
+  }
+
+  _findNextDFA(state, token) {
+    console.assert(state.dfaStates.length === this.dfas.length)
+    const dfas = this.dfas
+    for (let i = 0; i < state.dfaStates.length; i++) {
+      const dfa = dfas[i]
+      const dfaState = state.dfaStates[i]
+      if (dfa.canConsume(dfaState, token)) {
+        return i
+      }
+    }
+  }
+
+  _findInsertPos(el, newTag, mode) {
+    // TODO: we need to find out a correct way to do this
+    return el.childNodes.length
+  }
+
 }
 
 export class Token {
@@ -162,6 +309,10 @@ export class Token {
   }
 
   _normalize() {}
+
+  _compile() {
+    this.dfa = DFABuilder.singleToken(this.name)
+  }
 
 }
 
@@ -283,6 +434,10 @@ export class Interleave {
 
   _normalize() {
     // TODO
+  }
+
+  _compile() {
+    this.blocks.forEach(block => block._compile())
   }
 
 }

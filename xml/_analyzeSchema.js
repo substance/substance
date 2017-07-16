@@ -1,129 +1,108 @@
-import { forEach } from '../util'
 import DFA from './DFA'
+// TODO: we should hide this behind the Expression API
+import { DFAExpr, InterleaveExpr } from './RegularLanguage'
 
-const { START, END, TEXT, EPSILON } = DFA
+const { TEXT } = DFA
 
 export default
 function analyze(xmlSchema) {
   const tagNames = xmlSchema.getTagNames()
-  // preparations
   const elementSchemas = tagNames.map((name) => {
     const elementSchema = xmlSchema.getElementSchema(name)
     Object.assign(elementSchema, {
       children: {},
       parents: {},
+      siblings: {},
+      usedInlineBy: {},
+      usedStructuredBy: {}
     })
     return elementSchema
   })
-  // extract records
   elementSchemas.forEach((elementSchema) => {
     _analyzeElementSchema(elementSchema, xmlSchema)
   })
-  // post-processing
-  let records = {}
-  elementSchemas.forEach((elementSchema) => {
-    let r = ['name', 'type', 'children', 'parents', 'siblings',
-      'isStructured', 'isText',
-      'usedInlineBy', 'usedStructuredBy'
-    ].reduce((m, n) => {
-      if (elementSchema[n]) {
-        m[n] = elementSchema[n]
-      }
-      return m
-    }, {})
-    records[r.name] = r
-  })
-  tagNames.forEach((name) => {
-    const r = records[name]
-    // link the records in parent/children maps
-    r.children = Object.keys(r.children).reduce((m, n) => {
-      m[n] = records[n]
-      return m
-    }, {})
-    r.parents = Object.keys(r.parents).reduce((m, n) => {
-      m[n] = records[n]
-      return m
-    }, {})
-  })
-  return records
+
+  // TODO: it looks like this has not been used anymore
+
+  // let records = {}
+  // elementSchemas.forEach((elementSchema) => {
+  //   let r = ['name', 'type', 'children', 'parents', 'siblings',
+  //     'isStructured', 'isText',
+  //     'usedInlineBy', 'usedStructuredBy'
+  //   ].reduce((m, n) => {
+  //     if (elementSchema[n]) {
+  //       m[n] = elementSchema[n]
+  //     }
+  //     return m
+  //   }, {})
+  //   records[r.name] = r
+  // })
+  // tagNames.forEach((name) => {
+  //   const r = records[name]
+  //   // link the records in parent/children maps
+  //   r.children = Object.keys(r.children).reduce((m, n) => {
+  //     m[n] = records[n]
+  //     return m
+  //   }, {})
+  //   r.parents = Object.keys(r.parents).reduce((m, n) => {
+  //     m[n] = records[n]
+  //     return m
+  //   }, {})
+  // })
+  // return records
 }
 
+/*
+ We use this to detect automatically, if an
+ element is used as a text node or an element node,
+ or both at the same time.
+*/
 function _analyzeElementSchema(elementSchema, xmlSchema) {
-  const dfa = elementSchema.expr.dfa
-  // TODO: analyze InterleaveExpr
-  if (!dfa) return
-  if (!dfa.transitions) {
-    if (elementSchema.type === 'implicit') elementSchema.type = 'element'
-    return
+  const expr = elementSchema.expr
+  if (!expr) return
+  let _siblings = []
+  if (expr instanceof DFAExpr) {
+    if (expr.dfa) {
+      _siblings = expr.dfa._tokensByPath()
+    }
+  } else if (expr instanceof InterleaveExpr) {
+    expr.dfas.forEach((dfa) => {
+      if (dfa) {
+        _siblings = _siblings.concat(dfa._tokensByPath())
+      }
+    })
   }
+  if (_siblings.length === 0) {
+    // use 'element' for nodes with type 'implicit'
+    // TODO: do we really need 'implicit'?
+    if (elementSchema.type === 'implicit') elementSchema.type = 'element'
+  }
+
   const name = elementSchema.name
-  // group start edges by follow state
-  let first = {}
-  forEach(dfa.transitions[START], (to, token) => {
-    if (!first[to]) first[to] = []
-    first[to].push(token)
-  })
-  let visited = {START: true, END: true}
   let hasText = false
   let hasElements = false
-  forEach(first, (tokens, state) => {
-    let _children = tokens.reduce((m, token) => {
-      if (token !== EPSILON) {
-        m[token] = true
-      }
-      return m
-    }, {})
-    let stack = [state]
-    while(stack.length > 0) {
-      let from = stack.pop()
-      if (state === END) continue
-      visited[from] = true
-      let T = dfa.transitions[from]
-      if (!T) throw new Error(`Internal Error: no transition from state ${from}`)
-      let tokens = Object.keys(T)
-      for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i]
-        const to = T[token]
-        if (!visited[to]) stack.push(to)
-        const childSchema = xmlSchema.getElementSchema(token)
-        if (!childSchema) continue
-        childSchema.parents[name] = true
-        elementSchema.children[token] = true
-        _children[token] = true
-      }
+  _siblings.forEach((tagNames) => {
+    // register each other as parent and children
+    let _hasText = tagNames.indexOf(TEXT) >= 0
+    let _hasElements = (!_hasText && tagNames.length > 0)
+    if (_hasText) {
+      hasText = true
     }
-    {
-      // if there is TEXT allowed on this path
-      // mark all recorded tags as inline
-      const tokens = Object.keys(_children)
-      if (_children[TEXT]) {
-        hasText = true
-        for (let i = 0; i < tokens.length; i++) {
-          const token = tokens[i]
-          const childSchema = xmlSchema.getElementSchema(token)
-          if (!childSchema) continue
-          if (!childSchema.usedInlineBy) childSchema.usedInlineBy = {}
-          childSchema.usedInlineBy[name] = true
-        }
-      } else if (Object.keys(_children).length > 0) {
-        hasElements = true
-        for (let i = 0; i < tokens.length; i++) {
-          const token = tokens[i]
-          const childSchema = xmlSchema.getElementSchema(token)
-          if (!childSchema) continue
-          if (!childSchema.usedStructuredBy) childSchema.usedStructuredBy = {}
-          childSchema.usedStructuredBy[name] = true
-        }
-      }
-      for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i]
-        const childSchema = xmlSchema.getElementSchema(token)
-        if (!childSchema) continue
-        if (!childSchema.siblings) childSchema.siblings = {}
-        childSchema.siblings[name] = tokens
-      }
+    if (_hasElements) {
+      hasElements = true
     }
+    tagNames.forEach((tagName) => {
+      const childSchema = xmlSchema.getElementSchema(tagName)
+      if (!childSchema) return
+      childSchema.parents[name] = true
+      elementSchema.children[tagName] = true
+      // Note: we store siblings, grouped by parent
+      elementSchema.siblings[name] = tagNames
+      if (_hasElements) childSchema.usedStructuredBy[name] = true
+      if (_hasText) childSchema.usedInlineBy[name] = true
+    })
   })
+  // TODO: do we really need this?
   if (hasElements) {
     elementSchema.isStructured = true
   }

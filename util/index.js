@@ -1,6 +1,7 @@
 import * as async from './async'
 export { default as ArrayIterator } from './ArrayIterator'
 export { default as ArrayTree } from './ArrayTree'
+export { default as array2table } from './array2table'
 export { async }
 export { default as camelCase } from './camelCase'
 export { default as capitalize } from './capitalize'
