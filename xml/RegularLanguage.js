@@ -121,16 +121,16 @@ export class DFAExpr extends Expression {
     let msg = []
     if (token !== TEXT) {
       if (!this.isAllowed(token)) {
-        msg.push(`<${token}> is not a valid in <${this.name}>`)
+        msg.push(`<${token}> is not valid in <${this.name}>\n${this.toString()}`)
       } else {
         // otherwise just the position is wrong
-        msg.push(`<${token}> is not allowed at the current position in <${this.name}>.`)
+        msg.push(`<${token}> is not allowed at the current position in <${this.name}>.\n${this.toString()}`)
         // TODO: try to find a suitable alternative position
         // we need to refactor this, as here we do not have access to the actual element
         // so we can't tell, if there is a valid position
       }
     } else {
-      msg.push(`TEXT is not allowed at the current position. ${state.trace.join(',')}`)
+      msg.push(`TEXT is not allowed at the current position: ${state.trace.join(',')}\n${this.toString()}`)
     }
     return msg.join('')
   }
