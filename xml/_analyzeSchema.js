@@ -1,14 +1,12 @@
+import { forEach } from '../util'
 import DFA from './DFA'
 // TODO: we should hide this behind the Expression API
 import { DFAExpr, InterleaveExpr } from './RegularLanguage'
 
 const { TEXT } = DFA
 
-export default
-function analyze(xmlSchema) {
-  const tagNames = xmlSchema.getTagNames()
-  const elementSchemas = tagNames.map((name) => {
-    const elementSchema = xmlSchema.getElementSchema(name)
+export default function analyze(elementSchemas) {
+  forEach(elementSchemas, (elementSchema) => {
     Object.assign(elementSchema, {
       children: {},
       parents: {},
@@ -16,40 +14,10 @@ function analyze(xmlSchema) {
       usedInlineBy: {},
       usedStructuredBy: {}
     })
-    return elementSchema
   })
-  elementSchemas.forEach((elementSchema) => {
-    _analyzeElementSchema(elementSchema, xmlSchema)
+  forEach(elementSchemas, (elementSchema) => {
+    _analyzeElementSchema(elementSchema, elementSchemas)
   })
-
-  // TODO: it looks like this has not been used anymore
-
-  // let records = {}
-  // elementSchemas.forEach((elementSchema) => {
-  //   let r = ['name', 'type', 'children', 'parents', 'siblings',
-  //     'isStructured', 'isText',
-  //     'usedInlineBy', 'usedStructuredBy'
-  //   ].reduce((m, n) => {
-  //     if (elementSchema[n]) {
-  //       m[n] = elementSchema[n]
-  //     }
-  //     return m
-  //   }, {})
-  //   records[r.name] = r
-  // })
-  // tagNames.forEach((name) => {
-  //   const r = records[name]
-  //   // link the records in parent/children maps
-  //   r.children = Object.keys(r.children).reduce((m, n) => {
-  //     m[n] = records[n]
-  //     return m
-  //   }, {})
-  //   r.parents = Object.keys(r.parents).reduce((m, n) => {
-  //     m[n] = records[n]
-  //     return m
-  //   }, {})
-  // })
-  // return records
 }
 
 /*
@@ -57,7 +25,7 @@ function analyze(xmlSchema) {
  element is used as a text node or an element node,
  or both at the same time.
 */
-function _analyzeElementSchema(elementSchema, xmlSchema) {
+function _analyzeElementSchema(elementSchema, elementSchemas) {
   const expr = elementSchema.expr
   const name = elementSchema.name
   if (!expr) return
@@ -92,7 +60,7 @@ function _analyzeElementSchema(elementSchema, xmlSchema) {
       hasElements = true
     }
     tagNames.forEach((tagName) => {
-      const childSchema = xmlSchema.getElementSchema(tagName)
+      const childSchema = elementSchemas[tagName]
       if (!childSchema) return
       childSchema.parents[name] = true
       elementSchema.children[tagName] = true
