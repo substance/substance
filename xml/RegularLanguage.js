@@ -34,6 +34,10 @@ export class Expression {
     }
   }
 
+  isAllowed(tagName) {
+    return Boolean(this._allowedChildren[tagName])
+  }
+
   /*
     Simplifies the whole expression eliminating unnecessary structure.
   */
@@ -48,6 +52,25 @@ export class Expression {
     // TODO: we need to
     this.root._compile()
   }
+
+  _describeError(state, token) {
+    let msg = []
+    if (token !== TEXT) {
+      if (!this.isAllowed(token)) {
+        msg.push(`<${token}> is not valid in <${this.name}>\n${this.toString()}`)
+      } else {
+        // otherwise just the position is wrong
+        msg.push(`<${token}> is not allowed at the current position in <${this.name}>.\n${this.toString()}`)
+        // TODO: try to find a suitable alternative position
+        // we need to refactor this, as here we do not have access to the actual element
+        // so we can't tell, if there is a valid position
+      }
+    } else {
+      msg.push(`TEXT is not allowed at the current position: ${state.trace.join(',')}\n${this.toString()}`)
+    }
+    return msg.join('')
+  }
+
 }
 
 Expression.fromJSON = function(data) {
@@ -102,10 +125,6 @@ export class DFAExpr extends Expression {
     return this.dfa.isFinished(state.dfaState)
   }
 
-  isAllowed(tagName) {
-    return Boolean(this._allowedChildren[tagName])
-  }
-
   _initialize() {
     super._initialize()
 
@@ -117,23 +136,6 @@ export class DFAExpr extends Expression {
     this.dfa = new DFA(this.root.dfa.transitions)
   }
 
-  _describeError(state, token) {
-    let msg = []
-    if (token !== TEXT) {
-      if (!this.isAllowed(token)) {
-        msg.push(`<${token}> is not valid in <${this.name}>\n${this.toString()}`)
-      } else {
-        // otherwise just the position is wrong
-        msg.push(`<${token}> is not allowed at the current position in <${this.name}>.\n${this.toString()}`)
-        // TODO: try to find a suitable alternative position
-        // we need to refactor this, as here we do not have access to the actual element
-        // so we can't tell, if there is a valid position
-      }
-    } else {
-      msg.push(`TEXT is not allowed at the current position: ${state.trace.join(',')}\n${this.toString()}`)
-    }
-    return msg.join('')
-  }
 
   _computeAllowedChildren() {
     this._allowedChildren = _collectAllTokensFromDFA(this.dfa)
@@ -221,6 +223,10 @@ function _collectAllTokensFromDFA(dfa) {
 
 export class InterleaveExpr extends Expression {
 
+  constructor(name, root) {
+    super(name, root)
+  }
+
   getInitialState() {
     const dfas = this.dfas
     const dfaStates = new Array(dfas.length)
@@ -297,6 +303,7 @@ export class InterleaveExpr extends Expression {
         return i
       }
     }
+    return -1
   }
 
   _findInsertPos(el, newTag, mode) { // eslint-disable-line
