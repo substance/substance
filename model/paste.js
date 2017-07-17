@@ -216,10 +216,10 @@ function _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited) {
       let _annos = annotationIndex.get([oldId, prop.name])
       for (let i = 0; i < _annos.length; i++) {
         let anno = _annos[i]
-        if (anno.start.path[0] === oldId) {
+        if (anno.start.path[0] === oldId && newId) {
           anno.start.path[0] = newId
         }
-        if (anno.end.path[0] === oldId) {
+        if (anno.end.path[0] === oldId && newId) {
           anno.end.path[0] = newId
         }
         annos.push(anno)
