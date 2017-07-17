@@ -6,6 +6,7 @@ import DFA from './DFA'
 import { createExpression, Token, Choice, Sequence, Optional, Plus, Kleene, Interleave } from './RegularLanguage'
 import _loadRNG from './_loadRNG'
 import _analyzeSchema from './_analyzeSchema'
+// import prettyPrintXML from './prettyPrintXML'
 
 const TEXT = DFA.TEXT
 
@@ -32,14 +33,9 @@ function compileRNG(fs, searchDirs, entry) {
   // turn the RNG schema into our internal data structure
   let transformedGrammar = _transformRNG(grammar)
 
-  // console.log(grammar.getNativeElement())
+  // console.log(prettyPrintXML(transformedGrammar))
 
   let xmlSchema = _compile(transformedGrammar)
-
-  // this adds some reflection info and derives the type
-  _analyzeSchema(xmlSchema)
-
-  debugger
 
   return xmlSchema
 }
@@ -70,12 +66,11 @@ function _processDefine(el, defs) {
     }
   } else {
     if (defs[name]) {
-      console.info(`Overwriting definition ${name}`, el)
+      console.info(`Overwriting definition ${name}`)
     }
     defs[name] = el
   }
 }
-
 
 /* Transformation of RNG into internal representation */
 
@@ -143,12 +138,20 @@ function _transformElementDefinition(doc, name, orig, defs) {
 
   let hasPruned = true
   while (hasPruned) {
+    // Unwrap nested choices
     let nestedChoice = children.find('choice > choice')
     if (nestedChoice) {
-      let parentNode = nestedChoice.parentNode
-      parentNode.parentNode.replaceChild(parentNode, nestedChoice)
+      // unwrap onto parent level
+      let parentChoice = nestedChoice.parentNode
+      // TODO: we could use DOM helpers as we do in Texture converters
+      let children = nestedChoice.children
+      children.forEach((child) => {
+        parentChoice.insertBefore(child, nestedChoice)
+      })
+      parentChoice.removeChild(nestedChoice)
       continue
     }
+    // Simplify singular choices
     let choices = children.findAll('choice')
     for (let i = 0; i < choices.length; i++) {
       let choice = choices[i]
@@ -236,11 +239,16 @@ function _compile(grammar) {
     const name = element.attr('name')
     const attributes = _collectAttributes(element.find('attributes'))
     const children = element.find('children')
+    const type = element.attr('type')
     let block = _processChildren(children, grammar)
     let expr = createExpression(name, block)
-    let schema = { name, attributes, expr }
+    let schema = { name, type, attributes, expr }
     schemas[name] = schema
   })
+
+  // this adds some reflection info and derives the type
+  _analyzeSchema(schemas)
+
   const start = grammar.find('start')
   if (!start) {
     throw new Error('<start> is mandatory')

@@ -1,4 +1,4 @@
-import { last } from '../util'
+import { last, cloneDeep } from '../util'
 import DFA from './DFA'
 
 const { TEXT } = DFA

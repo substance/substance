@@ -1,4 +1,4 @@
-import { forEach } from '../util'
+import { forEach, last, isString } from '../util'
 import DFABuilder from './DFABuilder'
 import DFA from './DFA'
 
@@ -27,6 +27,13 @@ export class Expression {
     return this.root.copy()
   }
 
+  toJSON() {
+    return {
+      name: this.name,
+      content: this.root.toJSON()
+    }
+  }
+
   /*
     Simplifies the whole expression eliminating unnecessary structure.
   */
@@ -41,7 +48,12 @@ export class Expression {
     // TODO: we need to
     this.root._compile()
   }
+}
 
+Expression.fromJSON = function(data) {
+  const name = data.name
+  const root = _fromJSON(data.content)
+  return createExpression(name, root)
 }
 
 export function createExpression(name, root) {
@@ -287,7 +299,7 @@ export class InterleaveExpr extends Expression {
     }
   }
 
-  _findInsertPos(el, newTag, mode) {
+  _findInsertPos(el, newTag, mode) { // eslint-disable-line
     // TODO: we need to find out a correct way to do this
     return el.childNodes.length
   }
@@ -304,6 +316,10 @@ export class Token {
     return this.name
   }
 
+  toJSON() {
+    return this.name
+  }
+
   copy() {
     return new Token(this.name)
   }
@@ -314,6 +330,10 @@ export class Token {
     this.dfa = DFABuilder.singleToken(this.name)
   }
 
+}
+
+Token.fromJSON = function (data) {
+  return new Token(data)
 }
 
 /*
@@ -327,6 +347,13 @@ export class Choice {
 
   copy() {
     return new Choice(this.blocks.map(b=>b.copy()))
+  }
+
+  toJSON() {
+    return {
+      type: '|',
+      blocks: this.blocks.map(b=>b.toJSON())
+    }
   }
 
   _normalize() {
@@ -366,6 +393,12 @@ export class Choice {
 
 }
 
+Choice.fromJSON = function(data) {
+  return new Choice(data.blocks.map((block) => {
+    return _fromJSON(block)
+  }))
+}
+
 /*
   (a,b,c) (= ordered)
 */
@@ -377,6 +410,13 @@ export class Sequence {
 
   copy() {
     return new Sequence(this.blocks.map(b=>b.copy()))
+  }
+
+  toJSON() {
+    return {
+      type: ',',
+      blocks: this.blocks.map(b=>b.toJSON())
+    }
   }
 
   _compile() {
@@ -415,6 +455,12 @@ export class Sequence {
 
 }
 
+Sequence.fromJSON = function(data) {
+  return new Sequence(data.blocks.map((block) => {
+    return _fromJSON(block)
+  }))
+}
+
 /*
   ~(a,b,c) (= unordered)
 */
@@ -432,6 +478,13 @@ export class Interleave {
     return '('+ this.blocks.map(b=>b.toString()).join('~') + ')'
   }
 
+  toJSON() {
+    return {
+      type: '~',
+      blocks: this.blocks.map(b=>b.toJSON())
+    }
+  }
+
   _normalize() {
     // TODO
   }
@@ -441,6 +494,13 @@ export class Interleave {
   }
 
 }
+
+Interleave.fromJSON = function(data) {
+  return new Interleave(data.blocks.map((block) => {
+    return _fromJSON(block)
+  }))
+}
+
 
 /*
   ()?
@@ -453,6 +513,13 @@ export class Optional {
 
   copy() {
     return new Optional(this.block.copy())
+  }
+
+  toJSON() {
+    return {
+      type: '?',
+      block: this.block.toJSON()
+    }
   }
 
   _compile() {
@@ -483,6 +550,11 @@ export class Optional {
 
 }
 
+Optional.fromJSON = function(data) {
+  return new Optional(_fromJSON(data.block))
+}
+
+
 /*
   ()*
 */
@@ -494,6 +566,13 @@ export class Kleene {
 
   copy() {
     return new Kleene(this.block.copy())
+  }
+
+  toJSON() {
+    return {
+      type: '*',
+      block: this.block.toJSON()
+    }
   }
 
   _compile() {
@@ -524,6 +603,10 @@ export class Kleene {
 
 }
 
+Kleene.fromJSON = function(data) {
+  return new Kleene(_fromJSON(data.block))
+}
+
 /*
   ()+
 */
@@ -535,6 +618,13 @@ export class Plus {
 
   copy() {
     return new Plus(this.block.copy())
+  }
+
+  toJSON() {
+    return {
+      type: '+',
+      block: this.block.toJSON()
+    }
   }
 
   _compile() {
@@ -561,5 +651,31 @@ export class Plus {
 
   toString() {
     return this.block.toString() + '+'
+  }
+}
+
+Plus.fromJSON = function(data) {
+  return new Plus(_fromJSON(data.block))
+}
+
+function _fromJSON(data) {
+  switch(data.type) {
+    case ',':
+      return Sequence.fromJSON(data)
+    case '~':
+      return Interleave.fromJSON(data)
+    case '|':
+      return Choice.fromJSON(data)
+    case '?':
+      return Optional.fromJSON(data)
+    case '+':
+      return Plus.fromJSON(data)
+    case '*':
+      return Kleene.fromJSON(data)
+    default:
+      if (isString(data)) {
+        return new Token(data)
+      }
+      throw new Error('Unsupported data.')
   }
 }
