@@ -37,12 +37,14 @@ import BrowserWindowsEdgeTwoParagraphsFixture from './fixture/html/browser-windo
 import GDocsOSXLinuxChromePlainTextFixture from './fixture/html/google-docs-osx-linux-chrome-plain-text'
 import GDocsOSXLinuxChromeAnnotatedTextFixture from './fixture/html/google-docs-osx-linux-chrome-annotated-text'
 import GDocsOSXLinuxChromeTwoParagraphsFixture from './fixture/html/google-docs-osx-linux-chrome-two-paragraphs'
+import GDocsOSXLinuxChromeExtendedFixture from './fixture/html/google-docs-osx-linux-chrome-extended'
 import GDocsLinuxFirefoxPlainTextFixture from './fixture/html/google-docs-linux-firefox-plain-text'
 import GDocsLinuxFirefoxAnnotatedTextFixture from './fixture/html/google-docs-linux-firefox-annotated-text'
 import GDocsOSXFirefoxPlainTextFixture from './fixture/html/google-docs-osx-firefox-plain-text'
 import LibreOfficeOSXPlainTextFixture from './fixture/html/libre-office-osx-linux-plain-text'
 import LibreOfficeOSXAnnotatedTextFixture from './fixture/html/libre-office-osx-linux-annotated-text'
 import LibreOfficeOSXTwoParagraphsFixture from './fixture/html/libre-office-osx-linux-two-paragraphs'
+import LibreOfficeOSXExtendedFixture from './fixture/html/libre-office-osx-linux-extended'
 import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
@@ -309,6 +311,10 @@ function ClipboardTests(memory) {
     _twoParagraphsTest(t, GDocsOSXLinuxChromeTwoParagraphsFixture)
   })
 
+  test("GoogleDocs - Chrome (OSX/Linux) - Extended", function(t) {
+    _extendedTest(t, GDocsOSXLinuxChromeExtendedFixture)
+  })
+
   test("GoogleDocs - Firefox (Linux) - Plain Text", function(t) {
     _plainTextTest(t, GDocsLinuxFirefoxPlainTextFixture)
   })
@@ -331,6 +337,10 @@ function ClipboardTests(memory) {
 
   test("LibreOffice (OSX/Linux) - Two Paragraphs", function(t) {
     _twoParagraphsTest(t, LibreOfficeOSXTwoParagraphsFixture)
+  })
+
+  test("LibreOffice (OSX/Linux) - Extended", function(t) {
+    _extendedTest(t, LibreOfficeOSXExtendedFixture)
   })
 
   test("Microsoft Word 11 (OSX) - Plain Text", function(t) {
@@ -411,6 +421,38 @@ function _fixtureTest(t, html, impl, forceWindows) {
   impl(doc, clipboard)
 }
 
+function _emptyParagraphSeed(tx) {
+  let body = tx.get('body')
+  tx.create({
+    type: 'paragraph',
+    id: 'p1',
+    content: ''
+  })
+  body.show('p1')
+  tx.create({
+    type: 'paragraph',
+    id: 'p2',
+    content: ''
+  })
+  body.show('p2')
+}
+
+function _emptyFixtureTest(t, html, impl, forceWindows) {
+  let { editorSession, clipboard, doc } = _fixture(t, _emptyParagraphSeed)
+  if (forceWindows) {
+    // NOTE: faking 'Windows' mode in importer so that
+    // the correct implementation will be used
+    clipboard.htmlImporter._isWindows = true
+  }
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  impl(doc, clipboard)
+}
+
 function _plainTextTest(t, html, forceWindows) {
   _fixtureTest(t, html, function(doc, clipboard) {
     let event = new ClipboardEvent()
@@ -450,6 +492,41 @@ function _twoParagraphsTest(t, html, forceWindows) {
     t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
     let p3 = body.getChildAt(2)
     t.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.")
+    t.end()
+  }, forceWindows)
+}
+
+function _extendedTest(t, html, forceWindows) {
+  _emptyFixtureTest(t, html, function(doc, clipboard) {
+    let event = new ClipboardEvent()
+    event.clipboardData.setData('text/plain', '')
+    event.clipboardData.setData('text/html', html)
+    clipboard.onPaste(event)
+    let body = doc.get('body')
+    let p1 = body.getChildAt(0)
+    t.equal(p1.content.length, 121, "First paragraph should contain 121 symbols.")
+    let annotationsP1 = doc.getIndex('annotations').get(['p1', 'content'])
+    t.equal(annotationsP1.length, 2, "There should be two annotations inside first paragraph.")
+    let annoFirstP1 = annotationsP1[0] || {}
+    t.equal(annoFirstP1.type, 'emphasis', "The annotation should be an emphasis.")
+    t.equal(annoFirstP1.startOffset, 4, "Emphasis annotation should start from 5th symbol.")
+    t.equal(annoFirstP1.endOffset, 11, "Emphasis annotation should end at 12th symbol.")
+    let annoSecondP1 = annotationsP1[1] || {}
+    t.equal(annoSecondP1.type, 'strong', "The annotation should be a strong.")
+    t.equal(annoSecondP1.startOffset, 17, "Strong annotation should start from 18th symbol.")
+    t.equal(annoSecondP1.endOffset, 29, "Strong annotation should end at 30th symbol.")
+    let p2 = body.getChildAt(1)
+    t.equal(p2.content.length, 178, "Second paragraph should contain 178 symbols.")
+    let annotationsP2 = doc.getIndex('annotations').get(['p2', 'content'])
+    t.equal(annotationsP2.length, 2, "There should be two annotations inside second paragraph.")
+    let annoFirstP2 = annotationsP2[0] || {}
+    t.equal(annoFirstP2.type, 'strong', "The annotation should be an emphasis.")
+    t.equal(annoFirstP2.startOffset, 14, "Strong annotation should start from 15th symbol.")
+    t.equal(annoFirstP2.endOffset, 29, "Strong annotation should end at 30th symbol.")
+    let annoSecondP2 = annotationsP2[1] || {}
+    t.equal(annoSecondP2.type, 'emphasis', "The annotation should be a strong.")
+    t.equal(annoSecondP2.startOffset, 54, "Emphasis annotation should start from 55th symbol.")
+    t.equal(annoSecondP2.endOffset, 57, "Emphasis annotation should end at 57th symbol.")
     t.end()
   }, forceWindows)
 }
