@@ -96,7 +96,8 @@ function buildLib(target, production) {
         'model/**/*.js',
         'packages/**/*.js',
         'util/*.js',
-        'ui/*.js'
+        'ui/*.js',
+        'xml/*.js'
       ]
     }
   }

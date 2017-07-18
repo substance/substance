@@ -9,17 +9,14 @@ import XMLExternalNodeConverter from './XMLExternalNodeConverter'
 import XMLSchema from './XMLSchema'
 import XMLTextNode from './XMLTextNode'
 import XMLTextNodeConverter from './XMLTextNodeConverter'
-import XMLValidator from './XMLValidator'
-import analyzeSchema from './_analyzeSchema'
 import checkSchema from './checkSchema'
-import prettyPrint from './prettyPrint'
 import compileRNG from './compileRNG'
-import deserializeXMLSchema from './deserializeXMLSchema'
-import serializeXMLSchema from './serializeXMLSchema'
 import registerSchema from './registerSchema'
 import SchemaDrivenCommandManager from './SchemaDrivenCommandManager'
 import loadRNG from './_loadRNG'
 import validateXMLSchema from './validateXML'
+import ValidatingChildNodeIterator from './ValidatingChildNodeIterator'
+import prettyPrintXML from './prettyPrintXML'
 
 export {
   XMLAnchorNode,
@@ -33,15 +30,12 @@ export {
   XMLSchema,
   XMLTextNode,
   XMLTextNodeConverter,
-  XMLValidator,
-  analyzeSchema,
   checkSchema,
-  prettyPrint as prettyPrintXML,
-  serializeXMLSchema,
-  deserializeXMLSchema,
   compileRNG,
   registerSchema,
   SchemaDrivenCommandManager,
   loadRNG,
-  validateXMLSchema
+  validateXMLSchema,
+  ValidatingChildNodeIterator,
+  prettyPrintXML
 }
