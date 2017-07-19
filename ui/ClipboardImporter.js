@@ -94,7 +94,6 @@ class ClipboardImporter extends HTMLImporter {
     }
 
     body.findAll('span').forEach(span => {
-      const style = span.el.style
       // Google Docs uses spans with inline styles 
       // insted of inline nodes
       // We are scanning each span for certain inline styles:
@@ -102,25 +101,30 @@ class ClipboardImporter extends HTMLImporter {
       // font-style: italic -> <i>
       // vertical-align: super -> <sup>
       // vertical-align: sub -> <sub>
-      // TODO: handle nested cases when for instance 
-      // strong text also emphasised
-      let nodeType
-      if(style['font-weight'] === '700') {
-        nodeType = 'b'
-      } else if (style['font-style'] === 'italic') {
-        nodeType = 'i'
-      } else if (style['vertical-align'] === 'super') {
-        nodeType = 'sup'
-      } else if (style['vertical-align'] === 'sub') {
-        nodeType = 'sub'
+
+      let nodeTypes = []
+      if(span.getStyle('font-weight') === '700') nodeTypes.push('b')
+      if(span.getStyle('font-style') === 'italic') nodeTypes.push('i')
+      if(span.getStyle('vertical-align') === 'super') nodeTypes.push('sup')
+      if(span.getStyle('vertical-align') === 'sub') nodeTypes.push('sub')
+
+      function createInlineNodes(parentEl, isRoot) {
+        if(nodeTypes.length > 0) {
+          let el = parentEl.createElement(nodeTypes[0])
+          if(nodeTypes.length === 1) el.append(span.textContent)
+
+          if(isRoot) {
+            parentEl.replaceChild(span, el)
+          } else {
+            parentEl.appendChild(el)
+          }
+
+          nodeTypes.shift()
+          createInlineNodes(el)
+        }
       }
 
-      if(nodeType) {
-        let parentEl = span.getParent()
-        let el = parentEl.createElement(nodeType)
-        el.append(span.textContent)
-        parentEl.replaceChild(span, el)
-      }
+      createInlineNodes(span.getParent(), true)
     })
 
     return body
