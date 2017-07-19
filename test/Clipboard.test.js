@@ -497,30 +497,67 @@ function _extendedTest(t, html, forceWindows) {
     event.clipboardData.setData('text/html', html)
     clipboard.onPaste(event)
     let body = doc.get('body')
-    let p1 = body.getChildAt(0)
-    t.equal(p1.content.length, 121, "First paragraph should contain 121 symbols.")
-    let annotationsP1 = doc.getIndex('annotations').get([p1.id, 'content'])
-    t.equal(annotationsP1.length, 2, "There should be two annotations inside first paragraph.")
-    let annoFirstP1 = annotationsP1[0] || {}
-    t.equal(annoFirstP1.type, 'emphasis', "The annotation should be an emphasis.")
-    t.equal(annoFirstP1.startOffset, 4, "Emphasis annotation should start from 5th symbol.")
-    t.equal(annoFirstP1.endOffset, 11, "Emphasis annotation should end at 12th symbol.")
-    let annoSecondP1 = annotationsP1[1] || {}
-    t.equal(annoSecondP1.type, 'strong', "The annotation should be a strong.")
-    t.equal(annoSecondP1.startOffset, 18, "Strong annotation should start from 19th symbol.")
-    t.equal(annoSecondP1.endOffset, 30, "Strong annotation should end at 31th symbol.")
-    let p2 = body.getChildAt(1)
-    t.equal(p2.content.length, 178, "Second paragraph should contain 178 symbols.")
-    let annotationsP2 = doc.getIndex('annotations').get([p2.id, 'content'])
-    t.equal(annotationsP2.length, 2, "There should be two annotations inside second paragraph.")
-    let annoFirstP2 = annotationsP2[0] || {}
-    t.equal(annoFirstP2.type, 'strong', "The annotation should be an emphasis.")
-    t.equal(annoFirstP2.startOffset, 14, "Strong annotation should start from 15th symbol.")
-    t.equal(annoFirstP2.endOffset, 30, "Strong annotation should end at 31th symbol.")
-    let annoSecondP2 = annotationsP2[1] || {}
-    t.equal(annoSecondP2.type, 'emphasis', "The annotation should be a strong.")
-    t.equal(annoSecondP2.startOffset, 53, "Emphasis annotation should start from 54th symbol.")
-    t.equal(annoSecondP2.endOffset, 57, "Emphasis annotation should end at 58th symbol.")
+    // First node is a paragraph with strong, emphasis, superscript and subscript annos
+    let node1 = body.getChildAt(0)
+    t.equal(node1.type, 'paragraph', "First node should be a paragraph.")
+    t.equal(node1.content.length, 121, "First paragraph should contain 121 symbols.")
+    let annotationsNode1 = doc.getIndex('annotations').get([node1.id, 'content'])
+    t.equal(annotationsNode1.length, 4, "There should be four annotations inside a first paragraph.")
+    let annoFirstNode1 = annotationsNode1[0] || {}
+    t.equal(annoFirstNode1.type, 'emphasis', "The annotation should be an emphasis.")
+    t.equal(annoFirstNode1.startOffset, 4, "Emphasis annotation should start from 5th symbol.")
+    t.equal(annoFirstNode1.endOffset, 11, "Emphasis annotation should end at 12th symbol.")
+    let annoSecondNode1 = annotationsNode1[1] || {}
+    t.equal(annoSecondNode1.type, 'strong', "The annotation should be a strong.")
+    t.equal(annoSecondNode1.startOffset, 18, "Strong annotation should start from 19th symbol.")
+    t.equal(annoSecondNode1.endOffset, 30, "Strong annotation should end at 31th symbol.")
+    let annoThirdNode1 = annotationsNode1[2] || {}
+    t.equal(annoThirdNode1.type, 'superscript', "The annotation should be a superscript.")
+    t.equal(annoThirdNode1.startOffset, 41, "Superscript annotation should start from 42th symbol.")
+    t.equal(annoThirdNode1.endOffset, 49, "Superscript annotation should end at 50th symbol.")
+    let annoFourthNode1 = annotationsNode1[3] || {}
+    t.equal(annoFourthNode1.type, 'subscript', "The annotation should be a subscript.")
+    t.equal(annoFourthNode1.startOffset, 50, "Subscript annotation should start from 51th symbol.")
+    t.equal(annoFourthNode1.endOffset, 56, "Subscript annotation should end at 57th symbol.")
+    
+    // Second node is a first level heading without annos
+    let node2 = body.getChildAt(1)
+    t.equal(node2.type, 'heading', "Second node should be a heading.")
+    t.equal(node2.level, 1, "Second node should be a first level heading.")
+    t.equal(node2.content.length, 12, "Heading should contain 12 symbols.")
+    let annotationsNode2 = doc.getIndex('annotations').get([node2.id, 'content'])
+    t.equal(annotationsNode2.length, 0, "There should be no annotations inside a heading.")
+
+    // Third node is a paragraph with overlapping annos
+    let node3 = body.getChildAt(2)
+    t.equal(node3.type, 'paragraph', "Third node should be a paragraph.")
+    t.equal(node3.content.length, 178, "Second paragraph should contain 178 symbols.")
+    let annotationsNode3 = doc.getIndex('annotations').get([node3.id, 'content'])
+    t.equal(annotationsNode3.length, 6, "There should be six annotations inside a second paragraph.")
+    let annoFirstNode3 = annotationsNode3[0] || {}
+    t.equal(annoFirstNode3.type, 'strong', "The annotation should be a strong.")
+    t.equal(annoFirstNode3.startOffset, 14, "Strong annotation should start from 15th symbol.")
+    t.equal(annoFirstNode3.endOffset, 25, "Strong annotation should end at 26th symbol.")
+    let annoSecondNode3 = annotationsNode3[1] || {}
+    t.equal(annoSecondNode3.type, 'emphasis', "The annotation should be an emphasis.")
+    t.equal(annoSecondNode3.startOffset, 14, "Emphasis annotation should start from 15th symbol.")
+    t.equal(annoSecondNode3.endOffset, 20, "Emphasis annotation should end at 21th symbol.")
+    let annoThirdNode3 = annotationsNode3[2] || {}
+    t.equal(annoThirdNode3.type, 'superscript', "The annotation should be a superscript.")
+    t.equal(annoThirdNode3.startOffset, 15, "Superscript annotation should start from 16th symbol.")
+    t.equal(annoThirdNode3.endOffset, 17, "Superscript annotation should end at 18th symbol.")
+    let annoFourthNode3 = annotationsNode3[3] || {}
+    t.equal(annoFourthNode3.type, 'subscript', "The annotation should be a subscript.")
+    t.equal(annoFourthNode3.startOffset, 17, "Subscript annotation should start from 18th symbol.")
+    t.equal(annoFourthNode3.endOffset, 19, "Subscript annotation should end at 20th symbol.")
+    let annoFifthNode3 = annotationsNode3[4] || {}
+    t.equal(annoFifthNode3.type, 'emphasis', "The annotation should be an emphasis.")
+    t.equal(annoFifthNode3.startOffset, 26, "Emphasis annotation should start from 27th symbol.")
+    t.equal(annoFifthNode3.endOffset, 30, "Emphasis annotation should end at 31th symbol.")
+    let annoSixthNode3 = annotationsNode3[5] || {}
+    t.equal(annoSixthNode3.type, 'strong', "The annotation should be a strong.")
+    t.equal(annoSixthNode3.startOffset, 27, "Strong annotation should start from 28th symbol.")
+    t.equal(annoSixthNode3.endOffset, 29, "Strong annotation should end at 30th symbol.")
     t.end()
   }, forceWindows)
 }
