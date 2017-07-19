@@ -2,6 +2,7 @@ import {
   ImagePackage, Component, Configurator,
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
   ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage,
+  SubscriptPackage, SuperscriptPackage
   //InlineWrapperPackage,
 } from 'substance'
 
@@ -35,6 +36,8 @@ export default function getTestConfig() {
   config.import(HeadingPackage)
   config.import(StrongPackage)
   config.import(EmphasisPackage)
+  config.import(SubscriptPackage)
+  config.import(SuperscriptPackage)
   config.import(LinkPackage)
   config.import(ListPackage)
   config.import(TablePackage)
