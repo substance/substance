@@ -429,12 +429,6 @@ function _emptyParagraphSeed(tx) {
     content: ''
   })
   body.show('p1')
-  tx.create({
-    type: 'paragraph',
-    id: 'p2',
-    content: ''
-  })
-  body.show('p2')
 }
 
 function _emptyFixtureTest(t, html, impl, forceWindows) {
@@ -505,7 +499,7 @@ function _extendedTest(t, html, forceWindows) {
     let body = doc.get('body')
     let p1 = body.getChildAt(0)
     t.equal(p1.content.length, 121, "First paragraph should contain 121 symbols.")
-    let annotationsP1 = doc.getIndex('annotations').get(['p1', 'content'])
+    let annotationsP1 = doc.getIndex('annotations').get([p1.id, 'content'])
     t.equal(annotationsP1.length, 2, "There should be two annotations inside first paragraph.")
     let annoFirstP1 = annotationsP1[0] || {}
     t.equal(annoFirstP1.type, 'emphasis', "The annotation should be an emphasis.")
@@ -513,20 +507,20 @@ function _extendedTest(t, html, forceWindows) {
     t.equal(annoFirstP1.endOffset, 11, "Emphasis annotation should end at 12th symbol.")
     let annoSecondP1 = annotationsP1[1] || {}
     t.equal(annoSecondP1.type, 'strong', "The annotation should be a strong.")
-    t.equal(annoSecondP1.startOffset, 17, "Strong annotation should start from 18th symbol.")
-    t.equal(annoSecondP1.endOffset, 29, "Strong annotation should end at 30th symbol.")
+    t.equal(annoSecondP1.startOffset, 18, "Strong annotation should start from 19th symbol.")
+    t.equal(annoSecondP1.endOffset, 30, "Strong annotation should end at 31th symbol.")
     let p2 = body.getChildAt(1)
     t.equal(p2.content.length, 178, "Second paragraph should contain 178 symbols.")
-    let annotationsP2 = doc.getIndex('annotations').get(['p2', 'content'])
+    let annotationsP2 = doc.getIndex('annotations').get([p2.id, 'content'])
     t.equal(annotationsP2.length, 2, "There should be two annotations inside second paragraph.")
     let annoFirstP2 = annotationsP2[0] || {}
     t.equal(annoFirstP2.type, 'strong', "The annotation should be an emphasis.")
     t.equal(annoFirstP2.startOffset, 14, "Strong annotation should start from 15th symbol.")
-    t.equal(annoFirstP2.endOffset, 29, "Strong annotation should end at 30th symbol.")
+    t.equal(annoFirstP2.endOffset, 30, "Strong annotation should end at 31th symbol.")
     let annoSecondP2 = annotationsP2[1] || {}
     t.equal(annoSecondP2.type, 'emphasis', "The annotation should be a strong.")
-    t.equal(annoSecondP2.startOffset, 54, "Emphasis annotation should start from 55th symbol.")
-    t.equal(annoSecondP2.endOffset, 57, "Emphasis annotation should end at 57th symbol.")
+    t.equal(annoSecondP2.startOffset, 53, "Emphasis annotation should start from 54th symbol.")
+    t.equal(annoSecondP2.endOffset, 57, "Emphasis annotation should end at 58th symbol.")
     t.end()
   }, forceWindows)
 }
