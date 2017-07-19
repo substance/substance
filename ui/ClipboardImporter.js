@@ -102,6 +102,8 @@ class ClipboardImporter extends HTMLImporter {
       // font-style: italic -> <i>
       // vertical-align: super -> <sup>
       // vertical-align: sub -> <sub>
+      // TODO: handle nested cases when for instance 
+      // strong text also emphasised
       let nodeType
       if(style['font-weight'] === '700') {
         nodeType = 'b'
