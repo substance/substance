@@ -90,8 +90,37 @@ class ClipboardImporter extends HTMLImporter {
     // specific format, e.g., id="docs-internal-guid-5bea85da-43dc-fb06-e327-00c1c6576cf7"
     let bold = body.find('b')
     if (bold && /^docs-internal/.exec(bold.id)) {
-      return bold
+      body = bold
     }
+
+    body.findAll('span').forEach(span => {
+      const style = span.el.style
+      // Google Docs uses spans with inline styles 
+      // insted of inline nodes
+      // We are scanning each span for certain inline styles:
+      // font-weight: 700 -> <b>
+      // font-style: italic -> <i>
+      // vertical-align: super -> <sup>
+      // vertical-align: sub -> <sub>
+      let nodeType
+      if(style['font-weight'] === '700') {
+        nodeType = 'b'
+      } else if (style['font-style'] === 'italic') {
+        nodeType = 'i'
+      } else if (style['vertical-align'] === 'super') {
+        nodeType = 'sup'
+      } else if (style['vertical-align'] === 'sub') {
+        nodeType = 'sub'
+      }
+
+      if(nodeType) {
+        let parentEl = span.getParent()
+        let el = parentEl.createElement(nodeType)
+        el.append(span.textContent)
+        parentEl.replaceChild(span, el)
+      }
+    })
+
     return body
   }
 
