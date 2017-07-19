@@ -101,7 +101,7 @@ class ClipboardImporter extends HTMLImporter {
       // font-style: italic -> <i>
       // vertical-align: super -> <sup>
       // vertical-align: sub -> <sub>
-
+      // TODO: union siblings to avoid separated annotations for nested tags
       let nodeTypes = []
       if(span.getStyle('font-weight') === '700') nodeTypes.push('b')
       if(span.getStyle('font-style') === 'italic') nodeTypes.push('i')
