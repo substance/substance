@@ -101,7 +101,7 @@ class ClipboardImporter extends HTMLImporter {
       // font-style: italic -> <i>
       // vertical-align: super -> <sup>
       // vertical-align: sub -> <sub>
-      // TODO: union siblings to avoid separated annotations for nested tags
+
       let nodeTypes = []
       if(span.getStyle('font-weight') === '700') nodeTypes.push('b')
       if(span.getStyle('font-style') === 'italic') nodeTypes.push('i')
@@ -125,6 +125,37 @@ class ClipboardImporter extends HTMLImporter {
       }
 
       createInlineNodes(span.getParent(), true)
+    })
+
+    let tags = ['b', 'i', 'sup', 'sub']
+
+    tags.forEach(tag => {
+      body.findAll(tag).forEach(el => {
+        // Union siblings with the same tags, e.g. we are turning 
+        // <b>str</b><b><i>ong</i></b> to <b>str<i>ong</i></b>
+        let previousSiblingEl = el.getPreviousSibling()
+        if(previousSiblingEl && el.tagName === previousSiblingEl.tagName) {
+          let parentEl = el.getParent()
+          let newEl = parentEl.createElement(tag)
+          newEl.setInnerHTML(previousSiblingEl.getInnerHTML() + el.getInnerHTML())
+          parentEl.replaceChild(el, newEl)
+          parentEl.removeChild(previousSiblingEl)
+        }
+
+        // Union siblings and child with the same tags, e.g. we are turning 
+        // <i>emph</i><b><i>asis</i></b> to <i>emph<b>asis</b></i>
+        // Note that at this state children always have the same text content
+        // e.g. there can't be cases like <b><i>emph</i> asis</b> so we don't treat them
+        if(previousSiblingEl && previousSiblingEl.tagName && el.getChildCount() > 0 && el.getChildAt(0).tagName === previousSiblingEl.tagName) {
+          let parentEl = el.getParent()
+          let childEl = el.getChildAt(0)
+          let newEl = parentEl.createElement(previousSiblingEl.tagName)
+          let newChildEl = newEl.createElement(tag)
+          newChildEl.setTextContent(childEl.textContent)
+          newEl.appendChild(newChildEl)
+          parentEl.replaceChild(el, newEl)
+        }
+      })
     })
 
     return body
