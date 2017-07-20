@@ -62,6 +62,12 @@ class ClipboardImporter extends HTMLImporter {
     }
 
     let htmlDoc = DefaultDOMElement.parseHTML(html)
+    let generatorMeta = htmlDoc.find('meta[name="generator"]')
+    if(generatorMeta) {
+      let generator = generatorMeta.getAttribute('content')
+      if(generator.indexOf('LibreOffice') > -1) this._isLibreOffice = true
+    }
+
     let body = htmlDoc.find('body')
     body = this._sanitizeBody(body)
     if (!body) {
@@ -79,6 +85,14 @@ class ClipboardImporter extends HTMLImporter {
     body = this._fixupGoogleDocsBody(body)
     // Remove <meta> element
     body.findAll('meta').forEach(el => el.remove())
+
+    // Some word processors are exporting new lines instead of spaces
+    // for these editors we will replace all new lines with space
+    if(this._isLibreOffice) {
+      let bodyHtml = body.getInnerHTML()
+      body.setInnerHTML(bodyHtml.replace(/\n/g, ' '))
+    }
+
     return body
   }
 
