@@ -51,6 +51,7 @@ import LibreOfficeOSXExtendedFixture from './fixture/html/libre-office-osx-linux
 import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
+import MSW11OSXExtendedFixture from './fixture/html/word-11-osx-extended'
 
 ClipboardTests()
 
@@ -358,6 +359,10 @@ function ClipboardTests(memory) {
     _twoParagraphsTest(t, MSW11OSXTwoParagraphsFixture)
   })
 
+  test("Microsoft Word 11 (OSX) - Extended", function(t) {
+    _extendedTest(t, MSW11OSXExtendedFixture)
+  })
+
 }
 
 
@@ -526,7 +531,7 @@ function _extendedTest(t, html, forceWindows) {
     t.equal(annoFourthNode1.type, 'subscript', "The annotation should be a subscript.")
     t.equal(annoFourthNode1.start.offset, 50, "Subscript annotation should start from 51th symbol.")
     t.equal(annoFourthNode1.end.offset, 56, "Subscript annotation should end at 57th symbol.")
-    
+
     // Second node is a first level heading without annos
     let node2 = body.getChildAt(1)
     t.equal(node2.type, 'heading', "Second node should be a heading.")
