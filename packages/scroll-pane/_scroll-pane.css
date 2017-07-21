@@ -14,8 +14,9 @@
   flex: 0 0 20px;
 }
 
-.sc-scroll-pane.sm-default-style.sm-substance-scrollbar.sm-scrollbar-position-left .se-scrollable {
+.sc-scroll-pane.sm-default-style .se-scrollable {
   flex: 1 1 0;
+  overflow: auto;
 }
 
 /* Hide native scroll bar in content panel */
