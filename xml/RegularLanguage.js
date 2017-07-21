@@ -171,16 +171,10 @@ export class DFAExpr extends Expression {
           }
         }
         const child = childNodes[pos]
-        let token
-        if (child.isTextNode()) {
-          if (/^\s*$/.exec(child.textContent)) {
-            continue
-          }
-          token = TEXT
-        } else if (child.isElementNode()) {
-          token = child.tagName
-        } else {
-          continue
+        let token = child.tagName
+        if (!token) {
+          // if this happens we need to fix
+          throw new Error('Internal Error')
         }
         let nextState = dfa.consume(state, token)
         if (nextState === -1) {
