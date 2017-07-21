@@ -68,7 +68,16 @@ class ClipboardImporter extends HTMLImporter {
       let generator = generatorMeta.getAttribute('content')
       if(generator.indexOf('LibreOffice') > -1) this._isLibreOffice = true
     } else if(xmnlsw) {
-      if(xmnlsw.indexOf('office:word') > -1) this._isMicrosoftWord = true
+      if(xmnlsw.indexOf('office:word') > -1) {
+        this._isMicrosoftWord = true
+        // For microsoft word we need only content between 
+        // <!--StartFragment--> and <!--EndFragment-->
+        // Note that there might be new lines so we should use [\s\S]
+        let match = /<!--StartFragment-->([\s\S]*)<!--EndFragment-->/.exec(html)
+        if (match) {
+          htmlDoc = DefaultDOMElement.parseHTML(match[1])
+        }
+      }
     } else if(html.indexOf('docs-internal-guid') > -1) {
       this._isGoogleDoc = true
     }
@@ -94,7 +103,7 @@ class ClipboardImporter extends HTMLImporter {
     // for these editors we will replace all new lines with space
     if(this._isLibreOffice || this._isMicrosoftWord) {
       let bodyHtml = body.getInnerHTML()
-      body.setInnerHTML(bodyHtml.replace(/\n/g, ' '))
+      body.setInnerHTML(bodyHtml.replace(/\r\n|\r|\n/g, ' '))
     } else if (this._isGoogleDoc) {
       body = this._fixupGoogleDocsBody(body)
     }
