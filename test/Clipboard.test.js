@@ -3,7 +3,8 @@ import {
   DefaultDOMElement, Registry, Clipboard,
   ParagraphPackage, HeadingPackage, StrongPackage,
   EmphasisPackage, LinkPackage, CodeblockPackage,
-  platform
+  SuperscriptPackage, SubscriptPackage,
+  platform, find
 } from 'substance'
 
 const ParagraphHTMLConverter = ParagraphPackage.ParagraphHTMLConverter
@@ -12,6 +13,8 @@ const StrongHTMLConverter = StrongPackage.StrongHTMLConverter
 const EmphasisHTMLConverter = EmphasisPackage.EmphasisHTMLConverter
 const LinkHTMLConverter = LinkPackage.LinkHTMLConverter
 const CodeblockHTMLConverter = CodeblockPackage.CodeblockHTMLConverter
+const SuperscriptHTMLConverter = SuperscriptPackage.SuperscriptHTMLConverter
+const SubscriptHTMLConverter = SubscriptPackage.SubscriptHTMLConverter
 
 import simple from './fixture/simple'
 import setupEditor from './fixture/setupEditor'
@@ -37,15 +40,18 @@ import BrowserWindowsEdgeTwoParagraphsFixture from './fixture/html/browser-windo
 import GDocsOSXLinuxChromePlainTextFixture from './fixture/html/google-docs-osx-linux-chrome-plain-text'
 import GDocsOSXLinuxChromeAnnotatedTextFixture from './fixture/html/google-docs-osx-linux-chrome-annotated-text'
 import GDocsOSXLinuxChromeTwoParagraphsFixture from './fixture/html/google-docs-osx-linux-chrome-two-paragraphs'
+import GDocsOSXLinuxChromeExtendedFixture from './fixture/html/google-docs-osx-linux-chrome-extended'
 import GDocsLinuxFirefoxPlainTextFixture from './fixture/html/google-docs-linux-firefox-plain-text'
 import GDocsLinuxFirefoxAnnotatedTextFixture from './fixture/html/google-docs-linux-firefox-annotated-text'
 import GDocsOSXFirefoxPlainTextFixture from './fixture/html/google-docs-osx-firefox-plain-text'
 import LibreOfficeOSXPlainTextFixture from './fixture/html/libre-office-osx-linux-plain-text'
 import LibreOfficeOSXAnnotatedTextFixture from './fixture/html/libre-office-osx-linux-annotated-text'
 import LibreOfficeOSXTwoParagraphsFixture from './fixture/html/libre-office-osx-linux-two-paragraphs'
+import LibreOfficeOSXExtendedFixture from './fixture/html/libre-office-osx-linux-extended'
 import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
+import MSW11OSXExtendedFixture from './fixture/html/word-11-osx-extended'
 
 ClipboardTests()
 
@@ -309,6 +315,10 @@ function ClipboardTests(memory) {
     _twoParagraphsTest(t, GDocsOSXLinuxChromeTwoParagraphsFixture)
   })
 
+  test("GoogleDocs - Chrome (OSX/Linux) - Extended", function(t) {
+    _extendedTest(t, GDocsOSXLinuxChromeExtendedFixture)
+  })
+
   test("GoogleDocs - Firefox (Linux) - Plain Text", function(t) {
     _plainTextTest(t, GDocsLinuxFirefoxPlainTextFixture)
   })
@@ -333,6 +343,10 @@ function ClipboardTests(memory) {
     _twoParagraphsTest(t, LibreOfficeOSXTwoParagraphsFixture)
   })
 
+  test("LibreOffice (OSX/Linux) - Extended", function(t) {
+    _extendedTest(t, LibreOfficeOSXExtendedFixture)
+  })
+
   test("Microsoft Word 11 (OSX) - Plain Text", function(t) {
     _plainTextTest(t, MSW11OSXPlainTextFixture)
   })
@@ -343,6 +357,10 @@ function ClipboardTests(memory) {
 
   test("Microsoft Word 11 (OSX) - Two Paragraphs", function(t) {
     _twoParagraphsTest(t, MSW11OSXTwoParagraphsFixture)
+  })
+
+  test("Microsoft Word 11 (OSX) - Extended", function(t) {
+    _extendedTest(t, MSW11OSXExtendedFixture)
   })
 
 }
@@ -356,6 +374,8 @@ let converterRegistry = new Registry({
     "emphasis": EmphasisHTMLConverter,
     "link": LinkHTMLConverter,
     "codeblock": CodeblockHTMLConverter,
+    "superscript": SuperscriptHTMLConverter,
+    "subscript": SubscriptHTMLConverter,
   })
 })
 
@@ -411,6 +431,32 @@ function _fixtureTest(t, html, impl, forceWindows) {
   impl(doc, clipboard)
 }
 
+function _emptyParagraphSeed(tx) {
+  let body = tx.get('body')
+  tx.create({
+    type: 'paragraph',
+    id: 'p1',
+    content: ''
+  })
+  body.show('p1')
+}
+
+function _emptyFixtureTest(t, html, impl, forceWindows) {
+  let { editorSession, clipboard, doc } = _fixture(t, _emptyParagraphSeed)
+  if (forceWindows) {
+    // NOTE: faking 'Windows' mode in importer so that
+    // the correct implementation will be used
+    clipboard.htmlImporter._isWindows = true
+  }
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  impl(doc, clipboard)
+}
+
 function _plainTextTest(t, html, forceWindows) {
   _fixtureTest(t, html, function(doc, clipboard) {
     let event = new ClipboardEvent()
@@ -450,6 +496,113 @@ function _twoParagraphsTest(t, html, forceWindows) {
     t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
     let p3 = body.getChildAt(2)
     t.equal(p3.content, '123456789', "Remainder of original p1 should go into forth paragraph.")
+    t.end()
+  }, forceWindows)
+}
+
+function _extendedTest(t, html, forceWindows) {
+  _emptyFixtureTest(t, html, function(doc, clipboard) {
+    let event = new ClipboardEvent()
+    event.clipboardData.setData('text/plain', '')
+    event.clipboardData.setData('text/html', html)
+    clipboard.onPaste(event)
+    let body = doc.get('body')
+    // First node is a paragraph with strong, emphasis, superscript and subscript annos
+    let node1 = body.getChildAt(0)
+    t.equal(node1.type, 'paragraph', "First node should be a paragraph.")
+    t.equal(node1.content.length, 121, "First paragraph should contain 121 symbols.")
+    let annotationsNode1 = doc.getIndex('annotations').get([node1.id, 'content']).sort((a, b) => {
+      return a.start.offset - b.start.offset
+    })
+    t.equal(annotationsNode1.length, 4, "There should be four annotations inside a first paragraph.")
+    let annoFirstNode1 = annotationsNode1[0] || {}
+    t.equal(annoFirstNode1.type, 'emphasis', "The annotation should be an emphasis.")
+    t.equal(annoFirstNode1.start.offset, 4, "Emphasis annotation should start from 5th symbol.")
+    t.equal(annoFirstNode1.end.offset, 11, "Emphasis annotation should end at 12th symbol.")
+    let annoSecondNode1 = annotationsNode1[1] || {}
+    t.equal(annoSecondNode1.type, 'strong', "The annotation should be a strong.")
+    t.equal(annoSecondNode1.start.offset, 18, "Strong annotation should start from 19th symbol.")
+    t.equal(annoSecondNode1.end.offset, 30, "Strong annotation should end at 31th symbol.")
+    let annoThirdNode1 = annotationsNode1[2] || {}
+    t.equal(annoThirdNode1.type, 'superscript', "The annotation should be a superscript.")
+    t.equal(annoThirdNode1.start.offset, 41, "Superscript annotation should start from 42th symbol.")
+    t.equal(annoThirdNode1.end.offset, 49, "Superscript annotation should end at 50th symbol.")
+    let annoFourthNode1 = annotationsNode1[3] || {}
+    t.equal(annoFourthNode1.type, 'subscript', "The annotation should be a subscript.")
+    t.equal(annoFourthNode1.start.offset, 50, "Subscript annotation should start from 51th symbol.")
+    t.equal(annoFourthNode1.end.offset, 56, "Subscript annotation should end at 57th symbol.")
+
+    // Second node is a first level heading without annos
+    let node2 = body.getChildAt(1)
+    t.equal(node2.type, 'heading', "Second node should be a heading.")
+    t.equal(node2.level, 1, "Second node should be a first level heading.")
+    t.equal(node2.content.length, 12, "Heading should contain 12 symbols.")
+    let annotationsNode2 = doc.getIndex('annotations').get([node2.id, 'content'])
+    t.equal(annotationsNode2.length, 0, "There should be no annotations inside a heading.")
+
+    // Third node is a paragraph with overlapping annos
+    let node3 = body.getChildAt(2)
+    t.equal(node3.type, 'paragraph', "Third node should be a paragraph.")
+    t.equal(node3.content.length, 178, "Second paragraph should contain 178 symbols.")
+    // let annotationsNode3 = doc.getIndex('annotations').get([node3.id, 'content']).sort((a, b) => {
+    //   return a.start.offset - b.start.offset
+    // })
+    // While we are not supporting combined formatting annotations 
+    // we will run selective tests for selections to ensure that annotations are exist
+
+    // Get annotations for range without annotations
+    let path = [node3.id, 'content']
+    let compare = function(a, b) {
+      if(a.id < b.id) return -1
+      if(a.id > b.id) return 1
+      return 0
+    }
+    let annos = doc.getIndex('annotations').get(path, 3, 5)
+    t.equal(annos.length, 0, "There should be no annotations within given range.")
+
+    // Get annotations for range with string, emphasis and superscript annotations
+    annos = doc.getIndex('annotations').get(path, 17, 18).sort(compare)
+    t.equal(annos.length, 3, "There should be three annotations within given range.")
+    t.isNotNil(find(annos, {type: 'emphasis'}), "Should contain emphasis annotation.")
+    t.isNotNil(find(annos, {type: 'strong'}), "Should contain strong annotation.")
+    t.isNotNil(find(annos, {type: 'superscript'}), "Should contain superscript annotation.")
+
+    // Get annotations for range with string, emphasis and subscript annotations
+    annos = doc.getIndex('annotations').get(path, 22, 23).sort(compare)
+    t.isNotNil(find(annos, {type: 'emphasis'}), "Should contain emphasis annotation.")
+    t.isNotNil(find(annos, {type: 'strong'}), "Should contain strong annotation.")
+    t.isNotNil(find(annos, {type: 'subscript'}), "Should contain subscript annotation.")
+
+    // Get annotations for range with string and emphasis
+    annos = doc.getIndex('annotations').get(path, 27, 29).sort(compare)
+    t.isNotNil(find(annos, {type: 'emphasis'}), "Should contain emphasis annotation.")
+    t.isNotNil(find(annos, {type: 'strong'}), "Should contain strong annotation.")
+
+    // t.equal(annotationsNode3.length, 6, "There should be six annotations inside a second paragraph.")
+    // let annoFirstNode3 = annotationsNode3[0] || {}
+    // t.equal(annoFirstNode3.type, 'strong', "The annotation should be a strong.")
+    // t.equal(annoFirstNode3.start.offset, 14, "Strong annotation should start from 15th symbol.")
+    // t.equal(annoFirstNode3.end.offset, 25, "Strong annotation should end at 26th symbol.")
+    // let annoSecondNode3 = annotationsNode3[1] || {}
+    // t.equal(annoSecondNode3.type, 'emphasis', "The annotation should be an emphasis.")
+    // t.equal(annoSecondNode3.start.offset, 15, "Emphasis annotation should start from 16th symbol.")
+    // t.equal(annoSecondNode3.end.offset, 24, "Emphasis annotation should end at 25th symbol.")
+    // let annoThirdNode3 = annotationsNode3[2] || {}
+    // t.equal(annoThirdNode3.type, 'superscript', "The annotation should be a superscript.")
+    // t.equal(annoThirdNode3.start.offset, 16, "Superscript annotation should start from 17th symbol.")
+    // t.equal(annoThirdNode3.end.offset, 19, "Superscript annotation should end at 20th symbol.")
+    // let annoFourthNode3 = annotationsNode3[3] || {}
+    // t.equal(annoFourthNode3.type, 'subscript', "The annotation should be a subscript.")
+    // t.equal(annoFourthNode3.start.offset, 21, "Subscript annotation should start from 22th symbol.")
+    // t.equal(annoFourthNode3.end.offset, 23, "Subscript annotation should end at 23th symbol.")
+    // let annoFifthNode3 = annotationsNode3[4] || {}
+    // t.equal(annoFifthNode3.type, 'emphasis', "The annotation should be an emphasis.")
+    // t.equal(annoFifthNode3.start.offset, 26, "Emphasis annotation should start from 27th symbol.")
+    // t.equal(annoFifthNode3.end.offset, 30, "Emphasis annotation should end at 31th symbol.")
+    // let annoSixthNode3 = annotationsNode3[5] || {}
+    // t.equal(annoSixthNode3.type, 'strong', "The annotation should be a strong.")
+    // t.equal(annoSixthNode3.start.offset, 27, "Strong annotation should start from 28th symbol.")
+    // t.equal(annoSixthNode3.end.offset, 29, "Strong annotation should end at 30th symbol.")
     t.end()
   }, forceWindows)
 }

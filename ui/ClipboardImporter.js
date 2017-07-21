@@ -62,6 +62,26 @@ class ClipboardImporter extends HTMLImporter {
     }
 
     let htmlDoc = DefaultDOMElement.parseHTML(html)
+    let generatorMeta = htmlDoc.find('meta[name="generator"]')
+    let xmnlsw = htmlDoc.find('html').getAttribute('xmlns:w')
+    if(generatorMeta) {
+      let generator = generatorMeta.getAttribute('content')
+      if(generator.indexOf('LibreOffice') > -1) this._isLibreOffice = true
+    } else if(xmnlsw) {
+      if(xmnlsw.indexOf('office:word') > -1) {
+        this._isMicrosoftWord = true
+        // For microsoft word we need only content between 
+        // <!--StartFragment--> and <!--EndFragment-->
+        // Note that there might be new lines so we should use [\s\S]
+        let match = /<!--StartFragment-->([\s\S]*)<!--EndFragment-->/.exec(html)
+        if (match) {
+          htmlDoc = DefaultDOMElement.parseHTML(match[1])
+        }
+      }
+    } else if(html.indexOf('docs-internal-guid') > -1) {
+      this._isGoogleDoc = true
+    }
+
     let body = htmlDoc.find('body')
     body = this._sanitizeBody(body)
     if (!body) {
@@ -76,9 +96,18 @@ class ClipboardImporter extends HTMLImporter {
   }
 
   _sanitizeBody(body) {
-    body = this._fixupGoogleDocsBody(body)
     // Remove <meta> element
     body.findAll('meta').forEach(el => el.remove())
+
+    // Some word processors are exporting new lines instead of spaces
+    // for these editors we will replace all new lines with space
+    if(this._isLibreOffice || this._isMicrosoftWord) {
+      let bodyHtml = body.getInnerHTML()
+      body.setInnerHTML(bodyHtml.replace(/\r\n|\r|\n/g, ' '))
+    } else if (this._isGoogleDoc) {
+      body = this._fixupGoogleDocsBody(body)
+    }
+
     return body
   }
 
@@ -90,8 +119,74 @@ class ClipboardImporter extends HTMLImporter {
     // specific format, e.g., id="docs-internal-guid-5bea85da-43dc-fb06-e327-00c1c6576cf7"
     let bold = body.find('b')
     if (bold && /^docs-internal/.exec(bold.id)) {
-      return bold
+      body = bold
     }
+
+    body.findAll('span').forEach(span => {
+      // Google Docs uses spans with inline styles 
+      // insted of inline nodes
+      // We are scanning each span for certain inline styles:
+      // font-weight: 700 -> <b>
+      // font-style: italic -> <i>
+      // vertical-align: super -> <sup>
+      // vertical-align: sub -> <sub>
+      // TODO: improve the result for other editors by fusing adjacent annotations of the same type
+      let nodeTypes = []
+      if(span.getStyle('font-weight') === '700') nodeTypes.push('b')
+      if(span.getStyle('font-style') === 'italic') nodeTypes.push('i')
+      if(span.getStyle('vertical-align') === 'super') nodeTypes.push('sup')
+      if(span.getStyle('vertical-align') === 'sub') nodeTypes.push('sub')
+
+      function createInlineNodes(parentEl, isRoot) {
+        if(nodeTypes.length > 0) {
+          let el = parentEl.createElement(nodeTypes[0])
+          if(nodeTypes.length === 1) el.append(span.textContent)
+
+          if(isRoot) {
+            parentEl.replaceChild(span, el)
+          } else {
+            parentEl.appendChild(el)
+          }
+
+          nodeTypes.shift()
+          createInlineNodes(el)
+        }
+      }
+
+      createInlineNodes(span.getParent(), true)
+    })
+
+    let tags = ['b', 'i', 'sup', 'sub']
+
+    tags.forEach(tag => {
+      body.findAll(tag).forEach(el => {
+        // Union siblings with the same tags, e.g. we are turning 
+        // <b>str</b><b><i>ong</i></b> to <b>str<i>ong</i></b>
+        let previousSiblingEl = el.getPreviousSibling()
+        if(previousSiblingEl && el.tagName === previousSiblingEl.tagName) {
+          let parentEl = el.getParent()
+          let newEl = parentEl.createElement(tag)
+          newEl.setInnerHTML(previousSiblingEl.getInnerHTML() + el.getInnerHTML())
+          parentEl.replaceChild(el, newEl)
+          parentEl.removeChild(previousSiblingEl)
+        }
+
+        // Union siblings and child with the same tags, e.g. we are turning 
+        // <i>emph</i><b><i>asis</i></b> to <i>emph<b>asis</b></i>
+        // Note that at this state children always have the same text content
+        // e.g. there can't be cases like <b><i>emph</i> asis</b> so we don't treat them
+        if(previousSiblingEl && previousSiblingEl.tagName && el.getChildCount() > 0 && el.getChildAt(0).tagName === previousSiblingEl.tagName) {
+          let parentEl = el.getParent()
+          let childEl = el.getChildAt(0)
+          let newEl = parentEl.createElement(previousSiblingEl.tagName)
+          let newChildEl = newEl.createElement(tag)
+          newChildEl.setTextContent(childEl.textContent)
+          newEl.appendChild(newChildEl)
+          parentEl.replaceChild(el, newEl)
+        }
+      })
+    })
+
     return body
   }
 
