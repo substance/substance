@@ -15,11 +15,11 @@ import { augmentSelection } from './selectionHelpers'
  */
 class EditingInterface {
 
-  constructor(doc) {
+  constructor(doc, options = {}) {
     this._document = doc
     this._selection = null
     // TODO: allow for custom editing implementation
-    this._impl = new Editing()
+    this._impl = options.editing || new Editing()
     this._direction = null
   }
 
