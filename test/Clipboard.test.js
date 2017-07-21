@@ -4,7 +4,7 @@ import {
   ParagraphPackage, HeadingPackage, StrongPackage,
   EmphasisPackage, LinkPackage, CodeblockPackage,
   SuperscriptPackage, SubscriptPackage,
-  platform
+  platform, find
 } from 'substance'
 
 const ParagraphHTMLConverter = ParagraphPackage.ParagraphHTMLConverter
@@ -454,7 +454,7 @@ function _emptyFixtureTest(t, html, impl, forceWindows) {
     startOffset: 0,
     containerId: 'body'
   })
-  impl(doc, editorSession, clipboard)
+  impl(doc, clipboard)
 }
 
 function _plainTextTest(t, html, forceWindows) {
@@ -501,7 +501,7 @@ function _twoParagraphsTest(t, html, forceWindows) {
 }
 
 function _extendedTest(t, html, forceWindows) {
-  _emptyFixtureTest(t, html, function(doc, editorSession, clipboard) {
+  _emptyFixtureTest(t, html, function(doc, clipboard) {
     let event = new ClipboardEvent()
     event.clipboardData.setData('text/plain', '')
     event.clipboardData.setData('text/html', html)
@@ -563,22 +563,20 @@ function _extendedTest(t, html, forceWindows) {
     // Get annotations for range with string, emphasis and superscript annotations
     annos = doc.getIndex('annotations').get(path, 17, 18).sort(compare)
     t.equal(annos.length, 3, "There should be three annotations within given range.")
-    t.equal(annos[0].type, 'emphasis', "The annotation should be an emphasis.")
-    t.equal(annos[1].type, 'strong', "The annotation should be a strong.")
-    t.equal(annos[2].type, 'superscript', "The annotation should be a superscript.")
+    t.isNotNil(find(annos, {type: 'emphasis'}), "Should contain emphasis annotation.")
+    t.isNotNil(find(annos, {type: 'strong'}), "Should contain strong annotation.")
+    t.isNotNil(find(annos, {type: 'superscript'}), "Should contain superscript annotation.")
 
     // Get annotations for range with string, emphasis and subscript annotations
     annos = doc.getIndex('annotations').get(path, 22, 23).sort(compare)
-    t.equal(annos.length, 3, "There should be three annotations within given range.")
-    t.equal(annos[0].type, 'emphasis', "The annotation should be an emphasis.")
-    t.equal(annos[1].type, 'strong', "The annotation should be a strong.")
-    t.equal(annos[2].type, 'subscript', "The annotation should be a subscript.")
-    
+    t.isNotNil(find(annos, {type: 'emphasis'}), "Should contain emphasis annotation.")
+    t.isNotNil(find(annos, {type: 'strong'}), "Should contain strong annotation.")
+    t.isNotNil(find(annos, {type: 'subscript'}), "Should contain subscript annotation.")
+
     // Get annotations for range with string and emphasis
     annos = doc.getIndex('annotations').get(path, 27, 29).sort(compare)
-    t.equal(annos.length, 2, "There should be two annotations within given range.")
-    t.equal(annos[0].type, 'emphasis', "The annotation should be an emphasis.")
-    t.equal(annos[1].type, 'strong', "The annotation should be a strong.")
+    t.isNotNil(find(annos, {type: 'emphasis'}), "Should contain emphasis annotation.")
+    t.isNotNil(find(annos, {type: 'strong'}), "Should contain strong annotation.")
 
     // t.equal(annotationsNode3.length, 6, "There should be six annotations inside a second paragraph.")
     // let annoFirstNode3 = annotationsNode3[0] || {}
