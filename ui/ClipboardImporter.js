@@ -63,9 +63,14 @@ class ClipboardImporter extends HTMLImporter {
 
     let htmlDoc = DefaultDOMElement.parseHTML(html)
     let generatorMeta = htmlDoc.find('meta[name="generator"]')
+    let xmnlsw = htmlDoc.find('html').getAttribute('xmlns:w')
     if(generatorMeta) {
       let generator = generatorMeta.getAttribute('content')
       if(generator.indexOf('LibreOffice') > -1) this._isLibreOffice = true
+    } else if(xmnlsw) {
+      if(xmnlsw.indexOf('office:word') > -1) this._isMicrosoftWord = true
+    } else if(html.indexOf('docs-internal-guid') > -1) {
+      this._isGoogleDoc = true
     }
 
     let body = htmlDoc.find('body')
@@ -82,15 +87,16 @@ class ClipboardImporter extends HTMLImporter {
   }
 
   _sanitizeBody(body) {
-    body = this._fixupGoogleDocsBody(body)
     // Remove <meta> element
     body.findAll('meta').forEach(el => el.remove())
 
     // Some word processors are exporting new lines instead of spaces
     // for these editors we will replace all new lines with space
-    if(this._isLibreOffice) {
+    if(this._isLibreOffice || this._isMicrosoftWord) {
       let bodyHtml = body.getInnerHTML()
       body.setInnerHTML(bodyHtml.replace(/\n/g, ' '))
+    } else if (this._isGoogleDoc) {
+      body = this._fixupGoogleDocsBody(body)
     }
 
     return body
@@ -115,7 +121,7 @@ class ClipboardImporter extends HTMLImporter {
       // font-style: italic -> <i>
       // vertical-align: super -> <sup>
       // vertical-align: sub -> <sub>
-
+      // TODO: improve the result for other editors by fusing adjacent annotations of the same type
       let nodeTypes = []
       if(span.getStyle('font-weight') === '700') nodeTypes.push('b')
       if(span.getStyle('font-style') === 'italic') nodeTypes.push('i')
