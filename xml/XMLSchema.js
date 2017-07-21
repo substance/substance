@@ -49,12 +49,12 @@ export default class XMLSchema {
     elementNames.forEach((name) => {
       let elementSchema = this._elementSchemas[name]
       result.push(`# <${elementSchema.name}>`)
-      result.push('\n')
+      result.push('')
       result.push(`type: ${elementSchema.type}`)
       result.push('attributes: '+ map(elementSchema.attributes, (_, name) => { return name }).join(', '))
       result.push('children:')
-      result.push('  ', elementSchema.expr.toString())
-      result.push('\n')
+      result.push('  '+elementSchema.expr.toString())
+      result.push('')
     })
     return result.join('\n')
   }
