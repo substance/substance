@@ -85,11 +85,6 @@ class ScrollPane extends AbstractScrollPane {
         }).ref('scrollbar')
           .attr('id', 'content-scrollbar')
       )
-
-      // Scanline is debugging purposes, display: none by default.
-      el.append(
-        $$('div').ref("scanline").addClass('se-scanline')
-      )
     }
 
     el.append(

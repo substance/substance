@@ -1,9 +1,7 @@
 .sc-scrollbar {
-  position: absolute;
-  left: 0px;
+  position: relative;
+  height: 100%;
   width: 20px;
-  top: 0px;
-  bottom: 0px;
   background: #FAFAFA;
   box-shadow: inset -4px 0 4px 0 rgba(25,25,25,0.04);
 }
