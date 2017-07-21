@@ -1,4 +1,4 @@
-import { forEach, last, isString } from '../util'
+import { forEach, isString } from '../util'
 import DFABuilder from './DFABuilder'
 import DFA from './DFA'
 
@@ -154,49 +154,49 @@ export class DFAExpr extends Expression {
     }
   }
 
+  _isValid(_tokens) {
+    let state = this.getInitialState()
+    for (let i = 0; i < _tokens.length; i++) {
+      if (!this.consume(state, _tokens[i])) {
+        return false
+      }
+    }
+    return this.isFinished(state)
+  }
+
   _findInsertPosInSequence(el, newTag, mode) {
     const childNodes = el.getChildNodes()
-    const tagName = this.name
-    const dfa = this.dfa
-    let candidates = []
-    if (dfa) {
-      let state = START
-      let pos = 0
-      for (;pos < childNodes.length; pos++) {
-        if (dfa.canConsume(state, newTag)) {
-          if (mode === 'first') {
-            return pos
-          } else {
-            candidates.push(pos)
-          }
-        }
-        const child = childNodes[pos]
-        let token = child.tagName
-        if (!token) {
-          // if this happens we need to fix
-          throw new Error('Internal Error')
-        }
-        let nextState = dfa.consume(state, token)
-        if (nextState === -1) {
-          console.error('Element is invalid:', el)
-          throw new Error(`Element <${tagName}> is invalid.`)
-        }
-        state = nextState
+    // Note: we try out all combinations, starting either at the end
+    // or at the beginning, and return the first valid combination
+    // Probably this could be improved, this is a start, though
+    const tokens = childNodes.map((child)=>{
+      if (child.isTextNode()) {
+        return TEXT
+      } else {
+        return child.tagName
       }
-      // also consider the position after all previous siblings
-      if (dfa.canConsume(state, newTag)) {
-        if (mode === 'first') {
-          return pos
-        } else {
-          candidates.push(pos)
-        }
-      }
+    })
+    const L = tokens.length
+    const self = this
+    function _isValid(pos) {
+      let _tokens = tokens.slice(0)
+      _tokens.splice(pos, 0, newTag)
+      return self._isValid(_tokens)
     }
     if (mode === 'first') {
-      return candidates[0]
+      for (let pos = 0; pos <= L; pos++) {
+        if (_isValid(pos)) {
+          return pos
+        }
+      }
     } else {
-      return last(candidates)
+      for (let pos = L; pos >= 0; pos--) {
+        if (_isValid(pos)) {
+          return pos
+        }
+      }
     }
+    return -1
   }
 
 }
