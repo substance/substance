@@ -104,7 +104,7 @@ function _checkChildren(elementSchema, el) {
   }
   if (valid && !expr.isFinished(state)) {
     state.errors.push({
-      msg: `<${el.tagName}> is incomplete.`,
+      msg: `<${el.tagName}> is incomplete.\nSchema: ${expr.toString()}`,
       el
     })
     valid = false

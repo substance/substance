@@ -1,6 +1,7 @@
 import { forEach, isString } from '../util'
 import DFABuilder from './DFABuilder'
 import DFA from './DFA'
+import _isTextNodeEmpty from './_isTextNodeEmpty'
 
 const { START, END, TEXT, EPSILON } = DFA
 
@@ -57,7 +58,7 @@ export class Expression {
     let msg = []
     if (token !== TEXT) {
       if (!this.isAllowed(token)) {
-        msg.push(`<${token}> is not valid in <${this.name}>\n${this.toString()}`)
+        msg.push(`<${token}> is not valid in <${this.name}>\nSchema: ${this.toString()}`)
       } else {
         // otherwise just the position is wrong
         msg.push(`<${token}> is not allowed at the current position in <${this.name}>.\n${this.toString()}`)
@@ -169,14 +170,19 @@ export class DFAExpr extends Expression {
     // Note: we try out all combinations, starting either at the end
     // or at the beginning, and return the first valid combination
     // Probably this could be improved, this is a start, though
-    const tokens = childNodes.map((child)=>{
-      // ATTENTION: here we have get XMLDocumentNodes
-      // i.e. TextNodes are something totally different
+    const tokens = []
+    childNodes.forEach((child)=>{
+      // ATTENTION: we need to be careful here
+      // as we use this either with real DOMElement
+      // or with XMLDocumentNodes which are just fake DOMElements
       const tagName = child.tagName
       if (!tagName) {
-        throw new Error('FIXME: Internal error.')
+        if (child._isDOMElement && !_isTextNodeEmpty(child)) {
+          tokens.push(TEXT)
+        }
+      } else {
+        tokens.push(tagName)
       }
-      return tagName
     })
     const L = tokens.length
     const self = this
