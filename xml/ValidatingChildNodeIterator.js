@@ -1,5 +1,6 @@
 import { last, cloneDeep } from '../util'
 import DFA from './DFA'
+import _isTextNodeEmpty from './_isTextNodeEmpty'
 
 const { TEXT } = DFA
 
@@ -30,8 +31,7 @@ export default class ValidatingChildNodeIterator {
     }
     if (!ok) {
       if (next.isTextNode()) {
-        const text = next.textContent
-        if (!/^\s*$/.exec(text)) {
+        if (!_isTextNodeEmpty(next)) {
           console.error(`TEXT is invalid within <${expr.name}>. Skipping.`, next.textContent)
         }
       } else if (next.isElementNode()) {

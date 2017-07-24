@@ -1,5 +1,6 @@
 import { DefaultDOMElement as DOM } from '../dom'
 import { isString } from '../util'
+import _isTextNodeEmpty from './_isTextNodeEmpty'
 
 /*
   Schema drive pretty-printer, that inserts indentation for
@@ -51,7 +52,7 @@ function _isMixed(el) {
   const childNodes = el.childNodes
   for (let i = 0; i < childNodes.length; i++) {
     let child = childNodes[i]
-    if (child.isTextNode() && !/^\s*$/.exec(child.textContent)) {
+    if (child.isTextNode() && !_isTextNodeEmpty(child)) {
       return true
     }
   }

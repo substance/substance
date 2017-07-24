@@ -1,4 +1,5 @@
 import DFA from './DFA'
+import _isTextNodeEmpty from './_isTextNodeEmpty'
 
 const { TEXT } = DFA
 
@@ -81,8 +82,8 @@ function _checkChildren(elementSchema, el) {
     const childEl = iterator.next()
     let token
     if (childEl.isTextNode()) {
-      // Note: skipping empty TextNodes
-      if (/^\s*$/.exec(childEl.textContent)) {
+      // Note: skipping empty text being child node of elements
+      if (elementSchema.type !== 'text' && _isTextNodeEmpty(childEl)) {
         continue
       }
       token = TEXT
