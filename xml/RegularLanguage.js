@@ -170,11 +170,13 @@ export class DFAExpr extends Expression {
     // or at the beginning, and return the first valid combination
     // Probably this could be improved, this is a start, though
     const tokens = childNodes.map((child)=>{
-      if (child.isTextNode()) {
-        return TEXT
-      } else {
-        return child.tagName
+      // ATTENTION: here we have get XMLDocumentNodes
+      // i.e. TextNodes are something totally different
+      const tagName = child.tagName
+      if (!tagName) {
+        throw new Error('FIXME: Internal error.')
       }
+      return tagName
     })
     const L = tokens.length
     const self = this

@@ -2,6 +2,7 @@ import XMLAnchorNode from './XMLAnchorNode'
 import XMLAnnotationNode from './XMLAnnotationNode'
 import XMLContainerNode from './XMLContainerNode'
 import XMLDocument from './XMLDocument'
+import XMLEditingInterface from './XMLEditingInterface'
 import XMLElementNode from './XMLElementNode'
 import XMLElementNodeConverter from './XMLElementNodeConverter'
 import XMLExternalNode from './XMLExternalNode'
@@ -23,6 +24,7 @@ export {
   XMLAnnotationNode,
   XMLContainerNode,
   XMLDocument,
+  XMLEditingInterface,
   XMLElementNode,
   XMLElementNodeConverter,
   XMLExternalNode,
