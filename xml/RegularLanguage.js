@@ -158,7 +158,12 @@ export class DFAExpr extends Expression {
   _isValid(_tokens) {
     let state = this.getInitialState()
     for (let i = 0; i < _tokens.length; i++) {
-      if (!this.consume(state, _tokens[i])) {
+      const token = _tokens[i]
+      // Note: there might be some elements which
+      // are not relevant, such as empty text nodes
+      // or comments etc.
+      if (!token) continue
+      if (!this.consume(state, token)) {
         return false
       }
     }
@@ -177,8 +182,10 @@ export class DFAExpr extends Expression {
       // or with XMLDocumentNodes which are just fake DOMElements
       const tagName = child.tagName
       if (!tagName) {
-        if (child._isDOMElement && !_isTextNodeEmpty(child)) {
+        if (child._isDOMElement && child.isTextNode() && !_isTextNodeEmpty(child)) {
           tokens.push(TEXT)
+        } else {
+          tokens.push(null)
         }
       } else {
         tokens.push(tagName)
