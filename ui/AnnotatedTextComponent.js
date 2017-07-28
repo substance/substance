@@ -92,10 +92,10 @@ class AnnotatedTextComponent extends Component {
           // opt-out for custom implementations
           !ComponentClass.isCustom) {
         ComponentClass = InlineNodeComponent
-      }
-      let el = $$(ComponentClass, { doc: doc, node: node })
-      return el
+      } 
     }
+    let el = $$(ComponentClass, { doc: doc, node: node })
+    return el
   }
 
   _finishFragment(fragment, context, parentContext) {

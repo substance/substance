@@ -13,6 +13,10 @@ class ContainerAnnotationIndex extends DocumentIndex {
     return Boolean(node._isContainerAnnotation)
   }
 
+  clear() {
+    this.annosById.clear()
+  }
+
   reset(data) {
     this.annosById.clear()
     this.anchorsByPath.clear()

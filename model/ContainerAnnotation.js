@@ -1,6 +1,6 @@
 import { isEqual, forEach } from '../util'
-import Annotation from './Annotation'
-import Selection from './Selection'
+import DocumentNode from './DocumentNode'
+import AnnotationMixin from './AnnotationMixin'
 
 /*
   Describes an annotation sticking on a container that can span over multiple
@@ -27,28 +27,16 @@ import Selection from './Selection'
   ```
  */
 
-class ContainerAnnotation extends Annotation {
+class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
 
-  /**
-    Provides a selection which has the same range as this annotation.
+  constructor(doc, props) {
+    super(doc, props)
 
-    @return {model/ContainerSelection}
-  */
-  getSelection() {
-    var doc = this.getDocument()
-    // Guard: when this is called while this node has been detached already.
-    if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
-      return Selection.nullSelection()
-    }
-    return doc.createSelection({
-      type: "container",
-      containerId: this.containerId,
-      startPath: this.start.path,
-      startOffset: this.start.offset,
-      endPath: this.end.path,
-      endOffset: this.end.offset
-    })
+    // HACK: leaving custom information so that we can better understand the role of the coordinate within the annotation
+    this.start._isStart = true
+    this.start._annotationId = this.id
+    this.end._isEnd = true
+    this.end._annotationId = this.id
   }
 
   setHighlighted(highlighted, scope) {

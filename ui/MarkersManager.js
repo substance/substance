@@ -1,5 +1,5 @@
 import { forEach, deleteFromArray, ArrayTree } from '../util'
-import { Marker } from '../model'
+import { Fragmenter, Marker } from '../model'
 
 /*
   MarkersManager keeps track of any Markers, which are annotations
@@ -86,6 +86,8 @@ class MarkersManager {
   getMarkers(path, opts) {
     opts = opts || {}
     let doc = this.editorSession.getDocument()
+    // Note: from a rendering point of view, we take annotations and custom markers (such as spell errors)
+    // and create markers (which are bound to one property) and dispatch them the respective TextPropertyComponents
     let annos = doc.getAnnotations(path) || []
     let markers = this._markers.get(path, opts.surfaceId, opts.containerId)
     return annos.concat(markers)
@@ -151,13 +153,16 @@ class MarkersIndex {
     this._containerMarkers = {}
   }
 
-  get(path, surfaceId) {
+  get(path, surfaceId, containerId) {
     let markers = this._documentMarkers[path] || []
     if (surfaceId && this._surfaceMarkers[surfaceId]) {
       let surfaceMarkers = this._surfaceMarkers[surfaceId][path]
       if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
     }
-    // TODO support container scoped markers
+    if (containerId && this._containerMarkers[containerId]) {
+      let containerMarkers = this._containerMarkers[containerId][path]
+      if (containerMarkers) markers = markers.concat(containerMarkers)
+    }
     return markers
   }
 
@@ -204,7 +209,13 @@ class MarkersIndex {
         break
       }
       case 'container': {
-        console.warn('Container scoped markers are not supported yet')
+        const containerId = marker.containerId
+        if (!this._containerMarkers[containerId]) {
+          this._containerMarkers[containerId] = new ArrayTree()
+        }
+        const path = marker.start.path
+        dirtyProps[path] = true
+        this._containerMarkers[containerId].add(path, marker)
         break
       }
       default:
@@ -232,7 +243,12 @@ class MarkersIndex {
         break
       }
       case 'container': {
-        console.warn('Container scoped markers are not supported yet')
+        if (!this._containerMarkers[marker.containerId]) {
+          this._containerMarkers[marker.containerId] = new ArrayTree()
+        }
+        const path = marker.start.path
+        dirtyProps[path] = true
+        this._containerMarkers[marker.containerId].remove(path, marker)
         break
       }
       default:

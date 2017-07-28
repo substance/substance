@@ -3,8 +3,6 @@ import { forEach, isString } from '../util'
 const ENTER = 1
 const EXIT = -1
 const ANCHOR = -2
-const FIRST = Symbol('first')
-const LAST = Symbol('last')
 
 // Fragmenter
 // --------
@@ -73,7 +71,7 @@ class Fragmenter {
   }
 
   _start(rootContext, text, annotations) {
-    var entries = _extractEntries(text, annotations)
+    var entries = _extractEntries.call(this, annotations)
     var stack = [{context: rootContext, entry: null}]
 
     var pos = 0
@@ -144,15 +142,10 @@ class Fragmenter {
 
 }
 
-// fragmentation hints:
 Fragmenter.SHOULD_NOT_SPLIT = 0
 Fragmenter.NORMAL = 10
 Fragmenter.ANY = 100
 Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE
-
-// symbols you can use to achieve auto-stretching fragments
-Fragmenter.FIRST = FIRST
-Fragmenter.LAST = LAST
 
 // This is a sweep algorithm wich uses a set of ENTER/EXIT entries
 // to manage a stack of active elements.
@@ -192,12 +185,11 @@ Fragmenter.LAST = LAST
 //   Removes 'idea1' from stack and creates a new 'bold1'
 //
 
-function _extractEntries(text, annotations) {
-  let openers = []
-  let closers = []
-  for (let i = 0; i < annotations.length; i++) {
-    let a = annotations[i]
-    const isAnchor = (a.isAnchor ? a.isAnchor() : false)
+function _extractEntries(annotations) {
+  var openers = []
+  var closers = []
+  forEach(annotations, function(a) {
+    var isAnchor = (a.isAnchor ? a.isAnchor() : false)
     // special treatment for zero-width annos such as ContainerAnnotation.Anchors
     if (isAnchor) {
       openers.push({
@@ -226,10 +218,11 @@ function _extractEntries(text, annotations) {
         l = Number.MAX_VALUE
       } else if (a.constructor.hasOwnProperty('fragmentation')) {
         l = a.constructor.fragmentation
+      } else if (a.hasOwnProperty('fragmentationHint')) {
+        l = a.fragmentationHint
       }
-      let startOffset = a.start.offset === FIRST ? 0 : a.start.offset
-      let endOffset = a.end.offset === LAST ? text.length : a.end.offset
-      ;[startOffset, endOffset] = [Math.min(startOffset, endOffset), Math.max(startOffset, endOffset)]
+      var startOffset = Math.min(a.start.offset, a.end.offset)
+      var endOffset = Math.max(a.start.offset, a.end.offset)
       var opener = {
         pos: startOffset,
         mode: ENTER,
@@ -251,27 +244,22 @@ function _extractEntries(text, annotations) {
         opener: opener
       })
     }
-  }
+  })
 
   // sort the openers
   openers.sort(_compareOpeners)
   // store indexes for openers
-  for (let i = openers.length - 1; i >= 0; i--) {
+  for (var i = openers.length - 1; i >= 0; i--) {
     openers[i].idx = i
   }
   closers.sort(_compareClosers)
-
-  return _mergeOpenersAndClosers(openers, closers)
-}
-
-function _mergeOpenersAndClosers(openers, closers) {
   // merge openers and closers, sorted by pos
-  let entries = new Array(openers.length+closers.length)
-  let idx = 0
-  let idx1 = 0
-  let idx2 = 0
-  let opener = openers[idx1]
-  let closer = closers[idx2]
+  var entries = new Array(openers.length+closers.length)
+  var idx = 0
+  var idx1 = 0
+  var idx2 = 0
+  var opener = openers[idx1]
+  var closer = closers[idx2]
   while(opener || closer) {
     if (opener && closer) {
       // close before open
