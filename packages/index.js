@@ -4,6 +4,7 @@ export { default as BodyScrollPanePackage } from './body-scroll-pane/BodyScrollP
 export { default as ButtonPackage } from './button/ButtonPackage'
 export { default as CodePackage } from './code/CodePackage'
 export { default as CodeblockPackage } from './codeblock/CodeblockPackage'
+export { default as ContainerAnnotationPackage } from './container-annotation/ContainerAnnotationPackage'
 export { default as ContextMenuPackage } from './context-menu/ContextMenuPackage'
 export { default as DropzonesPackage } from './dropzones/DropzonesPackage'
 export { default as EmphasisPackage } from './emphasis/EmphasisPackage'
