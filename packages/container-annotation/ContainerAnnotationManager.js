@@ -37,6 +37,10 @@ class ContainerAnnotationManager {
     // this.editorSession.startFlow()
   }
 
+  getAnnotationFragments(annoId) {
+    return this._containerFragments[annoId]
+  }
+
   _onDocumentChanged() {
     this._computeAnnotations()
     this._updateAnnotations()
