@@ -1,5 +1,5 @@
 import { forEach, deleteFromArray, ArrayTree } from '../util'
-import { Fragmenter, Marker } from '../model'
+import { Marker } from '../model'
 
 /*
   MarkersManager keeps track of any Markers, which are annotations
