@@ -2,6 +2,7 @@ import { Fragmenter } from '../model'
 import Component from './Component'
 import AnnotationComponent from './AnnotationComponent'
 import InlineNodeComponent from './InlineNodeComponent'
+import ContainerAnnotationFragment from './ContainerAnnotationFragment'
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -79,18 +80,12 @@ class AnnotatedTextComponent extends Component {
     let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
+    let ComponentClass = componentRegistry.get(node.type)
     // TODO: fix support for container annotations
     if (node.type === "container-annotation-fragment") {
-      // return $$(AnnotationComponent, { doc: doc, node: node })
-      //   .addClass("se-annotation-fragment")
-      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-    } else if (node.type === "container-annotation-anchor") {
-      // return $$(AnnotationComponent, { doc: doc, node: node })
-      //   .addClass("se-anchor")
-      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
-      //   .addClass(node.isStart?"start-anchor":"end-anchor")
+      ComponentClass = ContainerAnnotationFragment
     } else {
-      let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
+      ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
       if (node.constructor.isInline &&
           // also no extra wrapping if the node is already an inline node
           !ComponentClass.prototype._isInlineNodeComponent &&

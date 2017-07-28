@@ -1,6 +1,6 @@
-import { forEach } from '../util'
-import DocumentNode from './DocumentNode'
-import AnnotationMixin from './AnnotationMixin'
+import { isEqual, forEach } from '../util'
+import Annotation from './Annotation'
+import Selection from './Selection'
 
 /*
   Describes an annotation sticking on a container that can span over multiple
@@ -27,7 +27,29 @@ import AnnotationMixin from './AnnotationMixin'
   ```
  */
 
-class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
+class ContainerAnnotation extends Annotation {
+
+  /**
+    Provides a selection which has the same range as this annotation.
+
+    @return {model/ContainerSelection}
+  */
+  getSelection() {
+    var doc = this.getDocument()
+    // Guard: when this is called while this node has been detached already.
+    if (!doc) {
+      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
+      return Selection.nullSelection()
+    }
+    return doc.createSelection({
+      type: "container",
+      containerId: this.containerId,
+      startPath: this.start.path,
+      startOffset: this.start.offset,
+      endPath: this.end.path,
+      endOffset: this.end.offset
+    })
+  }
 
   setHighlighted(highlighted, scope) {
     if (this.highlighted !== highlighted) {
@@ -40,16 +62,31 @@ class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
     }
   }
 
+  _updateRange(tx, sel) {
+    if (!sel.isContainerSelection()) {
+      throw new Error('Invalid argument.')
+    }
+    // TODO: use coordinate ops
+    if (!isEqual(this.start.path, sel.start.path)) {
+      tx.set([this.id, 'start', 'path'], sel.start.path)
+    }
+    if (this.start.offset !== sel.start.offset) {
+      tx.set([this.id, 'start', 'offset'], sel.start.offset)
+    }
+    if (!isEqual(this.end.path, sel.end.path)) {
+      tx.set([this.id, 'end', 'path'], sel.end.path)
+    }
+    if (this.end.offset !== sel.end.offset) {
+      tx.set([this.id, 'end', 'offset'], sel.end.offset)
+    }
+  }
 }
 
 ContainerAnnotation.schema = {
   type: "container-annotation",
-  containerId: "string",
-  start: "coordinate",
-  end: "coordinate"
+  containerId: "string"
 }
 
-ContainerAnnotation.prototype._isAnnotation = true
 ContainerAnnotation.prototype._isContainerAnnotation = true
 
 export default ContainerAnnotation

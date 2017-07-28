@@ -6,10 +6,8 @@ import ChangeRecorder from './ChangeRecorder'
 
 /**
   Some helpers for working with Documents.
-
   @module
   @example
-
   ```js
   import { documentHelpers } from 'substance'
   documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
@@ -32,7 +30,6 @@ export default {
 
 /**
   For a given selection get all property annotations
-
   @param {Document} doc
   @param {Selection} sel
   @return {PropertyAnnotation[]} An array of property annotations.
@@ -53,7 +50,6 @@ function getPropertyAnnotationsForSelection(doc, sel, options) {
 
 /**
   For a given selection get all container annotations
-
   @param {Document} doc
   @param {Selection} sel
   @param {String} containerId
@@ -93,7 +89,6 @@ function isContainerAnnotation(doc, type) {
 
 /**
   For a given selection, get the corresponding text string
-
   @param {Document} doc
   @param {Selection} sel
   @return {string} text enclosed by the annotation
@@ -183,7 +178,6 @@ function deleteNode(doc, node) {
 /*
   Creates a 'deep' JSON copy of a node returning an array of JSON objects
   that can be used to create the object tree owned by the given root node.
-
   @param {DocumentNode} node
 */
 function copyNode(node) {
@@ -293,6 +287,31 @@ function deleteTextRange(doc, start, end) {
     }
     else {
       console.warn('TODO: handle annotation update case.')
+    }
+  })
+
+  // same for container annotation anchors
+  let containerAnnotationIndex = doc.getIndex('container-annotations')
+  let anchors = containerAnnotationIndex.getAnchorsForPath(path)
+  const L = endOffset - startOffset
+  anchors.forEach(anchor => {
+    const pos1 = startOffset
+    const pos2 = endOffset
+    const start = anchor.offset
+    const coor = anchor._isStart ? 'start' : 'end'
+    const anno = doc.get(anchor._annotationId)
+    if (pos2 <= start) {
+      doc.update([anno.id, coor], { type: 'shift', value: -L })
+    } else if (pos1 <= start) {
+      let newStart = start - Math.min(pos2-pos1, start-pos1)
+      if (newStart !== start) {
+        doc.update([anno.id, coor], { type: 'shift', value: newStart-start })
+      }
+    }
+    // check if the annotation has collapsed due to the last change and remove it in that case
+    if (anno.start.equals(anno.end)) {
+      // console.log('deleting container annotation', anno.id)
+      doc.delete(anno.id);
     }
   })
 }

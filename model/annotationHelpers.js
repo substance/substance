@@ -104,6 +104,7 @@ function deletedText(doc, path, startOffset, endOffset) {
       }
     }
   }
+
   // TODO: fix support for container annotations
   // // same for container annotation anchors
   // index = doc.getIndex('container-annotation-anchors');
@@ -194,6 +195,23 @@ function transferAnnotations(doc, path, offset, newPath, newOffset) {
       doc.set([a.id, 'end', 'offset'], newOffset + a.end.offset - offset);
     }
   }
+
+  let containerAnnotationIndex = doc.getIndex('container-annotations')
+  let anchors = containerAnnotationIndex.getAnchorsForPath(path)
+  anchors.forEach(anchor => {
+    const startOffset = anchor.offset
+    let anno = doc.get(anchor._annotationId)
+    if (offset <= startOffset) {
+      let coor = anchor._isStart ? 'start' : 'end'
+      // TODO: use coordintate ops
+      doc.set([anno.id, coor, 'path'], newPath);
+      doc.set([anno.id, coor, 'offset'], newOffset + startOffset - offset)
+    }
+    // check if the annotation has collapsed due to the last change and remove it in that case
+    if (anno.start.equals(anno.end)) {
+      doc.delete(anno.id)
+    }
+  })
 
   // TODO: fix support for container annotations
   // // same for container annotation anchors

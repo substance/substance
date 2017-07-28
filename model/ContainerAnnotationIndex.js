@@ -5,35 +5,54 @@ class ContainerAnnotationIndex extends DocumentIndex {
 
   constructor() {
     super()
-    this.byId = new TreeIndex()
+    this.annosById = new TreeIndex()
+    this.anchorsByPath = new TreeIndex.Arrays()
   }
 
   select(node) {
-    return node.isContainerAnnotation()
+    return Boolean(node._isContainerAnnotation)
   }
 
-  clear() {
-    this.byId.clear()
+  reset(data) {
+    this.annosById.clear()
+    this.anchorsByPath.clear()
+    this._initialize(data)
   }
 
   get(containerId, type) {
-    var annotations = map(this.byId.get(containerId))
+    var annotations = map(this.annosById.get(containerId))
     if (isString(type)) {
       annotations = filter(annotations, DocumentIndex.filterByType)
     }
     return annotations
   }
 
+  getAnchorsForPath(path) {
+    return this.anchorsByPath.get(path) || []
+  }
+
   create(anno) {
-    this.byId.set([anno.containerId, anno.id], anno)
+    this.annosById.set([anno.containerId, anno.id], anno)
+    this.anchorsByPath.add(anno.start.path, anno.start)
+    this.anchorsByPath.add(anno.end.path, anno.end)
   }
 
   delete(anno) {
-    this.byId.delete([anno.containerId, anno.id])
+    this.annosById.delete([anno.containerId, anno.id])
+    this.anchorsByPath.remove(anno.start.path, anno.start)
+    this.anchorsByPath.remove(anno.end.path, anno.end)
   }
 
-  update(node, path, newValue, oldValue) { // eslint-disable-line
-    // TODO should we support moving a container anno from one container to another?
+  update(anno, path, newValue, oldValue) {
+    // TODO: we need to change this when switching to coordinate ops
+    if (this.select(anno)) {
+      const coor = path[1]
+      const prop = path[2]
+      if ((coor === 'start' || coor === 'end') && prop === 'path') {
+        this.anchorsByPath.remove(oldValue, anno[coor])
+        this.anchorsByPath.add(newValue, anno[coor])
+      }
+    }
   }
 
 }

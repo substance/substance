@@ -7,10 +7,8 @@ import paste from './paste'
 /**
   Core editing implementation, that controls meta behavior
   such as deleting a selection, merging nodes, etc.
-
   Some of the implementation are then delegated to specific editing behaviors,
   such as manipulating content of a text-property, merging or breaking text nodes
-
   Note: this is pretty much the same what we did with transforms before.
         We decided to move this here, to switch to a stateful editor implementation (aka turtle-graphics-style)
  */
@@ -503,12 +501,9 @@ class Editing {
 
   /**
     Switch text type for a given node. E.g. from `paragraph` to `heading`.
-
     @param {Object} args object with `selection`, `containerId` and `data` with new node data
     @return {Object} object with updated `selection`
-
     @example
-
     ```js
     switchTextType(tx, {
       selection: bodyEditor.getSelection(),
@@ -721,6 +716,7 @@ class Editing {
     tx.update(path, { type: 'insert', start: startOffset, text: text })
     // update annotations
     let annos = tx.getAnnotations(path)
+    
     annos.forEach(function(anno) {
       let annoStart = anno.start.offset
       let annoEnd = anno.end.offset
@@ -774,6 +770,19 @@ class Editing {
         console.warn('TODO: handle annotation update case.')
       }
     })
+
+    let anchors = tx.getContainerAnnotations(path)
+    anchors.forEach(function(anchor) {
+      let start = anchor.offset
+      if (startOffset <= start) {
+        start += L
+        // HACK: In the ctor of Annotation we add _isStart and _isEnd, which are not regular Coordinate props otherwise
+        let coor = (anchor._isStart ? 'start' : 'end')
+        // TODO: Use coordintate ops!
+        tx.set([anchor._annotationId, coor, 'offset'], start)
+      }
+    })
+
     let offset = startOffset + text.length
     tx.setSelection({
       type: 'property',

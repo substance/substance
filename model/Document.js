@@ -4,9 +4,9 @@ import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import DocumentChange from './DocumentChange'
+import PathEventProxy from './PathEventProxy'
 import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
-import EditingInterface from './EditingInterface'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
@@ -42,33 +42,45 @@ class Document extends EventEmitter {
   /**
     @param {DocumentSchema} schema The document schema.
   */
-  constructor(schema, ...args) {
+  constructor(schema) {
     super()
 
-    this.schema = schema
+    // HACK: to be able to inherit but not execute this ctor
+    if (arguments[0] === 'SKIP') return
+
+    this.__id__ = uuid()
+
     /* istanbul ignore next */
     if (!schema) {
       throw new Error('A document needs a schema for reflection.')
     }
 
-    // used internally (-> Transaction)
-    this._ops = []
-
-    this._initialize(...args)
-  }
-
-  _initialize() {
-    this.__id__ = uuid()
+    this.schema = schema
     this.nodeFactory = new DocumentNodeFactory(this)
-    this.data = new IncrementalData(this.schema, this.nodeFactory)
+    this.data = new IncrementalData(schema, this.nodeFactory)
+
     // all by type
     this.addIndex('type', new PropertyIndex('type'))
+
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
+
     // TODO: these are only necessary if there is a container annotation
     // in the schema
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
+
+    // change event proxies are triggered after a document change has been applied
+    // before the regular document:changed event is fired.
+    // They serve the purpose of making the event notification more efficient
+    // In earlier days all observers such as node views where listening on the same event 'operation:applied'.
+    // This did not scale with increasing number of nodes, as on every operation all listeners where notified.
+    // The proxies filter the document change by interest and then only notify a small set of observers.
+    // Example: NotifyByPath notifies only observers which are interested in changes to a certain path.
+    this.eventProxies = {
+      'path': new PathEventProxy(this),
+    }
+    this.on('document:changed', this._updateEventProxies, this)
     // TODO: maybe we want to have a generalized concept for such low-level hooks
     // e.g. indexes are similar
     ParentNodeHook.register(this)
@@ -116,18 +128,14 @@ class Document extends EventEmitter {
     return this.data.getNodes()
   }
 
-  getAnnotations(path) {
-    return this.getIndex('annotations').get(path)
-  }
-
   /**
     Creates a context like a transaction for importing nodes.
     This is important in presence of cyclic dependencies.
     Indexes will not be updated during the import but will afterwards
-    when all nodes have been created.
+    when all nodes are have been created.
 
     @private
-    This is experimental.
+    @param {Function} importer a `function(doc)`, where with `doc` is a `model/AbstractDocument`
 
     @example
 
@@ -175,7 +183,7 @@ class Document extends EventEmitter {
     @example
 
     ```js
-    editorSession.transaction((tx) => {
+    doc.transaction(function(tx) {
       tx.create({
         id: 'p1',
         type: 'paragraph',
@@ -188,25 +196,11 @@ class Document extends EventEmitter {
     if (!nodeData.id) {
       nodeData.id = uuid(nodeData.type)
     }
-    if (!nodeData.type) {
-      throw new Error('No node type provided')
-    }
-    const op = this._create(nodeData)
-    if (op) {
-      this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitChange(op)
-      }
-      return this.get(nodeData.id)
-    }
-  }
-
-  createDefaultTextNode(text, dir) {
-    return this.create({
-      type: this.getSchema().getDefaultTextType(),
-      content: text || '',
-      direction: dir
-    })
+    var op = this._create(nodeData)
+    var change = new DocumentChange([op], {}, {})
+    change._extractInformation(this)
+    this._notifyChangeListeners(change, { hidden: true })
+    return this.data.get(nodeData.id)
   }
 
   /**
@@ -224,14 +218,11 @@ class Document extends EventEmitter {
     ```
   */
   delete(nodeId) {
-    const node = this.get(nodeId)
-    const op = this._delete(nodeId)
-    if (op) {
-      this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitChange(op)
-      }
-    }
+    var node = this.get(nodeId)
+    var op = this._delete(nodeId)
+    var change = new DocumentChange([op], {}, {})
+    change._extractInformation(this)
+    this._notifyChangeListeners(change, { hidden: true })
     return node
   }
 
@@ -251,14 +242,11 @@ class Document extends EventEmitter {
     ```
   */
   set(path, value) {
-    const oldValue = this.get(path)
-    const op = this._set(path, value)
-    if (op) {
-      this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitChange(op)
-      }
-    }
+    var oldValue = this.get(path)
+    var op = this._set(path, value)
+    var change = new DocumentChange([op], {}, {})
+    change._extractInformation(this)
+    this._notifyChangeListeners(change, { hidden: true })
     return oldValue
   }
 
@@ -297,13 +285,10 @@ class Document extends EventEmitter {
     would turn `[1,2,3,4]` into `[1,2,4]`.
   */
   update(path, diff) {
-    const op = this._update(path, diff)
-    if (op) {
-      this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitChange(op)
-      }
-    }
+    var op = this._update(path, diff)
+    var change = new DocumentChange([op], {}, {})
+    change._extractInformation(this)
+    this._notifyChangeListeners(change, { hidden: true })
     return op
   }
 
@@ -440,6 +425,10 @@ class Document extends EventEmitter {
     return sel
   }
 
+  getEventProxy(name) {
+    return this.eventProxies[name]
+  }
+
   newInstance() {
     var DocumentClass = this.constructor
     return new DocumentClass(this.schema)
@@ -458,28 +447,41 @@ class Document extends EventEmitter {
     return snippet
   }
 
-  createFromDocument(doc) {
-    // clear all content, otherwise there would be an inconsistent mixture
-    this.clear()
+  _apply(documentChange) {
+    forEach(documentChange.ops, function(op) {
+      this.data.apply(op)
+      this.emit('operation:applied', op)
+    }.bind(this))
+    // extract aggregated information, such as which property has been affected etc.
+    documentChange._extractInformation(this)
+  }
 
+  _notifyChangeListeners(change, info) {
+    info = info || {}
+    this.emit('document:changed', change, info, this)
+  }
+
+  _updateEventProxies(change, info) {
+    forEach(this.eventProxies, function(proxy) {
+      proxy.onDocumentChanged(change, info, this)
+    }.bind(this))
+  }
+
+  createFromDocument(doc) {
     let nodes = doc.getNodes()
     let annotations = []
     let contentNodes = []
     let containers = []
     forEach(nodes, (node) => {
-      if (node.isAnnotation()) {
+      if (node._isAnnotation) {
         annotations.push(node)
-      } else if (node.isContainer()) {
+      } else if (node._isContainer) {
         containers.push(node)
       } else {
         contentNodes.push(node)
       }
     })
-    contentNodes.concat(annotations).concat(containers).forEach(n=>{
-      this.create(n)
-    })
-
-    return this
+    contentNodes.concat(annotations).concat(containers).forEach(n=>this.create(n))
   }
 
   /**
@@ -491,63 +493,32 @@ class Document extends EventEmitter {
     return converter.exportDocument(this)
   }
 
-  clone() {
-    let copy = this.newInstance()
-    copy.createFromDocument(this)
-    return copy
+  getAnnotations(path) {
+    return this.getIndex('annotations').get(path)
   }
 
-  clear() {
-    this.data.clear()
-    this._ops.length = 0
-  }
-
-  /*
-    Provides a high-level turtle-graphics style interface
-    to this document
-  */
-  createEditingInterface() {
-    return new EditingInterface(this)
-  }
-
-  _apply(documentChange) {
-    forEach(documentChange.ops, (op) => {
-      this._applyOp(op)
-    })
-    // extract aggregated information, such as which property has been affected etc.
-    documentChange._extractInformation(this)
-  }
-
-  _applyOp(op) {
-    this.data.apply(op)
-    this.emit('operation:applied', op)
+  getContainerAnnotations(path) {
+    return this.getIndex('container-annotations').getAnchorsForPath(path)
   }
 
   _create(nodeData) {
-    return this.data.create(nodeData)
+    var op = this.data.create(nodeData)
+    return op
   }
 
   _delete(nodeId) {
-    return this.data.delete(nodeId)
-  }
-
-  _set(path, value) {
-    return this.data.set(path, value)
+    var op = this.data.delete(nodeId)
+    return op
   }
 
   _update(path, diff) {
-    return this.data.update(path, diff)
+    var op = this.data.update(path, diff)
+    return op
   }
 
-  _emitChange(op) {
-    const change = new DocumentChange([op], {}, {})
-    change._extractInformation(this)
-    this._notifyChangeListeners(change, { hidden: true })
-  }
-
-  _notifyChangeListeners(change, info) {
-    info = info || {}
-    this.emit('document:changed', change, info, this)
+  _set(path, value) {
+    var op = this.data.set(path, value)
+    return op
   }
 
   // NOTE: this is still here because DOMSelection is using it
@@ -587,7 +558,7 @@ class Document extends EventEmitter {
   _normalizeCoor({ path, offset }) {
     // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
     if (path.length === 1) {
-      let node = this.get(path[0]).getContainerRoot()
+      let node = this.get(path[0]).getRoot()
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         return new Coordinate(node.getPath(), offset === 0 ? 0 : node.getLength())

@@ -2,7 +2,6 @@ import { isPlainObject } from '../util'
 import copySelection from './copySelection'
 import Editing from './Editing'
 import Selection from './Selection'
-import { augmentSelection } from './selectionHelpers'
 
 /*
   Abstract base class for document editor APIs such as Transaction.
@@ -15,15 +14,13 @@ import { augmentSelection } from './selectionHelpers'
  */
 class EditingInterface {
 
-  constructor(doc, options = {}) {
+  constructor(doc) {
     this._document = doc
     this._selection = null
     // TODO: allow for custom editing implementation
-    this._impl = options.editing || new Editing()
+    this._impl = new Editing()
     this._direction = null
   }
-
-  dispose() {}
 
   getDocument() {
     return this._document
@@ -62,24 +59,32 @@ class EditingInterface {
   /* Selection API */
 
   createSelection(selData) {
-    // TODO: we need to rethink this
-    // I'd like to make it convenient for the 99% use cases
-    // which means reusing containerId and surfaceId
-    // However, it does not work well for cases
-    // where the surface changes
-    // Even better would be just to have surfaceId, and derive
-    // containerId dynamically
-    selData = augmentSelection(selData, this._selection)
+    // TODO: this is questionable
+    // I'd like to convenience first for the 99% use cases
+    // which means that I copy over containerId and surfaceId
+    // if possible and not explicitly set
+    const oldSel = this._selection
+    if (selData && oldSel) {
+      if (!selData.containerId && oldSel.containerId) {
+        selData.containerId = oldSel.containerId
+      }
+      if (!selData.surfaceId && oldSel.surfaceId) {
+        selData.surfaceId = oldSel.surfaceId
+      }
+    }
     return this._document.createSelection(selData)
   }
 
   setSelection(sel) {
-    if (!sel) {
-      sel = Selection.nullSelection
-    } else if (isPlainObject(sel)) {
+    if (!sel) sel = Selection.nullSelection
+    else if (isPlainObject(sel)) {
       sel = this.createSelection(sel)
-    } else {
-      sel = augmentSelection(sel, this._selection)
+    }
+    let oldSel = this._selection
+    if (oldSel && sel && !sel.isNull()) {
+      if (!sel.containerId) {
+        sel.containerId = oldSel.containerId
+      }
     }
     this._selection = sel
     return sel
@@ -173,7 +178,7 @@ class EditingInterface {
 
   paste(content) {
     const sel = this._selection
-    if (sel && !sel.isNull() && !sel.isCustomSelection()) {
+    if (sel && !sel.isNull()) {
       return this._impl.paste(this, content)
     }
   }
@@ -214,6 +219,10 @@ class EditingInterface {
 
   getAnnotations(...args) {
     return this._document.getAnnotations(...args)
+  }
+
+  getContainerAnnotations(...args) {
+    return this._document.getContainerAnnotations(...args)
   }
 
   getSchema() {
