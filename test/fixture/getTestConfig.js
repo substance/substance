@@ -1,5 +1,5 @@
 import {
-  ImagePackage, Component, Configurator,
+  ImagePackage, Component, Configurator, ContainerAnnotationPackage,
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
   ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage,
   SubscriptPackage, SuperscriptPackage
@@ -44,6 +44,7 @@ export default function getTestConfig() {
   config.import(CodeblockPackage)
   config.import(FilePackage)
   config.import(ImagePackage)
+  config.import(ContainerAnnotationPackage)
 
   config.addComponent('container', TestContainerComponent)
 
