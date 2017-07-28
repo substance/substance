@@ -1,5 +1,6 @@
 .sc-edit-link-tool {
   display: flex;
+  align-items: center;
 }
 
 .sc-edit-link-tool > * {
