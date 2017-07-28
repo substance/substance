@@ -22,7 +22,12 @@ class ContainerAnnotationManager {
 
     this._containerFragments = {}
 
-    //this.initialize()
+    // TODO: avoid this ugly hack
+    // We can't call it imediately as there is no Marker Manager yet
+    // We should somehow track when editor session did initialised
+    setTimeout(() => {
+      this.initialize()
+    }, 100)
   }
 
   dispose() {
@@ -33,8 +38,8 @@ class ContainerAnnotationManager {
     this._computeAnnotations()
     this._updateAnnotations()
     // HACK: we make commandStates dirty in order to trigger re-evaluation
-    // this.editorSession._setDirty('commandStates')
-    // this.editorSession.startFlow()
+    this.editorSession._setDirty('commandStates')
+    this.editorSession.startFlow()
   }
 
   getAnnotationFragments(annoId) {
