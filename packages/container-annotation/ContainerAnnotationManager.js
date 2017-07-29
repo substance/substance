@@ -66,7 +66,7 @@ class ContainerAnnotationManager {
           let node = container.getChildAt(i)
           if (!node.isText()) continue
           const path = node.getTextPath()
-          let fragment = new Marker(this.doc, {
+          let fragment = {
             type: 'container-annotation-fragment',
             scope: 'container',
             containerId: containerId,
@@ -74,7 +74,7 @@ class ContainerAnnotationManager {
             id: annoId,
             start: { path: path, offset: 0 },
             end: { path: path, offset: node.getLength() + 1 }
-          })
+          }
           if (i === startPos) {
             fragment.start = anno.start
             fragment.isFirst = true
@@ -83,10 +83,11 @@ class ContainerAnnotationManager {
             fragment.end = anno.end
             fragment.isLast = true
           }
-          //fragment = new Marker(this.doc, fragment)
+          
+          let marker = new Marker(this.doc, fragment)
 
-          fragments.push(fragment)
-          annos.push(fragment)
+          fragments.push(marker)
+          annos.push(marker)
         }
 
         this._containerFragments[anno.id] = fragments
@@ -99,9 +100,6 @@ class ContainerAnnotationManager {
     const state = this._state
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
-    // state.annotations.forEach((m, idx) => {
-    //   m.type = (idx === state.selected) ? 'selected-match' : 'match'
-    // })
     //console.log('setting container-annotations markers', state.annotations)
     markersManager.setMarkers('container-annotations', state.annotations)
   }
