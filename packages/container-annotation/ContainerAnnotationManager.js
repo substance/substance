@@ -22,12 +22,7 @@ class ContainerAnnotationManager {
 
     this._containerFragments = {}
 
-    // TODO: avoid this ugly hack
-    // We can't call it imediately as there is no Marker Manager yet
-    // We should somehow track when editor session did initialised
-    setTimeout(() => {
-      this.initialize()
-    }, 100)
+    this.initialize()
   }
 
   dispose() {

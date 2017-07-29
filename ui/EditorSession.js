@@ -96,6 +96,8 @@ class EditorSession extends EventEmitter {
       this.saveHandler = configurator.getSaveHandler()
     }
 
+    // Define markers manager first to call it in custom managers constructors when needed
+    this.markersManager = new MarkersManager(this)
     // Custom Managers (registered via configurator e.g. FindAndReplaceManager)
     this._managers = {}
     forEach(configurator.getManagers(), (ManagerClass, name) => {
@@ -114,7 +116,6 @@ class EditorSession extends EventEmitter {
     // The macro manager dispatches to macro detectors at the end of the flow
     this.macroManager = new MacroManager(this._context, macros)
     this.globalEventHandler = new GlobalEventHandler(this, this.surfaceManager)
-    this.markersManager = new MarkersManager(this)
     this.keyboardManager = new KeyboardManager(this, configurator.getKeyboardShortcuts(), {
       context: this._context
     })
