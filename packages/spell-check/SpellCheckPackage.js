@@ -1,5 +1,6 @@
 import CorrectionTool from './CorrectionTool'
 import SpellCheckCommand from './SpellCheckCommand'
+import SpellCheckManager from './SpellCheckManager'
 
 export default {
   name: 'spell-check',
@@ -8,5 +9,6 @@ export default {
       commandGroup: 'spell-check'
     })
     config.addTool('correction', CorrectionTool)
-  }
+  },
+  SpellCheckManager
 }

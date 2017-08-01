@@ -4,5 +4,6 @@ export default {
   name: 'input',
   configure: function(config) {
     config.addComponent('input', Input)
-  }
+  },
+  Input
 }

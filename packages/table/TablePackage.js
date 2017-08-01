@@ -32,5 +32,7 @@ export default {
       en: 'Cell',
       de: 'Zelle'
     })
-  }
+  },
+  Table,
+  TableCell
 }
