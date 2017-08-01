@@ -85,5 +85,6 @@ export default {
       }
     ])
   },
-  ProseEditor
+  ProseEditor,
+  ProseArticle
 }
