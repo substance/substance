@@ -21,6 +21,12 @@ class XMLImporter extends DOMImporter {
     return this.state.doc
   }
 
+  convertDocument(xmlDocument) {
+    let rootNode = xmlDocument.children[0]
+    if (!rootNode) throw new Error('XML Root node could not be found.')
+    this.convertElement(rootNode)
+  }
+
 }
 
 export default XMLImporter
