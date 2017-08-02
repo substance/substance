@@ -264,7 +264,11 @@ class MarkersIndex {
       let surfaceMarkers = this._surfaceMarkers[surfaceId][path]
       if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
     }
-    // TODO: support container markers
+    for(let conatinerId in this._containerMarkers) {
+      if (!this._containerMarkers.hasOwnProperty(conatinerId)) continue
+      let containerMarkers = this._containerMarkers[conatinerId][path]
+      if (containerMarkers) markers = markers.concat(containerMarkers)
+    }
     return markers
   }
 

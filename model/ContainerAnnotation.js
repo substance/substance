@@ -39,6 +39,17 @@ class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
     this.end._annotationId = this.id
   }
 
+  getContainer() {
+    return this.getDocument().get(this.containerId)
+  }
+
+  getNodeIds() {
+    const container = this.getContainer()
+    const startPos = container.getPosition(this.start.path[0])
+    const endPos = container.getPosition(this.end.path[0])
+    return container.getContent().slice(startPos, endPos+1)
+  }
+
   setHighlighted(highlighted, scope) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted
