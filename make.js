@@ -134,22 +134,56 @@ function buildTestsNode() {
 }
 
 // generates API documentation
-function buildDocs(mode='site') {
-  const docgen = require('substance-docgen')
-  docgen.bundle(b, {
+function buildDocs() {
+
+  function _hideUndocumented(project) {
+    project.groups.forEach((group) => {
+      group.children.forEach((c) => {
+        if (c && !c.hasComment()) {
+          // 1 = Private
+          c.setFlag(1, true)
+        }
+      })
+    })
+  } 
+
+  const typedoc = require('typedoc')
+  const out = 'tmp/doc'
+  b.rm(out)
+  b.custom('Creating documentation...', {
     src: [
-      './*.md',
-      './doc/*.md',
+      'index.d.ts',
       './collab/*.js',
       './dom/*.js',
-      './model/**/*.js',
+      './model/*.js',
       './packages/**/*.js',
       './ui/*.js',
+      './ui/*.ts',
       './util/*.js',
     ],
-    dest: 'dist/doc/',
-    config: './.docgenrc.js',
-    mode: mode // one of: 'source', 'json', 'site' (default: 'json')
+    execute(sources) {
+      let app = new typedoc.Application({
+        allowJs: true,
+        mode: 'file',
+        excludePrivate: true,
+        excludeExternals: true,
+        excludeNotExported: true,
+        externalPattern: "**/(node_modules|vendor|tmp)/**",
+        includeDeclarations: true,
+        ignoreCompilerErrors: true,
+        listInvalidSymbolLinks: true,
+        theme: 'default'
+      })
+      sources = app.expandInputFiles(sources)
+      let project = app.convert(sources)     
+      if (project) {
+        _hideUndocumented(project)
+        // b.writeSync('tmp/doc.json', JSON.stringify(_projectToJSON(project), 0, 2))
+        app.generateDocs(project, out)
+      } else {
+        throw new Error('Error running Typedoc: could not convert sources.')
+      }
+    }
   })
 }
 

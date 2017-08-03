@@ -42,7 +42,8 @@
     "karma-tape-reporter": "1.0.3",
     "substance-bundler": "^0.18.5",
     "substance-docgen": "0.5.2",
-    "substance-test": "^0.9.4"
+    "substance-test": "^0.9.4",
+    "typedoc": "^0.8.0"
   },
   "files": [
     "dist",
