@@ -1,5 +1,6 @@
 import { module } from 'substance-test'
 
+import { AnnotationCommand } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import { _p1, _p2, _p3 } from './fixture/samples'
 import TestContainerAnnotation from './fixture/TestContainerAnnotation'
@@ -161,3 +162,186 @@ test("Updating markers when changing path of ContainerAnnotations", (t) => {
   t.deepEqual(annoFragments[1].getPath(), ["p3", "content"], '.. and one marker on p3')
   t.end()
 })
+
+test("Toggle ContainerAnnotation tool must remove annotation", (t) => {
+  const { doc, editorSession } = setupEditor(t, _p1, _p2, _p3)
+  doc.create({
+    type: TestContainerAnnotation.type,
+    id: 'anno',
+    start: {
+      path: ['p1', 'content'],
+      offset: 3
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 5
+    },
+    containerId: 'body'
+  })
+
+  let cmd = new ToggleContainerAnnoCommand()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p2', 'content'],
+    startOffset: 1
+  })
+  cmd.execute({
+    commandState: {
+      mode: 'delete'
+    },
+    editorSession: editorSession,
+    selectionState: editorSession.getSelectionState()
+  })
+
+  const index = doc.getIndex('container-annotations')
+  t.equal(index.getAnchorsForPath(['p2', 'content']).length, 0, 'There should be no container annotations left in index') 
+  t.isNil(doc.get('anno'), 'Container annotation shouldn\'t exists')
+  t.end()
+})
+
+test("Deleting selection with ContainerAnnotation inside should remove it", (t) => {
+  const { doc, editorSession } = setupEditor(t, _p1, _p2, _p3)
+  doc.create({
+    type: TestContainerAnnotation.type,
+    id: 'anno',
+    start: {
+      path: ['p1', 'content'],
+      offset: 3
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 5
+    },
+    containerId: 'body'
+  })
+
+  editorSession.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 1,
+    endPath: ['p3', 'content'],
+    endOffset: 5
+  })
+
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+
+  const index = doc.getIndex('container-annotations')
+  t.equal(index.getAnchorsForPath(['p2', 'content']).length, 0, 'There should be no container annotations left in index') 
+  t.isNil(doc.get('anno'), 'Container annotation shouldn\'t exists')
+  t.end()
+})
+
+test("Deleting node with ContainerAnnotation inside should remove it", (t) => {
+  const { doc, editorSession } = setupEditor(t, _p1, _p2, _p3)
+  doc.create({
+    type: TestContainerAnnotation.type,
+    id: 'anno',
+    start: {
+      path: ['p2', 'content'],
+      offset: 3
+    },
+    end: {
+      path: ['p2', 'content'],
+      offset: 5
+    },
+    containerId: 'body'
+  })
+
+  editorSession.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 0,
+    endPath: ['p2', 'content'],
+    endOffset: doc.get('p2').getLength()
+  })
+
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+
+  const index = doc.getIndex('container-annotations')
+  t.equal(index.getAnchorsForPath(['p2', 'content']).length, 0, 'There should be no container annotations left in index') 
+  t.isNil(doc.get('anno'), 'Container annotation shouldn\'t exists')
+  t.end()
+})
+
+test("Deleting node where ContainerAnnotation begins should cut it", (t) => {
+  const { doc, editorSession } = setupEditor(t, _p1, _p2, _p3)
+  doc.create({
+    type: TestContainerAnnotation.type,
+    id: 'anno',
+    start: {
+      path: ['p1', 'content'],
+      offset: 3
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 5
+    },
+    containerId: 'body'
+  })
+
+  editorSession.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 0,
+    endPath: ['p2', 'content'],
+    endOffset: 0
+  })
+
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+
+  const index = doc.getIndex('container-annotations')
+  t.equal(index.getAnchorsForPath(['p1', 'content']).length, 0, 'There should be no container annotations left in index for p1') 
+  t.equal(index.getAnchorsForPath(['p2', 'content']).length, 1, 'There should be one container annotations left in index for p2')
+  t.equal(index.getAnchorsForPath(['p3', 'content']).length, 1, 'There should be one container annotations left in index for p3')
+  t.end()
+})
+
+test("Merging paragraph with ContainerAnnotation into paragraph before should move it to new start", (t) => {
+  const { doc, editorSession } = setupEditor(t, _p1, _p2, _p3)
+  doc.create({
+    type: TestContainerAnnotation.type,
+    id: 'anno',
+    start: {
+      path: ['p2', 'content'],
+      offset: 6
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 5
+    },
+    containerId: 'body'
+  })
+
+  editorSession.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 4,
+    endPath: ['p2', 'content'],
+    endOffset: 3
+  })
+
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+
+  const index = doc.getIndex('container-annotations')
+  t.equal(index.getAnchorsForPath(['p1', 'content']).length, 1, 'There should be one container annotation in index for p1')
+  t.equal(index.getAnchorsForPath(['p2', 'content']).length, 0, 'There should be no container annotation in index for p2')
+  t.end()
+})
+
+class ToggleContainerAnnoCommand extends AnnotationCommand {
+  constructor() {
+    super({ name: 'test-container-anno', nodeType: 'test-container-anno' })
+  }
+}
