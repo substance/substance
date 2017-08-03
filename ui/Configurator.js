@@ -442,6 +442,11 @@ class Configurator {
   }
 
   createArticle(seed) {
+    console.warn('DEPRECATED: createArticle is now called createDocument')
+    this.createDocument(seed)
+  }
+
+  createDocument(seed) {
     const schema = this.getSchema()
     const DocumentClass = schema.getDocumentClass()
     let doc = new DocumentClass(schema)
