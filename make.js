@@ -12,13 +12,6 @@ const UGLIFY_VERSION = '^2.7.5'
 
 const DIST = 'dist/'
 const TMP = 'tmp/'
-const STUFF = [
-  'package.json',
-  'LICENSE.md',
-  'README.md',
-  'CHANGELOG.md',
-  'make.js'
-]
 
 // Helpers
 // -------
@@ -67,7 +60,7 @@ function buildLib(target, production) {
   }
   if (target === 'coverage') {
     targets.push({
-      dest: 'tmp/substance.cov.js',
+      dest: TMP+'substance.cov.js',
       format: 'umd', moduleName: 'substance',
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
     })
@@ -112,7 +105,7 @@ function buildLib(target, production) {
 
 function buildTestsBrowser() {
   b.js('test/**/*.test.js', {
-    dest: 'tmp/tests.js',
+    dest: TMP+'tests.js',
     format: 'umd', moduleName: 'tests',
     external: {
       'substance': 'window.substance',
@@ -123,7 +116,7 @@ function buildTestsBrowser() {
 
 function buildTestsNode() {
   b.js('test/**/*.test.js', {
-    dest: 'tmp/tests.cjs.js',
+    dest: TMP+'tests.cjs.js',
     format: 'cjs',
     external: ['substance-test'],
     alias: {
@@ -137,48 +130,56 @@ function buildTestsNode() {
 function buildDocs() {
 
   function _hideUndocumented(project) {
-    project.groups.forEach((group) => {
-      group.children.forEach((c) => {
-        if (c && !c.hasComment()) {
-          // 1 = Private
-          c.setFlag(1, true)
-        }
+    if (project.groups) {
+      project.groups.forEach((group) => {
+        group.children.forEach((c) => {
+          if (c && !c.hasComment()) {
+            // 1 = Private
+            c.setFlag(1, true)
+          }
+        })
       })
-    })
-  } 
+    }
+  }
+
+  // function _toJSON(project) {
+  //   return Object.keys(project.reflections).map((id) => {
+  //     const r = project.reflections[id]
+  //     return r.toObject()
+  //   })
+  // }
 
   const typedoc = require('typedoc')
-  const out = 'tmp/doc'
+  const out = TMP+'doc'
   b.rm(out)
   b.custom('Creating documentation...', {
     src: [
-      'index.d.ts',
       './collab/*.js',
       './dom/*.js',
       './model/*.js',
       './packages/**/*.js',
       './ui/*.js',
-      './ui/*.ts',
+      './ui/types.d.ts',
       './util/*.js',
     ],
     execute(sources) {
       let app = new typedoc.Application({
         allowJs: true,
         mode: 'file',
-        excludePrivate: true,
         excludeExternals: true,
         excludeNotExported: true,
         externalPattern: "**/(node_modules|vendor|tmp)/**",
         includeDeclarations: true,
         ignoreCompilerErrors: true,
         listInvalidSymbolLinks: true,
-        theme: 'default'
+        theme: '.typedoc/theme',
+        readme: 'none'
       })
       sources = app.expandInputFiles(sources)
-      let project = app.convert(sources)     
+      let project = app.convert(sources)
       if (project) {
         _hideUndocumented(project)
-        // b.writeSync('tmp/doc.json', JSON.stringify(_projectToJSON(project), 0, 2))
+        // b.writeSync('tmp/doc.json', JSON.stringify(_toJSON(project), 0, 2))
         app.generateDocs(project, out)
       } else {
         throw new Error('Error running Typedoc: could not convert sources.')
