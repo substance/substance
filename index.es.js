@@ -24,3 +24,6 @@ export { default as cssSelect } from './vendor/css-select'
 
 // patched DomUtils
 export { default as DomUtils } from './vendor/domutils'
+
+// additional types
+export * from './ui/types'

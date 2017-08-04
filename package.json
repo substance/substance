@@ -11,6 +11,7 @@
   },
   "main": "dist/substance.cjs.js",
   "jsnext:main": "dist/substance.es.js",
+  "types": "index.d.ts",
   "scripts": {
     "prepublish": "node make publish",
     "lint": "eslint -c .eslintrc.js collab dom model packages test ui util index.es.js",

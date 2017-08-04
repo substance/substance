@@ -3,27 +3,15 @@ import { extend, forEach, isString, isFunction, uuid,
 import { DOMElement, DefaultDOMElement } from '../dom'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
+import { createElement } from './types'
 
 /**
-  A light-weight component implementation inspired by
-  [React](https://facebook.github.io/react/) and [Ember](http://emberjs.com/).
-  In contrast to the large frameworks it does much less things automagically in
+  A light-weight reactive rendering implementation inspired by
+  [React](https://facebook.github.io/react/).
+
+  In contrast to React it does a bit less automagically in
   favour of synchronous rendering and a minimalistic life-cycle. It also
   provides *up-tree* communication and *dependency injection*.
-
-  ### Why synchronous rendering?
-
-  Synchronous rendering, while it may *seem* less performant, is necessary
-  because substance must render the model, after it has changed before the next
-  change is triggered by the user.
-
-  Asynchronous rendering as it exists in React means that the UI will
-  eventually *catch* up to changes in the model. This is not acceptable in
-  substance because substance plays with contenteditable and thus, cursor
-  positions, etc are maintained in the browser's DOM. If we went the async way,
-  the cursor in the DOM would be briefly inconsistent with the cursor in the
-  model. In this brief window, changes triggered by the user would be impossible
-  to apply.
 
   ### Concepts:
 
@@ -61,13 +49,11 @@ import VirtualElement from './VirtualElement'
   in various stages of the rendering cycle. The names are pretty self
   explanatory. If in doubt, please check out the method documentation below.
 
-  1. {@link Component#didMount}
-  1. {@link Component#didUpdate}
-  1. {@link Component#dispose}
-  1. {@link Component#willReceiveProps}
-  1. {@link Component#willUpdateState}
-
-  @implements EventEmitter
+  1. {@link Component.didMount}
+  2. {@link Component.didUpdate}
+  3. {@link Component.dispose}
+  4. {@link Component.willReceiveProps}
+  5. {@link Component.willUpdateState}
 
   @example
 
@@ -90,15 +76,15 @@ import VirtualElement from './VirtualElement'
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-export default
-class Component extends EventEmitter {
-  /**
-    Construcutor is only used internally.
+export default class Component extends EventEmitter {
 
-    @param {Component} parent The parent component
-    @param {Object} props     Properties against which this class must
-                              be rendered the first time.
-  */
+  /**
+   * Construcutor is only used internally.
+   *
+   * @param {Component} parent The parent component
+   * @param {*} props  Properties against which this class must be rendered the first time.
+   * @param {*} [options]
+   */
   constructor(parent, props = {}, options = {}) {
     super()
 
@@ -196,7 +182,7 @@ class Component extends EventEmitter {
     Override this within your component to provide the initial state for the
     component. This method is internally called by the
     {@link RenderingEngine} and the state defined here is made available to
-    the {@link Component#render} method as this.state.
+    the {@link Component.render} method as this.state.
 
     @return {Object} the initial state
   */
@@ -214,8 +200,8 @@ class Component extends EventEmitter {
   }
 
   /**
-    Get the top-most Component. This the component mounted using
-    {@link ui/Component.mount}
+    Get the top-most Component.
+
     @return {Component} The root component
   */
   getRoot() {
@@ -295,10 +281,9 @@ class Component extends EventEmitter {
     ATTENTION: this does not create a DOM presentation but
     a virtual representation which is compiled into a DOM element later.
 
-    Every Component should override this method.
-
-    @param {Function} $$ method to create components
-    @return {VirtualElement} VirtualElement created using {@param $$}
+    @abstract
+    @param {createElement} $$ factory method to create elements
+    @return {VirtualElement} VirtualElement created using `$$`
   */
   render($$) {
     /* istanbul ignore next */
