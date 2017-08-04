@@ -4,10 +4,10 @@ import { Document, HTMLImporter, JSONConverter } from '../model'
 
 const INLINENODES = ['a','b','big','i','small','tt','abbr','acronym','cite','code','dfn','em','kbd','strong','samp','time','var','bdo','br','img','map','object','q','script','span','sub','sup','button','input','label','select','textarea'].reduce((m,n)=>{m[n]=true;return m}, {})
 
-/**
+/*
   Import HTML from clipboard. Used for inter-application copy'n'paste.
 
-  @internal
+  @private
 */
 export default
 class ClipboardImporter extends HTMLImporter {
@@ -30,6 +30,8 @@ class ClipboardImporter extends HTMLImporter {
 
   /**
     Parses HTML and applies some sanitization/normalization.
+
+    @param {string} html
   */
   importDocument(html) {
     if (this._isWindows) {

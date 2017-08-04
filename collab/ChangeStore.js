@@ -1,8 +1,10 @@
-/*
-  Implements Substance ChangeStore API. This is just a dumb store.
-  No integrity checks are made, as this is the task of DocumentEngine
-*/
-class ChangeStore {
+/**
+ * Simple reference implementation of a ChangeStore.
+ * No integrity checks are made, as this is the task of DocumentEngine.
+ *
+ * @private
+ */
+export default class ChangeStore {
   constructor(seed) {
     this._changes = seed || {}
   }
@@ -83,5 +85,3 @@ class ChangeStore {
     this._changes[documentId].push(change)
   }
 }
-
-export default ChangeStore

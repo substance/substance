@@ -18,9 +18,9 @@ const INVISIBLE_CHARACTER = "\u200B"
   @param {Object} config
   @param {DocumentSchema} config.schema
   @param {object[]} config.converters
+  @private
  */
-export default
-class DOMImporter {
+export default class DOMImporter {
 
   constructor(config, context) {
     this.context = context || {}
