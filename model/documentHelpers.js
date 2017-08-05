@@ -142,7 +142,7 @@ function getChangeFromDocument(doc) {
   Deletes a node and its children and attached annotations
   and removes it from a given container
 */
-function deleteNode(doc, node) {
+function deleteNode(doc, node, containerId, pos) {
   /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
@@ -154,6 +154,45 @@ function deleteNode(doc, node) {
     let annos = doc.getIndex('annotations').get(node.id)
     for (let i = 0; i < annos.length; i++) {
       doc.delete(annos[i].id)
+    }
+
+    // transfer anchors of ContainerAnnotations to previous or next node:
+    // - start anchors go to the next node
+    // - end anchors go to the previous node
+    // - when container annotations starts and ends in the same node we should remove it
+    if(containerId) {
+      let container = doc.get(containerId)
+      let anchors = doc.getIndex('container-annotations').getAnchorsForPath([node.id, 'content'])
+      anchors.forEach(anchor => {
+        let anno = doc.get(anchor._annotationId)
+        if (!anno) return
+        if(anno.start.path[0] === anno.end.path[0]) {
+          // container anno is inside node and should be deleted
+          doc.delete(anno.id)
+          return
+        }
+        //let pos = container.getPosition(anchor.path[0])
+        if (anchor._isStart) {
+          if (pos < container.getLength()-1) {
+            let nextNode = container.getChildAt(pos)
+            doc.set([anno.id, 'start', 'path'], [nextNode.id, 'content'])
+            doc.set([anno.id, 'start', 'offset'], 0)
+          } else {
+            // latest text node, e.g. container anno is inside node and should be deleted
+            // normally annotation should be already deleted
+            doc.delete(anno.id)
+          }
+        } else {
+          if (pos > 0) {
+            let previousNode = container.getChildAt(pos-1)
+            doc.set([anno.id, 'end', 'path'], [previousNode.id, 'content'])
+            doc.set([anno.id, 'end', 'offset'], doc.get(previousNode.id).getLength())
+          } else {
+            // something wrong goes here
+            doc.delete(anno.id)
+          }
+        }
+      })
     }
   }
   // delete recursively

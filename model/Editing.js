@@ -264,7 +264,7 @@ class Editing {
     // delete or truncate last node
     if (lastEntirelySelected) {
       container.hideAt(endPos)
-      documentHelpers.deleteNode(tx, lastNode)
+      documentHelpers.deleteNode(tx, lastNode, containerId, endPos)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = lastNode.getContainerRoot()
@@ -282,13 +282,13 @@ class Editing {
     for (let i = endPos-1; i > startPos; i--) {
       let nodeId = container.getNodeIdAt(i)
       container.hideAt(i)
-      documentHelpers.deleteNode(tx, tx.get(nodeId))
+      documentHelpers.deleteNode(tx, tx.get(nodeId), containerId, i)
     }
 
     // delete or truncate the first node
     if (firstEntirelySelected) {
       container.hideAt(startPos)
-      documentHelpers.deleteNode(tx, firstNode)
+      documentHelpers.deleteNode(tx, firstNode, containerId, startPos)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = firstNode.getContainerRoot()
