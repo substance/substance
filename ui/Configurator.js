@@ -443,7 +443,7 @@ class Configurator {
 
   createArticle(seed) {
     console.warn('DEPRECATED: createArticle is now called createDocument')
-    this.createDocument(seed)
+    return this.createDocument(seed)
   }
 
   createDocument(seed) {
