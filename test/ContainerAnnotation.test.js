@@ -2,7 +2,7 @@ import { module } from 'substance-test'
 
 import { AnnotationCommand } from 'substance'
 import setupEditor from './fixture/setupEditor'
-import { _p1, _p2, _p3 } from './fixture/samples'
+import { _p1, _p2, _p3, _p4 } from './fixture/samples'
 import TestContainerAnnotation from './fixture/TestContainerAnnotation'
 
 const test = module('ContainerAnnotation')
@@ -337,6 +337,39 @@ test("Merging paragraph with ContainerAnnotation into paragraph before should mo
   const index = doc.getIndex('container-annotations')
   t.equal(index.getAnchorsForPath(['p1', 'content']).length, 1, 'There should be one container annotation in index for p1')
   t.equal(index.getAnchorsForPath(['p2', 'content']).length, 0, 'There should be no container annotation in index for p2')
+  t.end()
+})
+
+test("Merging: last selected paragraph contains end of container anno", (t) => {
+  const { doc, editorSession } = setupEditor(t, _p1, _p2, _p3, _p4)
+  doc.create({
+    type: TestContainerAnnotation.type,
+    id: 'anno',
+    start: {
+      path: ['p2', 'content'],
+      offset: 6
+    },
+    end: {
+      path: ['p3', 'content'],
+      offset: 2
+    },
+    containerId: 'body'
+  })
+
+  editorSession.setSelection({
+    type: 'container',
+    containerId: 'body',
+    startPath: ['p1', 'content'],
+    startOffset: 4,
+    endPath: ['p3', 'content'],
+    endOffset: 4
+  })
+
+  editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+
+  t.isNil(doc.get('anno'), 'Container annotation shouldn\'t exists')
   t.end()
 })
 

@@ -1009,7 +1009,7 @@ class Editing {
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        documentHelpers.deleteNode(tx, source)
+        documentHelpers.deleteNode(tx, source, container.id, pos+1)
         tx.setSelection({
           type: 'property',
           path: targetPath,

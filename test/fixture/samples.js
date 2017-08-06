@@ -57,6 +57,17 @@ export function _p3(doc, body) {
   body.show('p3')
 }
 
+export const P4_TEXT = 'p4:rstuvw'
+
+export function _p4(doc, body) {
+  doc.create({
+    type: 'paragraph',
+    id: 'p4',
+    content: P4_TEXT
+  })
+  body.show('p4')
+}
+
 export function _empty(doc, body) {
   doc.create({
     type: 'paragraph',
