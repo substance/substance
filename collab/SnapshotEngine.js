@@ -76,7 +76,7 @@ class SnapshotEngine {
       if (!closestVersion) {
         return cb(null, undefined)
       }
-      this.snapshotStore.getSnapshot(documentId, version, cb)
+      this.snapshotStore.getSnapshot(documentId, closestVersion, cb)
     })
   }
 }
