@@ -63,6 +63,12 @@ class SnapshotEngine {
     let closestVersion
 
     this.snapshotStore.getVersions(documentId, (err, versions) => {
+      if (err) return cb(err)
+
+      if(versions.length === 0) {
+        return cb(null, undefined)
+      }
+
       if (versions.indexOf(version) >= 0) {
         closestVersion = version
       } else {
