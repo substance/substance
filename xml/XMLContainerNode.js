@@ -4,11 +4,11 @@ import XMLElementNode from './XMLElementNode'
 export default class XMLContainerNode extends ContainerMixin(XMLElementNode) {
 
   getContentPath() {
-    return [this.id, 'childNodes']
+    return [this.id, '_childNodes']
   }
 
   getContent() {
-    return this.childNodes
+    return this._childNodes
   }
 
   isContainer() {

@@ -1,5 +1,6 @@
 import { DocumentNode, documentHelpers } from '../model'
 import { DOMElement } from '../dom'
+import { last } from '../util'
 import node2element from './node2element'
 import cssSelect from '../vendor/css-select'
 import cssSelectAdapter from './cssSelectAdapter'
@@ -57,16 +58,40 @@ class XMLDocumentNode extends DocumentNode {
     return (parentNode && parentNode.isContainer())
   }
 
+  get children() {
+    return this.getChildren()
+  }
+
   getChildren() {
     // TODO: shouldn't we filter ElementNodes?
     return this.getChildNodes()
   }
 
   getChildNodes() {
-    if (this.childNodes) {
-      return documentHelpers.getNodes(this.getDocument(), this.childNodes)
+    if (this._childNodes) {
+      return documentHelpers.getNodes(this.getDocument(), this._childNodes)
     } else {
       return []
+    }
+  }
+
+  getChildCount() {
+    if (this._childNodes) {
+      return this._childNodes.length
+    } else {
+      return 0
+    }
+  }
+
+  getFirstChild() {
+    if (this._childNodes) {
+      return this.getDocument().get(this._childNodes[0])
+    }
+  }
+
+  getLastChild() {
+    if (this._childNodes) {
+      return this.getDocument().get(last(this._childNodes))
     }
   }
 

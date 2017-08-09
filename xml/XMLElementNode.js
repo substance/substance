@@ -16,7 +16,7 @@ class XMLElementNode extends XMLDocumentNode {
 
   removeChild(child) {
     const childId = child.id
-    const childPos = this.childNodes.indexOf(childId)
+    const childPos = this._childNodes.indexOf(childId)
     if (childPos >= 0) {
       this.removeAt(childPos)
     } else {
@@ -26,7 +26,7 @@ class XMLElementNode extends XMLDocumentNode {
   }
 
   insertAt(pos, child) {
-    const length = this.childNodes.length
+    const length = this._childNodes.length
     if (pos >= 0 && pos <= length) {
       const doc = this.getDocument()
       doc.update([this.id, 'childNodes'], { type: 'insert', pos, value: child.id })
@@ -37,7 +37,7 @@ class XMLElementNode extends XMLDocumentNode {
   }
 
   removeAt(pos) {
-    const length = this.childNodes.length
+    const length = this._childNodes.length
     if (pos >= 0 && pos < length) {
       const doc = this.getDocument()
       doc.update([this.id, 'childNodes'], { type: 'delete', pos: pos })
@@ -57,6 +57,8 @@ class XMLElementNode extends XMLDocumentNode {
     return true
   }
 
+  // TODO: implement as much of DOMElement as possible
+
 }
 
 XMLElementNode.prototype.append = DOMElement.prototype.append
@@ -66,7 +68,7 @@ XMLElementNode.prototype._elementType = 'element'
 XMLElementNode.type = 'element'
 
 XMLElementNode.schema = {
-  childNodes: { type: ['array', 'id'], default: [], owned: true}
+  _childNodes: { type: ['array', 'id'], default: [], owned: true}
 }
 
 XMLElementNode.isBlock = true

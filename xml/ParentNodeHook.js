@@ -21,7 +21,7 @@ class ParentNodeHook {
         switch(node._elementType) {
           case 'element':
           case 'container': {
-            _setParent(node, node.childNodes)
+            _setParent(node, node._childNodes)
             _setRegisteredParent(node)
             break
           }
