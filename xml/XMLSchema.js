@@ -18,6 +18,10 @@ export default class XMLSchema {
     })
   }
 
+  getIdAttribute() {
+    return 'id'
+  }
+
   getTagNames() {
     return Object.keys(this._elementSchemas)
   }
