@@ -27,6 +27,6 @@ XMLAnnotationNode.prototype._isPropertyAnnotation = true
 XMLAnnotationNode.type = 'annotation'
 
 XMLAnnotationNode.schema = {
-  start: "coordinate",
-  end: "coordinate"
+  start: { type: "coordinate", optional: true },
+  end: { type: "coordinate", optional: true }
 }
