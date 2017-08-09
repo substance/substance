@@ -114,7 +114,7 @@ class Component extends EventEmitter {
     this.el = options.el
 
     // context from parent (dependency injection) or if given via options
-    // the latter is a rather EXPERIMENTAL feature only used
+    // the latter is a rather EXPERIMENTAL feature only used TODO where?
     let context = options.context ? options.context : this._getContext() || {}
     this.context = context
     Object.freeze(this.context)
