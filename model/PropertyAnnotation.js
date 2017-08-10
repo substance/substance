@@ -45,8 +45,6 @@ PropertyAnnotation.autoExpandRight = true
 
 PropertyAnnotation.schema = {
   type: "annotation",
-  start: "coordinate",
-  end: "coordinate",
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
   _content: { type: "string", optional: true}

@@ -10,7 +10,7 @@ export default function(DocumentNode) {
     constructor(doc, props) {
       super(doc, _normalizedProps(props))
 
-      // wrap coordinates
+      // making sure that coordinates are Coordinate instances
       this.start = new Coordinate(this.start)
       this.end = new Coordinate(this.end)
     }
@@ -177,14 +177,16 @@ export default function(DocumentNode) {
   AbstractAnnotation.prototype._isAnnotation = true
 
   AbstractAnnotation.schema = {
-    start: "coordinate",
-    end: "coordinate"
+    start: { type: "coordinate", default: { path: [], offset: 0 } },
+    end: { type: "coordinate", default: { path: [], offset: 0 } }
   }
 
   return AbstractAnnotation
 }
 
 function _normalizedProps(props) {
+  // in the beginning we used startPath + endPath etc.
+  // now we use coodinates start and end where each coordinate has path + offset
   if (!props.hasOwnProperty('start')) {
     /*
       Instead of
@@ -192,28 +194,34 @@ function _normalizedProps(props) {
       use
         { start: { path: [], offset: 0 }, end: { path: [], offset: 10 } }
     */
+    // TODO: it would be good if we could get rid of the normalization on the long run
     // console.warn('DEPRECATED: create Annotation with "start" and "end" coordinate instead.')
-    props = Object.assign({}, props)
-    props.start = {
-      path: props.startPath || props.path,
-      offset: props.startOffset
+    let start, end
+    if (props.hasOwnProperty('startPath') || props.hasOwnProperty('path')) {
+      start = {
+        path: props.startPath || props.path,
+        offset: props.startOffset
+      }
     }
-    props.end = {}
     if (props.hasOwnProperty('endPath')) {
-      props.end.path = props.endPath
-    } else {
-      props.end.path = props.start.path
+      end = {
+        path: props.endPath,
+        offset: props.endOffset
+      }
     }
-    if (props.hasOwnProperty('endOffset')) {
-      props.end.offset = props.endOffset
-    } else {
-      props.end.offset = props.start.offset
+    if (start && !end) {
+      end = start
     }
-    delete props.path
-    delete props.startPath
-    delete props.endPath
-    delete props.startOffset
-    delete props.endOffset
+    if (start) {
+      props = Object.assign({}, props)
+      delete props.path
+      delete props.startPath
+      delete props.endPath
+      delete props.startOffset
+      delete props.endOffset
+      props.start = start
+      props.end = end
+    }
   } else if (props.hasOwnProperty('end') && !props.end.path) {
     props.end.path = props.start.path
   }
