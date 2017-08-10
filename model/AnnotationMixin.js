@@ -1,4 +1,4 @@
-import { isArrayEqual, isEqual } from '../util'
+import { isArrayEqual, isEqual, cloneDeep } from '../util'
 import documentHelpers from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
@@ -203,14 +203,14 @@ function _normalizedProps(props) {
         offset: props.startOffset
       }
     }
-    if (props.hasOwnProperty('endPath')) {
+    if (props.hasOwnProperty('endPath') || props.hasOwnProperty('endOffset')) {
       end = {
-        path: props.endPath,
+        path: props.endPath || props.path,
         offset: props.endOffset
       }
     }
     if (start && !end) {
-      end = start
+      end = cloneDeep(start)
     }
     if (start) {
       props = Object.assign({}, props)
