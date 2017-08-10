@@ -1,5 +1,5 @@
 import forEach from './forEach'
-import map from './map'
+import isArray from './isArray'
 
 /**
   Get bounding rectangle relative to a given parent element. Allows multiple
@@ -7,20 +7,30 @@ import map from './map'
   selection fragments). Takes a relative parent element that is used as a
   reference point, instead of the browser's viewport.
 
-  @param {Array} els elements to compute the bounding rectangle for
+  @param {DOMElement[]} els elements to compute the bounding rectangle for
   @param {DOMElement} containerEl relative parent used as a reference point
   @return {object} rectangle description with left, top, right, bottom, width and height
 */
 export default function getRelativeBoundingRect(els, containerEl) {
-  if (els.length === undefined) {
-    els = [els]
+  let nativeCotainerEl
+  if (containerEl._isDOMElement) {
+    nativeCotainerEl = containerEl.getNativeElement()
+  } else {
+    nativeCotainerEl = containerEl
   }
-  var elRects = map(els, function(el) {
-    return _getBoundingOffsetsRect(el, containerEl)
+  if (!isArray(els)) els = [els]
+  let elRects = els.map((el) => {
+    let nativeEl
+    if (el._isDOMElement) {
+      nativeEl = el.getNativeElement()
+    } else {
+      nativeEl = el
+    }
+    return _getBoundingOffsetsRect(nativeEl, nativeCotainerEl)
   })
 
-  var elsRect = _getBoundingRect(elRects)
-  var containerElRect = containerEl.getBoundingClientRect()
+  let elsRect = _getBoundingRect(elRects)
+  let containerElRect = nativeCotainerEl.getBoundingClientRect()
   return {
     left: elsRect.left,
     top: elsRect.top,
@@ -36,6 +46,8 @@ export default function getRelativeBoundingRect(els, containerEl) {
 
   Note: Here, `bounds.right` and `bounds.bottom` are relative to
   the left top of the viewport.
+
+  @param {object[]}
 */
 function _getBoundingRect(rects) {
   var bounds = {
@@ -72,6 +84,9 @@ function _getBoundingRect(rects) {
   The rectangle dimensions are calculated as the union of the given elements
   clientRects. A selection fragment, for example, may appear as a multi-line span
   element that consists of a single client rect per line of text in variable widths.
+
+  @param {HTMLElement} el native DOM element to get the bounding rectangle for
+  @param {HTMLElement} relativeParentEl native DOM element used as a reference point
 */
 function _getBoundingOffsetsRect(el, relativeParentEl) {
   var relativeParentElRect = relativeParentEl.getBoundingClientRect()
