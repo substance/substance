@@ -89,7 +89,7 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
   })
 }
 
-const BUILTIN_ATTRS = ['id', 'type', 'attributes', 'childNodes']
+const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes']
 
 function _defineAttribute(Node, attributeName) {
   let name = attributeName.replace(':', '_')

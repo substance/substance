@@ -29,7 +29,7 @@ class XMLElementNode extends XMLDocumentNode {
     const length = this._childNodes.length
     if (pos >= 0 && pos <= length) {
       const doc = this.getDocument()
-      doc.update([this.id, 'childNodes'], { type: 'insert', pos, value: child.id })
+      doc.update([this.id, '_childNodes'], { type: 'insert', pos, value: child.id })
     } else {
       throw new Error('Index out of bounds.')
     }
@@ -40,7 +40,7 @@ class XMLElementNode extends XMLDocumentNode {
     const length = this._childNodes.length
     if (pos >= 0 && pos < length) {
       const doc = this.getDocument()
-      doc.update([this.id, 'childNodes'], { type: 'delete', pos: pos })
+      doc.update([this.id, '_childNodes'], { type: 'delete', pos: pos })
     } else {
       throw new Error('Index out of bounds.')
     }
