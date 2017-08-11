@@ -106,6 +106,7 @@ class Surface extends Component {
         // OSX specific handling of dead-keys
         if (!platform.isIE) {
           el.on('compositionstart', this.onCompositionStart)
+          el.on('compositionend', this.onCompositionEnd)
         }
         // Note: TextEvent in Chrome/Webkit is the easiest for us
         // as it contains the actual inserted string.
@@ -295,7 +296,7 @@ class Surface extends Component {
 
   onTextInput(event) {
     if (!this._shouldConsumeEvent(event)) return
-    // console.log("TextInput:", event);
+    console.log("Surface.onTextInput():", event);
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
@@ -311,6 +312,26 @@ class Surface extends Component {
   // Handling Dead-keys under OSX
   onCompositionStart(event) {
     if (!this._shouldConsumeEvent(event)) return
+    console.log("Surface.onCompositionStart():", event);
+    // EXPERIMENTAL:
+    // We need to handle composed characters better
+    // Here we try to overwrite content which as been already inserted
+    // e.g. on OSX when holding down `a` a regular text-input event is triggered,
+    // after a second a context menu appears and a composition-start event is fired
+    // In that case, the first inserted character must be removed again
+    if (event.data) {
+      let l = event.data.length
+      let sel = this.editorSession.getSelection()
+      if (sel.isPropertySelection() && sel.isCollapsed()) {
+        let offset = sel.start.offset
+        this.editorSession.setSelection(sel.createWithNewRange(offset-l, offset))
+      }
+    }
+  }
+
+  onCompositionEnd(event) {
+    if (!this._shouldConsumeEvent(event)) return
+    console.log("Surface.onCompositionEnd():", event);
   }
 
   // TODO: do we need this anymore?
