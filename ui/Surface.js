@@ -296,7 +296,7 @@ class Surface extends Component {
 
   onTextInput(event) {
     if (!this._shouldConsumeEvent(event)) return
-    console.log("Surface.onTextInput():", event);
+    // console.log("Surface.onTextInput():", event);
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
@@ -312,7 +312,7 @@ class Surface extends Component {
   // Handling Dead-keys under OSX
   onCompositionStart(event) {
     if (!this._shouldConsumeEvent(event)) return
-    console.log("Surface.onCompositionStart():", event);
+    // console.log("Surface.onCompositionStart():", event);
     // EXPERIMENTAL:
     // We need to handle composed characters better
     // Here we try to overwrite content which as been already inserted
@@ -331,7 +331,7 @@ class Surface extends Component {
 
   onCompositionEnd(event) {
     if (!this._shouldConsumeEvent(event)) return
-    console.log("Surface.onCompositionEnd():", event);
+    // console.log("Surface.onCompositionEnd():", event);
   }
 
   // TODO: do we need this anymore?
