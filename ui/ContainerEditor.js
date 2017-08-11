@@ -183,7 +183,7 @@ class ContainerEditor extends Surface {
       }
     }
 
-    window.setTimeout(() => {
+    this._delayed(() => {
       this._updateModelSelection({ direction })
     })
   }
@@ -226,7 +226,7 @@ class ContainerEditor extends Surface {
       }
     }
 
-    window.setTimeout(() => {
+    this._delayed(() => {
       this._updateModelSelection({ direction })
     })
   }

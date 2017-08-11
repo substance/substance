@@ -4,6 +4,8 @@ import Component from './Component'
 import Clipboard from './Clipboard'
 import UnsupportedNode from './UnsupportedNodeComponent'
 
+const BROWSER_DELAY = platform.isFF ? 1 : 0
+
 /**
    Abstract interface for editing components.
    Dances with contenteditable, so you don't have to.
@@ -302,7 +304,6 @@ class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-
     let text = event.data
     if (!this.editorSession.keyboardManager.onTextInput(text)) {
       this.editorSession.transaction((tx) => {
@@ -325,7 +326,7 @@ class Surface extends Component {
       let l = event.data.length
       let sel = this.editorSession.getSelection()
       if (sel.isPropertySelection() && sel.isCollapsed()) {
-        console.log("Overwriting composed character")
+        // console.log("Overwriting composed character")
         let offset = sel.start.offset
         this.editorSession.setSelection(sel.createWithNewRange(offset-l, offset))
       }
@@ -335,6 +336,21 @@ class Surface extends Component {
   onCompositionEnd(event) {
     if (!this._shouldConsumeEvent(event)) return
     // console.log("Surface.onCompositionEnd():", event);
+    // Firefox does not fire textinput events at the end of compositions,
+    // but has providing everything in the compositionend event
+    if (platform.isFF) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (!event.data) return
+      this._delayed(() => {
+        let text = event.data
+        if (!this.editorSession.keyboardManager.onTextInput(text)) {
+          this.editorSession.transaction((tx) => {
+            tx.insertText(text)
+          }, { action: 'type' })
+        }
+      })
+    }
   }
 
   // TODO: do we need this anymore?
@@ -441,10 +457,10 @@ class Surface extends Component {
     // into an existing selection. In this case the window selection still
     // holds the old value, and is set to the correct selection after this
     // being called.
-    setTimeout(function() {
+    this._delayed(() => {
       let sel = this.domSelection.getSelection()
       this._setSelection(sel)
-    }.bind(this))
+    })
   }
 
   // When a user right clicks the DOM selection is updated (in Chrome the nearest
@@ -563,45 +579,45 @@ class Surface extends Component {
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
-    window.setTimeout(function() {
+    this._delayed(() => {
       this._updateModelSelection({direction})
-    }.bind(this))
+    })
   }
 
   _handleUpOrDownArrowKey(event) {
     event.stopPropagation()
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
-    window.setTimeout(function() {
+    this._delayed(() => {
       let options = {
         direction: (event.keyCode === keys.UP) ? 'left' : 'right'
       }
       this._updateModelSelection(options)
-    }.bind(this));
+    })
   }
 
   _handleHomeOrEndKey(event) {
     event.stopPropagation()
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
-    window.setTimeout(function() {
+    this._delayed(() => {
       let options = {
         direction: (event.keyCode === keys.HOME) ? 'left' : 'right'
       }
       this._updateModelSelection(options)
-    }.bind(this))
+    })
   }
 
   _handlePageUpOrDownKey(event) {
     event.stopPropagation()
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
-    window.setTimeout(function() {
+    this._delayed(() => {
       let options = {
         direction: (event.keyCode === keys.PAGEUP) ? 'left' : 'right'
       }
       this._updateModelSelection(options)
-    }.bind(this))
+    })
   }
 
   _handleSpaceKey(event) {
@@ -627,7 +643,7 @@ class Surface extends Component {
         code: event.code
       })
     } else {
-      window.setTimeout(()=>{
+      this._delayed(()=>{
         this._updateModelSelection()
       })
     }
@@ -752,6 +768,10 @@ class Surface extends Component {
 
   get id() {
     return this._surfaceId
+  }
+
+  _delayed(fn) {
+    window.setTimeout(fn, BROWSER_DELAY)
   }
 
 }
