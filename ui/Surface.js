@@ -288,6 +288,8 @@ class Surface extends Component {
           return this._handleDeleteKey(event)
         case keys.ESCAPE:
           return this._handleEscapeKey(event)
+        case keys.SPACE:
+          return this._handleSpaceKey(event)
         default:
           break
       }
@@ -323,6 +325,7 @@ class Surface extends Component {
       let l = event.data.length
       let sel = this.editorSession.getSelection()
       if (sel.isPropertySelection() && sel.isCollapsed()) {
+        console.log("Overwriting composed character")
         let offset = sel.start.offset
         this.editorSession.setSelection(sel.createWithNewRange(offset-l, offset))
       }
@@ -599,6 +602,17 @@ class Surface extends Component {
       }
       this._updateModelSelection(options)
     }.bind(this))
+  }
+
+  _handleSpaceKey(event) {
+    event.stopPropagation()
+    event.preventDefault()
+    const text = ' '
+    if (!this.editorSession.keyboardManager.onTextInput(text)) {
+      this.editorSession.transaction((tx) => {
+        tx.insertText(text)
+      }, { action: 'type' })
+    }
   }
 
   _handleTabKey(event) {
