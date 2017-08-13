@@ -1,6 +1,6 @@
 import { DocumentNode, documentHelpers } from '../model'
 import { DOMElement } from '../dom'
-import { last } from '../util'
+import { last, ArrayIterator } from '../util'
 import node2element from './node2element'
 import cssSelect from '../vendor/css-select'
 import cssSelectAdapter from './cssSelectAdapter'
@@ -81,6 +81,10 @@ class XMLDocumentNode extends DocumentNode {
     } else {
       return 0
     }
+  }
+
+  getChildNodeIterator() {
+    return new ArrayIterator(this.getChildNodes())
   }
 
   getFirstChild() {
