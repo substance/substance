@@ -42,6 +42,10 @@ class DocumentChange {
     This gets called by Document after applying the change.
   */
   _extractInformation(doc) {
+    // TODO: we should instead clean-up EditorSession et. al
+    // For now we allow this method to be called multiple times, but only extract the details the first time
+    if (this._extracted) return
+
     let ops = this.ops
     let created = {}
     let deleted = {}
@@ -130,6 +134,8 @@ class DocumentChange {
     this.created = created
     this.deleted = deleted
     this.updated = updated
+
+    this._extracted = true
   }
 
   invert() {
