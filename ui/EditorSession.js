@@ -343,7 +343,7 @@ class EditorSession extends EventEmitter {
     const t = this._transaction
     info = info || {}
     t._sync()
-    let change = t._recordChange(transformation, this.getSelection(), this.getFocusedSurface())
+    let change = t._recordChange(transformation, this.getSelection(), info)
     if (change) {
       this._commit(change, info)
     } else {
@@ -362,7 +362,7 @@ class EditorSession extends EventEmitter {
     this._undoRedo('redo')
   }
 
-/* eslint-disable no-invalid-this*/
+  /* eslint-disable no-invalid-this*/
 
   on(...args) {
     let name = args[0]
