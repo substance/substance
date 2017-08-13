@@ -72,9 +72,9 @@ class TextPropertyEditor extends Surface {
   }
 
   _handleEnterKey(event) {
-    event.preventDefault()
     event.stopPropagation()
-    if (this.props.multiLine) {
+    if (!this.props.multiLine) {
+      event.preventDefault()
       super._handleEnterKey(event)
     }
     this.el.emit('enter', {
