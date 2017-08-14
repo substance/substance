@@ -13,10 +13,11 @@ Custom converters (XML, HTML, etc.)                                         | �
 Custom HTML Rendering                                                       | ✓
 Drag & Drop Support                                                         | Beta
 Annotations can hold information (e.g. a comment)                           | ✓
+Multiple Editing Surfaces (e.g. title + abstract + body )                   | ✓
 Isolated Nodes (any content with any custom UI)                             | ✓
 Incremental document updates (undoable operations)                          | ✓
 Transformations for document manipulation                                   | ✓
-Custom editing toolbars                                                     | ✓
+Custom editing toolbars and overlays                                        | ✓
 Commands for controlling the editor                                         | ✓
 Multi-language support                                                      | ✓
 Realtime collaboration                                                      | Beta
@@ -26,8 +27,6 @@ Packages (aka Plugins)                                                      | �
 **UI Components**                                                           |
 TextPropertyEditor for editing annotated text                               | ✓
 ContainerEditor for in-flow-editing                                         | ✓
-Scrollable ContentPanel with support for highlights                         | ✓
-Customizable Toolbar                                                        | ✓
 ScrollPane with interactive visual Scrollbar                                | ✓
 **Platform support**                                                        |
 Mozilla Firefox (>=49)                                                      | Beta
