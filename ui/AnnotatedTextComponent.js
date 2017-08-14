@@ -83,7 +83,8 @@ class AnnotatedTextComponent extends Component {
     let ComponentClass = componentRegistry.get(node.type)
     // TODO: fix support for container annotations
     if (node.type === "container-annotation-fragment") {
-      ComponentClass = ContainerAnnotationFragment
+      let nodeType = node.anno ? node.anno.type : 'container-annotation-fragment'
+      ComponentClass = componentRegistry.get(nodeType) || ContainerAnnotationFragment
     } else {
       ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
       if (node.constructor.isInline &&
