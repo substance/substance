@@ -49,15 +49,19 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   didMount() {
-    if (this.context.surface && this.context.surface.hasNativeSpellcheck()) {
-      this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
-      this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
-    }
+    // TODO: this is problematic as it interferes with OSX's special character menu
+    // if (this.context.surface && this.context.surface.hasNativeSpellcheck()) {
+    //   this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
+    //   this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
+    // }
   }
 
   dispose() {
     if (this.context.markersManager) {
       this.context.markersManager.deregister(this)
+    }
+    if (this.domObserver) {
+      this.domObserver.disconnect()
     }
   }
 
@@ -120,6 +124,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   _onDomMutations(mutations) {
+    // console.log('Observed DOM mutation on', this.props.path, mutations)
     // HACK: only detecting mutations that are coming from the native spell-correction
     if (mutations.length === 2 && mutations[0].target === mutations[1].target) {
       let textEl = DefaultDOMElement.unwrap(mutations[0].target)

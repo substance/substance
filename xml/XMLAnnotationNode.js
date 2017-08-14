@@ -26,7 +26,5 @@ XMLAnnotationNode.prototype._isPropertyAnnotation = true
 
 XMLAnnotationNode.type = 'annotation'
 
-XMLAnnotationNode.schema = {
-  start: "coordinate",
-  end: "coordinate"
-}
+// schema inherited from mixin
+XMLAnnotationNode.schema = {}

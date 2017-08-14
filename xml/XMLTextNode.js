@@ -76,7 +76,8 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
     throw new Error('This is not implemented yet.')
   }
 
-  isTextNode() {
+  // regarding DOMElement API this is an ElementNode
+  isElementNode() {
     return true
   }
 

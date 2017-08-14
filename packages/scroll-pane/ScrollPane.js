@@ -197,9 +197,8 @@ class ScrollPane extends AbstractScrollPane {
     @param {DOMNode} el DOM node that lives inside the
   */
   getPanelOffsetForElement(el) {
-    let nativeEl = el.getNativeElement()
-    let contentContainerEl = this.refs.content.getNativeElement()
-    let rect = getRelativeBoundingRect(nativeEl, contentContainerEl)
+    let contentContainerEl = this.refs.content.el
+    let rect = getRelativeBoundingRect(el, contentContainerEl)
     return rect.top
   }
 

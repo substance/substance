@@ -76,4 +76,41 @@ class XMLDocument extends Document {
     return this.getXMLSchema().getElementSchema(type)
   }
 
+  _validateChange(change) {
+    let changed = {}
+    let deleted = []
+    change.ops.forEach((op) => {
+      switch (op.type) {
+        case "delete": {
+          deleted.push(op.val.id)
+          break
+        }
+        case "create": {
+          changed[op.val.id] = true
+          break
+        }
+        default: {
+          changed[op.path[0]] = true
+        }
+      }
+    })
+    // do not validate deleted nodes
+    deleted.forEach(id => delete changed[id])
+
+    const xmlSchema = this.getXMLSchema()
+    let errors = []
+    Object.keys(changed).forEach((id) => {
+      let node = this.get(id)
+      let res = xmlSchema.validateElement(node)
+      if (!res.ok) {
+        errors = errors.concat(res.errors)
+      }
+    })
+    return {
+      ok: errors.length === 0,
+      errors
+    }
+  }
 }
+
+XMLDocument.prototype._isXMLDocument = true

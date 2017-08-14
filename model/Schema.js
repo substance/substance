@@ -14,6 +14,13 @@ class Schema {
     @param {String} version
   */
   constructor(name, version) {
+    if (!name) {
+      throw new Error("'name' is mandatory")
+    }
+    if (!version) {
+      throw new Error("'version' is mandatory")
+    }
+
     /**
       @type {String}
     */

@@ -21,7 +21,7 @@ class ParentNodeHook {
         switch(node._elementType) {
           case 'element':
           case 'container': {
-            _setParent(node, node.childNodes)
+            _setParent(node, node._childNodes)
             _setRegisteredParent(node)
             break
           }
@@ -35,7 +35,7 @@ class ParentNodeHook {
         // ATTENTION: we only set parents but don't remove when they are deleted
         // assuming that if the parent gets deleted, the children get deleted too
         let update = op.diff
-        if (op.path[1] === 'childNodes') {
+        if (op.path[1] === '_childNodes') {
           if (update.isInsert()) {
             _setParent(node, update.getValue())
           } else if (update.isDelete()) {
@@ -45,7 +45,7 @@ class ParentNodeHook {
         break
       }
       case 'set': {
-        if (op.path[1] === 'childNodes') {
+        if (op.path[1] === '_childNodes') {
           _setParent(null, op.getOldValue())
           _setParent(node, op.getValue())
         }

@@ -6,16 +6,18 @@ import ContainerAnnotation from './ContainerAnnotation'
 
 class DocumentSchema extends Schema {
 
-  constructor({ name, DocumentClass, defaultTextType='text', version='0.0.0' }) {
-    super(name, version)
-
+  constructor(schemaSpec) {
+    super(schemaSpec.name, schemaSpec.version)
     /* istanbul ignore next */
-    if (!DocumentClass) {
+    if (!schemaSpec.DocumentClass) {
       throw new Error('DocumentClass is mandatory')
     }
+    Object.assign(this, schemaSpec)
 
-    this.DocumentClass = DocumentClass
-    this.defaultTextType = defaultTextType
+    // TODO: defaultTextType does not make sense in certain environments
+    if (!this.defaultTextType) {
+      this.defaultTextType = 'text'
+    }
   }
 
   getDocumentClass() {

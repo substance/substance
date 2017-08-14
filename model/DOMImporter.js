@@ -533,6 +533,12 @@ class DOMImporter {
    */
   _wrapInlineElementsIntoBlockElement(childIterator) {
     if (!childIterator.hasNext()) return
+
+    const converter = this._defaultBlockConverter
+    if (!converter) {
+      throw new Error('Wrapping inline elements automatically is not supported in this schema.')
+    }
+
     let dom = childIterator.peek().getOwnerDocument()
     let wrapper = dom.createElement('wrapper')
     while(childIterator.hasNext()) {
@@ -547,7 +553,6 @@ class DOMImporter {
     }
     const type = this.schema.getDefaultTextType()
     const id = this._getNextId(dom, type)
-    const converter = this._defaultBlockConverter
     let nodeData = { type, id }
     this.state.pushContext('wrapper', converter)
     nodeData = converter.import(wrapper, nodeData, this) || nodeData

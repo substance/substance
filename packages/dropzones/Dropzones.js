@@ -130,8 +130,8 @@ export default class Dropzones extends Component {
   */
   _getBoundingRect(comp) {
     let scrollPane = comp.context.scrollPane
-    let contentElement = scrollPane.getContentElement().getNativeElement()
-    let rect = getRelativeBoundingRect(comp.getNativeElement(), contentElement)
+    let contentElement = scrollPane.getContentElement()
+    let rect = getRelativeBoundingRect(comp.el, contentElement)
     return rect
   }
 

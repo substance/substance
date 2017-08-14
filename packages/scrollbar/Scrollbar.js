@@ -106,7 +106,7 @@ class Scrollbar extends Component {
           if (!nodeEl) return
 
           // Compute bounding rect relative to scroll pane content element
-          let rect = getRelativeBoundingRect(nodeEl.getNativeElement(), contentEl.getNativeElement())
+          let rect = getRelativeBoundingRect(nodeEl, contentEl)
           let top = rect.top / this.factor
           let height = rect.height / this.factor
 

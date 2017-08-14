@@ -10,6 +10,7 @@ import XMLExternalNode from './XMLExternalNode'
 import XMLExternalNodeConverter from './XMLExternalNodeConverter'
 import XMLContainerNode from './XMLContainerNode'
 import XMLNodeConverter from './XMLNodeConverter'
+import XMLDocumentImporter from './XMLDocumentImporter'
 
 export default function registerSchema(config, xmlSchema, DocumentClass) {
   const schemaName = xmlSchema.getName()
@@ -20,7 +21,9 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     DocumentClass: DocumentClass,
     // TODO: defaultTextType is not a global thing,
     // rather a container specific property
-    defaultTextType: 'p'
+    defaultTextType: 'p',
+  // HACK: storing the xmlSchema here so that we can use it later
+    xmlSchema: xmlSchema
   })
   const tagNames = xmlSchema.getTagNames()
   // add node definitions and converters
@@ -81,10 +84,12 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     config.addNode(Node)
     let converter = new ConverterClass(name)
     config.addConverter(schemaName, converter)
+
+    config.addImporter(schemaName, XMLDocumentImporter)
   })
 }
 
-const BUILTIN_ATTRS = ['id', 'type', 'attributes', 'childNodes']
+const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes']
 
 function _defineAttribute(Node, attributeName) {
   let name = attributeName.replace(':', '_')
