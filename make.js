@@ -11,14 +11,6 @@ const UGLIFY_VERSION = '^2.7.5'
 // ---------
 
 const DIST = 'dist/'
-const TMP = 'tmp/'
-const STUFF = [
-  'package.json',
-  'LICENSE.md',
-  'README.md',
-  'CHANGELOG.md',
-  'make.js'
-]
 
 // Helpers
 // -------
@@ -133,26 +125,6 @@ function buildTestsNode() {
   })
 }
 
-// generates API documentation
-function buildDocs(mode='site') {
-  const docgen = require('substance-docgen')
-  docgen.bundle(b, {
-    src: [
-      './*.md',
-      './doc/*.md',
-      './collab/*.js',
-      './dom/*.js',
-      './model/**/*.js',
-      './packages/**/*.js',
-      './ui/*.js',
-      './util/*.js',
-    ],
-    dest: 'dist/doc/',
-    config: './.docgenrc.js',
-    mode: mode // one of: 'source', 'json', 'site' (default: 'json')
-  })
-}
-
 function buildVendor() {
   install(b, 'uglify-js-harmony', UGLIFY_VERSION)
   const CLEANUP = true
@@ -234,7 +206,6 @@ function vendorRollup(name, opts = {}) {
 b.task('clean', () => {
   b.rm('./dist')
   b.rm('./.test')
-  b.rm('./.docs')
 })
 
 b.task('css', css)
@@ -280,19 +251,16 @@ b.task('cover', () => {
   })
 })
 
-b.task('docs', () => {
-  buildDocs('.docs/')
-}).describe('generates API documentation')
 
 b.task('vendor', buildVendor)
 .describe('pre-bundles vendor libraries')
 
 b.task('default', ['clean', 'lib'])
 
-b.task('publish', ['clean', 'lib', 'docs'])
+b.task('publish', ['clean', 'lib'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'lib:browser:dev', 'docs', 'test:browser'])
+b.task('dev', ['clean', 'lib:browser:dev', 'test:browser'])
 
 b.task('test', ['test:node', 'cover'])
 .describe('runs the test suite')
