@@ -8,8 +8,8 @@ import XMLElementNodeConverter from './XMLElementNodeConverter'
 import XMLExternalNode from './XMLExternalNode'
 import XMLExternalNodeConverter from './XMLExternalNodeConverter'
 import XMLSchema from './XMLSchema'
-import XMLTextNode from './XMLTextNode'
-import XMLTextNodeConverter from './XMLTextNodeConverter'
+import XMLTextElement from './XMLTextElement'
+import XMLTextElementConverter from './XMLTextElementConverter'
 import checkSchema from './checkSchema'
 import compileRNG from './compileRNG'
 import registerSchema from './registerSchema'
@@ -30,8 +30,8 @@ export {
   XMLExternalNode,
   XMLExternalNodeConverter,
   XMLSchema,
-  XMLTextNode,
-  XMLTextNodeConverter,
+  XMLTextElement,
+  XMLTextElementConverter,
   checkSchema,
   compileRNG,
   registerSchema,

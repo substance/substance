@@ -1,6 +1,6 @@
 import { forEach, camelCase } from '../util'
-import XMLTextNode from './XMLTextNode'
-import XMLTextNodeConverter from './XMLTextNodeConverter'
+import XMLTextElement from './XMLTextElement'
+import XMLTextElementConverter from './XMLTextElementConverter'
 import XMLElementNode from './XMLElementNode'
 import XMLElementNodeConverter from './XMLElementNodeConverter'
 import XMLAnnotationNode from './XMLAnnotationNode'
@@ -19,9 +19,6 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     name: schemaName,
     version: xmlSchema.getVersion(),
     DocumentClass: DocumentClass,
-    // TODO: defaultTextType is not a global thing,
-    // rather a container specific property
-    defaultTextType: 'p',
   // HACK: storing the xmlSchema here so that we can use it later
     xmlSchema: xmlSchema
   })
@@ -39,8 +36,8 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
         break
       }
       case 'text': {
-        NodeClass = XMLTextNode
-        ConverterClass = XMLTextNodeConverter
+        NodeClass = XMLTextElement
+        ConverterClass = XMLTextElementConverter
         break
       }
       case 'annotation': {
@@ -89,7 +86,7 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
   })
 }
 
-const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes']
+const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes', '_content']
 
 function _defineAttribute(Node, attributeName) {
   let name = attributeName.replace(':', '_')

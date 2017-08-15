@@ -6,14 +6,14 @@ import XMLDocumentNode from './XMLDocumentNode'
   Note: this is slightly different to Substance TextNode
   thus this does not extend Substance.TextNode.
 */
-export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
+export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
 
   getPath() {
-    return [this.id, 'content']
+    return [this.id, '_content']
   }
 
   getText() {
-    return this.content
+    return this._content
   }
 
   /*
@@ -24,8 +24,7 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
   */
   getChildren() {
     const annos = this.getAnnotations()
-    // sorting here by start.offset so that
-    // childNodes appear in natural order
+    // sorting here by start.offset so that childNodes appear in natural order
     annos.sort(_byStartOffset)
     return annos
   }
@@ -83,17 +82,20 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
 
 }
 
-XMLTextNode.prototype.text = DOMElement.prototype.text
+XMLTextElement.prototype._isXMLTextElement = true
 
-XMLTextNode.prototype._elementType = 'text'
+XMLTextElement.prototype.text = DOMElement.prototype.text
 
-XMLTextNode.isText = true
-XMLTextNode.isBlock = true
+XMLTextElement.prototype._elementType = 'text'
 
-XMLTextNode.type = 'text'
 
-XMLTextNode.schema = {
-  content: "text"
+XMLTextElement.isText = true
+XMLTextElement.isBlock = true
+
+XMLTextElement.type = 'text'
+
+XMLTextElement.schema = {
+  _content: "text"
 }
 
 function _byStartOffset(a,b) {

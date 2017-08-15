@@ -153,10 +153,20 @@ function _validateElement(elementSchema, el) {
     }
   }
   { // Elements
-    const res = _checkChildren(elementSchema, el)
-    if (!res.ok) {
-      errors = errors.concat(res.errors)
-      valid = false
+    if (elementSchema.type === 'external') {
+      // skip
+    } else {
+      // HACK: special treatment for our text elements which are not real DOM elements
+      let res
+      if (el._isXMLTextElement) {
+        res = _checkTextElement(elementSchema, el)
+      } else {
+        res = _checkChildren(elementSchema, el)
+      }
+      if (!res.ok) {
+        errors = errors.concat(res.errors)
+        valid = false
+      }
     }
   }
   return {
@@ -214,4 +224,19 @@ function _checkChildren(elementSchema, el) {
     state.ok = true
   }
   return state
+}
+
+function _checkTextElement(elementSchema, el) {
+  let res = {
+    ok: true,
+    errors: []
+  }
+  if (elementSchema.type !== 'text') {
+    res.ok = false
+    res.errors = [{
+      msg: 'Provided element is a text element',
+      el
+    }]
+  }
+  return res
 }
