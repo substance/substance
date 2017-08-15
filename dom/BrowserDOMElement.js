@@ -133,14 +133,6 @@ class BrowserDOMElement extends DOMElement {
     // ATTENTION: element properties are only used on HTML elements, such as the 'value' of an <input> element
     // In XML there are only attributes
     if (this._isXML()) throw new Error('setProperty() is only supported for HTML elements.')
-    if (!this._changedProperties) this._changedProperties = new Set()
-    // NOTE: there is no removeProperty()
-    // thus we are clearing our property when value=undefined
-    if (value === undefined) {
-      this._changedProperties.delete(name)
-    } else {
-      this._changedProperties.add(name)
-    }
     this.el[name] = value
     return this
   }
@@ -164,12 +156,6 @@ class BrowserDOMElement extends DOMElement {
       let attr = attributes.item(i)
       newEl.setAttribute(attr.name, attr.value)
     }
-    // NOTE: it does not make sense to set properties as they have a dynamic nature
-    // which depends strongly on the type they are defined on
-    // if (!this._changedProperties) this._changedProperties = new Set()
-    // this._changedProperties.forEach((name)=>{
-    //   newEl[name] = this.el[name]
-    // })
     if (this.eventListeners) {
       this.eventListeners.forEach(function(listener) {
         newEl.addEventListener(listener.eventName, listener.handler, listener.capture)
