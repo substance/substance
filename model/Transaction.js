@@ -107,22 +107,21 @@ class Transaction {
         change.info = info
         change.before = { selection: selBefore }
         change.after = { selection: tx.getSelection() }
-      }
-      // EXPERIMENTAL: in case of XMLDocuments we want to validate the stage document before committing
-      // the change to the real document
-      if (this.master._isXMLDocument) {
-        if (info && info.action === 'type') {
-          // HACK: not validating when we typing for sake of performance
-          // TODO: or should we?
-        } else {
-          let res = this.stage._validateChange(change)
-          if (!res.ok) {
-            // TODO: we need a helper to generate nice error messages
-            throw new Error('Transaction is violating the schema: \n' + res.errors.map(err=>err.msg).join('\n'))
+        // EXPERIMENTAL: in case of XMLDocuments we want to validate the stage document before committing
+        // the change to the real document
+        if (this.master._isXMLDocument) {
+          if (info && info.action === 'type') {
+            // HACK: not validating when we typing for sake of performance
+            // TODO: or should we?
+          } else {
+            let res = this.stage._validateChange(change)
+            if (!res.ok) {
+              // TODO: we need a helper to generate nice error messages
+              throw new Error('Transaction is violating the schema: \n' + res.errors.map(err=>err.msg).join('\n'))
+            }
           }
         }
       }
-
       hasFinished = true
     } finally {
       if (!hasFinished) {
