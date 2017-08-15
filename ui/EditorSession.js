@@ -103,7 +103,8 @@ class EditorSession extends EventEmitter {
     })
 
     // The command manager keeps the commandStates up-to-date
-    this.commandManager = new CommandManager(this._context, commands)
+    // EXPERIMENTAL: trying to reuse CommandManager
+    this.commandManager = options.commandManager || new CommandManager(this._context, commands)
 
     // The drag manager dispatches drag requests to registered drag handlers
     // TODO: after consolidating the API of this class, we probably need a less diverse context
