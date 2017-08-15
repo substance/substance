@@ -62,8 +62,8 @@ class AbstractEditor extends Component {
     this.domSelection = new DOMSelection(this)
 
     if (platform.inBrowser) {
-      this.documentEl = DefaultDOMElement.wrapNativeElement(document)
-      this.documentEl.on('keydown', this.onKeyDown, this)
+      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
+      documentEl.on('keydown', this.onKeyDown, this)
     }
   }
 
@@ -85,7 +85,8 @@ class AbstractEditor extends Component {
     // this.domSelection.dispose()
     this.resourceManager.dispose()
     if (platform.inBrowser) {
-      this.documentEl.off(this)
+      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
+      documentEl.off(this)
     }
   }
 
