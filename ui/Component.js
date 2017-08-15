@@ -228,6 +228,10 @@ class Component extends EventEmitter {
     return comp
   }
 
+  getElement() {
+    return this.el
+  }
+
   getNativeElement() {
     return this.el.getNativeElement()
   }
