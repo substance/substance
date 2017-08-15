@@ -140,6 +140,11 @@ class AbstractEditor extends Component {
   getComponentRegistry() {
     return this.componentRegistry
   }
+
+  getSurfaceManager() {
+    return this.surfaceManager
+  }
+
 }
 
 export default AbstractEditor
