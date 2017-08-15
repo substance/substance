@@ -244,12 +244,14 @@ class ClipboardImporter extends HTMLImporter {
 function _withCatchAllConverter(config) {
   config = Object.assign({}, config)
   let defaultTextType = config.schema.getDefaultTextType()
-  config.converters = config.converters.concat([{
-    type: defaultTextType,
-    matchElement: function(el) { return el.is('div') },
-    import: function(el, node, converter) {
-      node.content = converter.annotatedText(el, [node.id, 'content'])
-    }
-  }])
+  if (defaultTextType) {
+    config.converters = config.converters.concat([{
+      type: defaultTextType,
+      matchElement: function(el) { return el.is('div') },
+      import: function(el, node, converter) {
+        node.content = converter.annotatedText(el, [node.id, 'content'])
+      }
+    }])
+  }
   return config
 }
