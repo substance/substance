@@ -10,7 +10,7 @@ export default class ToolPanel extends Component {
     this.context.editorSession.off(this)
   }
 
-  render($$) {
+  render($$) { // eslint-disable-line
     throw new Error('This method is abstract')
   }
 
