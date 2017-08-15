@@ -13,11 +13,6 @@ class DocumentSchema extends Schema {
       throw new Error('DocumentClass is mandatory')
     }
     Object.assign(this, schemaSpec)
-
-    // TODO: defaultTextType does not make sense in certain environments
-    if (!this.defaultTextType) {
-      this.defaultTextType = 'text'
-    }
   }
 
   getDocumentClass() {

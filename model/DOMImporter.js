@@ -87,9 +87,6 @@ class DOMImporter {
         this._blockConverters.push(converter)
       }
     }
-    if (!this._defaultBlockConverter) {
-      throw new Error(`No converter for defaultTextType ${defaultTextType}`)
-    }
   }
 
   dispose() {
