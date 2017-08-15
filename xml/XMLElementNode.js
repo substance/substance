@@ -51,6 +51,13 @@ class XMLElementNode extends XMLDocumentNode {
     return true
   }
 
+  getChildAt(idx) {
+    let childId = this._childNodes[idx]
+    if (childId) {
+      return this.getDocument().get(childId)
+    }
+  }
+
   // TODO: implement as much of DOMElement as possible
 
 }
