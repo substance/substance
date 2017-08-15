@@ -623,9 +623,16 @@ class BrowserDOMElement extends DOMElement {
   emit(name, data) {
     let event
     if (data) {
-      event = new window.CustomEvent(name, { detail: data })
+      event = new window.CustomEvent(name, {
+        detail: data,
+        bubbles: true,
+        cancelable: true
+      })
     } else {
-      event = new window.Event(name)
+      event = new window.Event(name, {
+        bubbles: true,
+        cancelable: true
+      })
     }
     this.el.dispatchEvent(event)
   }
