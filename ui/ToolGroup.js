@@ -77,8 +77,11 @@ class ToolGroup extends Component {
     let commandGroups = this.context.commandGroups
     let filteredCommandStates = {} // command states objects of that group
     this.props.commandGroups.forEach((commandGroup) => {
+      // Note: as commandGroups and toolbars are defined
+      // separatedly, I prefer not to throw here
       if (!commandGroups[commandGroup]) {
-        throw new Error('commandGroup "'+commandGroup+'" not found')
+        // throw new Error('commandGroup "'+commandGroup+'" not found')
+        return
       }
       commandGroups[commandGroup].forEach((commandName) => {
         // in Stencila we are having mulitple EditorSessions
