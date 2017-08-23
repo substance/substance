@@ -44,6 +44,7 @@
     "substance-test": "^0.9.4"
   },
   "files": [
+    "collab",
     "dist",
     "dom",
     "model",
@@ -54,6 +55,7 @@
     "CHANGELOG.md",
     "index.es.js",
     "LICENSE.md",
+    "make.js",
     "README.md",
     "package.json",
     "*.css",
@@ -61,6 +63,7 @@
     "vendor/domutils.js",
     "vendor/entities.js",
     "vendor/htmlparser2.js",
-    "vendor/lodash-es.js"
+    "vendor/lodash-es.js",
+    "xml"
   ]
 }
