@@ -34,6 +34,18 @@ export default function paste (tx, args) {
   if (!pasteDoc) {
     pasteDoc = _convertPlainTextToDocument(tx, args)
   }
+  if (pasteDoc && !inContainer) {
+    // TODO: implement rich document import with merge into one paragraph
+    let nodes = []
+    let container = pasteDoc.get('snippet')
+    let content = container.getContent()
+    content.forEach(nodeId => {
+      let text = pasteDoc.get(nodeId).getText()
+      nodes.push(text)
+    })
+    tx.insertText(nodes.join('\r\n'))
+    return
+  }
   if (!sel.isCollapsed()) {
     tx.deleteSelection()
   }
