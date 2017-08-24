@@ -802,14 +802,16 @@ class Component extends EventEmitter {
 
   getChildren() {
     if (!this.el) return []
-    var children = this.el.getChildren()
+    let children = this.el.getChildren()
     children = children.map(_unwrapComp).filter(Boolean)
     return children
   }
 
   getChildAt(pos) {
-    var node = this.el.getChildAt(pos)
-    return _unwrapCompStrict(node)
+    let node = this.el.getChildAt(pos)
+    if (node) {
+      return _unwrapCompStrict(node)
+    }
   }
 
   find(cssSelector) {
