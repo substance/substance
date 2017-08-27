@@ -253,6 +253,10 @@ class BrowserDOMElement extends DOMElement {
     return childNodes
   }
 
+  getChildNodeIterator() {
+    return new BrowserChildNodeIterator(this.el)
+  }
+
   get childNodes() {
     return this.getChildNodes()
   }
@@ -834,6 +838,35 @@ class AttributesMapAdapter {
 
   entries() {
     return this.map((val, key)=>{ return [key, val] })
+  }
+
+}
+
+class BrowserChildNodeIterator {
+
+  constructor(el) {
+    this._next = el.firstChild
+    this._curr = null
+  }
+
+  hasNext() {
+    return Boolean(this._next)
+  }
+
+  next() {
+    let next = this._next
+    this._curr = next
+    this._next = next.nextSibling
+    return BrowserDOMElement.wrap(next)
+  }
+
+  back() {
+    this._next = this._curr
+    this._curr = this._curr.previousSibling
+  }
+
+  peek() {
+    return BrowserDOMElement.wrap(this._curr)
   }
 
 }
