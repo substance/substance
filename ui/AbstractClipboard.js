@@ -116,7 +116,7 @@ export default class AbstractClipboard {
   }
 
   _getImporter() {
-    return new new ClipboardImporter(this._config)
+    return new ClipboardImporter(this._config)
   }
 
   _getExporter() {

@@ -22,9 +22,6 @@ class ClipboardImporter extends HTMLImporter {
       REMOVE_INNER_WS: true
     })
 
-    // ATTENTION: this is only here so we can enfore windows conversion
-    // mode from within tests
-    this._isWindows = platform.isWindows
     this.editorOptions = config.editorOptions
   }
 
@@ -32,7 +29,7 @@ class ClipboardImporter extends HTMLImporter {
     Parses HTML and applies some sanitization/normalization.
   */
   importDocument(html) {
-    if (this._isWindows) {
+    if (platform.isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
       let match = /<!--StartFragment-->(.*)<!--EndFragment-->/.exec(html)
