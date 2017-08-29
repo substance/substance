@@ -12,7 +12,7 @@ import XMLContainerNode from './XMLContainerNode'
 import XMLNodeConverter from './XMLNodeConverter'
 import XMLDocumentImporter from './XMLDocumentImporter'
 
-export default function registerSchema(config, xmlSchema, DocumentClass) {
+export default function registerSchema(config, xmlSchema, DocumentClass, options = {}) {
   const schemaName = xmlSchema.getName()
   // schema declaration
   config.defineSchema({
@@ -82,7 +82,8 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     let converter = new ConverterClass(name)
     config.addConverter(schemaName, converter)
 
-    config.addImporter(schemaName, XMLDocumentImporter)
+    let ImporterClass = options.ImporterClass || XMLDocumentImporter
+    config.addImporter(schemaName, ImporterClass)
   })
 }
 

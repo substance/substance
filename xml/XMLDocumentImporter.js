@@ -26,6 +26,8 @@ export default class XMLDocumentImporter extends DOMImporter {
     const startTag = this.xmlSchema.getStartElement()
     let rootEl = dom.find(startTag)
     if (!rootEl) throw new Error(`Could not find <${startTag}> element.`)
+    // TODO: an XMLDocument should be more like a DOM
+    // and just have children, instead of the designated root element
     doc.root = this.convertElement(rootEl)
     return this.state.doc
   }
