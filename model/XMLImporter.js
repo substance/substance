@@ -8,7 +8,7 @@ import DOMImporter from './DOMImporter'
   TODO: provide example and activate reenable API docs
 */
 
-class XMLImporter extends DOMImporter {
+export default class XMLImporter extends DOMImporter {
 
   constructor(config, context) {
     super(Object.assign({ idAttribute: 'id' }, config), context)
@@ -28,5 +28,3 @@ class XMLImporter extends DOMImporter {
   }
 
 }
-
-export default XMLImporter

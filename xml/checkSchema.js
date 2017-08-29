@@ -1,5 +1,3 @@
-import { isArrayEqual } from '../util'
-
 /*
   Validates if a given schema fulfills
   the requirements for generating an editor.

@@ -1,4 +1,4 @@
-import { forEach, array2table } from '../util'
+import { forEach } from '../util'
 
 const START = 'START'
 const END = 'END'

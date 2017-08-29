@@ -59,7 +59,7 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
     this.setText(text)
   }
 
-  appendChild(child) {
+  appendChild(child) { // eslint-disable-line
     // TODO: children of TextNodes are special in our case.
     // A TextNode can only have annotations, inline-elements,
     // and anchors as children, which are implicitly bound
@@ -70,7 +70,7 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
     throw new Error('This is not implemented yet.')
   }
 
-  removeChild(child) {
+  removeChild(child) { // eslint-disable-line
     // ditto
     throw new Error('This is not implemented yet.')
   }
