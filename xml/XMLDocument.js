@@ -111,6 +111,79 @@ class XMLDocument extends Document {
       errors
     }
   }
+
+  /*
+    Experimental: analyzing the change on-the-fly
+    so that we can track changes hierarchically
+  */
+  _apply(documentChange) {
+    // TODO is this save?
+    if (!documentChange.ops) return
+
+    let created = {}
+    let deleted = {}
+    let updated = {}
+    let _recordUpdate = (id, level, op) => {
+      let record = updated[id]
+      if (!record) {
+        record = updated[id] = { ops: [], level }
+      } else {
+        record.level = Math.min(level, record.level)
+      }
+      if (op) record.ops.push(op)
+      return record
+    }
+    let _recordAncestorUpdates = (node) => {
+      this._forEachAncestor(node, (ancestor, level) => {
+        _recordUpdate(ancestor.id, level)
+      })
+    }
+    documentChange.ops.forEach((op) => {
+      // before applying the change we need to track the change
+      // Note: this does not work for general ops,
+      // only for ops generated via the XMLDocument API
+      switch(op.type) {
+        case 'create': {
+          created[op.path[0]] = op.val
+          break
+        }
+        case 'delete': {
+          let node = this.get(op.path[0])
+          _recordAncestorUpdates(node)
+          deleted[node.id] = node
+          break
+        }
+        case 'update':
+        case 'set': {
+          updated[op.path] = true
+          let node = this.get(op.path[0])
+          _recordUpdate(node.id, 0, op)
+          _recordAncestorUpdates(node)
+          break
+        }
+        default:
+          //
+      }
+      this._applyOp(op)
+    })
+    // clear updates for deleted nodes
+    Object.keys(deleted).forEach((id) => {
+      delete updated[id]
+    })
+    documentChange.created = created
+    documentChange.updated = updated
+    documentChange.deleted = deleted
+    documentChange._extracted = true
+  }
+
+  _forEachAncestor(node, fn) {
+    let level = 0
+    while ((node = node.parentNode)) {
+      level++
+      fn(node, level)
+    }
+  }
+
 }
 
 XMLDocument.prototype._isXMLDocument = true
