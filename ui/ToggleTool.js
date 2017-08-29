@@ -86,7 +86,9 @@ class ToggleTool extends Component {
   onClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    if (!this.props.disabled) this.executeCommand()
+    if (!this.props.disabled) {
+      this.executeCommand()
+    }
   }
 
   _getTooltipText() {
