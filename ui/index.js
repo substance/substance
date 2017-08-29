@@ -1,3 +1,4 @@
+export { default as AbstractClipboard } from './AbstractClipboard'
 export { default as AbstractEditor } from './AbstractEditor'
 export { default as AbstractIsolatedNodeComponent } from './AbstractIsolatedNodeComponent'
 export { default as AbstractScrollPane } from './AbstractScrollPane'

@@ -37,10 +37,7 @@ class Surface extends Component {
     // considering nesting in IsolatedNodes
     this._surfaceId = Surface.createSurfaceId(this)
 
-    this.clipboard = new Clipboard(this.editorSession, {
-      converterRegistry: this.context.converterRegistry,
-      editorOptions: this.editorSession.getConfigurator().getEditorOptions()
-    })
+    this.clipboard = new Clipboard(this.editorSession)
 
     this.domSelection = this.context.domSelection
     if (!this.domSelection) throw new Error('DOMSelection instance must be provided via context.')
@@ -75,7 +72,6 @@ class Surface extends Component {
     const editorSession = this.getEditorSession()
     const surfaceManager = this.getSurfaceManager()
     editorSession.off(this)
-    this.clipboard.dispose()
     if (surfaceManager) {
       surfaceManager.unregisterSurface(this)
     }
@@ -110,6 +106,8 @@ class Surface extends Component {
         } else {
           el.on('keypress', this.onTextInputShim)
         }
+        el.on('paste', this._onPaste)
+        el.on('cut', this._onCut)
       }
       if (!this.isReadonly()) {
         // Mouse Events
@@ -119,10 +117,8 @@ class Surface extends Component {
         // we will react on this to render a custom selection
         el.on('focus', this.onNativeFocus)
         el.on('blur', this.onNativeBlur)
-        // activate the clipboard
-        this.clipboard.attach(el)
       }
-
+      el.on('copy', this._onCopy)
     }
     return el
   }
@@ -484,8 +480,19 @@ class Surface extends Component {
     _state.hasNativeFocus = true
   }
 
-  // Internal implementations
+  _onCopy(e) {
+    this.clipboard.onCopy(e)
+  }
 
+  _onCut(e) {
+    this.clipboard.onCut(e)
+  }
+
+  _onPaste(e) {
+    this.clipboard.onPaste(e)
+  }
+
+  // Internal implementations
 
   _onSelectionChanged(selection) {
     let newMode = this._deriveModeFromSelection(selection)
