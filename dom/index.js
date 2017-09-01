@@ -8,3 +8,5 @@ export {
   DOMElement, DOMEventListener, DefaultDOMElement,
   BrowserDOMElement, MemoryDOMElement
 }
+
+export * from './domHelpers'
