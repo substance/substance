@@ -732,7 +732,7 @@ class BrowserWindow {
   constructor() {
     // Note: not
     this.el = window
-    window.__BrowserDOMElementWrapper__ = this
+    _attach(window, this)
   }
 
 }
