@@ -14,12 +14,19 @@ import XMLDocumentImporter from './XMLDocumentImporter'
 
 export default function registerSchema(config, xmlSchema, DocumentClass, options = {}) {
   const schemaName = xmlSchema.getName()
+  let defaultTextType
+  // Some schemas don't require a defaultTextType, still we need to provide
+  // it to the schema configuration if available
+  if (xmlSchema.getDefaultTextType) {
+    defaultTextType = xmlSchema.getDefaultTextType()
+  }
   // schema declaration
   config.defineSchema({
     name: schemaName,
     version: xmlSchema.getVersion(),
+    defaultTextType: defaultTextType,
     DocumentClass: DocumentClass,
-  // HACK: storing the xmlSchema here so that we can use it later
+    // HACK: storing the xmlSchema here so that we can use it later
     xmlSchema: xmlSchema
   })
   const tagNames = xmlSchema.getTagNames()
