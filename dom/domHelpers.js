@@ -7,3 +7,12 @@ export function findParentDOMElement(nativeEl) {
     nativeEl = nativeEl.parentNode
   }
 }
+
+export function stop(event) {
+  event.stopPropagation()
+}
+
+export function stopAndPrevent(event) {
+  event.stopPropagation()
+  event.preventDefault()
+}
