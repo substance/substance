@@ -60,7 +60,7 @@ class ToggleTool extends Component {
     let commandState = this.props.commandState
     let Button = this.getComponent('button')
     let btn = $$(Button, {
-      icon: this.props.name,
+      icon: this.getIconName(),
       active: commandState.active,
       disabled: commandState.disabled,
       theme: this.props.theme
@@ -80,6 +80,10 @@ class ToggleTool extends Component {
   }
 
   getName() {
+    return this.props.name
+  }
+
+  getIconName() {
     return this.props.name
   }
 
