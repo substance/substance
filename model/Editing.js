@@ -538,15 +538,21 @@ class Editing {
     if (!(node.isInstanceOf('text'))) {
       throw new Error('Trying to use switchTextType on a non text node.')
     }
+    const newId = uuid(data.type)
+    // Note: a TextNode is allowed to have its own way to store the plain-text
+    const oldPath = node.getTextPath()
+    console.assert(oldPath.length === 2, "Currently we assume that TextNodes store the plain-text on the first level")
+    const textProp = oldPath[1]
+    let newPath = [newId, textProp]
     // create a new node and transfer annotations
-    let newNode = Object.assign({
-      id: uuid(data.type),
+    let newNodeData = Object.assign({
+      id: newId,
       type: data.type,
-      content: node.content,
       direction: node.direction
     }, data)
-    let newPath = [newNode.id, 'content']
-    newNode = tx.create(newNode)
+    newNodeData[textProp] = node.getText()
+
+    let newNode = tx.create(newNodeData)
     annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0)
 
     // hide and delete the old one, show the new node
@@ -815,14 +821,17 @@ class Editing {
     }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
     else {
-      let newNode = node.toJSON()
-      delete newNode.id
-      newNode.content = text.substring(offset)
+      const textPath = node.getTextPath()
+      const textProp = textPath[1]
+      const newId = uuid(node.type)
+      let newNodeData = node.toJSON()
+      newNodeData.id = newId
+      newNodeData[textProp] = text.substring(offset)
       // if at the end insert a default text node no matter in which text node we are
       if (offset === text.length) {
-        newNode.type = tx.getSchema().getDefaultTextType()
+        newNodeData.type = tx.getSchema().getDefaultTextType()
       }
-      newNode = tx.create(newNode)
+      let newNode = tx.create(newNodeData)
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
@@ -850,8 +859,9 @@ class Editing {
     let L = node.length
     let itemPos = node.getItemPosition(listItem.id)
     let text = listItem.getText()
-    let newItem = listItem.toJSON()
-    delete newItem.id
+    let textProp = listItem.getTextPath()[1]
+    let newItemData = listItem.toJSON()
+    delete newItemData.id
     if (offset === 0) {
       // if breaking at an empty list item, then the list is split into two
       if (!text) {
@@ -902,8 +912,8 @@ class Editing {
       }
       // insert a new paragraph above the current one
       else {
-        newItem.content = ""
-        newItem = tx.create(newItem)
+        newItemData[textProp] = ""
+        let newItem = tx.create(newItemData)
         node.insertItemAt(itemPos, newItem.id)
         tx.setSelection({
           type: 'property',
@@ -914,12 +924,12 @@ class Editing {
     }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
     else {
-      newItem.content = text.substring(offset)
-      newItem = tx.create(newItem)
+      newItemData[textProp] = text.substring(offset)
+      let newItem = tx.create(newItemData)
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, [newItem.id,'content'], 0)
+        annotationHelpers.transferAnnotations(tx, path, offset, newItem.getTextPath(), 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
