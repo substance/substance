@@ -9,11 +9,11 @@ import XMLDocumentNode from './XMLDocumentNode'
 export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
 
   getPath() {
-    return [this.id, '_content']
+    return [this.id, 'content']
   }
 
   getText() {
-    return this._content
+    return this.content
   }
 
   /*
@@ -80,19 +80,6 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
     return true
   }
 
-  // TODO: we should make the core implementation independent of the actual
-  // property name (i.e. use getTextPath() somehow)
-  get content() {
-    console.error('FIXME: use getTextPath() to retrieve the actual property')
-    return this._content
-  }
-
-  set content(content) {
-    console.error('FIXME: use getTextPath() to retrieve the actual property')
-    this._content = content
-    return this
-  }
-
 }
 
 XMLTextElement.prototype._isXMLTextElement = true
@@ -108,7 +95,7 @@ XMLTextElement.isBlock = true
 XMLTextElement.type = 'text'
 
 XMLTextElement.schema = {
-  _content: "text"
+  content: "text"
 }
 
 function _byStartOffset(a,b) {
