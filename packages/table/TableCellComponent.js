@@ -6,7 +6,7 @@ class TableCellComponent extends Component {
     let el = $$('td').addClass('sc-table-cell')
     el.append(
       $$(TextPropertyEditor, {
-        path: node.getTextPath(),
+        path: node.getPath(),
         disabled: this.props.disabled
       }).ref('editor')
     )

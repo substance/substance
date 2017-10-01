@@ -144,7 +144,7 @@ class TextInputEditor extends TextPropertyEditor {
     const input = doc.getContentNode()
     this.editorSession.setSelection({
       type: 'property',
-      path: input.getTextPath(),
+      path: input.getPath(),
       startOffset: input.getLength(),
       surfaceId: this.id
     })
@@ -155,7 +155,7 @@ class TextInputEditor extends TextPropertyEditor {
     const input = doc.getContentNode()
     this.editorSession.setSelection({
       type: 'property',
-      path: input.getTextPath(),
+      path: input.getPath(),
       startOffset: 0,
       endffset: input.getLength(),
       surfaceId: this.id

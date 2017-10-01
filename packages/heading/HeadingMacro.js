@@ -30,7 +30,7 @@ export default {
         })
         tx.setSelection({
           type: 'property',
-          path: node.getTextPath(),
+          path: node.getPath(),
           startOffset: startOffset - match[0].length
         })
       })

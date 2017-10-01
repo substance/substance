@@ -303,14 +303,14 @@ function deleteListRange(doc, list, start, end) {
   }
   if (!start) {
     start = {
-      path: list.getItemAt(0).getTextPath(),
+      path: list.getItemAt(0).getPath(),
       offset: 0
     }
   }
   if (!end) {
     let item = list.getLastItem()
     end = {
-      path: item.getTextPath(),
+      path: item.getPath(),
       offset: item.getLength()
     }
   }
@@ -366,10 +366,10 @@ function mergeListItems(doc, listId, itemPos) {
   // HACK: make sure that the list is really from the doc
   let list = doc.get(listId)
   let target = list.getItemAt(itemPos)
-  let targetPath = target.getTextPath()
+  let targetPath = target.getPath()
   let targetLength = target.getLength()
   let source = list.getItemAt(itemPos+1)
-  let sourcePath = source.getTextPath()
+  let sourcePath = source.getPath()
   // hide source
   list.removeItemAt(itemPos+1)
   // append the text

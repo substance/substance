@@ -33,7 +33,7 @@ class TextBlockComponent extends NodeComponent {
     }
     el.append($$(TextProperty, {
       placeholder: this.props.placeholder,
-      path: node.getTextPath(),
+      path: node.getPath(),
       direction: node.direction
     }))
     return el

@@ -43,7 +43,7 @@ export default {
         return $$(arg)
       } else {
         let item = arg
-        return $$('li').append(converter.annotatedText(item.getTextPath()))
+        return $$('li').append(converter.annotatedText(item.getPath()))
       }
     })
     return el

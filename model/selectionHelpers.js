@@ -87,7 +87,7 @@ export function setCursor(tx, node, containerId, mode) {
     }
     tx.setSelection({
       type: 'property',
-      path: node.getTextPath(),
+      path: node.getPath(),
       startOffset: offset,
       containerId: containerId
     })
@@ -102,7 +102,7 @@ export function setCursor(tx, node, containerId, mode) {
     }
     tx.setSelection({
       type: 'property',
-      path: item.getTextPath(),
+      path: item.getPath(),
       startOffset: offset,
       containerId: containerId
     })
@@ -128,7 +128,7 @@ export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, s
   node = node.getContainerRoot()
   if (node.isText()) {
     return new PropertySelection({
-      path: node.getTextPath(),
+      path: node.getPath(),
       startOffset: mode === 'after' ? node.getLength() : 0,
       endOffset: mode === 'before' ? 0 : node.getLength(),
       reverse: reverse,
@@ -139,11 +139,11 @@ export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, s
     let first = node.getFirstItem()
     let last = node.getLastItem()
     let start = {
-      path: first.getTextPath(),
+      path: first.getPath(),
       offset: 0
     }
     let end = {
-      path: last.getTextPath(),
+      path: last.getPath(),
       offset: last.getLength()
     }
     if (mode === 'after') start = end

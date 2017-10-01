@@ -169,7 +169,7 @@ class Editing {
       container.showAt(nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
-        path: newNode.getTextPath(),
+        path: newNode.getPath(),
         startOffset: 0,
         containerId: container.id,
       })
@@ -181,7 +181,7 @@ class Editing {
           if (previous.isText()) {
             tx.setSelection({
               type: 'property',
-              path: previous.getTextPath(),
+              path: previous.getPath(),
               startOffset: previous.getLength()
             })
             this.delete(tx, direction)
@@ -201,7 +201,7 @@ class Editing {
           if (next.isText()) {
             tx.setSelection({
               type: 'property',
-              path: next.getTextPath(),
+              path: next.getPath(),
               startOffset: 0
             })
             this.delete(tx, direction)
@@ -311,7 +311,7 @@ class Editing {
       container.showAt(startPos, textNode.id)
       tx.setSelection({
         type: 'property',
-        path: textNode.getTextPath(),
+        path: textNode.getPath(),
         startOffset: 0,
         containerId: containerId
       })
@@ -540,7 +540,7 @@ class Editing {
     }
     const newId = uuid(data.type)
     // Note: a TextNode is allowed to have its own way to store the plain-text
-    const oldPath = node.getTextPath()
+    const oldPath = node.getPath()
     console.assert(oldPath.length === 2, "Currently we assume that TextNodes store the plain-text on the first level")
     const textProp = oldPath[1]
     let newPath = [newId, textProp]
@@ -593,7 +593,7 @@ class Editing {
           type: 'list-item',
           content: node.getText(),
         })
-        annotationHelpers.transferAnnotations(tx, node.getTextPath(), 0, newItem.getTextPath(), 0)
+        annotationHelpers.transferAnnotations(tx, node.getPath(), 0, newItem.getPath(), 0)
         let newList = tx.create(Object.assign({
           type: 'list',
           items: [newItem.id]
@@ -602,7 +602,7 @@ class Editing {
         container.showAt(nodePos, newList.id)
         tx.setSelection({
           type: 'property',
-          path: newItem.getTextPath(),
+          path: newItem.getPath(),
           startOffset: sel.start.offset,
           containerId: sel.containerId
         })
@@ -611,7 +611,7 @@ class Editing {
         let itemPos = node.getItemPosition(itemId)
         let item = node.getItemAt(itemPos)
         let newTextNode = tx.createDefaultTextNode(item.getText())
-        annotationHelpers.transferAnnotations(tx, item.getTextPath(), 0, newTextNode.getTextPath(), 0)
+        annotationHelpers.transferAnnotations(tx, item.getPath(), 0, newTextNode.getPath(), 0)
         // take the item out of the list
         node.removeItemAt(itemPos)
         if (node.isEmpty()) {
@@ -641,7 +641,7 @@ class Editing {
         }
         tx.setSelection({
           type: 'property',
-          path: newTextNode.getTextPath(),
+          path: newTextNode.getPath(),
           startOffset: sel.start.offset,
           containerId: sel.containerId
         })
@@ -821,7 +821,7 @@ class Editing {
     }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
     else {
-      const textPath = node.getTextPath()
+      const textPath = node.getPath()
       const textProp = textPath[1]
       const newId = uuid(node.type)
       let newNodeData = node.toJSON()
@@ -835,7 +835,7 @@ class Editing {
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, newNode.getTextPath(), 0)
+        annotationHelpers.transferAnnotations(tx, path, offset, newNode.getPath(), 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
@@ -844,7 +844,7 @@ class Editing {
       // update the selection
       tx.setSelection({
         type: 'property',
-        path: newNode.getTextPath(),
+        path: newNode.getPath(),
         startOffset: 0,
         containerId: container.id
       })
@@ -859,7 +859,7 @@ class Editing {
     let L = node.length
     let itemPos = node.getItemPosition(listItem.id)
     let text = listItem.getText()
-    let textProp = listItem.getTextPath()[1]
+    let textProp = listItem.getPath()[1]
     let newItemData = listItem.toJSON()
     delete newItemData.id
     if (offset === 0) {
@@ -906,7 +906,7 @@ class Editing {
         }
         tx.setSelection({
           type: 'property',
-          path: newTextNode.getTextPath(),
+          path: newTextNode.getPath(),
           startOffset: 0
         })
       }
@@ -917,7 +917,7 @@ class Editing {
         node.insertItemAt(itemPos, newItem.id)
         tx.setSelection({
           type: 'property',
-          path: listItem.getTextPath(),
+          path: listItem.getPath(),
           startOffset: 0
         })
       }
@@ -929,14 +929,14 @@ class Editing {
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, newItem.getTextPath(), 0)
+        annotationHelpers.transferAnnotations(tx, path, offset, newItem.getPath(), 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
       node.insertItemAt(itemPos+1, newItem.id)
       tx.setSelection({
         type: 'property',
-        path: newItem.getTextPath(),
+        path: newItem.getPath(),
         startOffset: 0
       })
     }
@@ -960,7 +960,7 @@ class Editing {
         documentHelpers.mergeListItems(tx, list.id, itemPos)
         tx.setSelection({
           type: 'property',
-          path: target.getTextPath(),
+          path: target.getPath(),
           startOffset: targetLength,
           containerId: container.id
         })
@@ -990,11 +990,11 @@ class Editing {
         return
       }
       let target = first
-      let targetPath = target.getTextPath()
+      let targetPath = target.getPath()
       let targetLength = target.getLength()
       if (second.isText()) {
         let source = second
-        let sourcePath = source.getTextPath()
+        let sourcePath = source.getPath()
         container.hide(source.id)
         // append the text
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
@@ -1011,7 +1011,7 @@ class Editing {
         let list = second
         if (!second.isEmpty()) {
           let source = list.getFirstItem()
-          let sourcePath = source.getTextPath()
+          let sourcePath = source.getPath()
           // remove merged item from list
           list.removeItemAt(0)
           // append the text
@@ -1037,9 +1037,9 @@ class Editing {
     } else if (first.isList()) {
       if (second.isText()) {
         let source = second
-        let sourcePath = source.getTextPath()
+        let sourcePath = source.getPath()
         let target = first.getLastItem()
-        let targetPath = target.getTextPath()
+        let targetPath = target.getPath()
         let targetLength = target.getLength()
         // hide source
         container.hide(source.id)
@@ -1050,7 +1050,7 @@ class Editing {
         documentHelpers.deleteNode(tx, source)
         tx.setSelection({
           type: 'property',
-          path: target.getTextPath(),
+          path: target.getPath(),
           startOffset: targetLength,
           containerId: container.id
         })
@@ -1072,7 +1072,7 @@ class Editing {
         let item = tx.get(last(firstItems))
         tx.setSelection({
           type: 'property',
-          path: item.getTextPath(),
+          path: item.getPath(),
           startOffset: item.getLength(),
           containerId: container.id
         })

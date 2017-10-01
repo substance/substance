@@ -590,15 +590,15 @@ class Document extends EventEmitter {
       let node = this.get(path[0]).getContainerRoot()
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
-        return new Coordinate(node.getTextPath(), offset === 0 ? 0 : node.getLength())
+        return new Coordinate(node.getPath(), offset === 0 ? 0 : node.getLength())
       } else if (node.isList()) {
         // console.warn("DEPRECATED: don't use node coordinates for ListNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         if (offset === 0) {
           let item = node.getItemAt(0)
-          return new Coordinate(item.getTextPath(), 0)
+          return new Coordinate(item.getPath(), 0)
         } else {
           let item = this.get(last(node.items))
-          return new Coordinate(item.getTextPath(), item.getLength())
+          return new Coordinate(item.getPath(), item.getLength())
         }
       }
     }
