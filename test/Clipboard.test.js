@@ -417,11 +417,8 @@ function _fixture(t, seed) {
 
 function _fixtureTest(t, html, impl, forceWindows) {
   let { editorSession, clipboard, doc } = _fixture(t, simple)
-  if (forceWindows) {
-    // NOTE: faking 'Windows' mode in importer so that
-    // the correct implementation will be used
-    clipboard.htmlImporter._isWindows = true
-  }
+  let _isWindows = platform.isWindows
+  platform.isWindows = Boolean(forceWindows)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -429,6 +426,7 @@ function _fixtureTest(t, html, impl, forceWindows) {
     containerId: 'body'
   })
   impl(doc, clipboard)
+  platform.isWindows = _isWindows
 }
 
 function _emptyParagraphSeed(tx) {
@@ -547,7 +545,7 @@ function _extendedTest(t, html, forceWindows) {
     // let annotationsNode3 = doc.getIndex('annotations').get([node3.id, 'content']).sort((a, b) => {
     //   return a.start.offset - b.start.offset
     // })
-    // While we are not supporting combined formatting annotations 
+    // While we are not supporting combined formatting annotations
     // we will run selective tests for selections to ensure that annotations are exist
 
     // Get annotations for range without annotations

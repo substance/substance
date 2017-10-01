@@ -60,7 +60,7 @@ class ToggleTool extends Component {
     let commandState = this.props.commandState
     let Button = this.getComponent('button')
     let btn = $$(Button, {
-      icon: this.props.name,
+      icon: this.getIconName(),
       active: commandState.active,
       disabled: commandState.disabled,
       theme: this.props.theme
@@ -83,10 +83,16 @@ class ToggleTool extends Component {
     return this.props.name
   }
 
+  getIconName() {
+    return this.props.name
+  }
+
   onClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    if (!this.props.disabled) this.executeCommand()
+    if (!this.props.disabled) {
+      this.executeCommand()
+    }
   }
 
   _getTooltipText() {

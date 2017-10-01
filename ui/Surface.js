@@ -15,6 +15,10 @@ class Surface extends Component {
   constructor(...args) {
     super(...args)
 
+    this._initialize()
+  }
+
+  _initialize() {
     // EditorSession instance must be provided either as a prop
     // or via dependency-injection
     this.editorSession = this.props.editorSession || this.context.editorSession
@@ -31,29 +35,12 @@ class Surface extends Component {
     }
     // this path is an identifier unique for this surface
     // considering nesting in IsolatedNodes
-    this._surfaceId = createSurfaceId(this)
+    this._surfaceId = Surface.createSurfaceId(this)
 
-    this.clipboard = new Clipboard(this.editorSession, {
-      converterRegistry: this.context.converterRegistry,
-      editorOptions: this.editorSession.getConfigurator().getEditorOptions()
-    })
+    this.clipboard = new Clipboard(this.editorSession)
 
     this.domSelection = this.context.domSelection
     if (!this.domSelection) throw new Error('DOMSelection instance must be provided via context.')
-
-    this.domObserver = null
-
-    // HACK: we need to listen to mousup on document
-    // to catch events outside the surface
-    if (platform.inBrowser) {
-      this.documentEl = DefaultDOMElement.wrapNativeElement(window.document)
-    }
-
-    // set when editing is enabled
-    this.undoEnabled = true
-
-    // a registry for TextProperties which allows us to dispatch changes
-    this._textProperties = {}
 
     this._state = {
       // true if the document session's selection is addressing this surface
@@ -72,21 +59,21 @@ class Surface extends Component {
   }
 
   didMount() {
-    if (this.context.surfaceManager) {
-      this.context.surfaceManager.registerSurface(this)
+    const editorSession = this.getEditorSession()
+    const surfaceManager = this.getSurfaceManager()
+    if (surfaceManager) {
+      surfaceManager.registerSurface(this)
     }
-    this.editorSession.onRender('selection', this._onSelectionChanged, this)
+    editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
 
   dispose() {
-    this.editorSession.off(this)
-    this.clipboard.dispose()
-    if (this.domObserver) {
-      this.domObserver.disconnect()
-    }
-    if (this.context.surfaceManager) {
-      this.context.surfaceManager.unregisterSurface(this)
+    const editorSession = this.getEditorSession()
+    const surfaceManager = this.getSurfaceManager()
+    editorSession.off(this)
+    if (surfaceManager) {
+      surfaceManager.unregisterSurface(this)
     }
   }
 
@@ -119,6 +106,8 @@ class Surface extends Component {
         } else {
           el.on('keypress', this.onTextInputShim)
         }
+        el.on('paste', this._onPaste)
+        el.on('cut', this._onCut)
       }
       if (!this.isReadonly()) {
         // Mouse Events
@@ -128,10 +117,8 @@ class Surface extends Component {
         // we will react on this to render a custom selection
         el.on('focus', this.onNativeFocus)
         el.on('blur', this.onNativeBlur)
-        // activate the clipboard
-        this.clipboard.attach(el)
       }
-
+      el.on('copy', this._onCopy)
     }
     return el
   }
@@ -163,6 +150,10 @@ class Surface extends Component {
     return this._surfaceId
   }
 
+  getSurfaceId() {
+    return this._surfaceId
+  }
+
   isDisabled() {
     return this.props.disabled
   }
@@ -184,11 +175,15 @@ class Surface extends Component {
   }
 
   getDocument() {
-    return this.editorSession.getDocument()
+    return this.getEditorSession().getDocument()
   }
 
   getEditorSession() {
     return this.editorSession
+  }
+
+  getSurfaceManager() {
+    return this.context.surfaceManager
   }
 
   isEnabled() {
@@ -212,14 +207,14 @@ class Surface extends Component {
   }
 
   focus() {
-    if (this.editorSession.getFocusedSurface() !== this) {
+    if (this.getEditorSession().getFocusedSurface() !== this) {
       this.selectFirst()
     }
   }
 
   blur() {
-    if (this.editorSession.getFocusedSurface() === this) {
-      this.editorSession.setSelection(null)
+    if (this.getEditorSession().getFocusedSurface() === this) {
+      this.getEditorSession().setSelection(null)
     }
   }
 
@@ -232,7 +227,7 @@ class Surface extends Component {
     if (this.isDisabled()) return
     if (platform.inBrowser) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
-      let sel = this.editorSession.getSelection()
+      let sel = this.getEditorSession().getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
         // HACK: accessing the scrollpane directly
@@ -263,7 +258,7 @@ class Surface extends Component {
     if ( event.key === 'Dead' ) return
 
     // keyboard shortcuts
-    let custom = this.editorSession.keyboardManager.onKeydown(event)
+    let custom = this.getEditorSession().keyboardManager.onKeydown(event)
     if (!custom) {
       // core handlers for cursor movements and editor interactions
       switch ( event.keyCode ) {
@@ -304,9 +299,10 @@ class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
+    const editorSession = this.getEditorSession()
     let text = event.data
-    if (!this.editorSession.keyboardManager.onTextInput(text)) {
-      this.editorSession.transaction((tx) => {
+    if (!editorSession.keyboardManager.onTextInput(text)) {
+      editorSession.transaction((tx) => {
         tx.insertText(text)
       }, { action: 'type' })
     }
@@ -324,11 +320,11 @@ class Surface extends Component {
     // In that case, the first inserted character must be removed again
     if (event.data) {
       let l = event.data.length
-      let sel = this.editorSession.getSelection()
+      let sel = this.getEditorSession().getSelection()
       if (sel.isPropertySelection() && sel.isCollapsed()) {
         // console.log("Overwriting composed character")
         let offset = sel.start.offset
-        this.editorSession.setSelection(sel.createWithNewRange(offset-l, offset))
+        this.getEditorSession().setSelection(sel.createWithNewRange(offset-l, offset))
       }
     }
   }
@@ -344,8 +340,8 @@ class Surface extends Component {
       if (!event.data) return
       this._delayed(() => {
         let text = event.data
-        if (!this.editorSession.keyboardManager.onTextInput(text)) {
-          this.editorSession.transaction((tx) => {
+        if (!this.getEditorSession().keyboardManager.onTextInput(text)) {
+          this.getEditorSession().transaction((tx) => {
             tx.insertText(text)
           }, { action: 'type' })
         }
@@ -373,9 +369,9 @@ class Surface extends Component {
     }
     event.preventDefault()
     event.stopPropagation()
-    if (!this.editorSession.keyboardManager.onTextInput(character)) {
+    if (!this.getEditorSession().keyboardManager.onTextInput(character)) {
       if (character.length>0) {
-        this.editorSession.transaction((tx) => {
+        this.getEditorSession().transaction((tx) => {
           tx.insertText(character)
         }, { action: 'type' })
       }
@@ -439,10 +435,10 @@ class Surface extends Component {
     // then the handler needs to kick in and recover a persisted selection or such
     this._state.skipNextFocusEvent = true
 
-    // Bind mouseup to the whole document in case of dragging out of the surface
-    if (this.documentEl) {
-      // TODO: we should handle mouse up only if we started a drag (and the selection has really changed)
-      this.documentEl.on('mouseup', this.onMouseUp, this, { once: true })
+    // HACK: we need to listen to mousup on document to catch events outside the surface
+    if (platform.inBrowser) {
+      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
+      documentEl.on('mouseup', this.onMouseUp, this, { once: true })
     }
   }
 
@@ -484,8 +480,19 @@ class Surface extends Component {
     _state.hasNativeFocus = true
   }
 
-  // Internal implementations
+  _onCopy(e) {
+    this.clipboard.onCopy(e)
+  }
 
+  _onCut(e) {
+    this.clipboard.onCut(e)
+  }
+
+  _onPaste(e) {
+    this.clipboard.onPaste(e)
+  }
+
+  // Internal implementations
 
   _onSelectionChanged(selection) {
     let newMode = this._deriveModeFromSelection(selection)
@@ -524,7 +531,7 @@ class Surface extends Component {
       if (this.state.mode === 'co-focused') {
         let selState = this.context.editorSession.getSelectionState()
         let sel = selState.getSelection()
-        let surface = this.context.surfaceManager.getSurface(sel.surfaceId)
+        let surface = this.getSurfaceManager().getSurface(sel.surfaceId)
         if (surface) {
           let isolatedNodeComponent = surface.context.isolatedNodeComponent
           if (isolatedNodeComponent) {
@@ -624,8 +631,8 @@ class Surface extends Component {
     event.stopPropagation()
     event.preventDefault()
     const text = ' '
-    if (!this.editorSession.keyboardManager.onTextInput(text)) {
-      this.editorSession.transaction((tx) => {
+    if (!this.getEditorSession().keyboardManager.onTextInput(text)) {
+      this.getEditorSession().transaction((tx) => {
         tx.insertText(text)
       }, { action: 'type' })
     }
@@ -652,7 +659,7 @@ class Surface extends Component {
   _handleEnterKey(event) {
     event.preventDefault()
     event.stopPropagation()
-    this.editorSession.transaction((tx) => {
+    this.getEditorSession().transaction((tx) => {
       tx.break()
     }, { action: 'break' })
   }
@@ -663,7 +670,7 @@ class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     let direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right'
-    this.editorSession.transaction((tx) => {
+    this.getEditorSession().transaction((tx) => {
       tx.deleteCharacter(direction)
     }, { action: 'delete' })
   }
@@ -684,7 +691,7 @@ class Surface extends Component {
     if (!sel.isNull() && sel.surfaceId === this.id && platform.isFF) {
       this._focusElement()
     }
-    this.editorSession.setSelection(sel)
+    this.getEditorSession().setSelection(sel)
   }
 
   _updateModelSelection(options) {
@@ -704,24 +711,6 @@ class Surface extends Component {
       startOffset: 0,
       endOffset: text.length
     }))
-  }
-
-  // internal API for TextProperties to enable dispatching
-  // TextProperty components are registered via path
-  _registerTextProperty(textPropertyComponent) {
-    let path = textPropertyComponent.getPath()
-    this._textProperties[path] = textPropertyComponent
-  }
-
-  _unregisterTextProperty(textPropertyComponent) {
-    let path = textPropertyComponent.getPath()
-    if (this._textProperties[path] === textPropertyComponent) {
-      delete this._textProperties[path]
-    }
-  }
-
-  _getTextPropertyComponent(path) {
-    return this._textProperties[path]
   }
 
   // TODO: we could integrate container node rendering into this helper
@@ -791,7 +780,7 @@ Surface.prototype._isSurface = true
   - figure caption: 'body/fig1/fig1-caption.content'
   - nested containers: 'body/section1'
 */
-function createSurfaceId(surface) {
+Surface.createSurfaceId = function(surface) {
   let isolatedNodeComponent = surface.context.isolatedNodeComponent
   if (isolatedNodeComponent) {
     let parentSurface = isolatedNodeComponent.context.surface

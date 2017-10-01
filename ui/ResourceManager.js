@@ -38,8 +38,8 @@ class ResourceManager {
 
   _onDocumentChange(change) {
     let doc = this.editorSession.getDocument()
-    forEach(change.created, (node) => {
-      node = doc.get(node.id)
+    forEach(change.created, (_, id) => {
+      let node = doc.get(id)
       if (node.constructor.isResource) {
         setTimeout(() => {
           this.triggerFetch(node)

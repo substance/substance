@@ -89,10 +89,12 @@ function _convertPlainTextToDocument(tx, args) {
 
 function _pasteAnnotatedText(tx, copy) {
   let sel = tx.selection
-  let nodes = copy.get(Document.SNIPPET_ID).nodes
-  let textPath = [nodes[0], 'content']
-  let text = copy.get(textPath)
-  let annotations = copy.getIndex('annotations').get(textPath)
+  const nodes = copy.get(Document.SNIPPET_ID).nodes
+  const firstId = nodes[0]
+  const first = copy.get(firstId)
+  const textPath = first.getPath()
+  const text = copy.get(textPath)
+  const annotations = copy.getIndex('annotations').get(textPath)
   // insert plain text
   let path = sel.start.path
   let offset = sel.start.offset

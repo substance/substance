@@ -65,9 +65,8 @@ class FileManager {
 
   _onDocumentChange(change) {
     let doc = this.editorSession.getDocument()
-    forEach(change.created, (nodeData) => {
-      // we would need the real node to support inheritance
-      let node = doc.get(nodeData.id)
+    forEach(change.created, (_, id) => {
+      let node = doc.get(id)
       if (node._isFileNode) {
         this.storeFile(node)
       }

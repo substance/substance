@@ -22,9 +22,6 @@ class ClipboardImporter extends HTMLImporter {
       REMOVE_INNER_WS: true
     })
 
-    // ATTENTION: this is only here so we can enfore windows conversion
-    // mode from within tests
-    this._isWindows = platform.isWindows
     this.editorOptions = config.editorOptions
   }
 
@@ -32,7 +29,7 @@ class ClipboardImporter extends HTMLImporter {
     Parses HTML and applies some sanitization/normalization.
   */
   importDocument(html) {
-    if (this._isWindows) {
+    if (platform.isWindows) {
       // Under windows we can exploit <!--StartFragment--> and <!--EndFragment-->
       // to have an easier life
       let match = /<!--StartFragment-->(.*)<!--EndFragment-->/.exec(html)
@@ -70,7 +67,7 @@ class ClipboardImporter extends HTMLImporter {
     } else if(xmnlsw) {
       if(xmnlsw.indexOf('office:word') > -1) {
         this._isMicrosoftWord = true
-        // For microsoft word we need only content between 
+        // For microsoft word we need only content between
         // <!--StartFragment--> and <!--EndFragment-->
         // Note that there might be new lines so we should use [\s\S]
         let match = /<!--StartFragment-->([\s\S]*)<!--EndFragment-->/.exec(html)
@@ -123,7 +120,7 @@ class ClipboardImporter extends HTMLImporter {
     }
 
     body.findAll('span').forEach(span => {
-      // Google Docs uses spans with inline styles 
+      // Google Docs uses spans with inline styles
       // insted of inline nodes
       // We are scanning each span for certain inline styles:
       // font-weight: 700 -> <b>
@@ -160,7 +157,7 @@ class ClipboardImporter extends HTMLImporter {
 
     tags.forEach(tag => {
       body.findAll(tag).forEach(el => {
-        // Union siblings with the same tags, e.g. we are turning 
+        // Union siblings with the same tags, e.g. we are turning
         // <b>str</b><b><i>ong</i></b> to <b>str<i>ong</i></b>
         let previousSiblingEl = el.getPreviousSibling()
         if(previousSiblingEl && el.tagName === previousSiblingEl.tagName) {
@@ -171,7 +168,7 @@ class ClipboardImporter extends HTMLImporter {
           parentEl.removeChild(previousSiblingEl)
         }
 
-        // Union siblings and child with the same tags, e.g. we are turning 
+        // Union siblings and child with the same tags, e.g. we are turning
         // <i>emph</i><b><i>asis</i></b> to <i>emph<b>asis</b></i>
         // Note that at this state children always have the same text content
         // e.g. there can't be cases like <b><i>emph</i> asis</b> so we don't treat them
@@ -244,12 +241,14 @@ class ClipboardImporter extends HTMLImporter {
 function _withCatchAllConverter(config) {
   config = Object.assign({}, config)
   let defaultTextType = config.schema.getDefaultTextType()
-  config.converters = config.converters.concat([{
-    type: defaultTextType,
-    matchElement: function(el) { return el.is('div') },
-    import: function(el, node, converter) {
-      node.content = converter.annotatedText(el, [node.id, 'content'])
-    }
-  }])
+  if (defaultTextType) {
+    config.converters = config.converters.concat([{
+      type: defaultTextType,
+      matchElement: function(el) { return el.is('div') },
+      import: function(el, node, converter) {
+        node.content = converter.annotatedText(el, [node.id, 'content'])
+      }
+    }])
+  }
   return config
 }

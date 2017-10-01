@@ -1,6 +1,15 @@
 import { TextBlock } from '../../model'
 
-class Heading extends TextBlock {}
+class Heading extends TextBlock {
+
+  isHeading() {
+    return true
+  }
+
+  getLevel() {
+    return this.level
+  }
+}
 
 Heading.schema = {
   type: "heading",

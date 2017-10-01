@@ -17,7 +17,7 @@ export default function createEditorSession(...seeds) {
     if (first.isText()) {
       editorSession.setSelection({
         type: 'property',
-        path: first.getTextPath(),
+        path: first.getPath(),
         startOffset: 0,
         containerId: 'body',
         surfaceId: 'body'
@@ -25,7 +25,7 @@ export default function createEditorSession(...seeds) {
     } else if (first.isList()) {
       editorSession.setSelection({
         type: 'property',
-        path: first.getItemAt(0).getTextPath(),
+        path: first.getItemAt(0).getPath(),
         startOffset: 0,
         containerId: 'body',
         surfaceId: 'body'

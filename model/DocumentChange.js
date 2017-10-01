@@ -111,7 +111,7 @@ class DocumentChange {
         let node = container.getChildAt(pos)
         let path
         if (node.isText()) {
-          path = [node.id, 'content']
+          path = node.getPath()
         } else {
           path = [node.id]
         }

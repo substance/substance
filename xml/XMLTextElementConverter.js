@@ -1,10 +1,10 @@
 import XMLNodeConverter from './XMLNodeConverter'
 
 export default
-class TextNodeConverter extends XMLNodeConverter {
+class XMLTextElementConverter extends XMLNodeConverter {
 
   import(el, node, converter) {
-    node.content = converter.annotatedText(el, [node.id, 'content'])
+    node.content = converter.annotatedText(el, [node.id, 'content'], { preserveWhitespace: true })
   }
 
   export(node, el, converter) {

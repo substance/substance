@@ -6,7 +6,7 @@ import XMLDocumentNode from './XMLDocumentNode'
   Note: this is slightly different to Substance TextNode
   thus this does not extend Substance.TextNode.
 */
-export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
+export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
 
   getPath() {
     return [this.id, 'content']
@@ -24,8 +24,7 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
   */
   getChildren() {
     const annos = this.getAnnotations()
-    // sorting here by start.offset so that
-    // childNodes appear in natural order
+    // sorting here by start.offset so that childNodes appear in natural order
     annos.sort(_byStartOffset)
     return annos
   }
@@ -60,7 +59,7 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
     this.setText(text)
   }
 
-  appendChild(child) {
+  appendChild(child) { // eslint-disable-line
     // TODO: children of TextNodes are special in our case.
     // A TextNode can only have annotations, inline-elements,
     // and anchors as children, which are implicitly bound
@@ -71,7 +70,7 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
     throw new Error('This is not implemented yet.')
   }
 
-  removeChild(child) {
+  removeChild(child) { // eslint-disable-line
     // ditto
     throw new Error('This is not implemented yet.')
   }
@@ -83,16 +82,19 @@ export default class XMLTextNode extends TextNodeMixin(XMLDocumentNode) {
 
 }
 
-XMLTextNode.prototype.text = DOMElement.prototype.text
+XMLTextElement.prototype._isXMLTextElement = true
 
-XMLTextNode.prototype._elementType = 'text'
+XMLTextElement.prototype.text = DOMElement.prototype.text
 
-XMLTextNode.isText = true
-XMLTextNode.isBlock = true
+XMLTextElement.prototype._elementType = 'text'
 
-XMLTextNode.type = 'text'
 
-XMLTextNode.schema = {
+XMLTextElement.isText = true
+XMLTextElement.isBlock = true
+
+XMLTextElement.type = 'text'
+
+XMLTextElement.schema = {
   content: "text"
 }
 

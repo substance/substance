@@ -1,6 +1,6 @@
 import { ToolPanel } from '../../ui'
 
-class Toolbar extends ToolPanel {
+export default class Toolbar extends ToolPanel {
 
   render($$) {
     let el = $$('div').addClass('sc-toolbar')
@@ -16,5 +16,3 @@ class Toolbar extends ToolPanel {
     return this.props.theme || 'light'
   }
 }
-
-export default Toolbar

@@ -19,8 +19,7 @@ const INVISIBLE_CHARACTER = "\u200B"
   @param {DocumentSchema} config.schema
   @param {object[]} config.converters
  */
-export default
-class DOMImporter {
+export default class DOMImporter {
 
   constructor(config, context) {
     this.context = context || {}
@@ -86,9 +85,6 @@ class DOMImporter {
       } else {
         this._blockConverters.push(converter)
       }
-    }
-    if (!this._defaultBlockConverter) {
-      throw new Error(`No converter for defaultTextType ${defaultTextType}`)
     }
   }
 

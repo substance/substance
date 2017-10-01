@@ -386,7 +386,7 @@ test("IB2: Inserting BlockNode using cursor at start of a TextNode", (t) => {
   t.equal(body.nodes[0], 'ib1', 'First node should be inserted block node.')
   t.equal(body.nodes[1], 'p1', 'Second node should be inserted block node.')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, p1.getTextPath(), '... on paragraph')
+  t.deepEqual(sel.start.path, p1.getPath(), '... on paragraph')
   t.equal(sel.start.offset, 0, '... first position')
   t.end()
 })
@@ -667,7 +667,7 @@ test("DEL4: Deleting using DELETE with cursor inside an empty TextNode and TextN
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
   t.equal(p2.getText(), P2_TEXT, 'p2 should not be affected')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, p2.getTextPath(), '... on p2')
+  t.deepEqual(sel.start.path, p2.getPath(), '... on p2')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -727,7 +727,7 @@ test("DEL7: Deleting using DELETE with cursor at the end of a non-empty TextNode
   let p1 = doc.get('p1')
   t.equal(body.nodes.length, 1, 'There should be only one node left.')
   t.ok(sel.isCollapsed(), 'Selection should be a collapsed')
-  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.deepEqual(sel.start.path, p1.getPath(), '... on p1')
   t.equal(sel.start.offset, P1_TEXT.length, '... at the same position as before')
   t.end()
 })
@@ -827,7 +827,7 @@ test("DEL12: Deleting using BACKSPACE with cursor inside an empty TextNode and T
   let p1 = doc.get('p1')
   t.isNil(doc.get('empty'), 'empty node should have been deleted')
   t.equal(p1.getText(), P1_TEXT, 'p1 should be untouched')
-  t.deepEqual(sel.start.path, p1.getTextPath(), 'Cursor should be in p1')
+  t.deepEqual(sel.start.path, p1.getPath(), 'Cursor should be in p1')
   t.equal(sel.start.offset, P1_TEXT.length, '... at last position')
   t.end()
 })
@@ -866,7 +866,7 @@ test("DEL14: Deleting using BACKSPACE with cursor at the start of a non-empty Te
   t.isNil(doc.get('p2'), 'p2 should have been deleted')
   t.equal(p1.getText(), P1_TEXT+P2_TEXT, 'Text should have been merged')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.deepEqual(sel.start.path, p1.getPath(), '... on p1')
   t.ok(sel.start.offset, P1_TEXT.length, '... cursor should after the original text of p1')
   t.end()
 })
@@ -908,7 +908,7 @@ test("DEL16: Deleting using BACKSPACE with cursor after IsolatedNode", (t) => {
   t.equal(body.getLength(), 2, 'There should still be two nodes')
   let pnew = body.getChildAt(0)
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, pnew.getTextPath(), '... on new paragraph')
+  t.deepEqual(sel.start.path, pnew.getPath(), '... on new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -930,7 +930,7 @@ test("DEL17: Deleting using BACKSPACE with cursor before IsolatedNode with TextN
   t.equal(body.getLength(), 2, 'There should still be two nodes')
   t.equal(p1.getText(), P1_TEXT.slice(0, -1), 'Last character of p1 should have been deleted')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.deepEqual(sel.start.path, p1.getPath(), '... on p1')
   t.equal(sel.start.offset, P1_TEXT.length-1, '... at last position')
   t.end()
 })
@@ -971,7 +971,7 @@ test("DEL19: Deleting an entirely selected IsolatedNode", (t) => {
   let pnew = body.getChildAt(1)
   t.equal(body.getLength(), 3, 'There should be 3 nodes')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, pnew.getTextPath(), '... on new paragraph')
+  t.deepEqual(sel.start.path, pnew.getPath(), '... on new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -982,9 +982,9 @@ test("DEL20: Deleting a range starting before a TextNode and ending after a Text
   let p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
-    startPath: p1.getTextPath(),
+    startPath: p1.getPath(),
     startOffset: 0,
-    endPath: p2.getTextPath(),
+    endPath: p2.getPath(),
     endOffset: p2.getLength(),
     containerId: 'body'
   })
@@ -998,7 +998,7 @@ test("DEL20: Deleting a range starting before a TextNode and ending after a Text
   t.ok(first.isText(), '... which is a TextNode')
   t.ok(first.isEmpty(), '... which is empty')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.deepEqual(sel.start.path, first.getPath(), '... on that TextNode')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -1009,9 +1009,9 @@ test("DEL21: Deleting a range starting in the middle of a TextNode and ending af
   let p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
-    startPath: p1.getTextPath(),
+    startPath: p1.getPath(),
     startOffset: 3,
-    endPath: p2.getTextPath(),
+    endPath: p2.getPath(),
     endOffset: p2.getLength(),
     containerId: 'body'
   })
@@ -1025,7 +1025,7 @@ test("DEL21: Deleting a range starting in the middle of a TextNode and ending af
   t.ok(first.isText(), '... which is a TextNode')
   t.equal(first.getText(), P1_TEXT.slice(0, 3), '... with truncated content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.deepEqual(sel.start.path, first.getPath(), '... on that TextNode')
   t.equal(sel.start.offset, 3, '... at last position')
   t.end()
 })
@@ -1036,9 +1036,9 @@ test("DEL22: Deleting a range starting before a TextNode and ending in the middl
   let p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
-    startPath: p1.getTextPath(),
+    startPath: p1.getPath(),
     startOffset: 0,
-    endPath: p2.getTextPath(),
+    endPath: p2.getPath(),
     endOffset: 3,
     containerId: 'body'
   })
@@ -1052,7 +1052,7 @@ test("DEL22: Deleting a range starting before a TextNode and ending in the middl
   t.ok(first.isText(), '... which is a TextNode')
   t.equal(first.getText(), P2_TEXT.slice(3), '... with sliced content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.deepEqual(sel.start.path, first.getPath(), '... on that TextNode')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -1063,9 +1063,9 @@ test("DEL23: Deleting a range starting in the middle of a TextNode and ending in
   let p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
-    startPath: p1.getTextPath(),
+    startPath: p1.getPath(),
     startOffset: 3,
-    endPath: p2.getTextPath(),
+    endPath: p2.getPath(),
     endOffset: 3,
     containerId: 'body'
   })
@@ -1079,7 +1079,7 @@ test("DEL23: Deleting a range starting in the middle of a TextNode and ending in
   t.ok(first.isText(), '... which is a TextNode')
   t.equal(first.getText(), P1_TEXT.slice(0,3)+P2_TEXT.slice(3), '... with merged content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, first.getTextPath(), '... on that TextNode')
+  t.deepEqual(sel.start.path, first.getPath(), '... on that TextNode')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -1090,7 +1090,7 @@ test("DEL24: Deleting a range starting in the middle of a TextNode and ending in
   let l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
-    startPath: p1.getTextPath(),
+    startPath: p1.getPath(),
     startOffset: 3,
     endPath: ['l1-1', 'content'],
     endOffset: 3,
@@ -1105,7 +1105,7 @@ test("DEL24: Deleting a range starting in the middle of a TextNode and ending in
   t.equal(p1.getText(), P1_TEXT.slice(0,3)+LI1_TEXT.slice(3), '... with merged content')
   t.equal(l1.items.length, 1, 'The list should have only 1 item left')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, p1.getTextPath(), '... on p1')
+  t.deepEqual(sel.start.path, p1.getPath(), '... on p1')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -1118,7 +1118,7 @@ test("DEL25: Deleting a range starting in the middle of a ListItem and ending in
     type: 'container',
     startPath: ['l1-2', 'content'],
     startOffset: 3,
-    endPath: p1.getTextPath(),
+    endPath: p1.getPath(),
     endOffset: 3,
     containerId: 'body'
   })
@@ -1132,7 +1132,7 @@ test("DEL25: Deleting a range starting in the middle of a ListItem and ending in
   let li2 = l1.getItemAt(1)
   t.equal(li2.getText(), LI2_TEXT.slice(0,3)+P1_TEXT.slice(3), 'The second item should container merged content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, li2.getTextPath(), '... on second list item')
+  t.deepEqual(sel.start.path, li2.getPath(), '... on second list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -1156,7 +1156,7 @@ test("DEL26: Deleting a range within a ListItem", (t) => {
   let li2 = l1.getItemAt(1)
   t.equal(li2.getText(), LI2_TEXT.slice(0,3)+LI2_TEXT.slice(6), 'The second item should be changed')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, li2.getTextPath(), '... on second list item')
+  t.deepEqual(sel.start.path, li2.getPath(), '... on second list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -1180,7 +1180,7 @@ test("DEL27: Deleting a range across two ListItems within the same List", (t) =>
   let li1 = l1.getItemAt(0)
   t.equal(li1.getText(), LI1_TEXT.slice(0,3)+LI2_TEXT.slice(3), 'The items should be merged')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
-  t.deepEqual(sel.start.path, li1.getTextPath(), '... on the list item')
+  t.deepEqual(sel.start.path, li1.getPath(), '... on the list item')
   t.equal(sel.start.offset, 3, '... at correct position')
   t.end()
 })
@@ -1240,7 +1240,7 @@ test("DEL30: Merging two ListItems using DELETE", (t) => {
   let li = l.getItemAt(0)
   t.equal(li.getText(), LI1_TEXT+LI2_TEXT, 'The list item should have the merged text')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, li.getTextPath(), '... on the list item')
+  t.deepEqual(sel.start.path, li.getPath(), '... on the list item')
   t.equal(sel.start.offset, LI1_TEXT.length, '... at the end of the original content')
   t.end()
 })
@@ -1290,7 +1290,7 @@ test("DEL33: Deleting using BACKSPACE at the start of a text property editor", (
   })
   editorSession.setSelection({
     type: 'property',
-    path: p.getTextPath(),
+    path: p.getPath(),
     startOffset: 0,
     endOffset: 0
   })
@@ -1312,7 +1312,7 @@ test("DEL44: Deleting using DEL at the end of a text property editor", (t) => {
   })
   editorSession.setSelection({
     type: 'property',
-    path: p.getTextPath(),
+    path: p.getPath(),
     startOffset: 3,
     endOffset: 3
   })
@@ -1564,7 +1564,7 @@ test("BR10: Breaking a ListItem with cursor in the middle of text", (t) => {
   let li2 = doc.get(l.items[1])
   t.equal(li1.getText(), LI1_TEXT.slice(0,3), 'First item should have been truncated.')
   t.equal(li2.getText(), LI1_TEXT.slice(3), 'remaining line should have been inserted into new list item.')
-  t.deepEqual(sel.start.path, li2.getTextPath(), 'Cursor should in second item')
+  t.deepEqual(sel.start.path, li2.getPath(), 'Cursor should in second item')
   t.equal(sel.start.offset, 0, 'Cursor should be at begin of item.')
   t.end()
 })
@@ -1587,7 +1587,7 @@ test("BR11: Breaking a ListItem with cursor at begin of text", (t) => {
   let li2 = doc.get(l.items[1])
   t.equal(li1.getText(), '', 'First item should be empty.')
   t.equal(li2.getText(), LI1_TEXT, 'Text should have moved to next item.')
-  t.deepEqual(sel.start.path, li2.getTextPath(), 'Cursor should be in second item')
+  t.deepEqual(sel.start.path, li2.getPath(), 'Cursor should be in second item')
   t.equal(sel.start.offset, 0, '... at begin of item.')
   t.end()
 })
@@ -1616,7 +1616,7 @@ test("BR12: Splitting a List by breaking an empty ListItem", (t) => {
   t.equal(l2.items.length, 1, 'The second list should now have only one item')
   t.equal(l2.items[0], 'l1-2', '... with id "li-2"')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
+  t.deepEqual(sel.start.path, p.getPath(), '... on the new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -1641,7 +1641,7 @@ test("BR13: Breaking the last empty list item", (t) => {
   t.equal(l1.items.length, 2, 'The list should now have only two items')
   t.equal(p.getText(), '', 'The paragraph should be empty')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
+  t.deepEqual(sel.start.path, p.getPath(), '... on the new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })
@@ -1718,7 +1718,7 @@ test("L5-1: Toggling a ListItem using BACKSPACE", (t) => {
   t.equal(p.type, 'paragraph', 'The second one should be a paragraph')
   t.equal(p.getText(), LI2_TEXT, '.. with the text of the second item')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
-  t.deepEqual(sel.start.path, p.getTextPath(), '... on the new paragraph')
+  t.deepEqual(sel.start.path, p.getPath(), '... on the new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
   t.end()
 })

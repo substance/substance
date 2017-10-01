@@ -36,11 +36,6 @@ test("creating a DOMImporter", (t) => {
   }, 'should throw if a converter does not have a matcher function')
   t.throws(() => {
     new DOMImporter({ schema, converters: [{
-      type: 'heading', tagName: 'h1'
-    }] })
-  }, 'should throw if there is no converter for the defaultTextType')
-  t.throws(() => {
-    new DOMImporter({ schema, converters: [{
       type: 'foo', tagName: 'h1'
     }] })
   }, 'should throw if a converter is associated with an unknown node type')

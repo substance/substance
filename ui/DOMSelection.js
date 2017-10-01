@@ -132,10 +132,10 @@ class DOMSelection {
   mapModelToDOMCoordinates(sel) {
     if (DEBUG) console.info('Model->DOM: sel =', sel.toString());
     let rootEl
-    let surface = this.editor.surfaceManager.getSurface(sel.surfaceId)
+    let surface = this.editor.getSurfaceManager().getSurface(sel.surfaceId)
     if (!surface) {
       console.warn('Selection should have "surfaceId" set.')
-      rootEl = this.editor.el
+      rootEl = this.editor.getElement()
     } else {
       rootEl = surface.el
     }
@@ -333,7 +333,7 @@ class DOMSelection {
     let coor = null
     // this deals with a cursor in a TextProperty
     if (!coor) {
-      coor = TextPropertyComponent.getCoordinate(this.editor.el, nodeEl, offset)
+      coor = TextPropertyComponent.getCoordinate(this.editor.getElement(), nodeEl, offset)
     }
     let comp = Component.unwrap(nodeEl)
     if (!coor && comp) {

@@ -2,7 +2,7 @@ export default function(SuperClass) {
   class TextNodeMixin extends SuperClass {
     getTextPath() {
       // TODO: deprecate this
-      // console.warn('DEPRECATED: use node.getPath()')
+      console.warn('DEPRECATED: use node.getPath()')
       return this.getPath()
     }
 

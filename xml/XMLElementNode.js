@@ -19,6 +19,18 @@ class XMLElementNode extends XMLDocumentNode {
     return this
   }
 
+  insertBefore(newChild, ref) {
+    if (!ref) {
+      this.appendChild(newChild)
+    } else {
+      let pos = this._childNodes.indexOf(ref.id)
+      if (pos < 0) {
+        throw new Error('Given node is not a child.')
+      }
+      this.insertAt(pos, newChild)
+    }
+  }
+
   insertAt(pos, child) {
     const length = this._childNodes.length
     if (pos >= 0 && pos <= length) {
@@ -49,6 +61,13 @@ class XMLElementNode extends XMLDocumentNode {
 
   isElementNode() {
     return true
+  }
+
+  getChildAt(idx) {
+    let childId = this._childNodes[idx]
+    if (childId) {
+      return this.getDocument().get(childId)
+    }
   }
 
   // TODO: implement as much of DOMElement as possible

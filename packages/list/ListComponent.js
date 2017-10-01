@@ -21,7 +21,7 @@ class ListComponent extends Component {
       } else if(arg.type === 'list-item') {
         let item = arg
         return $$(ListItemComponent, {
-          path: [item.id, 'content'],
+          path: item.getPath(),
           node: item,
           tagName: 'li'
         })

@@ -17,7 +17,6 @@ class ElementNodeConverter extends XMLNodeConverter {
   }
 
   export(node, el, converter) {
-    const doc = node.getDocument()
     el.tagName = this.tagNameNS
     el.setAttributes(node.attributes)
     el.childNodes.forEach((childNode) => {

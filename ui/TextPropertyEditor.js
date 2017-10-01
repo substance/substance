@@ -71,6 +71,10 @@ class TextPropertyEditor extends Surface {
     })
   }
 
+  getPath() {
+    return this.props.path
+  }
+
   _handleEnterKey(event) {
     event.stopPropagation()
     if (!this.props.multiLine) {
@@ -96,10 +100,6 @@ class TextPropertyEditor extends Surface {
       shiftKey: event.shiftKey,
       code: event.code
     })
-  }
-
-  getPath() {
-    return this.props.path
   }
 }
 

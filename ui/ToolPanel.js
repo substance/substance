@@ -1,6 +1,6 @@
 import Component from './Component'
 
-class ToolPanel extends Component {
+export default class ToolPanel extends Component {
 
   didMount() {
     this.context.editorSession.onRender(this._onCommandStatesChanged, this)
@@ -10,10 +10,8 @@ class ToolPanel extends Component {
     this.context.editorSession.off(this)
   }
 
-  _onCommandStatesChanged(editorSession) {
-    if (editorSession.hasChanged('commandStates')) {
-      this.rerender()
-    }
+  render($$) { // eslint-disable-line
+    throw new Error('This method is abstract')
   }
 
   renderEntries($$) {
@@ -60,6 +58,10 @@ class ToolPanel extends Component {
     return this.props.theme || 'dark'
   }
 
-}
+  _onCommandStatesChanged(editorSession) {
+    if (editorSession.hasChanged('commandStates')) {
+      this.rerender()
+    }
+  }
 
-export default ToolPanel
+}

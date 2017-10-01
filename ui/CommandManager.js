@@ -133,6 +133,8 @@ export default class CommandManager {
   }
 
   _onSessionUpdate(editorSession) {
+    // TODO: the first condition does not make sense
+    // as 'change' is not a valid resource
     if (editorSession.hasChanged('change') || editorSession.hasChanged('selection') || editorSession.hasChanged('commandStates')) {
       this._updateCommandStates(editorSession)
     }

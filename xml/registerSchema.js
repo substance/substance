@@ -1,6 +1,6 @@
 import { forEach, camelCase } from '../util'
-import XMLTextNode from './XMLTextNode'
-import XMLTextNodeConverter from './XMLTextNodeConverter'
+import XMLTextElement from './XMLTextElement'
+import XMLTextElementConverter from './XMLTextElementConverter'
 import XMLElementNode from './XMLElementNode'
 import XMLElementNodeConverter from './XMLElementNodeConverter'
 import XMLAnnotationNode from './XMLAnnotationNode'
@@ -12,17 +12,21 @@ import XMLContainerNode from './XMLContainerNode'
 import XMLNodeConverter from './XMLNodeConverter'
 import XMLDocumentImporter from './XMLDocumentImporter'
 
-export default function registerSchema(config, xmlSchema, DocumentClass) {
+export default function registerSchema(config, xmlSchema, DocumentClass, options = {}) {
   const schemaName = xmlSchema.getName()
+  let defaultTextType
+  // Some schemas don't require a defaultTextType, still we need to provide
+  // it to the schema configuration if available
+  if (xmlSchema.getDefaultTextType) {
+    defaultTextType = xmlSchema.getDefaultTextType()
+  }
   // schema declaration
   config.defineSchema({
     name: schemaName,
     version: xmlSchema.getVersion(),
+    defaultTextType: defaultTextType,
     DocumentClass: DocumentClass,
-    // TODO: defaultTextType is not a global thing,
-    // rather a container specific property
-    defaultTextType: 'p',
-  // HACK: storing the xmlSchema here so that we can use it later
+    // HACK: storing the xmlSchema here so that we can use it later
     xmlSchema: xmlSchema
   })
   const tagNames = xmlSchema.getTagNames()
@@ -39,8 +43,8 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
         break
       }
       case 'text': {
-        NodeClass = XMLTextNode
-        ConverterClass = XMLTextNodeConverter
+        NodeClass = XMLTextElement
+        ConverterClass = XMLTextElementConverter
         break
       }
       case 'annotation': {
@@ -85,11 +89,12 @@ export default function registerSchema(config, xmlSchema, DocumentClass) {
     let converter = new ConverterClass(name)
     config.addConverter(schemaName, converter)
 
-    config.addImporter(schemaName, XMLDocumentImporter)
+    let ImporterClass = options.ImporterClass || XMLDocumentImporter
+    config.addImporter(schemaName, ImporterClass)
   })
 }
 
-const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes']
+const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes', '_content']
 
 function _defineAttribute(Node, attributeName) {
   let name = attributeName.replace(':', '_')
