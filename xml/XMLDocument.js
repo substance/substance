@@ -123,7 +123,11 @@ class XMLDocument extends Document {
     let created = {}
     let deleted = {}
     let updated = {}
-    let _recordUpdate = (id, level, op) => {
+    let affectedContainerAnnos = []
+
+    const doc = this
+
+    function _recordUpdate(id, level, op) {
       let record = updated[id]
       if (!record) {
         record = updated[id] = { ops: [], level }
@@ -133,11 +137,61 @@ class XMLDocument extends Document {
       if (op) record.ops.push(op)
       return record
     }
-    let _recordAncestorUpdates = (node) => {
-      this._forEachAncestor(node, (ancestor, level) => {
+
+    function _recordAncestorUpdates(node) {
+      doc._forEachAncestor(node, (ancestor, level) => {
         _recordUpdate(ancestor.id, level)
       })
     }
+
+    // TODO: we will introduce a special operation type for coordinates
+    function _checkAnnotation(op) {
+      // HACK: detecting annotation changes in an opportunistic way
+      switch (op.type) {
+        case "create":
+        case "delete": {
+          const annoData = op.val
+          if (annoData.hasOwnProperty('start')) {
+            updated[annoData.start.path] = true
+            let node = doc.get(annoData.start.path[0])
+            if (node) {
+              _recordUpdate(node.id, 0, op)
+              _recordAncestorUpdates(node)
+            }
+          }
+          if (annoData.hasOwnProperty('end')) {
+            updated[annoData.end.path] = true
+            let node = doc.get(annoData.start.path[0])
+            if (node) {
+              _recordUpdate(node.id, 0, op)
+              _recordAncestorUpdates(node)
+            }
+          }
+          break
+        }
+        case "update":
+        case "set": {
+          let anno = doc.get(op.path[0])
+          if (anno) {
+            if (anno.isPropertyAnnotation()) {
+              updated[anno.start.path] = true
+              let node = doc.get(anno.start.path[0])
+              if (node) {
+                _recordUpdate(node.id, 0, op)
+                _recordAncestorUpdates(node)
+              }
+            } else if (anno.isContainerAnnotation()) {
+              affectedContainerAnnos.push(anno)
+            }
+          }
+          break
+        }
+        default:
+          /* istanbul ignore next */
+          throw new Error('Illegal state')
+      }
+    }
+
     documentChange.ops.forEach((op) => {
       // before applying the change we need to track the change
       // Note: this does not work for general ops,
@@ -164,6 +218,9 @@ class XMLDocument extends Document {
         default:
           //
       }
+      // record impacts of changes to annotations
+      _checkAnnotation(op)
+
       this._applyOp(op)
     })
     // clear updates for deleted nodes
