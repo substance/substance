@@ -3,7 +3,6 @@ import { selectionHelpers, EditingBehavior } from '../model'
 import Surface from './Surface'
 import IsolatedNodeComponent from './IsolatedNodeComponent'
 import RenderingEngine from './RenderingEngine'
-import UnsupportedNode from './UnsupportedNodeComponent'
 
 /**
   Represents an editor for content rendered in a flow, such as a manuscript.
