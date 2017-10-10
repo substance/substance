@@ -3,6 +3,7 @@ import { selectionHelpers, EditingBehavior } from '../model'
 import Surface from './Surface'
 import IsolatedNodeComponent from './IsolatedNodeComponent'
 import RenderingEngine from './RenderingEngine'
+import UnsupportedNode from './UnsupportedNodeComponent'
 
 /**
   Represents an editor for content rendered in a flow, such as a manuscript.
@@ -104,6 +105,20 @@ class ContainerEditor extends Surface {
     return el
   }
 
+  renderNode($$, node) {
+    let doc = this.getDocument()
+    let componentRegistry = this.getComponentRegistry()
+    let ComponentClass = componentRegistry.get(node.type)
+    if (!ComponentClass) {
+      console.error('Could not resolve a component for type: ' + node.type)
+      ComponentClass = UnsupportedNode
+    }
+    return $$(ComponentClass, {
+      doc: doc,
+      node: node
+    }).ref(node.id)
+  }
+
   selectFirst() {
     const container = this.getContainer()
     if (container.getLength() > 0) {
@@ -117,7 +132,7 @@ class ContainerEditor extends Surface {
     let props = { node }
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
-      return super.renderNode($$, node, nodeIndex)
+      return this.renderNode($$, node, nodeIndex)
     } else {
       let componentRegistry = this.context.componentRegistry
       let ComponentClass = componentRegistry.get(node.type)
