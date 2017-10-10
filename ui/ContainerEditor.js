@@ -105,20 +105,6 @@ class ContainerEditor extends Surface {
     return el
   }
 
-  renderNode($$, node) {
-    let doc = this.getDocument()
-    let componentRegistry = this.getComponentRegistry()
-    let ComponentClass = componentRegistry.get(node.type)
-    if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type)
-      ComponentClass = UnsupportedNode
-    }
-    return $$(ComponentClass, {
-      doc: doc,
-      node: node
-    }).ref(node.id)
-  }
-
   selectFirst() {
     const container = this.getContainer()
     if (container.getLength() > 0) {
@@ -141,6 +127,14 @@ class ContainerEditor extends Surface {
       } else {
         return $$(IsolatedNodeComponent, props).ref(node.id)
       }
+    }
+  }
+
+  _extractNodeProps(node) {
+    let doc = this.getDocument()
+    return {
+      doc: doc,
+      node: node
     }
   }
 
