@@ -124,18 +124,13 @@ class Surface extends Component {
   }
 
   renderNode($$, node) {
-    let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let ComponentClass = componentRegistry.get(node.type)
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
       ComponentClass = UnsupportedNode
     }
-    return $$(ComponentClass, {
-      placeholder: this.props.placeholder,
-      doc: doc,
-      node: node
-    }).ref(node.id)
+    return $$(ComponentClass, this._extractNodeProps(node)).ref(node.id)
   }
 
   getComponentRegistry() {
@@ -728,6 +723,15 @@ class Surface extends Component {
       doc: doc,
       node: node
     })
+  }
+
+  _extractNodeProps(node) {
+    let doc = this.getDocument()
+    return {
+      placeholder: this.props.placeholder,
+      doc: doc,
+      node: node
+    }
   }
 
   // only take care of events which are emitted on targets which belong to this surface

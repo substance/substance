@@ -117,7 +117,7 @@ class ContainerEditor extends Surface {
     let props = { node }
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
-      return super.renderNode($$, node, nodeIndex)
+      return this.renderNode($$, node, nodeIndex)
     } else {
       let componentRegistry = this.context.componentRegistry
       let ComponentClass = componentRegistry.get(node.type)
@@ -126,6 +126,14 @@ class ContainerEditor extends Surface {
       } else {
         return $$(IsolatedNodeComponent, props).ref(node.id)
       }
+    }
+  }
+
+  _extractNodeProps(node) {
+    let doc = this.getDocument()
+    return {
+      doc: doc,
+      node: node
     }
   }
 
