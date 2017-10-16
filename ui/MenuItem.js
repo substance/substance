@@ -59,7 +59,7 @@ class MenuItem extends Component {
 
   _getLabel() {
     let labelProvider = this.context.labelProvider
-    return labelProvider.getLabel(this.props.name)
+    return labelProvider.getLabel(this.props.name, this.props.commandState)
   }
 
   _getKeyboardShortcut() {

@@ -14,10 +14,23 @@ export default class ToolPanel extends Component {
     throw new Error('This method is abstract')
   }
 
+  /*
+    Defines the components used to render certain entry types
+
+    Override to customize.
+  */
+  getEntryTypeComponents() {
+    return {
+      'tool-group': this.getComponent('tool-group'),
+      'tool-dropdown': this.getComponent('tool-dropdown')
+    }
+  }
+
   renderEntries($$) {
     let els = []
     this.props.toolPanel.forEach((entry) => {
-      let ComponentClass = this.getComponent(entry.type)
+      let entryTypeComponents = this.getEntryTypeComponents()
+      let ComponentClass = entryTypeComponents[entry.type]
       if (!ComponentClass) throw new Error('Toolpanel entry type not found')
       let props = Object.assign({}, entry, { theme: this.getTheme() })
       els.push(

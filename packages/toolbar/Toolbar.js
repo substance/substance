@@ -2,6 +2,7 @@ import { ToolPanel } from '../../ui'
 
 export default class Toolbar extends ToolPanel {
 
+
   render($$) {
     let el = $$('div').addClass('sc-toolbar')
     el.append(
