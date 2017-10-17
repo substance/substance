@@ -15,15 +15,6 @@ import Tooltip from './Tooltip'
 
   Usually instantiated in a Toolbar or an Overlay. Usage:
 
-  ```
-  $$(Tool, {
-    icon: 'strong',
-    label: 'strong',
-    style: 'outline',
-    active: false,
-    disabled: false
-  })
-  ```
 */
 class ToggleTool extends Component {
 

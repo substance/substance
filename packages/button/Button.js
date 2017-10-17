@@ -66,7 +66,7 @@ class Button extends Component {
 
   getLabel(name) {
     let labelProvider = this.context.labelProvider
-    return labelProvider.getLabel(name)
+    return labelProvider.getLabel(name, this.props.commandState)
   }
 }
 

@@ -7,7 +7,6 @@ import { forEach } from '../util'
   ```
   $$(ToolGroup, {
     name: 'annotations',
-    type: 'tool-group',
     contextual: true,
     showDisabled: true,
     style: 'minimal', // icon only display
@@ -50,12 +49,11 @@ class ToolGroup extends Component {
 
   render($$) {
     let commandStates = this._getCommandStates()
-    let tools = this.context.tools
     let el = $$('div').addClass(this._getClassNames())
     el.addClass('sm-'+this.props.name)
     forEach(commandStates, (commandState, commandName) => {
       if (this.isToolEnabled(commandName, commandState) || this.props.showDisabled) {
-        let ToolClass = tools[commandName] || ToggleTool
+        let ToolClass = this._getToolClass(commandName)
         el.append(
           $$(ToolClass, {
             name: commandName,
@@ -99,6 +97,11 @@ class ToolGroup extends Component {
 
   _getClassNames() {
     return 'sc-tool-group'
+  }
+
+  _getToolClass(commandName) {
+    let tools = this.context.tools
+    return tools[commandName] || ToggleTool
   }
 }
 
