@@ -46,6 +46,8 @@ class ToolDropdown extends ToolGroup {
       } else if (this.props.style === 'descriptive') {
         toggleButton = $$(Button, {
           label: toggleName,
+          // HACK: this allows tool buttons to render labels with template strings
+          commandState: commandStates[toggleName],
           dropdown: true,
           active: this.state.showChoices,
           theme: this.props.theme
