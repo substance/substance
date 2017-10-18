@@ -23,7 +23,8 @@ export default class ToolPanel extends Component {
     return {
       'tool-group': this.getComponent('tool-group'),
       'tool-dropdown': this.getComponent('tool-dropdown'),
-      'tool-prompt': this.getComponent('tool-prompt')
+      'tool-prompt': this.getComponent('tool-prompt'),
+      'tool-separator': this.getComponent('tool-separator')
     }
   }
 
