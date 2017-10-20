@@ -14,9 +14,8 @@ class Undo extends Command {
     let editorSession = params.editorSession
     if (editorSession.canUndo()) {
       editorSession.undo()
-      return true
     }
-    return false
+    return true
   }
 
 }

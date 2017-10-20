@@ -5,8 +5,11 @@ class ExecuteCommandHandler {
   }
   execute(params) {
     let commandState = params.editorSession.getCommandStates()[this.commandName]
-    if (!commandState || commandState.disabled) return false
-    this.editorSession.executeCommand(this.commandName, params)
+    // Don't know what to do, may be handled at a higher level
+    if (!commandState) return false
+    if (!commandState.disabled) {
+      this.editorSession.executeCommand(this.commandName, params)
+    }
     return true
   }
 }

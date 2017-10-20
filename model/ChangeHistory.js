@@ -1,6 +1,10 @@
 class ChangeHistory {
 
   constructor() {
+    this.reset()
+  }
+
+  reset() {
     // undo list
     this.doneChanges = []
     // redo list
