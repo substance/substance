@@ -135,6 +135,7 @@ class EditorSession extends EventEmitter {
     this.markersManager.dispose()
   }
 
+
   hasChanged(resource) {
     return this._dirtyFlags[resource]
   }
@@ -232,6 +233,16 @@ class EditorSession extends EventEmitter {
 
   canRedo() {
     return this._history.canRedo()
+  }
+
+  /*
+    There are cases when we want to explicitly reset the change history of
+    an editor session
+  */
+  resetHistory() {
+    this._history.reset()
+    this._setDirty('commandStates')
+    this.startFlow()
   }
 
   executeCommand(...args) {
