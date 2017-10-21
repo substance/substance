@@ -242,7 +242,9 @@ class EditorSession extends EventEmitter {
   resetHistory() {
     this._history.reset()
     this._setDirty('commandStates')
-    this.startFlow()
+    if (!this._flowing) {
+      this.startFlow()
+    }
   }
 
   executeCommand(...args) {
