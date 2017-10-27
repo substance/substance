@@ -8,7 +8,7 @@ import DOMImporter from './DOMImporter'
   @class
   @abstract
 */
-class HTMLImporter extends DOMImporter {
+export default class HTMLImporter extends DOMImporter {
 
   constructor(config) {
     super(Object.assign({ idAttribute: 'data-id' }, config))
@@ -60,5 +60,3 @@ class HTMLImporter extends DOMImporter {
   }
 
 }
-
-export default HTMLImporter

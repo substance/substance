@@ -15,6 +15,7 @@ import ListPackage from '../list/ListPackage'
 import TablePackage from '../table/TablePackage'
 import ProseArticle from './ProseArticle'
 import ProseEditor from './ProseEditor'
+import ProseArticleImporter from './ProseArticleImporter'
 
 export default {
   name: 'prose-editor',
@@ -22,8 +23,11 @@ export default {
     config.defineSchema({
       name: 'prose-article',
       DocumentClass: ProseArticle,
-      defaultTextType: 'paragraph'
+      defaultTextType: 'paragraph',
+      version: '1.0'
     })
+    config.addImporter('html', ProseArticleImporter)
+
     // Undo/Redo etc.
     config.import(BasePackage)
     config.import(BlockquotePackage)
