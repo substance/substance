@@ -582,6 +582,7 @@ class EditorSession extends EventEmitter {
       newSelection.surfaceId = change.after.surfaceId
     }
     this._setSelection(newSelection)
+    this.emit('commit', change)
   }
 
   _applyChange(change, info) {
