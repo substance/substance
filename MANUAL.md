@@ -25,7 +25,7 @@ This document explains the major concepts of Substance and help you get started 
 Install and run the `example-editor` application to try out Substance.
 
 ```bash
-$ git clone https://github.com/substance/simple-writer.git
+$ git clone https://github.com/substance/example-editor.git
 ```
 
 ```bash
@@ -94,7 +94,7 @@ Example elements: `<figure>`, `<table>`
 
 ```js
 let schema =  new DocumentSchema({
-  name: 'simple-article',
+  name: 'example-article',
   DocumentClass: Document,
   defaultTextType: 'paragraph'
 })
@@ -114,7 +114,7 @@ Next we want to populate the document with content. There are different ways to 
 Substance is designed to work with XML as a data representation format. This gives you the opportunity to model a completely custom content model for your documents. Let's assume the following simple XML document.
 
 ```xml
-<simple-article>
+<example-article>
   <title>Hello Substance</title>
   <body>
     <paragraph>Hello <emphasis>Substance</emphasis></paragraph>
@@ -123,7 +123,7 @@ Substance is designed to work with XML as a data representation format. This giv
       <caption>Lorem ipsum</caption>
     </figure>
   </body>
-</simple-article>
+</example-article>
 ```
 
 We need to provide converters for all elements (title, body, paragraph, figure, caption). A converter simply converts from DOM elements to Substance Nodes, which are regular Javascript objects.
@@ -179,7 +179,7 @@ export default {
 }
 ```
 
-To import the above XML snippet we also need converters for `<simple-article>`, `<body>` and `<paragraph>`. To put it all together we create an instance of XMLImporter and provide schema plus converters.
+To import the above XML snippet we also need converters for `<exaple-article>`, `<body>` and `<paragraph>`. To put it all together we create an instance of XMLImporter and provide schema plus converters.
 
 
 ```js
@@ -215,7 +215,7 @@ The Configurator API also helps us with registering the schema. Note, that we di
 
 ```js
 configurator.defineSchema({
-  name: 'simple-article',
+  name: 'example-article',
   DocumentClass: Document,
   defaultTextType: 'paragraph'
 })
