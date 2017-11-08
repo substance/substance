@@ -598,6 +598,18 @@ class EditorSession extends EventEmitter {
     this._info = info
   }
 
+  _applyRemoteChange(change) {
+    // console.log('EditorSession: applying remote change');
+    if (change.ops.length > 0) {
+      this._applyChange(change, { remote: true })
+      // update the 'stage' and the undo-history too
+      this._transaction.__applyChange__(change)
+      this._transformLocalChangeHistory(change)
+      this._setSelection(this._transformSelection(change))
+      this.startFlow()
+    }
+  }
+
   /*
     Are there unsaved changes?
   */
