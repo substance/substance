@@ -98,7 +98,7 @@ let schema =  new DocumentSchema({
   DocumentClass: Document,
   defaultTextType: 'paragraph'
 })
-this.schema.addNodes([Title, Body, Paragraph])
+schema.addNodes([Title, Body, Paragraph])
 ```
 
 ### Create an empty document instance
