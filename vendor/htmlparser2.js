@@ -8046,3 +8046,5 @@ Parser_1.prototype.oncdata = function(value){
 };
 
 export default Parser_1;
+
+//# sourceMappingURL=./htmlparser2.js.map

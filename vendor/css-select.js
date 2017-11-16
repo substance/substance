@@ -964,8 +964,7 @@ function compileFactory(adapter){
 		if(context){
 			return function has(elem){
 				return next(elem) && (
-					(context[0] = elem), adapter.existsOne(func, adapter.getChildren(elem))
-				);
+					context[0] = elem, adapter.existsOne(func, adapter.getChildren(elem)));
 			};
 		}
 
@@ -991,7 +990,7 @@ function compileFactory(adapter){
 	return compile;
 }
 
-var index = CSSselect$1;
+var cssSelect = CSSselect$1;
 
 var falseFunc      = BaseFuncs.falseFunc;
 var defaultCompile = compile(domutils);
@@ -1074,4 +1073,6 @@ CSSselect$1.iterate = selectAll;
 CSSselect$1._compileUnsafe = defaultCompile.compileUnsafe;
 CSSselect$1._compileToken = defaultCompile.compileToken;
 
-export default index;
+export default cssSelect;
+
+//# sourceMappingURL=./css-select.js.map
