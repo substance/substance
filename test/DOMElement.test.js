@@ -587,6 +587,12 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("serialize CDATA", (t) => {
+    let doc = DefaultDOMElement.createDocument('xml')
+    let el = doc.createCDATASection('x+5')
+    t.equal(el.serialize(), '<![CDATA[x+5]]>', 'CDATA should be serialized correctly')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {
