@@ -2806,3 +2806,5 @@ function orderBy(collection, iteratees, orders, guard) {
 }
 
 export { camelCase, capitalize, debounce, get, find, isMatch, merge, mergeWith, setWith, uniq, unset, without, orderBy };
+
+//# sourceMappingURL=./lodash-es.js.map

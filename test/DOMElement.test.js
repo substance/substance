@@ -463,6 +463,15 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("find element after changing tagName", function(t) {
+    let xmlDoc = DefaultDOMElement.parseXML('<dummy><foo></foo></dummy>')
+    let foo = xmlDoc.find('foo')
+    foo.tagName = 'bar'
+    let bar = xmlDoc.find('bar')
+    t.notNil(bar, 'Should find a <bar> element')
+    t.end()
+  })
+
   test("insertAt", function(t) {
     let dummy = DefaultDOMElement.parseSnippet('<dummy><bla></bla></dummy>', 'xml')
     let doc = dummy.getOwnerDocument()
@@ -587,6 +596,12 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("serialize CDATA", (t) => {
+    let doc = DefaultDOMElement.createDocument('xml')
+    let el = doc.createCDATASection('x+5')
+    t.equal(el.serialize(), '<![CDATA[x+5]]>', 'CDATA should be serialized correctly')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {
