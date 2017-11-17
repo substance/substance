@@ -148,6 +148,7 @@ class MemoryDOMElement extends DOMElement {
     } else {
       this.name = String(tagName).toLowerCase()
     }
+    this.nameWithoutNS = nameWithoutNS(this.name)
     return this
   }
 
