@@ -40,7 +40,7 @@ function buildLib(target, production) {
       dest: DIST+'substance.es5.js',
       format: 'umd', moduleName: 'substance',
       sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
-      useStrict
+      strict: useStrict
     })
   }
   if (target === 'node' || target === 'all') {
