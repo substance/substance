@@ -212,7 +212,8 @@ function _compileSchema(schema) {
 function _compileDefintion(definition) {
   let result = definition
   if (isArray(definition.type) && definition.type[0] !== "array") {
-    definition.type = [ "array", definition.type[0] ]
+    definition.targetTypes = definition.type
+    definition.type = [ "array", "id" ]
   } else if (definition.type === 'text') {
     result = {
       type: "string",
