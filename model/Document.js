@@ -307,6 +307,19 @@ class Document extends EventEmitter {
     return op
   }
 
+  /*
+    Update multiple properties of a node by delegating to Document.set for each
+    changed property.
+  */
+  updateNode(id, newProps) {
+    let node = this.get(id)
+    forEach(newProps, (value, key) => {
+      if (!isEqual(node[key], newProps[key])) {
+        this.set([id, key], value)
+      }
+    })
+  }
+
   /**
     Add a document index.
 
@@ -538,6 +551,7 @@ class Document extends EventEmitter {
   _update(path, diff) {
     return this.data.update(path, diff)
   }
+
 
   _emitChange(op) {
     const change = new DocumentChange([op], {}, {})

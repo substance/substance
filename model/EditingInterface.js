@@ -59,6 +59,10 @@ class EditingInterface {
     return this._document.update(path, diffOp)
   }
 
+  updateNode(id, newProps) {
+    return this._document.updateNode(id, newProps)
+  }
+
   /* Selection API */
 
   createSelection(selData) {
