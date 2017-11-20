@@ -35,6 +35,14 @@ class ContainerAnnotationIndex extends DocumentIndex {
     return this.anchorsByPath.get(path) || []
   }
 
+  getContainerIds() {
+    return Object.keys(this.annosById)
+  }
+
+  getAnnotationIdsForContainerId(containerId) {
+    return Object.keys(this.annosById[containerId])
+  }
+
   create(anno) {
     this.annosById.set([anno.containerId, anno.id], anno)
     this.anchorsByPath.add(anno.start.path, anno.start)
