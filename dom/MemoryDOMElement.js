@@ -612,11 +612,15 @@ MemoryDOMElement.parseMarkup = function(str, format, options={}) {
     str = `<__snippet__>${str}</__snippet__>`
   }
   let doc
+  let parserOpts = Object.assign({
+    format,
+    decodeEntities: true
+  }, options)
   if (format === 'html') {
-    doc = parseMarkup(str, { format: format, decodeEntities: true })
+    doc = parseMarkup(str, parserOpts)
     _sanitizeHTMLStructure(doc)
   } else if (format === 'xml') {
-    doc = parseMarkup(str, { format: format, decodeEntities: true })
+    doc = parseMarkup(str, parserOpts)
   }
   if (options.snippet) {
     let childNodes = doc.find('__snippet__').childNodes
