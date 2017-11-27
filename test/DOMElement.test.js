@@ -602,6 +602,22 @@ function DOMElementTests(impl) {
     t.equal(el.serialize(), '<![CDATA[x+5]]>', 'CDATA should be serialized correctly')
     t.end()
   })
+
+  test("Retain classes after cloning", (t) => {
+    let doc = DefaultDOMElement.createDocument('html')
+    let el = doc.createElement('div')
+    el.addClass('foo')
+    t.ok(el.hasClass('foo'), 'original element should have class set')
+    let clone = el.clone(true)
+    t.ok(clone.hasClass('foo'), 'clone should have class set')
+    // now using the 'class' attribute
+    el = doc.createElement('div')
+    el.attr('class', 'foo')
+    t.ok(el.hasClass('foo'), 'original element should have class set')
+    clone = el.clone(true)
+    t.ok(clone.hasClass('foo'), 'clone should have class set')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {

@@ -165,9 +165,11 @@ class MemoryDOMElement extends DOMElement {
     // Note: keeping the Set version of classes and styles in sync
     switch(name) {
       case 'class':
+        this.classes = new Set()
         parseClasses(this.classes, value)
         break
       case 'style':
+        this.styles = new Map()
         parseStyles(this.styles, value)
         break
       default:
@@ -551,8 +553,9 @@ class MemoryDOMElement extends DOMElement {
             break
           }
           default:
-            this.attributes.set(name, val)
+            //
         }
+        this.attributes.set(name, val)
       })
     }
     if (this.eventListeners && other.eventListeners) {
