@@ -608,14 +608,18 @@ MemoryDOMElement.parseMarkup = function(str, format, options={}) {
   if (!str) {
     return MemoryDOMElement.createDocument(format)
   }
-  if (options.snippet) {
-    str = `<__snippet__>${str}</__snippet__>`
-  }
-  let doc
   let parserOpts = Object.assign({
     format,
     decodeEntities: true
   }, options)
+  // opt-out from HTML structure sanitization
+  if (options.raw) {
+    return parseMarkup(str, parserOpts)
+  }
+  if (options.snippet) {
+    str = `<__snippet__>${str}</__snippet__>`
+  }
+  let doc
   if (format === 'html') {
     doc = parseMarkup(str, parserOpts)
     _sanitizeHTMLStructure(doc)
