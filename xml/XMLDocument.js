@@ -64,11 +64,11 @@ class XMLDocument extends Document {
     return this.getRootNode().findAll(cssSelector)
   }
 
-  createElement(tagName) {
-    let node = this.create({
+  createElement(tagName, data) {
+    let node = this.create(Object.assign({
       id: uuid(tagName),
       type: tagName
-    })
+    }, data))
     return node
   }
 
