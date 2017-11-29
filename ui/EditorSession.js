@@ -133,6 +133,12 @@ class EditorSession extends EventEmitter {
     this.macroManager.dispose()
     this.globalEventHandler.dispose()
     this.markersManager.dispose()
+
+    forEach(this._managers, (manager) => {
+      if (manager.dispose) {
+        manager.dispose()
+      }
+    })
   }
 
 
