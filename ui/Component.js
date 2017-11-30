@@ -509,7 +509,8 @@ class Component extends EventEmitter {
     @example
   */
   send(action) {
-    var comp = this
+    // We start looking for handlers at the parent level
+    var comp = this.getParent()
     while(comp) {
       if (comp._actionHandlers && comp._actionHandlers[action]) {
         comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1))
