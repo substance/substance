@@ -64,9 +64,9 @@ function getInverse(inverse, re){
   }
   return function(data){
     return data
-        .replace(re, func)
-        .replace(re_astralSymbols, astralReplacer)
-        .replace(re_nonASCII, singleCharReplacer);
+      .replace(re, func)
+      .replace(re_astralSymbols, astralReplacer)
+      .replace(re_nonASCII, singleCharReplacer);
   };
 }
 
@@ -428,23 +428,27 @@ class DomUtils {
     return elem.data
   }
 
-  getText(elem){
-    if(Array.isArray(elem)) return elem.map(e => this.getText(e)).join("");
+  getText(elem, sub){
+    if(Array.isArray(elem)) return elem.map(e => this.getText(e, sub)).join("");
     switch(elem.type) {
       case ElementType.Tag:
       case ElementType.Script:
       case ElementType.Style:
-        return this.getText(this.getChildren(elem))
+        return this.getText(this.getChildren(elem), true)
       case ElementType.Text:
-      case ElementType.Comment:
       case ElementType.CDATA:
+        return elem.data
+      case ElementType.Comment:
+        
+        
+        if (sub) {
+          return ""
+        }
         return elem.data
       default:
         return ""
     }
   }
-
-
 
   getChildren(elem) {
     return elem.childNodes;
