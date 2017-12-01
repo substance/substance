@@ -618,6 +618,25 @@ function DOMElementTests(impl) {
     t.ok(clone.hasClass('foo'), 'clone should have class set')
     t.end()
   })
+
+  test("el.textContent should not show comments", (t) => {
+    let doc = DefaultDOMElement.createDocument('html')
+    let el = doc.createElement('div')
+    let comment = doc.createComment('Hello')
+    el.append(comment)
+    t.equal(el.textContent.trim(), '', 'text should be empty.')
+    t.end()
+  })
+
+  test("el.textContent should show CData", (t) => {
+    let doc = DefaultDOMElement.createDocument('xml')
+    let el = doc.createElement('foo')
+    let cdata = doc.createCDATASection('x<y')
+    el.append(cdata)
+    t.equal(el.textContent.trim(), 'x<y', 'text should contain data.')
+    t.end()
+  })
+
 }
 
 if (platform.inBrowser) {
@@ -661,5 +680,7 @@ if (platform.inBrowser) {
     }
     t.end()
   })
+
+
 
 }
