@@ -127,21 +127,13 @@ class XMLDocument extends Document {
 
     const doc = this
 
-    function _recordUpdate(id, level, op) {
+    function _recordUpdate(id, op) {
       let record = updated[id]
       if (!record) {
-        record = updated[id] = { ops: [], level }
-      } else {
-        record.level = Math.min(level, record.level)
+        record = updated[id] = { ops: [] }
       }
       if (op) record.ops.push(op)
       return record
-    }
-
-    function _recordAncestorUpdates(node) {
-      doc._forEachAncestor(node, (ancestor, level) => {
-        _recordUpdate(ancestor.id, level)
-      })
     }
 
     // TODO: we will introduce a special operation type for coordinates
@@ -155,16 +147,14 @@ class XMLDocument extends Document {
             updated[annoData.start.path] = true
             let node = doc.get(annoData.start.path[0])
             if (node) {
-              _recordUpdate(node.id, 0, op)
-              _recordAncestorUpdates(node)
+              _recordUpdate(node.id, op)
             }
           }
           if (annoData.hasOwnProperty('end')) {
             updated[annoData.end.path] = true
             let node = doc.get(annoData.start.path[0])
             if (node) {
-              _recordUpdate(node.id, 0, op)
-              _recordAncestorUpdates(node)
+              _recordUpdate(node.id, op)
             }
           }
           break
@@ -177,8 +167,7 @@ class XMLDocument extends Document {
               updated[anno.start.path] = true
               let node = doc.get(anno.start.path[0])
               if (node) {
-                _recordUpdate(node.id, 0, op)
-                _recordAncestorUpdates(node)
+                _recordUpdate(node.id, op)
               }
             } else if (anno.isContainerAnnotation()) {
               affectedContainerAnnos.push(anno)
@@ -203,7 +192,6 @@ class XMLDocument extends Document {
         }
         case 'delete': {
           let node = this.get(op.path[0])
-          _recordAncestorUpdates(node)
           deleted[node.id] = node
           break
         }
@@ -211,8 +199,7 @@ class XMLDocument extends Document {
         case 'set': {
           updated[op.path] = true
           let node = this.get(op.path[0])
-          _recordUpdate(node.id, 0, op)
-          _recordAncestorUpdates(node)
+          _recordUpdate(node.id, op)
           break
         }
         default:
@@ -231,14 +218,6 @@ class XMLDocument extends Document {
     documentChange.updated = updated
     documentChange.deleted = deleted
     documentChange._extracted = true
-  }
-
-  _forEachAncestor(node, fn) {
-    let level = 0
-    while ((node = node.parentNode)) {
-      level++
-      fn(node, level)
-    }
   }
 
 }
