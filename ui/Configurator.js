@@ -213,18 +213,21 @@ class Configurator {
     if (!CommandClass.prototype._isCommand) {
       throw new Error("Expecting 'CommandClass' to be of type ui/Command.")
     }
+    options = options || {}
     this.config.commands[name] = {
-      name: name,
-      CommandClass: CommandClass,
-      options: options || {}
+      name,
+      CommandClass,
+      options
     }
 
     // Register commandGroup entry
     let commandGroup = options.commandGroup
-    if (!this.config.commandGroups[commandGroup]) {
-      this.config.commandGroups[commandGroup] = []
+    if (commandGroup) {
+      if (!this.config.commandGroups[commandGroup]) {
+        this.config.commandGroups[commandGroup] = []
+      }
+      this.config.commandGroups[commandGroup].push(name)
     }
-    this.config.commandGroups[commandGroup].push(name)
   }
 
   addTool(name, ToolClass) {
