@@ -42,9 +42,11 @@ const platform = {
 
   isMac: false,
 
+  devtools: false,
+
   // in tests we change the state of this to emulate execuatio under certain conditions
   // to reset to defaults we call this function
-  _reset: detect
+  _reset: detect,
 }
 
 function detect() {
@@ -104,6 +106,16 @@ function detect() {
     }
   }
 
+  if (platform.inBrowser) {
+    let widthThreshold = window.outerWidth - window.innerWidth > 160
+    let heightThreshold = window.outerHeight - window.innerHeight > 160
+    let orientation = widthThreshold ? 'vertical' : 'horizontal'
+    if (!(heightThreshold && widthThreshold) &&
+      ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || widthThreshold || heightThreshold)) {
+      platform.devtools = true
+      platform.devtoolsOrientation = orientation
+    }
+  }
 }
 
 detect()
