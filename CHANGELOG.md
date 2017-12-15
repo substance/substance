@@ -125,6 +125,10 @@ These changes might break your current implementation and may need some migratio
 
   - When no tool component is registered (`config.addTool`) for a command, `ToggleTool` is used.
 
+  - `AbstractEditor` is not registering a global `keydown` handler automatically. You should do this in your top-level component on `didMount()`.
+  - `Surface.onKeydown()` does not prevent or stop the event, if no keyboard shortcut and no built-in handler is attached.
+  > This might need to be revised
+
 - DEPRECATIONS:
   - `DocumentChange.isAffected()`: Use `DocumentChange.hasUpdated()` instead
 
