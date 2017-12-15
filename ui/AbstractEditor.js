@@ -1,8 +1,6 @@
 import Component from './Component'
 import ResourceManager from './ResourceManager'
 import DOMSelection from './DOMSelection'
-import { DefaultDOMElement } from '../dom'
-import { platform } from '../util'
 
 /**
   Reusable abstract editor implementation.
