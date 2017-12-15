@@ -17,10 +17,11 @@ import { platform } from '../util'
   }
   ```
 */
-class AbstractEditor extends Component {
+export default class AbstractEditor extends Component {
 
   constructor(...args) {
     super(...args)
+
     this._initialize(this.props)
   }
 
@@ -60,11 +61,6 @@ class AbstractEditor extends Component {
 
     this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
     this.domSelection = new DOMSelection(this)
-
-    if (platform.inBrowser) {
-      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
-      documentEl.on('keydown', this.onKeyDown, this)
-    }
   }
 
   willReceiveProps(nextProps) {
@@ -84,10 +80,6 @@ class AbstractEditor extends Component {
     // not necessary
     // this.domSelection.dispose()
     this.resourceManager.dispose()
-    if (platform.inBrowser) {
-      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
-      documentEl.off(this)
-    }
   }
 
   getChildContext() {
@@ -146,5 +138,3 @@ class AbstractEditor extends Component {
   }
 
 }
-
-export default AbstractEditor
