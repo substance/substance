@@ -29,7 +29,7 @@ export default class CommandManager {
     this._initialize()
 
     // on any update we will recompute
-    this.editorSession.onUpdate(this._onSessionUpdate, this)
+    this.editorSession.on('pre-render', this._onSessionUpdate, this)
 
     // compute initial command states and
     // promote to editorSession
