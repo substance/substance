@@ -214,6 +214,9 @@ class Configurator {
       throw new Error("Expecting 'CommandClass' to be of type ui/Command.")
     }
     options = options || {}
+    if (this.config.commands[name] && !options.force) {
+      throw new Error(`Another command with name ${name} has already been registered. Use 'options.force' if this is intentional.`)
+    }
     this.config.commands[name] = {
       name,
       CommandClass,
@@ -666,7 +669,6 @@ class Configurator {
     let SaveHandler = this.config.SaveHandlerClass || DefaultSaveHandler
     return new SaveHandler()
   }
-
 
 }
 
