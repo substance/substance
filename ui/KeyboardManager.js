@@ -1,7 +1,7 @@
 import { keys, parseKeyEvent, platform } from '../util'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
-class KeyboardManager {
+export default class KeyboardManager {
 
   constructor(editorSession, bindings, options) {
     this.editorSession = editorSession
@@ -16,8 +16,11 @@ class KeyboardManager {
         let handler = new ExecuteCommandHandler(editorSession, spec.command)
         let hook = handler.execute.bind(handler)
         if (type === 'keydown') {
-          this.keydownBindings[parseCombo(key)] = hook
+          key = parseCombo(key)
+          if (!this.keydownBindings[key]) this.keydownBindings[key] = []
+          this.keydownBindings[key].push(hook)
         } else if (type === 'textinput') {
+          // TODO: do we have multiple textinputBindings too?
           this.textinputBindings[key] = hook
         }
       } else {
@@ -28,10 +31,14 @@ class KeyboardManager {
 
   onKeydown(event) {
     let key = parseKeyEvent(event)
-    let hook = this.keydownBindings[key]
-    if (hook) {
+    let hooks = this.keydownBindings[key]
+    if (hooks) {
       let params = this._getParams()
-      const hasExecuted = hook(params, this.context)
+      let hasExecuted = false
+      for (let i = 0; i < hooks.length && !hasExecuted; i++) {
+        const hook = hooks[i]
+        hasExecuted = hook(params, this.context)
+      }
       if (hasExecuted) {
         event.preventDefault()
         event.stopPropagation()
@@ -135,5 +142,3 @@ function parseCombo(combo) {
 }
 
 KeyboardManager.parseCombo = parseCombo
-
-export default KeyboardManager
