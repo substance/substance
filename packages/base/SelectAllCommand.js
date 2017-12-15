@@ -6,9 +6,16 @@ class SelectAll extends Command {
   getCommandState(params) {
     let editorSession = params.editorSession
     let isBlurred = editorSession.isBlurred()
-    return {
-      disabled: editorSession.getSelection().isNull() || isBlurred
-    }
+    let surface = params.surface || editorSession.getFocusedSurface()
+    let sel = editorSession.getSelection()
+    // We only know what to do in ContainerEditors and TextPropertyEditors
+    let disabled = (
+      isBlurred ||
+      !sel || sel.isNull() ||
+      !surface ||
+      !(surface._isContainerEditor || surface._isTextPropertyEditor)
+    )
+    return { disabled }
   }
 
   execute(params) {
