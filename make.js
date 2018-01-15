@@ -84,6 +84,7 @@ function buildLib(target, production) {
     config.istanbul = {
       include: [
         'collab/*.js',
+        'dar/*.js',
         'dom/*.js',
         'model/**/*.js',
         'packages/**/*.js',
