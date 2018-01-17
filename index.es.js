@@ -1,6 +1,9 @@
 // collab
 export * from './collab/index'
 
+// dar
+export * from './dar/index'
+
 // dom
 export * from './dom/index'
 
