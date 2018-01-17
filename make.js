@@ -4,6 +4,7 @@ const path = require('path')
 const install = require('substance-bundler/extensions/install')
 const fork = require('substance-bundler/extensions/fork')
 const karma = require('substance-bundler/extensions/karma')
+const rng = require('substance-bundler/extensions/rng')
 
 const UGLIFY_VERSION = '^2.7.5'
 
@@ -211,23 +212,27 @@ b.task('clean', () => {
 
 b.task('css', css)
 
-b.task('lib:browser', ['css'], () => {
+b.task('schema', () => {
+  rng(b, './dar/Manifest.rng', { dir: 'tmp' })
+})
+
+b.task('lib:browser', ['css', 'schema'], () => {
   buildLib('browser', 'production')
 })
 
-b.task('lib:browser:legacy', ['css'], () => {
+b.task('lib:browser:legacy', ['css', 'schema'], () => {
   buildLib('browser:legacy', 'production')
 })
 
-b.task('lib:browser:dev', ['css'], () => {
+b.task('lib:browser:dev', ['css', 'schema'], () => {
   buildLib('browser')
 })
 
-b.task('lib:dev', ['css'], () => {
+b.task('lib:dev', ['css', 'schema'], () => {
   buildLib('all')
 })
 
-b.task('lib', ['css'], () => {
+b.task('lib', ['css', 'schema'], () => {
   buildLib('all', 'production')
   // Note: legacy build can not be mixed with the other builds
   buildLib('browser:legacy', 'production')
