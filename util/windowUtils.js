@@ -111,3 +111,11 @@ export function setDOMSelection(startNode, startOffset, endNode, endOffset) {
   wsel.removeAllRanges()
   wsel.addRange(wrange)
 }
+
+export function getQueryStringParam(param, url) {
+  if (typeof window === 'undefined') return null
+  let href = url ? url : window.location.href;
+  let reg = new RegExp( '[?&]' + param + '=([^&#]*)', 'i' );
+  let string = reg.exec(href);
+  return string ? decodeURIComponent(string[1]) : null;
+}
