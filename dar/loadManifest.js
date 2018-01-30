@@ -11,5 +11,5 @@ export default function loadManifest(xmlStr) {
   let importer = configurator.createImporter(ManifestSchema.getName())
   let manifest = importer.importDocument(xmlStr)
   let editorSession = new EditorSession(manifest, { configurator })
-  return { manifest, editorSession }
+  return editorSession
 }
