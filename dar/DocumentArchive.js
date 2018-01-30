@@ -14,7 +14,7 @@ export default class DocumentArchive {
     let docs = manifest.findAll('container > documents > document')
     return docs.map(d => {
       return {
-        id: d.id,
+        id: d.id || d.attr('path'),
         type: d.attr('type'),
         path: d.attr('path'),
         name: d.attr('name')
