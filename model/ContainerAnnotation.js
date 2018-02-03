@@ -1,4 +1,4 @@
-import { forEach } from '../util'
+import forEach from '../util/forEach'
 import DocumentNode from './DocumentNode'
 import AnnotationMixin from './AnnotationMixin'
 

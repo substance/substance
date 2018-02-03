@@ -1,4 +1,4 @@
-import { ToolPanel } from '../../ui'
+import ToolPanel from '../../ui/ToolPanel'
 
 /*
   A default implementation to render the content for the overlay (aka popup) tools.

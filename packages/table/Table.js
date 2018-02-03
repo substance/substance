@@ -1,4 +1,4 @@
-import { BlockNode } from '../../model'
+import BlockNode from '../../model/BlockNode'
 
 class Table extends BlockNode {
 

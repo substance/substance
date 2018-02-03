@@ -1,4 +1,4 @@
-import { isPlainObject } from '../util'
+import isPlainObject from '../util/isPlainObject'
 
 class Range {
 

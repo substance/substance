@@ -1,4 +1,4 @@
-import { Component } from '../../ui'
+import Component from '../../ui/Component'
 
 /**
   Layout component for simple layout tasks, without having to write CSS

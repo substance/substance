@@ -1,4 +1,5 @@
-import { copySelection, documentHelpers } from '../model'
+import copySelection from '../model/copySelection'
+import documentHelpers from '../model/documentHelpers'
 import AbstractClipboard from './AbstractClipboard'
 
 /**

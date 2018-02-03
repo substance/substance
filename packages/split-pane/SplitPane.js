@@ -1,4 +1,4 @@
-import { Component } from '../../ui'
+import Component from '../../ui/Component'
 
 /**
   A split view layout component. Takes properties for configuration and 2 children via append.

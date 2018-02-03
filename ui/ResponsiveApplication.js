@@ -1,5 +1,6 @@
-import { cloneDeep, platform } from '../util'
-import { DefaultDOMElement } from '../dom'
+import cloneDeep from '../util/cloneDeep'
+import platform from '../util/platform'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
 
 class ResponsiveApplication extends Component {

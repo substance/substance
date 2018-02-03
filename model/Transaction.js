@@ -1,4 +1,4 @@
-import { isFunction } from '../util'
+import isFunction from '../util/isFunction'
 import DocumentChange from './DocumentChange'
 
 /*

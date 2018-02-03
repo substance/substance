@@ -1,7 +1,7 @@
 import Paragraph from './Paragraph'
 import ParagraphComponent from './ParagraphComponent'
 import ParagraphHTMLConverter from './ParagraphHTMLConverter'
-import { SwitchTextTypeCommand } from '../../ui'
+import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'paragraph',

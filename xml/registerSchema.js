@@ -1,4 +1,5 @@
-import { forEach, camelCase } from '../util'
+import forEach from '../util/forEach'
+import camelCase from '../util/camelCase'
 import XMLTextElement from './XMLTextElement'
 import XMLTextElementConverter from './XMLTextElementConverter'
 import XMLElementNode from './XMLElementNode'

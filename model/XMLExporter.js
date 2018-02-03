@@ -1,5 +1,8 @@
-import { forEach, isBoolean, isNumber, isString } from '../util'
-import { DefaultDOMElement } from '../dom'
+import forEach from '../util/forEach'
+import isBoolean from '../util/isBoolean'
+import isNumber from '../util/isNumber'
+import isString from '../util/isString'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import DOMExporter from './DOMExporter'
 
 /*

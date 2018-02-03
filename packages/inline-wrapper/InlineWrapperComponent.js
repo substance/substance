@@ -1,4 +1,4 @@
-import { InlineNodeComponent } from '../../ui'
+import InlineNodeComponent from '../../ui/InlineNodeComponent'
 
 class InlineWrapperComponent extends InlineNodeComponent {
 

@@ -1,4 +1,7 @@
-import { isString, isNumber, isNil, uuid } from '../util'
+import isString from '../util/isString'
+import isNumber from '../util/isNumber'
+import isNil from '../util/isNil'
+import uuid from '../util/uuid'
 import DOMElement from './DOMElement'
 
 // using a dynamic signature to store the wrapper on the native element

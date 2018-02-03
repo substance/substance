@@ -1,5 +1,6 @@
-import { DefaultDOMElement } from '../dom'
-import { forEach, EventEmitter } from '../util'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
+import forEach from '../util/forEach'
+import EventEmitter from '../util/EventEmitter'
 
 class Router extends EventEmitter {
   constructor(...args) {

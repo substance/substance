@@ -1,5 +1,5 @@
 import { DefaultDOMElement as DOM } from '../dom'
-import { Fragmenter } from '../model'
+import Fragmenter from '../model/Fragmenter'
 
 // converts a node into an XML DOM node
 export default function node2element(node) {

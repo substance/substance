@@ -1,4 +1,5 @@
-import { keys, platform } from '../util'
+import keys from '../util/keys'
+import platform from '../util/platform'
 import Component from './Component'
 
 class AbstractIsolatedNodeComponent extends Component {

@@ -1,4 +1,4 @@
-import { forEach } from '../util'
+import forEach from '../util/forEach'
 import FontAwesomeIcon from './FontAwesomeIcon'
 
 class FontAwesomeIconProvider {

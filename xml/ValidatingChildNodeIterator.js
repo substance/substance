@@ -1,4 +1,5 @@
-import { last, cloneDeep } from '../util'
+import last from '../util/last'
+import cloneDeep from '../util/cloneDeep'
 import DFA from './DFA'
 import _isTextNodeEmpty from './_isTextNodeEmpty'
 

@@ -1,4 +1,4 @@
-import { Command } from '../../ui'
+import Command from '../../ui/Command'
 
 class FindAndReplaceCommand extends Command {
 

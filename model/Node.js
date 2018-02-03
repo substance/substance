@@ -1,7 +1,11 @@
-import {
-  cloneDeep, forEach, isArray, isBoolean, isNumber, isObject, isString,
-  EventEmitter
-} from '../util'
+import cloneDeep from '../util/cloneDeep'
+import forEach from '../util/forEach'
+import isArray from '../util/isArray'
+import isBoolean from '../util/isBoolean'
+import isNumber from '../util/isNumber'
+import isObject from '../util/isObject'
+import isString from '../util/isString'
+import EventEmitter from '../util/EventEmitter'
 import Property from './Property'
 
 /*

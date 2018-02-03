@@ -1,4 +1,6 @@
-import { forEach, Registry, without } from '../util'
+import forEach from '../util/forEach'
+import Registry from '../util/Registry'
+import without from '../util/without'
 
 /*
   Listens to changes on the document and selection and updates the commandStates

@@ -1,4 +1,4 @@
-import { DragAndDropHandler } from '../../ui'
+import DragAndDropHandler from '../../ui/DragAndDropHandler'
 
 export default
 class MoveNode extends DragAndDropHandler {

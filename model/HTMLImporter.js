@@ -1,4 +1,4 @@
-import { DefaultDOMElement } from '../dom'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import DOMImporter from './DOMImporter'
 
 /*

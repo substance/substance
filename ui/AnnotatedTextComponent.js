@@ -1,4 +1,4 @@
-import { Fragmenter } from '../model'
+import Fragmenter from '../model/Fragmenter'
 import Component from './Component'
 import AnnotationComponent from './AnnotationComponent'
 import InlineNodeComponent from './InlineNodeComponent'

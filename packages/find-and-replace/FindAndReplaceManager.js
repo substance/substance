@@ -1,4 +1,4 @@
-import { Marker } from '../../model'
+import Marker from '../../model/Marker'
 
 class FindAndReplaceManager {
 

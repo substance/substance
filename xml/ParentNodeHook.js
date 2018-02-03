@@ -1,4 +1,4 @@
-import { isArray } from '../util'
+import isArray from '../util/isArray'
 
 /*
   Maintains links to the parent node, but only for children of ElementNodes.

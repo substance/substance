@@ -1,9 +1,14 @@
-import {
-  forEach, isPlainObject, isFunction, isString,
-  EventEmitter, uuid
-} from '../util'
-import { Selection, SelectionState, ChangeHistory,
-  Transaction, operationHelpers } from '../model'
+import forEach from '../util/forEach'
+import isPlainObject from '../util/isPlainObject'
+import isFunction from '../util/isFunction'
+import isString from '../util/isString'
+import EventEmitter from '../util/EventEmitter'
+import uuid from '../util/uuid'
+import Selection from '../model/Selection'
+import SelectionState from '../model/SelectionState'
+import ChangeHistory from '../model/ChangeHistory'
+import Transaction from '../model/Transaction'
+import * as operationHelpers from '../model/operationHelpers'
 
 class EditorSession extends EventEmitter {
 

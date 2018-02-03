@@ -1,4 +1,5 @@
-import { platform, substanceGlobals } from '../util'
+import platform from '../util/platform'
+import substanceGlobals from '../util/substanceGlobals'
 import ClipboardImporter from './ClipboardImporter'
 import ClipboardExporter from './ClipboardExporter'
 

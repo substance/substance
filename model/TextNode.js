@@ -1,8 +1,6 @@
 import DocumentNode from './DocumentNode'
 import TextNodeMixin from './TextNodeMixin'
-/**
-  A base class for all text-ish nodes, such as Paragraphs, Headings,
-  Prerendered, etc.
+/** A base class for all text-ish nodes, such as Paragraphs, Headings, Prerendered, etc.
 */
 class TextNode extends TextNodeMixin(DocumentNode) {
 

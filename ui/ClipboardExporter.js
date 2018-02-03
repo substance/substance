@@ -1,4 +1,6 @@
-import { Document, HTMLExporter, JSONConverter } from '../model'
+import Document from '../model/Document'
+import HTMLExporter from '../model/HTMLExporter'
+import JSONConverter from '../model/JSONConverter'
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.

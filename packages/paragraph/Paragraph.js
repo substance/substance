@@ -1,4 +1,4 @@
-import { TextBlock } from '../../model'
+import TextBlock from '../../model/TextBlock'
 
 class Paragraph extends TextBlock {}
 

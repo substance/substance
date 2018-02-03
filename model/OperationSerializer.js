@@ -1,4 +1,6 @@
-import { isArray, isNumber, isObject } from '../util'
+import isArray from '../util/isArray'
+import isNumber from '../util/isNumber'
+import isObject from '../util/isObject'
 import ObjectOperation from './ObjectOperation'
 import TextOperation from './TextOperation'
 import ArrayOperation from './ArrayOperation'

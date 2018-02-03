@@ -1,4 +1,4 @@
-import { last } from '../util'
+import last from '../util/last'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
