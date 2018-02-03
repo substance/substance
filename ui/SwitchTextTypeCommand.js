@@ -1,5 +1,5 @@
-import { isMatch } from '../util'
-import { Command } from '.'
+import isMatch from '../util/isMatch'
+import Command from './Command'
 
 /*
   Usage in packages:

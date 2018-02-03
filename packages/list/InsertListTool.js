@@ -1,4 +1,4 @@
-import { Tool } from '../../ui'
+import { default as Tool } from '../../ui/ToggleTool'
 
 class InsertListTool extends Tool {
   getClassNames () {

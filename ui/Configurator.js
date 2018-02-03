@@ -1,5 +1,10 @@
-import { forEach, map, isString, Registry, platform } from '../util'
-import { DocumentSchema, EditingBehavior } from '../model'
+import forEach from '../util/forEach'
+import map from '../util/map'
+import isString from '../util/isString'
+import Registry from '../util/Registry'
+import platform from '../util/platform'
+import DocumentSchema from '../model/DocumentSchema'
+import EditingBehavior from '../model/EditingBehavior'
 import ComponentRegistry from './ComponentRegistry'
 
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'

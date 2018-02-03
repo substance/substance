@@ -1,4 +1,4 @@
-import { ToolPanel } from '../../ui'
+import ToolPanel from '../../ui/ToolPanel'
 
 export default class Toolbar extends ToolPanel {
 

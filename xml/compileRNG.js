@@ -1,5 +1,5 @@
-import { isString } from '../util'
-import { DefaultDOMElement } from '../dom'
+import isString from '../util/isString'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import nameWithoutNS from './nameWithoutNS'
 import XMLSchema from './XMLSchema'
 import DFA from './DFA'

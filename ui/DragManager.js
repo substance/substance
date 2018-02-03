@@ -1,6 +1,9 @@
-import { DefaultDOMElement } from '../dom'
-import { EventEmitter, platform, getDOMRangeFromEvent, isMouseInsideDOMSelection } from '../util'
-import { operationHelpers } from '../model'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
+import EventEmitter from '../util/EventEmitter'
+import platform from '../util/platform'
+import { getDOMRangeFromEvent } from '../util/windowUtils'
+import { isMouseInsideDOMSelection } from '../util/windowUtils'
+import * as operationHelpers from '../model/operationHelpers'
 import Component from './Component'
 import DragAndDropHandler from './DragAndDropHandler'
 

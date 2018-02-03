@@ -1,4 +1,4 @@
-import { isPlainObject } from '../util'
+import isPlainObject from '../util/isPlainObject'
 import copySelection from './copySelection'
 import Editing from './Editing'
 import Selection from './Selection'

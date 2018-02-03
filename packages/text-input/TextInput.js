@@ -1,7 +1,10 @@
-import {
-  TextNode, Document, EditorSession, Configurator,
-  AbstractEditor, TextPropertyEditor, BasePackage
-} from '../../index.es'
+import TextNode from '../../model/TextNode'
+import Document from '../../model/Document'
+import EditorSession from '../../ui/EditorSession'
+import Configurator from '../../ui/Configurator'
+import AbstractEditor from '../../ui/AbstractEditor'
+import TextPropertyEditor from '../../ui/TextPropertyEditor'
+import BasePackage from '../base/BasePackage'
 
 const { UndoCommand, RedoCommand, SelectAllCommand } = BasePackage
 

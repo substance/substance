@@ -1,4 +1,5 @@
-import { cloneDeep, isEqual } from '../util'
+import cloneDeep from '../util/cloneDeep'
+import isEqual from '../util/isEqual'
 import Selection from './Selection'
 
 class CustomSelection extends Selection {

@@ -1,4 +1,6 @@
-import { AbstractEditor, ContainerEditor, WorkflowPane } from '../../ui'
+import AbstractEditor from '../../ui/AbstractEditor'
+import ContainerEditor from '../../ui/ContainerEditor'
+import WorkflowPane from '../../ui/WorkflowPane'
 import Toolbar from '../toolbar/Toolbar'
 
 /**

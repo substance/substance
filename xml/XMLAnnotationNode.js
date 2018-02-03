@@ -1,4 +1,4 @@
-import { AnnotationMixin } from '../model'
+import AnnotationMixin from '../model/AnnotationMixin'
 import XMLDocumentNode from './XMLDocumentNode'
 
 export default

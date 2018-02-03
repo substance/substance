@@ -1,4 +1,6 @@
-import { cloneDeep, isEqual, isNumber } from '../util'
+import cloneDeep from '../util/cloneDeep'
+import isEqual from '../util/isEqual'
+import isNumber from '../util/isNumber'
 import Conflict from './Conflict'
 
 const NOP = "NOP"

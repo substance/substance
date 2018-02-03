@@ -1,4 +1,6 @@
-import { isArray, forEach, TreeIndex } from '../util'
+import isArray from '../util/isArray'
+import forEach from '../util/forEach'
+import TreeIndex from '../util/TreeIndex'
 import NodeIndex from './NodeIndex'
 
 class PropertyIndex extends NodeIndex {

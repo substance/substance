@@ -1,4 +1,4 @@
-import { PropertyAnnotation } from '../../model'
+import PropertyAnnotation from '../../model/PropertyAnnotation'
 
 class Code extends PropertyAnnotation {}
 

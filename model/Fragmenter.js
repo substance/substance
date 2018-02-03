@@ -1,4 +1,5 @@
-import { forEach, isString } from '../util'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
 
 const ENTER = 1
 const EXIT = -1

@@ -1,4 +1,4 @@
-import { NodeComponent } from '../../ui'
+import NodeComponent from '../../ui/NodeComponent'
 
 class ImageComponent extends NodeComponent {
 

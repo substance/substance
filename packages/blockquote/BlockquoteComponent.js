@@ -1,4 +1,4 @@
-import { TextBlockComponent } from '../../ui'
+import TextBlockComponent from '../../ui/TextBlockComponent'
 
 class BlockquoteComponent extends TextBlockComponent {
   render($$) {

@@ -1,4 +1,4 @@
-import { ToggleTool } from '../../ui'
+import ToggleTool from '../../ui/ToggleTool'
 
 class InsertImageTool extends ToggleTool {
 

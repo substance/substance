@@ -1,4 +1,4 @@
-import { forEach } from '../util'
+import forEach from '../util/forEach'
 import DFA from './DFA'
 // TODO: we should hide this behind the Expression API
 import { DFAExpr, InterleaveExpr } from './RegularLanguage'

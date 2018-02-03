@@ -1,4 +1,4 @@
-import { Overlay } from '../../ui'
+import Overlay from '../../ui/Overlay'
 
 export default {
   name: 'overlay',

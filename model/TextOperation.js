@@ -1,4 +1,5 @@
-import { isString, isNumber } from '../util'
+import isString from '../util/isString'
+import isNumber from '../util/isNumber'
 import Conflict from './Conflict'
 
 const INSERT = "insert"

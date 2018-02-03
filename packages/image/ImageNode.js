@@ -1,4 +1,4 @@
-import { DocumentNode } from '../../model'
+import DocumentNode from '../../model/DocumentNode'
 
 class ImageNode extends DocumentNode {
 

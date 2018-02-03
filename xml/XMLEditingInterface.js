@@ -1,4 +1,4 @@
-import { EditingInterface } from '../model'
+import EditingInterface from '../model/EditingInterface'
 
 export default class XMLEditingInterface extends EditingInterface {
 

@@ -1,5 +1,5 @@
-import { isString } from '../../util'
-import { Component } from '../../ui'
+import isString from '../../util/isString'
+import Component from '../../ui/Component'
 import ListItemComponent from './ListItemComponent'
 import renderListNode from './renderListNode'
 import getListTagName from './getListTagName'

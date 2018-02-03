@@ -1,4 +1,4 @@
-import { last } from '../../util'
+import last from '../../util/last'
 import getListTagName from './getListTagName'
 
 export default function renderListNode(node, rootEl, createElement) {

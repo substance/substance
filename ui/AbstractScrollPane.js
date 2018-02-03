@@ -1,6 +1,8 @@
-import { getSelectionRect, getRelativeMouseBounds, platform } from '../util'
-import { DefaultDOMElement } from '../dom'
-import { Component } from '../ui'
+import { getSelectionRect } from '../util/windowUtils'
+import getRelativeMouseBounds from '../util/getRelativeMouseBounds'
+import platform from '../util/platform'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
+import Component from '../ui/Component'
 
 class AbstractScrollPane extends Component {
 

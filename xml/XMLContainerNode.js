@@ -1,4 +1,4 @@
-import { ContainerMixin } from '../model'
+import ContainerMixin from '../model/ContainerMixin'
 import XMLElementNode from './XMLElementNode'
 
 export default class XMLContainerNode extends ContainerMixin(XMLElementNode) {

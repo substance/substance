@@ -1,4 +1,4 @@
-import { annotationHelpers } from '../model'
+import annotationHelpers from '../model/annotationHelpers'
 import Command from './Command'
 
 /**

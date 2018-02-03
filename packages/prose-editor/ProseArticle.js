@@ -1,4 +1,4 @@
-import { Document } from '../../model'
+import Document from '../../model/Document'
 
 export default
 class ProseArticle extends Document {

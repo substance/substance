@@ -1,4 +1,4 @@
-import { Component } from '../../ui'
+import Component from '../../ui/Component'
 
 class ToolSeparator extends Component {
   render($$) {

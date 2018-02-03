@@ -1,4 +1,4 @@
-import { platform } from '../util'
+import platform from '../util/platform'
 
 class SurfaceManager {
 

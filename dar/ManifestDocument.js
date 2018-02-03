@@ -1,4 +1,4 @@
-import { XMLDocument } from '../xml'
+import XMLDocument from '../xml/XMLDocument'
 
 export default class ManifestDocument extends XMLDocument {
   getRootNode() {

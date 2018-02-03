@@ -1,4 +1,4 @@
-import { request } from '../util'
+import request from '../util/request'
 
 /*
   HTTP client for talking with DocumentServer

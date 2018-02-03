@@ -1,4 +1,4 @@
-import { isString } from '../../util'
+import isString from '../../util/isString'
 import renderListNode from './renderListNode'
 import getListTagName from './getListTagName'
 

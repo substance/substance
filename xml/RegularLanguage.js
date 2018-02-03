@@ -1,4 +1,5 @@
-import { forEach, isString } from '../util'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
 import DFABuilder from './DFABuilder'
 import DFA from './DFA'
 import _isTextNodeEmpty from './_isTextNodeEmpty'

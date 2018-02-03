@@ -1,4 +1,5 @@
-import { cloneDeep, forEach } from '../util'
+import cloneDeep from '../util/cloneDeep'
+import forEach from '../util/forEach'
 import Document from './Document'
 import documentHelpers from './documentHelpers'
 import { isFirst, isLast } from './selectionHelpers'

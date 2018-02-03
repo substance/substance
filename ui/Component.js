@@ -1,6 +1,12 @@
-import { extend, forEach, isString, isFunction, uuid,
-  EventEmitter, platform } from '../util'
-import { DOMElement, DefaultDOMElement } from '../dom'
+import extend from '../util/extend'
+import forEach from '../util/forEach'
+import isString from '../util/isString'
+import isFunction from '../util/isFunction'
+import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
+import platform from '../util/platform'
+import DOMElement from '../dom/DOMElement'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
 

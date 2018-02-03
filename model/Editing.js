@@ -1,4 +1,7 @@
-import { isArrayEqual, isString, last, uuid } from '../util'
+import isArrayEqual from '../util/isArrayEqual'
+import isString from '../util/isString'
+import last from '../util/last'
+import uuid from '../util/uuid'
 import annotationHelpers from './annotationHelpers'
 import documentHelpers from './documentHelpers'
 import { setCursor, isEntirelySelected, selectNode } from './selectionHelpers'
