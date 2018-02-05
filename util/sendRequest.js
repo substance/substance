@@ -22,7 +22,9 @@ export default function sendRequest(params, cb) {
         xmlhttp.setRequestHeader(key, val)
       })
     }
-    if (params.data) {
+    if (params.data instanceof FormData) {
+      xmlhttp.send(params.data)
+    } else if (params.data) {
       xmlhttp.send(JSON.stringify(params.data))
     } else {
       xmlhttp.send()
