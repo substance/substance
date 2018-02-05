@@ -70,7 +70,7 @@ class BrowserDOMElement extends DOMElement {
     if (oldDocType) {
       oldDocType.parentNode.replaceChild(newDocType, oldDocType)
     } else {
-      ownerDocument.appendChild(newDocType)
+      ownerDocument.insertBefore(newDocType, ownerDocument.firstChild)
     }
   }
 
