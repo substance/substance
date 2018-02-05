@@ -22,7 +22,7 @@ export default function sendRequest(params, cb) {
         xmlhttp.setRequestHeader(key, val)
       })
     }
-    if (params.data instanceof FormData) {
+    if (params.data instanceof FormData) { // eslint-disable-line no-undef
       xmlhttp.send(params.data)
     } else if (params.data) {
       xmlhttp.send(JSON.stringify(params.data))
