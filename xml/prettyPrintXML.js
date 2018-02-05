@@ -21,7 +21,7 @@ export default function prettyPrintXML(xml) {
 }
 
 function _prettyPrint(result, el, level) {
-  let indent = new Array(level*2).join(' ')
+  let indent = new Array(level*2).fill(' ').join('')
   if (el.isElementNode()) {
     const isMixed = _isMixed(el)
     if (isMixed) {
