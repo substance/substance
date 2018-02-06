@@ -1,4 +1,4 @@
-import { Component } from '../../ui'
+import Component from '../../ui/Component'
 import TableCellComponent from './TableCellComponent'
 
 class TableComponent extends Component {

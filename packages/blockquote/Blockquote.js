@@ -1,4 +1,4 @@
-import { TextBlock } from '../../model'
+import TextBlock from '../../model/TextBlock'
 
 class Blockquote extends TextBlock {}
 

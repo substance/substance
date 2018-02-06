@@ -1,7 +1,7 @@
 import Codeblock from './Codeblock'
 import CodeblockComponent from './CodeblockComponent'
 import CodeblockHTMLConverter from './CodeblockHTMLConverter'
-import { SwitchTextTypeCommand } from '../../ui'
+import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'codeblock',

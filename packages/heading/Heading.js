@@ -1,4 +1,4 @@
-import { TextBlock } from '../../model'
+import TextBlock from '../../model/TextBlock'
 
 class Heading extends TextBlock {
 

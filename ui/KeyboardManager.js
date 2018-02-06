@@ -1,4 +1,6 @@
-import { keys, parseKeyEvent, platform } from '../util'
+import keys from '../util/keys'
+import parseKeyEvent from '../util/parseKeyEvent'
+import platform from '../util/platform'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
 export default class KeyboardManager {

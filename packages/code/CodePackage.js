@@ -1,4 +1,5 @@
-import { AnnotationComponent, AnnotationCommand } from '../../ui'
+import AnnotationComponent from '../../ui/AnnotationComponent'
+import AnnotationCommand from '../../ui/AnnotationCommand'
 import Code from './Code'
 import CodeHTMLConverter from './CodeHTMLConverter'
 

@@ -1,5 +1,5 @@
-import { uuid } from '../../util'
-import { InsertNodeCommand } from '../../ui'
+import uuid from '../../util/uuid'
+import InsertNodeCommand from '../../ui/InsertNodeCommand'
 
 class InsertTableCommand extends InsertNodeCommand {
   createNodeData(tx) {

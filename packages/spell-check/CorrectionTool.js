@@ -1,4 +1,4 @@
-import { Tool } from '../../ui'
+import { default as Tool } from '../../ui/ToggleTool'
 
 class CorrectionTool extends Tool {
 

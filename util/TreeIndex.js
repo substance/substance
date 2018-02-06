@@ -1,4 +1,5 @@
-import { get, setWith } from 'lodash-es'
+import get from 'lodash-es/get'
+import setWith from 'lodash-es/setWith'
 import isString from './isString'
 import isArray from './isArray'
 import deleteFromArray from './deleteFromArray'

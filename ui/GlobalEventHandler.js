@@ -7,8 +7,10 @@
   This implementation is just a prototype and might change with the next releases.
 */
 
-import { DOMElement, DOMEventListener, DefaultDOMElement } from '../dom'
-import { platform } from '../util'
+import DOMElement from '../dom/DOMElement'
+import DOMEventListener from '../dom/DOMEventListener'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
+import platform from '../util/platform'
 
 /*
   TODO: to be 100% safe we would need to introduce a hidden contenteditable

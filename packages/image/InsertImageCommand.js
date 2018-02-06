@@ -1,4 +1,4 @@
-import { InsertNodeCommand } from '../../ui'
+import InsertNodeCommand from '../../ui/InsertNodeCommand'
 import insertImage from './insertImage'
 
 export default class InsertImageCommand extends InsertNodeCommand {

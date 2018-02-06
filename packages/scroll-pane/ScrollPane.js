@@ -1,5 +1,6 @@
-import { platform, getRelativeBoundingRect } from '../../util'
-import { AbstractScrollPane } from '../../ui'
+import platform from '../../util/platform'
+import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
+import AbstractScrollPane from '../../ui/AbstractScrollPane'
 import Scrollbar from '../scrollbar/Scrollbar'
 
 /**

@@ -1,4 +1,5 @@
-import { isArray, isEqual } from '../util'
+import isArray from '../util/isArray'
+import isEqual from '../util/isEqual'
 import ObjectOperation from './ObjectOperation'
 
 /*

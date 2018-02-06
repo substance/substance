@@ -1,4 +1,5 @@
-import { isArray, last } from '../util'
+import isArray from '../util/isArray'
+import last from '../util/last'
 import Coordinate from './Coordinate'
 
 /*

@@ -1,4 +1,4 @@
-import { EventEmitter } from '../util'
+import EventEmitter from '../util/EventEmitter'
 import SnapshotEngine from './SnapshotEngine'
 
 /*

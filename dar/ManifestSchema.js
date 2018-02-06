@@ -1,4 +1,4 @@
-import { XMLSchema } from '../xml'
+import XMLSchema from '../xml/XMLSchema'
 import ManifestSchemaData from '../tmp/Manifest.data.js'
 
 const ManifestSchema = XMLSchema.fromJSON(ManifestSchemaData)

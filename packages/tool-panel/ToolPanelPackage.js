@@ -1,4 +1,8 @@
-import { ToolDropdown, ToolGroup, ToolPrompt, ToolPanel, MenuGroup } from '../../ui'
+import ToolDropdown from '../../ui/ToolDropdown'
+import ToolGroup from '../../ui/ToolGroup'
+import ToolPrompt from '../../ui/ToolPrompt'
+import ToolPanel from '../../ui/ToolPanel'
+import MenuGroup from '../../ui/MenuGroup'
 import ToolSeparator from './ToolSeparator'
 
 export default {

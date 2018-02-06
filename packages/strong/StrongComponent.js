@@ -1,4 +1,4 @@
-import { AnnotationComponent } from '../../ui'
+import AnnotationComponent from '../../ui/AnnotationComponent'
 
 class StrongComponent extends AnnotationComponent {
   getTagName() {

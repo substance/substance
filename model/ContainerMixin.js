@@ -1,4 +1,5 @@
-import { isNumber, isString } from '../util'
+import isNumber from '../util/isNumber'
+import isString from '../util/isString'
 import ContainerAddress from './ContainerAddress'
 import documentHelpers from './documentHelpers'
 

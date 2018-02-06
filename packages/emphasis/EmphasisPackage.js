@@ -1,4 +1,4 @@
-import { AnnotationCommand } from '../../ui'
+import AnnotationCommand from '../../ui/AnnotationCommand'
 import Emphasis from './Emphasis'
 import EmphasisHTMLConverter from './EmphasisHTMLConverter'
 import EmphasisComponent from './EmphasisComponent'

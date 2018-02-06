@@ -1,4 +1,4 @@
-import { DefaultDOMElement } from '../dom'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import _lookupRNG from './_lookupRNG'
 
 export default function _expandIncludes(fs, searchDirs, root) {

@@ -1,5 +1,7 @@
-import { forEach, deleteFromArray, ArrayTree } from '../util'
-import { Marker } from '../model'
+import forEach from '../util/forEach'
+import deleteFromArray from '../util/deleteFromArray'
+import ArrayTree from '../util/ArrayTree'
+import Marker from '../model/Marker'
 
 /*
   MarkersManager keeps track of any Markers, which are annotations

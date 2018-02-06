@@ -1,6 +1,6 @@
-import { DefaultDOMElement } from '../dom'
-import { DOMImporter } from '../model'
-import { isString } from '../util'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
+import DOMImporter from '../model/DOMImporter'
+import isString from '../util/isString'
 import ValidatingChildNodeIterator from './ValidatingChildNodeIterator'
 
 export default class XMLDocumentImporter extends DOMImporter {

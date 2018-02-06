@@ -1,4 +1,5 @@
-import { EventEmitter, SubstanceError as Err } from '../util'
+import EventEmitter from '../util/EventEmitter'
+import Err from '../util/SubstanceError'
 
 /**
   ClientConnection abstraction. Uses websockets internally

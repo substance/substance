@@ -1,4 +1,7 @@
-import { isArray, isString, forEach, EventEmitter } from '../util'
+import isArray from '../util/isArray'
+import isString from '../util/isString'
+import forEach from '../util/forEach'
+import EventEmitter from '../util/EventEmitter'
 
 /*
   A data storage implemention that supports data defined via a {@link Schema},

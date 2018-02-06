@@ -1,4 +1,4 @@
-import { Coordinate } from '../model'
+import Coordinate from '../model/Coordinate'
 import Component from './Component'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 

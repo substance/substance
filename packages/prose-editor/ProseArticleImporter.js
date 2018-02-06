@@ -1,4 +1,4 @@
-import { HTMLImporter } from '../../model'
+import HTMLImporter from '../../model/HTMLImporter'
 
 // TODO: FIX this. Should be used together with configurator
 export default class ProseArticleImporter extends HTMLImporter {

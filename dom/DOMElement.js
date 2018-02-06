@@ -1,5 +1,9 @@
-import { isObject, isFunction, isString, isArray, forEach,
-  ArrayIterator } from '../util'
+import isObject from '../util/isObject'
+import isFunction from '../util/isFunction'
+import isString from '../util/isString'
+import isArray from '../util/isArray'
+import forEach from '../util/forEach'
+import ArrayIterator from '../util/ArrayIterator'
 import DOMEventListener from './DOMEventListener'
 
 const NOT_IMPLEMENTED = 'This method is not implemented.'

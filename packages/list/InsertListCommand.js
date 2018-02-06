@@ -1,4 +1,4 @@
-import { SwitchTextTypeCommand } from '../../ui'
+import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 class InsertListCommand extends SwitchTextTypeCommand {
 

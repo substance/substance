@@ -1,4 +1,4 @@
-import { isNumber } from '../util'
+import isNumber from '../util/isNumber'
 
 const SHIFT = 'shift'
 

@@ -1,4 +1,6 @@
-import { last, createCountingIdGenerator, ArrayIterator } from '../util'
+import last from '../util/last'
+import createCountingIdGenerator from '../util/createCountingIdGenerator'
+import ArrayIterator from '../util/ArrayIterator'
 
 const WS_LEFT = /^\s+/g
 // TODO: this is probably incorrect, /^\s*/ would always be a match

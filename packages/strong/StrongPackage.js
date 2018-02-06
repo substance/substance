@@ -1,4 +1,4 @@
-import { AnnotationCommand } from '../../ui'
+import AnnotationCommand from '../../ui/AnnotationCommand'
 import Strong from './Strong'
 import StrongHTMLConverter from './StrongHTMLConverter'
 import StrongComponent from './StrongComponent'

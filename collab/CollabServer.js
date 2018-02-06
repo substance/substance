@@ -1,4 +1,5 @@
-import { forEach, SubstanceError as Err } from '../util'
+import forEach from '../util/forEach'
+import Err from '../util/SubstanceError'
 import Server from './Server'
 import CollabEngine from './CollabEngine'
 

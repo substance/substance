@@ -1,4 +1,7 @@
-import { isString, filter, map, TreeIndex } from '../util'
+import isString from '../util/isString'
+import filter from '../util/filter'
+import map from '../util/map'
+import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
 class ContainerAnnotationIndex extends DocumentIndex {
