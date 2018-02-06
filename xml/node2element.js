@@ -1,4 +1,4 @@
-import { DefaultDOMElement as DOM } from '../dom'
+import DOM from '../dom/DefaultDOMElement'
 import Fragmenter from '../model/Fragmenter'
 
 // converts a node into an XML DOM node

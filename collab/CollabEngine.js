@@ -1,4 +1,7 @@
-import { EventEmitter, forEach, map, SubstanceError as Err } from '../util'
+import EventEmitter from '../util/EventEmitter'
+import forEach from '../util/forEach'
+import map from '../util/map'
+import Err from '../util/SubstanceError'
 import DocumentChange from '../model/DocumentChange'
 import * as operationHelpers from '../model/operationHelpers'
 

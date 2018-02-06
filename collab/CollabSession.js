@@ -1,4 +1,5 @@
-import { cloneDeep, SubstanceError as Err } from '../util'
+import cloneDeep from '../util/cloneDeep'
+import Err from '../util/SubstanceError'
 import DocumentChange from '../model/DocumentChange'
 import EditorSession from '../ui/EditorSession'
 

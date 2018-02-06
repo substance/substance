@@ -1,4 +1,4 @@
-import { DefaultDOMElement as DOM } from '../dom'
+import DOM from '../dom/DefaultDOMElement'
 import isString from '../util/isString'
 import _isTextNodeEmpty from './_isTextNodeEmpty'
 
