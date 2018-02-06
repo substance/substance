@@ -14,7 +14,7 @@ export default function prettyPrintXML(xml) {
     dom = xml
   }
   const result = []
-  dom.children.forEach((el) => {
+  dom.childNodes.forEach((el) => {
     _prettyPrint(result, el, 0)
   })
   return result.join('\n')
