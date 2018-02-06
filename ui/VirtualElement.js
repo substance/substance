@@ -1,6 +1,15 @@
-import { clone, flattenOften, isArray, isFunction, isNumber, isBoolean, isNil,
-  isPlainObject, isString, without, map } from '../util'
-import { DOMElement } from '../dom'
+import clone from '../util/clone'
+import flattenOften from '../util/flattenOften'
+import isArray from '../util/isArray'
+import isFunction from '../util/isFunction'
+import isNumber from '../util/isNumber'
+import isBoolean from '../util/isBoolean'
+import isNil from '../util/isNil'
+import isPlainObject from '../util/isPlainObject'
+import isString from '../util/isString'
+import without from '../util/without'
+import map from '../util/map'
+import DOMElement from '../dom/DOMElement'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.

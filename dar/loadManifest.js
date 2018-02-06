@@ -1,5 +1,7 @@
-import { Configurator, EditorSession } from '../ui'
-import { registerSchema, XMLDocumentImporter } from '../xml'
+import Configurator from '../ui/Configurator'
+import EditorSession from '../ui/EditorSession'
+import registerSchema from '../xml/registerSchema'
+import XMLDocumentImporter from '../xml/XMLDocumentImporter'
 import ManifestSchema from './ManifestSchema'
 import ManifestDocument from './ManifestDocument'
 

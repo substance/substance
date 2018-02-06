@@ -1,4 +1,4 @@
-import { EditAnnotationCommand } from '../../ui'
+import EditAnnotationCommand from '../../ui/EditAnnotationCommand'
 import Link from './Link'
 import LinkComponent from './LinkComponent'
 import LinkCommand from './LinkCommand'

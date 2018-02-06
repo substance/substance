@@ -1,4 +1,4 @@
-import { isString } from '../util'
+import isString from '../util/isString'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 

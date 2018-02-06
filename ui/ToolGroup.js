@@ -1,5 +1,6 @@
-import { Component, ToggleTool } from '.'
-import { forEach } from '../util'
+import Component from './Component'
+import ToggleTool from './ToggleTool'
+import forEach from '../util/forEach'
 
 /*
   Tools rendered in flat tool group

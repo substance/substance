@@ -1,4 +1,4 @@
-import { forEach } from '../util'
+import forEach from '../util/forEach'
 
 const START = 'START'
 const END = 'END'

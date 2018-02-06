@@ -1,4 +1,4 @@
-import { forEach } from '../util'
+import forEach from '../util/forEach'
 import ElementType from 'domelementtype'
 import Parser from '../vendor/htmlparser2'
 import MemoryDOMElement from './MemoryDOMElement'

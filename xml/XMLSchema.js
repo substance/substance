@@ -1,4 +1,5 @@
-import { forEach, map } from '../util'
+import forEach from '../util/forEach'
+import map from '../util/map'
 import { Expression } from './RegularLanguage'
 import DFA from './DFA'
 import _isTextNodeEmpty from './_isTextNodeEmpty'

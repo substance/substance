@@ -1,4 +1,4 @@
-import { ToggleTool } from '../../ui'
+import ToggleTool from '../../ui/ToggleTool'
 
 /**
   Tool for editing an existing link.

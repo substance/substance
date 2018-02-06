@@ -1,4 +1,5 @@
-import { forEach, map } from '../util'
+import forEach from '../util/forEach'
+import map from '../util/map'
 
 /*
   Storage for files such as images and other assets.

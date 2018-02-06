@@ -1,4 +1,4 @@
-import { isNil } from '../util'
+import isNil from '../util/isNil'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'

@@ -1,4 +1,4 @@
-import { Registry } from '../util'
+import Registry from '../util/Registry'
 
 /*
   Registry for Nodes.

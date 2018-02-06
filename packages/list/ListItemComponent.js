@@ -1,4 +1,4 @@
-import { TextPropertyComponent } from '../../ui'
+import TextPropertyComponent from '../../ui/TextPropertyComponent'
 
 class ListItemComponent extends TextPropertyComponent {}
 

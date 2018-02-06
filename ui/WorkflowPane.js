@@ -1,4 +1,4 @@
-import { ToolPanel } from '.'
+import ToolPanel from './ToolPanel'
 
 class WorkflowPane extends ToolPanel {
 

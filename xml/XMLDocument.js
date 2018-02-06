@@ -1,10 +1,10 @@
-import {
-  IncrementalData, Document,
-  PropertyIndex, AnnotationIndex,
-  DocumentNodeFactory
-} from '../model'
-import { uuid } from '../util'
-import { DefaultDOMElement } from '../dom'
+import IncrementalData from '../model/IncrementalData'
+import Document from '../model/Document'
+import PropertyIndex from '../model/PropertyIndex'
+import AnnotationIndex from '../model/AnnotationIndex'
+import DocumentNodeFactory from '../model/DocumentNodeFactory'
+import uuid from '../util/uuid'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 
 import ParentNodeHook from './ParentNodeHook'
 import XMLEditingInterface from './XMLEditingInterface'

@@ -1,5 +1,10 @@
-import { isEqual, isNil, isPlainObject, forEach,
-  last, uuid, EventEmitter } from '../util'
+import isEqual from '../util/isEqual'
+import isNil from '../util/isNil'
+import isPlainObject from '../util/isPlainObject'
+import forEach from '../util/forEach'
+import last from '../util/last'
+import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'

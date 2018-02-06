@@ -1,4 +1,7 @@
-import { forEach, isArray, cloneDeep, uuid } from '../util'
+import forEach from '../util/forEach'
+import isArray from '../util/isArray'
+import cloneDeep from '../util/cloneDeep'
+import uuid from '../util/uuid'
 import DFA from './DFA'
 
 const START = DFA.START

@@ -1,4 +1,6 @@
-import { isArrayEqual, isEqual, cloneDeep } from '../util'
+import isArrayEqual from '../util/isArrayEqual'
+import isEqual from '../util/isEqual'
+import cloneDeep from '../util/cloneDeep'
 import documentHelpers from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'

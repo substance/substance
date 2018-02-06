@@ -1,4 +1,4 @@
-import { isEqual } from '../util'
+import isEqual from '../util/isEqual'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 import Component from './Component'
 

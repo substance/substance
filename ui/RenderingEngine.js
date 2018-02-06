@@ -1,5 +1,8 @@
-import { isFunction, forEach, uuid, substanceGlobals } from '../util'
-import { DefaultDOMElement } from '../dom'
+import isFunction from '../util/isFunction'
+import forEach from '../util/forEach'
+import uuid from '../util/uuid'
+import substanceGlobals from '../util/substanceGlobals'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
 import VirtualElement from './VirtualElement'
 import Component from './Component'
 

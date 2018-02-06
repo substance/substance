@@ -1,4 +1,6 @@
-import { isFunction, isString, findIndex } from '../util'
+import isFunction from '../util/isFunction'
+import isString from '../util/isString'
+import findIndex from '../util/findIndex'
 
 /*
   Internal implementation used to store event bindings.

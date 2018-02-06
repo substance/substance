@@ -1,7 +1,7 @@
 import Blockquote from './Blockquote'
 import BlockquoteComponent from './BlockquoteComponent'
 import BlockquoteHTMLConverter from './BlockquoteHTMLConverter'
-import { SwitchTextTypeCommand } from '../../ui'
+import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'blockquote',

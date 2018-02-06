@@ -1,4 +1,4 @@
-import { DOMElement } from '../dom'
+import DOMElement from '../dom/DOMElement'
 import XMLDocumentNode from './XMLDocumentNode'
 
 export default

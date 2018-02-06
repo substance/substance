@@ -1,4 +1,4 @@
-import { TextNode } from '../../model'
+import TextNode from '../../model/TextNode'
 
 class TableCell extends TextNode {}
 

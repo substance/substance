@@ -1,4 +1,4 @@
-import { Command } from '../../ui'
+import Command from '../../ui/Command'
 
 /**
   Used for edit tools or property annotations (e.g. EditLinkTool)

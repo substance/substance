@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { isEqual } from '../util'
+import isEqual from '../util/isEqual'
 import ObjectOperation from './ObjectOperation'
 
 const MAXIMUM_CHANGE_DURATION = 1500

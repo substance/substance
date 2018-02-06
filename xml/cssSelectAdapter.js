@@ -1,4 +1,4 @@
-import { map } from '../util'
+import map from '../util/map'
 import DomUtils from '../vendor/domutils'
 import nameWithoutNS from './nameWithoutNS'
 

@@ -1,4 +1,4 @@
-import { ToolPanel } from '../../ui'
+import ToolPanel from '../../ui/ToolPanel'
 
 class ContextMenu extends ToolPanel {
 

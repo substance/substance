@@ -1,5 +1,6 @@
 import { EventEmitter, forEach, map, SubstanceError as Err } from '../util'
-import { DocumentChange, operationHelpers } from '../model'
+import DocumentChange from '../model/DocumentChange'
+import * as operationHelpers from '../model/operationHelpers'
 
 /*
   Engine for realizing collaborative editing. Implements the server-methods of

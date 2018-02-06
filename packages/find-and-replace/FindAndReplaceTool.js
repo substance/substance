@@ -1,5 +1,5 @@
-import { ToggleTool } from '../../ui'
-import { debounce } from '../../util'
+import ToggleTool from '../../ui/ToggleTool'
+import debounce from '../../util/debounce'
 
 class FindAndReplaceTool extends ToggleTool {
 

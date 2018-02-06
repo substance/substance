@@ -1,5 +1,5 @@
-import { DefaultDOMElement } from '../dom'
-import { isArray } from '../util'
+import DefaultDOMElement from '../dom/DefaultDOMElement'
+import isArray from '../util/isArray'
 import _expandIncludes from './_expandIncludes'
 import _lookupRNG from './_lookupRNG'
 

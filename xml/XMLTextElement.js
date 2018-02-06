@@ -1,5 +1,5 @@
-import { TextNodeMixin } from '../model'
-import { DOMElement } from '../dom'
+import TextNodeMixin from '../model/TextNodeMixin'
+import DOMElement from '../dom/DOMElement'
 import XMLDocumentNode from './XMLDocumentNode'
 
 /*
