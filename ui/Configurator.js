@@ -83,7 +83,7 @@ class Configurator {
       keyboardShortcuts: [],
       icons: {},
       labels: {},
-      lang: 'en_US',
+      lang: 'en',
       editorOptions: [],
       CommandManagerClass: DefaultCommandManager,
       DragManagerClass: DefaultDragManager,
@@ -593,7 +593,7 @@ class Configurator {
   }
 
   getDefaultLanguage() {
-    return this.config.lang || 'en_US'
+    return this.config.lang || 'en'
   }
 
   /* This is used for DependencyInjection of core implementations */
