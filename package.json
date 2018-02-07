@@ -1,6 +1,6 @@
 {
   "name": "substance",
-  "version": "1.0.0-preview.23",
+  "version": "1.0.0-preview.24",
   "description": "",
   "repository": {
     "type": "git",
@@ -66,5 +66,8 @@
     "vendor/htmlparser2.js",
     "vendor/lodash-es.js",
     "xml"
-  ]
+  ],
+  "publishConfig": {
+    "tag": "next"
+  }
 }
