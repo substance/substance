@@ -66,5 +66,8 @@
     "vendor/htmlparser2.js",
     "vendor/lodash-es.js",
     "xml"
-  ]
+  ],
+  "publishConfig": {
+    "tag": "next"
+  }
 }
