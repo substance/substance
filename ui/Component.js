@@ -256,9 +256,13 @@ class Component extends EventEmitter {
     ```
   */
   getLabel(name, ...args) {
-    let labelProvider = this.context.labelProvider
+    let labelProvider = this.getLabelProvider()
     if (!labelProvider) throw new Error('Missing labelProvider.')
     return labelProvider.getLabel(name, ...args)
+  }
+
+  getLabelProvider() {
+    return this.context.labelProvider
   }
 
   /**

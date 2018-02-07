@@ -144,4 +144,8 @@ export default class AbstractEditor extends Component {
     return this.surfaceManager
   }
 
+  getLabelProvider() {
+    return this.labelProvider
+  }
+
 }
