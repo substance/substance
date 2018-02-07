@@ -33,13 +33,14 @@ export default class AbstractEditor extends Component {
   }
 
   _initialize(props) {
-    if (!props.editorSession) {
+    const editorSession = props.editorSession
+    if (!editorSession) {
       throw new Error('EditorSession instance required');
     }
-    this.editorSession = props.editorSession
-    this.doc = this.editorSession.getDocument()
+    this.editorSession = editorSession
+    this.doc = editorSession.getDocument()
 
-    let configurator = this.editorSession.getConfigurator()
+    let configurator = editorSession.getConfigurator()
     this.componentRegistry = configurator.getComponentRegistry()
     this.commandGroups = configurator.getCommandGroups()
     this.keyboardShortcuts = configurator.getKeyboardShortcutsByCommand()
@@ -48,17 +49,26 @@ export default class AbstractEditor extends Component {
     this.iconProvider = configurator.getIconProvider()
 
     // legacy
-    this.surfaceManager = this.editorSession.surfaceManager
-    this.commandManager = this.editorSession.commandManager
-    this.dragManager = this.editorSession.dragManager
-    this.macroManager = this.editorSession.macroManager
-    this.converterRegistry = this.editorSession.converterRegistry
-    this.globalEventHandler = this.editorSession.globalEventHandler
-    this.editingBehavior = this.editorSession.editingBehavior
-    this.markersManager = this.editorSession.markersManager
+    this.surfaceManager = editorSession.surfaceManager
+    this.commandManager = editorSession.commandManager
+    this.dragManager = editorSession.dragManager
+    this.macroManager = editorSession.macroManager
+    this.converterRegistry = editorSession.converterRegistry
+    this.globalEventHandler = editorSession.globalEventHandler
+    this.editingBehavior = editorSession.editingBehavior
+    this.markersManager = editorSession.markersManager
 
-    this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
+    this.resourceManager = new ResourceManager(editorSession, this.getChildContext())
     this.domSelection = new DOMSelection(this)
+
+    // initialize the label provider
+    this.labelProvider.setLanguage(editorSession.getLanguage())
+    // if the language is changed update the LabelProvider
+    // and do a force rerender
+    editorSession.onUpdate('lang', (lang) => {
+      this.labelProvider.setLanguage(lang)
+    }, this)
+    editorSession.onRender('lang', this.rerender, this)
   }
 
   willReceiveProps(nextProps) {
@@ -71,7 +81,9 @@ export default class AbstractEditor extends Component {
   }
 
   _dispose() {
-    this.getEditorSession().detachEditor(this)
+    const editorSession = this.getEditorSession()
+    editorSession.off(this)
+    editorSession.detachEditor(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()
@@ -133,6 +145,10 @@ export default class AbstractEditor extends Component {
 
   getSurfaceManager() {
     return this.surfaceManager
+  }
+
+  getLabelProvider() {
+    return this.labelProvider
   }
 
 }
