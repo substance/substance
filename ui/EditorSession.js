@@ -181,6 +181,10 @@ class EditorSession extends EventEmitter {
         return this.getCommandStates()
       case 'change':
         return this.getChange()
+      case 'lang':
+        return this.getLanguage()
+      case 'dir':
+        return this.getTextDirection()
       default:
         throw new Error('Unknown resource: ' + resourceName)
     }
