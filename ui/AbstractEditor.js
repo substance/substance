@@ -59,6 +59,13 @@ export default class AbstractEditor extends Component {
 
     this.resourceManager = new ResourceManager(this.editorSession, this.getChildContext())
     this.domSelection = new DOMSelection(this)
+
+    // if the language is changed update the LabelProvider
+    // and do a force rerender
+    this.editorSession.onUpdate('lang', (lang) => {
+      this.labelProvider.setLanguage(lang)
+    }, this)
+    this.editorSession.onRender('lang', this.rerender, this)
   }
 
   willReceiveProps(nextProps) {
@@ -71,7 +78,9 @@ export default class AbstractEditor extends Component {
   }
 
   _dispose() {
-    this.getEditorSession().detachEditor(this)
+    const editorSession = this.getEditorSession()
+    editorSession.off(this)
+    editorSession.detachEditor(this)
     // Note: we need to clear everything, as the childContext
     // changes which is immutable
     this.empty()

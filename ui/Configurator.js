@@ -8,7 +8,6 @@ import EditingBehavior from '../model/EditingBehavior'
 import ComponentRegistry from './ComponentRegistry'
 
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'
-import LabelProvider from './DefaultLabelProvider'
 
 import DefaultCommandManager from './CommandManager'
 import DefaultDragManager from './DragManager'
@@ -19,6 +18,7 @@ import DefaultMacroManager from './MacroManager'
 import DefaultMarkersManager from './MarkersManager'
 import DefaultSurfaceManager from './SurfaceManager'
 import DefaultSaveHandler from '../packages/persistence/SaveHandlerStub'
+import DefaultLabelProvider from './DefaultLabelProvider'
 
 /**
   Default Configurator for Substance editors. It provides an API for
@@ -540,10 +540,6 @@ class Configurator {
     return new FontAwesomeIconProvider(this.config.icons)
   }
 
-  getLabelProvider() {
-    return new LabelProvider(this.config.labels)
-  }
-
   getEditingBehavior() {
     var editingBehavior = new EditingBehavior()
     this.config.editingBehaviors.forEach(function(behavior) {
@@ -673,6 +669,19 @@ class Configurator {
   getSaveHandler() {
     let SaveHandler = this.config.SaveHandlerClass || DefaultSaveHandler
     return new SaveHandler()
+  }
+
+  getLabelProviderClass() {
+    return this.config.LabelProviderClass || DefaultLabelProvider
+  }
+
+  setLabelProviderClass(LabelProviderClass) {
+    this.config.LabelProviderClass = LabelProviderClass
+  }
+
+  getLabelProvider() {
+    const LabelProvider = this.getLabelProviderClass()
+    return new LabelProvider(this.config.labels)
   }
 
 }

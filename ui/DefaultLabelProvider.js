@@ -7,23 +7,27 @@ class DefaultLabelProvider {
     this.labels = labels
   }
 
-  getLabel(name, context) {
+  getLabel(name, params) {
     let labels = this.labels[this.lang]
     if (!labels) return name
     let rawLabel = labels[name] || name
     // If context is provided, resolve templates
-    if (context) {
-      return this._evalTemplate(rawLabel, context)
+    if (params) {
+      return this._evalTemplate(rawLabel, params)
     } else {
       return rawLabel
     }
   }
 
-  _evalTemplate(label, context) {
+  setLanguage(lang) {
+    this.lang = lang || 'en'
+  }
+
+  _evalTemplate(label, params) {
     let vars = this._extractVariables(label)
     vars.forEach((varName) => {
       let searchExp = new RegExp(`\\\${${varName}}`, 'g')
-      let replaceStr = context[varName]
+      let replaceStr = params[varName]
       label = label.replace(searchExp, replaceStr)
     })
     return label
