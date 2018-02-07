@@ -2,6 +2,7 @@
  Default label provider implementation
 */
 class DefaultLabelProvider {
+
   constructor(labels, lang) {
     this.lang = lang || 'en'
     this.labels = labels
@@ -44,10 +45,6 @@ class DefaultLabelProvider {
     return vars
   }
 
-  hasLabel(name) {
-    let labels = this.labels[this.lang]
-    return Boolean(labels[name])
-  }
 }
 
 export default DefaultLabelProvider
