@@ -777,12 +777,16 @@ class Surface extends Component {
     window.setTimeout(fn, BROWSER_DELAY)
   }
 
-  // prevent the native behavior of key combos
+  // prevent the native behavior of contenteditable key shorcuts
   _muteNativeHandlers(event) {
+    const contentEditableShortcuts = [
+      'META+66', // Bold
+      'META+73', // Italic
+      'META+85'  // Underline
+    ]
     const key = parseKeyEvent(event)
-    const keyboardManager = this.editorSession.keyboardManager
-
-    if(keyboardManager.keydownBindings[key]) {
+    
+    if(contentEditableShortcuts.indexOf(key) > -1) {
       event.preventDefault()
     }
   }
