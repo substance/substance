@@ -1,6 +1,7 @@
 import keys from '../util/keys'
 import platform from '../util/platform'
 import startsWith from '../util/startsWith'
+import parseKeyEvent from '../util/parseKeyEvent'
 import { getDOMRangeFromEvent } from '../util/windowUtils'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
@@ -68,6 +69,9 @@ class Surface extends Component {
       surfaceManager.registerSurface(this)
     }
     editorSession.onRender('selection', this._onSelectionChanged, this)
+
+    const globalEventHandler = editorSession.globalEventHandler
+    globalEventHandler.addEventListener('keydown', this._muteNativeHandlers, this)
   }
 
 
@@ -78,6 +82,9 @@ class Surface extends Component {
     if (surfaceManager) {
       surfaceManager.unregisterSurface(this)
     }
+
+    const globalEventHandler = editorSession.globalEventHandler
+    globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
   }
 
   didUpdate() {
@@ -768,6 +775,16 @@ class Surface extends Component {
 
   _delayed(fn) {
     window.setTimeout(fn, BROWSER_DELAY)
+  }
+
+  // prevent the native behavior of key combos
+  _muteNativeHandlers(event) {
+    const key = parseKeyEvent(event)
+    const keyboardManager = this.editorSession.keyboardManager
+
+    if(keyboardManager.keydownBindings[key]) {
+      event.preventDefault()
+    }
   }
 
 }
