@@ -1,6 +1,7 @@
 import forEach from '../util/forEach'
 import last from '../util/last'
 import uuid from '../util/uuid'
+import EventEmitter from '../util/EventEmitter'
 import prettyPrintXML from '../xml/prettyPrintXML'
 import ManifestLoader from './ManifestLoader'
 
@@ -20,10 +21,11 @@ import ManifestLoader from './ManifestLoader'
   when the user changes a document, it records the change and stores it into the buffer,
   and eventually saving a new version of the ardhive.
 */
-export default class PersistedDocumentArchive {
+export default class PersistedDocumentArchive extends EventEmitter {
   // TODO: move this into substance
 
   constructor(storage, buffer) {
+    super()
     this.storage = storage
     this.buffer = buffer
 
@@ -31,6 +33,10 @@ export default class PersistedDocumentArchive {
     this._upstreamArchive = null
     this._sessions = null
     this._pendingFiles = {}
+  }
+
+  hasPendingChanges() {
+    return this.buffer.hasPendingChanges()
   }
 
   createFile(file) {
@@ -181,6 +187,8 @@ export default class PersistedDocumentArchive {
     forEach(sessions, (session, docId) => {
       session.onUpdate('document', (change) => {
         this.buffer.addChange(docId, change)
+        // Apps can subscribe to this (e.g. to show there's pending changes)
+        this.emit('archive:changed')
       })
     })
   }
