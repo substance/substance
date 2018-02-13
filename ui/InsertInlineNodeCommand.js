@@ -74,6 +74,14 @@ class InsertInlineNodeCommand extends Command {
     return false
   }
 
+  /*
+    This is needed in order for SchemaDrivenCommandManager to categorise the
+    the command.
+  */
+  isAnnotationCommand() {
+    return true
+  }
+
   /**
     Insert new inline node at the current selection
   */

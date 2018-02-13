@@ -11,6 +11,8 @@ const DISABLED = Object.freeze({
 export default class SchemaDrivenCommandManager extends CommandManager {
 
   _initialize() {
+    // NOTE: So far insert inline commands fall into the annotationCommands
+    // category (e.g. InsertXrefCommand)
     const annotationCommands = new Map()
     const insertCommands = new Map()
     const switchTypeCommands = new Map()

@@ -15,6 +15,10 @@
   padding: 0px 5px;
 }
 
+.sc-menu-item[disabled=true] {
+  opacity: 0.3;
+}
+
 .sc-menu-item.sm-active {
   background: white;
   color: inherit;
