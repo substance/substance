@@ -36,6 +36,10 @@ class InsertNodeCommand extends Command {
     return sel.isCollapsed() && selectionState.isFirst() && selectionState.isLast()
   }
 
+  isInsertCommand() {
+    return true
+  }
+
   execute(params, context) {
     var state = params.commandState
     if (state.disabled) return
