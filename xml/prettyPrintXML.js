@@ -63,7 +63,7 @@ function _containsCDATA(el) {
   const childNodes = el.childNodes
   for (let i = 0; i < childNodes.length; i++) {
     let child = childNodes[i]
-    if (child.nodeType === 'cdata') {
+    if (child.getNodeType() === 'cdata') {
       return true
     }
   }
