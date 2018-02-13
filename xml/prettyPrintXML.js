@@ -24,7 +24,8 @@ function _prettyPrint(result, el, level) {
   let indent = new Array(level*2).fill(' ').join('')
   if (el.isElementNode()) {
     const isMixed = _isMixed(el)
-    if (isMixed) {
+    const containsCDATA = _containsCDATA(el)
+    if (isMixed || containsCDATA) {
       result.push(indent + el.outerHTML)
     } else {
       let children = el.children
@@ -32,12 +33,12 @@ function _prettyPrint(result, el, level) {
       let tagStr = [`<${tagName}`]
       el.getAttributes().forEach((val, name) => {
         tagStr.push(`${name}="${val}"`)
-      })
+      });
       if (children.length > 0) {
         result.push(indent + tagStr.join(' ') + '>')
         el.children.forEach((child) => {
           _prettyPrint(result, child, level+1)
-        })
+        });
         result.push(indent + `</${tagName}>`)
       } else {
         result.push(indent + tagStr.join(' ') + ' />')
@@ -53,6 +54,16 @@ function _isMixed(el) {
   for (let i = 0; i < childNodes.length; i++) {
     let child = childNodes[i]
     if (child.isTextNode() && !_isTextNodeEmpty(child)) {
+      return true
+    }
+  }
+}
+
+function _containsCDATA(el) {
+  const childNodes = el.childNodes
+  for (let i = 0; i < childNodes.length; i++) {
+    let child = childNodes[i]
+    if (child.getNodeType() === 'cdata') {
       return true
     }
   }
