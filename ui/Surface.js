@@ -779,13 +779,23 @@ class Surface extends Component {
 
   // prevent the native behavior of contenteditable key shorcuts
   _muteNativeHandlers(event) {
-    const contentEditableShortcuts = [
-      'META+66', // Bold
-      'META+73', // Italic
-      'META+85'  // Underline
-    ]
+    let contentEditableShortcuts
+
+    if (platform.isMac) {
+      contentEditableShortcuts = [
+        'META+66', // Cmd+Bold
+        'META+73', // Cmd+Italic
+        'META+85'  // Cmd+Underline
+      ]
+    } else {
+      contentEditableShortcuts = [
+        'CTRL+66', // Ctrl+Bold
+        'CTRL+73', // Ctrl+Italic
+        'CTRL+85'  // Ctrl+Underline
+      ]
+    }
+
     const key = parseKeyEvent(event)
-    
     if(contentEditableShortcuts.indexOf(key) > -1) {
       event.preventDefault()
     }
