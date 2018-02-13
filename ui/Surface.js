@@ -1,6 +1,7 @@
 import keys from '../util/keys'
 import platform from '../util/platform'
 import startsWith from '../util/startsWith'
+import parseKeyEvent from '../util/parseKeyEvent'
 import { getDOMRangeFromEvent } from '../util/windowUtils'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
@@ -68,6 +69,9 @@ class Surface extends Component {
       surfaceManager.registerSurface(this)
     }
     editorSession.onRender('selection', this._onSelectionChanged, this)
+
+    const globalEventHandler = editorSession.globalEventHandler
+    globalEventHandler.addEventListener('keydown', this._muteNativeHandlers, this)
   }
 
 
@@ -78,6 +82,9 @@ class Surface extends Component {
     if (surfaceManager) {
       surfaceManager.unregisterSurface(this)
     }
+
+    const globalEventHandler = editorSession.globalEventHandler
+    globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
   }
 
   didUpdate() {
@@ -768,6 +775,30 @@ class Surface extends Component {
 
   _delayed(fn) {
     window.setTimeout(fn, BROWSER_DELAY)
+  }
+
+  // prevent the native behavior of contenteditable key shorcuts
+  _muteNativeHandlers(event) {
+    let contentEditableShortcuts
+
+    if (platform.isMac) {
+      contentEditableShortcuts = [
+        'META+66', // Cmd+Bold
+        'META+73', // Cmd+Italic
+        'META+85'  // Cmd+Underline
+      ]
+    } else {
+      contentEditableShortcuts = [
+        'CTRL+66', // Ctrl+Bold
+        'CTRL+73', // Ctrl+Italic
+        'CTRL+85'  // Ctrl+Underline
+      ]
+    }
+
+    const key = parseKeyEvent(event)
+    if(contentEditableShortcuts.indexOf(key) > -1) {
+      event.preventDefault()
+    }
   }
 
 }
