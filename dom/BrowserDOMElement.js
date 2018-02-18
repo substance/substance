@@ -569,9 +569,8 @@ class BrowserDOMElement extends DOMElement {
     return this
   }
 
-
   blur() {
-    this.el.focus()
+    this.el.blur()
     return this
   }
 
