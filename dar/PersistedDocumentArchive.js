@@ -61,7 +61,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
     return filePath
   }
 
-  addDocument(type, xml) {
+  addDocument(type, name, xml) {
     let documentId = uuid()
     let sessions = this._sessions
     let session = this._loadDocument(type, { data: xml }, sessions)
@@ -72,7 +72,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
     this._sessions.manifest.transaction(tx => {
       let documents = tx.find('documents')
       let docEntry = tx.createElement('document', { id: documentId }).attr({
-        name: documentId,
+        name: name,
         path: documentId+'.xml',
         type: type
       })
