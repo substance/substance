@@ -5,6 +5,7 @@ import EventEmitter from '../util/EventEmitter'
 import prettyPrintXML from '../xml/prettyPrintXML'
 import ManifestLoader from './ManifestLoader'
 
+
 /*
   A PersistedDocumentArchive is a 3-tier stack representing a document archive
   at different application levels:
@@ -58,6 +59,56 @@ export default class PersistedDocumentArchive extends EventEmitter {
     })
     this._pendingFiles[filePath] = URL.createObjectURL(file)
     return filePath
+  }
+
+  addDocument(type, name, xml) {
+    let documentId = uuid()
+    let sessions = this._sessions
+    let session = this._loadDocument(type, { data: xml }, sessions)
+    sessions[documentId] = session
+
+    this._registerForSessionChanges(session, documentId)
+
+    this._sessions.manifest.transaction(tx => {
+      let documents = tx.find('documents')
+      let docEntry = tx.createElement('document', { id: documentId }).attr({
+        name: name,
+        path: documentId+'.xml',
+        type: type
+      })
+      documents.appendChild(docEntry)
+    })
+    return documentId
+  }
+
+  removeDocument(documentId) {
+    let session = this._sessions[documentId]
+    this._unregisterFromSession(session)
+    this._sessions.manifest.transaction(tx => {
+      let documents = tx.find('documents')
+      let docEntry = tx.find(`#${documentId}`)
+      documents.removeChild(docEntry)
+    })
+  }
+
+  renameDocument(documentId, name) {
+    this._sessions.manifest.transaction(tx => {
+      let docEntry = tx.find(`#${documentId}`)
+      docEntry.attr({name})
+    })
+  }
+
+  getDocumentEntries() {
+    let manifest = this.getEditorSession('manifest').getDocument()
+    let documents = manifest.findAll('documents > document')
+    return documents.map(doc => {
+      return {
+        id: doc.id,
+        name: doc.attr('name'),
+        type: doc.attr('type'),
+        editorSession: this.getEditorSession(doc.id)
+      }
+    })
   }
 
   resolveUrl(path) {
@@ -119,7 +170,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
         buffer.reset(upstreamArchive.version)
       }
       // register for any changes in each session
-      this._registerForChanges(sessions)
+      this._registerForAllChanges(sessions)
 
       this._archiveId = archiveId
       this._upstreamArchive = upstreamArchive
@@ -183,14 +234,22 @@ export default class PersistedDocumentArchive extends EventEmitter {
     return ManifestLoader.load(record.data)
   }
 
-  _registerForChanges(sessions) {
+  _registerForAllChanges(sessions) {
     forEach(sessions, (session, docId) => {
-      session.onUpdate('document', (change) => {
-        this.buffer.addChange(docId, change)
-        // Apps can subscribe to this (e.g. to show there's pending changes)
-        this.emit('archive:changed')
-      })
+      this._registerForSessionChanges(session, docId)
     })
+  }
+
+  _registerForSessionChanges(session, docId) {
+    session.onUpdate('document', (change) => {
+      this.buffer.addChange(docId, change)
+      // Apps can subscribe to this (e.g. to show there's pending changes)
+      this.emit('archive:changed')
+    }, this)
+  }
+
+  _unregisterFromSession(session) {
+    session.off(this)
   }
 
   /*
