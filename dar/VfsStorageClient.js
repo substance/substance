@@ -28,16 +28,18 @@ function _readRawArchive(fs, archiveId, baseUrl = '') {
   let docs = manifest.findAll('documents > document')
   let assets = manifest.findAll('assets > asset')
   let rawArchive = {
-    'manifest.xml': {
-      encoding: 'utf8',
-      data: manifestXML
+    resources: {
+      'manifest.xml': {
+        encoding: 'utf8',
+        data: manifestXML
+      }
     }
   }
+  
   docs.forEach(entry => {
     let path = entry.attr('path')
-    let type = entry.attr('type')
     let content = fs.readFileSync(`${archiveId}/${entry.path}`)
-    rawArchive[path] = {
+    rawArchive.resources[path] = {
       encoding: 'utf8',
       data: content
     }
@@ -45,7 +47,7 @@ function _readRawArchive(fs, archiveId, baseUrl = '') {
   assets.forEach(asset => {
     let path = asset.attr('path')
     // TODO: we could store other stats and maybe mime-types in VFS
-    rawArchive[path] = {
+    rawArchive.resources[path] = {
       encoding: 'url',
       data: baseUrl+archiveId+'/'+path
     }
