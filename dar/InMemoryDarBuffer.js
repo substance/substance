@@ -29,12 +29,23 @@ export default class InMemoryDarBuffer {
     return this._changes.length > 0
   }
 
+  /*
+    Slightly different semantics than hasPendingChanges.
+  */
+  isDirty() {
+    return Object.keys(this._isDirty).length > 0
+  }
+
   getChanges() {
     return this._changes.slice()
   }
 
   hasResourceChanged(docId) {
     return this._isDirty[docId]
+  }
+
+  setDirty(docId) {
+    this._isDirty[docId] = true
   }
 
   hasBlob(id) {

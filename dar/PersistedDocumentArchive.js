@@ -40,6 +40,10 @@ export default class PersistedDocumentArchive extends EventEmitter {
     return this.buffer.hasPendingChanges()
   }
 
+  isDirty() {
+    return this.buffer.isDirty()
+  }
+
   createFile(file) {
     let assetId = uuid()
     let fileExtension = last(file.name.split('.'))
@@ -185,7 +189,34 @@ export default class PersistedDocumentArchive extends EventEmitter {
       console.info('Save: no pending changes.')
       return Promise.resolve()
     }
-    return this._save()
+    return this._save(this._archiveId)
+  }
+
+  /*
+    TODO: In a save as workflow, currently static assets are ignored.
+    We would need a way to have them locally and fill up pendingFiles
+    again.
+
+    Another solution would be to support save as workflows in the backend.
+    However then we would miss local (unsaved changes). So probably a
+    combination of the two:
+
+      1. copy all files from original archive to new archive (backend)
+      2. perform a regular save (over new archive, including pending
+         documents and blobs
+  */
+  saveAs(archiveId) {
+    this._makeAllResourcesDirty()
+    return this._save(archiveId)
+  }
+
+  _makeAllResourcesDirty() {
+    let docEntries = this.getDocumentEntries()
+    // We set dirty the manifest file and all related documents
+    this.buffer.setDirty('manifest')
+    docEntries.forEach(entry => {
+      this.buffer.setDirty(entry.id)
+    })
   }
 
   getEditorSession(docId) {
@@ -255,8 +286,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
   /*
     Create a raw archive for upload from the changed resources.
   */
-  _save() {
-    const archiveId = this._archiveId
+  _save(archiveId) {
     const buffer = this.buffer
     const storage = this.storage
     const sessions = this._sessions
@@ -320,6 +350,9 @@ export default class PersistedDocumentArchive extends EventEmitter {
       res = JSON.parse(res)
       // console.log('Saved. New version:', res.version)
       buffer.reset(res.version)
+
+      // After successful save the archiveId may have changed (save as use case)
+      this._archiveId = archiveId
     }).catch(err => {
       console.error('Saving failed.', err)
     })
