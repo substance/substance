@@ -201,9 +201,9 @@ export default class PersistedDocumentArchive extends EventEmitter {
     However then we would miss local (unsaved changes). So probably a
     combination of the two:
 
-      1. copy all files from original archive to new archive (backend)
-      2. perform a regular save (over new archive, including pending
-         documents and blobs
+      1. clone: copy all files from original archive to new archive (backend)
+      2. perform a regular save using user buffer (over new archive, including pending
+         documents and blobs)
   */
   saveAs(archiveId) {
     this._makeAllResourcesDirty()
