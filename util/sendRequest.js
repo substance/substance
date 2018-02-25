@@ -37,10 +37,10 @@ export default function sendRequest(params, cb) {
         resolve(response)
       } else {
         console.error(xmlhttp.statusText)
-        if (cb) cb(xmlhttp.status)
-        reject(xmlhttp.statusText, xmlhttp.status)
+        let err = new Error(xmlhttp.statusText)
+        if (cb) cb(err)
+        reject(err)
       }
     }
   })
 }
-

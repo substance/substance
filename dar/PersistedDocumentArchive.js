@@ -116,7 +116,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
     if (blobUrl) {
       return blobUrl
     } else {
-      let fileRecord = this._upstreamArchive[path]
+      let fileRecord = this._upstreamArchive.resources[path]
       if (fileRecord && fileRecord.encoding === 'url') {
         return fileRecord.data
       }
@@ -185,7 +185,20 @@ export default class PersistedDocumentArchive extends EventEmitter {
       console.info('Save: no pending changes.')
       return Promise.resolve()
     }
-    return this._save()
+    return this._save(this._archiveId)
+  }
+
+  /*
+    Save as is implemented as follows.
+
+    1. clone: copy all files from original archive to new archive (backend)
+    2. save: perform a regular save using user buffer (over new archive, including pending
+       documents and blobs)
+  */
+  saveAs(newArchiveId) {
+    return this.storage.clone(this._archiveId, newArchiveId).then(() => {
+      return this._save(newArchiveId)
+    })
   }
 
   getEditorSession(docId) {
@@ -198,7 +211,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
   */
   _load(rawArchive) {
     let sessions = {}
-    let manifestSession = this._loadManifest(rawArchive['manifest.xml'])
+    let manifestSession = this._loadManifest(rawArchive.resources['manifest.xml'])
     sessions['manifest'] = manifestSession
     // TODO: either we find a modular way how to call importers for single resources
     let manifest = manifestSession.getDocument()
@@ -219,7 +232,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
       let id = node.attr('id')
       let type = node.attr('type')
       let path = node.attr('path') || id
-      let record = rawArchive[path]
+      let record = rawArchive.resources[path]
       // HACK: passing down 'sessions' so that we can add the pub-meta session in Texture
       let session = this._loadDocument(type, record, sessions)
       sessions[id] = session
@@ -255,20 +268,20 @@ export default class PersistedDocumentArchive extends EventEmitter {
   /*
     Create a raw archive for upload from the changed resources.
   */
-  _save() {
-    const archiveId = this._archiveId
+  _save(archiveId) {
     const buffer = this.buffer
     const storage = this.storage
     const sessions = this._sessions
     let data = {
       version: buffer.getVersion(),
-      diff: buffer.getChanges()
+      diff: buffer.getChanges(),
+      resources: {}
     }
     // Update the manifest if changed
     let manifest = sessions.manifest.getDocument()
     if (buffer.hasResourceChanged('manifest')) {
       let manifestXmlStr = prettyPrintXML(manifest.toXML())
-      data['manifest.xml'] = {
+      data.resources['manifest.xml'] = {
         id: 'manifest',
         data: manifestXmlStr,
         encoding: 'utf8',
@@ -285,7 +298,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
       let path = node.attr('path') || id
       let session = sessions[id]
       // TODO: how should we communicate file renamings?
-      data[path] = {
+      data.resources[path] = {
         id,
         // HACK: same as when loading we pass down all sessions so that we can do some hacking there
         data: this._exportDocument(type, session, sessions),
@@ -299,7 +312,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
       if (!buffer.hasBlob(id)) return
       let path = node.attr('path') || id
       let blobRecord = buffer.getBlob(id)
-      data[path] = {
+      data.resources[path] = {
         id,
         data: blobRecord.blob,
         encoding: 'blob',
@@ -319,6 +332,9 @@ export default class PersistedDocumentArchive extends EventEmitter {
       res = JSON.parse(res)
       // console.log('Saved. New version:', res.version)
       buffer.reset(res.version)
+
+      // After successful save the archiveId may have changed (save as use case)
+      this._archiveId = archiveId
     }).catch(err => {
       console.error('Saving failed.', err)
     })

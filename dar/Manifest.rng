@@ -5,11 +5,11 @@
   datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
 >
   <start>
-    <ref name="archive"/>
+    <ref name="dar"/>
   </start>
 
-  <define name="archive">
-    <element name="archive">
+  <define name="dar">
+    <element name="dar">
       <ref name="documents"/>
       <ref name="assets"/>
     </element>
