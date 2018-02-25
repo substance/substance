@@ -40,10 +40,6 @@ export default class PersistedDocumentArchive extends EventEmitter {
     return this.buffer.hasPendingChanges()
   }
 
-  isDirty() {
-    return this.buffer.isDirty()
-  }
-
   createFile(file) {
     let assetId = uuid()
     let fileExtension = last(file.name.split('.'))
@@ -202,15 +198,6 @@ export default class PersistedDocumentArchive extends EventEmitter {
   saveAs(newArchiveId) {
     return this.storage.clone(this._archiveId, newArchiveId).then(() => {
       return this._save(newArchiveId)
-    })
-  }
-
-  _makeAllResourcesDirty() {
-    let docEntries = this.getDocumentEntries()
-    // We set dirty the manifest file and all related documents
-    this.buffer.setDirty('manifest')
-    docEntries.forEach(entry => {
-      this.buffer.setDirty(entry.id)
     })
   }
 
