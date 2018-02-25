@@ -193,21 +193,16 @@ export default class PersistedDocumentArchive extends EventEmitter {
   }
 
   /*
-    TODO: In a save as workflow, currently static assets are ignored.
-    We would need a way to have them locally and fill up pendingFiles
-    again.
+    Save as is implemented as follows.
 
-    Another solution would be to support save as workflows in the backend.
-    However then we would miss local (unsaved changes). So probably a
-    combination of the two:
-
-      1. clone: copy all files from original archive to new archive (backend)
-      2. perform a regular save using user buffer (over new archive, including pending
-         documents and blobs)
+    1. clone: copy all files from original archive to new archive (backend)
+    2. save: perform a regular save using user buffer (over new archive, including pending
+       documents and blobs)
   */
-  saveAs(archiveId) {
-    this._makeAllResourcesDirty()
-    return this._save(archiveId)
+  saveAs(newArchiveId) {
+    return this.storage.clone(this._archiveId, newArchiveId).then(() => {
+      return this._save(newArchiveId)
+    })
   }
 
   _makeAllResourcesDirty() {
