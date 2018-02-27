@@ -33,4 +33,16 @@ export default class ManifestDocument extends XMLDocument {
     return this.findAll('assets > asset')
   }
 
+  getDocumentEntries() {
+    let documents = this.findAll('documents > document')
+    return documents.map(doc => {
+      return {
+        id: doc.id,
+        name: doc.attr('name'),
+        type: doc.attr('type'),
+        path: doc.attr('path')
+      }
+    })
+  }
+
 }

@@ -2,7 +2,6 @@ import forEach from '../util/forEach'
 import last from '../util/last'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
-import prettyPrintXML from '../xml/prettyPrintXML'
 import ManifestLoader from './ManifestLoader'
 
 
@@ -23,7 +22,6 @@ import ManifestLoader from './ManifestLoader'
   and eventually saving a new version of the ardhive.
 */
 export default class PersistedDocumentArchive extends EventEmitter {
-  // TODO: move this into substance
 
   constructor(storage, buffer) {
     super()
@@ -61,6 +59,21 @@ export default class PersistedDocumentArchive extends EventEmitter {
     return filePath
   }
 
+  /*
+    Adds a document record to the manifest file
+  */
+  _addDocumentRecord(documentId, type, name, path) {
+    this._sessions.manifest.transaction(tx => {
+      let documents = tx.find('documents')
+      let docEntry = tx.createElement('document', { id: documentId }).attr({
+        name: name,
+        path: path,
+        type: type
+      })
+      documents.appendChild(docEntry)
+    })
+  }
+
   addDocument(type, name, xml) {
     let documentId = uuid()
     let sessions = this._sessions
@@ -69,15 +82,8 @@ export default class PersistedDocumentArchive extends EventEmitter {
 
     this._registerForSessionChanges(session, documentId)
 
-    this._sessions.manifest.transaction(tx => {
-      let documents = tx.find('documents')
-      let docEntry = tx.createElement('document', { id: documentId }).attr({
-        name: name,
-        path: documentId+'.xml',
-        type: type
-      })
-      documents.appendChild(docEntry)
-    })
+    this._addDocumentRecord(documentId, type, name, documentId+'.xml')
+
     return documentId
   }
 
@@ -99,16 +105,7 @@ export default class PersistedDocumentArchive extends EventEmitter {
   }
 
   getDocumentEntries() {
-    let manifest = this.getEditorSession('manifest').getDocument()
-    let documents = manifest.findAll('documents > document')
-    return documents.map(doc => {
-      return {
-        id: doc.id,
-        name: doc.attr('name'),
-        type: doc.attr('type'),
-        editorSession: this.getEditorSession(doc.id)
-      }
-    })
+    return this.getEditorSession('manifest').getDocument().getDocumentEntries()
   }
 
   resolveUrl(path) {
@@ -155,8 +152,8 @@ export default class PersistedDocumentArchive extends EventEmitter {
       }
     })
     .then(() => {
-      // convert raw archive into sessions
-      let sessions = this._load(upstreamArchive)
+      // convert raw archive into sessions (=ingestion)
+      let sessions = this._ingest(upstreamArchive)
       // contract: there must be a manifest
       if (!sessions['manifest']) {
         throw new Error('There must be a manifest session.')
@@ -205,41 +202,6 @@ export default class PersistedDocumentArchive extends EventEmitter {
     return this._sessions[docId]
   }
 
-  /*
-    Creates EditorSessions from a raw archive.
-    This might involve some consolidation and ingestion.
-  */
-  _load(rawArchive) {
-    let sessions = {}
-    let manifestSession = this._loadManifest(rawArchive.resources['manifest.xml'])
-    sessions['manifest'] = manifestSession
-    // TODO: either we find a modular way how to call importers for single resources
-    let manifest = manifestSession.getDocument()
-    // TODO: ATM we have the problem, that import must be done in the correct
-    // order as they are not independent from each other. We should think harder how we can make them independent
-    // e.g. by introducing an explicit ingestion step.
-    // Example: we are using an entity for things like authors and affiliations.
-    // There we have pulled out responsibility from the JATS model, which then requires
-    // a pub-meta.json. After ingestion, these two documents should be only loosely coupled,
-    // and thus import should be independent. ATM, ingestion is done during the regular import
-    // of the manuscript, which makes the importer dependent, which is bad.
-    // An ingestion workflow needs a different architecture, because it works
-    // in a more opinionated way, and results in implicit changes to the documents.
-    // E.g. resources are added (such as pub-meta.json) and content is transformed.
-    // After ingestion it must be possible to load resources independently.
-    let documentNodes = manifest.getDocumentNodes()
-    documentNodes.forEach(node => {
-      let id = node.attr('id')
-      let type = node.attr('type')
-      let path = node.attr('path') || id
-      let record = rawArchive.resources[path]
-      // HACK: passing down 'sessions' so that we can add the pub-meta session in Texture
-      let session = this._loadDocument(type, record, sessions)
-      sessions[id] = session
-    })
-    return sessions
-  }
-
   _loadManifest(record) {
     if (!record) {
       throw new Error('manifest.xml is missing')
@@ -272,61 +234,16 @@ export default class PersistedDocumentArchive extends EventEmitter {
     const buffer = this.buffer
     const storage = this.storage
     const sessions = this._sessions
-    let data = {
-      version: buffer.getVersion(),
-      diff: buffer.getChanges(),
-      resources: {}
-    }
-    // Update the manifest if changed
-    let manifest = sessions.manifest.getDocument()
-    if (buffer.hasResourceChanged('manifest')) {
-      let manifestXmlStr = prettyPrintXML(manifest.toXML())
-      data.resources['manifest.xml'] = {
-        id: 'manifest',
-        data: manifestXmlStr,
-        encoding: 'utf8',
-        updatedAt: Date.now()
-      }
-    }
-    // Note: we are only adding resources that have changed
-    // and only those which are registered in the manifest
-    let documentNodes = manifest.getDocumentNodes()
-    documentNodes.forEach(node => {
-      let id = node.attr('id')
-      if (!buffer.hasResourceChanged(id)) return
-      let type = node.attr('type')
-      let path = node.attr('path') || id
-      let session = sessions[id]
-      // TODO: how should we communicate file renamings?
-      data.resources[path] = {
-        id,
-        // HACK: same as when loading we pass down all sessions so that we can do some hacking there
-        data: this._exportDocument(type, session, sessions),
-        encoding: 'utf8',
-        updatedAt: Date.now()
-      }
-    })
-    let assetNodes = manifest.getAssetNodes()
-    assetNodes.forEach(node => {
-      let id = node.attr('id')
-      if (!buffer.hasBlob(id)) return
-      let path = node.attr('path') || id
-      let blobRecord = buffer.getBlob(id)
-      data.resources[path] = {
-        id,
-        data: blobRecord.blob,
-        encoding: 'blob',
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      }
-    })
+
+    let rawArchive = this._exportChanges(sessions, buffer)
+
     // CHALLENGE: we either need to lock the buffer, so that
     // new changes are interfering with ongoing sync
     // or we need something pretty smart caching changes until the
     // sync has succeeded or failed, e.g. we could use a second buffer in the meantime
     // probably a fast first-level buffer (in-mem) is necessary anyways, even in conjunction with
     // a slower persisted buffer
-    return storage.write(archiveId, data).then(res => {
+    return storage.write(archiveId, rawArchive).then(res => {
       // TODO: if successful we should receive the new version as response
       // and then we can reset the buffer
       res = JSON.parse(res)
@@ -339,4 +256,39 @@ export default class PersistedDocumentArchive extends EventEmitter {
       console.error('Saving failed.', err)
     })
   }
+
+  _exportAssets(sessions, buffer, rawArchive) {
+    let manifest = sessions.manifest.getDocument()
+    let assetNodes = manifest.getAssetNodes()
+    assetNodes.forEach(node => {
+      let id = node.attr('id')
+      if (!buffer.hasBlob(id)) return
+      let path = node.attr('path') || id
+      let blobRecord = buffer.getBlob(id)
+      rawArchive.resources[path] = {
+        id,
+        data: blobRecord.blob,
+        encoding: 'blob',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+    })
+  }
+
+  /*
+    Uses the current state of the buffer to generate a rawArchive object
+    containing all changed documents
+  */
+  _exportChanges(sessions, buffer) {
+    let rawArchive = {
+      version: buffer.getVersion(),
+      diff: buffer.getChanges(),
+      resources: {}
+    }
+    this._exportManifest(sessions, buffer, rawArchive)
+    this._exportDocuments(sessions, buffer, rawArchive)
+    this._exportAssets(sessions, buffer, rawArchive)
+    return rawArchive
+  }
+
 }

@@ -28,6 +28,7 @@ function _readRawArchive(fs, archiveId, baseUrl = '') {
   let docs = manifest.findAll('documents > document')
   let assets = manifest.findAll('assets > asset')
   let rawArchive = {
+    version: "0",
     resources: {
       'manifest.xml': {
         encoding: 'utf8',
@@ -35,7 +36,7 @@ function _readRawArchive(fs, archiveId, baseUrl = '') {
       }
     }
   }
-  
+
   docs.forEach(entry => {
     let path = entry.attr('path')
     let content = fs.readFileSync(`${archiveId}/${entry.path}`)
