@@ -19,16 +19,7 @@ export default class DocumentArchive {
   }
 
   getDocumentEntries() {
-    const manifest = this.getManifest()
-    let docs = manifest.findAll('container > documents > document')
-    return docs.map(d => {
-      return {
-        id: d.id || d.attr('path'),
-        type: d.attr('type'),
-        path: d.attr('path'),
-        name: d.attr('name')
-      }
-    })
+    return this.getEditorSession('manifest').getDocument().getDocumentEntries()
   }
 
   getEditorSession(docId) {
