@@ -1,5 +1,6 @@
 import Component from './Component'
 import ToggleTool from './ToggleTool'
+import MenuItem from './MenuItem'
 import forEach from '../util/forEach'
 
 /*
@@ -102,7 +103,13 @@ class ToolGroup extends Component {
 
   _getToolClass(commandName) {
     let tools = this.context.tools
-    return tools[commandName] || ToggleTool
+    let DefaultToolClass
+    if (this.props.style === 'descriptive') {
+      DefaultToolClass = MenuItem
+    } else {
+      DefaultToolClass = ToggleTool
+    }
+    return tools[commandName] || DefaultToolClass
   }
 }
 

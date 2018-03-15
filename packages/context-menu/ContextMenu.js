@@ -15,27 +15,24 @@ class ContextMenu extends ToolPanel {
     this.context.scrollPane.off(this)
   }
 
-  /*
-    Override with custom rendering
-  */
   render($$) {
     let el = $$('div').addClass('sc-context-menu sm-hidden')
+    el.addClass('sm-theme-'+this.getTheme())
+    el.append(
+      $$('div').addClass('se-active-tools').append(
+        this.renderEntries($$)
+      ).ref('entriesContainer')
+    )
     return el
-  }
-
-  getActiveToolGroupNames() {
-    return ['context-menu-primary', 'context-menu-document']
-  }
-
-  showDisabled() {
-    return true
   }
 
   /*
     Override if you just want to use a different style
   */
-  getToolStyle() {
-    return 'plain-dark'
+
+  show(hints) {
+    this.el.removeClass('sm-hidden')
+    this._position(hints)
   }
 
   hide() {
@@ -59,6 +56,10 @@ class ContextMenu extends ToolPanel {
     let maxLeftPos = mouseBounds.left + mouseBounds.right - contextMenuWidth
     leftPos = Math.min(leftPos, maxLeftPos)
     this.el.css('left', leftPos)
+  }
+
+  getTheme() {
+    return this.props.theme || 'dark'
   }
 }
 
