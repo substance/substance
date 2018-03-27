@@ -528,6 +528,10 @@ class Document extends EventEmitter {
     return new EditingInterface(this)
   }
 
+  invert(change) {
+    return change.invert()
+  }
+
   _apply(documentChange) {
     forEach(documentChange.ops, (op) => {
       this._applyOp(op)
