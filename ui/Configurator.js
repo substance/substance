@@ -576,6 +576,8 @@ class Configurator {
         if (platform.isMac) {
           shortcut = shortcut.replace(/CommandOrControl/i, '⌘')
           shortcut = shortcut.replace(/Ctrl/i, '^')
+          shortcut = shortcut.replace(/Shift/i, '⇧')
+          shortcut = shortcut.replace(/Enter/i, '↵')
           shortcut = shortcut.replace(/Alt/i, '⌥')
           shortcut = shortcut.replace(/\+/g, '')
         } else {
