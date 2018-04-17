@@ -60,7 +60,8 @@ export default function registerSchema(config, xmlSchema, DocumentClass, options
       }
       case 'inline-element': {
         NodeClass = XMLInlineElementNode
-        ConverterClass = XMLNodeConverter
+        // NOTE: Inline nodes can have children too
+        ConverterClass = XMLElementNodeConverter
         break
       }
       case 'external': {
