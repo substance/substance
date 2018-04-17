@@ -54,7 +54,7 @@ class XMLElementNode extends XMLDocumentNode {
   }
 
   getInnerXML() {
-    return this.getChildren().map((child) => {
+    return this.getChildren().map(child => {
       return child.toXML().outerHTML
     }).join('')
   }

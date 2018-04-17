@@ -1,5 +1,4 @@
 .sc-find-and-replace-tool {
-  background: #fafafa;
   border-top: 1px solid var(--border-color);
   padding: 5px;
 }
@@ -122,4 +121,3 @@
 .sc-match {
   background: rgba(42, 140, 255, 0.3)
 }
-
