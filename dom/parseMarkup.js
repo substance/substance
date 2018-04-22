@@ -27,7 +27,7 @@ export default function parseMarkup(markup, options) {
 
 
 const re_whitespace = /\s+/g
-const re_doctype = /^DOCTYPE\s+([^\s]+)\s+PUBLIC\s+["]([^"]+)["]\s+["]([^"]+)["]\s*$/
+const re_doctype = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"]+)["])?)\s*$/
 
 /*
   Customized implementation of [DomHandler](https://github.com/fb55/domhandler).

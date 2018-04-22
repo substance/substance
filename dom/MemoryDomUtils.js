@@ -433,7 +433,13 @@ export default class DomUtils {
 
   renderDoctype(elem) {
     const { name, publicId, systemId } = this.getData(elem)
-    return `<!DOCTYPE ${name} PUBLIC "${publicId}" "${systemId}">`
+    let frags = ['DOCTYPE', name]
+    if (publicId) {
+      frags.push('PUBLIC')
+      frags.push('"'+publicId+'"')
+      if (systemId) frags.push('"'+systemId+'"')
+    }
+    return '<!' + frags.join(" ") + '>'
   }
 
   renderText(elem, opts) {
