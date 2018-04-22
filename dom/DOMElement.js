@@ -726,8 +726,13 @@ class DOMElement {
     throw new Error('NOT_IMPLEMENTED')
   }
 
-  setDocType(qualifiedNameStr, publicId, systemId) { // eslint-disable-line
+  setDoctype(qualifiedNameStr, publicId, systemId) { // eslint-disable-line
     throw new Error('NOT_IMPLEMENTED')
+  }
+
+  setDocType(...args) {
+    console.error('DEPRECATED: use setDoctype() instead')
+    return this.setDoctype(...args)
   }
 
   /**

@@ -64,7 +64,7 @@ class BrowserDOMElement extends DOMElement {
     }
   }
 
-  setDocType(qualifiedNameStr, publicId, systemId) {
+  setDoctype(qualifiedNameStr, publicId, systemId) {
     let ownerDocument = this._getNativeOwnerDocument()
     let oldDocType = ownerDocument.doctype
     let newDocType = ownerDocument.implementation.createDocumentType(
