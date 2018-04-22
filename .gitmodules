@@ -6,7 +6,3 @@
 	path = vendor/htmlparser2
 	url = https://github.com/substance/htmlparser2
 	branch = substance
-[submodule "vendor/domutils"]
-	path = vendor/domutils
-	url = https://github.com/substance/domutils
-	branch = substance
