@@ -59,6 +59,10 @@ class MemoryDOMElement extends DOMElement {
         this.data = args.data
         break
       }
+      case ElementType.Doctype: {
+        this.data = args.data
+        break
+      }
       case 'document': {
         let format = args.format
         this.format = format
@@ -246,6 +250,28 @@ class MemoryDOMElement extends DOMElement {
     return this.getOwnerDocument().contentType
   }
 
+  getDoctype() {
+    if (this.isDocumentNode()) {
+      return _findDocTypeElement(this)
+    } else {
+      return this.getOwnerDocument().getDoctype()
+    }
+  }
+
+  setDoctype(qualifiedNameStr, publicId, systemId) {
+    // NOTE: there must be only one <!DOCTYPE> before the first content element
+    let doc = this.getOwnerDocument()
+    let oldDocType = _findDocTypeElement(doc)
+    let newDocType = this.createDocumentType(qualifiedNameStr, publicId, systemId)
+    if (oldDocType) {
+      doc.replaceChild(newDocType, oldDocType)
+    } else {
+      // insert it before the first ELEMENT
+      doc.insertBefore(newDocType, doc.getChildren()[0])
+    }
+    doc.doctype = newDocType
+  }
+
   getInnerHTML() {
     return DomUtils.getInnerHTML(this, { decodeEntities: true })
   }
@@ -408,6 +434,10 @@ class MemoryDOMElement extends DOMElement {
 
   createProcessingInstruction(name, data) {
     return new MemoryDOMElement(ElementType.Directive, { name: name, data: data, ownerDocument: this.getOwnerDocument() })
+  }
+
+  createDocumentType(qualifiedNameStr, publicId, systemId) {
+    return new MemoryDOMDoctype(ElementType.Doctype, { data: { name: qualifiedNameStr, publicId, systemId }, ownerDocument: this.getOwnerDocument() })
   }
 
   createCDATASection(data) {
@@ -692,6 +722,12 @@ MemoryDOMElement.getBrowserWindow = function() {
   return _browserWindowStub
 }
 
+class MemoryDOMDoctype extends MemoryDOMElement {
+  get name() { return this.data.name }
+  get publicId() { return this.data.publicId }
+  get systemId() { return this.data.systemId }
+}
+
 function parseClasses(classes, classStr) {
   classStr.split(/\s+/).forEach((name) => {
     classes.add(name)
@@ -884,5 +920,18 @@ function _sanitizeHTMLStructure(doc) {
     htmlEl.appendChild(bodyEl)
 
     doc.append(htmlEl)
+  }
+}
+
+function _findDocTypeElement(doc) {
+  // Note: the looked up doctype element will be cached on the document element
+  if (doc.doctype) return doc.doctype
+  const childNodes = doc.childNodes
+  for (let i = 0; i < childNodes.length; i++) {
+    let child = childNodes[i]
+    if (child.type === ElementType.Doctype) {
+      doc.doctype = child
+      return child
+    }
   }
 }

@@ -27,6 +27,7 @@ export default function parseMarkup(markup, options) {
 
 
 const re_whitespace = /\s+/g
+const re_doctype = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"]+)["])?)\s*$/
 
 /*
   Customized implementation of [DomHandler](https://github.com/fb55/domhandler).
@@ -131,6 +132,16 @@ class DomHandler {
   onprocessinginstruction(name, data) {
     let element = this.document.createProcessingInstruction(name, data)
     this._addDomElement(element)
+  }
+
+  ondeclaration(data) {
+    if (data.startsWith('DOCTYPE')) {
+      let m = re_doctype.exec(data)
+      if (!m) throw new Error('Could not parse DOCTYPE element: ' + data)
+      this.document.setDoctype(m[1], m[2], m[3])
+    } else {
+      throw new Error('Not implemented: parse declaration '+data)
+    }
   }
 
 }

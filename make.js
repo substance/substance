@@ -131,12 +131,6 @@ function buildVendor() {
   install(b, 'uglify-js-harmony', UGLIFY_VERSION)
   const CLEANUP = true
   const MINIFY = false
-  vendorRollup('domutils', {
-    commonjs: true,
-    external: ['domelementtype', 'entities'],
-    cleanup: CLEANUP,
-    minify: MINIFY
-  })
   vendorRollup('entities', {
     commonjs: true,
     json: true,

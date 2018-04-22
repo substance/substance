@@ -637,6 +637,27 @@ function DOMElementTests(impl) {
     t.end()
   })
 
+  test("doctype should be serialized (XML)", t => {
+    let doc = DefaultDOMElement.createDocument('xml')
+    doc.setDoctype('foo', 'Foo 1.0', 'http://schema.org/foo.dtd')
+    doc.append(doc.createElement('foo'))
+    t.equal(doc.serialize(), '<!DOCTYPE foo PUBLIC "Foo 1.0" "http://schema.org/foo.dtd"><foo/>', 'doctype should have been serialized')
+    t.end()
+  })
+
+  test("doctype should be parsed correctly", t => {
+    let xml = '<!DOCTYPE foo PUBLIC "Foo 1.0" "http://schema.org/foo.dtd"><foo/>'
+    let doc = DefaultDOMElement.parseXML(xml)
+    let doctype = doc.getDoctype()
+    t.deepEqual(
+      { name: doctype.name, publicId: doctype.publicId, systemId: doctype.systemId },
+      { name: 'foo', publicId: "Foo 1.0", systemId: "http://schema.org/foo.dtd" },
+      "doctype should have been parsed correctly"
+    )
+    t.equal(doc.serialize(), xml, "doctype should have been serialized correctly")
+    t.end()
+  })
+
 }
 
 if (platform.inBrowser) {

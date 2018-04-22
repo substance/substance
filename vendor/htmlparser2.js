@@ -8033,6 +8033,16 @@ Parser$1.prototype.done = Parser$1.prototype.end;
 
 var Parser_1 = Parser$1;
 
+Parser_1.prototype.ondeclaration = function(value){
+  if(this._cbs.ondeclaration){
+    this._cbs.ondeclaration(value);
+  } else if(this._cbs.onprocessinginstruction){
+    var name = this._getInstructionName(value);
+    this._cbs.onprocessinginstruction("!" + name, "!" + value);
+  }
+};
+
+
 Parser_1.prototype.oncdata = function(value){
   this._updatePosition(1);
 
