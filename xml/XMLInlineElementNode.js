@@ -40,6 +40,18 @@ class XMLInlineElementNode extends XMLAnnotationNode {
     return this
   }
 
+  insertBefore(newChild, ref) {
+    if (!ref) {
+      this.appendChild(newChild)
+    } else {
+      let pos = this._childNodes.indexOf(ref.id)
+      if (pos < 0) {
+        throw new Error('Given node is not a child.')
+      }
+      this.insertAt(pos, newChild)
+    }
+  }
+
   insertAt(pos, child) {
     const length = this._childNodes.length
     if (pos >= 0 && pos <= length) {
@@ -60,6 +72,19 @@ class XMLInlineElementNode extends XMLAnnotationNode {
       throw new Error('Index out of bounds.')
     }
     return this
+  }
+
+  getInnerXML() {
+    return this.getChildren().map(child => {
+      return child.toXML().outerHTML
+    }).join('')
+  }
+
+  getChildAt(idx) {
+    let childId = this._childNodes[idx]
+    if (childId) {
+      return this.getDocument().get(childId)
+    }
   }
 }
 
