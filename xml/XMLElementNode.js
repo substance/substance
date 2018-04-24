@@ -1,73 +1,40 @@
 import DOMElement from '../dom/DOMElement'
 import XMLDocumentNode from './XMLDocumentNode'
+import xmlNodeHelpers from './xmlNodeHelpers'
 
 export default
 class XMLElementNode extends XMLDocumentNode {
 
   appendChild(child) {
-    this.insertAt(this._childNodes.length, child)
+    xmlNodeHelpers.appendChild(this, child)
   }
 
   removeChild(child) {
-    const childId = child.id
-    const childPos = this._childNodes.indexOf(childId)
-    if (childPos >= 0) {
-      this.removeAt(childPos)
-    } else {
-      throw new Error(`node ${childId} is not a child of ${this.id}`)
-    }
-    return this
+    xmlNodeHelpers.removeChild(this, child)
   }
 
   insertBefore(newChild, ref) {
-    if (!ref) {
-      this.appendChild(newChild)
-    } else {
-      let pos = this._childNodes.indexOf(ref.id)
-      if (pos < 0) {
-        throw new Error('Given node is not a child.')
-      }
-      this.insertAt(pos, newChild)
-    }
+    xmlNodeHelpers.insertBefore(this, newChild, ref)
   }
 
   insertAt(pos, child) {
-    const length = this._childNodes.length
-    if (pos >= 0 && pos <= length) {
-      const doc = this.getDocument()
-      doc.update([this.id, '_childNodes'], { type: 'insert', pos, value: child.id })
-    } else {
-      throw new Error('Index out of bounds.')
-    }
-    return this
+    xmlNodeHelpers.insertAt(this, pos, child)
   }
 
   removeAt(pos) {
-    const length = this._childNodes.length
-    if (pos >= 0 && pos < length) {
-      const doc = this.getDocument()
-      doc.update([this.id, '_childNodes'], { type: 'delete', pos: pos })
-    } else {
-      throw new Error('Index out of bounds.')
-    }
-    return this
+    xmlNodeHelpers.removeAt(this, pos)
   }
 
   getInnerXML() {
-    return this.getChildren().map(child => {
-      return child.toXML().outerHTML
-    }).join('')
+    xmlNodeHelpers.getInnerXML(this)
+  }
+
+  getChildAt(idx) {
+    xmlNodeHelpers.getChildAt(this, idx)
   }
 
   isElementNode() {
     return true
-  }
-
-  getChildAt(idx) {
-    let childId = this._childNodes[idx]
-    if (childId) {
-      return this.getDocument().get(childId)
-    }
   }
 
   // TODO: implement as much of DOMElement as possible
