@@ -42,44 +42,6 @@ class XMLInlineElementNode extends XMLAnnotationNode {
     xmlNodeHelpers.insertAt(this, pos, child)
   }
 
-  // appendChild(child) {
-  //   this.insertAt(this._childNodes.length, child)
-  // }
-
-  // removeChild(child) {
-  //   const childId = child.id
-  //   const childPos = this._childNodes.indexOf(childId)
-  //   if (childPos >= 0) {
-  //     this.removeAt(childPos)
-  //   } else {
-  //     throw new Error(`node ${childId} is not a child of ${this.id}`)
-  //   }
-  //   return this
-  // }
-  //
-  // insertBefore(newChild, ref) {
-  //   if (!ref) {
-  //     this.appendChild(newChild)
-  //   } else {
-  //     let pos = this._childNodes.indexOf(ref.id)
-  //     if (pos < 0) {
-  //       throw new Error('Given node is not a child.')
-  //     }
-  //     this.insertAt(pos, newChild)
-  //   }
-  // }
-
-  // insertAt(pos, child) {
-  //   const length = this._childNodes.length
-  //   if (pos >= 0 && pos <= length) {
-  //     const doc = this.getDocument()
-  //     doc.update([this.id, '_childNodes'], { type: 'insert', pos, value: child.id })
-  //   } else {
-  //     throw new Error('Index out of bounds.')
-  //   }
-  //   return this
-  // }
-
   removeAt(pos) {
     xmlNodeHelpers.removeAt(this, pos)
   }
