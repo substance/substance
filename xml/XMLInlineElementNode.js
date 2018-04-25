@@ -1,4 +1,5 @@
 import XMLAnnotationNode from './XMLAnnotationNode'
+import xmlNodeHelpers from './xmlNodeHelpers'
 
 export default
 class XMLInlineElementNode extends XMLAnnotationNode {
@@ -25,6 +26,35 @@ class XMLInlineElementNode extends XMLAnnotationNode {
     this._parentNode = parent
   }
 
+  appendChild(child) {
+    xmlNodeHelpers.appendChild(this, child)
+  }
+
+  removeChild(child) {
+    xmlNodeHelpers.removeChild(this, child)
+  }
+
+  insertBefore(newChild, ref) {
+    xmlNodeHelpers.insertBefore(this, newChild, ref)
+  }
+
+  insertAt(pos, child) {
+    xmlNodeHelpers.insertAt(this, pos, child)
+  }
+
+  removeAt(pos) {
+    xmlNodeHelpers.removeAt(this, pos)
+  }
+
+  getInnerXML() {
+    return this.getChildren().map(child => {
+      return child.toXML().outerHTML
+    }).join('')
+  }
+
+  getChildAt(idx) {
+    xmlNodeHelpers.getChildAt(this, idx)
+  }
 }
 
 XMLInlineElementNode.prototype._elementType = 'inline-element'
