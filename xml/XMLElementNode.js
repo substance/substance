@@ -1,28 +1,28 @@
 import DOMElement from '../dom/DOMElement'
 import XMLDocumentNode from './XMLDocumentNode'
-import xmlNodeHelpers from './xmlNodeHelpers'
+import * as xmlNodeHelpers from './xmlNodeHelpers'
 
 export default
 class XMLElementNode extends XMLDocumentNode {
 
   appendChild(child) {
-    xmlNodeHelpers.appendChild(this, child)
+    return xmlNodeHelpers.appendChild(this, child)
   }
 
   removeChild(child) {
-    xmlNodeHelpers.removeChild(this, child)
+    return xmlNodeHelpers.removeChild(this, child)
   }
 
   insertBefore(newChild, ref) {
-    xmlNodeHelpers.insertBefore(this, newChild, ref)
+    return xmlNodeHelpers.insertBefore(this, newChild, ref)
   }
 
   insertAt(pos, child) {
-    xmlNodeHelpers.insertAt(this, pos, child)
+    return xmlNodeHelpers.insertAt(this, pos, child)
   }
 
   removeAt(pos) {
-    xmlNodeHelpers.removeAt(this, pos)
+    return xmlNodeHelpers.removeAt(this, pos)
   }
 
   getInnerXML() {
@@ -30,7 +30,7 @@ class XMLElementNode extends XMLDocumentNode {
   }
 
   getChildAt(idx) {
-    xmlNodeHelpers.getChildAt(this, idx)
+    return xmlNodeHelpers.getChildAt(this, idx)
   }
 
   isElementNode() {
