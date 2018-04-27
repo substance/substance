@@ -1,18 +1,9 @@
-export default {
-  appendChild,
-  removeChild,
-  insertBefore,
-  insertAt,
-  removeAt,
-  getInnerXML,
-  getChildAt
-}
-
-function appendChild(xmlNode, child) {
+export function appendChild(xmlNode, child) {
   insertAt(xmlNode, xmlNode._childNodes.length, child)
+  return xmlNode
 }
 
-function removeChild(xmlNode, child) {
+export function removeChild(xmlNode, child) {
   const childId = child.id
   const childPos = xmlNode._childNodes.indexOf(childId)
   if (childPos >= 0) {
@@ -23,7 +14,7 @@ function removeChild(xmlNode, child) {
   return xmlNode
 }
 
-function insertBefore(xmlNode, newChild, ref) {
+export function insertBefore(xmlNode, newChild, ref) {
   if (!ref) {
     appendChild(newChild)
   } else {
@@ -33,9 +24,10 @@ function insertBefore(xmlNode, newChild, ref) {
     }
     insertAt(xmlNode, pos, newChild)
   }
+  return xmlNode
 }
 
-function insertAt(xmlNode, pos, child) {
+export function insertAt(xmlNode, pos, child) {
   const length = xmlNode._childNodes.length
   if (pos >= 0 && pos <= length) {
     const doc = xmlNode.getDocument()
@@ -46,7 +38,7 @@ function insertAt(xmlNode, pos, child) {
   return xmlNode
 }
 
-function removeAt(xmlNode, pos) {
+export function removeAt(xmlNode, pos) {
   const length = xmlNode._childNodes.length
   if (pos >= 0 && pos < length) {
     const doc = xmlNode.getDocument()
@@ -57,13 +49,13 @@ function removeAt(xmlNode, pos) {
   return xmlNode
 }
 
-function getInnerXML(xmlNode) {
+export function getInnerXML(xmlNode) {
   return xmlNode.getChildren().map(child => {
     return child.toXML().outerHTML
   }).join('')
 }
 
-function getChildAt(xmlNode, idx) {
+export function getChildAt(xmlNode, idx) {
   let childId = xmlNode._childNodes[idx]
   if (childId) {
     return xmlNode.getDocument().get(childId)
