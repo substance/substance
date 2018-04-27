@@ -546,7 +546,7 @@ class EditorSession extends EventEmitter {
       this._applyChange(change, {})
       this._transaction.__applyChange__(change)
       // move change to the opposite change list (undo <-> redo)
-      to.push(change.invert())
+      to.push(doc.invert(change))
       // use selection from change
       let sel = change.after.selection
       if (sel) sel.attach(doc)
@@ -588,7 +588,8 @@ class EditorSession extends EventEmitter {
     change.timestamp = Date.now()
     this._applyChange(change, info)
     if (info['history'] !== false && !info['hidden']) {
-      this._history.push(change.invert())
+      let inverted = this.getDocument().invert(change)
+      this._history.push(inverted)
     }
     var newSelection = change.after.selection || Selection.nullSelection
     // HACK injecting the surfaceId here...
