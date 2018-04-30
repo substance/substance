@@ -16,7 +16,7 @@ export function removeChild(xmlNode, child) {
 
 export function insertBefore(xmlNode, newChild, ref) {
   if (!ref) {
-    appendChild(newChild)
+    appendChild(xmlNode, newChild)
   } else {
     let pos = xmlNode._childNodes.indexOf(ref.id)
     if (pos < 0) {
