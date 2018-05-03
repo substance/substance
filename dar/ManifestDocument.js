@@ -35,14 +35,18 @@ export default class ManifestDocument extends XMLDocument {
 
   getDocumentEntries() {
     let documents = this.findAll('documents > document')
-    return documents.map(doc => {
-      return {
-        id: doc.id,
-        name: doc.attr('name'),
-        type: doc.attr('type'),
-        path: doc.attr('path')
-      }
-    })
+    return documents.map(_getEntryFromDocumentNode)
   }
 
+  getDocumentEntry(id) {
+    let entryNode = this.get(id)
+    if (entryNode && entryNode.type === 'document') {
+      return _getEntryFromDocumentNode(entryNode)
+    }
+  }
+
+}
+
+function _getEntryFromDocumentNode(documentNode) {
+  return Object.assign({ id: documentNode.id }, documentNode.getAttributes())
 }
