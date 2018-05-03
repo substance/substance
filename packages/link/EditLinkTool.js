@@ -47,13 +47,13 @@ class EditLinkTool extends ToggleTool {
       }),
       $$(Button, {
         icon: 'open-link',
-        theme: 'dark',
+        theme: this.props.theme,
       }).attr('title', this.getLabel('open-link'))
         .on('click', this._openLink),
 
       $$(Button, {
         icon: 'delete',
-        theme: 'dark',
+        theme: this.props.theme,
       }).attr('title', this.getLabel('delete-link'))
         .on('click', this.onDelete)
     )

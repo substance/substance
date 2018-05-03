@@ -4,7 +4,6 @@
   white-space: nowrap;
   background: none;
   border: none;
-  color: #fff;
   text-align: left;
   line-height: 24px;
   font-size: 11px;
@@ -13,6 +12,10 @@
   border: 1px solid transparent;
   border-radius: 3px;
   padding: 0px 5px;
+}
+
+.sc-menu-item:hover {
+  background: #F7F7F9;
 }
 
 .sc-menu-item[disabled=true] {
