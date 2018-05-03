@@ -365,8 +365,11 @@ function _createNewSelection(containerSel, start, end) {
       surfaceId: containerSel.surfaceId
     })
   } else {
-    newSel = new ContainerSelection(containerSel.containerId,
-    start.path, start.offset, end.path, end.offset, false, containerSel.surfaceId)
+    newSel = new ContainerSelection(
+      containerSel.containerId,
+      start.path, start.offset, end.path, end.offset,
+      false, containerSel.surfaceId
+    )
   }
   // we need to attach the new selection
   const doc = containerSel._internal.doc

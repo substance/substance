@@ -785,13 +785,13 @@ class Surface extends Component {
       contentEditableShortcuts = [
         'META+66', // Cmd+Bold
         'META+73', // Cmd+Italic
-        'META+85'  // Cmd+Underline
+        'META+85' // Cmd+Underline
       ]
     } else {
       contentEditableShortcuts = [
         'CTRL+66', // Ctrl+Bold
         'CTRL+73', // Ctrl+Italic
-        'CTRL+85'  // Ctrl+Underline
+        'CTRL+85' // Ctrl+Underline
       ]
     }
 

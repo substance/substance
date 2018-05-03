@@ -25,7 +25,7 @@ class Data extends EventEmitter {
     if (!nodeFactory) {
       throw new Error('nodeFactory is mandatory')
     }
-   /* istanbul ignore end */
+    /* istanbul ignore end */
 
     this.schema = schema
     this.nodeFactory = nodeFactory

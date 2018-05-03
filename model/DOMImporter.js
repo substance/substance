@@ -610,7 +610,7 @@ export default class DOMImporter {
     var firstNode = nodes[0]
     var lastNode = last(nodes)
     var text, trimmed
-      // trim the first and last text
+    // trim the first and last text
     if (firstNode && firstNode.isTextNode()) {
       text = firstNode.textContent
       trimmed = this._trimLeft(text)

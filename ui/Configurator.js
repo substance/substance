@@ -125,7 +125,7 @@ class Configurator {
     return this.config.editorOptions
   }
 
-    /**
+  /**
     Adds a node to this configuration. Later, when you use
     {@link Configurator#getSchema()}, this node will be added to that schema.
     Usually, used within a package to add its own nodes to the schema.

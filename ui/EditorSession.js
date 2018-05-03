@@ -835,7 +835,8 @@ class EditorSession extends EventEmitter {
     // manipulation during iteration
     let observers = _observers.slice()
     for (let i = 0; i < observers.length; i++) {
-      let o = observers[i]      // an observer might have been deregistered while this iteration was going on
+      // an observer might have been deregistered while this iteration was going on
+      let o = observers[i]
       if (o._deregistered) continue
       if (!o.resource) {
         o.handler.call(o.context, this)

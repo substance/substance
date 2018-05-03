@@ -68,7 +68,7 @@ class BrowserDOMElement extends DOMElement {
     let ownerDocument = this._getNativeOwnerDocument()
     let oldDocType = ownerDocument.doctype
     let newDocType = ownerDocument.implementation.createDocumentType(
-     qualifiedNameStr, publicId, systemId
+      qualifiedNameStr, publicId, systemId
     )
     if (oldDocType) {
       oldDocType.parentNode.replaceChild(newDocType, oldDocType)
