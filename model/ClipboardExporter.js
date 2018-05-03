@@ -1,6 +1,6 @@
-import Document from '../model/Document'
-import HTMLExporter from '../model/HTMLExporter'
-import JSONConverter from '../model/JSONConverter'
+import HTMLExporter from './HTMLExporter'
+import JSONConverter from './JSONConverter'
+import { SNIPPET_ID, TEXT_SNIPPET_ID } from './documentHelpers'
 
 /**
   Export HTML from clipboard. Used for inter-application copy'n'paste.
@@ -21,7 +21,7 @@ class ClipboardExporter extends HTMLExporter {
     let html
     let elements = this.convertDocument(doc);
     // special treatment for a text snippet
-    if (elements.length === 1 && elements[0].attr('data-id') === Document.TEXT_SNIPPET_ID) {
+    if (elements.length === 1 && elements[0].attr('data-id') === TEXT_SNIPPET_ID) {
       html = elements[0].innerHTML
     } else {
       html = elements.map(function(el) {
@@ -42,9 +42,9 @@ class ClipboardExporter extends HTMLExporter {
     @return {Array} array of DOM elements each represented single node
   */
   convertDocument(doc) {
-    let content = doc.get(Document.SNIPPET_ID)
+    let content = doc.get(SNIPPET_ID)
     if (!content) {
-      throw new Error('Illegal clipboard document: could not find container "' + Document.SNIPPET_ID + '"')
+      throw new Error('Illegal clipboard document: could not find container "' + SNIPPET_ID + '"')
     }
     return this.convertContainer(content)
   }

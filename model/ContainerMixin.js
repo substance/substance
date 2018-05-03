@@ -1,7 +1,7 @@
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 import ContainerAddress from './ContainerAddress'
-import documentHelpers from './documentHelpers'
+import { getNodes } from './documentHelpers'
 
 export default function (DocumentNode) {
 
@@ -195,7 +195,7 @@ export default function (DocumentNode) {
     }
 
     getChildren() {
-      return documentHelpers.getNodes(this.getDocument(), this.getContent())
+      return getNodes(this.getDocument(), this.getContent())
     }
 
     getChildAt(idx) {

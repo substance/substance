@@ -1,7 +1,7 @@
 import isArrayEqual from '../util/isArrayEqual'
 import isEqual from '../util/isEqual'
 import cloneDeep from '../util/cloneDeep'
-import documentHelpers from './documentHelpers'
+import { getTextForSelection } from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 
@@ -81,7 +81,7 @@ export default function(DocumentNode) {
         console.warn('Trying to use a Annotation which is not attached to the document.')
         return ""
       }
-      return documentHelpers.getTextForSelection(doc, this.getSelection())
+      return getTextForSelection(doc, this.getSelection())
     }
 
     isAnnotation() {

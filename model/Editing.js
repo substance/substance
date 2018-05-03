@@ -3,7 +3,7 @@ import isString from '../util/isString'
 import last from '../util/last'
 import uuid from '../util/uuid'
 import annotationHelpers from './annotationHelpers'
-import documentHelpers from './documentHelpers'
+import { deleteTextRange, deleteNode, deleteListRange, mergeListItems } from './documentHelpers'
 import { setCursor, isEntirelySelected, selectNode } from './selectionHelpers'
 import paste from './paste'
 
@@ -99,7 +99,7 @@ class Editing {
       this._deleteNodeSelection(tx, sel, direction)
     }
     // TODO: what to do with custom selections?
-    else if (sel.isCustomSelection()) {}
+    else if (sel.isCustomSelection()) {} // eslint-disable-line no-empty
     // if the selection is collapsed this is the classical one-character deletion
     // either backwards (backspace) or forward (delete)
     else if (sel.isCollapsed()) {
@@ -135,7 +135,7 @@ class Editing {
         let endOffset = startOffset+1
         let start = { path: path, offset: startOffset }
         let end = { path: path, offset: endOffset }
-        documentHelpers.deleteTextRange(tx, start, end)
+        deleteTextRange(tx, start, end)
         tx.setSelection({
           type: 'property',
           path: path,
@@ -146,7 +146,7 @@ class Editing {
     }
     // deleting a range of characters within a text property
     else if (sel.isPropertySelection()) {
-      documentHelpers.deleteTextRange(tx, sel.start, sel.end)
+      deleteTextRange(tx, sel.start, sel.end)
       tx.setSelection(sel.collapse('left'))
     }
     // deleting a range within a container (across multiple nodes)
@@ -167,7 +167,7 @@ class Editing {
         sel.isAfter() && direction === 'left' ) {
       // replace the node with default text node
       container.hideAt(nodePos)
-      documentHelpers.deleteNode(tx, tx.get(nodeId))
+      deleteNode(tx, tx.get(nodeId))
       let newNode = tx.createDefaultTextNode()
       container.showAt(nodePos, newNode.id)
       tx.setSelection({
@@ -249,9 +249,9 @@ class Editing {
       let node = tx.get(startId).getContainerRoot()
       /* istanbul ignore else  */
       if (node.isText()) {
-        documentHelpers.deleteTextRange(tx, start, end)
+        deleteTextRange(tx, start, end)
       } else if (node.isList()) {
-        documentHelpers.deleteListRange(tx, node, start, end)
+        deleteListRange(tx, node, start, end)
       } else {
         throw new Error('Not supported yet.')
       }
@@ -269,15 +269,15 @@ class Editing {
     // delete or truncate last node
     if (lastEntirelySelected) {
       container.hideAt(endPos)
-      documentHelpers.deleteNode(tx, lastNode)
+      deleteNode(tx, lastNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = lastNode.getContainerRoot()
       /* istanbul ignore else  */
       if (node.isText()) {
-        documentHelpers.deleteTextRange(tx, null, end)
+        deleteTextRange(tx, null, end)
       } else if (node.isList()) {
-        documentHelpers.deleteListRange(tx, node, null, end)
+        deleteListRange(tx, node, null, end)
       } else {
         // IsolatedNodes can not be selected partially
       }
@@ -287,21 +287,21 @@ class Editing {
     for (let i = endPos-1; i > startPos; i--) {
       let nodeId = container.getNodeIdAt(i)
       container.hideAt(i)
-      documentHelpers.deleteNode(tx, tx.get(nodeId))
+      deleteNode(tx, tx.get(nodeId))
     }
 
     // delete or truncate the first node
     if (firstEntirelySelected) {
       container.hideAt(startPos)
-      documentHelpers.deleteNode(tx, firstNode)
+      deleteNode(tx, firstNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = firstNode.getContainerRoot()
       /* istanbul ignore else  */
       if (node.isText()) {
-        documentHelpers.deleteTextRange(tx, start, null)
+        deleteTextRange(tx, start, null)
       } else if (node.isList()) {
-        documentHelpers.deleteListRange(tx, node, start, null)
+        deleteListRange(tx, node, start, null)
       } else {
         // IsolatedNodes can not be selected partially
       }
@@ -380,7 +380,7 @@ class Editing {
         })
       } else {
         container.hideAt(nodePos)
-        documentHelpers.deleteNode(tx, tx.get(nodeId))
+        deleteNode(tx, tx.get(nodeId))
         container.showAt(nodePos, blockNode.id)
         tx.setSelection({
           type: 'node',
@@ -407,7 +407,7 @@ class Editing {
         // replace node
         if (text.length === 0) {
           container.hideAt(nodePos)
-          documentHelpers.deleteNode(tx, node)
+          deleteNode(tx, node)
           container.showAt(nodePos, blockNode.id)
           setCursor(tx, blockNode, container.id, 'after')
         }
@@ -476,7 +476,7 @@ class Editing {
         container.showAt(nodePos+1, textNode)
       } else {
         container.hide(nodeId)
-        documentHelpers.deleteNode(tx, tx.get(nodeId))
+        deleteNode(tx, tx.get(nodeId))
         container.showAt(nodePos, textNode)
       }
       setCursor(tx, textNode, sel.containerId, 'after')
@@ -562,7 +562,7 @@ class Editing {
     let container = tx.get(sel.containerId)
     let pos = container.getPosition(nodeId, 'strict')
     container.hide(nodeId)
-    documentHelpers.deleteNode(tx, node)
+    deleteNode(tx, node)
     container.showAt(pos, newNode.id)
 
     tx.setSelection({
@@ -601,7 +601,7 @@ class Editing {
           type: 'list',
           items: [newItem.id]
         }, params))
-        documentHelpers.deleteNode(tx, node)
+        deleteNode(tx, node)
         container.showAt(nodePos, newList.id)
         tx.setSelection({
           type: 'property',
@@ -619,7 +619,7 @@ class Editing {
         node.removeItemAt(itemPos)
         if (node.isEmpty()) {
           container.hideAt(nodePos)
-          documentHelpers.deleteNode(tx, node)
+          deleteNode(tx, node)
           container.showAt(nodePos, newTextNode.id)
         } else if (itemPos === 0) {
           container.showAt(nodePos, newTextNode.id)
@@ -763,7 +763,7 @@ class Editing {
       }
       // VI
       else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
-          // skip
+        // skip
       }
       // VII anno.start before and anno.end after
       else if (annoStart<startOffset && annoEnd>=endOffset) {
@@ -875,19 +875,19 @@ class Editing {
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
           container.hide(node.id)
-          documentHelpers.deleteNode(tx, node)
+          deleteNode(tx, node)
           container.showAt(nodePos, newTextNode.id)
         }
         // if at the first list item, remove the item
         else if (itemPos === 0) {
           node.remove(listItem.id)
-          documentHelpers.deleteNode(tx, listItem)
+          deleteNode(tx, listItem)
           container.showAt(nodePos, newTextNode.id)
         }
         // if at the last list item, remove the item and append the paragraph
         else if (itemPos >= L-1) {
           node.remove(listItem.id)
-          documentHelpers.deleteNode(tx, listItem)
+          deleteNode(tx, listItem)
           container.showAt(nodePos+1, newTextNode.id)
         }
         // otherwise create a new list
@@ -960,7 +960,7 @@ class Editing {
         itemPos = (direction === 'left') ? itemPos-1 : itemPos
         let target = list.getItemAt(itemPos)
         let targetLength = target.getLength()
-        documentHelpers.mergeListItems(tx, list.id, itemPos)
+        mergeListItems(tx, list.id, itemPos)
         tx.setSelection({
           type: 'property',
           path: target.getPath(),
@@ -986,7 +986,7 @@ class Editing {
       // Simplification for empty nodes
       if (first.isEmpty()) {
         container.hide(first.id)
-        documentHelpers.deleteNode(tx, first)
+        deleteNode(tx, first)
         // TODO: need to clear where to handle
         // selections ... probably better not to do it here
         setCursor(tx, second, container.id, 'before')
@@ -1003,7 +1003,7 @@ class Editing {
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        documentHelpers.deleteNode(tx, source)
+        deleteNode(tx, source)
         tx.setSelection({
           type: 'property',
           path: targetPath,
@@ -1022,11 +1022,11 @@ class Editing {
           // transfer annotations
           annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
           // delete item and prune empty list
-          documentHelpers.deleteNode(tx, source)
+          deleteNode(tx, source)
         }
         if (list.isEmpty()) {
           container.hide(list.id)
-          documentHelpers.deleteNode(tx, list)
+          deleteNode(tx, list)
         }
         tx.setSelection({
           type: 'property',
@@ -1050,7 +1050,7 @@ class Editing {
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        documentHelpers.deleteNode(tx, source)
+        deleteNode(tx, source)
         tx.setSelection({
           type: 'property',
           path: target.getPath(),
@@ -1071,7 +1071,7 @@ class Editing {
           second.removeItemAt(0)
           first.appendItem(secondItems[i])
         }
-        documentHelpers.deleteNode(tx, second)
+        deleteNode(tx, second)
         let item = tx.get(last(firstItems))
         tx.setSelection({
           type: 'property',
@@ -1085,7 +1085,7 @@ class Editing {
     } else {
       if (second.isText() && second.isEmpty()) {
         container.hide(second.id)
-        documentHelpers.deleteNode(tx, second)
+        deleteNode(tx, second)
         setCursor(tx, first, container.id, 'after')
       } else {
         selectNode(tx, direction === 'left' ? first.id : second.id, container.id)

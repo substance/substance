@@ -10,6 +10,17 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
 
+const COMPONENT_FACTORY = {
+  createComponent(ComponentClass, parent, props) {
+    return new ComponentClass(parent, props)
+  },
+  createElementComponent(parent, virtualElement) {
+    return new ElementComponent(parent, virtualElement)
+  },
+  createTextNodeComponent(parent, virtualElement) {
+    return new TextNodeComponent(parent, virtualElement)
+  }
+}
 /**
   A light-weight component implementation inspired by
   [React](https://facebook.github.io/react/) and [Ember](http://emberjs.com/).
@@ -128,7 +139,9 @@ class Component extends EventEmitter {
     // used for rerendering and can be used by components for incremental rendering
     // Note: usually it is inherited from the parent. In case of root components
     // it can be provided via context or options
-    this.renderingEngine = (parent && parent.renderingEngine) || context.renderingEngine || options.renderingEngine || new RenderingEngine()
+    this.renderingEngine = (parent && parent.renderingEngine) || context.renderingEngine || options.renderingEngine || new RenderingEngine({
+      componentFactory: COMPONENT_FACTORY
+    })
 
     // HACK: to allow that ElementComponent and TextComponent can derive from Component
     // we need to skip the initialization of the rest
@@ -338,7 +351,7 @@ class Component extends EventEmitter {
     el = DefaultDOMElement.wrap(el)
     // Makes sure a new element is created for the component
     this.el = null
-    this.renderingEngine = new RenderingEngine({ elementFactory: el.getOwnerDocument() })
+    this.renderingEngine = Component.createRenderingEngine(el.getOwnerDocument())
     this._render()
     el.appendChild(this.el)
     if (el.isInDocument()) {
@@ -1011,6 +1024,13 @@ Component.getComponentFromNativeElement = function(nativeEl) {
   // first, it makes sense after all, as DefaultDOMElement.wrap()
   // provides the DOMElement instance of a previously wrapped native element.
   return _unwrapComp(DefaultDOMElement.wrap(nativeEl))
+}
+
+Component.createRenderingEngine = function(elementFactory) {
+  return new RenderingEngine({
+    componentFactory: COMPONENT_FACTORY,
+    elementFactory
+  })
 }
 
 // NOTE: this is used for incremental updates only

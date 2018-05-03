@@ -1,7 +1,6 @@
 import cloneDeep from '../util/cloneDeep'
 import forEach from '../util/forEach'
-import Document from './Document'
-import documentHelpers from './documentHelpers'
+import { copyNode, deleteTextRange, deleteListRange, TEXT_SNIPPET_ID } from './documentHelpers'
 import { isFirst, isLast } from './selectionHelpers'
 
 /**
@@ -41,14 +40,14 @@ function _copyPropertySelection(doc, selection) {
   let containerNode = snippet.getContainer()
   snippet.create({
     type: doc.schema.getDefaultTextType(),
-    id: Document.TEXT_SNIPPET_ID,
+    id: TEXT_SNIPPET_ID,
     content: text.substring(offset, endOffset)
   })
-  containerNode.show(Document.TEXT_SNIPPET_ID)
+  containerNode.show(TEXT_SNIPPET_ID)
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
   forEach(annotations, function(anno) {
     let data = cloneDeep(anno.toJSON())
-    let path = [Document.TEXT_SNIPPET_ID, 'content']
+    let path = [TEXT_SNIPPET_ID, 'content']
     data.start = {
       path: path,
       offset: Math.max(offset, anno.start.offset)-offset
@@ -91,7 +90,7 @@ function _copyContainerSelection(tx, sel) {
       continue
     }
     if (!created[id]) {
-      documentHelpers.copyNode(node).forEach((nodeData) => {
+      copyNode(node).forEach((nodeData) => {
         let copy = snippet.create(nodeData)
         created[copy.id] = true
       })
@@ -102,18 +101,18 @@ function _copyContainerSelection(tx, sel) {
     // ATTENTION: we need the root node here, e.g. the list, not the list items
     let startNode = snippet.get(start.getNodeId()).getContainerRoot()
     if (startNode.isText()) {
-      documentHelpers.deleteTextRange(snippet, null, start)
+      deleteTextRange(snippet, null, start)
     } else if (startNode.isList()) {
-      documentHelpers.deleteListRange(snippet, startNode, null, start)
+      deleteListRange(snippet, startNode, null, start)
     }
   }
   if (!skippedLast) {
     // ATTENTION: we need the root node here, e.g. the list, not the list items
     let endNode = snippet.get(end.getNodeId()).getContainerRoot()
     if (endNode.isText()) {
-      documentHelpers.deleteTextRange(snippet, end, null)
+      deleteTextRange(snippet, end, null)
     } else if (endNode.isList()) {
-      documentHelpers.deleteListRange(snippet, endNode, end, null)
+      deleteListRange(snippet, endNode, end, null)
     }
   }
   return snippet
@@ -124,7 +123,7 @@ function _copyNodeSelection(doc, selection) {
   let containerNode = snippet.getContainer()
   let nodeId = selection.getNodeId()
   let node = doc.get(nodeId)
-  documentHelpers.copyNode(node).forEach((nodeData) => {
+  copyNode(node).forEach((nodeData) => {
     snippet.create(nodeData)
   })
   containerNode.show(node.id)
