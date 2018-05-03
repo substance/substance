@@ -1,9 +1,10 @@
 .sc-context-menu {
   position: absolute;
-  background: #2E2E2C;
+  background: #fff;
   border-radius: 5px;
   font-size: var(--small-font-size);
   z-index: 1000;
+  box-shadow: var(--default-box-shadow);
 }
 
 .sc-context-menu.sm-hidden {

@@ -1,4 +1,8 @@
-/* Global variables
+/*
+  Global variables
+
+  TODO: we should move all app-specific styling into app-land, and only keep
+        styles that are necessary for the editing to work.
 -------------------------------------------------- */
 
 :root {
@@ -24,6 +28,8 @@
   --fill-light-color: #f7f9f9; /* #f8f8f8; */
   --fill-dark-color: #404040;
 
+  --default-box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #aaa;
+
   /* Depending on a base-color */
   --darken-color-1: rgba(0,0,0,0.05);
   --darken-color-2: rgba(0,0,0,0.10);
@@ -38,6 +44,13 @@
   --lighten-color-5: rgba(0,0,0,0.75);
 
   --link-color: #1795CD;
+
+  --text-action-color: #2E72EA;
+  --border-action-color: #2E72EA;
+  --light-bg-color: #F7F7F9; /* light grey */
+  --active-color: #2E72EA;
+  --active-light-bg-color: #2E72EA0a;
+  --separator-color: rgba(0,0,0,0.05);
 
   /* We disable this for now, as accessibility needs more discussion */
   --focus-outline-color: transparent; /* #1795CD;/* #5BE3FF;
@@ -74,16 +87,4 @@
 
   /* RGB #A3CDFD = HSB 209,29,80 */
   --local-selection-color: #2A8CFF;
-
-  /* Collaborator colors */
-  --collaborator-color-1: #A4E57A;
-  --collaborator-color-2: #BC90FF;
-  --collaborator-color-3: #D6BB4C;
-  --collaborator-color-4: #BAA6A0;
-  --collaborator-color-5: #7BB5B3;
-  --collaborator-color-6: #FF7B7B;
-  --collaborator-color-7: #A0CC00;
-  --collaborator-color-8: #89CAFF;
-  --collaborator-color-9: #FF9FBF;
-  --collaborator-color-10: #FFB533;
 }
