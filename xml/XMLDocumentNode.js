@@ -1,6 +1,7 @@
 import DocumentNode from '../model/DocumentNode'
 import documentHelpers from '../model/documentHelpers'
 import DOMElement from '../dom/DOMElement'
+import clone from '../util/clone'
 import last from '../util/last'
 import ArrayIterator from '../util/ArrayIterator'
 import node2element from './node2element'
@@ -123,6 +124,10 @@ class XMLDocumentNode extends DocumentNode {
   getAttribute(name) {
     if (name === 'id') return this.id
     return this.attributes[name]
+  }
+
+  getAttributes() {
+    return clone(this.attributes)
   }
 
   getElementSchema() {
