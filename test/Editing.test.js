@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { module } from 'substance-test'
-import { Document, EditingInterface, forEach, documentHelpers } from 'substance'
+import { EditingInterface, forEach, documentHelpers } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import headersAndParagraphs from './fixture/headersAndParagraphs'
 import {
