@@ -11,7 +11,7 @@ var xmlJSON = {
 	quot: quot
 };
 
-var xml = Object.freeze({
+var xml = /*#__PURE__*/Object.freeze({
 	amp: amp,
 	apos: apos,
 	gt: gt,
@@ -4271,7 +4271,7 @@ var entitiesJSON = {
 	"Map": "⤅"
 };
 
-var entities = Object.freeze({
+var entities = /*#__PURE__*/Object.freeze({
 	Aacute: Aacute,
 	aacute: aacute,
 	Abreve: Abreve,
@@ -6402,13 +6402,13 @@ var require$$0 = ( xml && xmlJSON ) || xml;
 
 var require$$1 = ( entities && entitiesJSON ) || entities;
 
-var inverseXML = getInverseObj(require$$0);
-var xmlReplacer = getInverseReplacer(inverseXML);
+var inverseXML = getInverseObj(require$$0),
+    xmlReplacer = getInverseReplacer(inverseXML);
 
 var XML = getInverse(inverseXML, xmlReplacer);
 
-var inverseHTML = getInverseObj(require$$1);
-var htmlReplacer = getInverseReplacer(inverseHTML);
+var inverseHTML = getInverseObj(require$$1),
+    htmlReplacer = getInverseReplacer(inverseHTML);
 
 var HTML = getInverse(inverseHTML, htmlReplacer);
 
@@ -6437,8 +6437,8 @@ function getInverseReplacer(inverse){
 	return new RegExp(multiple.join("|"), "g");
 }
 
-var re_nonASCII = /[^\0-\x7F]/g;
-var re_astralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+var re_nonASCII = /[^\0-\x7F]/g,
+    re_astralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
 
 function singleCharReplacer(c){
 	return "&#x" + c.charCodeAt(0).toString(16).toUpperCase() + ";";
@@ -6513,7 +6513,7 @@ var decode = {
 	"159": 376
 };
 
-var decode$1 = Object.freeze({
+var decode$1 = /*#__PURE__*/Object.freeze({
 	default: decode
 });
 
@@ -6765,7 +6765,7 @@ var _entities = {
   entitiesJSON,
   legacyJSON,
   xmlJSON
-};
+}
 
 export default _entities;
 
