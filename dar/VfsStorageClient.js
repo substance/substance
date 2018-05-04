@@ -39,10 +39,14 @@ function _readRawArchive(fs, archiveId, baseUrl = '') {
 
   docs.forEach(entry => {
     let path = entry.attr('path')
-    let content = fs.readFileSync(`${archiveId}/${entry.path}`)
-    rawArchive.resources[path] = {
-      encoding: 'utf8',
-      data: content
+    if (fs.existsSync(`${archiveId}/${entry.path}`)) {
+      let content = fs.readFileSync(`${archiveId}/${entry.path}`)
+      rawArchive.resources[path] = {
+        encoding: 'utf8',
+        data: content
+      }
+    } else {
+      console.warn(`${archiveId}/${entry.path} not found in vfs`)
     }
   })
   assets.forEach(asset => {
