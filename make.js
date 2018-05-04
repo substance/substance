@@ -6,7 +6,7 @@ const fork = require('substance-bundler/extensions/fork')
 const karma = require('substance-bundler/extensions/karma')
 const rng = require('substance-bundler/extensions/rng')
 
-const UGLIFY_VERSION = '^2.7.5'
+const UGLIFY_VERSION = '^3.3.9'
 
 // Constants
 // ---------
@@ -128,7 +128,7 @@ function buildTestsNode() {
 }
 
 function buildVendor() {
-  install(b, 'uglify-js-harmony', UGLIFY_VERSION)
+  install(b, 'uglify-es', UGLIFY_VERSION)
   const CLEANUP = true
   const MINIFY = false
   vendorRollup('entities', {
@@ -142,17 +142,21 @@ function buildVendor() {
       'domelementtype', 'entities', 'boolbase',
       'css-what', 'domutils', 'nth-check'
     ],
-    commonjs: true,
+    commonjs: {
+      include: ['vendor/css-select/**']
+    },
     json: true,
     cleanup: CLEANUP,
     minify: MINIFY
   })
   vendorRollup('htmlparser2', {
-    commonjs: { include: ['vendor/htmlparser2/**'] },
+    commonjs: {
+      include: ['node_modules/**', 'vendor/htmlparser2/**']
+    },
     ignore: ['events'],
+    // attention: the order is important:
+    // first the more specific ones
     alias: {
-      'entities':
-        path.join(__dirname, 'vendor/entities.js'),
       'entities/lib/decode_codepoint.js':
         path.join(__dirname, 'vendor/_entities_decodeCodepoint.js'),
       'entities/maps/entities.json':
@@ -161,8 +165,10 @@ function buildVendor() {
         path.join(__dirname, 'vendor/_entities_legacyJSON.js'),
       'entities/maps/xml.json':
         path.join(__dirname, 'vendor/_entities_xmlJSON.js'),
+      'entities':
+        path.join(__dirname, 'vendor/entities.js'),
       'inherits':
-        path.join(__dirname, 'vendor/_inherits.js'),
+        path.join(__dirname, 'vendor/_inherits.js')
     },
     json: true,
     cleanup: CLEANUP,
