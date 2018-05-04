@@ -179,6 +179,10 @@ export default class PersistedDocumentArchive extends EventEmitter {
     })
   }
 
+  _repair() {
+    // no-op
+  }
+
   save() {
     if (!this.buffer.hasPendingChanges()) {
       console.info('Save: no pending changes.')
