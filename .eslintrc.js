@@ -22,7 +22,7 @@ module.exports = {
   ].reduce((m, key)=>{m[key]=true;return m}, {}),
   "rules": {
     // 0 - off, 1 - warning, 2 - error
-    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "indent": ["error", 2, { "SwitchCase": 1, "MemberExpression": "off" }],
     "semi": [0, "always"],
     "comma-dangle": [2, "only-multiline"],
     "no-cond-assign": 2,

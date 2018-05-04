@@ -10,6 +10,10 @@ import DomUtils from '../vendor/domutils'
 import DOMElement from './DOMElement'
 import parseMarkup from './parseMarkup'
 
+const MemoryDOMElementFactory = (type, data) => {
+  return new MemoryDOMElement(type, data)
+}
+
 export default
 class MemoryDOMElement extends DOMElement {
 
@@ -282,7 +286,8 @@ class MemoryDOMElement extends DOMElement {
     if (this.childNodes) {
       let _doc = parseMarkup(html, {
         ownerDocument: this.getOwnerDocument(),
-        decodeEntities: true
+        decodeEntities: true,
+        elementFactory: MemoryDOMElementFactory
       })
       this.empty()
       // ATTENTION: important to copy the childNodes array first
@@ -645,7 +650,8 @@ MemoryDOMElement.parseMarkup = function(str, format, options={}) {
   }
   let parserOpts = Object.assign({
     format,
-    decodeEntities: true
+    decodeEntities: true,
+    elementFactory: MemoryDOMElementFactory
   }, options)
   // opt-out from HTML structure sanitization
   if (options.raw) {

@@ -21,6 +21,7 @@ import Coordinate from './Coordinate'
 import { createNodeSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
+import { SNIPPET_ID } from './documentHelpers'
 
 const converter = new JSONConverter()
 
@@ -468,7 +469,7 @@ class Document extends EventEmitter {
     var snippet = this.newInstance()
     var snippetContainer = snippet.create({
       type: 'container',
-      id: Document.SNIPPET_ID
+      id: SNIPPET_ID
     })
     snippet.getContainer = function() {
       return snippetContainer
@@ -631,12 +632,5 @@ class Document extends EventEmitter {
 }
 
 Document.prototype._isDocument = true
-
-// used by transforms copy, paste
-// and by ClipboardImporter/Exporter
-Document.SNIPPET_ID = "snippet"
-
-Document.TEXT_SNIPPET_ID = "text-snippet"
-
 
 export default Document

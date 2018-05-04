@@ -11,19 +11,6 @@ Parser.prototype.ondeclaration = function(value){
   }
 }
 
-/*
-Parser.prototype.oncdata = function(value){
-  this._updatePosition(1);
-
-  if(this._options.xmlMode || this._options.recognizeCDATA){
-    if(this._cbs.oncdatastart) this._cbs.oncdatastart();
-    if(this._cbs.ontext) this._cbs.ontext(value);
-    if(this._cbs.oncdataend) this._cbs.oncdataend();
-  } else {
-    this.oncomment("[CDATA[" + value + "]]");
-  }
-};
-*/
 Parser.prototype.oncdata = function(value){
   this._updatePosition(1);
 

@@ -1,7 +1,7 @@
-import domutils from 'domutils';
 import BaseFuncs from 'boolbase';
-import cssWhat from 'css-what';
 import nthCheck from 'nth-check';
+import cssWhat from 'css-what';
+import domutils from 'domutils';
 
 var universal = 50;
 var tag = 30;
@@ -24,17 +24,17 @@ var procedure = {
 	adjacent: adjacent
 };
 
-var procedure$1 = Object.freeze({
-	universal: universal,
-	tag: tag,
-	attribute: attribute,
-	pseudo: pseudo,
-	descendant: descendant,
-	child: child,
-	parent: parent,
-	sibling: sibling,
-	adjacent: adjacent,
-	default: procedure
+var procedure$1 = /*#__PURE__*/Object.freeze({
+  universal: universal,
+  tag: tag,
+  attribute: attribute,
+  pseudo: pseudo,
+  descendant: descendant,
+  child: child,
+  parent: parent,
+  sibling: sibling,
+  adjacent: adjacent,
+  default: procedure
 });
 
 var procedure$2 = ( procedure$1 && procedure ) || procedure$1;
@@ -116,7 +116,7 @@ function getProcedure(token){
 	return proc;
 }
 
-var falseFunc$2 = BaseFuncs.falseFunc;
+var falseFunc = BaseFuncs.falseFunc;
 
 
 var reChars = /[-[\]{}()*+?.,\\^$|#\s]/g;
@@ -179,7 +179,7 @@ function factory(adapter){
 				}
 			} else {
 				if(/\s/.test(value)){
-					return falseFunc$2;
+					return falseFunc;
 				}
 
 				value = value.replace(reChars, "\\$&");
@@ -206,7 +206,7 @@ function factory(adapter){
 				len = value.length;
 
 			if(len === 0){
-				return falseFunc$2;
+				return falseFunc;
 			}
 
 			if(data.ignoreCase){
@@ -229,7 +229,7 @@ function factory(adapter){
 				len   = -value.length;
 
 			if(len === 0){
-				return falseFunc$2;
+				return falseFunc;
 			}
 
 			if(data.ignoreCase){
@@ -251,7 +251,7 @@ function factory(adapter){
 				value = data.value;
 
 			if(value === ""){
-				return falseFunc$2;
+				return falseFunc;
 			}
 
 			if(data.ignoreCase){
@@ -400,8 +400,8 @@ function generalFactory(adapter, Pseudos){
 
 var general = generalFactory;
 
-var trueFunc$1          = BaseFuncs.trueFunc;
-var falseFunc$3         = BaseFuncs.falseFunc;
+var trueFunc          = BaseFuncs.trueFunc,
+	falseFunc$1         = BaseFuncs.falseFunc;
 
 function filtersFactory(adapter){
 	var attributes  = attributes$1(adapter),
@@ -445,8 +445,8 @@ function filtersFactory(adapter){
 		"nth-child": function(next, rule){
 			var func = nthCheck(rule);
 
-			if(func === falseFunc$3) return func;
-			if(func === trueFunc$1)  return getChildFunc(next);
+			if(func === falseFunc$1) return func;
+			if(func === trueFunc)  return getChildFunc(next);
 
 			return function nthChild(elem){
 				var siblings = adapter.getSiblings(elem);
@@ -464,8 +464,8 @@ function filtersFactory(adapter){
 		"nth-last-child": function(next, rule){
 			var func = nthCheck(rule);
 
-			if(func === falseFunc$3) return func;
-			if(func === trueFunc$1)  return getChildFunc(next);
+			if(func === falseFunc$1) return func;
+			if(func === trueFunc)  return getChildFunc(next);
 
 			return function nthLastChild(elem){
 				var siblings = adapter.getSiblings(elem);
@@ -483,8 +483,8 @@ function filtersFactory(adapter){
 		"nth-of-type": function(next, rule){
 			var func = nthCheck(rule);
 
-			if(func === falseFunc$3) return func;
-			if(func === trueFunc$1)  return getChildFunc(next);
+			if(func === falseFunc$1) return func;
+			if(func === trueFunc)  return getChildFunc(next);
 
 			return function nthOfType(elem){
 				var siblings = adapter.getSiblings(elem);
@@ -502,8 +502,8 @@ function filtersFactory(adapter){
 		"nth-last-of-type": function(next, rule){
 			var func = nthCheck(rule);
 
-			if(func === falseFunc$3) return func;
-			if(func === trueFunc$1)  return getChildFunc(next);
+			if(func === falseFunc$1) return func;
+			if(func === trueFunc)  return getChildFunc(next);
 
 			return function nthLastOfType(elem){
 				var siblings = adapter.getSiblings(elem);
@@ -635,7 +635,7 @@ function pseudosFactory(adapter){
 		link: function(elem){
 			return adapter.hasAttrib(elem, "href");
 		},
-		visited: falseFunc$3, 
+		visited: falseFunc$1, 
 		
 
 		
@@ -777,7 +777,7 @@ function factory$1(adapter){
 				var func = pseudos[name];
 				verifyArgs(func, name, subselect);
 
-				if(next === trueFunc$1) return func;
+				if(next === trueFunc) return func;
 
 				return function pseudoArgs(elem){
 					return func(elem, subselect) && next(elem);
@@ -795,8 +795,8 @@ var pseudos = factory$1;
 
 var compile = compileFactory;
 
-var trueFunc       = BaseFuncs.trueFunc;
-var falseFunc$1      = BaseFuncs.falseFunc;
+var trueFunc$1       = BaseFuncs.trueFunc,
+	falseFunc$2      = BaseFuncs.falseFunc;
 
 function compileFactory(adapter){
 	var Pseudos     = pseudos(adapter),
@@ -845,9 +845,7 @@ function compileFactory(adapter){
 
 
 		token.forEach(function(t){
-			if(t.length > 0 && isTraversal(t[0]) && t[0].type !== "descendant"){
-				
-			} else if(hasContext && !includesScopePseudo(t)){
+			if(t.length > 0 && isTraversal(t[0]) && t[0].type !== "descendant"); else if(hasContext && !includesScopePseudo(t)){
 				t.unshift(DESCENDANT_TOKEN);
 			} else {
 				return;
@@ -881,7 +879,7 @@ function compileFactory(adapter){
 				}
 				return compileRules(rules, options, context);
 			})
-			.reduce(reduceRules, falseFunc$1);
+			.reduce(reduceRules, falseFunc$2);
 
 		query.shouldTestNextSiblings = shouldTestNextSiblings;
 
@@ -894,16 +892,16 @@ function compileFactory(adapter){
 
 	function compileRules(rules, options, context){
 		return rules.reduce(function(func, rule){
-			if(func === falseFunc$1) return func;
+			if(func === falseFunc$2) return func;
 			return Rules[rule.type](func, rule, options, context);
-		}, options && options.rootFunc || trueFunc);
+		}, options && options.rootFunc || trueFunc$1);
 	}
 
 	function reduceRules(a, b){
-		if(b === falseFunc$1 || a === trueFunc){
+		if(b === falseFunc$2 || a === trueFunc$1){
 			return a;
 		}
-		if(a === falseFunc$1 || b === trueFunc){
+		if(a === falseFunc$2 || b === trueFunc$1){
 			return b;
 		}
 
@@ -933,8 +931,8 @@ function compileFactory(adapter){
 
 		var func = compileToken(token, opts, context);
 
-		if(func === falseFunc$1) return next;
-		if(func === trueFunc)  return falseFunc$1;
+		if(func === falseFunc$2) return next;
+		if(func === trueFunc$1)  return falseFunc$2;
 
 		return function(elem){
 			return !func(elem) && next(elem);
@@ -952,8 +950,8 @@ function compileFactory(adapter){
 
 		var func = compileToken(token, opts, context);
 
-		if(func === falseFunc$1) return falseFunc$1;
-		if(func === trueFunc){
+		if(func === falseFunc$2) return falseFunc$2;
+		if(func === trueFunc$1){
 			return function(elem){
 				return adapter.getChildren(elem).some(adapter.isTag) && next(elem);
 			};
@@ -964,7 +962,8 @@ function compileFactory(adapter){
 		if(context){
 			return function has(elem){
 				return next(elem) && (
-					context[0] = elem, adapter.existsOne(func, adapter.getChildren(elem)));
+					(context[0] = elem), adapter.existsOne(func, adapter.getChildren(elem))
+				);
 			};
 		}
 
@@ -990,10 +989,10 @@ function compileFactory(adapter){
 	return compile;
 }
 
-var cssSelect = CSSselect$1;
+var cssSelect = CSSselect;
 
-var falseFunc      = BaseFuncs.falseFunc;
-var defaultCompile = compile(domutils);
+var falseFunc$3      = BaseFuncs.falseFunc,
+	defaultCompile = compile(domutils);
 
 function adapterCompile(adapter){
 	if(!adapter.__compile__){
@@ -1037,11 +1036,11 @@ function appendNextSiblings(elems, adapter){
 }
 
 var selectAll = getSelectorFunc(function selectAll(query, elems, options){
-	return (query === falseFunc || !elems || elems.length === 0) ? [] : options.adapter.findAll(query, elems);
+	return (query === falseFunc$3 || !elems || elems.length === 0) ? [] : options.adapter.findAll(query, elems);
 });
 
 var selectOne = getSelectorFunc(function selectOne(query, elems, options){
-	return (query === falseFunc || !elems || elems.length === 0) ? null : options.adapter.findOne(query, elems);
+	return (query === falseFunc$3 || !elems || elems.length === 0) ? null : options.adapter.findOne(query, elems);
 });
 
 function is(elem, query, options){
@@ -1052,26 +1051,26 @@ function is(elem, query, options){
 }
 
 
-function CSSselect$1(query, elems, options){
+function CSSselect(query, elems, options){
 	return selectAll(query, elems, options);
 }
 
-CSSselect$1.compile = defaultCompile;
-CSSselect$1.filters = defaultCompile.Pseudos.filters;
-CSSselect$1.pseudos = defaultCompile.Pseudos.pseudos;
+CSSselect.compile = defaultCompile;
+CSSselect.filters = defaultCompile.Pseudos.filters;
+CSSselect.pseudos = defaultCompile.Pseudos.pseudos;
 
-CSSselect$1.selectAll = selectAll;
-CSSselect$1.selectOne = selectOne;
+CSSselect.selectAll = selectAll;
+CSSselect.selectOne = selectOne;
 
-CSSselect$1.is = is;
-
-
-CSSselect$1.parse = defaultCompile;
-CSSselect$1.iterate = selectAll;
+CSSselect.is = is;
 
 
-CSSselect$1._compileUnsafe = defaultCompile.compileUnsafe;
-CSSselect$1._compileToken = defaultCompile.compileToken;
+CSSselect.parse = defaultCompile;
+CSSselect.iterate = selectAll;
+
+
+CSSselect._compileUnsafe = defaultCompile.compileUnsafe;
+CSSselect._compileToken = defaultCompile.compileToken;
 
 export default cssSelect;
 

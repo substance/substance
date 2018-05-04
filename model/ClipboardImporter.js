@@ -1,8 +1,8 @@
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import platform from '../util/platform'
-import Document from '../model/Document'
-import HTMLImporter from '../model/HTMLImporter'
-import JSONConverter from '../model/JSONConverter'
+import HTMLImporter from './HTMLImporter'
+import JSONConverter from './JSONConverter'
+import { SNIPPET_ID } from './documentHelpers'
 
 const INLINENODES = ['a','b','big','i','small','tt','abbr','acronym','cite','code','dfn','em','kbd','strong','samp','time','var','bdo','br','img','map','object','q','script','span','sub','sup','button','input','label','select','textarea'].reduce((m,n)=>{m[n]=true;return m}, {})
 
@@ -226,7 +226,7 @@ class ClipboardImporter extends HTMLImporter {
     @param {String} body body element of given HTML document
   */
   convertBody(body) {
-    this.convertContainer(body.childNodes, Document.SNIPPET_ID)
+    this.convertContainer(body.childNodes, SNIPPET_ID)
   }
 
   /**

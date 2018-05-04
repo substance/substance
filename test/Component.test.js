@@ -1162,7 +1162,7 @@ function ComponentTests(debug, memory) {
         {ref: 'a', name: 'X'}, // preserved (props changed)
         {ref: 'd', name: 'Y'}, // new
         {ref: 'b', name: 'B'}, // preserved (same props)
-        {ref: 'e', name: 'Z'}  // new
+        {ref: 'e', name: 'Z'} // new
       ]
     })
 

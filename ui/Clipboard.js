@@ -1,5 +1,5 @@
 import copySelection from '../model/copySelection'
-import documentHelpers from '../model/documentHelpers'
+import { getTextForSelection } from '../model/documentHelpers'
 import AbstractClipboard from './AbstractClipboard'
 
 /**
@@ -33,7 +33,7 @@ export default class Clipboard extends AbstractClipboard {
     let clipboardHtml = ""
     let htmlExporter = this._getExporter()
     if (!sel.isCollapsed()) {
-      clipboardText = documentHelpers.getTextForSelection(doc, sel) || ""
+      clipboardText = getTextForSelection(doc, sel) || ""
       clipboardDoc = copySelection(doc, sel)
       clipboardHtml = htmlExporter.exportDocument(clipboardDoc)
     }

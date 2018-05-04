@@ -176,7 +176,8 @@ function RenderingEngineTests(debug) {
 
 function _capture(comp) {
   var vc = internal._wrap(comp)
-  var state = new RenderingEngine.State()
+  let renderingEngine = Component.createRenderingEngine()
+  var state = renderingEngine._createState()
   internal._capture(state, vc, 'force')
   vc._state = state
   vc._isMapped = function(o) { return state.isMapped(o); }

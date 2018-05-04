@@ -1,7 +1,7 @@
 import platform from '../util/platform'
 import substanceGlobals from '../util/substanceGlobals'
-import ClipboardImporter from './ClipboardImporter'
-import ClipboardExporter from './ClipboardExporter'
+import ClipboardImporter from '../model/ClipboardImporter'
+import ClipboardExporter from '../model/ClipboardExporter'
 
 export default class AbstractClipboard {
 

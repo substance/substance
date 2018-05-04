@@ -1,5 +1,5 @@
 import DocumentNode from '../model/DocumentNode'
-import documentHelpers from '../model/documentHelpers'
+import { getNodes } from '../model/documentHelpers'
 import DOMElement from '../dom/DOMElement'
 import clone from '../util/clone'
 import last from '../util/last'
@@ -72,7 +72,7 @@ class XMLDocumentNode extends DocumentNode {
 
   getChildNodes() {
     if (this._childNodes) {
-      return documentHelpers.getNodes(this.getDocument(), this._childNodes)
+      return getNodes(this.getDocument(), this._childNodes)
     } else {
       return []
     }

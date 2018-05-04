@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { module } from 'substance-test'
-import { Document, EditingInterface, forEach } from 'substance'
+import { EditingInterface, forEach, documentHelpers } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import headersAndParagraphs from './fixture/headersAndParagraphs'
 import {
@@ -1876,7 +1876,7 @@ test("CP1: Copying a property selection", (t) => {
     containerId: 'body'
   })
   let copy = editor.copySelection()
-  let textNode = copy.get(Document.TEXT_SNIPPET_ID)
+  let textNode = copy.get(documentHelpers.TEXT_SNIPPET_ID)
   t.notNil(textNode, 'There should be a text node for the property fragment.')
   t.equal(textNode.content, 'graph', 'Selected text should be copied.')
   t.end()
@@ -1893,8 +1893,8 @@ test("CP2: Copying a property selection with annotated text", (t) => {
     containerId: 'body'
   })
   let copy = editor.copySelection()
-  t.equal(copy.get([Document.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.')
-  let annos = copy.getIndex('annotations').get([Document.TEXT_SNIPPET_ID, 'content'])
+  t.equal(copy.get([documentHelpers.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.')
+  let annos = copy.getIndex('annotations').get([documentHelpers.TEXT_SNIPPET_ID, 'content'])
   t.equal(annos.length, 1, 'There should be one annotation on copied text.')
   let anno = annos[0]
   t.equal(anno.type, "emphasis", "The annotation should be 'emphasis'.")
@@ -1914,7 +1914,7 @@ test("CP3: Copying a container selection", (t) => {
     endOffset: 9,
   })
   let copy = editor.copySelection()
-  let content = copy.get(Document.SNIPPET_ID)
+  let content = copy.get(documentHelpers.SNIPPET_ID)
   t.notNil(content, 'There should be a container node with id "content".')
   // 4 nodes? 'body', 'snippets', 'p1', 'p2'
   t.equal(content.nodes.length, 4, 'There should be 4 nodes in the copied document.')

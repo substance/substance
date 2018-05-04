@@ -1,6 +1,6 @@
 import TreeIndex from '../util/TreeIndex'
 import Selection from './Selection'
-import documentHelpers from './documentHelpers'
+import { getPropertyAnnotationsForSelection, getContainerAnnotationsForSelection, getMarkersForSelection } from './documentHelpers'
 import { isFirst, isLast } from './selectionHelpers'
 // import printStacktrace from '../util/printStacktrace'
 
@@ -132,7 +132,7 @@ class SelectionState {
 
     // create a mapping by type for the currently selected annotations
     let annosByType = new TreeIndex.Arrays()
-    const propAnnos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
+    const propAnnos = getPropertyAnnotationsForSelection(doc, sel)
     propAnnos.forEach(function(anno) {
       annosByType.add(anno.type, anno)
     })
@@ -143,7 +143,7 @@ class SelectionState {
 
     const containerId = sel.containerId
     if (containerId) {
-      const containerAnnos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, containerId)
+      const containerAnnos = getContainerAnnotationsForSelection(doc, sel, containerId)
       containerAnnos.forEach(function(anno) {
         annosByType.add(anno.type, anno)
       })
@@ -154,7 +154,7 @@ class SelectionState {
   _deriveMarkerState(sel) {
     const doc = this.document
     let state = this._state
-    let markers = documentHelpers.getMarkersForSelection(doc, sel)
+    let markers = getMarkersForSelection(doc, sel)
     state.markers = markers
   }
 

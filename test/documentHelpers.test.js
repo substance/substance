@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import { documentHelpers } from 'substance'
+import { documentHelpers, getChangeFromDocument } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import containerAnnoSample from './fixture/containerAnnoSample'
@@ -66,7 +66,7 @@ test("Get text for container selection", (t) => {
 test("Get change from document", (t) => {
   let doc = fixture(simple)
   doc.create({ type: 'strong', id: 's1', path: ["p1", "content"], startOffset: 0, endOffset: 1})
-  let change = documentHelpers.getChangeFromDocument(doc)
+  let change = getChangeFromDocument(doc)
   t.equal(change.ops.length, 6, 'There should be 6 operations')
   t.deepEqual(change.ops.map(op => op.type), new Array(6).fill('create'), 'all should be create ops')
   t.deepEqual(change.ops.map(op => op.path[0]), ['p1', 'p2', 'p3', 'p4', 's1', 'body'], '.. in correct order')

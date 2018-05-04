@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import { Document, EditingInterface } from 'substance'
+import { documentHelpers, EditingInterface } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 
@@ -24,7 +24,7 @@ test("Pasting a single paragraph", function(t) {
   let container = snippet.getContainer()
   let p = snippet.create({
     type: 'paragraph',
-    id: Document.TEXT_SNIPPET_ID,
+    id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
   container.show(p.id)
@@ -52,7 +52,7 @@ test("Pasting annotated text", function(t) {
   let container = snippet.getContainer()
   let p = snippet.create({
     type: 'paragraph',
-    id: Document.TEXT_SNIPPET_ID,
+    id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
   container.show(p.id)

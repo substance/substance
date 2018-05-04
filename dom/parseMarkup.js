@@ -1,7 +1,6 @@
 import forEach from '../util/forEach'
 import ElementType from 'domelementtype'
 import Parser from '../vendor/htmlparser2'
-import MemoryDOMElement from './MemoryDOMElement'
 
 /*
   Parses HTML or XML
@@ -19,7 +18,7 @@ export default function parseMarkup(markup, options) {
   let parserOptions = Object.assign({}, options, {
     xmlMode : (format === 'xml'),
   })
-  let handler = new DomHandler({ format })
+  let handler = new DomHandler({ format, elementFactory: options.elementFactory })
   let parser = new Parser(handler, parserOptions)
   parser.end(markup)
   return handler.document
@@ -35,6 +34,8 @@ const re_doctype = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"
 class DomHandler {
 
   constructor(options = {}) {
+    this.elementFactory = options.elementFactory
+    if (!this.elementFactory) throw new Error("'elementFactory' is required")
     this.options = options
     this.document = null
     this._tagStack = []
@@ -42,7 +43,7 @@ class DomHandler {
 
   // called directly after construction of Parser and at the end of Parser.reset()
   onparserinit(){
-    this.document = new MemoryDOMElement('document', { format: this.options.format })
+    this.document = this.elementFactory('document', { format: this.options.format })
     this._tagStack = [this.document]
   }
 

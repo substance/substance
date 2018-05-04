@@ -6,33 +6,6 @@ import isArrayEqual from '../util/isArrayEqual'
 import DocumentIndex from './DocumentIndex'
 import annotationHelpers from './annotationHelpers'
 import { isEntirelySelected } from './selectionHelpers'
-import ChangeRecorder from './ChangeRecorder'
-
-/**
-  Some helpers for working with Documents.
-
-  @module
-  @example
-
-  ```js
-  import { documentHelpers } from 'substance'
-  documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
-  ```
-*/
-export default {
-  getPropertyAnnotationsForSelection,
-  getContainerAnnotationsForSelection,
-  getTextForSelection,
-  getMarkersForSelection,
-  getChangeFromDocument,
-  copyNode,
-  deleteNode,
-  deleteTextRange,
-  deleteListRange,
-  mergeListItems,
-  isContainerAnnotation,
-  getNodes
-}
 
 /**
   For a given selection get all property annotations
@@ -42,7 +15,7 @@ export default {
   @return {PropertyAnnotation[]} An array of property annotations.
           Returns an empty array when selection is a container selection.
 */
-function getPropertyAnnotationsForSelection(doc, sel, options) {
+export function getPropertyAnnotationsForSelection(doc, sel, options) {
   options = options || {}
   if (!sel.isPropertySelection()) {
     return []
@@ -64,7 +37,7 @@ function getPropertyAnnotationsForSelection(doc, sel, options) {
   @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
 */
-function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
+export function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
@@ -90,7 +63,7 @@ function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
   @param {String} type
   @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
 */
-function isContainerAnnotation(doc, type) {
+export function isContainerAnnotation(doc, type) {
   let schema = doc.getSchema()
   return schema.isInstanceOf(type, 'container-annotation')
 }
@@ -102,7 +75,7 @@ function isContainerAnnotation(doc, type) {
   @param {Selection} sel
   @return {string} text enclosed by the annotation
 */
-function getTextForSelection(doc, sel) {
+export function getTextForSelection(doc, sel) {
   if (!sel || sel.isNull()) {
     return ""
   } else if (sel.isPropertySelection()) {
@@ -130,7 +103,7 @@ function getTextForSelection(doc, sel) {
   }
 }
 
-function getMarkersForSelection(doc, sel) {
+export function getMarkersForSelection(doc, sel) {
   // only PropertySelections are supported right now
   if (!sel || !sel.isPropertySelection()) return []
   const path = sel.getPath()
@@ -142,16 +115,11 @@ function getMarkersForSelection(doc, sel) {
   return filtered
 }
 
-function getChangeFromDocument(doc) {
-  let recorder = new ChangeRecorder(doc)
-  return recorder.generateChange()
-}
-
 /*
   Deletes a node and its children and attached annotations
   and removes it from a given container
 */
-function deleteNode(doc, node) {
+export function deleteNode(doc, node) {
   /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
@@ -190,7 +158,7 @@ function deleteNode(doc, node) {
 
   @param {DocumentNode} node
 */
-function copyNode(node) {
+export function copyNode(node) {
   let nodes = []
   // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
   let nodeSchema = node.getSchema()
@@ -237,7 +205,7 @@ function copyNode(node) {
   V: <-|->-|       :   move end by diff to start
   VI: <-|--|->     :   move end by total span
 */
-function deleteTextRange(doc, start, end) {
+export function deleteTextRange(doc, start, end) {
   if (!start) {
     start = {
       path: end.path,
@@ -301,7 +269,7 @@ function deleteTextRange(doc, start, end) {
   })
 }
 
-function deleteListRange(doc, list, start, end) {
+export function deleteListRange(doc, list, start, end) {
   if (doc !== list.getDocument()) {
     list = doc.get(list.id)
   }
@@ -366,7 +334,7 @@ function deleteListRange(doc, list, start, end) {
   }
 }
 
-function mergeListItems(doc, listId, itemPos) {
+export function mergeListItems(doc, listId, itemPos) {
   // HACK: make sure that the list is really from the doc
   let list = doc.get(listId)
   let target = list.getItemAt(itemPos)
@@ -383,8 +351,13 @@ function mergeListItems(doc, listId, itemPos) {
   doc.delete(source.id)
 }
 
-function getNodes(doc, ids) {
+export function getNodes(doc, ids) {
   return ids.map((id) => {
     return doc.get(id, 'strict')
   })
 }
+
+// used by transforms copy, paste
+// and by ClipboardImporter/Exporter
+export const SNIPPET_ID = "snippet"
+export const TEXT_SNIPPET_ID = "text-snippet"

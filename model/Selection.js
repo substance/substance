@@ -10,7 +10,7 @@ class Selection {
       enumerable: false,
       value: _internal
     })
-      // set when attached to document
+    // set when attached to document
     _internal.doc = null
   }
 

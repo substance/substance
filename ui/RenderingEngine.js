@@ -4,7 +4,6 @@ import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import VirtualElement from './VirtualElement'
-import Component from './Component'
 
 /*
 
@@ -90,13 +89,16 @@ export default
 class RenderingEngine {
 
   constructor(options = {}) {
+    this.componentFactory = options.componentFactory
+    if (!this.componentFactory) throw new Error("'componentFactory' is mandatory")
     this.elementFactory = options.elementFactory || DefaultDOMElement.createDocument('html')
+    if (!this.elementFactory) throw new Error("'elementFactory' is mandatory")
   }
 
   _render(comp, oldProps, oldState) {
     // var t0 = Date.now()
     var vel = _createWrappingVirtualComponent(comp)
-    var state = new RenderingEngine.State(this.elementFactory)
+    var state = this._createState()
     if (oldProps) {
       state.setOldProps(vel, oldProps)
     }
@@ -127,7 +129,7 @@ class RenderingEngine {
   _renderChild(comp, vel) {
     // HACK: to make this work with the rest of the implementation
     // we ingest a fake parent
-    var state = new RenderingEngine.State(this.elementFactory)
+    var state = this._createState()
     vel.parent = { _comp: comp }
     try {
       _capture(state, vel)
@@ -136,6 +138,10 @@ class RenderingEngine {
     } finally {
       state.dispose()
     }
+  }
+
+  _createState() {
+    return new RenderingState(this.componentFactory, this.elementFactory)
   }
 }
 
@@ -150,14 +156,14 @@ function _create(state, vel) {
   }
   if (vel._isVirtualComponent) {
     console.assert(parent, "A Component should have a parent.")
-    comp = new vel.ComponentClass(parent, vel.props)
+    comp = state.componentFactory.createComponent(vel.ComponentClass, parent, vel.props)
     // HACK: making sure that we have the right props
     vel.props = comp.props
     comp.__htmlConfig__ = vel._copyHTMLConfig()
   } else if (vel._isVirtualHTMLElement) {
-    comp = new Component.Element(parent, vel)
+    comp = state.componentFactory.createElementComponent(parent, vel)
   } else if (vel._isVirtualTextNode) {
-    comp = new Component.TextNode(parent, vel)
+    comp = state.componentFactory.createTextNodeComponent(parent, vel)
   }
   if (vel._ref) {
     comp._ref = vel._ref
@@ -776,7 +782,8 @@ RenderingEngine.createContext = function(comp) {
 
 class RenderingState {
 
-  constructor(elementFactory) {
+  constructor(componentFactory, elementFactory) {
+    this.componentFactory = componentFactory
     this.elementFactory = elementFactory
     this.poluted = []
     this.id = "__"+uuid()
@@ -889,5 +896,3 @@ class RenderingState {
     return this.get(vc, 'oldState')
   }
 }
-
-RenderingEngine.State = RenderingState

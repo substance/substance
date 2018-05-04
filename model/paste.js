@@ -2,8 +2,7 @@ import isArray from '../util/isArray'
 import last from '../util/last'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
-import Document from './Document'
-import documentHelpers from './documentHelpers'
+import { deleteNode, SNIPPET_ID, TEXT_SNIPPET_ID } from './documentHelpers'
 import { setCursor } from './selectionHelpers'
 
 /**
@@ -39,7 +38,7 @@ function paste(tx, args) {
   if (!sel.isCollapsed()) {
     tx.deleteSelection()
   }
-  let snippet = pasteDoc.get(Document.SNIPPET_ID)
+  let snippet = pasteDoc.get(SNIPPET_ID)
   if (snippet.getLength() > 0) {
     let first = snippet.getChildAt(0)
     if (first.isText()) {
@@ -66,13 +65,13 @@ function _convertPlainTextToDocument(tx, args) {
   let defaultTextType = pasteDoc.getSchema().getDefaultTextType()
   let container = pasteDoc.create({
     type: 'container',
-    id: Document.SNIPPET_ID,
+    id: SNIPPET_ID,
     nodes: []
   })
   let node
   if (lines.length === 1) {
     node = pasteDoc.create({
-      id: Document.TEXT_SNIPPET_ID,
+      id: TEXT_SNIPPET_ID,
       type: defaultTextType,
       content: lines[0]
     })
@@ -92,7 +91,7 @@ function _convertPlainTextToDocument(tx, args) {
 
 function _pasteAnnotatedText(tx, copy) {
   let sel = tx.selection
-  const nodes = copy.get(Document.SNIPPET_ID).nodes
+  const nodes = copy.get(SNIPPET_ID).nodes
   const firstId = nodes[0]
   const first = copy.get(firstId)
   const textPath = first.getPath()
@@ -129,7 +128,7 @@ function _pasteDocument(tx, pasteDoc) {
     if (text.length === 0) {
       insertPos = startPos
       container.hide(nodeId)
-      documentHelpers.deleteNode(tx, tx.get(nodeId))
+      deleteNode(tx, tx.get(nodeId))
     } else if ( text.length === sel.start.offset ) {
       insertPos = startPos + 1
     } else {
@@ -147,7 +146,7 @@ function _pasteDocument(tx, pasteDoc) {
     }
   }
   // transfer nodes from content document
-  let nodeIds = pasteDoc.get(Document.SNIPPET_ID).nodes
+  let nodeIds = pasteDoc.get(SNIPPET_ID).nodes
   let insertedNodes = []
   let visited = {}
   for (let i = 0; i < nodeIds.length; i++) {
