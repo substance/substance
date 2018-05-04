@@ -173,6 +173,8 @@ export default class PersistedDocumentArchive extends EventEmitter {
       this._upstreamArchive = upstreamArchive
       this._sessions = sessions
 
+      // Run through a repair step (e.g. remove missing files from archive)
+      this._repair()
       return this
     })
   }
