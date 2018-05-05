@@ -42,7 +42,7 @@
     "karma-tap": "1.0.4",
     "karma-tape-reporter": "1.0.3",
     "substance": "1.0.0-preview.19",
-    "substance-bundler": "0.23.2",
+    "substance-bundler": "0.23.3",
     "substance-test": "^0.9.4"
   },
   "files": [
