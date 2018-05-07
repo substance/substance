@@ -24,7 +24,7 @@ class XMLDocument extends Document {
 
   toXML() {
     let dom = DefaultDOMElement.createDocument('xml')
-    dom.setDocType(...this.getDocTypeParams())
+    dom.setDoctype(...this.getDocTypeParams())
     let xml = dom.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"')
     dom.insertAt(0, xml)
     let rootElement = this.getRootNode().toXML()
