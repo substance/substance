@@ -273,23 +273,27 @@ export function deleteListRange(doc, list, start, end) {
   if (doc !== list.getDocument()) {
     list = doc.get(list.id)
   }
+  let startItem, endItem
   if (!start) {
+    startItem = list.getItemAt(0)
     start = {
-      path: list.getItemAt(0).getPath(),
+      path: startItem.getPath(),
       offset: 0
     }
+  } else {
+    startItem = doc.get(start.path[0])
   }
   if (!end) {
-    let item = list.getLastItem()
+    endItem = list.getLastItem()
     end = {
-      path: item.getPath(),
-      offset: item.getLength()
+      path: endItem.getPath(),
+      offset: endItem.getLength()
     }
+  } else {
+    endItem = doc.get(end.path[0])
   }
-  let startId = start.path[0]
-  let startPos = list.getItemPosition(startId)
-  let endId = end.path[0]
-  let endPos = list.getItemPosition(endId)
+  let startPos = list.getItemPosition(startItem)
+  let endPos = list.getItemPosition(endItem)
   // range within the same item
   if (startPos === endPos) {
     deleteTextRange(doc, start, end)
@@ -299,32 +303,31 @@ export function deleteListRange(doc, list, start, end) {
   if (startPos > endPos) {
     [start, end] = [end, start];
     [startPos, endPos] = [endPos, startPos];
-    [startId, endId] = [endId, startId];
+    [startItem, endItem] = [endItem, startItem];
   }
-  let firstItem = doc.get(startId)
-  let lastItem = doc.get(endId)
-  let firstEntirelySelected = isEntirelySelected(doc, firstItem, start, null)
-  let lastEntirelySelected = isEntirelySelected(doc, lastItem, null, end)
+  let firstEntirelySelected = isEntirelySelected(doc, startItem, start, null)
+  let lastEntirelySelected = isEntirelySelected(doc, endItem, null, end)
 
   // delete or truncate last node
   if (lastEntirelySelected) {
     list.removeItemAt(endPos)
-    deleteNode(doc, lastItem)
+    deleteNode(doc, endItem)
   } else {
     deleteTextRange(doc, null, end)
   }
 
   // delete inner nodes
+  let items = list.getItems()
   for (let i = endPos-1; i > startPos; i--) {
-    let itemId = list.items[i]
+    let item = items[i]
     list.removeItemAt(i)
-    deleteNode(doc, doc.get(itemId))
+    deleteNode(doc, item)
   }
 
   // delete or truncate the first node
   if (firstEntirelySelected) {
     list.removeItemAt(startPos)
-    deleteNode(doc, firstItem)
+    deleteNode(doc, startItem)
   } else {
     deleteTextRange(doc, start, null)
   }
@@ -337,18 +340,18 @@ export function deleteListRange(doc, list, start, end) {
 export function mergeListItems(doc, listId, itemPos) {
   // HACK: make sure that the list is really from the doc
   let list = doc.get(listId)
-  let target = list.getItemAt(itemPos)
-  let targetPath = target.getPath()
-  let targetLength = target.getLength()
-  let source = list.getItemAt(itemPos+1)
-  let sourcePath = source.getPath()
+  let targetItem = list.getItemAt(itemPos)
+  let targetPath = targetItem.getPath()
+  let targetLength = targetItem.getLength()
+  let sourceItem = list.getItemAt(itemPos+1)
+  let sourcePath = sourceItem.getPath()
   // hide source
   list.removeItemAt(itemPos+1)
   // append the text
-  doc.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+  doc.update(targetPath, { type: 'insert', start: targetLength, text: sourceItem.getText() })
   // transfer annotations
   annotationHelpers.transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
-  doc.delete(source.id)
+  deleteNode(doc, sourceItem)
 }
 
 export function getNodes(doc, ids) {
