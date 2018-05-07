@@ -1,4 +1,5 @@
 import isString from '../../util/isString'
+import { walk } from '../../dom/domHelpers'
 import renderListNode from './renderListNode'
 
 export default {
@@ -10,28 +11,32 @@ export default {
   },
 
   import: function(el, node, converter) {
-    let self = this
     this._santizeNestedLists(el)
-    if (el.is('ol')) {
-      node.ordered = true
-    }
-    node.items = []
-    let itemEls = el.findAll('li')
-    itemEls.forEach(function(li) {
-      // ATTENTION: pulling out nested list elements here on-the-fly
-      let listItem = converter.convertElement(li)
-      listItem.level = _getLevel(li)
-      node.items.push(listItem.id)
-    })
-    function _getLevel(li) {
-      let _el = li
-      let level = 1
-      while(_el) {
-        if (_el.parentNode === el) return level
-        _el = _el.parentNode
-        if (self.matchElement(_el)) level++
+
+    let items = []
+    let config = []
+    walk(el, ((el, level) => {
+      if (el.is('li')) {
+        items.push({ el, level })
+      } else if (!config[level]) {
+        if (el.is('ul')) config[level] = 'unordered'
+        else if (el.is('ol')) config[level] = 'ordered'
+        else {
+          console.error('Unsupported content element in lists')
+        }
       }
-    }
+    }))
+    this._createItems(converter, node, items, config)
+  },
+
+  // this is specific to the node model defined in ListNode
+  _createItems(converter, node, items, types) {
+    node.items = items.map(d => {
+      let listItem = converter.convertElement(d.el)
+      listItem.level = d.level
+      return listItem.id
+    })
+    node.config = types.join(',')
   },
 
   export: function(node, el, converter) {
@@ -41,17 +46,28 @@ export default {
         return $$(arg)
       } else {
         let item = arg
-        return $$('li').append(converter.annotatedText(item.getPath()))
+        let path = item.getPath()
+        return $$('li').append(converter.annotatedText(path))
       }
     }
-    return renderListNode(node, [], _createElement)
+    let _el = renderListNode(node, _createElement)
+    el.tagName = _el.tagName
+    el.attr(_el.getAttributes())
+    el.append(_el.getChildNodes())
+    return el
   },
 
   _santizeNestedLists(root) {
+    // pulling out uls from <li> to simplify the problem
+    /*
+      E.g.
+      `<ul><li>Foo:<ul>...</ul></li>`
+      Is turned into:
+      `<ul><li>Foo:</li><ul>...</ul></ul>`
+    */
     let nestedLists = root.findAll('ol,ul')
     nestedLists.forEach((el)=>{
       while (!el.parentNode.is('ol,ul')) {
-        // pull it up
         let parent = el.parentNode
         let grandParent = parent.parentNode
         let pos = grandParent.getChildIndex(parent)

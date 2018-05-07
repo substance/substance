@@ -71,6 +71,17 @@ export default function(DocumentNode) {
       return this.getLength()
     }
 
+    _getLevelSpecs(levelSpec) {
+      return levelSpec ? levelSpec.split(',').map(s => s.trim()) : []
+    }
+
+    setLevelSpecs(levelSpec) {
+      if (isArray(levelSpec)) {
+        levelSpec = levelSpec.join(',')
+      }
+      this._setLevelSpecs(levelSpec)
+    }
+
   }
 
   return AbstractList

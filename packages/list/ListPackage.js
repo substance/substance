@@ -4,7 +4,6 @@ import ListComponent from './ListComponent'
 import ListHTMLConverter from './ListHTMLConverter'
 import ListItemHTMLConverter from './ListItemHTMLConverter'
 import InsertListCommand from './InsertListCommand'
-import TextPropertyComponent from '../../ui/TextPropertyComponent'
 
 export default {
   name: 'list',
@@ -12,7 +11,6 @@ export default {
     config.addNode(ListNode)
     config.addNode(ListItemNode)
     config.addComponent('list', ListComponent)
-    config.addComponent('list-item', TextPropertyComponent)
     config.addCommand('insert-unordered-list', InsertListCommand, {
       spec: { type: 'list', ordered: false },
       commandGroup: 'text-types'

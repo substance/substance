@@ -1,29 +1,26 @@
 import last from '../../util/last'
 
-const DEFAULT_LEVEL_SPEC = function () {
-  return {
-    type: 'unordered'
-  }
-}
+const DEFAULT_LEVEL_SPEC = 'unordered'
 
 export default function renderListNode(node, $$) {
   let levelSpecs = node.getLevelSpecs() || []
   let items = node.getItems()
   let stack = [$$(_getTagName(0))]
   for (let i = 0; i < items.length; i++) {
-    let item = items[i]
-    if (item.level<stack.length) {
-      for (let j = stack.length; j > item.level; j--) {
+    const item = items[i]
+    const level = item.level
+    if (level < stack.length) {
+      for (let j = stack.length; j > level; j--) {
         stack.pop()
       }
-    } else if (item.level>stack.length) {
-      for (let j = stack.length; j < item.level; j++) {
+    } else if (level > stack.length) {
+      for (let j = stack.length; j < level; j++) {
         let sublist = $$(_getTagName(j))
         last(stack).append(sublist)
         stack.push(sublist)
       }
     }
-    console.assert(item.level === stack.length, 'item.level should now be the same as stack.length')
+    console.assert(level === stack.length, 'item.level should now be the same as stack.length')
     last(stack).append(
       $$(item)
     )
@@ -41,13 +38,13 @@ export default function renderListNode(node, $$) {
         spec = levelSpecs[i]
         if (spec) break
       }
-      spec = spec || DEFAULT_LEVEL_SPEC()
+      spec = spec || DEFAULT_LEVEL_SPEC
       levelSpecs[level] = spec
     }
     return spec
   }
   function _getTagName(level) {
     let spec = _getLevelSpec(level)
-    return spec.type === 'ordered' ? 'ol' : 'ul'
+    return spec === 'ordered' ? 'ol' : 'ul'
   }
 }

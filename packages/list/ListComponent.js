@@ -1,6 +1,6 @@
 import isString from '../../util/isString'
 import NodeComponent from '../../ui/NodeComponent'
-import TextPropertyComponent from '../../ui/TextPropertyComponent'
+import ListItemComponent from './ListItemComponent'
 import renderListNode from './renderListNode'
 
 export default class ListComponent extends NodeComponent {
@@ -12,8 +12,9 @@ export default class ListComponent extends NodeComponent {
       if (isString(item)) {
         return $$(item)
       } else if(item.type === 'list-item') {
-        return $$(TextPropertyComponent, {
-          path: item.getPath(),
+        let path = item.getPath()
+        return $$(ListItemComponent, {
+          path,
           node: item,
           tagName: 'li'
         }).ref(item.id)
