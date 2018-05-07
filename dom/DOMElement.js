@@ -432,6 +432,14 @@ class DOMElement {
   }
 
   /**
+    Just an alias for getInnerHTML() which feels
+    better when working with XML DOMs
+  */
+  getInnerXML() {
+    return this.getInnerHTML()
+  }
+
+  /**
     Set the innerHTML of this element.
 
     @private
@@ -444,6 +452,10 @@ class DOMElement {
     throw new Error(NOT_IMPLEMENTED)
   }
 
+  setInnerXML(xml) {
+    return this.setInnerHTML(xml)
+  }
+
   /**
     Get the outerHTML of this element.
 
@@ -454,6 +466,10 @@ class DOMElement {
   getOuterHTML() {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
+  }
+
+  getOuterXML() {
+    return this.getOuterHTML()
   }
 
   /**
