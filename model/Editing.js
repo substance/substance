@@ -1063,8 +1063,7 @@ export default class Editing {
         let target = first.getLastItem()
         let targetPath = target.getPath()
         let targetLength = target.getLength()
-        // merge to lists that were split by an empty paragraph
-        let third = container.getChildAt(pos+2)
+        let third = (container.length > pos+2) ? container.getChildAt(pos+2) : null
         if (second.getLength() === 0) {
           container.hide(second.id)
           deleteNode(tx, second)
@@ -1076,6 +1075,7 @@ export default class Editing {
           annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
           deleteNode(tx, source)
         }
+        // merge to lists if they were split by a paragraph
         if (third && third.type === first.type) {
           this._mergeTwoLists(tx, container, first, third)
         }
