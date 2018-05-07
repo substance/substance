@@ -2,32 +2,30 @@ import isString from '../../util/isString'
 import { walk } from '../../dom/domHelpers'
 import renderListNode from './renderListNode'
 
-export default {
+export default class ListHTMLConverter {
 
-  type: "list",
+  get type() { return "list" }
 
-  matchElement: function(el) {
+  matchElement(el) {
     return el.is('ul') || el.is('ol')
-  },
+  }
 
-  import: function(el, node, converter) {
+  import(el, node, converter) {
     this._santizeNestedLists(el)
 
     let items = []
     let config = []
     walk(el, ((el, level) => {
+      if (!el.isElementNode()) return
       if (el.is('li')) {
         items.push({ el, level })
       } else if (!config[level]) {
         if (el.is('ul')) config[level] = 'unordered'
         else if (el.is('ol')) config[level] = 'ordered'
-        else {
-          console.error('Unsupported content element in lists')
-        }
       }
     }))
     this._createItems(converter, node, items, config)
-  },
+  }
 
   // this is specific to the node model defined in ListNode
   _createItems(converter, node, items, types) {
@@ -37,9 +35,9 @@ export default {
       return listItem.id
     })
     node.config = types.join(',')
-  },
+  }
 
-  export: function(node, el, converter) {
+  export(node, el, converter) {
     let $$ = converter.$$
     let _createElement = function(arg) {
       if (isString(arg)) {
@@ -55,7 +53,7 @@ export default {
     el.attr(_el.getAttributes())
     el.append(_el.getChildNodes())
     return el
-  },
+  }
 
   _santizeNestedLists(root) {
     // pulling out uls from <li> to simplify the problem
