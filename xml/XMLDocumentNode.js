@@ -86,6 +86,11 @@ class XMLDocumentNode extends DocumentNode {
     }
   }
 
+  getChildPosition(child) {
+    if (!child || !this._childNodes) return -1
+    return this._childNodes.indexOf(child.id)
+  }
+
   getChildNodeIterator() {
     return new ArrayIterator(this.getChildNodes())
   }
