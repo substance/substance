@@ -174,11 +174,13 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   isEditable() {
-    return this.getSurface().isEditable()
+    const surface = this.getSurface()
+    return surface ? surface.isEditable() : false
   }
 
   isReadonly() {
-    return this.getSurface().isReadonly()
+    const surface = this.getSurface()
+    return surface ? surface.isReadonly() : true
   }
 
   getDOMCoordinate(charPos) {

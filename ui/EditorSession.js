@@ -10,6 +10,7 @@ import ChangeHistory from '../model/ChangeHistory'
 import Transaction from '../model/Transaction'
 import * as operationHelpers from '../model/operationHelpers'
 
+export default
 class EditorSession extends EventEmitter {
 
   constructor(doc, options) {
@@ -526,6 +527,12 @@ class EditorSession extends EventEmitter {
   }
 
   _setSelection(sel) {
+    // Note: we can't prevent selections with an unregistered surface id here,
+    // because this happens initially, or when a change is applied that creates
+    // a surface and puts the selection into the new node,
+    // the surface will be rendered later.
+    // Still, we could do a integrity check at the end of each flow
+
     let hasChanged = this.getSelectionState().setSelection(sel)
     if (hasChanged) this._setDirty('selection')
     return hasChanged
@@ -929,5 +936,3 @@ function _addContainerId(sel, editorSession) {
     }
   }
 }
-
-export default EditorSession

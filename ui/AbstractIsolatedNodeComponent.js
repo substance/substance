@@ -170,7 +170,9 @@ class AbstractIsolatedNodeComponent extends Component {
       if (sel && sel.surfaceId) {
         let surfaceManager = this.context.surfaceManager
         let surface = surfaceManager.getSurface(sel.surfaceId)
-        isolatedNodes = surface.getComponentPath().filter(comp => comp._isAbstractIsolatedNodeComponent)
+        if (surface) {
+          isolatedNodes = surface.getComponentPath().filter(comp => comp._isAbstractIsolatedNodeComponent)
+        }
       }
       selState.set('isolatedNodes', isolatedNodes)
     }

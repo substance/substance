@@ -1,5 +1,6 @@
 import platform from '../util/platform'
 
+export default
 class SurfaceManager {
 
   constructor(editorSession) {
@@ -67,11 +68,17 @@ class SurfaceManager {
   unregisterSurface(surface) {
     surface.off(this)
     let surfaceId = surface.getId()
-    // TODO: this is not working, has side-effects
-    // with inline-nodes (see #985)
+    // Note: in an earlier stage we did something like this here
+    // ```
     // if (surface === this.getFocusedSurface()) {
     //   this.editorSession.setSelection(null)
     // }
+    // ```
+    // This is apparently not the right thing to do, because
+    // it will trigger a new flow, while probably still executing a flow
+    // Also such a change should not be done implicitly, but explicitly.
+    // E.g. when a node with selection is deleted, the selection should be nulled
+    // by the model transformation
     let registeredSurface = this.surfaces[surfaceId]
     if (registeredSurface === surface) {
       delete this.surfaces[surfaceId]
@@ -106,8 +113,15 @@ class SurfaceManager {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorSession.getSelection().toString());
       focusedSurface._focus()
       focusedSurface.rerenderDOMSelection()
+    } else {
+      // NOTE: Tried to add an integrity check here
+      // for valid sel.surfaceId
+      // However this is problematic, when an editor
+      // is run headless, i.e. when there are no surfaces rendered
+      // On the long run we should separate these to modes
+      // more explicitly. For now, any code using surfaces need
+      // to be aware of the fact, that this might be not availabls
+      // while in the model it is referenced.
     }
   }
 }
-
-export default SurfaceManager
