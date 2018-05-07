@@ -1,6 +1,5 @@
 import isArrayEqual from '../util/isArrayEqual'
 import isString from '../util/isString'
-import last from '../util/last'
 import uuid from '../util/uuid'
 import annotationHelpers from './annotationHelpers'
 import { deleteTextRange, deleteNode, deleteListRange, mergeListItems } from './documentHelpers'
@@ -17,7 +16,7 @@ import paste from './paste'
   Note: this is pretty much the same what we did with transforms before.
         We decided to move this here, to switch to a stateful editor implementation (aka turtle-graphics-style)
  */
-class Editing {
+export default class Editing {
 
   // create an annotation for the current selection using the given data
   annotate(tx, annotation) {
@@ -130,6 +129,10 @@ class Editing {
         // ATTENTION: deviation from standard implementation
         // for list items: Word and GDoc toggle a list item
         // when doing a BACKSPACE at the first position
+        // IMO this is not 'consistent' because it is not the
+        // inverse of 'break'
+        // We will 'toggle' only if the cursor is on the first position
+        // of the first item
         let root = node.getContainerRoot()
         if (root.isList() && offset === 0 && direction === 'left') {
           return this.toggleList(tx)
@@ -670,9 +673,12 @@ class Editing {
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
+        let level = item.getLevel()
         // Note: allowing only 3 levels
-        if (item && item.level<3) {
-          tx.set([itemId, 'level'], item.level+1)
+        if (item && level<3) {
+          item.setLevel(item.level+1)
+          // a pseudo change to let the list know that something has changed
+          tx.set([node.id, '_itemsChanged'], true)
         }
       }
     } else if (sel.isContainerSelection()) {
@@ -689,8 +695,18 @@ class Editing {
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
-        if (item && item.level>1) {
-          tx.set([itemId, 'level'], item.level-1)
+        let level = item.getLevel()
+        if (item) {
+          if (level > 1) {
+            item.setLevel(item.level-1)
+            // a pseudo change to let the list know that something has changed
+            tx.set([node.id, '_itemsChanged'], true)
+          }
+          // TODO: we could toggle the list item to paragraph
+          // if dedenting on the first level
+          //  else {
+          //   return this.toggleList(tx)
+          // }
         }
       }
     } else if (sel.isContainerSelection()) {
@@ -1044,18 +1060,25 @@ class Editing {
       }
     } else if (first.isList()) {
       if (second.isText()) {
-        let source = second
-        let sourcePath = source.getPath()
         let target = first.getLastItem()
         let targetPath = target.getPath()
         let targetLength = target.getLength()
-        // hide source
-        container.hide(source.id)
-        // append the text
-        tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
-        // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        deleteNode(tx, source)
+        // merge to lists that were split by an empty paragraph
+        let third = container.getChildAt(pos+2)
+        if (second.getLength() === 0) {
+          container.hide(second.id)
+          deleteNode(tx, second)
+        } else {
+          let source = second
+          let sourcePath = source.getPath()
+          container.hide(source.id)
+          tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+          annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+          deleteNode(tx, source)
+        }
+        if (third && third.type === first.type) {
+          this._mergeTwoLists(tx, container, first, third)
+        }
         tx.setSelection({
           type: 'property',
           path: target.getPath(),
@@ -1069,15 +1092,8 @@ class Editing {
           // as BACKSPACE will first turn the list into a paragraph
           throw new Error('Illegal state')
         }
-        container.hide(second.id)
-        let firstItems = first.getItems().slice()
-        let secondItems = second.getItems().slice()
-        for (let i=0; i<secondItems.length;i++) {
-          second.removeItemAt(0)
-          first.appendItem(secondItems[i])
-        }
-        deleteNode(tx, second)
-        let item = last(firstItems)
+        let item = first.getLastItem()
+        this._mergeTwoLists(tx, container, first, second)
         tx.setSelection({
           type: 'property',
           path: item.getPath(),
@@ -1097,6 +1113,14 @@ class Editing {
       }
     }
   }
-}
 
-export default Editing
+  _mergeTwoLists(tx, container, first, second) {
+    container.hide(second.id)
+    let secondItems = second.getItems().slice()
+    for (let i=0; i<secondItems.length;i++) {
+      second.removeItemAt(0)
+      first.appendItem(secondItems[i])
+    }
+    deleteNode(tx, second)
+  }
+}

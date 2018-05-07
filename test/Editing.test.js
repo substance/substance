@@ -1265,6 +1265,28 @@ test("DEL31: Merging a List into previous List using DELETE", (t) => {
   t.end()
 })
 
+test("DEL31-2: Merging a List into previous List using DELETE on an empty paragraph in between", (t) => {
+  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _empty, _l2, _l21, _l22)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['empty', 'content'],
+    startOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.deleteCharacter('left')
+  })
+  let sel = editorSession.getSelection()
+  let body = doc.get('body')
+  let l1 = doc.get('l1')
+  t.equal(body.length, 1, 'There should only be one node on the top level')
+  t.equal(l1.items.length, 4, 'First list should have 4 items')
+  t.ok(sel.isCollapsed(), 'The selection should be collapsed')
+  t.deepEqual(sel.start.path, ['l1-2', 'content'], '... on the second list item')
+  t.equal(sel.start.offset, LI2_TEXT.length, '... at the last position')
+  t.end()
+})
+
 test("DEL32: Merging an empty List into previous TextNode using DELETE", (t) => {
   let { editorSession, doc } = setupEditor(t, _p1, _l1)
   let p1 = doc.get('p1')
@@ -1698,11 +1720,11 @@ test("BR15: Breaking a list with a first empty item", (t) => {
 })
 
 
-test("L5-1: Toggling a ListItem using BACKSPACE", (t) => {
+test("L5-1: Toggling the first item of a List using BACKSPACE", (t) => {
   let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
-    path: ['l1-2', 'content'],
+    path: ['l1-1', 'content'],
     startOffset: 0,
     containerId: 'body'
   })
@@ -1712,11 +1734,11 @@ test("L5-1: Toggling a ListItem using BACKSPACE", (t) => {
   let sel = editorSession.getSelection()
   let body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should be two nodes now')
+  let p = body.getChildAt(0)
   let l = doc.get('l1')
-  let p = body.getChildAt(1)
   t.equal(l.items.length, 1, 'Only one list item should be left')
   t.equal(p.type, 'paragraph', 'The second one should be a paragraph')
-  t.equal(p.getText(), LI2_TEXT, '.. with the text of the second item')
+  t.equal(p.getText(), LI1_TEXT, '.. with the text of the second item')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
   t.deepEqual(sel.start.path, p.getPath(), '... on the new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
