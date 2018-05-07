@@ -4,7 +4,7 @@ import DOMElement from '../dom/DOMElement'
 import clone from '../util/clone'
 import last from '../util/last'
 import ArrayIterator from '../util/ArrayIterator'
-import node2element from './node2element'
+import { node2element, getInnerXML } from './xmlNodeHelpers'
 import cssSelect from '../vendor/css-select'
 import cssSelectAdapter from './cssSelectAdapter'
 
@@ -149,6 +149,10 @@ class XMLDocumentNode extends DocumentNode {
 
   isElementNode() {
     return false
+  }
+
+  getInnerXML() {
+    return getInnerXML(this)
   }
 
 }

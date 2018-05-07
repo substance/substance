@@ -25,10 +25,6 @@ class XMLElementNode extends XMLDocumentNode {
     return xmlNodeHelpers.removeAt(this, pos)
   }
 
-  getInnerXML() {
-    xmlNodeHelpers.getInnerXML(this)
-  }
-
   getChildAt(idx) {
     return xmlNodeHelpers.getChildAt(this, idx)
   }
