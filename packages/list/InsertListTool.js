@@ -1,6 +1,6 @@
 import ToggleTool from '../../ui/ToggleTool'
 
-expor default class InsertListTool extends ToggleTool {
+export default class InsertListTool extends ToggleTool {
   getClassNames () {
     return 'sc-insert-list-tool'
   }
