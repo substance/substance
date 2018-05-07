@@ -32,6 +32,10 @@ class ListNode extends ListMixin(DocumentNode) {
     doc.update(this.getItemsPath(), { type: 'delete', pos: pos })
   }
 
+  getLevelSpecs() {
+    return this.levelSpecs
+  }
+
   // overridden
 
   getItemAt(idx) {
@@ -54,9 +58,9 @@ class ListNode extends ListMixin(DocumentNode) {
 ListNode.type = 'list'
 
 ListNode.schema = {
-  ordered: { type: 'boolean', default: false },
   // list-items are owned by the list
   // this means, if the list gets deleted, the list items
   // will be deleted too
-  items: { type: [ 'array', 'id' ], default: [], owned: true }
+  items: { type: [ 'array', 'id' ], default: [], owned: true },
+  levelSpecs: { type: ['array', 'object' ], default: [] }
 }

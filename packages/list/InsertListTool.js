@@ -1,6 +1,6 @@
-import { default as Tool } from '../../ui/ToggleTool'
+import ToggleTool from '../../ui/ToggleTool'
 
-class InsertListTool extends Tool {
+expor default class InsertListTool extends ToggleTool {
   getClassNames () {
     return 'sc-insert-list-tool'
   }
@@ -14,4 +14,3 @@ class InsertListTool extends Tool {
     })
   }
 }
-export default InsertListTool

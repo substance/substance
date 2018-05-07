@@ -1,9 +1,15 @@
 import last from '../../util/last'
-import getListTagName from './getListTagName'
 
-export default function renderListNode(node, rootEl, createElement) {
+const DEFAULT_LEVEL_SPEC = function () {
+  return {
+    type: 'unordered'
+  }
+}
+
+export default function renderListNode(node, $$) {
+  let levelSpecs = node.getLevelSpecs() || []
   let items = node.getItems()
-  let stack = [rootEl]
+  let stack = [$$(_getTagName(0))]
   for (let i = 0; i < items.length; i++) {
     let item = items[i]
     if (item.level<stack.length) {
@@ -12,18 +18,36 @@ export default function renderListNode(node, rootEl, createElement) {
       }
     } else if (item.level>stack.length) {
       for (let j = stack.length; j < item.level; j++) {
-        // Note: ATM all sublists have the same order type
-        let sublist = createElement(getListTagName(node))
+        let sublist = $$(_getTagName(j))
         last(stack).append(sublist)
         stack.push(sublist)
       }
     }
     console.assert(item.level === stack.length, 'item.level should now be the same as stack.length')
     last(stack).append(
-      createElement(item)
+      $$(item)
     )
   }
   for(let j=stack.length; j>1;j--) {
     stack.pop()
+  }
+
+  return stack[0]
+
+  function _getLevelSpec(level) {
+    let spec = levelSpecs[level]
+    if (!spec) {
+      for(let i = level-1; i>=0; i--) {
+        spec = levelSpecs[i]
+        if (spec) break
+      }
+      spec = spec || DEFAULT_LEVEL_SPEC()
+      levelSpecs[level] = spec
+    }
+    return spec
+  }
+  function _getTagName(level) {
+    let spec = _getLevelSpec(level)
+    return spec.type === 'ordered' ? 'ol' : 'ul'
   }
 }

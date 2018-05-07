@@ -1,6 +1,5 @@
 import isString from '../../util/isString'
 import renderListNode from './renderListNode'
-import getListTagName from './getListTagName'
 
 export default {
 
@@ -37,16 +36,15 @@ export default {
 
   export: function(node, el, converter) {
     let $$ = converter.$$
-    el.tagName = getListTagName(node)
-    renderListNode(node, el, (arg)=>{
+    let _createElement = function(arg) {
       if (isString(arg)) {
         return $$(arg)
       } else {
         let item = arg
         return $$('li').append(converter.annotatedText(item.getPath()))
       }
-    })
-    return el
+    }
+    return renderListNode(node, [], _createElement)
   },
 
   _santizeNestedLists(root) {

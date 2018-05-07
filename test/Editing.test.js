@@ -1760,7 +1760,6 @@ test("L8-1: Toggling a paragraph into a List", (t) => {
   t.equal(body.getLength(), 1, 'There should be 1 node')
   let l = body.getNodeAt(0)
   t.equal(l.type, 'list', '.. a list')
-  t.equal(l.ordered, false, '.. unordered')
   t.equal(l.getLength(), 1, '.. with one item')
   let li = l.getItemAt(0)
   t.equal(li.getText(), P1_TEXT, '.. with text of p1')

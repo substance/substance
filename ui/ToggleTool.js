@@ -16,7 +16,7 @@ import Tooltip from './Tooltip'
   Usually instantiated in a Toolbar or an Overlay. Usage:
 
 */
-class ToggleTool extends Component {
+export default class ToggleTool extends Component {
 
   get _isTool() {
     return true
@@ -105,5 +105,3 @@ class ToggleTool extends Component {
     this.context.commandManager.executeCommand(this.getCommandName(), props)
   }
 }
-
-export default ToggleTool
