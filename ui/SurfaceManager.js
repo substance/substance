@@ -1,5 +1,6 @@
 import platform from '../util/platform'
 
+export default
 class SurfaceManager {
 
   constructor(editorSession) {
@@ -106,8 +107,15 @@ class SurfaceManager {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorSession.getSelection().toString());
       focusedSurface._focus()
       focusedSurface.rerenderDOMSelection()
+    } else {
+      // NOTE: Tried to add an integrity check here
+      // for valid sel.surfaceId
+      // However this is problematic, when an editor
+      // is run headless, i.e. when there are no surfaces rendered
+      // On the long run we should separate these to modes
+      // more explicitly. For now, any code using surfaces need
+      // to be aware of the fact, that this might be not availabls
+      // while in the model it is referenced.
     }
   }
 }
-
-export default SurfaceManager
