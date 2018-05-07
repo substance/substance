@@ -1,23 +1,13 @@
 import DocumentNode from '../../model/DocumentNode'
+import ListMixin from '../../model/ListMixin'
 
 export default
-class ListNode extends DocumentNode {
+class ListNode extends ListMixin(DocumentNode) {
 
   // specific implementation
 
   createListItem(text) {
     return this.getDocument().create( { type: 'list-item', content: text })
-  }
-
-  getItemAt(idx) {
-    return this.getDocument().get(this.items[idx])
-  }
-
-  getItemPosition(item) {
-    const id = item.id
-    let pos = this.items.indexOf(id)
-    if (pos < 0) throw new Error('Item is not within this list: ' + id)
-    return pos
   }
 
   getItems() {
@@ -31,10 +21,6 @@ class ListNode extends DocumentNode {
     return [this.id, 'items']
   }
 
-  getLength() {
-    return this.items.length
-  }
-
   insertItemAt(pos, item) {
     const doc = this.getDocument()
     const id = item.id
@@ -46,37 +32,24 @@ class ListNode extends DocumentNode {
     doc.update(this.getItemsPath(), { type: 'delete', pos: pos })
   }
 
-  // general implementation (abstract)
+  // overridden
 
-  getFirstItem() {
-    return this.getItemAt(0)
+  getItemAt(idx) {
+    return this.getDocument().get(this.items[idx])
   }
 
-  getLastItem() {
-    return this.getItemAt(this.getLength()-1)
+  getItemPosition(item) {
+    const id = item.id
+    let pos = this.items.indexOf(id)
+    if (pos < 0) throw new Error('Item is not within this list: ' + id)
+    return pos
   }
 
-  appendItem(item) {
-    this.insertItemAt(this.items.length, item)
+  getLength() {
+    return this.items.length
   }
 
-  removeItem(item) {
-    const pos = this.getItemPosition(item)
-    if (pos >= 0) {
-      this.removeItemAt(pos)
-    }
-  }
-
-  isEmpty() {
-    return this.getLength() === 0
-  }
-
-  get length() {
-    return this.getLength()
-  }
 }
-
-ListNode.isList = true
 
 ListNode.type = 'list'
 
