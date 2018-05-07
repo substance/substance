@@ -132,12 +132,12 @@ class Configurator {
 
     @param {Node} NodeClass
    */
-  addNode(NodeClass) {
-    var type = NodeClass.type
+  addNode(NodeClass, override) {
+    let type = NodeClass.type
     if (!type) {
       throw new Error('A NodeClass must have a type.')
     }
-    if (this.config.nodes[type]) {
+    if (this.config.nodes[type] && !override) {
       throw new Error('NodeClass with this type name is already registered: ' + type)
     }
     this.config.nodes[type] = NodeClass
