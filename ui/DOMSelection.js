@@ -135,7 +135,7 @@ class DOMSelection {
     let rootEl
     let surface = this.editor.getSurfaceManager().getSurface(sel.surfaceId)
     if (!surface) {
-      console.warn('Selection should have "surfaceId" set.')
+      console.warn('No surface:', sel.surfaceId)
       rootEl = this.editor.getElement()
     } else {
       rootEl = surface.el
