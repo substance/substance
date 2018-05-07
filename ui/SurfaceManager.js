@@ -68,11 +68,17 @@ class SurfaceManager {
   unregisterSurface(surface) {
     surface.off(this)
     let surfaceId = surface.getId()
-    // TODO: this is not working, has side-effects
-    // with inline-nodes (see #985)
+    // Note: in an earlier stage we did something like this here
+    // ```
     // if (surface === this.getFocusedSurface()) {
     //   this.editorSession.setSelection(null)
     // }
+    // ```
+    // This is apparently not the right thing to do, because
+    // it will trigger a new flow, while probably still executing a flow
+    // Also such a change should not be done implicitly, but explicitly.
+    // E.g. when a node with selection is deleted, the selection should be nulled
+    // by the model transformation
     let registeredSurface = this.surfaces[surfaceId]
     if (registeredSurface === surface) {
       delete this.surfaces[surfaceId]
