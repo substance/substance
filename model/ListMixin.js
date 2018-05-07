@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import isArray from '../util/isArray'
 
 const ERR_ABSTRACT = 'This method is abstract!'
 
