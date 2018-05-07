@@ -645,20 +645,26 @@ class Surface extends Component {
 
   _handleTabKey(event) {
     event.stopPropagation()
+    this.el.emit('tab', {
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
+      code: event.code
+    })
     if (this.props.handleTab === false) {
       event.preventDefault()
-      this.el.emit('tab', {
-        altKey: event.altKey,
-        ctrlKey: event.ctrlKey,
-        metaKey: event.metaKey,
-        shiftKey: event.shiftKey,
-        code: event.code
-      })
     } else {
-      this._delayed(()=>{
-        this._updateModelSelection()
-      })
+      this.__handleTab(event)
     }
+  }
+
+  __handleTab() {
+    // in many cases we let the browser do the TAB
+    // and then record the changed selection
+    this._delayed(() => {
+      this._updateModelSelection()
+    })
   }
 
   _handleEnterKey(event) {

@@ -1,54 +1,29 @@
 import isString from '../../util/isString'
-import Component from '../../ui/Component'
+import NodeComponent from '../../ui/NodeComponent'
 import ListItemComponent from './ListItemComponent'
 import renderListNode from './renderListNode'
-import getListTagName from './getListTagName'
 
-class ListComponent extends Component {
-
-  didMount() {
-    this.context.editorSession.onRender('document', this._onChange, this)
-  }
+export default class ListComponent extends NodeComponent {
 
   render($$) {
     let node = this.props.node
-    let el = $$(getListTagName(node))
-      .addClass('sc-list')
-      .attr('data-id', node.id)
-    renderListNode(node, el, (arg) => {
-      if (isString(arg)) {
-        return $$(arg)
-      } else if(arg.type === 'list-item') {
-        let item = arg
+    let el = renderListNode(node, (item) => {
+      // item is either a list item node, or a tagName
+      if (isString(item)) {
+        return $$(item)
+      } else if(item.type === 'list-item') {
+        let path = item.getPath()
         return $$(ListItemComponent, {
-          path: item.getPath(),
+          path,
           node: item,
           tagName: 'li'
-        })
-        // setting ref to preserve items when rerendering
-        .ref(item.id)
+        }).ref(item.id)
       }
     })
+    el.addClass('sc-list').attr('data-id', node.id)
     return el
   }
-
-  _onChange(change) {
-    const node = this.props.node
-    if (change.hasUpdated(node.id)) {
-      return this.rerender()
-    }
-    // check if any of the list items are affected
-    let itemIds = node.items
-    for (let i = 0; i < itemIds.length; i++) {
-      if (change.hasUpdated([itemIds[i], 'level'])) {
-        return this.rerender()
-      }
-    }
-  }
-
 }
 
 // we need this ATM to prevent this being wrapped into an isolated node (see ContainerEditor._renderNode())
 ListComponent.prototype._isCustomNodeComponent = true
-
-export default ListComponent

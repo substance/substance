@@ -1,6 +1,6 @@
 import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
-class InsertListCommand extends SwitchTextTypeCommand {
+export default class InsertListCommand extends SwitchTextTypeCommand {
 
   execute (params) {
     let ordered = this.config.spec.ordered
@@ -10,5 +10,3 @@ class InsertListCommand extends SwitchTextTypeCommand {
     })
   }
 }
-
-export default InsertListCommand

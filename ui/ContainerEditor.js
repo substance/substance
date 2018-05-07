@@ -244,6 +244,7 @@ class ContainerEditor extends Surface {
   _handleTabKey(event) {
     const editorSession = this.getEditorSession()
     const sel = editorSession.getSelection()
+    // EXPERIMENTAL: using TAB to enter an isolated node
     if (sel.isNodeSelection() && sel.isFull()) {
       const comp = this.refs[sel.getNodeId()]
       if (comp && selectionHelpers.stepIntoIsolatedNode(editorSession, comp)) {
@@ -253,6 +254,19 @@ class ContainerEditor extends Surface {
       }
     }
     super._handleTabKey(event)
+  }
+
+  __handleTab(e) {
+    e.preventDefault()
+    if (e.shiftKey) {
+      this.getEditorSession().transaction((tx) => {
+        tx.dedent()
+      }, { action: 'dedent' })
+    } else {
+      this.getEditorSession().transaction((tx) => {
+        tx.indent()
+      }, { action: 'indent' })
+    }
   }
 
   // Used by Clipboard

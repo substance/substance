@@ -15,7 +15,6 @@ export default {
       spec: { type: 'list', ordered: false },
       commandGroup: 'text-types'
     })
-
     config.addLabel('insert-unordered-list', {
       en: 'Unordered list',
       de: 'Aufzählung'
@@ -33,5 +32,11 @@ export default {
     config.addIcon('insert-ordered-list', { 'fontawesome': 'fa-list-ol' })
     config.addConverter('html', ListHTMLConverter)
     config.addConverter('html', ListItemHTMLConverter)
-  }
+  },
+  ListNode,
+  ListItemNode,
+  ListComponent,
+  ListHTMLConverter,
+  ListItemHTMLConverter,
+  InsertListCommand
 }

@@ -1,14 +1,14 @@
 import forEach from '../util/forEach'
-import map from '../util/map'
+import isFunction from '../util/isFunction'
 import isString from '../util/isString'
-import Registry from '../util/Registry'
+import map from '../util/map'
 import platform from '../util/platform'
+import Registry from '../util/Registry'
 import DocumentSchema from '../model/DocumentSchema'
 import EditingBehavior from '../model/EditingBehavior'
+
 import ComponentRegistry from './ComponentRegistry'
-
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'
-
 import DefaultCommandManager from './CommandManager'
 import DefaultDragManager from './DragManager'
 import DefaultFileManager from './FileManager'
@@ -132,12 +132,12 @@ class Configurator {
 
     @param {Node} NodeClass
    */
-  addNode(NodeClass) {
-    var type = NodeClass.type
+  addNode(NodeClass, override) {
+    let type = NodeClass.type
     if (!type) {
       throw new Error('A NodeClass must have a type.')
     }
-    if (this.config.nodes[type]) {
+    if (this.config.nodes[type] && !override) {
       throw new Error('NodeClass with this type name is already registered: ' + type)
     }
     this.config.nodes[type] = NodeClass
@@ -150,10 +150,14 @@ class Configurator {
     @param {Object} converter a converter for that format.
    */
   addConverter(type, converter) {
-    var converters = this.config.converters[type]
+    let converters = this.config.converters[type]
     if (!converters) {
       converters = {}
       this.config.converters[type] = converters
+    }
+    if (isFunction(converter)) {
+      let ConverterClass = converter
+      converter = new ConverterClass()
     }
     if (!converter.type) {
       throw new Error('A converter needs an associated type.')

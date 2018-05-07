@@ -99,42 +99,42 @@ export function _l1(doc, body) {
 
 export function _l11(doc) {
   const l1 = doc.get('l1')
-  doc.create({
+  let item = doc.create({
     type: 'list-item',
     id: 'l1-1',
     content: LI1_TEXT
   })
-  l1.appendItem('l1-1')
+  l1.appendItem(item)
 }
 
 export function _l12(doc) {
   const l1 = doc.get('l1')
-  doc.create({
+  let item = doc.create({
     type: 'list-item',
     id: 'l1-2',
     content: LI2_TEXT
   })
-  l1.appendItem('l1-2')
+  l1.appendItem(item)
 }
 
 export function _l13(doc) {
   const l1 = doc.get('l1')
-  doc.create({
+  let item = doc.create({
     type: 'list-item',
     id: 'l1-3',
     content: LI3_TEXT
   })
-  l1.appendItem('l1-3')
+  l1.appendItem(item)
 }
 
 export function _l1_empty(doc) {
   const l1 = doc.get('l1')
-  doc.create({
+  let item = doc.create({
     type: 'list-item',
     id: 'l1-empty',
     content: ''
   })
-  l1.appendItem('l1-empty')
+  l1.appendItem(item)
 }
 
 export function _li1plus(doc) {
@@ -154,22 +154,22 @@ export function _l2(doc, body) {
 
 export function _l21(doc) {
   const l2 = doc.get('l2')
-  doc.create({
+  let item = doc.create({
     type: 'list-item',
     id: 'l2-1',
     content: LI21_TEXT
   })
-  l2.appendItem('l2-1')
+  l2.appendItem(item)
 }
 
 export function _l22(doc) {
   const l2 = doc.get('l2')
-  doc.create({
+  let item = doc.create({
     type: 'list-item',
     id: 'l2-2',
     content: LI22_TEXT
   })
-  l2.appendItem('l2-2')
+  l2.appendItem(item)
 }
 
 export function _l1_single(doc, body) {

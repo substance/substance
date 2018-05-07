@@ -1,6 +1,5 @@
 import isArrayEqual from '../util/isArrayEqual'
 import isString from '../util/isString'
-import last from '../util/last'
 import uuid from '../util/uuid'
 import annotationHelpers from './annotationHelpers'
 import { deleteTextRange, deleteNode, deleteListRange, mergeListItems } from './documentHelpers'
@@ -17,7 +16,7 @@ import paste from './paste'
   Note: this is pretty much the same what we did with transforms before.
         We decided to move this here, to switch to a stateful editor implementation (aka turtle-graphics-style)
  */
-class Editing {
+export default class Editing {
 
   // create an annotation for the current selection using the given data
   annotate(tx, annotation) {
@@ -51,7 +50,7 @@ class Editing {
       let container = tx.get(containerId)
       let nodeId = sel.getNodeId()
       let nodePos = container.getPosition(nodeId, 'strict')
-      let textNode = tx.createDefaultTextNode()
+      let textNode = this.createTextNode(tx, container)
       if (sel.isBefore()) {
         container.showAt(nodePos, textNode.id)
         // leave selection as is
@@ -89,6 +88,18 @@ class Editing {
     }
   }
 
+  createTextNode(tx, container, text) { // eslint-disable-line no-unused-vars
+    // Note: override this create a different node type
+    // according to the context
+    return tx.createDefaultTextNode(text)
+  }
+
+  createListNode(tx, container, node = {}) { // eslint-disable-line no-unused-vars
+    // Note: override this create a different node type
+    // according to the context
+    return tx.create({ type: "list", items: [], config: node.ordered ? 'ordered' : 'unordered' })
+  }
+
   delete(tx, direction) {
     let sel = tx.selection
     // special implementation for node selections:
@@ -118,6 +129,10 @@ class Editing {
         // ATTENTION: deviation from standard implementation
         // for list items: Word and GDoc toggle a list item
         // when doing a BACKSPACE at the first position
+        // IMO this is not 'consistent' because it is not the
+        // inverse of 'break'
+        // We will 'toggle' only if the cursor is on the first position
+        // of the first item
         let root = node.getContainerRoot()
         if (root.isList() && offset === 0 && direction === 'left') {
           return this.toggleList(tx)
@@ -168,7 +183,7 @@ class Editing {
       // replace the node with default text node
       container.hideAt(nodePos)
       deleteNode(tx, tx.get(nodeId))
-      let newNode = tx.createDefaultTextNode()
+      let newNode = this.createTextNode(tx, container)
       container.showAt(nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
@@ -310,7 +325,7 @@ class Editing {
     // insert a new TextNode if all has been deleted
     if (firstEntirelySelected && lastEntirelySelected) {
       // insert a new paragraph
-      let textNode = tx.createDefaultTextNode()
+      let textNode = this.createTextNode(tx, container)
       container.showAt(startPos, textNode.id)
       tx.setSelection({
         type: 'property',
@@ -469,7 +484,7 @@ class Editing {
       let container = tx.get(containerId)
       let nodeId = sel.getNodeId()
       let nodePos = container.getPosition(nodeId, 'strict')
-      let textNode = tx.createDefaultTextNode(text)
+      let textNode = this.createTextNode(tx, container, text)
       if (sel.isBefore()) {
         container.showAt(nodePos, textNode)
       } else if (sel.isAfter()) {
@@ -591,16 +606,10 @@ class Editing {
       /* istanbul ignore else  */
       if (node.isText()) {
         container.hideAt(nodePos)
-        // TODO: what if this should create a different list-item type?
-        let newItem = tx.create({
-          type: 'list-item',
-          content: node.getText(),
-        })
+        let newList = this.createListNode(tx, container, params)
+        let newItem = newList.createListItem(node.getText())
         annotationHelpers.transferAnnotations(tx, node.getPath(), 0, newItem.getPath(), 0)
-        let newList = tx.create(Object.assign({
-          type: 'list',
-          items: [newItem.id]
-        }, params))
+        newList.appendItem(newItem)
         deleteNode(tx, node)
         container.showAt(nodePos, newList.id)
         tx.setSelection({
@@ -611,9 +620,9 @@ class Editing {
         })
       } else if (node.isList()) {
         let itemId = sel.start.path[0]
-        let itemPos = node.getItemPosition(itemId)
-        let item = node.getItemAt(itemPos)
-        let newTextNode = tx.createDefaultTextNode(item.getText())
+        let item = tx.get(itemId)
+        let itemPos = node.getItemPosition(item)
+        let newTextNode = this.createTextNode(tx, container, item.getText())
         annotationHelpers.transferAnnotations(tx, item.getPath(), 0, newTextNode.getPath(), 0)
         // take the item out of the list
         node.removeItemAt(itemPos)
@@ -628,17 +637,16 @@ class Editing {
         } else {
           //split the
           let tail = []
-          const items = node.items.slice()
+          const items = node.getItems()
           const L = items.length
           for (let i = L-1; i >= itemPos; i--) {
             tail.unshift(items[i])
             node.removeItemAt(i)
           }
-          let newList = tx.create({
-            type: 'list',
-            items: tail,
-            ordered: node.ordered
-          })
+          let newList = this.createListNode(tx, container, node)
+          for (let i = 0; i < tail.length; i++) {
+            newList.appendItem(tail[i])
+          }
           container.showAt(nodePos+1, newTextNode.id)
           container.showAt(nodePos+2, newList.id)
         }
@@ -665,9 +673,12 @@ class Editing {
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
+        let level = item.getLevel()
         // Note: allowing only 3 levels
-        if (item && item.level<3) {
-          tx.set([itemId, 'level'], item.level+1)
+        if (item && level<3) {
+          item.setLevel(item.level+1)
+          // a pseudo change to let the list know that something has changed
+          tx.set([node.id, '_itemsChanged'], true)
         }
       }
     } else if (sel.isContainerSelection()) {
@@ -684,8 +695,18 @@ class Editing {
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
-        if (item && item.level>1) {
-          tx.set([itemId, 'level'], item.level-1)
+        let level = item.getLevel()
+        if (item) {
+          if (level > 1) {
+            item.setLevel(item.level-1)
+            // a pseudo change to let the list know that something has changed
+            tx.set([node.id, '_itemsChanged'], true)
+          }
+          // TODO: we could toggle the list item to paragraph
+          // if dedenting on the first level
+          //  else {
+          //   return this.toggleList(tx)
+          // }
         }
       }
     } else if (sel.isContainerSelection()) {
@@ -860,7 +881,7 @@ class Editing {
     let listItem = tx.get(path[0])
 
     let L = node.length
-    let itemPos = node.getItemPosition(listItem.id)
+    let itemPos = node.getItemPosition(listItem)
     let text = listItem.getText()
     let textProp = listItem.getPath()[1]
     let newItemData = listItem.toJSON()
@@ -871,7 +892,7 @@ class Editing {
         // if it is the first or last item, a default text node is inserted before or after, and the item is removed
         // if the list has only one element, it is removed
         let nodePos = container.getPosition(node.id, 'strict')
-        let newTextNode = tx.createDefaultTextNode()
+        let newTextNode = this.createTextNode(tx, container)
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
           container.hide(node.id)
@@ -880,30 +901,29 @@ class Editing {
         }
         // if at the first list item, remove the item
         else if (itemPos === 0) {
-          node.remove(listItem.id)
+          node.removeItem(listItem)
           deleteNode(tx, listItem)
           container.showAt(nodePos, newTextNode.id)
         }
         // if at the last list item, remove the item and append the paragraph
         else if (itemPos >= L-1) {
-          node.remove(listItem.id)
+          node.removeItem(listItem)
           deleteNode(tx, listItem)
           container.showAt(nodePos+1, newTextNode.id)
         }
         // otherwise create a new list
         else {
           let tail = []
-          const items = node.items.slice()
+          const items = node.getItems().slice()
           for (let i = L-1; i > itemPos; i--) {
             tail.unshift(items[i])
-            node.remove(items[i])
+            node.removeItem(items[i])
           }
-          node.remove(items[itemPos])
-          let newList = tx.create({
-            type: 'list',
-            items: tail,
-            ordered: node.ordered
-          })
+          node.removeItem(items[itemPos])
+          let newList = this.createListNode(tx, container, node)
+          for (let i = 0; i < tail.length; i++) {
+            newList.appendItem(tail[i])
+          }
           container.showAt(nodePos+1, newTextNode.id)
           container.showAt(nodePos+2, newList.id)
         }
@@ -917,7 +937,7 @@ class Editing {
       else {
         newItemData[textProp] = ""
         let newItem = tx.create(newItemData)
-        node.insertItemAt(itemPos, newItem.id)
+        node.insertItemAt(itemPos, newItem)
         tx.setSelection({
           type: 'property',
           path: listItem.getPath(),
@@ -936,7 +956,7 @@ class Editing {
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
-      node.insertItemAt(itemPos+1, newItem.id)
+      node.insertItemAt(itemPos+1, newItem)
       tx.setSelection({
         type: 'property',
         path: newItem.getPath(),
@@ -951,7 +971,8 @@ class Editing {
     if (node.isList()) {
       let list = node
       let itemId = coor.path[0]
-      let itemPos = list.getItemPosition(itemId)
+      let item = tx.get(itemId)
+      let itemPos = list.getItemPosition(item)
       let withinListNode = (
         (direction === 'left' && itemPos > 0) ||
         (direction === 'right' && itemPos<list.items.length-1)
@@ -1039,18 +1060,25 @@ class Editing {
       }
     } else if (first.isList()) {
       if (second.isText()) {
-        let source = second
-        let sourcePath = source.getPath()
         let target = first.getLastItem()
         let targetPath = target.getPath()
         let targetLength = target.getLength()
-        // hide source
-        container.hide(source.id)
-        // append the text
-        tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
-        // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        deleteNode(tx, source)
+        let third = (container.length > pos+2) ? container.getChildAt(pos+2) : null
+        if (second.getLength() === 0) {
+          container.hide(second.id)
+          deleteNode(tx, second)
+        } else {
+          let source = second
+          let sourcePath = source.getPath()
+          container.hide(source.id)
+          tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+          annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+          deleteNode(tx, source)
+        }
+        // merge to lists if they were split by a paragraph
+        if (third && third.type === first.type) {
+          this._mergeTwoLists(tx, container, first, third)
+        }
         tx.setSelection({
           type: 'property',
           path: target.getPath(),
@@ -1064,15 +1092,8 @@ class Editing {
           // as BACKSPACE will first turn the list into a paragraph
           throw new Error('Illegal state')
         }
-        container.hide(second.id)
-        let firstItems = first.items.slice()
-        let secondItems = second.items.slice()
-        for (let i=0; i<secondItems.length;i++) {
-          second.removeItemAt(0)
-          first.appendItem(secondItems[i])
-        }
-        deleteNode(tx, second)
-        let item = tx.get(last(firstItems))
+        let item = first.getLastItem()
+        this._mergeTwoLists(tx, container, first, second)
         tx.setSelection({
           type: 'property',
           path: item.getPath(),
@@ -1092,6 +1113,14 @@ class Editing {
       }
     }
   }
-}
 
-export default Editing
+  _mergeTwoLists(tx, container, first, second) {
+    container.hide(second.id)
+    let secondItems = second.getItems().slice()
+    for (let i=0; i<secondItems.length;i++) {
+      second.removeItemAt(0)
+      first.appendItem(secondItems[i])
+    }
+    deleteNode(tx, second)
+  }
+}

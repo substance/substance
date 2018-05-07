@@ -83,7 +83,8 @@ function HTMLImporterTests(memory) {
     let node = importer.convertElement(el)
     t.equal(node.type, 'list', 'Imported node should be a list')
     t.equal(node.id, 'l1', 'id should be correct')
-    t.equal(node.ordered, false, 'node should unordered')
+    let levelSpecs = node.getLevelSpecs()
+    t.equal(levelSpecs[0], 'unordered', 'node should unordered')
     t.equal(node.items.length, 2, 'it should have 2 items')
     let li1 = node.getItemAt(0)
     let li2 = node.getItemAt(1)
@@ -97,9 +98,10 @@ function HTMLImporterTests(memory) {
     let html = '<ol data-id="l1"></ol>'
     let el = DefaultDOMElement.parseSnippet(html, 'html')
     let node = importer.convertElement(el)
+    let levelSpecs = node.getLevelSpecs()
     t.equal(node.type, 'list', 'Imported node should be a list')
     t.equal(node.id, 'l1', 'id should be correct')
-    t.equal(node.ordered, true, 'node should ordered')
+    t.equal(levelSpecs[0], 'ordered', 'node should be ordered')
     t.end()
   })
 

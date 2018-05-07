@@ -1,17 +1,13 @@
 import DocumentNode from '../../model/DocumentNode'
+import ListMixin from '../../model/ListMixin'
 
-class ListNode extends DocumentNode {
+export default
+class ListNode extends ListMixin(DocumentNode) {
 
-  getItemAt(idx) {
-    return this.getDocument().get(this.items[idx])
-  }
+  // specific implementation
 
-  getFirstItem() {
-    return this.getItemAt(0)
-  }
-
-  getLastItem() {
-    return this.getItemAt(this.getLength()-1)
+  createListItem(text) {
+    return this.getDocument().create( { type: 'list-item', content: text })
   }
 
   getItems() {
@@ -21,56 +17,54 @@ class ListNode extends DocumentNode {
     })
   }
 
-  getItemPosition(itemId) {
-    if (itemId._isNode) itemId = itemId.id
-    let pos = this.items.indexOf(itemId)
-    if (pos < 0) throw new Error('Item is not within this list: ' + itemId)
-    return pos
+  getItemsPath() {
+    return [this.id, 'items']
   }
 
-  insertItemAt(pos, itemId) {
+  insertItemAt(pos, item) {
     const doc = this.getDocument()
-    doc.update([this.id, 'items'], { type: 'insert', pos: pos, value: itemId })
-  }
-
-  appendItem(itemId) {
-    this.insertItemAt(this.items.length, itemId)
+    const id = item.id
+    doc.update(this.getItemsPath(), { type: 'insert', pos: pos, value: id })
   }
 
   removeItemAt(pos) {
     const doc = this.getDocument()
-    doc.update([this.id, 'items'], { type: 'delete', pos: pos })
+    doc.update(this.getItemsPath(), { type: 'delete', pos: pos })
   }
 
-  remove(itemId) {
-    const doc = this.getDocument()
-    const pos = this.getItemPosition(itemId)
-    if (pos >= 0) {
-      doc.update([this.id, 'items'], { type: 'delete', pos: pos })
-    }
+  // overridden
+
+  getItemAt(idx) {
+    return this.getDocument().get(this.items[idx])
   }
 
-  isEmpty() {
-    return this.items.length === 0
+  getItemPosition(item) {
+    const id = item.id
+    let pos = this.items.indexOf(id)
+    if (pos < 0) throw new Error('Item is not within this list: ' + id)
+    return pos
   }
 
   getLength() {
     return this.items.length
   }
 
-  get length() {
-    return this.getLength()
+  getLevelSpecs() {
+    return super._getLevelSpecs(this.config)
   }
-}
 
-ListNode.isList = true
+  _setLevelSpecs(config) {
+    this.getDocument().set([this.id, 'config'], config)
+  }
+
+}
 
 ListNode.type = 'list'
 
 ListNode.schema = {
-  ordered: { type: 'boolean', default: false },
   // list-items are owned by the list
-  items: { type: [ 'array', 'id' ], default: [], owned: true }
+  // this means, if the list gets deleted, the list items
+  // will be deleted too
+  items: { type: [ 'array', 'id' ], default: [], owned: true },
+  config: { type: 'string', default: 'unordered' }
 }
-
-export default ListNode
