@@ -1,7 +1,7 @@
 import isString from '../../util/isString'
+import renderListNode from '../../util/renderListNode'
 import NodeComponent from '../../ui/NodeComponent'
 import ListItemComponent from './ListItemComponent'
-import renderListNode from './renderListNode'
 
 export default class ListComponent extends NodeComponent {
 

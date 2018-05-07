@@ -1,6 +1,6 @@
 import isString from '../../util/isString'
+import renderListNode from '../../util/renderListNode'
 import { walk } from '../../dom/domHelpers'
-import renderListNode from './renderListNode'
 
 export default class ListHTMLConverter {
 

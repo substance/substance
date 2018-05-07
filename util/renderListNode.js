@@ -1,4 +1,4 @@
-import last from '../../util/last'
+import last from './last'
 
 const DEFAULT_LEVEL_SPEC = 'unordered'
 
