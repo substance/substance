@@ -160,6 +160,7 @@ class DOMElement {
   */
   setId(id) {
     this.setAttribute('id', id)
+    return this
   }
 
   /**
