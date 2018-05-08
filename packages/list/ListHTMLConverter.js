@@ -20,21 +20,21 @@ export default class ListHTMLConverter {
       if (el.is('li')) {
         items.push({ el, level })
       } else if (!config[level]) {
-        if (el.is('ul')) config[level] = 'unordered'
-        else if (el.is('ol')) config[level] = 'ordered'
+        if (el.is('ul')) config[level] = 'bullet'
+        else if (el.is('ol')) config[level] = 'order'
       }
     }))
     this._createItems(converter, node, items, config)
   }
 
   // this is specific to the node model defined in ListNode
-  _createItems(converter, node, items, types) {
+  _createItems(converter, node, items, levelTypes) {
     node.items = items.map(d => {
       let listItem = converter.convertElement(d.el)
       listItem.level = d.level
       return listItem.id
     })
-    node.config = types.join(',')
+    node.listType = levelTypes.join(',')
   }
 
   export(node, el, converter) {

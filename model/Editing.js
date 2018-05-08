@@ -94,10 +94,10 @@ export default class Editing {
     return tx.createDefaultTextNode(text)
   }
 
-  createListNode(tx, container, node = {}) { // eslint-disable-line no-unused-vars
+  createListNode(tx, container, params = {}) { // eslint-disable-line no-unused-vars
     // Note: override this create a different node type
     // according to the context
-    return tx.create({ type: "list", items: [], config: node.ordered ? 'ordered' : 'unordered' })
+    return tx.create({ type: "list", items: [], listType: params.listType || 'bullet' })
   }
 
   delete(tx, direction) {

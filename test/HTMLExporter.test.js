@@ -134,7 +134,7 @@ function htmlExporterTests(memory) {
     let ol = doc.create({
       type: 'list',
       id: 'ol1',
-      config: 'ordered'
+      listType: 'order'
     })
     let el = exporter.convertNode(ol)
     t.equal(el.tagName, 'ol', 'Exported element should be a <ol>')
@@ -187,7 +187,7 @@ function _l1(doc) {
     type: 'list',
     id: 'l1',
     items: ['li1', 'li2'],
-    config: 'unordered'
+    listType: 'bullet'
   })
 }
 
@@ -218,6 +218,6 @@ function _l2(doc) {
     type: 'list',
     id: 'l1',
     items: ['li1', 'li3', 'li4', 'li2'],
-    config: 'unordered'
+    listType: 'bullet'
   })
 }

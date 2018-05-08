@@ -1,9 +1,9 @@
 import last from './last'
 
-const DEFAULT_LEVEL_SPEC = 'unordered'
+const DEFAULT_LEVEL_SPEC = 'bullet'
 
 export default function renderListNode(node, $$) {
-  let levelSpecs = node.getLevelSpecs() || []
+  let levelTypes = node.getLevelTypes() || []
   let items = node.getItems()
   let stack = [$$(_getTagName(0))]
   for (let i = 0; i < items.length; i++) {
@@ -31,20 +31,20 @@ export default function renderListNode(node, $$) {
 
   return stack[0]
 
-  function _getLevelSpec(level) {
-    let spec = levelSpecs[level]
+  function _getListType(level) {
+    let spec = levelTypes[level]
     if (!spec) {
       for(let i = level-1; i>=0; i--) {
-        spec = levelSpecs[i]
+        spec = levelTypes[i]
         if (spec) break
       }
       spec = spec || DEFAULT_LEVEL_SPEC
-      levelSpecs[level] = spec
+      levelTypes[level] = spec
     }
     return spec
   }
   function _getTagName(level) {
-    let spec = _getLevelSpec(level)
-    return spec === 'ordered' ? 'ol' : 'ul'
+    let spec = _getListType(level)
+    return spec === 'order' ? 'ol' : 'ul'
   }
 }

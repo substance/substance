@@ -72,15 +72,20 @@ export default function(DocumentNode) {
       return this.getLength()
     }
 
-    _getLevelSpecs(levelSpec) {
-      return levelSpec ? levelSpec.split(',').map(s => s.trim()) : []
+    getListType(level) {
+      let levelTypes = this.getLevelTypes()
+      return levelTypes[level] || 'bullet'
     }
 
-    setLevelSpecs(levelSpec) {
-      if (isArray(levelSpec)) {
-        levelSpec = levelSpec.join(',')
+    _getLevelTypes(levelTypeStr) {
+      return levelTypeStr ? levelTypeStr.split(',').map(s => s.trim()) : []
+    }
+
+    setLevelTypes(levelTypeStr) {
+      if (isArray(levelTypeStr)) {
+        levelTypeStr = levelTypeStr.join(',')
       }
-      this._setLevelSpecs(levelSpec)
+      this._setLevelTypes(levelTypeStr)
     }
 
   }
