@@ -37,11 +37,13 @@ export default function registerSchema(config, xmlSchema, DocumentClass, options
     const name = elementSchema.name
     let NodeClass, ConverterClass
     switch (elementSchema.type) {
-      case 'element':
-      case 'hybrid': {
+      case 'element': {
         NodeClass = XMLElementNode
         ConverterClass = XMLElementNodeConverter
         break
+      }
+      case 'hybrid': {
+        throw new Error('Mixed element types are not supported yet.')
       }
       case 'text': {
         NodeClass = XMLTextElement
