@@ -125,7 +125,7 @@ function _renderTextNode(dom, node) {
   let el = _createElement(dom, node)
   if (annos && annos.length > 0) {
     let fragmenter = new Fragmenter({
-      onText: (context, text, fragment) => {
+      onText: (context, text) => {
         const node = context.node
         if (node.isText()) {
           context.el.append(text)

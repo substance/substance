@@ -161,7 +161,6 @@ function _validateElement(elementSchema, el) {
       let res
       if (el._isXMLTextElement) {
         res = _checkChildren(elementSchema, el.toXML())
-        // res = _checkXMLTextElement(elementSchema, el)
       } else {
         res = _checkChildren(elementSchema, el)
       }
@@ -226,19 +225,4 @@ function _checkChildren(elementSchema, el) {
     state.ok = true
   }
   return state
-}
-
-function _checkTextElement(elementSchema, el) {
-  let res = {
-    ok: true,
-    errors: []
-  }
-  if (elementSchema.type !== 'text') {
-    res.ok = false
-    res.errors = [{
-      msg: 'Provided element is a text element',
-      el
-    }]
-  }
-  return res
 }
