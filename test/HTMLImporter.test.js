@@ -83,7 +83,7 @@ function HTMLImporterTests(memory) {
     let node = importer.convertElement(el)
     t.equal(node.type, 'list', 'Imported node should be a list')
     t.equal(node.id, 'l1', 'id should be correct')
-    t.equal(node.getListType(0), 'bullet', 'node should unordered')
+    t.equal(node.getListType(1), 'bullet', 'node should unordered')
     t.equal(node.items.length, 2, 'it should have 2 items')
     let li1 = node.getItemAt(0)
     let li2 = node.getItemAt(1)
@@ -99,7 +99,7 @@ function HTMLImporterTests(memory) {
     let node = importer.convertElement(el)
     t.equal(node.type, 'list', 'Imported node should be a list')
     t.equal(node.id, 'l1', 'id should be correct')
-    t.equal(node.getListType(0), 'order', 'node should be ordered')
+    t.equal(node.getListType(1), 'order', 'node should be ordered')
     t.end()
   })
 

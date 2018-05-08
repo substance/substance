@@ -73,11 +73,26 @@ export default function(DocumentNode) {
     }
 
     getListType(level) {
+      // ATTENTION: level start with 1
+      let idx = level-1
       let levelTypes = this.getLevelTypes()
-      return levelTypes[level] || 'bullet'
+      return levelTypes[idx] || 'bullet'
     }
 
-    _getLevelTypes(levelTypeStr) {
+    setListType(level, listType) {
+      let idx = level-1
+      let levelTypes = this.getLevelTypes()
+      if (levelTypes.length < level) {
+        for (let i = 0; i < idx; i++) {
+          if (!levelTypes[i]) levelTypes[i] = 'bullet'
+        }
+      }
+      levelTypes[idx] = listType
+      this.setLevelTypes(levelTypes)
+    }
+
+    getLevelTypes() {
+      let levelTypeStr = this.getLevelTypeString()
       return levelTypeStr ? levelTypeStr.split(',').map(s => s.trim()) : []
     }
 
@@ -85,9 +100,11 @@ export default function(DocumentNode) {
       if (isArray(levelTypeStr)) {
         levelTypeStr = levelTypeStr.join(',')
       }
-      this._setLevelTypes(levelTypeStr)
+      let oldLevelTypeStr = this.getLevelTypeString()
+      if (oldLevelTypeStr !== levelTypeStr) {
+        this.setLevelTypeString(levelTypeStr)
+      }
     }
-
   }
 
   return AbstractList
