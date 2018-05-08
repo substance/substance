@@ -160,7 +160,8 @@ function _validateElement(elementSchema, el) {
       // HACK: special treatment for our text elements which are not real DOM elements
       let res
       if (el._isXMLTextElement) {
-        res = _checkTextElement(elementSchema, el)
+        res = _checkChildren(elementSchema, el.toXML())
+        // res = _checkXMLTextElement(elementSchema, el)
       } else {
         res = _checkChildren(elementSchema, el)
       }
