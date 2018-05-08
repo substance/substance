@@ -1,4 +1,5 @@
 import DataNode from './Node'
+import isString from '../util/isString'
 
 /**
   Base node type for document nodes.
@@ -64,7 +65,8 @@ class DocumentNode extends DataNode {
     @returns {DocumentNode} the parent node
   */
   getParent() {
-    return this.document.get(this.parent)
+    if (isString(this.parent)) return this.document.get(this.parent)
+    return this.parent
   }
 
   /**
