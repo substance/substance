@@ -1,15 +1,17 @@
 import Component from '../../ui/Component'
 
-class Input extends Component {
+export default class Input extends Component {
 
   _onChange() {
     let editorSession = this.context.editorSession
     let path = this.props.path
     let newVal = this.el.val()
-
     editorSession.transaction(function(tx) {
       tx.set(path, newVal)
     })
+    // ATTENTION: running the editor flow will rerender the model selection
+    // which takes away the focus from this input
+    this.el.getNativeElement().focus()
   }
 
   render($$) {
@@ -27,8 +29,7 @@ class Input extends Component {
       value: val,
       type: this.props.type,
       placeholder: this.props.placeholder
-    })
-    .addClass('sc-input')
+    }).addClass('sc-input')
 
     if (this.props.path) {
       el.on('change', this._onChange)
@@ -41,5 +42,3 @@ class Input extends Component {
     return el
   }
 }
-
-export default Input

@@ -125,15 +125,23 @@ function _renderTextNode(dom, node) {
   let el = _createElement(dom, node)
   if (annos && annos.length > 0) {
     let fragmenter = new Fragmenter({
-      onText: (context, text) => { context.append(text) },
+      onText: (context, text) => {
+        const node = context.node
+        if (node.isText()) {
+          context.el.append(text)
+        }
+      },
       onEnter: (fragment) => {
-        return _node2element(dom, fragment.node)
+        return {
+          el: _node2element(dom, fragment.node),
+          node: fragment.node
+        }
       },
       onExit: (fragment, context, parentContext) => {
-        parentContext.append(context)
+        parentContext.el.append(context.el)
       }
     });
-    fragmenter.start(el, text, annos)
+    fragmenter.start({ el, node }, text, annos)
   } else {
     el.append(text)
   }

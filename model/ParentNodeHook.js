@@ -23,7 +23,7 @@ import isArray from '../util/isArray'
   With Texture we want to investigate a further option: replacing the node model with a DOM.
 */
 
-class ParentNodeHook {
+export default class ParentNodeHook {
 
   constructor(doc) {
     this.doc = doc
@@ -135,5 +135,3 @@ class ParentNodeHook {
 ParentNodeHook.register = function(doc) {
   return new ParentNodeHook(doc)
 }
-
-export default ParentNodeHook
