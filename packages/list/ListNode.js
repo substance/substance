@@ -49,11 +49,11 @@ class ListNode extends ListMixin(DocumentNode) {
     return this.items.length
   }
 
-  getLevelTypeString() {
+  getListTypeString() {
     return this.listType
   }
 
-  setLevelTypeString(levelTypeStr) {
+  setListTypeString(levelTypeStr) {
     this.getDocument().set([this.id, 'listType'], levelTypeStr)
   }
 

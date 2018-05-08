@@ -75,34 +75,34 @@ export default function(DocumentNode) {
     getListType(level) {
       // ATTENTION: level start with 1
       let idx = level-1
-      let levelTypes = this.getLevelTypes()
-      return levelTypes[idx] || 'bullet'
+      let listTypes = this._getListTypes()
+      return listTypes[idx] || 'bullet'
     }
 
     setListType(level, listType) {
       let idx = level-1
-      let levelTypes = this.getLevelTypes()
-      if (levelTypes.length < level) {
+      let listTypes = this._getListTypes()
+      if (listTypes.length < level) {
         for (let i = 0; i < idx; i++) {
-          if (!levelTypes[i]) levelTypes[i] = 'bullet'
+          if (!listTypes[i]) listTypes[i] = 'bullet'
         }
       }
-      levelTypes[idx] = listType
-      this.setLevelTypes(levelTypes)
+      listTypes[idx] = listType
+      this._setListTypes(listTypes)
     }
 
-    getLevelTypes() {
-      let levelTypeStr = this.getLevelTypeString()
-      return levelTypeStr ? levelTypeStr.split(',').map(s => s.trim()) : []
+    _getListTypes() {
+      let listTypeString = this.getListTypeString()
+      return listTypeString ? listTypeString.split(',').map(s => s.trim()) : []
     }
 
-    setLevelTypes(levelTypeStr) {
-      if (isArray(levelTypeStr)) {
-        levelTypeStr = levelTypeStr.join(',')
+    _setListTypes(listTypeString) {
+      if (isArray(listTypeString)) {
+        listTypeString = listTypeString.join(',')
       }
-      let oldLevelTypeStr = this.getLevelTypeString()
-      if (oldLevelTypeStr !== levelTypeStr) {
-        this.setLevelTypeString(levelTypeStr)
+      let oldListTypeString = this.getListTypeString()
+      if (oldListTypeString !== listTypeString) {
+        this.setListTypeString(listTypeString)
       }
     }
   }
