@@ -1,21 +1,19 @@
 import last from './last'
 
-const DEFAULT_LEVEL_SPEC = 'unordered'
-
-export default function renderListNode(node, $$) {
-  let levelSpecs = node.getLevelSpecs() || []
-  let items = node.getItems()
-  let stack = [$$(_getTagName(0))]
+export default function renderListNode(listNode, $$) {
+  let items = listNode.getItems()
+  let stack = [$$(_getTagName(1))]
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
-    const level = item.level
+    // ATTENTION: levels are one-based, i.e. start counting with 1 instead of 0
+    const level = item.getLevel()
     if (level < stack.length) {
       for (let j = stack.length; j > level; j--) {
         stack.pop()
       }
     } else if (level > stack.length) {
       for (let j = stack.length; j < level; j++) {
-        let sublist = $$(_getTagName(j))
+        let sublist = $$(_getTagName(j+1))
         last(stack).append(sublist)
         stack.push(sublist)
       }
@@ -31,20 +29,8 @@ export default function renderListNode(node, $$) {
 
   return stack[0]
 
-  function _getLevelSpec(level) {
-    let spec = levelSpecs[level]
-    if (!spec) {
-      for(let i = level-1; i>=0; i--) {
-        spec = levelSpecs[i]
-        if (spec) break
-      }
-      spec = spec || DEFAULT_LEVEL_SPEC
-      levelSpecs[level] = spec
-    }
-    return spec
-  }
   function _getTagName(level) {
-    let spec = _getLevelSpec(level)
-    return spec === 'ordered' ? 'ol' : 'ul'
+    let listType = listNode.getListType(level)
+    return listType === 'order' ? 'ol' : 'ul'
   }
 }

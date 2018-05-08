@@ -153,6 +153,10 @@ class DocumentNode extends DataNode {
     return Boolean(this.constructor.isList)
   }
 
+  isListItem() {
+    return Boolean(this.constructor.isListItem)
+  }
+
   isContainer() {
     return Boolean(this._isContainer)
   }

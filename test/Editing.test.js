@@ -10,7 +10,9 @@ import {
   _s1, _empty, _il1,
   _block1, _block2,
   _in1, IN1_TITLE,
-  _l1, _l11, _l12, _l13, _l1_empty, _li1plus, LI1_TEXT, LI2_TEXT, LI3_TEXT,
+  _l1, _l11, _l12, _l13, _l1_empty,
+  _li1plus, _li2plus,
+  LI1_TEXT, LI2_TEXT, LI3_TEXT,
   _l2, _l21, _l22,
   _t1, _t1_sparse, T_CONTENT
 } from './fixture/samples'
@@ -1851,6 +1853,32 @@ test("L8-5: Toggling the only list-item of a list into a paragraph", (t) => {
   let p = body.getNodeAt(0)
   t.equal(p.type, 'paragraph', '.. which should be paragraph')
   t.equal(p.getText(), LI1_TEXT, '.. with text of first list item')
+  t.end()
+})
+
+test("L9: Changing the list type", (t) => {
+  let { doc, editorSession} = setupEditor(t, _l1, _l11)
+  editorSession.transaction((tx)=>{
+    let list = tx.get('l1')
+    list.setListType(1, 'order')
+  })
+  let list = doc.get('l1')
+  t.equal(list.getListType(1), 'order', 'level type should have been updated')
+  t.equal(list.getListTypeString(), 'order', 'serialized level type string should have been updated')
+  t.end()
+})
+
+test("L9-2: Changing nested list types", (t) => {
+  let { doc, editorSession} = setupEditor(t, _l1, _l11, _l12, _li2plus)
+  let list = doc.get('l1')
+  t.equal(list.getListType(1), 'bullet', 'first level should have correct list type')
+  t.equal(list.getListType(2), 'bullet', 'second level should have correct list type')
+  editorSession.transaction((tx)=>{
+    let list = tx.get('l1')
+    list.setListType(2, 'order')
+  })
+  t.equal(list.getListType(1), 'bullet', 'first level should have correct list type')
+  t.equal(list.getListType(2), 'order', 'second level should have correct list type')
   t.end()
 })
 

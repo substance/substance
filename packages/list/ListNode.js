@@ -49,12 +49,12 @@ class ListNode extends ListMixin(DocumentNode) {
     return this.items.length
   }
 
-  getLevelSpecs() {
-    return super._getLevelSpecs(this.config)
+  getListTypeString() {
+    return this.listType
   }
 
-  _setLevelSpecs(config) {
-    this.getDocument().set([this.id, 'config'], config)
+  setListTypeString(levelTypeStr) {
+    this.getDocument().set([this.id, 'listType'], levelTypeStr)
   }
 
 }
@@ -66,5 +66,5 @@ ListNode.schema = {
   // this means, if the list gets deleted, the list items
   // will be deleted too
   items: { type: [ 'array', 'id' ], default: [], owned: true },
-  config: { type: 'string', default: 'unordered' }
+  listType: { type: 'string', default: 'bullet' }
 }

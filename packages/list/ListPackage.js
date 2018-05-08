@@ -4,6 +4,7 @@ import ListComponent from './ListComponent'
 import ListHTMLConverter from './ListHTMLConverter'
 import ListItemHTMLConverter from './ListItemHTMLConverter'
 import InsertListCommand from './InsertListCommand'
+import ToggleListCommand from './ToggleListCommand'
 
 export default {
   name: 'list',
@@ -12,7 +13,7 @@ export default {
     config.addNode(ListItemNode)
     config.addComponent('list', ListComponent)
     config.addCommand('insert-unordered-list', InsertListCommand, {
-      spec: { type: 'list', ordered: false },
+      spec: { type: 'list', listType: 'bullet' },
       commandGroup: 'text-types'
     })
     config.addLabel('insert-unordered-list', {
@@ -22,7 +23,7 @@ export default {
     config.addIcon('insert-unordered-list', { 'fontawesome': 'fa-list-ul' })
 
     config.addCommand('insert-ordered-list', InsertListCommand, {
-      spec: { type: 'list', ordered: true },
+      spec: { type: 'list', listType: 'order' },
       commandGroup: 'text-types'
     })
     config.addLabel('insert-ordered-list', {
@@ -38,5 +39,6 @@ export default {
   ListComponent,
   ListHTMLConverter,
   ListItemHTMLConverter,
-  InsertListCommand
+  InsertListCommand,
+  ToggleListCommand
 }

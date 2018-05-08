@@ -107,6 +107,9 @@ class XMLDocumentNode extends DocumentNode {
     }
   }
 
+  getParent() {
+    return this.parentNode
+  }
 
   get tagName() {
     return this.type
