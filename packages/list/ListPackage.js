@@ -3,8 +3,8 @@ import ListItemNode from './ListItemNode'
 import ListComponent from './ListComponent'
 import ListHTMLConverter from './ListHTMLConverter'
 import ListItemHTMLConverter from './ListItemHTMLConverter'
-import InsertListCommand from './InsertListCommand'
 import ToggleListCommand from './ToggleListCommand'
+import IndentListCommand from './IndentListCommand'
 
 export default {
   name: 'list',
@@ -39,6 +39,6 @@ export default {
   ListComponent,
   ListHTMLConverter,
   ListItemHTMLConverter,
-  InsertListCommand,
-  ToggleListCommand
+  ToggleListCommand,
+  IndentListCommand
 }
