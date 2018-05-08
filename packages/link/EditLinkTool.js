@@ -44,7 +44,7 @@ class EditLinkTool extends ToggleTool {
         type: 'url',
         path: urlPath,
         placeholder: 'Paste or type a link url'
-      }),
+      }).ref('input'),
       $$(Button, {
         icon: 'open-link',
         theme: this.props.theme,
