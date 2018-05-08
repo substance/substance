@@ -141,6 +141,10 @@ export function _li1plus(doc) {
   doc.set(['l1-1', 'level'], 2)
 }
 
+export function _li2plus(doc) {
+  doc.set(['l1-2', 'level'], 2)
+}
+
 export const LI21_TEXT = 'l2-1:abcdef'
 export const LI22_TEXT = 'l2-2:0123456'
 
