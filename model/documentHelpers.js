@@ -326,8 +326,11 @@ export function deleteListRange(doc, list, start, end) {
 
   // delete or truncate the first node
   if (firstEntirelySelected) {
-    list.removeItemAt(startPos)
-    deleteNode(doc, startItem)
+    // NOTE: this does not work well, because then
+    // the item where the selection remains would have gone
+    // list.removeItemAt(startPos)
+    // deleteNode(doc, startItem)
+    deleteTextRange(doc, start, null)
   } else {
     deleteTextRange(doc, start, null)
   }

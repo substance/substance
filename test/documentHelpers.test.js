@@ -153,7 +153,8 @@ test("deleteListRange()", (t) => {
     { path: ['l1-1', 'content'], offset: 0 },
     { path: ['l1-3', 'content'], offset: LI3_TEXT }
   )
-  t.nil(doc.get('l1-1'), 'first list item should have been deleted')
+  t.notNil(doc.get('l1-1'), 'first list-item should remain')
+  t.equal(doc.get(['l1-1', 'content']), '', '.. but left empty')
   t.nil(doc.get('l1-2'), 'second list item should have been deleted')
   t.nil(doc.get('l1-3'), 'third list item should have been deleted')
 
