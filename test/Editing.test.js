@@ -1854,6 +1854,18 @@ test("L8-5: Toggling the only list-item of a list into a paragraph", (t) => {
   t.end()
 })
 
+test("L9: Changing the list type", (t) => {
+  let { doc, editorSession} = setupEditor(t, _l1, _l11)
+  editorSession.transaction((tx)=>{
+    let list = tx.get('l1')
+    list.setListType(1, 'order')
+  })
+  let list = doc.get('l1')
+  t.equal(list.getListType(1), 'order', 'level type should have been updated')
+  t.equal(list.getListTypeString(), 'order', 'serialized level type string should have been updated')
+  t.end()
+})
+
 test("IND1: Indenting a ListItem", (t) => {
   let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
