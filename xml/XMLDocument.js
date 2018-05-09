@@ -92,7 +92,9 @@ class XMLDocument extends Document {
           break
         }
         default: {
-          changed[op.path[0]] = true
+          if (op.path) {
+            changed[op.path[0]] = true
+          }
         }
       }
     })
@@ -178,8 +180,7 @@ class XMLDocument extends Document {
           break
         }
         default:
-          /* istanbul ignore next */
-          throw new Error('Illegal state')
+          //
       }
     }
 
