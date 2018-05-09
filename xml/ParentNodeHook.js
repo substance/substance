@@ -18,17 +18,10 @@ class ParentNodeHook {
     let node = doc.get(op.path[0])
     switch(op.type) {
       case 'create': {
-        switch(node._elementType) {
-          case 'element':
-          case 'container': {
-            _setParent(node, node._childNodes)
-            _setRegisteredParent(node)
-            break
-          }
-          default: {
-            _setRegisteredParent(node)
-          }
+        if (node._childNodes) {
+          _setParent(node, node._childNodes)
         }
+        _setRegisteredParent(node)
         break
       }
       case 'update': {
