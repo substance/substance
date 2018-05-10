@@ -13,12 +13,22 @@ export default function renderListNode(listNode, $$) {
       }
     } else if (level > stack.length) {
       for (let j = stack.length; j < level; j++) {
+        let list = stack[j-1]
+        let childCount = list.getChildCount()
+        let item
+        if (childCount === 0) {
+          item = $$('li')
+          list.append(item)
+        } else {
+          item = list.getChildAt(childCount-1)
+        }
         let sublist = $$(_getTagName(j+1))
-        last(stack).append(sublist)
+        item.append(sublist)
         stack.push(sublist)
       }
     }
     console.assert(level === stack.length, 'item.level should now be the same as stack.length')
+    // appending to the current level
     last(stack).append(
       $$(item)
     )

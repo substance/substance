@@ -40,6 +40,14 @@ class VirtualElement extends DOMElement {
     return this.getChildNodes()
   }
 
+  getChildCount() {
+    return this.children.length
+  }
+
+  getChildAt(idx) {
+    return this.children[idx]
+  }
+
   /*
     Provides the component after this VirtualElement has been rendered.
   */
