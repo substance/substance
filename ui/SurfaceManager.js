@@ -25,6 +25,10 @@ class SurfaceManager {
    */
   getSurface(name) {
     if (name) {
+      // DEBUG
+      // if (!this.surfaces.hasOwnProperty(name)) {
+      //   console.log('Unknown surface:', name, 'Registered:', Object.keys(this.surfaces).join(','))
+      // }
       return this.surfaces[name]
     }
   }
@@ -106,7 +110,6 @@ class SurfaceManager {
     // been blurred, e.g., while some component, such as Find-And-Replace
     // dialog has the focus
     if (this.editorSession._blurred) return
-
     let focusedSurface = this.getFocusedSurface()
     // console.log('focusedSurface', focusedSurface)
     if (focusedSurface && !focusedSurface.isDisabled()) {
