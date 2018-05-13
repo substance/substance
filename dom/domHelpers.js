@@ -8,6 +8,13 @@ export function findParentDOMElement(nativeEl) {
   }
 }
 
+export function findParent(el, selector) {
+  while(el) {
+    if (el.is(selector)) return el
+    el = el.getParent()
+  }
+}
+
 export function stop(event) {
   event.stopPropagation()
 }
