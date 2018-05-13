@@ -6,13 +6,16 @@ export function appendChild(xmlNode, child) {
   return xmlNode
 }
 
+export function getChildPos(xmlNode, child) {
+  return xmlNode._childNodes.indexOf(child.id)
+}
+
 export function removeChild(xmlNode, child) {
-  const childId = child.id
-  const childPos = xmlNode._childNodes.indexOf(childId)
+  const childPos = getChildPos(xmlNode, child)
   if (childPos >= 0) {
     removeAt(xmlNode, childPos)
   } else {
-    throw new Error(`node ${childId} is not a child of ${xmlNode.id}`)
+    throw new Error(`Node ${child.id} is not a child of ${xmlNode.id}`)
   }
   return xmlNode
 }
@@ -21,9 +24,9 @@ export function insertBefore(xmlNode, newChild, ref) {
   if (!ref) {
     appendChild(xmlNode, newChild)
   } else {
-    let pos = xmlNode._childNodes.indexOf(ref.id)
+    let pos = getChildPos(xmlNode, ref)
     if (pos < 0) {
-      throw new Error('Given node is not a child.')
+      throw new Error(`Node ${child.id} is not a child of ${xmlNode.id}`)
     }
     insertAt(xmlNode, pos, newChild)
   }
