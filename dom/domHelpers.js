@@ -47,3 +47,21 @@ export function isRightButton(event) {
   }
   return isRightButton
 }
+
+export function getBoundingRect(el) {
+  let _rect = el.getNativeElement().getBoundingClientRect()
+  return {
+    top: _rect.top,
+    left: _rect.left,
+    height: _rect.height,
+    width: _rect.width
+  }
+}
+
+export function isXInside(x, rect) {
+  return x >= rect.left && x <= rect.left+rect.width
+}
+
+export function isYInside(y, rect) {
+  return y >= rect.top && y <= rect.top+rect.height
+}
