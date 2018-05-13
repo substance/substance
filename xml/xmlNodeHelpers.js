@@ -26,7 +26,7 @@ export function insertBefore(xmlNode, newChild, ref) {
   } else {
     let pos = getChildPos(xmlNode, ref)
     if (pos < 0) {
-      throw new Error(`Node ${child.id} is not a child of ${xmlNode.id}`)
+      throw new Error(`Node ${newChild.id} is not a child of ${xmlNode.id}`)
     }
     insertAt(xmlNode, pos, newChild)
   }
