@@ -37,3 +37,13 @@ function _walk(el, cb, level) {
     }
   }
 }
+
+export function isRightButton(event) {
+  let isRightButton = false
+  if (event.hasOwnProperty("which")) {
+    isRightButton = (event.which === 3)
+  } else if (event.hasOwnProperty("button")) {
+    isRightButton = (event.button === 2)
+  }
+  return isRightButton
+}
