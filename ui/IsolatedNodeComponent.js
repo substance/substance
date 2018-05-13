@@ -3,6 +3,7 @@ import Component from './Component'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 
 const BRACKET = 'X'
+const SLASH = '/'.charCodeAt(0)
 
 /*
   Isolation Strategies:
@@ -162,17 +163,17 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
         newState.mode = 'co-selected'
       }
     } else {
-      let isolatedNodeComponent = surface.context.isolatedNodeComponent
-      if (isolatedNodeComponent) {
-        if (isolatedNodeComponent === this) {
-          newState.mode = 'focused'
+      let sel = selState.getSelection()
+      let surfaceId = sel.surfaceId
+      let id = this.getId()
+      if (id.length < surfaceId.length && surfaceId.startsWith(id) && surfaceId.charCodeAt(id.length) === SLASH) {
+        let tail = surfaceId.slice(id.length+1)
+        if (tail.indexOf('/') > 0) {
+          newState.mode = 'co-focused'
           newState.unblocked = true
         } else {
-          let isolatedNodes = this._getIsolatedNodes(selState)
-          if (isolatedNodes.indexOf(this) > -1) {
-            newState.mode = 'co-focused'
-            newState.unblocked = true
-          }
+          newState.mode = 'focused'
+          newState.unblocked = true
         }
       }
     }

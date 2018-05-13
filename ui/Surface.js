@@ -14,7 +14,7 @@ const BROWSER_DELAY = platform.isFF ? 1 : 0
    Abstract interface for editing components.
    Dances with contenteditable, so you don't have to.
 */
-class Surface extends Component {
+export default class Surface extends Component {
 
   constructor(...args) {
     super(...args)
@@ -55,6 +55,7 @@ class Surface extends Component {
   getChildContext() {
     return {
       surface: this,
+      parentSurfaceId: this.getId(),
       doc: this.getDocument(),
       // HACK: clearing isolatedNodeComponent so that we can easily know
       // if this surface is within an isolated node
@@ -825,24 +826,10 @@ Surface.prototype._isSurface = true
   - nested containers: 'body/section1'
 */
 Surface.createSurfaceId = function(surface) {
-  let isolatedNodeComponent = surface.context.isolatedNodeComponent
-  if (isolatedNodeComponent) {
-    let parentSurface = isolatedNodeComponent.context.surface
-    // nested containers
-    if (surface.isContainerEditor()) {
-      if (isolatedNodeComponent._isInlineNodeComponent) {
-        return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
-      } else {
-        return parentSurface.id + '/' + surface.name
-      }
-    }
-    // other isolated nodes such as tables, figures, etc.
-    else {
-      return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + surface.name
-    }
+  let parentSurfaceId = surface.context.parentSurfaceId
+  if (parentSurfaceId) {
+    return parentSurfaceId + '/' + surface.name
   } else {
     return surface.name
   }
 }
-
-export default Surface
