@@ -40,9 +40,9 @@ function _walk(el, cb, level) {
 
 export function isRightButton(event) {
   let isRightButton = false
-  if (event.hasOwnProperty("which")) {
+  if ('which' in event) {
     isRightButton = (event.which === 3)
-  } else if (event.hasOwnProperty("button")) {
+  } else if ('button' in event) {
     isRightButton = (event.button === 2)
   }
   return isRightButton
