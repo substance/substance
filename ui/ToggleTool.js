@@ -8,13 +8,9 @@ import Tooltip from './Tooltip'
   is just the visual representation of the command state. You can use this component
   for simple button-like tools, or extend it to create your own UI.
 
-  @class
-  @component
-
   @example
 
   Usually instantiated in a Toolbar or an Overlay. Usage:
-
 */
 export default class ToggleTool extends Component {
 
@@ -63,9 +59,6 @@ export default class ToggleTool extends Component {
     return ''
   }
 
-  /*
-    For now always same as tool name
-  */
   getCommandName() {
     return this.getName()
   }

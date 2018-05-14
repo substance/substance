@@ -1,6 +1,6 @@
 import ToolPanel from '../../ui/ToolPanel'
 
-class ContextMenu extends ToolPanel {
+export default class ContextMenu extends ToolPanel {
 
   didMount() {
     super.didMount()
@@ -25,10 +25,6 @@ class ContextMenu extends ToolPanel {
     )
     return el
   }
-
-  /*
-    Override if you just want to use a different style
-  */
 
   show(hints) {
     this.el.removeClass('sm-hidden')
@@ -62,5 +58,3 @@ class ContextMenu extends ToolPanel {
     return this.props.theme || 'dark'
   }
 }
-
-export default ContextMenu
