@@ -29,17 +29,15 @@ export default class ToolPanel extends Component {
   }
 
   renderEntries($$) {
-    let els = []
-    this.props.toolPanel.forEach((entry) => {
+    return this.props.toolPanel.map(entry => {
       let entryTypeComponents = this.getEntryTypeComponents()
       let ComponentClass = entryTypeComponents[entry.type]
       if (!ComponentClass) throw new Error('Toolpanel entry type not found')
       let props = Object.assign({}, entry, { theme: this.getTheme() })
-      els.push(
-        $$(ComponentClass, props).ref(entry.name)
-      )
+      let el = $$(ComponentClass, props)
+      if (entry.name) el.ref(entry.name)
+      return el
     })
-    return els
   }
 
   hasEnabledTools() {
