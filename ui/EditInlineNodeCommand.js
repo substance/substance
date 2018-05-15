@@ -15,9 +15,16 @@ class EditInlineNodeCommand extends Command {
       active: false
     }
     let annos = this._getAnnotationsForSelection(params)
-    if (annos.length > 0 && annos[0].getSelection().equals(sel)) {
-      newState.disabled = false
-      newState.nodeId = annos[0].id
+
+    // Among the annotations found we need to pick the first that exactly
+    // matches the current selection
+    if (annos.length > 0) {
+      annos.forEach(anno => {
+        if (anno.getSelection().equals(sel)) {
+          newState.disabled = false
+          newState.nodeId = anno.id
+        }
+      })
     }
     return newState
   }
