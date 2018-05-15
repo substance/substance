@@ -58,6 +58,32 @@ export function getBoundingRect(el) {
   }
 }
 
+export function getBoundingRectForRects(...rects) {
+  let top, left, bottom, right
+  if (rects.length > 0) {
+    let first = rects[0]
+    top = first.top
+    left = first.left
+    bottom = top + first.height
+    right = left + first.width
+    for (let i = 1; i < rects.length; i++) {
+      let r = rects[i]
+      top = Math.min(top, r.top)
+      left = Math.min(left, r.left)
+      bottom = Math.max(bottom, r.top+r.height)
+      right = Math.max(right, r.left+r.width)
+    }
+  }
+  return {
+    top,
+    left,
+    right,
+    bottom,
+    height: bottom-top,
+    width: right-left
+  }
+}
+
 export function isXInside(x, rect) {
   return x >= rect.left && x <= rect.left+rect.width
 }
