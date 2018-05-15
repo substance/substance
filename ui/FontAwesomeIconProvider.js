@@ -1,28 +1,32 @@
 import forEach from '../util/forEach'
+import isString from '../util/isString'
 import FontAwesomeIcon from './FontAwesomeIcon'
 
-class FontAwesomeIconProvider {
+export default class FontAwesomeIconProvider {
 
   constructor(icons) {
     this.faMap = {}
     this.textMap = {}
-    forEach(icons, function(config, name) {
-      let faClass = config['fontawesome']
-      if (faClass) {
-        this.addFAIcon(name, faClass)
+    forEach(icons, (config, name) => {
+      let faConfig = config['fontawesome']
+      if (faConfig) {
+        if (isString(faConfig)) {
+          faConfig = { icon: faConfig }
+        }
+        this.addFAIcon(name, faConfig)
       }
       let text = config['text']
       if (text) {
         this.addTextIcon(name, text)
       }
-    }.bind(this))
+    })
   }
 
   renderIcon($$, name) {
-    let faClass = this.faMap[name]
+    let faProps = this.faMap[name]
     let text = this.textMap[name]
-    if (faClass) {
-      return $$(FontAwesomeIcon, { icon: faClass })
+    if (faProps) {
+      return $$(FontAwesomeIcon, faProps)
     } else if (text) {
       return text
     }
@@ -36,5 +40,3 @@ class FontAwesomeIconProvider {
     this.textMap[name] = text
   }
 }
-
-export default FontAwesomeIconProvider

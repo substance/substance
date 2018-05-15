@@ -127,11 +127,20 @@ class XMLDocumentNode extends DocumentNode {
       throw new Error("'id' is read-only and can not be changed")
     }
     this.getDocument().set([this.id, 'attributes', name], val)
+    return this
   }
 
   getAttribute(name) {
     if (name === 'id') return this.id
     return this.attributes[name]
+  }
+
+  removeAttribute(name) {
+    if (this.attributes.hasOwnProperty(name)) {
+      this.getDocument().set([this.id, 'attributes', name], undefined)
+      delete this.attributes[name]
+    }
+    return this
   }
 
   getAttributes() {

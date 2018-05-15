@@ -1,7 +1,8 @@
 import Component from '../../ui/Component'
 import TextPropertyEditor from '../../ui/TextPropertyEditor'
 
-class TableCellComponent extends Component {
+export default class TableCellComponent extends Component {
+
   render($$) {
     let node = this.props.node
     let el = $$('td').addClass('sc-table-cell')
@@ -32,6 +33,3 @@ class TableCellComponent extends Component {
 }
 
 TableCellComponent.prototype._isTableCellComponent = true
-
-
-export default TableCellComponent

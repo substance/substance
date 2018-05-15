@@ -17,7 +17,7 @@ import forEach from '../util/forEach'
   })
   ```
 */
-class ToolGroup extends Component {
+export default class ToolGroup extends Component {
 
   /*
     Determine wether a tool should be shown or not
@@ -112,5 +112,3 @@ class ToolGroup extends Component {
     return tools[commandName] || DefaultToolClass
   }
 }
-
-export default ToolGroup

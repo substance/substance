@@ -34,6 +34,7 @@
   <define name="document">
     <element name="document">
       <attribute name="id" />
+      <attribute name="name" />
       <attribute name="type" />
       <attribute name="path" />
     </element>
@@ -42,6 +43,7 @@
   <define name="asset">
     <element name="asset">
       <attribute name="id" />
+      <attribute name="name" />
       <attribute name="type" />
       <attribute name="path" />
     </element>

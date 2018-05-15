@@ -8,7 +8,7 @@ class AbstractIsolatedNodeComponent extends Component {
     super(...args)
 
     this.name = this.props.node.id
-    this._id = this.context.surface.id +'/'+this.name
+    this._id = this.context.parentSurfaceId +'/'+ this.name
     this._state = {
       selectionFragment: null
     }
@@ -23,6 +23,7 @@ class AbstractIsolatedNodeComponent extends Component {
 
   getChildContext() {
     return {
+      parentSurfaceId: this.getId(),
       isolatedNodeComponent: this,
       // TODO: we should clear 'surface' here
       // so that we know that we are not controlled by a surface

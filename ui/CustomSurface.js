@@ -9,6 +9,17 @@ export default class CustomSurface extends Component {
     this._surfaceId = this._createSurfaceId()
   }
 
+  getChildContext() {
+    return {
+      surface: this,
+      parentSurfaceId: this.getId()
+      // HACK: clearing isolatedNodeComponent so that we can easily know
+      // if this surface is within an isolated node
+      // isolatedNodeComponent: null
+    }
+  }
+
+
   didMount() {
     const surfaceManager = this.context.editorSession.surfaceManager
     surfaceManager.registerSurface(this)
