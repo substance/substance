@@ -58,16 +58,16 @@ class DocumentChange {
     let affectedContainerAnnos = []
 
     // TODO: we will introduce a special operation type for coordinates
-    function _checkAnnotation(op) {
+    function _checkAnnotation(op, upd) {
       switch (op.type) {
         case "create":
         case "delete": {
           let node = op.val
           if (node.hasOwnProperty('start')) {
-            updated[node.start.path] = true
+            upd[node.start.path] = true
           }
           if (node.hasOwnProperty('end')) {
-            updated[node.end.path] = true
+            upd[node.end.path] = true
           }
           break
         }
@@ -77,7 +77,7 @@ class DocumentChange {
           let node = doc.get(op.path[0])
           if (node) {
             if (node.isPropertyAnnotation()) {
-              updated[node.start.path] = true
+              upd[node.start.path] = true
             } else if (node.isContainerAnnotation()) {
               affectedContainerAnnos.push(node)
             }
@@ -105,7 +105,7 @@ class DocumentChange {
         // also mark the node itself as dirty
         updated[op.path[0]] = true
       }
-      _checkAnnotation(op)
+      _checkAnnotation(op, updated)
     }
 
     affectedContainerAnnos.forEach(function(anno) {
