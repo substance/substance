@@ -42,6 +42,10 @@ export default class CustomSurface extends Component {
     return this._surfaceId
   }
 
+  getSurfaceId() {
+    return this.getId()
+  }
+
   getContainer() {
     return undefined
   }
