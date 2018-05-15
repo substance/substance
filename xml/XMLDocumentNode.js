@@ -136,8 +136,10 @@ class XMLDocumentNode extends DocumentNode {
   }
 
   removeAttribute(name) {
-    this.getDocument().set([this.id, 'attributes', name], undefined)
-    delete this.attributes[name]
+    if (this.attributes.hasOwnProperty(name)) {
+      this.getDocument().set([this.id, 'attributes', name], undefined)
+      delete this.attributes[name]
+    }
     return this
   }
 
