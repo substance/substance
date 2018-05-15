@@ -8,10 +8,7 @@ class AbstractIsolatedNodeComponent extends Component {
     super(...args)
 
     this.name = this.props.node.id
-    this._id = this.context.parentSurfaceId +'/'+ this.name
-    this._state = {
-      selectionFragment: null
-    }
+    this._state = { selectionFragment: null }
 
     this.handleAction('escape', this.escape)
     this.ContentClass = this._getContentClass(this.props.node)
@@ -19,6 +16,11 @@ class AbstractIsolatedNodeComponent extends Component {
     // NOTE: FF does not allow to navigate contenteditable isles
     let useBlocker = platform.isFF || !this.ContentClass.noBlocker
     this.blockingMode = useBlocker ? 'closed' : 'open'
+  }
+
+  getInitialState() {
+    let selState = this.context.editorSession.getSelectionState()
+    return this._deriveStateFromSelectionState(selState)
   }
 
   getChildContext() {
@@ -31,10 +33,6 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  getInitialState() {
-    let selState = this.context.editorSession.getSelectionState()
-    return this._deriveStateFromSelectionState(selState)
-  }
 
   didMount() {
     super.didMount()
@@ -67,6 +65,11 @@ class AbstractIsolatedNodeComponent extends Component {
   }
 
   getId() {
+    // HACK: doing this lazily here instead of in the constructor.
+    // This is because `getInitialState()` already needs this information
+    if (!this._id) {
+      this._id = this.context.parentSurfaceId +'/'+ this.name
+    }
     return this._id
   }
 
