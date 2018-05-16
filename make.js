@@ -31,42 +31,45 @@ function buildLib(target, production) {
   const useStrict = production
   if (target === 'browser' || target === 'all') {
     targets.push({
-      dest: DIST+'substance.js',
-      format: 'umd', moduleName: 'substance',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
+      file: DIST+'substance.js',
+      format: 'umd',
+      name: 'substance',
+      sourcemapRoot: __dirname, sourcemapPrefix: 'substance',
     })
   }
   if (target === 'browser:legacy') {
     targets.push({
-      dest: DIST+'substance.es5.js',
-      format: 'umd', moduleName: 'substance',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
+      file: DIST+'substance.es5.js',
+      format: 'umd',
+      name: 'substance',
+      sourcemapRoot: __dirname, sourcemapPrefix: 'substance',
       strict: useStrict
     })
   }
   if (target === 'node' || target === 'all') {
     targets.push({
-      dest: DIST+'substance.cjs.js',
+      file: DIST+'substance.cjs.js',
       format: 'cjs',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+      sourcemapRoot: __dirname, sourcemapPrefix: 'substance'
     })
   }
   if (target === 'es' || target === 'all') {
     targets.push({
-      dest: DIST+'substance.es.js',
+      file: DIST+'substance.es.js',
       format: 'es',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+      sourcemapRoot: __dirname, sourcemapPrefix: 'substance'
     })
   }
   if (target === 'coverage') {
     targets.push({
-      dest: 'tmp/substance.cov.js',
-      format: 'umd', moduleName: 'substance',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+      file: 'tmp/substance.cov.js',
+      format: 'umd',
+      name: 'substance',
+      sourcemapRoot: __dirname, sourcemapPrefix: 'substance'
     })
   }
   const config = {
-    targets,
+    output: targets,
     alias: {
       'domutils': path.join(__dirname, 'vendor/domutils.js'),
       'entities': path.join(__dirname, 'vendor/entities.js'),
@@ -106,23 +109,27 @@ function buildLib(target, production) {
 
 function buildTestsBrowser() {
   b.js('test/**/*.test.js', {
-    dest: 'tmp/tests.js',
-    format: 'umd', moduleName: 'tests',
+    output: [{
+      file: 'tmp/tests.js',
+      format: 'umd',
+      name: 'tests'
+    }],
     external: {
       'substance': 'window.substance',
       'substance-test': 'window.substanceTest'
-    },
+    }
   })
 }
 
 function buildTestsNode() {
   b.js('test/**/*.test.js', {
-    dest: 'tmp/tests.cjs.js',
-    format: 'cjs',
+    output: [{
+      file: 'tmp/tests.cjs.js',
+      format: 'cjs'
+    }],
     external: ['substance-test'],
     alias: {
-      'substance':
-        path.join(__dirname, 'dist/substance.es.js')
+      'substance': path.join(__dirname, 'dist/substance.es.js')
     }
   })
 }

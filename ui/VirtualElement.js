@@ -522,7 +522,9 @@ class VirtualComponent extends VirtualHTMLElement {
     this.children = props.children
   }
 
-  get _isVirtualComponent() { return true; }
+  get _isVirtualHTMLElement() { return false }
+
+  get _isVirtualComponent() { return true }
 
   getComponent() {
     return this._comp
