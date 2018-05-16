@@ -33,18 +33,18 @@ function ComponentTests(debug, memory) {
     class NilRender extends TestComponent {
       render() {}
     }
-    t.throws(function() {
+    t.throws(() => {
       NilRender.render()
     }, "Should throw an exception when render does return nil")
 
     class InvalidRender extends TestComponent {
-      render() {
+      render($$) {
         return $$(Simple)
       }
     }
-    t.throws(function() {
+    t.throws(() => {
       InvalidRender.render()
-    }, "Should throw an exception when render does not return a low-level element but a Component")
+    }, /must return a plain element/, "Should throw an exception when render does not return a plain element")
 
     t.end()
   })
