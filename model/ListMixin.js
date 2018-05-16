@@ -3,84 +3,82 @@ import isArray from '../util/isArray'
 
 const ERR_ABSTRACT = 'This method is abstract!'
 
-export default function(DocumentNode) {
-
+export default function (DocumentNode) {
   class AbstractList extends DocumentNode {
-
-    isList() {
+    isList () {
       return true
     }
 
-    createListItem(text) {
+    createListItem (text) {
       throw new Error(ERR_ABSTRACT)
     }
 
-    getItems() {
+    getItems () {
       throw new Error(ERR_ABSTRACT)
     }
 
-    getItemsPath() {
+    getItemsPath () {
       throw new Error(ERR_ABSTRACT)
     }
 
-    insertItemAt(pos, item) {
+    insertItemAt (pos, item) {
       throw new Error(ERR_ABSTRACT)
     }
 
-    removeItemAt(pos) {
+    removeItemAt (pos) {
       throw new Error(ERR_ABSTRACT)
     }
 
     // general
 
-    getItemAt(idx) {
+    getItemAt (idx) {
       return this.getItems()[idx]
     }
 
-    getItemPosition(item) {
+    getItemPosition (item) {
       return this.getItems().indexOf(item)
     }
 
-    getLength() {
+    getLength () {
       return this.getItems().length
     }
 
-    getFirstItem() {
+    getFirstItem () {
       return this.getItemAt(0)
     }
 
-    getLastItem() {
-      return this.getItemAt(this.getLength()-1)
+    getLastItem () {
+      return this.getItemAt(this.getLength() - 1)
     }
 
-    appendItem(item) {
+    appendItem (item) {
       this.insertItemAt(this.items.length, item)
     }
 
-    removeItem(item) {
+    removeItem (item) {
       const pos = this.getItemPosition(item)
       if (pos >= 0) {
         this.removeItemAt(pos)
       }
     }
 
-    isEmpty() {
+    isEmpty () {
       return this.getLength() === 0
     }
 
-    get length() {
+    get length () {
       return this.getLength()
     }
 
-    getListType(level) {
+    getListType (level) {
       // ATTENTION: level start with 1
-      let idx = level-1
+      let idx = level - 1
       let listTypes = this._getListTypes()
       return listTypes[idx] || 'bullet'
     }
 
-    setListType(level, listType) {
-      let idx = level-1
+    setListType (level, listType) {
+      let idx = level - 1
       let listTypes = this._getListTypes()
       if (listTypes.length < level) {
         for (let i = 0; i < idx; i++) {
@@ -91,12 +89,12 @@ export default function(DocumentNode) {
       this._setListTypes(listTypes)
     }
 
-    _getListTypes() {
+    _getListTypes () {
       let listTypeString = this.getListTypeString()
       return listTypeString ? listTypeString.split(',').map(s => s.trim()) : []
     }
 
-    _setListTypes(listTypeString) {
+    _setListTypes (listTypeString) {
       if (isArray(listTypeString)) {
         listTypeString = listTypeString.join(',')
       }

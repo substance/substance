@@ -11,8 +11,7 @@ import XMLEditingInterface from './XMLEditingInterface'
 
 export default
 class XMLDocument extends Document {
-
-  _initialize() {
+  _initialize () {
     this.nodeFactory = new DocumentNodeFactory(this)
     this.data = new IncrementalData(this.schema, this.nodeFactory)
     // all by type
@@ -22,7 +21,7 @@ class XMLDocument extends Document {
     ParentNodeHook.register(this)
   }
 
-  toXML() {
+  toXML () {
     let dom = DefaultDOMElement.createDocument('xml')
     dom.setDoctype(...this.getDocTypeParams())
     let xml = dom.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"')
@@ -32,17 +31,17 @@ class XMLDocument extends Document {
     return dom
   }
 
-  getDocTypeParams() {
+  getDocTypeParams () {
     // return [qualifiedNameStr, publicId, systemId]
     throw new Error('This method is abstract')
   }
 
-  getXMLSchema() {
+  getXMLSchema () {
     // should provide an XMLSchema instance
     throw new Error('This method is abstract')
   }
 
-  getRootNode() {
+  getRootNode () {
     // should provide the root-element
     throw new Error('This method is abstract')
   }
@@ -50,23 +49,23 @@ class XMLDocument extends Document {
   /*
     Provide a <!DOCTYPE ...> element as a string here
   */
-  getDocTypeAsString() {
+  getDocTypeAsString () {
     return new Error('This method is abstract')
   }
 
-  createEditingInterface() {
+  createEditingInterface () {
     return new XMLEditingInterface(this)
   }
 
-  find(cssSelector) {
+  find (cssSelector) {
     return this.getRootNode().find(cssSelector)
   }
 
-  findAll(cssSelector) {
+  findAll (cssSelector) {
     return this.getRootNode().findAll(cssSelector)
   }
 
-  createElement(tagName, data) {
+  createElement (tagName, data) {
     let node = this.create(Object.assign({
       id: uuid(tagName),
       type: tagName
@@ -74,20 +73,20 @@ class XMLDocument extends Document {
     return node
   }
 
-  getElementSchema(type) {
+  getElementSchema (type) {
     return this.getXMLSchema().getElementSchema(type)
   }
 
-  _validateChange(change) {
+  _validateChange (change) {
     let changed = {}
     let deleted = []
     change.ops.forEach((op) => {
       switch (op.type) {
-        case "delete": {
+        case 'delete': {
           deleted.push(op.val.id)
           break
         }
-        case "create": {
+        case 'create': {
           changed[op.val.id] = true
           break
         }
@@ -120,7 +119,7 @@ class XMLDocument extends Document {
     Experimental: analyzing the change on-the-fly
     so that we can track changes hierarchically
   */
-  _apply(documentChange) {
+  _apply (documentChange) {
     // TODO is this save?
     if (!documentChange.ops) return
 
@@ -131,7 +130,7 @@ class XMLDocument extends Document {
 
     const doc = this
 
-    function _recordUpdate(id, op) {
+    function _recordUpdate (id, op) {
       let record = updated[id]
       if (!record) {
         record = updated[id] = { ops: [] }
@@ -141,11 +140,11 @@ class XMLDocument extends Document {
     }
 
     // TODO: we will introduce a special operation type for coordinates
-    function _checkAnnotation(op) {
+    function _checkAnnotation (op) {
       // HACK: detecting annotation changes in an opportunistic way
       switch (op.type) {
-        case "create":
-        case "delete": {
+        case 'create':
+        case 'delete': {
           const annoData = op.val
           if (annoData.hasOwnProperty('start')) {
             updated[annoData.start.path] = true
@@ -163,8 +162,8 @@ class XMLDocument extends Document {
           }
           break
         }
-        case "update":
-        case "set": {
+        case 'update':
+        case 'set': {
           let anno = doc.get(op.path[0])
           if (anno) {
             if (anno.isPropertyAnnotation()) {
@@ -188,7 +187,7 @@ class XMLDocument extends Document {
       // before applying the change we need to track the change
       // Note: this does not work for general ops,
       // only for ops generated via the XMLDocument API
-      switch(op.type) {
+      switch (op.type) {
         case 'create': {
           created[op.path[0]] = op.val
           break
@@ -222,7 +221,6 @@ class XMLDocument extends Document {
     documentChange.deleted = deleted
     documentChange._extracted = true
   }
-
 }
 
 XMLDocument.prototype._isXMLDocument = true

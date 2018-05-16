@@ -2,8 +2,7 @@ import Component from '../../ui/Component'
 import TableCellComponent from './TableCellComponent'
 
 class TableComponent extends Component {
-
-  render($$) {
+  render ($$) {
     let el = $$('table').addClass('sc-table')
     let node = this.props.node
     let doc = this.props.node.getDocument()
@@ -31,13 +30,13 @@ class TableComponent extends Component {
     return el
   }
 
-  onClick(event) {
+  onClick (event) {
     event.stopPropagation()
     // console.log('Clicked on Table', this.props.node.id, event.target)
   }
 
   // TODO: this should only be used for the initial table state
-  onDblClick(event) {
+  onDblClick (event) {
     event.stopPropagation()
     // console.log('DblClicked on Table', this.props.node.id, event.target)
 
@@ -61,14 +60,13 @@ class TableComponent extends Component {
     }
   }
 
-  grabFocus() {
+  grabFocus () {
     let cellId = this.props.node.cells[0][0]
     if (cellId) {
       let comp = this.refs[cellId]
       comp.grabFocus()
     }
   }
-
 }
 
 TableComponent.hasDropzones = true

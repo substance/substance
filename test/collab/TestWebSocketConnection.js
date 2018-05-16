@@ -5,8 +5,7 @@ import TestWebSocket from './TestWebSocket'
   Browser WebSocket abstraction. Handles reconnects etc.
 */
 class TestWebSocketConnection extends ClientConnection {
-
-  _createWebSocket() {
+  _createWebSocket () {
     // this.config has messageQueue, clientId, serverId
     var ws = new TestWebSocket(this.config)
     return ws
@@ -15,30 +14,30 @@ class TestWebSocketConnection extends ClientConnection {
   /*
     Manual connect
   */
-  connect() {
+  connect () {
     this._connect()
   }
 
   /*
     Manual disconnect
   */
-  disconnect() {
+  disconnect () {
     this._disconnect()
   }
 
-  _connect(...args) {
+  _connect (...args) {
     // Create websocket and bind events open/close/message
     super._connect(...args)
     // connects websocket to the messageQueue and triggers 'open' event
     this.ws.connect()
   }
 
-  _disconnect(...args) {
+  _disconnect (...args) {
     this.ws.disconnect()
     super._disconnect(...args)
   }
 
-  _onConnectionClose() {
+  _onConnectionClose () {
     this.emit('close')
   }
 
@@ -46,14 +45,13 @@ class TestWebSocketConnection extends ClientConnection {
     Our message queue holds JS objects already so we just
     pass through the msg
   */
-  serializeMessage(msg) {
+  serializeMessage (msg) {
     return msg
   }
 
-  deserializeMessage(msg) {
+  deserializeMessage (msg) {
     return msg
   }
-
 }
 
 export default TestWebSocketConnection

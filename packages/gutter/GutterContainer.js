@@ -9,11 +9,7 @@ import Component from '../../ui/Component'
   @component
 */
 class GutterContainer extends Component {
-  constructor(...args) {
-    super(...args)
-  }
-
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-gutter-container sm-hidden')
     let gutterEl = this.props.gutter
     // TODO: Assigning a ref for a VirtualElement that gets passed via
@@ -23,26 +19,26 @@ class GutterContainer extends Component {
     return el
   }
 
-  didMount() {
+  didMount () {
     // rerender the overlay content after anything else has been updated
     this.context.editorSession.onRender('commandStates', this.rerender, this)
   }
 
-  dispose() {
+  dispose () {
     this.context.editorSession.off(this)
   }
 
-  position(hints) {
+  position (hints) {
     // HACK: we navigate the dom as we can't use
     // this.refs.gutter (see comment in render method)
     let gutterEl = this.el.children[0]._comp
     if (gutterEl.isVisible()) {
-      this._position(hints);
+      this._position(hints)
       this.el.removeClass('sm-hidden')
     }
   }
 
-  _position(hints) {
+  _position (hints) {
     if (hints) {
       // By default, gutter is centered (y-axis) and left of the scrollPane content (x-axis)
       this.el.css('top', hints.rectangle.top + hints.rectangle.height - hints.rectangle.height / 2)

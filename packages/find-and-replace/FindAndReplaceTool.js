@@ -2,16 +2,15 @@ import ToggleTool from '../../ui/ToggleTool'
 import debounce from '../../util/debounce'
 
 class FindAndReplaceTool extends ToggleTool {
-
-  didMount() {
+  didMount () {
     this.context.editorSession.onPosition(this._onPosition, this)
   }
 
-  dispose() {
+  dispose () {
     this.context.editorSession.off(this)
   }
 
-  _onPosition() {
+  _onPosition () {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     // After each operation, such as start find or find next,
     // findAndReplaceManager leaves a flag `_requestLookupMatch` to indicate we
@@ -26,11 +25,11 @@ class FindAndReplaceTool extends ToggleTool {
         this.refs.findString.el.focus()
         this.refs.findString.el.select()
         findAndReplaceManager._requestFocusSearchString = false
-      },0)
+      }, 0)
     }
   }
 
-  render($$) {
+  render ($$) {
     let commandState = this.props.commandState
     let el = $$('div').addClass('sc-find-and-replace-tool')
 
@@ -115,7 +114,7 @@ class FindAndReplaceTool extends ToggleTool {
     return el
   }
 
-  _renderStatusDescription($$) {
+  _renderStatusDescription ($$) {
     let commandState = this.props.commandState
     let statusDescriptionEl = $$('div').addClass('se-status').append(
       $$('div').addClass('se-status-title').append(
@@ -128,14 +127,14 @@ class FindAndReplaceTool extends ToggleTool {
         $$('div').addClass('se-status-description').append(
           commandState.totalMatches,
           ' results found for ',
-          '"'+ commandState.findString +'"'
+          '"' + commandState.findString + '"'
         )
       )
     } else if (commandState.findString !== '') {
       statusDescriptionEl.append(
         $$('div').addClass('se-status-description').append(
           'No results found for ',
-          '"'+ commandState.findString +'"'
+          '"' + commandState.findString + '"'
         )
       )
     } else {
@@ -151,7 +150,7 @@ class FindAndReplaceTool extends ToggleTool {
   /*
     We disable selection rendering in the surface, while our tool has the focus
   */
-  _onFocus() {
+  _onFocus () {
     let editorSession = this.context.editorSession
     editorSession.setBlurred(true)
     // HACK: we need to manually start a flow, otherwise tools would not update visually
@@ -161,12 +160,12 @@ class FindAndReplaceTool extends ToggleTool {
   /*
     Re-enable selection rendering in surface
   */
-  _onBlur() {
+  _onBlur () {
     let editorSession = this.context.editorSession
     editorSession.setBlurred(false)
   }
 
-  _renderStatusCounter($$) {
+  _renderStatusCounter ($$) {
     let commandState = this.props.commandState
     let statusCounterEl
 
@@ -179,27 +178,26 @@ class FindAndReplaceTool extends ToggleTool {
     return statusCounterEl
   }
 
-  _findNext() {
+  _findNext () {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.findNext()
   }
 
-  _replaceNext() {
+  _replaceNext () {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.replaceNext()
   }
 
-  _replaceAll() {
+  _replaceAll () {
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.replaceAll()
   }
-
 
   /*
     Returns true if keyboard event is a text input
   */
 
-  findStringHasChanged() {
+  findStringHasChanged () {
     let findString = this.refs.findString.val()
     let previousFindString = this._previousFindString
     this._previousFindString = findString
@@ -211,26 +209,26 @@ class FindAndReplaceTool extends ToggleTool {
 
     All matches are highlighted in the document and the first one is selected.
   */
-  _startFind() {
+  _startFind () {
     let editorSession = this.context.editorSession
     let findString = this.refs.findString.val()
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
     findAndReplaceManager.startFind(findString)
   }
 
-  _scrollToSelectedMatch() {
+  _scrollToSelectedMatch () {
     let editorSession = this.context.editorSession
     let surface = editorSession.getFocusedSurface()
     surface.context.scrollPane.scrollTo('.sc-selected-match', 'onlyIfNotVisible')
   }
 
-  _triggerFindNext(e) {
+  _triggerFindNext (e) {
     if (e.keyCode === 13) {
       this._findNext()
     }
   }
 
-  _triggerReplace(e) {
+  _triggerReplace (e) {
     if (e.keyCode === 13) {
       this._replaceNext()
     }
@@ -241,12 +239,11 @@ class FindAndReplaceTool extends ToggleTool {
 
     NOTE: no flow is triggered here
   */
-  _setReplaceString() {
+  _setReplaceString () {
     let replaceString = this.refs.replaceString.val()
     let findAndReplaceManager = this.context.editorSession.getManager('find-and-replace')
     findAndReplaceManager.setReplaceString(replaceString)
   }
-
 }
 
 export default FindAndReplaceTool

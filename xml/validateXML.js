@@ -1,4 +1,4 @@
-export default function validateXML(xmlSchema, dom) {
+export default function validateXML (xmlSchema, dom) {
   let root = dom.find(xmlSchema.getStartElement())
   if (!root) {
     return {
@@ -12,11 +12,11 @@ export default function validateXML(xmlSchema, dom) {
   }
 }
 
-function validateElement(xmlSchema, el) {
+function validateElement (xmlSchema, el) {
   let errors = []
   let valid = true
   let q = [el]
-  while(q.length>0) {
+  while (q.length > 0) {
     let next = q.shift()
     let res = xmlSchema.validateElement(next)
     if (!res.ok) {

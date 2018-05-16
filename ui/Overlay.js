@@ -4,8 +4,7 @@ import ToolPanel from './ToolPanel'
   A default implementation to render the content for the overlay (aka popup) tools.
 */
 class Overlay extends ToolPanel {
-
-  didMount() {
+  didMount () {
     super.didMount()
     if (!this.context.scrollPane) {
       throw new Error('Requires scrollPane context')
@@ -13,15 +12,15 @@ class Overlay extends ToolPanel {
     this.context.scrollPane.on('selection:positioned', this._onSelectionPositioned, this)
   }
 
-  dispose() {
+  dispose () {
     super.dispose()
     this.context.scrollPane.off(this)
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-overlay')
     el.addClass('sm-hidden')
-    el.addClass('sm-theme-'+this.getTheme())
+    el.addClass('sm-theme-' + this.getTheme())
     el.append(
       $$('div').addClass('se-active-tools').append(
         this.renderEntries($$)
@@ -30,16 +29,16 @@ class Overlay extends ToolPanel {
     return el
   }
 
-  show(hints) {
+  show (hints) {
     this.el.removeClass('sm-hidden')
     this._position(hints)
   }
 
-  hide() {
+  hide () {
     this.el.addClass('sm-hidden')
   }
 
-  _onSelectionPositioned(hints) {
+  _onSelectionPositioned (hints) {
     if (this.hasEnabledTools()) {
       this.el.removeClass('sm-hidden')
       let overlayWidth = this.el.htmlProp('offsetWidth')
@@ -47,7 +46,7 @@ class Overlay extends ToolPanel {
       let selectionMaxWidth = selRect.width
       // By default, Overlays are aligned center/bottom to the selection
       this.el.css('top', selRect.top + selRect.height)
-      let leftPos = selRect.left + selectionMaxWidth/2 - overlayWidth/2
+      let leftPos = selRect.left + selectionMaxWidth / 2 - overlayWidth / 2
       // Must not exceed left bound
       leftPos = Math.max(leftPos, 0)
       // Must not exceed right bound
@@ -59,10 +58,9 @@ class Overlay extends ToolPanel {
     }
   }
 
-  getTheme() {
+  getTheme () {
     return this.props.theme || 'dark'
   }
-
 }
 
 export default Overlay

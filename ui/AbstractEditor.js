@@ -16,26 +16,25 @@ import DOMSelection from './DOMSelection'
   ```
 */
 export default class AbstractEditor extends Component {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     this._initialize(this.props)
   }
 
-  didMount() {
+  didMount () {
     // Connect editorSession with editor component
     this.getEditorSession().attachEditor(this)
   }
 
-  dispose() {
+  dispose () {
     this._dispose()
   }
 
-  _initialize(props) {
+  _initialize (props) {
     const editorSession = props.editorSession
     if (!editorSession) {
-      throw new Error('EditorSession instance required');
+      throw new Error('EditorSession instance required')
     }
     this.editorSession = editorSession
     this.doc = editorSession.getDocument()
@@ -71,7 +70,7 @@ export default class AbstractEditor extends Component {
     editorSession.onRender('lang', this.rerender, this)
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     let newSession = nextProps.editorSession
     let shouldDispose = newSession && newSession !== this.editorSession
     if (shouldDispose) {
@@ -80,7 +79,7 @@ export default class AbstractEditor extends Component {
     }
   }
 
-  _dispose() {
+  _dispose () {
     const editorSession = this.getEditorSession()
     editorSession.off(this)
     editorSession.detachEditor(this)
@@ -92,7 +91,7 @@ export default class AbstractEditor extends Component {
     this.resourceManager.dispose()
   }
 
-  getChildContext() {
+  getChildContext () {
     return {
       editor: this,
       editorSession: this.editorSession,
@@ -119,36 +118,35 @@ export default class AbstractEditor extends Component {
   /*
     Handle document key down events.
   */
-  onKeyDown(event) {
+  onKeyDown (event) {
     // ignore fake IME events (emitted in IE and Chromium)
-    if ( event.key === 'Dead' ) return
+    if (event.key === 'Dead') return
     // Handle custom keyboard shortcuts globally
     let custom = this.editorSession.keyboardManager.onKeydown(event)
     return custom
   }
 
-  getDocument() {
+  getDocument () {
     return this.editorSession.getDocument()
   }
 
-  getConfigurator() {
+  getConfigurator () {
     return this.editorSession.getConfigurator()
   }
 
-  getEditorSession() {
+  getEditorSession () {
     return this.editorSession
   }
 
-  getComponentRegistry() {
+  getComponentRegistry () {
     return this.componentRegistry
   }
 
-  getSurfaceManager() {
+  getSurfaceManager () {
     return this.surfaceManager
   }
 
-  getLabelProvider() {
+  getLabelProvider () {
     return this.labelProvider
   }
-
 }

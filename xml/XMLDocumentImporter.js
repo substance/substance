@@ -4,20 +4,19 @@ import isString from '../util/isString'
 import ValidatingChildNodeIterator from './ValidatingChildNodeIterator'
 
 export default class XMLDocumentImporter extends DOMImporter {
-
-  constructor(config, context) {
+  constructor (config, context) {
     // TODO: this should be stream-lined
     super({
       // legacy: the old Substance.Data schema
       schema: config.schema,
       // HACK: usually we use configurator.createImporter()
       converters: config.converters,
-      idAttribute: config.schema.xmlSchema.getIdAttribute(),
+      idAttribute: config.schema.xmlSchema.getIdAttribute()
     }, context)
     this.xmlSchema = config.schema.xmlSchema
   }
 
-  importDocument(dom) {
+  importDocument (dom) {
     this.reset()
     const doc = this.state.doc
     if (isString(dom)) {
@@ -37,7 +36,7 @@ export default class XMLDocumentImporter extends DOMImporter {
     return this.state.doc
   }
 
-  _initialize() {
+  _initialize () {
     const schema = this.schema
     const defaultTextType = schema.getDefaultTextType()
     const converters = this.converters
@@ -81,7 +80,7 @@ export default class XMLDocumentImporter extends DOMImporter {
     this._allConverters = this._blockConverters.concat(this._propertyAnnotationConverters)
   }
 
-  _createNodeData(el, type) {
+  _createNodeData (el, type) {
     let nodeData = super._createNodeData(el, type)
     let attributes = {}
     el.getAttributes().forEach((value, key) => {
@@ -91,18 +90,18 @@ export default class XMLDocumentImporter extends DOMImporter {
     return nodeData
   }
 
-  getChildNodeIterator(el) {
+  getChildNodeIterator (el) {
     // TODO: this looks very hacky. Why do we need el plus it?
     let schema = this.xmlSchema.getElementSchema(el.tagName)
     let it = el.getChildNodeIterator()
     return new ValidatingChildNodeIterator(el, it, schema.expr)
   }
 
-  _convertPropertyAnnotation() {
+  _convertPropertyAnnotation () {
     throw new Error('stand-alone annotations are not supported.')
   }
 
-  _convertInlineNode(el, nodeData, converter) {
+  _convertInlineNode (el, nodeData, converter) {
     const path = []
     if (converter.import) {
       nodeData = converter.import(el, nodeData, this) || nodeData

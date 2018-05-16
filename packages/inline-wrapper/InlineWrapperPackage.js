@@ -13,11 +13,11 @@ import InlineWrapperConverter from './InlineWrapperConverter'
 */
 export default {
   name: 'inline-wrapper',
-  configure: function(config, options) {
+  configure: function (config, options) {
     config.addNode(InlineWrapper)
     config.addComponent(InlineWrapper.type, InlineWrapperComponent)
     if (options.converters) {
-      options.converters.forEach(function(name) {
+      options.converters.forEach(function (name) {
         config.addConverter(name, InlineWrapperConverter)
       })
     }

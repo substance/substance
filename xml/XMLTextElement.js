@@ -7,12 +7,11 @@ import XMLDocumentNode from './XMLDocumentNode'
   thus this does not extend Substance.TextNode.
 */
 export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
-
-  getPath() {
+  getPath () {
     return [this.id, 'content']
   }
 
-  getText() {
+  getText () {
     return this.content
   }
 
@@ -22,14 +21,14 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
     as they only have plain-text, and overlaying annotations,
     i.e., annotations are not stored hierarchically.
   */
-  getChildren() {
+  getChildren () {
     const annos = this.getAnnotations()
     // sorting here by start.offset so that childNodes appear in natural order
     annos.sort(_byStartOffset)
     return annos
   }
 
-  setText(text) {
+  setText (text) {
     const doc = this.getDocument()
     const path = this.getPath()
     const oldText = this.getText()
@@ -43,19 +42,19 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
 
   // DOMElement API (partial)
 
-  getTextContent() {
+  getTextContent () {
     return this.getText()
   }
 
-  setTextContent(text) {
+  setTextContent (text) {
     return this.setText(text)
   }
 
-  get textContent() {
+  get textContent () {
     return this.getText()
   }
 
-  set textContent(text) {
+  set textContent (text) {
     this.setText(text)
   }
 
@@ -76,10 +75,9 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
   }
 
   // regarding DOMElement API this is an ElementNode
-  isElementNode() {
+  isElementNode () {
     return true
   }
-
 }
 
 XMLTextElement.prototype._isXMLTextElement = true
@@ -88,16 +86,15 @@ XMLTextElement.prototype.text = DOMElement.prototype.text
 
 XMLTextElement.prototype._elementType = 'text'
 
-
 XMLTextElement.isText = true
 XMLTextElement.isBlock = true
 
 XMLTextElement.type = 'text'
 
 XMLTextElement.schema = {
-  content: "text"
+  content: 'text'
 }
 
-function _byStartOffset(a,b) {
+function _byStartOffset (a, b) {
   return a.start.offset - b.start.offset
 }

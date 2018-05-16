@@ -1,6 +1,6 @@
 import { DefaultDOMElement, platform } from 'substance'
 
-export default function getMountPoint(t) {
+export default function getMountPoint (t) {
   let mountPoint
   if (platform.inBrowser) {
     mountPoint = t.sandbox

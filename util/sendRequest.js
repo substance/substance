@@ -1,7 +1,8 @@
+/* global XMLHttpRequest */
 import forEach from './forEach'
 
-export default function sendRequest(params, cb) {
-  return new Promise(function(resolve, reject) {
+export default function sendRequest (params, cb) {
+  return new Promise(function (resolve, reject) {
     var method = (params.method || 'GET').toUpperCase()
     var url = params.url
     if (['GET', 'POST', 'PUT', 'DELETE'].indexOf(method) < 0) {
@@ -11,14 +12,14 @@ export default function sendRequest(params, cb) {
       throw new Error("Parameter 'url' is required.")
     }
     var xmlhttp = new XMLHttpRequest()
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       // TODO: we could support more states here to give feedback
       // e.g. about progress of an upload
       if (xmlhttp.readyState === 4) return _done()
     }
     xmlhttp.open(method, url, true)
     if (params.header) {
-      forEach(params.header, function(val, key) {
+      forEach(params.header, function (val, key) {
         xmlhttp.setRequestHeader(key, val)
       })
     }
@@ -30,7 +31,7 @@ export default function sendRequest(params, cb) {
       xmlhttp.send()
     }
 
-    function _done() {
+    function _done () {
       if (xmlhttp.status === 200) {
         var response = xmlhttp.responseText
         if (cb) cb(null, response)

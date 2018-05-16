@@ -10,28 +10,25 @@ import { isFirst, isLast } from './selectionHelpers'
   @return {Object} with a `doc` property that has a fresh doc with the copied content
 */
 
-export default function copySelection(doc, selection) {
+export default function copySelection (doc, selection) {
   if (!selection) throw new Error("'selection' is mandatory.")
   let copy = null
   if (!selection.isNull() && !selection.isCollapsed()) {
     // return a simplified version if only a piece of text is selected
     if (selection.isPropertySelection()) {
       copy = _copyPropertySelection(doc, selection)
-    }
-    else if (selection.isContainerSelection()) {
+    } else if (selection.isContainerSelection()) {
       copy = _copyContainerSelection(doc, selection)
-    }
-    else if (selection.isNodeSelection()) {
+    } else if (selection.isNodeSelection()) {
       copy = _copyNodeSelection(doc, selection)
-    }
-    else {
+    } else {
       console.error('Copy is not yet supported for selection type.')
     }
   }
   return copy
 }
 
-function _copyPropertySelection(doc, selection) {
+function _copyPropertySelection (doc, selection) {
   let path = selection.start.path
   let offset = selection.start.offset
   let endOffset = selection.end.offset
@@ -45,23 +42,23 @@ function _copyPropertySelection(doc, selection) {
   })
   containerNode.show(TEXT_SNIPPET_ID)
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
-  forEach(annotations, function(anno) {
+  forEach(annotations, function (anno) {
     let data = cloneDeep(anno.toJSON())
     let path = [TEXT_SNIPPET_ID, 'content']
     data.start = {
       path: path,
-      offset: Math.max(offset, anno.start.offset)-offset
+      offset: Math.max(offset, anno.start.offset) - offset
     }
     data.end = {
       path: path,
-      offset: Math.min(endOffset, anno.end.offset)-offset
+      offset: Math.min(endOffset, anno.end.offset) - offset
     }
     snippet.create(data)
   })
   return snippet
 }
 
-function _copyContainerSelection(tx, sel) {
+function _copyContainerSelection (tx, sel) {
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
 
@@ -77,15 +74,15 @@ function _copyContainerSelection(tx, sel) {
 
   // First copy the whole covered nodes
   let created = {}
-  for(let i = 0; i<L; i++) {
+  for (let i = 0; i < L; i++) {
     let id = nodeIds[i]
     let node = tx.get(id)
     // skip NIL selections, such as cursor at the end of first node or cursor at the start of last node.
-    if (i===0 && isLast(tx, start)) {
+    if (i === 0 && isLast(tx, start)) {
       skippedFirst = true
       continue
     }
-    if (i===L-1 && isFirst(tx, end)) {
+    if (i === L - 1 && isFirst(tx, end)) {
       skippedLast = true
       continue
     }
@@ -118,7 +115,7 @@ function _copyContainerSelection(tx, sel) {
   return snippet
 }
 
-function _copyNodeSelection(doc, selection) {
+function _copyNodeSelection (doc, selection) {
   let snippet = doc.createSnippet()
   let containerNode = snippet.getContainer()
   let nodeId = selection.getNodeId()

@@ -28,28 +28,27 @@ import Component from '../../ui/Component'
 */
 
 class Scrollbar extends Component {
-
-  didMount() {
+  didMount () {
     // do a full rerender when window gets resized
     DefaultDOMElement.getBrowserWindow().on('resize', this.onResize, this)
     // update the scroll handler on scroll
     this.props.scrollPane.on('scroll', this.onScroll, this)
     // TODO: why is this necessary here?
-    setTimeout(function() {
+    setTimeout(function () {
       this.updatePositions()
     }.bind(this))
   }
 
-  dispose() {
+  dispose () {
     DefaultDOMElement.getBrowserWindow().off(this)
     this.props.scrollPane.off(this)
   }
 
-  didUpdate() {
+  didUpdate () {
     this.updatePositions()
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div')
       .addClass('sc-scrollbar')
       .on('mousedown', this.onMouseDown)
@@ -57,10 +56,10 @@ class Scrollbar extends Component {
     if (this.props.highlights) {
       let highlightEls = []
 
-      forEach(this.props.highlights, function(highlights, scope) {
-        forEach(highlights, function(h) {
+      forEach(this.props.highlights, function (highlights, scope) {
+        forEach(highlights, function (h) {
           highlightEls.push(
-            $$('div').ref(h).addClass('se-highlight sm-'+scope)
+            $$('div').ref(h).addClass('se-highlight sm-' + scope)
           )
         })
       })
@@ -75,7 +74,7 @@ class Scrollbar extends Component {
     return el
   }
 
-  updatePositions() {
+  updatePositions () {
     let scrollPane = this.props.scrollPane
     let scrollableEl = scrollPane.getScrollableElement()
     let contentHeight = scrollPane.getContentHeight()
@@ -100,9 +99,9 @@ class Scrollbar extends Component {
     // If we have highlights, update them as well
     if (this.props.highlights) {
       // Compute highlights
-      forEach(this.props.highlights,function(highlights) {
-        forEach(highlights, function(nodeId) {
-          let nodeEl = scrollableEl.find('*[data-id="'+nodeId+'"]')
+      forEach(this.props.highlights, function (highlights) {
+        forEach(highlights, function (nodeId) {
+          let nodeEl = scrollableEl.find('*[data-id="' + nodeId + '"]')
 
           if (!nodeEl) return
 
@@ -130,19 +129,19 @@ class Scrollbar extends Component {
     }
   }
 
-  getScrollableElement() {
+  getScrollableElement () {
     return this.props.scrollPane.getScrollableElement()
   }
 
-  onResize() {
+  onResize () {
     this.rerender()
   }
 
-  onScroll() {
+  onScroll () {
     this.updatePositions()
   }
 
-  onMouseDown(e) {
+  onMouseDown (e) {
     e.stopPropagation()
     e.preventDefault()
     this._mouseDown = true
@@ -166,14 +165,14 @@ class Scrollbar extends Component {
   }
 
   // Handle Mouse Up
-  onMouseUp() {
+  onMouseUp () {
     this._mouseDown = false
     let _window = DefaultDOMElement.getBrowserWindow()
     _window.off('mousemove', this.onMouseMove, this)
     _window.off('mouseup', this.onMouseUp, this)
   }
 
-  onMouseMove(e) {
+  onMouseMove (e) {
     if (this._mouseDown) {
       let scrollPane = this.props.scrollPane
       let scrollableEl = scrollPane.getScrollableElement()
@@ -181,7 +180,7 @@ class Scrollbar extends Component {
       let y = e.pageY - scrollBarOffset
 
       // find offset to visible-area.top
-      let scroll = (y-this.offset)*this.factor
+      let scroll = (y - this.offset) * this.factor
       scrollableEl.setProperty('scrollTop', scroll)
     }
   }

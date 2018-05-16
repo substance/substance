@@ -82,13 +82,13 @@
     - or classify as `text` or `element`
 
 */
-export default function checkSchema(xmlSchema) {
+export default function checkSchema (xmlSchema) {
   const tagNames = xmlSchema.getTagNames()
   let issues = []
   for (let i = 0; i < tagNames.length; i++) {
     const name = tagNames[i]
     const elementSchema = xmlSchema.getElementSchema(name)
-    switch(elementSchema.type) {
+    switch (elementSchema.type) {
       case 'text': {
         issues = issues.concat(_checkTextElement(elementSchema))
         break
@@ -124,7 +124,7 @@ export default function checkSchema(xmlSchema) {
   return issues
 }
 
-function _checkTextElement(elementSchema) {
+function _checkTextElement (elementSchema) {
   const issues = []
   // should not be used inline
   if (_usedInline(elementSchema)) {
@@ -141,7 +141,7 @@ function _checkTextElement(elementSchema) {
   return issues
 }
 
-function _checkElement(elementSchema) {
+function _checkElement (elementSchema) {
   const issues = []
   if (_usedInline(elementSchema)) {
     issues.push(`[2]: element <${elementSchema.name}> is used inline by ${_usedInlineBy(elementSchema).join(',')}`)
@@ -153,7 +153,7 @@ function _checkElement(elementSchema) {
   return issues
 }
 
-function _checkHybridElement(elementSchema) {
+function _checkHybridElement (elementSchema) {
   const issues = []
   if (_usedInlineOnly(elementSchema)) {
     issues.push(`[2.2]: hybrid element <${elementSchema.name}> is used inline by ${_usedInlineBy(elementSchema).join(',')}`)
@@ -165,7 +165,7 @@ function _checkHybridElement(elementSchema) {
   return issues
 }
 
-function _checkAnnotation(elementSchema) {
+function _checkAnnotation (elementSchema) {
   const issues = []
   // must not be used as structured content
   if (!_usedInlineOnly(elementSchema)) {
@@ -183,7 +183,7 @@ function _checkAnnotation(elementSchema) {
   return issues
 }
 
-function _checkInlineElement(elementSchema) {
+function _checkInlineElement (elementSchema) {
   const issues = []
   if (!_usedInlineOnly(elementSchema)) {
     issues.push(`[3]: inline-element <${elementSchema.name}> is used in structured content by ${_usedStructuredBy(elementSchema).join(',')}`)
@@ -191,7 +191,7 @@ function _checkInlineElement(elementSchema) {
   return issues
 }
 
-function _checkAnchor(elementSchema) {
+function _checkAnchor (elementSchema) {
   const issues = []
   if (!_usedInlineOnly(elementSchema)) {
     issues.push(`[3]: anchor <${elementSchema.name}> is used in structured content by ${_usedStructuredBy(elementSchema).join(',')}`)
@@ -199,23 +199,22 @@ function _checkAnchor(elementSchema) {
   return issues
 }
 
-function _usedInline(elementSchema) {
+function _usedInline (elementSchema) {
   let usedInlineBy = elementSchema.usedInlineBy || {}
   return Object.keys(usedInlineBy).length > 0
 }
 
-function _usedInlineBy(elementSchema) {
+function _usedInlineBy (elementSchema) {
   let usedInlineBy = elementSchema.usedInlineBy || {}
   return Object.keys(usedInlineBy)
 }
 
-
-function _usedInlineOnly(elementSchema) {
+function _usedInlineOnly (elementSchema) {
   let usedStructuredBy = _usedStructuredBy(elementSchema)
   return (usedStructuredBy.length === 0)
 }
 
-function _usedStructuredBy(elementSchema) {
+function _usedStructuredBy (elementSchema) {
   let usedInlineBy = elementSchema.usedInlineBy || {}
   let parents = Object.keys(elementSchema.parents)
   let usedStructuredBy = parents.filter((name) => {

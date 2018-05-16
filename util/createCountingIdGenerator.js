@@ -1,6 +1,6 @@
-export default function createCountingIdGenerator() {
+export default function createCountingIdGenerator () {
   var counters = {}
-  return function uuid(prefix) {
+  return function uuid (prefix) {
     if (!counters.hasOwnProperty(prefix)) {
       counters[prefix] = 1
     }

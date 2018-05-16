@@ -5,10 +5,10 @@ import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
 
-export function fromJSON(json) {
+export function fromJSON (json) {
   if (!json) return Selection.nullSelection
   var type = json.type
-  switch(type) {
+  switch (type) {
     case 'property':
       return PropertySelection.fromJSON(json)
     case 'container':
@@ -26,7 +26,7 @@ export function fromJSON(json) {
 /*
   Helper to check if a coordinate is the first position of a node.
 */
-export function isFirst(doc, coor) {
+export function isFirst (doc, coor) {
   if (coor.isNodeCoordinate() && coor.offset === 0) return true
   let node = doc.get(coor.path[0]).getContainerRoot()
   if (node.isText() && coor.offset === 0) return true
@@ -39,7 +39,7 @@ export function isFirst(doc, coor) {
 /*
   Helper to check if a coordinate is the last position of a node.
 */
-export function isLast(doc, coor) {
+export function isLast (doc, coor) {
   if (coor.isNodeCoordinate() && coor.offset > 0) return true
   let node = doc.get(coor.path[0]).getContainerRoot()
   if (node.isText() && coor.offset >= node.getLength()) return true
@@ -50,12 +50,12 @@ export function isLast(doc, coor) {
   }
 }
 
-export function isEntirelySelected(doc, node, start, end) {
+export function isEntirelySelected (doc, node, start, end) {
   let { isEntirelySelected } = getRangeInfo(doc, node, start, end)
   return isEntirelySelected
 }
 
-export function getRangeInfo(doc, node, start, end) {
+export function getRangeInfo (doc, node, start, end) {
   let isFirst = true
   let isLast = true
   if (node.isText()) {
@@ -71,14 +71,14 @@ export function getRangeInfo(doc, node, start, end) {
       let itemId = end.path[0]
       let itemPos = node.getItemPosition(itemId)
       let item = doc.get(itemId)
-      if (itemPos < node.items.length-1 || end.offset < item.getLength()) isLast = false
+      if (itemPos < node.items.length - 1 || end.offset < item.getLength()) isLast = false
     }
   }
   let isEntirelySelected = isFirst && isLast
   return {isFirst, isLast, isEntirelySelected}
 }
 
-export function setCursor(tx, node, containerId, mode) {
+export function setCursor (tx, node, containerId, mode) {
   if (node.isText()) {
     let offset = 0
     if (mode === 'after') {
@@ -110,7 +110,7 @@ export function setCursor(tx, node, containerId, mode) {
     tx.setSelection({
       type: 'node',
       containerId: containerId,
-      nodeId: node.id,
+      nodeId: node.id
       // NOTE: ATM we mostly use 'full' NodeSelections
       // Still, they are supported internally
       // mode: mode
@@ -118,11 +118,11 @@ export function setCursor(tx, node, containerId, mode) {
   }
 }
 
-export function selectNode(tx, nodeId, containerId) {
+export function selectNode (tx, nodeId, containerId) {
   tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerId }))
 }
 
-export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, surfaceId}) {
+export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, surfaceId }) {
   let node = doc.get(nodeId)
   if (!node) return Selection.nullSelection
   node = node.getContainerRoot()
@@ -135,7 +135,7 @@ export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, s
       containerId: containerId,
       surfaceId: surfaceId
     })
-  } else if (node.isList() && node.getLength()>0) {
+  } else if (node.isList() && node.getLength() > 0) {
     let first = node.getFirstItem()
     let last = node.getLastItem()
     let start = {
@@ -162,7 +162,7 @@ export function createNodeSelection({ doc, nodeId, containerId, mode, reverse, s
   }
 }
 
-export function stepIntoIsolatedNode(editorSession, comp) {
+export function stepIntoIsolatedNode (editorSession, comp) {
   // this succeeds if the content component provides
   // a grabFocus() implementation
   if (comp.grabFocus()) return true
@@ -194,7 +194,7 @@ export function stepIntoIsolatedNode(editorSession, comp) {
   return false
 }
 
-export function augmentSelection(selData, oldSel) {
+export function augmentSelection (selData, oldSel) {
   // don't do magically if a surfaceId is present
   if (selData && oldSel && !selData.surfaceId && !oldSel.isNull()) {
     selData.containerId = selData.containerId || oldSel.containerId

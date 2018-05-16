@@ -10,8 +10,7 @@ import * as operationHelpers from '../model/operationHelpers'
   real time editing as a reusable library.
 */
 class CollabEngine extends EventEmitter {
-
-  constructor(documentEngine) {
+  constructor (documentEngine) {
     super()
     this.documentEngine = documentEngine
     // Active collaborators
@@ -21,7 +20,7 @@ class CollabEngine extends EventEmitter {
   /*
     Register collaborator for a given documentId
   */
-  _register(collaboratorId, documentId, collaboratorInfo) {
+  _register (collaboratorId, documentId, collaboratorInfo) {
     let collaborator = this._collaborators[collaboratorId]
 
     if (!collaborator) {
@@ -41,7 +40,7 @@ class CollabEngine extends EventEmitter {
   /*
     Unregister collaborator id from document
   */
-  _unregister(collaboratorId, documentId) {
+  _unregister (collaboratorId, documentId) {
     let collaborator = this._collaborators[collaboratorId]
     delete collaborator.documents[documentId]
     let docCount = Object.keys(collaborator.documents).length
@@ -54,7 +53,7 @@ class CollabEngine extends EventEmitter {
   /*
     Get list of active documents for a given collaboratorId
   */
-  getDocumentIds(collaboratorId) {
+  getDocumentIds (collaboratorId) {
     let collaborator = this._collaborators[collaboratorId]
     if (!collaborator) {
       // console.log('CollabEngine.getDocumentIds', collaboratorId, 'not found');
@@ -67,9 +66,9 @@ class CollabEngine extends EventEmitter {
   /*
     Get collaborators for a specific document
   */
-  getCollaborators(documentId, collaboratorId) {
+  getCollaborators (documentId, collaboratorId) {
     let collaborators = {}
-    forEach(this._collaborators, function(collab) {
+    forEach(this._collaborators, function (collab) {
       let doc = collab.documents[documentId]
       if (doc && collab.collaboratorId !== collaboratorId) {
         let entry = {
@@ -86,9 +85,9 @@ class CollabEngine extends EventEmitter {
   /*
     Get only collaborator ids for a specific document
   */
-  getCollaboratorIds(documentId, collaboratorId) {
+  getCollaboratorIds (documentId, collaboratorId) {
     let collaborators = this.getCollaborators(documentId, collaboratorId)
-    return map(collaborators, function(c) {
+    return map(collaborators, function (c) {
       return c.collaboratorId
     })
   }
@@ -103,8 +102,8 @@ class CollabEngine extends EventEmitter {
     Note: a client can reconnect having a pending change
     which is similar to the commit case
   */
-  sync({documentId, version, change, collaboratorId}, cb) {
-    this._sync({documentId, version, change}, function(err, result) {
+  sync ({documentId, version, change, collaboratorId}, cb) {
+    this._sync({documentId, version, change}, function (err, result) {
       if (err) return cb(err)
       // Registers the collaborator If not already registered for that document
       this._register(collaboratorId, documentId)
@@ -115,15 +114,16 @@ class CollabEngine extends EventEmitter {
   /*
     Internal implementation of sync
 
-
     @param {String} args.documentId document id
     @param {Number} args.version client version
     @param {Number} args.change new change (optional)
 
     OUT: version, change (rebased client change), serverChange (ustream ops)
   */
-  _sync({documentId, version, change}, cb) {
+  _sync ({documentId, version, change}, cb) {
     this.documentEngine.getVersion(documentId, (err, serverVersion) => {
+      if (err) return cb(err)
+
       if (version > serverVersion) {
         cb(new Err('InvalidVersionError', {
           message: 'Client version greater than server version'
@@ -141,9 +141,10 @@ class CollabEngine extends EventEmitter {
     })
   }
 
-  _syncPullOnly({documentId, version, change}, cb) {
-    console.warn('This code is not yet tested')
+  _syncPullOnly ({documentId, version, change}, cb) {
     this.documentEngine.getChanges(documentId, version, (err, changes) => {
+      if (err) return cb(err)
+
       let serverChange
 
       // Collect ops from all changes to turn them into a single change
@@ -166,7 +167,7 @@ class CollabEngine extends EventEmitter {
   /*
     Fast forward sync (client version = server version)
   */
-  _syncFF({documentId, change}, cb) {
+  _syncFF ({documentId, change}, cb) {
     this.documentEngine.addChange(documentId, change, (err, serverVersion) => {
       if (err) return cb(err)
       cb(null, {
@@ -180,15 +181,15 @@ class CollabEngine extends EventEmitter {
   /*
     Rebased sync (client version < server version)
   */
-  _syncRB({documentId, change, version}, cb) {
-    this._rebaseChange({documentId, change, version}, function(err, rebased) {
+  _syncRB ({documentId, change, version}, cb) {
+    this._rebaseChange({documentId, change, version}, function (err, rebased) {
       // result has change, changes, version (serverversion)
       if (err) return cb(err)
       // Store the rebased commit
       this.documentEngine.addChange(
         documentId,
         change,
-        function(err, serverVersion) {
+        function (err, serverVersion) {
           if (err) return cb(err)
           cb(null, {
             change: rebased.change,
@@ -207,14 +208,16 @@ class CollabEngine extends EventEmitter {
     IN: documentId, change, version (client version)
     OUT: change, serverChange, version (server version)
   */
-  _rebaseChange({documentId, change, version}, cb) {
-    this.documentEngine.getChanges(documentId, version, function(err, result, serverVersion) {
+  _rebaseChange ({documentId, change, version}, cb) {
+    this.documentEngine.getChanges(documentId, version, function (err, result, serverVersion) {
+      if (err) return cb(err)
+
       // HACK: it happened that result.changes was empty
       let B = result.map(this.deserializeChange)
       let a = this.deserializeChange(change)
       // transform changes
       operationHelpers.transformDocumentChange(a, B)
-      let ops = B.reduce(function(ops, change) {
+      let ops = B.reduce(function (ops, change) {
         return ops.concat(change.ops)
       }, [])
       let serverChange = new DocumentChange(ops, {}, {})
@@ -232,25 +235,24 @@ class CollabEngine extends EventEmitter {
 
     NOTE: This method is synchronous
   */
-  disconnect(args) {
+  disconnect (args) {
     this._unregister(args.collaboratorId, args.documentId)
   }
 
   /*
     To JSON
   */
-  serializeChange(change) {
+  serializeChange (change) {
     return change.toJSON()
   }
 
   /*
     From JSON
   */
-  deserializeChange(serializedChange) {
+  deserializeChange (serializedChange) {
     let ch = DocumentChange.fromJSON(serializedChange)
     return ch
   }
-
 }
 
 export default CollabEngine

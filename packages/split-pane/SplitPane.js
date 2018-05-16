@@ -24,8 +24,7 @@ import Component from '../../ui/Component'
 */
 
 class SplitPane extends Component {
-
-  render($$) {
+  render ($$) {
     if (this.props.children.length !== 2) {
       throw new Error('SplitPane only works with exactly two child elements')
     }
@@ -59,7 +58,7 @@ class SplitPane extends Component {
   }
 
   // Accepts % and px units for size property
-  getSizedStyle(size) {
+  getSizedStyle (size) {
     if (!size || size === 'inherit') return {}
     if (this.props.splitType === 'horizontal') {
       return {'height': size}
@@ -67,7 +66,6 @@ class SplitPane extends Component {
       return {'width': size}
     }
   }
-
 }
 
 export default SplitPane

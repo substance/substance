@@ -4,37 +4,35 @@ import * as xmlNodeHelpers from './xmlNodeHelpers'
 
 export default
 class XMLElementNode extends XMLDocumentNode {
-
-  appendChild(child) {
+  appendChild (child) {
     return xmlNodeHelpers.appendChild(this, child)
   }
 
-  removeChild(child) {
+  removeChild (child) {
     return xmlNodeHelpers.removeChild(this, child)
   }
 
-  insertBefore(newChild, ref) {
+  insertBefore (newChild, ref) {
     return xmlNodeHelpers.insertBefore(this, newChild, ref)
   }
 
-  insertAt(pos, child) {
+  insertAt (pos, child) {
     return xmlNodeHelpers.insertAt(this, pos, child)
   }
 
-  removeAt(pos) {
+  removeAt (pos) {
     return xmlNodeHelpers.removeAt(this, pos)
   }
 
-  getChildAt(idx) {
+  getChildAt (idx) {
     return xmlNodeHelpers.getChildAt(this, idx)
   }
 
-  isElementNode() {
+  isElementNode () {
     return true
   }
 
   // TODO: implement as much of DOMElement as possible
-
 }
 
 XMLElementNode.prototype.append = DOMElement.prototype.append
@@ -44,7 +42,7 @@ XMLElementNode.prototype._elementType = 'element'
 XMLElementNode.type = 'element'
 
 XMLElementNode.schema = {
-  _childNodes: { type: ['array', 'id'], default: [], owned: true}
+  _childNodes: { type: ['array', 'id'], default: [], owned: true }
 }
 
 XMLElementNode.isBlock = true

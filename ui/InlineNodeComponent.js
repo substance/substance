@@ -3,8 +3,7 @@ import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 import Component from './Component'
 
 class InlineNodeComponent extends AbstractIsolatedNodeComponent {
-
-  render($$) {
+  render ($$) {
     const node = this.props.node
     const ContentClass = this.ContentClass
     const state = this.state
@@ -12,14 +11,14 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     let el = $$('span')
     el.addClass(this.getClassNames())
       .addClass('sc-inline-node')
-      .addClass('sm-'+this.props.node.type)
-      .attr("data-id", node.id)
+      .addClass('sm-' + this.props.node.type)
+      .attr('data-id', node.id)
       .attr('data-inline', '1')
 
     let disabled = this.isDisabled()
 
     if (state.mode) {
-      el.addClass('sm-'+state.mode)
+      el.addClass('sm-' + state.mode)
     } else {
       el.addClass('sm-not-selected')
     }
@@ -41,8 +40,8 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
     if (disabled) {
       el.addClass('sm-disabled')
-         .attr('contenteditable', false)
-         .on('click', this.onClick)
+        .attr('contenteditable', false)
+        .on('click', this.onClick)
     }
 
     // TODO: Chrome et al. does not display selections
@@ -55,25 +54,24 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     el.attr('draggable', true)
 
     return el
-
   }
 
-  isDisabled() {
-    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1;
+  isDisabled () {
+    return !this.state.mode || ['co-selected', 'cursor'].indexOf(this.state.mode) > -1
   }
 
-  getClassNames() {
+  getClassNames () {
     return ''
   }
 
-  onClick(event) {
+  onClick (event) {
     if (!this._shouldConsumeEvent(event)) {
       return
     }
     this.selectNode()
   }
 
-  selectNode() {
+  selectNode () {
     // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
@@ -88,7 +86,7 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
-  _getContentClass(node) {
+  _getContentClass (node) {
     let ComponentClass
     // first try to get the component registered for this node
     ComponentClass = this.getComponent(node.type, true)
@@ -106,7 +104,7 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
 
   // TODO: this is almost the same as in InlineNodeComponent
   // We should try to consolidate this
-  _deriveStateFromSelectionState(selState) {
+  _deriveStateFromSelectionState (selState) {
     let surface = this._getSurface(selState)
     if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
@@ -115,7 +113,7 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
       let node = this.props.node
       if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.start.path, node.start.path)) {
         let nodeSel = node.getSelection()
-        if(nodeSel.equals(sel)) {
+        if (nodeSel.equals(sel)) {
           return { mode: 'selected' }
         }
         if (sel.contains(nodeSel)) {
@@ -134,13 +132,12 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     }
     return null
   }
-
 }
 
 InlineNodeComponent.prototype._isInlineNodeComponent = true
 
 class StubInlineNodeComponent extends Component {
-  render($$) {
+  render ($$) {
     const node = this.props.node
     return $$('span').text('???').attr('data-id', node.id).attr('data-type', node.type)
   }

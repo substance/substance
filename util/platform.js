@@ -46,11 +46,10 @@ const platform = {
 
   // in tests we change the state of this to emulate execuatio under certain conditions
   // to reset to defaults we call this function
-  _reset: detect,
+  _reset: detect
 }
 
-function detect() {
-
+function detect () {
   if (typeof window !== 'undefined') {
     platform.inBrowser = true
 
@@ -93,7 +92,7 @@ function detect() {
   }
 
   if (platform.inBrowser) {
-    platform.isWindows = (window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf("Win") !== -1)
+    platform.isWindows = (window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf('Win') !== -1)
     platform.isMac = (window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
   }
 

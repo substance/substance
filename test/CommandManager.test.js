@@ -4,7 +4,7 @@ import setupEditor from './fixture/setupEditor'
 
 const test = module('CommandManager')
 
-test("Command state changing with selection", (t) => {
+test('Command state changing with selection', (t) => {
   let { editorSession } = setupEditor(t, simple)
   editorSession.setSelection({
     type: 'property',
@@ -12,7 +12,7 @@ test("Command state changing with selection", (t) => {
     startOffset: 3,
     containerId: 'body'
   })
-  
+
   let commandStates = editorSession.getCommandStates()
   t.equal(commandStates.paragraph.active, true, 'Paragraph should be active for collapsed selection')
   t.equal(commandStates.paragraph.disabled, false, 'Paragraph should not be disabled for collapsed selection')

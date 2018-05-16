@@ -63,7 +63,7 @@ import DefaultLabelProvider from './DefaultLabelProvider'
   that at the moment.
 */
 class Configurator {
-  constructor() {
+  constructor () {
     this.config = {
       schema: {},
       nodes: {},
@@ -87,7 +87,7 @@ class Configurator {
       editorOptions: [],
       CommandManagerClass: DefaultCommandManager,
       DragManagerClass: DefaultDragManager,
-      SaveHandlerClass: null,
+      SaveHandlerClass: null
     }
   }
 
@@ -100,7 +100,7 @@ class Configurator {
     @param  {DocumentSchema} schema A schema to be used for articles created
         from this configuration.
    */
-  defineSchema(schema) {
+  defineSchema (schema) {
     if (schema.ArticleClass) {
       console.warn('DEPRECATED: schema.ArticleClass is now called schema.DocumentClass')
       schema.DocumentClass = schema.ArticleClass
@@ -111,7 +111,7 @@ class Configurator {
     this.config.schema = schema
   }
 
-  addEditorOption(option) {
+  addEditorOption (option) {
     if (!option.key) {
       throw new Error('An option key must be defined')
     }
@@ -121,7 +121,7 @@ class Configurator {
     this.config.editorOptions[option.key] = option.value
   }
 
-  getEditorOptions() {
+  getEditorOptions () {
     return this.config.editorOptions
   }
 
@@ -132,7 +132,7 @@ class Configurator {
 
     @param {Node} NodeClass
    */
-  addNode(NodeClass, override) {
+  addNode (NodeClass, override) {
     let type = NodeClass.type
     if (!type) {
       throw new Error('A NodeClass must have a type.')
@@ -149,7 +149,7 @@ class Configurator {
     @param {string} type      a conversion format type, eg. 'html', 'xml', 'json'
     @param {Object} converter a converter for that format.
    */
-  addConverter(type, converter) {
+  addConverter (type, converter) {
     let converters = this.config.converters[type]
     if (!converters) {
       converters = {}
@@ -171,7 +171,7 @@ class Configurator {
     @param {string} type          a conversion format type. eg. 'html', 'xml'
     @param {Object} ImporterClass an importer for the conversion format.
    */
-  addImporter(type, ImporterClass) {
+  addImporter (type, ImporterClass) {
     this.config.importers[type] = ImporterClass
   }
 
@@ -181,7 +181,7 @@ class Configurator {
     @param {string} type          a conversion format type. eg. 'html', 'xml'
     @param {Object} ExporterClass an exporter for the conversion format.
    */
-  addExporter(type, ExporterClass) {
+  addExporter (type, ExporterClass) {
     this.config.exporters[type] = ExporterClass
   }
 
@@ -199,12 +199,12 @@ class Configurator {
     @param {Class} ComponentClass  A subclass of {@link Component} for nodes
                                    of nodeType.
    */
-  addComponent(nodeType, ComponentClass, force) {
+  addComponent (nodeType, ComponentClass, force) {
     if (!force && this.config.components[nodeType]) {
-      throw new Error(nodeType+' already registered')
+      throw new Error(nodeType + ' already registered')
     }
     if (!ComponentClass) {
-      throw new Error('Provided nil for component '+nodeType)
+      throw new Error('Provided nil for component ' + nodeType)
     }
     if (!ComponentClass.prototype._isComponent) {
       throw new Error('ComponentClass must be a subclass of ui/Component.')
@@ -212,12 +212,12 @@ class Configurator {
     this.config.components[nodeType] = ComponentClass
   }
 
-  addCommand(name, CommandClass, options) {
+  addCommand (name, CommandClass, options) {
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
     }
     if (!CommandClass) {
-      throw new Error('Provided nil for command '+name)
+      throw new Error('Provided nil for command ' + name)
     }
     if (!CommandClass.prototype._isCommand) {
       throw new Error("Expecting 'CommandClass' to be of type ui/Command.")
@@ -242,12 +242,12 @@ class Configurator {
     }
   }
 
-  addTool(name, ToolClass) {
+  addTool (name, ToolClass) {
     if (!isString(name)) {
       throw new Error("Expecting 'name' to be a String")
     }
     if (!ToolClass) {
-      throw new Error('Provided nil for tool '+name)
+      throw new Error('Provided nil for tool ' + name)
     }
     if (!ToolClass || !ToolClass.prototype._isTool) {
       throw new Error("Expecting 'ToolClass' to be of type ui/Tool. name:", name)
@@ -256,23 +256,23 @@ class Configurator {
     this.config.tools[name] = ToolClass
   }
 
-  getTools() {
+  getTools () {
     return this.config.tools
   }
 
-  addToolPanel(name, spec) {
+  addToolPanel (name, spec) {
     this.config.toolPanels[name] = spec
   }
 
-  getToolPanel(name) {
+  getToolPanel (name) {
     return this.config.toolPanels[name]
   }
 
-  addManager(name, ManagerClass) {
+  addManager (name, ManagerClass) {
     this.config.managers[name] = ManagerClass
   }
 
-  getManagers() {
+  getManagers () {
     return this.config.managers
   }
 
@@ -284,7 +284,7 @@ class Configurator {
     @param {Object} options  your custom method of representing the icon as a
         JSON object. Enables plugging in your own IconProvider.
    */
-  addIcon(iconName, options) {
+  addIcon (iconName, options) {
     var iconConfig = this.config.icons[iconName]
     if (!iconConfig) {
       iconConfig = {}
@@ -320,14 +320,14 @@ class Configurator {
     $$('span').append(labels.getLabel('superscript'))
     ```
   */
-  addLabel(labelName, label) {
+  addLabel (labelName, label) {
     if (isString(label)) {
-      if(!this.config.labels['en']) {
+      if (!this.config.labels['en']) {
         this.config.labels['en'] = {}
       }
       this.config.labels['en'][labelName] = label
     } else {
-      forEach(label, function(label, lang) {
+      forEach(label, function (label, lang) {
         if (!this.config.labels[lang]) {
           this.config.labels[lang] = {}
         }
@@ -366,7 +366,7 @@ class Configurator {
     config.addSeed(seedFn)
     ```
   */
-  addSeed(seed) {
+  addSeed (seed) {
     this.config.seed = seed
   }
 
@@ -376,15 +376,15 @@ class Configurator {
 
     @param {EditingBehavior} editingBehavior.
    */
-  addEditingBehavior(editingBehavior) {
+  addEditingBehavior (editingBehavior) {
     this.config.editingBehaviors.push(editingBehavior)
   }
 
-  addMacro(macro) {
+  addMacro (macro) {
     this.config.macros.push(macro)
   }
 
-  addDragAndDrop(DragAndDropHandlerClass) {
+  addDragAndDrop (DragAndDropHandlerClass) {
     // we deprecated this after it became more clear what
     // we actually needed to solve
     console.warn('DEPRECATED: Use addDropHandler() instead')
@@ -394,7 +394,7 @@ class Configurator {
     this.addDropHandler(new DragAndDropHandlerClass())
   }
 
-  addDropHandler(dropHandler) {
+  addDropHandler (dropHandler) {
     // legacy
     if (dropHandler._isDragAndDropHandler) {
       dropHandler.type = dropHandler.type || 'drop-asset'
@@ -402,7 +402,7 @@ class Configurator {
     this.config.dropHandlers.push(dropHandler)
   }
 
-  addKeyboardShortcut(combo, spec) {
+  addKeyboardShortcut (combo, spec) {
     let entry = {
       key: combo,
       spec: spec
@@ -410,11 +410,11 @@ class Configurator {
     this.config.keyboardShortcuts.push(entry)
   }
 
-  addFileProxy(FileProxyClass) {
+  addFileProxy (FileProxyClass) {
     this.config.fileProxies.push(FileProxyClass)
   }
 
-  getFileAdapters() {
+  getFileAdapters () {
     return this.config.fileProxies.slice(0)
   }
 
@@ -428,7 +428,7 @@ class Configurator {
     @return {configurator}   returns the configurator instance to make it easy
                              to chain calls to import.
    */
-  import(pkg, options) {
+  import (pkg, options) {
     pkg.configure(this, options || {})
     return this
   }
@@ -436,15 +436,15 @@ class Configurator {
   // Config Interpreter APIs
   // ------------------------
 
-  getConfig() {
+  getConfig () {
     return this.config
   }
 
-  getStyles() {
+  getStyles () {
     return this.config.styles
   }
 
-  getSchema() {
+  getSchema () {
     if (!this.schema) {
       this.schema = new DocumentSchema(this.config.schema)
       this.schema.addNodes(this.config.nodes)
@@ -452,16 +452,16 @@ class Configurator {
     return this.schema
   }
 
-  getDocumentClass() {
+  getDocumentClass () {
     return this.config.schema.DocumentClass
   }
 
-  createArticle(seed) {
+  createArticle (seed) {
     console.warn('DEPRECATED: createArticle is now called createDocument')
     return this.createDocument(seed)
   }
 
-  createDocument(seed) {
+  createDocument (seed) {
     const schema = this.getSchema()
     const DocumentClass = schema.getDocumentClass()
     let doc = new DocumentClass(schema)
@@ -471,16 +471,16 @@ class Configurator {
     return doc
   }
 
-  createImporter(type, context, options = {}) {
+  createImporter (type, context, options = {}) {
     var ImporterClass = this.config.importers[type]
     var config = Object.assign({
       schema: this.getSchema(),
-      converters: this.getConverterRegistry().get(type).values(),
+      converters: this.getConverterRegistry().get(type).values()
     }, options)
     return new ImporterClass(config, context)
   }
 
-  createExporter(type, context, options = {}) {
+  createExporter (type, context, options = {}) {
     var ExporterClass = this.config.exporters[type]
     var config = Object.assign({
       schema: this.getSchema(),
@@ -489,27 +489,27 @@ class Configurator {
     return new ExporterClass(config, context)
   }
 
-  getCommandGroups() {
+  getCommandGroups () {
     return this.config.commandGroups
   }
 
-  getComponentRegistry() {
+  getComponentRegistry () {
     var componentRegistry = new ComponentRegistry()
-    forEach(this.config.components, function(ComponentClass, name) {
+    forEach(this.config.components, function (ComponentClass, name) {
       componentRegistry.add(name, ComponentClass)
     })
     return componentRegistry
   }
 
-  getCommands() {
-    return map(this.config.commands, function(item, name) {
+  getCommands () {
+    return map(this.config.commands, function (item, name) {
       return new item.CommandClass(Object.assign({name: name}, item.options))
     })
   }
 
-  getSurfaceCommandNames() {
+  getSurfaceCommandNames () {
     var commands = this.getCommands()
-    var commandNames = commands.map(function(C) {
+    var commandNames = commands.map(function (C) {
       return C.name
     })
     return commandNames
@@ -521,10 +521,10 @@ class Configurator {
     `configurator.getConverterRegistry().get('html').get('paragraph')` provides
     a HTML converter for Paragraphs.
   */
-  getConverterRegistry() {
+  getConverterRegistry () {
     if (!this.converterRegistry) {
       var converterRegistry = new Registry()
-      forEach(this.config.converters, function(converters, name) {
+      forEach(this.config.converters, function (converters, name) {
         converterRegistry.add(name, new Registry(converters))
       })
       this.converterRegistry = converterRegistry
@@ -532,46 +532,46 @@ class Configurator {
     return this.converterRegistry
   }
 
-  getDropHandlers() {
+  getDropHandlers () {
     return this.config.dropHandlers.slice(0)
   }
 
-  getSeed() {
+  getSeed () {
     return this.config.seed
   }
 
-  getIconProvider() {
+  getIconProvider () {
     return new FontAwesomeIconProvider(this.config.icons)
   }
 
-  getEditingBehavior() {
+  getEditingBehavior () {
     var editingBehavior = new EditingBehavior()
-    this.config.editingBehaviors.forEach(function(behavior) {
+    this.config.editingBehaviors.forEach(function (behavior) {
       behavior.register(editingBehavior)
     })
     return editingBehavior
   }
 
-  getMacros() {
+  getMacros () {
     return this.config.macros
   }
 
-  getKeyboardShortcuts() {
+  getKeyboardShortcuts () {
     return this.config.keyboardShortcuts
   }
 
-  getFindAndReplaceConfig() {
+  getFindAndReplaceConfig () {
     return this.config.findAndReplace
   }
 
-  setFindAndReplaceConfig(config) {
+  setFindAndReplaceConfig (config) {
     this.config.findAndReplace = config
   }
 
   /*
     Allows lookup of a keyboard shortcut by command name
   */
-  getKeyboardShortcutsByCommand() {
+  getKeyboardShortcutsByCommand () {
     let keyboardShortcuts = {}
     this.config.keyboardShortcuts.forEach((entry) => {
       if (entry.spec.command) {
@@ -594,102 +594,101 @@ class Configurator {
     return keyboardShortcuts
   }
 
-  setDefaultLanguage(lang) {
+  setDefaultLanguage (lang) {
     this.config.lang = lang
   }
 
-  getDefaultLanguage() {
+  getDefaultLanguage () {
     return this.config.lang || 'en'
   }
 
   /* This is used for DependencyInjection of core implementations */
 
-  setCommandManagerClass(CommandManagerClass) {
+  setCommandManagerClass (CommandManagerClass) {
     this.config.CommandManagerClass = CommandManagerClass
   }
 
-  getCommandManagerClass() {
+  getCommandManagerClass () {
     return this.config.CommandManagerClass || DefaultCommandManager
   }
 
-  setDragManagerClass(DragManagerClass) {
+  setDragManagerClass (DragManagerClass) {
     this.config.DragManagerClass = DragManagerClass
   }
 
-  getDragManagerClass() {
+  getDragManagerClass () {
     return this.config.DragManagerClass || DefaultDragManager
   }
 
-  setFileManagerClass(FileManagerClass) {
+  setFileManagerClass (FileManagerClass) {
     this.config.FileManagerClass = FileManagerClass
   }
 
-  getFileManagerClass() {
+  getFileManagerClass () {
     return this.config.FileManagerClass || DefaultFileManager
   }
 
-  setGlobalEventHandlerClass(GlobalEventHandlerClass) {
+  setGlobalEventHandlerClass (GlobalEventHandlerClass) {
     this.config.GlobalEventHandlerClass = GlobalEventHandlerClass
   }
 
-  getGlobalEventHandlerClass() {
+  getGlobalEventHandlerClass () {
     return this.config.GlobalEventHandlerClass || DefaultGlobalEventHandler
   }
 
-  setKeyboardManagerClass(KeyboardManagerClass) {
+  setKeyboardManagerClass (KeyboardManagerClass) {
     this.config.KeyboardManagerClass = KeyboardManagerClass
   }
 
-  getKeyboardManagerClass() {
+  getKeyboardManagerClass () {
     return this.config.KeyboardManagerClass || DefaultKeyboardManager
   }
 
-  setMacroManagerClass(MacroManagerClass) {
+  setMacroManagerClass (MacroManagerClass) {
     this.config.MacroManagerClass = MacroManagerClass
   }
 
-  getMacroManagerClass() {
+  getMacroManagerClass () {
     return this.config.MacroManagerClass || DefaultMacroManager
   }
 
-  setMarkersManagerClass(MarkersManagerClass) {
+  setMarkersManagerClass (MarkersManagerClass) {
     this.config.MarkersManagerClass = MarkersManagerClass
   }
 
-  getMarkersManagerClass() {
+  getMarkersManagerClass () {
     return this.config.MarkersManagerClass || DefaultMarkersManager
   }
 
-  setSurfaceManagerClass(SurfaceManagerClass) {
+  setSurfaceManagerClass (SurfaceManagerClass) {
     this.config.SurfaceManagerClass = SurfaceManagerClass
   }
 
-  getSurfaceManagerClass() {
+  getSurfaceManagerClass () {
     return this.config.SurfaceManagerClass || DefaultSurfaceManager
   }
 
-  setSaveHandlerClass(SaveHandlerClass) {
+  setSaveHandlerClass (SaveHandlerClass) {
     this.config.SaveHandlerClass = SaveHandlerClass
   }
 
-  getSaveHandler() {
+  getSaveHandler () {
     let SaveHandler = this.config.SaveHandlerClass || DefaultSaveHandler
     return new SaveHandler()
   }
 
-  getLabelProviderClass() {
+  getLabelProviderClass () {
     return this.config.LabelProviderClass || DefaultLabelProvider
   }
 
-  setLabelProviderClass(LabelProviderClass) {
+  setLabelProviderClass (LabelProviderClass) {
     this.config.LabelProviderClass = LabelProviderClass
   }
 
-  getLabelProvider() {
+  getLabelProvider () {
     const LabelProvider = this.getLabelProviderClass()
     return new LabelProvider(this.config.labels)
   }
-
 }
 
 export default Configurator

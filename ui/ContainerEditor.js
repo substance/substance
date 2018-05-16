@@ -27,8 +27,7 @@ import RenderingEngine from './RenderingEngine'
 */
 
 class ContainerEditor extends Surface {
-
-  constructor(parent, props, el) {
+  constructor (parent, props, el) {
     // default props derived from the given props
     props.containerId = props.containerId || props.node.id
     props.name = props.name || props.containerId || props.node.id
@@ -51,34 +50,34 @@ class ContainerEditor extends Surface {
   }
 
   // Note: this component is self managed
-  shouldRerender(newProps) {
+  shouldRerender (newProps) {
     if (newProps.disabled !== this.props.disabled) return true
     // TODO: we should still detect when the document has changed,
     // see https://github.com/substance/substance/issues/543
     return false
   }
 
-  willReceiveProps(newProps) {
+  willReceiveProps (newProps) {
     super.willReceiveProps.apply(this, arguments)
     this._deriveInternalState(newProps)
   }
 
-  didMount() {
+  didMount () {
     super.didMount.apply(this, arguments)
     let editorSession = this.getEditorSession()
     editorSession.onUpdate('document', this._onContainerChanged, this, {
-      path:  this.container.getContentPath()
+      path: this.container.getContentPath()
     })
     this._attachPlaceholder()
   }
 
-  dispose() {
+  dispose () {
     super.dispose.apply(this, arguments)
     let editorSession = this.getEditorSession()
     editorSession.off(this)
   }
 
-  render($$) {
+  render ($$) {
     let el = super.render($$)
 
     let doc = this.getDocument()
@@ -88,12 +87,12 @@ class ContainerEditor extends Surface {
       console.warn('No container node found for ', containerId)
     }
     el.addClass('sc-container-editor container-node ' + containerId)
-      .attr("data-id", containerId)
+      .attr('data-id', containerId)
 
     // native spellcheck
     el.attr('spellcheck', this.props.spellcheck === 'native')
 
-    containerNode.getNodes().forEach(function(node, index) {
+    containerNode.getNodes().forEach(function (node, index) {
       el.append(this._renderNode($$, node, index))
     }.bind(this))
 
@@ -106,7 +105,7 @@ class ContainerEditor extends Surface {
     return el
   }
 
-  selectFirst() {
+  selectFirst () {
     const container = this.getContainer()
     if (container.getLength() > 0) {
       const editorSession = this.getEditorSession()
@@ -115,7 +114,7 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _renderNode($$, node, nodeIndex) {
+  _renderNode ($$, node, nodeIndex) {
     let props = { node }
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
@@ -131,7 +130,7 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _extractNodeProps(node) {
+  _extractNodeProps (node) {
     let doc = this.getDocument()
     return {
       doc: doc,
@@ -139,7 +138,7 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _deriveInternalState(props) {
+  _deriveInternalState (props) {
     let _state = this._state
     if (!props.hasOwnProperty('enabled') || props.enabled) {
       _state.enabled = true
@@ -148,7 +147,7 @@ class ContainerEditor extends Surface {
     }
   }
 
-  _selectNextIsolatedNode(direction) {
+  _selectNextIsolatedNode (direction) {
     let selState = this.getEditorSession().getSelectionState()
     let node = (direction === 'left') ? selState.getPreviousNode() : selState.getNextNode()
     let isIsolatedNode = !node.isText() && !node.isList()
@@ -168,7 +167,7 @@ class ContainerEditor extends Surface {
     return false
   }
 
-  _handleLeftOrRightArrowKey(event) {
+  _handleLeftOrRightArrowKey (event) {
     event.stopPropagation()
     const doc = this.getDocument()
     const sel = this.getEditorSession().getSelection()
@@ -182,7 +181,7 @@ class ContainerEditor extends Surface {
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
         let nodePos = container.getPosition(doc.get(sel.getNodeId()))
-        if ((left && nodePos === 0) || (right && nodePos === container.length-1)) {
+        if ((left && nodePos === 0) || (right && nodePos === container.length - 1)) {
           event.preventDefault()
           return
         }
@@ -198,7 +197,7 @@ class ContainerEditor extends Surface {
     })
   }
 
-  _handleUpOrDownArrowKey(event) {
+  _handleUpOrDownArrowKey (event) {
     event.stopPropagation()
     const doc = this.getDocument()
     const sel = this.getEditorSession().getSelection()
@@ -211,7 +210,7 @@ class ContainerEditor extends Surface {
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
         let nodePos = container.getPosition(doc.get(sel.getNodeId()))
-        if ((up && nodePos === 0) || (down && nodePos === container.length-1)) {
+        if ((up && nodePos === 0) || (down && nodePos === container.length - 1)) {
           event.preventDefault()
           return
         }
@@ -224,11 +223,11 @@ class ContainerEditor extends Surface {
         if (!event.shiftKey) {
           event.preventDefault()
           if (up) {
-            let prev = container.getChildAt(nodePos-1)
+            let prev = container.getChildAt(nodePos - 1)
             selectionHelpers.setCursor(editorSession, prev, sel.containerId, 'after')
             return
           } else {
-            let next = container.getChildAt(nodePos+1)
+            let next = container.getChildAt(nodePos + 1)
             selectionHelpers.setCursor(editorSession, next, sel.containerId, 'before')
             return
           }
@@ -241,7 +240,7 @@ class ContainerEditor extends Surface {
     })
   }
 
-  _handleTabKey(event) {
+  _handleTabKey (event) {
     const editorSession = this.getEditorSession()
     const sel = editorSession.getSelection()
     // EXPERIMENTAL: using TAB to enter an isolated node
@@ -256,7 +255,7 @@ class ContainerEditor extends Surface {
     super._handleTabKey(event)
   }
 
-  __handleTab(e) {
+  __handleTab (e) {
     e.preventDefault()
     if (e.shiftKey) {
       this.getEditorSession().transaction((tx) => {
@@ -270,22 +269,22 @@ class ContainerEditor extends Surface {
   }
 
   // Used by Clipboard
-  isContainerEditor() {
+  isContainerEditor () {
     return true
   }
 
   /**
     Returns the containerId the editor is bound to
   */
-  getContainerId() {
+  getContainerId () {
     return this.containerId
   }
 
-  getContainer() {
+  getContainer () {
     return this.getDocument().get(this.getContainerId())
   }
 
-  isEmpty() {
+  isEmpty () {
     let containerNode = this.getContainer()
     return (containerNode && containerNode.length === 0)
   }
@@ -293,7 +292,7 @@ class ContainerEditor extends Surface {
   /*
     Adds a placeholder if needed
   */
-  _attachPlaceholder() {
+  _attachPlaceholder () {
     let firstNode = this.childNodes[0]
     // Remove old placeholder if necessary
     if (this.placeholderNode) {
@@ -310,12 +309,12 @@ class ContainerEditor extends Surface {
     }
   }
 
-  isEditable() {
+  isEditable () {
     return super.isEditable.call(this) && !this.isEmpty()
   }
 
   // called by flow when subscribed resources have been updated
-  _onContainerChanged(change) {
+  _onContainerChanged (change) {
     let doc = this.getDocument()
     // first update the container
     let renderContext = RenderingEngine.createContext(this)
@@ -324,9 +323,9 @@ class ContainerEditor extends Surface {
     let path = container.getContentPath()
     for (let i = 0; i < change.ops.length; i++) {
       let op = change.ops[i]
-      if (op.type === "update" && op.path[0] === path[0]) {
+      if (op.type === 'update' && op.path[0] === path[0]) {
         let diff = op.diff
-        if (diff.type === "insert") {
+        if (diff.type === 'insert') {
           let nodeId = diff.getValue()
           let node = doc.get(nodeId)
           let nodeEl
@@ -339,14 +338,13 @@ class ContainerEditor extends Surface {
             nodeEl = $$('div')
           }
           this.insertAt(diff.getOffset(), nodeEl)
-        } else if (diff.type === "delete") {
+        } else if (diff.type === 'delete') {
           this.removeAt(diff.getOffset())
         }
       }
     }
     this._attachPlaceholder()
   }
-
 }
 
 ContainerEditor.prototype._isContainerEditor = true

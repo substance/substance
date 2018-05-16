@@ -2,11 +2,10 @@ import InsertNodeCommand from '../../ui/InsertNodeCommand'
 import insertImage from './insertImage'
 
 export default class InsertImageCommand extends InsertNodeCommand {
-
   /*
     Inserts file and image nodes
   */
-  execute(params) {
+  execute (params) {
     let editorSession = params.editorSession
 
     editorSession.transaction((tx) => {
@@ -15,5 +14,4 @@ export default class InsertImageCommand extends InsertNodeCommand {
       })
     })
   }
-
 }

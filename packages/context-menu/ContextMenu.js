@@ -1,8 +1,7 @@
 import ToolPanel from '../../ui/ToolPanel'
 
 export default class ContextMenu extends ToolPanel {
-
-  didMount() {
+  didMount () {
     super.didMount()
     if (!this.context.scrollPane) {
       throw new Error('Requires a scrollPane context')
@@ -10,14 +9,14 @@ export default class ContextMenu extends ToolPanel {
     this.context.scrollPane.on('context-menu:opened', this._onContextMenuOpened, this)
   }
 
-  dispose() {
+  dispose () {
     super.dispose()
     this.context.scrollPane.off(this)
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-context-menu sm-hidden')
-    el.addClass('sm-theme-'+this.getTheme())
+    el.addClass('sm-theme-' + this.getTheme())
     el.append(
       $$('div').addClass('se-active-tools').append(
         this.renderEntries($$)
@@ -26,19 +25,19 @@ export default class ContextMenu extends ToolPanel {
     return el
   }
 
-  show(hints) {
+  show (hints) {
     this.el.removeClass('sm-hidden')
     this._position(hints)
   }
 
-  hide() {
+  hide () {
     this.el.addClass('sm-hidden')
   }
 
   /*
     Positions the content menu relative to the scrollPane
   */
-  _onContextMenuOpened(hints) {
+  _onContextMenuOpened (hints) {
     let mouseBounds = hints.mouseBounds
     this.el.removeClass('sm-hidden')
     let contextMenuWidth = this.el.htmlProp('offsetWidth')
@@ -54,7 +53,7 @@ export default class ContextMenu extends ToolPanel {
     this.el.css('left', leftPos)
   }
 
-  getTheme() {
+  getTheme () {
     return this.props.theme || 'dark'
   }
 }

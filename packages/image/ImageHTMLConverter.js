@@ -3,9 +3,9 @@ export default {
   type: 'image',
   tagName: 'img',
 
-  import: function(el, node, converter) {
+  import: function (el, node, converter) {
     let imageFile = converter.getDocument().create({
-      id: 'file-'+node.id,
+      id: 'file-' + node.id,
       type: 'file',
       fileType: 'image',
       url: el.attr('src')
@@ -13,7 +13,7 @@ export default {
     node.imageFile = imageFile.id
   },
 
-  export: function(node, el) {
+  export: function (node, el) {
     let imageFile = node.document.get(node.imageFile)
     el.attr('src', imageFile.getUrl())
   }

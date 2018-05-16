@@ -1,11 +1,10 @@
 class ContainerAddress {
-
-  constructor(pos, offset) {
+  constructor (pos, offset) {
     this.pos = pos
     this.offset = offset
   }
 
-  isBefore(other, strict) {
+  isBefore (other, strict) {
     strict = Boolean(strict)
     if (this.pos < other.pos) {
       return true
@@ -23,16 +22,16 @@ class ContainerAddress {
     }
   }
 
-  isAfter(other, strict) {
+  isAfter (other, strict) {
     return other.isBefore(this, strict)
   }
 
-  isEqual(other) {
+  isEqual (other) {
     return (this.pos === other.pos && this.offset === other.offset)
   }
 
-  toString() {
-    return [this.pos,'.',this.offset].join('')
+  toString () {
+    return [this.pos, '.', this.offset].join('')
   }
 }
 

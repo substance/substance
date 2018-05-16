@@ -1,7 +1,7 @@
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import _lookupRNG from './_lookupRNG'
 
-export default function _expandIncludes(fs, searchDirs, root) {
+export default function _expandIncludes (fs, searchDirs, root) {
   let includes = root.findAll('include')
   if (includes.length === 0) return false
 

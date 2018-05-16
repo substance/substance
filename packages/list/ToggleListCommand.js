@@ -1,8 +1,7 @@
 import Command from '../../ui/Command'
 
 export default class ToggleListCommand extends Command {
-
-  getCommandState(params) {
+  getCommandState (params) {
     let editorSession = this._getEditorSession(params)
     let doc = editorSession.getDocument()
     let sel = this._getSelection(params)
@@ -18,8 +17,11 @@ export default class ToggleListCommand extends Command {
           let action = active ? 'toggleList' : 'setListType'
           let listId = list.id
           return {
-            disabled: false, active,
-            action, listId, level
+            disabled: false,
+            active,
+            action,
+            listId,
+            level
           }
         } else if (node.isText() && node.isBlock) {
           return {
@@ -38,7 +40,7 @@ export default class ToggleListCommand extends Command {
     if (disabled) return
 
     let editorSession = params.editorSession
-    switch(action) {
+    switch (action) {
       case 'toggleList': {
         editorSession.transaction((tx) => {
           tx.toggleList()

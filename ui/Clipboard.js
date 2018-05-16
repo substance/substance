@@ -14,8 +14,7 @@ import AbstractClipboard from './AbstractClipboard'
   @internal
 */
 export default class Clipboard extends AbstractClipboard {
-
-  constructor(editorSession) {
+  constructor (editorSession) {
     super(editorSession.getConfigurator())
 
     this.editorSession = editorSession
@@ -24,16 +23,16 @@ export default class Clipboard extends AbstractClipboard {
   /*
     Copies selected content from document to clipboard.
   */
-  _copy() {
+  _copy () {
     let editorSession = this.getEditorSession()
     let sel = editorSession.getSelection()
     let doc = editorSession.getDocument()
     let clipboardDoc = null
-    let clipboardText = ""
-    let clipboardHtml = ""
+    let clipboardText = ''
+    let clipboardHtml = ''
     let htmlExporter = this._getExporter()
     if (!sel.isCollapsed()) {
-      clipboardText = getTextForSelection(doc, sel) || ""
+      clipboardText = getTextForSelection(doc, sel) || ''
       clipboardDoc = copySelection(doc, sel)
       clipboardHtml = htmlExporter.exportDocument(clipboardDoc)
     }
@@ -44,9 +43,9 @@ export default class Clipboard extends AbstractClipboard {
     }
   }
 
-  _cut() {
+  _cut () {
     let editorSession = this.getEditorSession()
-    editorSession.transaction((tx)=>{
+    editorSession.transaction((tx) => {
       tx.deleteSelection()
     })
   }
@@ -56,9 +55,9 @@ export default class Clipboard extends AbstractClipboard {
 
     @param {String} plainText plain text
   */
-  _pastePlainText(plainText) {
+  _pastePlainText (plainText) {
     let editorSession = this.getEditorSession()
-    editorSession.transaction(function(tx) {
+    editorSession.transaction(function (tx) {
       tx.paste(plainText)
     }, { action: 'paste' })
   }
@@ -69,7 +68,7 @@ export default class Clipboard extends AbstractClipboard {
     @param {ui/DOMElement} docElement
     @param {String} text plain text representation used as a fallback
   */
-  _pasteHtml(html, text) {
+  _pasteHtml (html, text) {
     let htmlImporter = this._getImporter()
     let content = htmlImporter.importDocument(html) || text
     if (content) {
@@ -81,8 +80,7 @@ export default class Clipboard extends AbstractClipboard {
     return true
   }
 
-  getEditorSession() {
+  getEditorSession () {
     return this.editorSession
   }
-
 }

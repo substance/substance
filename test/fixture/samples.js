@@ -2,7 +2,7 @@ import { EditingInterface } from 'substance'
 
 export const H1_TEXT = 'h1:abcdefg'
 
-export function _h1(doc, body) {
+export function _h1 (doc, body) {
   doc.create({
     type: 'heading',
     id: 'h1',
@@ -14,19 +14,19 @@ export function _h1(doc, body) {
 
 export const H2_TEXT = 'h2:lmnopqrs'
 
-export function _h2(doc, body) {
+export function _h2 (doc, body) {
   doc.create({
     type: 'heading',
     id: 'h2',
     content: H2_TEXT,
-    level:2
+    level: 2
   })
   body.show('h2')
 }
 
 export const P1_TEXT = 'p1:abcdef'
 
-export function _p1(doc, body) {
+export function _p1 (doc, body) {
   doc.create({
     type: 'paragraph',
     id: 'p1',
@@ -37,7 +37,7 @@ export function _p1(doc, body) {
 
 export const P2_TEXT = 'p2:ghijk'
 
-export function _p2(doc, body) {
+export function _p2 (doc, body) {
   doc.create({
     type: 'paragraph',
     id: 'p2',
@@ -46,7 +46,7 @@ export function _p2(doc, body) {
   body.show('p2')
 }
 
-export function _empty(doc, body) {
+export function _empty (doc, body) {
   doc.create({
     type: 'paragraph',
     id: 'empty',
@@ -55,13 +55,13 @@ export function _empty(doc, body) {
   body.show('empty')
 }
 
-export function _s1(doc) {
+export function _s1 (doc) {
   doc.create({
     type: 'strong',
     id: 's1',
     start: {
       path: ['p1', 'content'],
-      offset: 3,
+      offset: 3
     },
     end: {
       offset: 5
@@ -69,7 +69,7 @@ export function _s1(doc) {
   })
 }
 
-export function _il1(doc) {
+export function _il1 (doc) {
   let tx = new EditingInterface(doc)
   tx.setSelection({
     type: 'property',
@@ -89,7 +89,7 @@ export const LI2_TEXT = 'l1-2:0123456'
 export const LI3_TEXT = 'l1-3:ghij'
 
 // list with two items
-export function _l1(doc, body) {
+export function _l1 (doc, body) {
   doc.create({
     type: 'list',
     id: 'l1'
@@ -97,7 +97,7 @@ export function _l1(doc, body) {
   body.show('l1')
 }
 
-export function _l11(doc) {
+export function _l11 (doc) {
   const l1 = doc.get('l1')
   let item = doc.create({
     type: 'list-item',
@@ -107,7 +107,7 @@ export function _l11(doc) {
   l1.appendItem(item)
 }
 
-export function _l12(doc) {
+export function _l12 (doc) {
   const l1 = doc.get('l1')
   let item = doc.create({
     type: 'list-item',
@@ -117,7 +117,7 @@ export function _l12(doc) {
   l1.appendItem(item)
 }
 
-export function _l13(doc) {
+export function _l13 (doc) {
   const l1 = doc.get('l1')
   let item = doc.create({
     type: 'list-item',
@@ -127,7 +127,7 @@ export function _l13(doc) {
   l1.appendItem(item)
 }
 
-export function _l1_empty(doc) {
+export function _l1Empty (doc) {
   const l1 = doc.get('l1')
   let item = doc.create({
     type: 'list-item',
@@ -137,18 +137,18 @@ export function _l1_empty(doc) {
   l1.appendItem(item)
 }
 
-export function _li1plus(doc) {
+export function _li1plus (doc) {
   doc.set(['l1-1', 'level'], 2)
 }
 
-export function _li2plus(doc) {
+export function _li2plus (doc) {
   doc.set(['l1-2', 'level'], 2)
 }
 
 export const LI21_TEXT = 'l2-1:abcdef'
 export const LI22_TEXT = 'l2-2:0123456'
 
-export function _l2(doc, body) {
+export function _l2 (doc, body) {
   doc.create({
     type: 'list',
     id: 'l2'
@@ -156,7 +156,7 @@ export function _l2(doc, body) {
   body.show('l2')
 }
 
-export function _l21(doc) {
+export function _l21 (doc) {
   const l2 = doc.get('l2')
   let item = doc.create({
     type: 'list-item',
@@ -166,7 +166,7 @@ export function _l21(doc) {
   l2.appendItem(item)
 }
 
-export function _l22(doc) {
+export function _l22 (doc) {
   const l2 = doc.get('l2')
   let item = doc.create({
     type: 'list-item',
@@ -176,7 +176,7 @@ export function _l22(doc) {
   l2.appendItem(item)
 }
 
-export function _l1_single(doc, body) {
+export function _l1Single (doc, body) {
   doc.create({
     type: 'list-item',
     id: 'l1-1',
@@ -190,7 +190,7 @@ export function _l1_single(doc, body) {
   body.show('l1')
 }
 
-export function _block1(doc, body) {
+export function _block1 (doc, body) {
   doc.create({
     type: 'test-block',
     id: 'block1'
@@ -198,7 +198,7 @@ export function _block1(doc, body) {
   body.show('block1')
 }
 
-export function _block2(doc, body) {
+export function _block2 (doc, body) {
   doc.create({
     type: 'test-block',
     id: 'block2'
@@ -209,7 +209,7 @@ export function _block2(doc, body) {
 export const IN1_TITLE = 'TITLE'
 export const IN1_BODY = 'BODY'
 export const IN1_CAPTION = 'CAPTION'
-export function _in1(doc, body) {
+export function _in1 (doc, body) {
   doc.create({
     type: 'structured-node',
     id: 'in1',
@@ -222,17 +222,17 @@ export function _in1(doc, body) {
 
 export const T_CONTENT = [['A1', 'B1'], ['A2', 'B2']]
 
-export function _t1(doc, body) {
-  doc.create({type: 'table-cell', id: 't1_a1', content:T_CONTENT[0][0]})
-  doc.create({type: 'table-cell', id: 't1_b1', content:T_CONTENT[0][1]})
-  doc.create({type: 'table-cell', id: 't1_a2', content:T_CONTENT[1][0]})
-  doc.create({type: 'table-cell', id: 't1_b2', content:T_CONTENT[1][1]})
+export function _t1 (doc, body) {
+  doc.create({type: 'table-cell', id: 't1_a1', content: T_CONTENT[0][0]})
+  doc.create({type: 'table-cell', id: 't1_b1', content: T_CONTENT[0][1]})
+  doc.create({type: 'table-cell', id: 't1_a2', content: T_CONTENT[1][0]})
+  doc.create({type: 'table-cell', id: 't1_b2', content: T_CONTENT[1][1]})
   body.show(doc.create({
     type: 'table', id: 't1', cells: [['t1_a1', 't1_b1'], ['t1_a2', 't1_b2']]
   }))
 }
 
-export function _t1_sparse(doc, body) {
+export function _t1Sparse (doc, body) {
   _t1(doc, body)
   doc.set(['t1', 'cells'], [['t1_a1', null], [null, 't1_b2']])
 }

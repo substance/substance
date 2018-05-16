@@ -44,11 +44,10 @@ const converter = new JSONConverter()
 */
 
 class Document extends EventEmitter {
-
   /**
     @param {DocumentSchema} schema The document schema.
   */
-  constructor(schema, ...args) {
+  constructor (schema, ...args) {
     super()
 
     this.schema = schema
@@ -63,7 +62,7 @@ class Document extends EventEmitter {
     this._initialize(...args)
   }
 
-  _initialize() {
+  _initialize () {
     this.__id__ = uuid()
     this.nodeFactory = new DocumentNodeFactory(this)
     this.data = new IncrementalData(this.schema, this.nodeFactory)
@@ -80,19 +79,19 @@ class Document extends EventEmitter {
     ParentNodeHook.register(this)
   }
 
-  dispose() {
+  dispose () {
     this.off()
     this.data.off()
   }
 
-  get id() {
+  get id () {
     return this.__id__
   }
 
   /**
     @returns {model/DocumentSchema} the document's schema.
   */
-  getSchema() {
+  getSchema () {
     return this.schema
   }
 
@@ -101,7 +100,7 @@ class Document extends EventEmitter {
 
     @returns {Boolean} `true` if a node with id exists, `false` otherwise.
   */
-  contains(id) {
+  contains (id) {
     return this.data.contains(id)
   }
 
@@ -111,18 +110,18 @@ class Document extends EventEmitter {
     @param {String|String[]} path node id or path to property.
     @returns {DocumentNode|any|undefined} a Node instance, a value or undefined if not found.
   */
-  get(path, strict) {
+  get (path, strict) {
     return this.data.get(path, strict)
   }
 
   /**
     @return {Object} A hash of {@link model/DocumentNode} instances.
   */
-  getNodes() {
+  getNodes () {
     return this.data.getNodes()
   }
 
-  getAnnotations(path) {
+  getAnnotations (path) {
     return this.getIndex('annotations').get(path)
   }
 
@@ -161,7 +160,7 @@ class Document extends EventEmitter {
     off all listeners (such as indexes) until the data is consistent.
 
   */
-  import(importer) {
+  import (importer) {
     try {
       this.data._stopIndexing()
       importer(this)
@@ -190,7 +189,7 @@ class Document extends EventEmitter {
     })
     ```
   */
-  create(nodeData) {
+  create (nodeData) {
     if (!nodeData.id) {
       nodeData.id = uuid(nodeData.type)
     }
@@ -207,7 +206,7 @@ class Document extends EventEmitter {
     }
   }
 
-  createDefaultTextNode(text, dir) {
+  createDefaultTextNode (text, dir) {
     return this.create({
       type: this.getSchema().getDefaultTextType(),
       content: text || '',
@@ -229,7 +228,7 @@ class Document extends EventEmitter {
     })
     ```
   */
-  delete(nodeId) {
+  delete (nodeId) {
     const node = this.get(nodeId)
     const op = this._delete(nodeId)
     if (op) {
@@ -256,7 +255,7 @@ class Document extends EventEmitter {
     })
     ```
   */
-  set(path, value) {
+  set (path, value) {
     const oldValue = this.get(path)
     const op = this._set(path, value)
     if (op) {
@@ -276,7 +275,6 @@ class Document extends EventEmitter {
     @returns {any} The value before applying the update.
 
     @example
-
 
     Inserting text into a string property:
     ```
@@ -302,7 +300,7 @@ class Document extends EventEmitter {
     ```
     would turn `[1,2,3,4]` into `[1,2,4]`.
   */
-  update(path, diff) {
+  update (path, diff) {
     const op = this._update(path, diff)
     if (op) {
       this._ops.push(op)
@@ -317,7 +315,7 @@ class Document extends EventEmitter {
     Update multiple properties of a node by delegating to Document.set for each
     changed property.
   */
-  updateNode(id, newProps) {
+  updateNode (id, newProps) {
     let node = this.get(id)
     forEach(newProps, (value, key) => {
       if (!isEqual(node[key], newProps[key])) {
@@ -332,7 +330,7 @@ class Document extends EventEmitter {
     @param {String} name
     @param {DocumentIndex} index
   */
-  addIndex(name, index) {
+  addIndex (name, index) {
     return this.data.addIndex(name, index)
   }
 
@@ -340,7 +338,7 @@ class Document extends EventEmitter {
     @param {String} name
     @returns {DocumentIndex} the node index with given name.
   */
-  getIndex(name) {
+  getIndex (name) {
     return this.data.getIndex(name)
   }
 
@@ -384,7 +382,7 @@ class Document extends EventEmitter {
     doc.createSelection(null)
     ```
   */
-  createSelection(data) {
+  createSelection (data) {
     let sel
     if (isNil(data)) return Selection.nullSelection
     if (arguments.length !== 1 || !isPlainObject(data)) {
@@ -396,7 +394,7 @@ class Document extends EventEmitter {
             data.endOffset = data.startOffset
           }
           if (!data.hasOwnProperty('reverse')) {
-            if (data.startOffset>data.endOffset) {
+            if (data.startOffset > data.endOffset) {
               [data.startOffset, data.endOffset] = [data.endOffset, data.startOffset]
               data.reverse = !data.reverse
             }
@@ -404,19 +402,19 @@ class Document extends EventEmitter {
           // integrity checks:
           let text = this.get(data.path, 'strict')
           if (data.startOffset < 0 || data.startOffset > text.length) {
-            throw new Error('Invalid startOffset: target property has length '+text.length+', given startOffset is ' + data.startOffset)
+            throw new Error('Invalid startOffset: target property has length ' + text.length + ', given startOffset is ' + data.startOffset)
           }
           if (data.endOffset < 0 || data.endOffset > text.length) {
-            throw new Error('Invalid startOffset: target property has length '+text.length+', given endOffset is ' + data.endOffset)
+            throw new Error('Invalid startOffset: target property has length ' + text.length + ', given endOffset is ' + data.endOffset)
           }
           sel = new PropertySelection(data)
           break
         }
         case 'container': {
           let container = this.get(data.containerId, 'strict')
-          if (!container) throw new Error('Can not create ContainerSelection: container "'+data.containerId+'" does not exist.')
-          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset})
-          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset})
+          if (!container) throw new Error('Can not create ContainerSelection: container "' + data.containerId + '" does not exist.')
+          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset })
+          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset })
           let startAddress = container.getAddress(start)
           let endAddress = container.getAddress(end)
           if (!startAddress) {
@@ -459,25 +457,25 @@ class Document extends EventEmitter {
     return sel
   }
 
-  newInstance() {
+  newInstance () {
     var DocumentClass = this.constructor
     return new DocumentClass(this.schema)
   }
 
   // useful in combination with paste transformation
-  createSnippet() {
+  createSnippet () {
     var snippet = this.newInstance()
     var snippetContainer = snippet.create({
       type: 'container',
       id: SNIPPET_ID
     })
-    snippet.getContainer = function() {
+    snippet.getContainer = function () {
       return snippetContainer
     }
     return snippet
   }
 
-  createFromDocument(doc) {
+  createFromDocument (doc) {
     // clear all content, otherwise there would be an inconsistent mixture
     this.clear()
 
@@ -494,7 +492,7 @@ class Document extends EventEmitter {
         contentNodes.push(node)
       }
     })
-    contentNodes.concat(annotations).concat(containers).forEach(n=>{
+    contentNodes.concat(annotations).concat(containers).forEach(n => {
       this.create(n)
     })
 
@@ -506,17 +504,17 @@ class Document extends EventEmitter {
 
     @returns {Object} Plain content.
   */
-  toJSON() {
+  toJSON () {
     return converter.exportDocument(this)
   }
 
-  clone() {
+  clone () {
     let copy = this.newInstance()
     copy.createFromDocument(this)
     return copy
   }
 
-  clear() {
+  clear () {
     this.data.clear()
     this._ops.length = 0
   }
@@ -525,15 +523,15 @@ class Document extends EventEmitter {
     Provides a high-level turtle-graphics style interface
     to this document
   */
-  createEditingInterface() {
+  createEditingInterface () {
     return new EditingInterface(this)
   }
 
-  invert(change) {
+  invert (change) {
     return change.invert()
   }
 
-  _apply(documentChange) {
+  _apply (documentChange) {
     forEach(documentChange.ops, (op) => {
       this._applyOp(op)
     })
@@ -541,41 +539,40 @@ class Document extends EventEmitter {
     documentChange._extractInformation(this)
   }
 
-  _applyOp(op) {
+  _applyOp (op) {
     this.data.apply(op)
     this.emit('operation:applied', op)
   }
 
-  _create(nodeData) {
+  _create (nodeData) {
     return this.data.create(nodeData)
   }
 
-  _delete(nodeId) {
+  _delete (nodeId) {
     return this.data.delete(nodeId)
   }
 
-  _set(path, value) {
+  _set (path, value) {
     return this.data.set(path, value)
   }
 
-  _update(path, diff) {
+  _update (path, diff) {
     return this.data.update(path, diff)
   }
 
-
-  _emitChange(op) {
+  _emitChange (op) {
     const change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
     this._notifyChangeListeners(change, { hidden: true })
   }
 
-  _notifyChangeListeners(change, info) {
+  _notifyChangeListeners (change, info) {
     info = info || {}
     this.emit('document:changed', change, info, this)
   }
 
   // NOTE: this is still here because DOMSelection is using it
-  _createSelectionFromRange(range) {
+  _createSelectionFromRange (range) {
     if (!range) return Selection.nullSelection
     let inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
@@ -608,7 +605,7 @@ class Document extends EventEmitter {
     }
   }
 
-  _normalizeCoor({ path, offset }) {
+  _normalizeCoor ({ path, offset }) {
     // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
     if (path.length === 1) {
       let node = this.get(path[0]).getContainerRoot()
@@ -628,7 +625,6 @@ class Document extends EventEmitter {
     }
     return new Coordinate(path, offset)
   }
-
 }
 
 Document.prototype._isDocument = true

@@ -20,8 +20,7 @@ import DOMElement from '../dom/DOMElement'
   which is done by {@link RenderingEngine}
 */
 class VirtualElement extends DOMElement {
-
-  constructor(owner) {
+  constructor (owner) {
     super()
 
     // set when this gets inserted into another virtual element
@@ -32,26 +31,26 @@ class VirtualElement extends DOMElement {
     this._ref = null
   }
 
-  getParent() {
+  getParent () {
     return this.parent
   }
 
-  get childNodes() {
+  get childNodes () {
     return this.getChildNodes()
   }
 
-  getChildCount() {
+  getChildCount () {
     return this.children.length
   }
 
-  getChildAt(idx) {
+  getChildAt (idx) {
     return this.children[idx]
   }
 
   /*
     Provides the component after this VirtualElement has been rendered.
   */
-  getComponent() {
+  getComponent () {
     return this._comp
   }
 
@@ -66,7 +65,7 @@ class VirtualElement extends DOMElement {
 
     @param {String} ref id for the compiled Component
   */
-  ref(ref) {
+  ref (ref) {
     if (!ref) throw new Error('Illegal argument')
     /*
       Attention: only the owner can create a ref()
@@ -89,18 +88,17 @@ class VirtualElement extends DOMElement {
     this._ref = ref
     if (this._context) {
       const refs = this._context.refs
-      if(refs[ref]) {
-        throw new Error('An item with reference "'+ref+'" already exists.')
+      if (refs[ref]) {
+        throw new Error('An item with reference "' + ref + '" already exists.')
       }
       refs[ref] = this
     }
     return this
   }
 
-  isInDocument() {
+  isInDocument () {
     return false
   }
-
 }
 
 VirtualElement.prototype._isVirtualElement = true
@@ -113,8 +111,7 @@ VirtualElement.prototype._isVirtualElement = true
   @extends ui/VirtualElement
 */
 class VirtualHTMLElement extends VirtualElement {
-
-  constructor(tagName) {
+  constructor (tagName) {
     super()
 
     this._tagName = tagName
@@ -128,23 +125,23 @@ class VirtualHTMLElement extends VirtualElement {
     this.children = []
   }
 
-  getTagName() {
+  getTagName () {
     return this._tagName
   }
 
-  setTagName(tagName) {
+  setTagName (tagName) {
     this._tagName = tagName
     return this
   }
 
-  hasClass(className) {
+  hasClass (className) {
     if (this.classNames) {
       return this.classNames.indexOf(className) > -1
     }
     return false
   }
 
-  addClass(className) {
+  addClass (className) {
     if (!this.classNames) {
       this.classNames = []
     }
@@ -152,27 +149,27 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeClass(className) {
+  removeClass (className) {
     if (this.classNames) {
       this.classNames = without(this.classNames, className)
     }
     return this
   }
 
-  removeAttribute(name) {
+  removeAttribute (name) {
     if (this.attributes) {
       delete this.attributes[name]
     }
     return this
   }
 
-  getAttribute(name) {
+  getAttribute (name) {
     if (this.attributes) {
       return this.attributes[name]
     }
   }
 
-  setAttribute(name, value) {
+  setAttribute (name, value) {
     if (!this.attributes) {
       this.attributes = {}
     }
@@ -180,7 +177,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  getAttributes() {
+  getAttributes () {
     // we are having separated storages for differet
     // kind of attributes which we now pull together
     // in the same way as a native DOM element has it
@@ -192,37 +189,37 @@ class VirtualHTMLElement extends VirtualElement {
       attributes.class = this.classNames.join(' ')
     }
     if (this.style) {
-      attributes.style = map(this.style, function(val, key) {
-        return key + ":" + val
+      attributes.style = map(this.style, function (val, key) {
+        return key + ':' + val
       }).join(';')
     }
     return attributes
   }
 
-  getId() {
+  getId () {
     return this.getAttribute('id')
   }
 
-  setId(id) {
+  setId (id) {
     this.setAttribute('id', id)
     return this
   }
 
-  setTextContent(text) {
+  setTextContent (text) {
     text = String(text || '')
     this.empty()
     this.appendChild(text)
     return this
   }
 
-  setInnerHTML(html) {
+  setInnerHTML (html) {
     html = html || ''
     this.empty()
     this._innerHTMLString = html
     return this
   }
 
-  getInnerHTML() {
+  getInnerHTML () {
     if (!this.hasOwnProperty('_innerHTMLString')) {
       throw new Error('Not supported.')
     } else {
@@ -230,42 +227,42 @@ class VirtualHTMLElement extends VirtualElement {
     }
   }
 
-  getValue() {
+  getValue () {
     return this.htmlProp('value')
   }
 
-  setValue(value) {
+  setValue (value) {
     this.htmlProp('value', value)
     return this
   }
 
-  getChildNodes() {
+  getChildNodes () {
     return this.children
   }
 
-  getChildren() {
-    return this.children.filter(function(child) {
-      return child.getNodeType() !== "text"
+  getChildren () {
+    return this.children.filter(function (child) {
+      return child.getNodeType() !== 'text'
     })
   }
 
-  isTextNode() {
+  isTextNode () {
     return false
   }
 
-  isElementNode() {
+  isElementNode () {
     return true
   }
 
-  isCommentNode() {
+  isCommentNode () {
     return false
   }
 
-  isDocumentNode() {
+  isDocumentNode () {
     return false
   }
 
-  append() {
+  append () {
     if (this._innerHTMLString) {
       throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.')
     }
@@ -273,7 +270,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  appendChild(child) {
+  appendChild (child) {
     if (this._innerHTMLString) {
       throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.')
     }
@@ -281,7 +278,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  insertAt(pos, child) {
+  insertAt (pos, child) {
     child = this._normalizeChild(child)
     if (!child) {
       throw new Error('Illegal child: ' + child)
@@ -296,7 +293,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  insertBefore(child, before) {
+  insertBefore (child, before) {
     var pos = this.children.indexOf(before)
     if (pos > -1) {
       this.insertAt(pos, child)
@@ -306,7 +303,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeAt(pos) {
+  removeAt (pos) {
     if (pos < 0 || pos >= this.children.length) {
       throw new Error('removeAt(): Index out of bounds.')
     }
@@ -314,7 +311,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeChild(child) {
+  removeChild (child) {
     if (!child || !child._isVirtualElement) {
       throw new Error('removeChild(): Illegal arguments. Expecting a CheerioDOMElement instance.')
     }
@@ -326,7 +323,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  replaceChild(oldChild, newChild) {
+  replaceChild (oldChild, newChild) {
     if (!newChild || !oldChild ||
         !newChild._isVirtualElement || !oldChild._isVirtualElement) {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
@@ -340,7 +337,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  empty() {
+  empty () {
     var children = this.children
     while (children.length) {
       var child = children.pop()
@@ -350,13 +347,13 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  getProperty(name) {
+  getProperty (name) {
     if (this.htmlProps) {
       return this.htmlProps[name]
     }
   }
 
-  setProperty(name, value) {
+  setProperty (name, value) {
     if (!this.htmlProps) {
       this.htmlProps = {}
     }
@@ -364,20 +361,20 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeProperty(name) {
+  removeProperty (name) {
     if (this.htmlProps) {
       delete this.htmlProps[name]
     }
     return this
   }
 
-  getStyle(name) {
+  getStyle (name) {
     if (this.style) {
       return this.style[name]
     }
   }
 
-  setStyle(name, value) {
+  setStyle (name, value) {
     if (!this.style) {
       this.style = {}
     }
@@ -386,22 +383,22 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  _createEventListener(eventName, handler, options) {
+  _createEventListener (eventName, handler, options) {
     options.context = options.context || this._owner._comp
     return super._createEventListener(eventName, handler, options)
   }
 
-  getNodeType() {
-    return "element"
+  getNodeType () {
+    return 'element'
   }
 
-  hasInnerHTML() {
+  hasInnerHTML () {
     return Boolean(this._innerHTMLString)
   }
 
-  _normalizeChild(child) {
+  _normalizeChild (child) {
     if (isNil(child)) {
-      return
+
     } else if (child._isVirtualElement) {
       return child
     } else if (isString(child) || isBoolean(child) || isNumber(child)) {
@@ -411,7 +408,7 @@ class VirtualHTMLElement extends VirtualElement {
     }
   }
 
-  _append(outlet, args) {
+  _append (outlet, args) {
     if (args.length === 1 && !isArray(args[0])) {
       this._appendChild(outlet, args[0])
       return
@@ -420,14 +417,14 @@ class VirtualHTMLElement extends VirtualElement {
     if (isArray(args[0])) {
       children = args[0]
     } else if (arguments.length > 1) {
-      children = Array.prototype.slice.call(args,0)
+      children = Array.prototype.slice.call(args, 0)
     } else {
       return
     }
     children.forEach(this._appendChild.bind(this, outlet))
   }
 
-  _appendChild(outlet, child) {
+  _appendChild (outlet, child) {
     child = this._normalizeChild(child)
     // TODO: discuss. Having a bad feeling about this,
     // because it could obscure an implementation error
@@ -437,33 +434,33 @@ class VirtualHTMLElement extends VirtualElement {
     return child
   }
 
-  _insertAt(outlet, pos, child) {
+  _insertAt (outlet, pos, child) {
     if (!child) return
     outlet.splice(pos, 0, child)
     this._attach(child)
   }
 
-  _removeAt(outlet, pos) {
+  _removeAt (outlet, pos) {
     var child = outlet[pos]
     outlet.splice(pos, 1)
     this._detach(child)
   }
 
-  _attach(child) {
+  _attach (child) {
     child.parent = this
     if (this._context && child._owner !== this._owner && child._ref) {
       this._context.foreignRefs[child._ref] = child
     }
   }
 
-  _detach(child) {
+  _detach (child) {
     child.parent = null
     if (this._context && child._owner !== this._owner && child._ref) {
       delete this.context.foreignRefs[child._ref]
     }
   }
 
-  _mergeHTMLConfig(other) {
+  _mergeHTMLConfig (other) {
     if (other.classNames) {
       if (!this.classNames) {
         this.classNames = []
@@ -499,7 +496,6 @@ class VirtualHTMLElement extends VirtualElement {
 
 VirtualHTMLElement.prototype._isVirtualHTMLElement = true
 
-
 /*
   A virtual element which gets rendered by a custom component.
 
@@ -508,8 +504,7 @@ VirtualHTMLElement.prototype._isVirtualHTMLElement = true
   @extends ui/VirtualElement
 */
 class VirtualComponent extends VirtualHTMLElement {
-
-  constructor(ComponentClass, props) {
+  constructor (ComponentClass, props) {
     super()
 
     props = props || {}
@@ -522,37 +517,37 @@ class VirtualComponent extends VirtualHTMLElement {
     this.children = props.children
   }
 
-  get _isVirtualHTMLElement() { return false }
+  get _isVirtualHTMLElement () { return false }
 
-  get _isVirtualComponent() { return true }
+  get _isVirtualComponent () { return true }
 
-  getComponent() {
+  getComponent () {
     return this._comp
   }
 
   // Note: for VirtualComponentElement we put children into props
   // so that the render method of ComponentClass can place it.
-  getChildren() {
+  getChildren () {
     return this.props.children
   }
 
-  getNodeType() {
+  getNodeType () {
     return 'component'
   }
 
-  outlet(name) {
+  outlet (name) {
     return new Outlet(this, name)
   }
 
-  _attach(child) {
+  _attach (child) {
     child._preliminaryParent = this
   }
 
-  _detach(child) {
+  _detach (child) {
     child._preliminaryParent = null
   }
 
-  _copyHTMLConfig() {
+  _copyHTMLConfig () {
     return {
       classNames: clone(this.classNames),
       attributes: clone(this.attributes),
@@ -564,13 +559,13 @@ class VirtualComponent extends VirtualHTMLElement {
 }
 
 class Outlet {
-  constructor(virtualEl, name) {
+  constructor (virtualEl, name) {
     this.virtualEl = virtualEl
     this.name = name
     Object.freeze(this)
   }
 
-  _getOutlet() {
+  _getOutlet () {
     var outlet = this.virtualEl.props[this.name]
     if (!outlet) {
       outlet = []
@@ -579,15 +574,15 @@ class Outlet {
     return outlet
   }
 
-  append() {
+  append () {
     var outlet = this._getOutlet()
     this.virtualEl._append(outlet, arguments)
     return this
   }
 
-  empty() {
+  empty () {
     var arr = this.virtualEl.props[this.name]
-    arr.forEach(function(el) {
+    arr.forEach(function (el) {
       this._detach(el)
     }.bind(this))
     arr.splice(0, arr.length)
@@ -595,15 +590,13 @@ class Outlet {
   }
 }
 
-
 class VirtualTextNode extends VirtualElement {
-
-  constructor(text) {
+  constructor (text) {
     super()
     this.text = text
   }
 
-  get _isVirtualTextNode() { return true; }
+  get _isVirtualTextNode () { return true }
 }
 
 VirtualElement.Component = VirtualComponent
@@ -631,15 +624,15 @@ VirtualElement.TextNode = VirtualTextNode
   $$(HelloMessage, {name: 'John'})
   ```
 */
-VirtualElement.createElement = function() {
+VirtualElement.createElement = function () {
   var content
   var _first = arguments[0]
   var _second = arguments[1]
   var type
   if (isString(_first)) {
-    type = "element"
+    type = 'element'
   } else if (isFunction(_first) && _first.prototype._isComponent) {
-    type = "component"
+    type = 'component'
   } else if (isNil(_first)) {
     throw new Error('$$(null): provided argument was null or undefined.')
   } else {
@@ -649,10 +642,10 @@ VirtualElement.createElement = function() {
   var props = {}
   var classNames, ref
   var eventHandlers = []
-  for(var key in _second) {
+  for (var key in _second) {
     if (!_second.hasOwnProperty(key)) continue
     var val = _second[key]
-    switch(key) {
+    switch (key) {
       case 'class':
         classNames = val
         break
@@ -680,14 +673,14 @@ VirtualElement.createElement = function() {
   if (ref) {
     content.ref(ref)
   }
-  eventHandlers.forEach(function(h) {
+  eventHandlers.forEach(function (h) {
     if (isFunction(h.handler)) {
       content.on(h.name, h.handler)
     } else if (isPlainObject(h.handler)) {
       var params = h.handler
       content.on(h.name, params.handler, params.context, params)
     } else {
-      throw new Error('Illegal arguments for $$(_,{ on'+h.name+'})')
+      throw new Error('Illegal arguments for $$(_,{ on' + h.name + '})')
     }
   })
   // allow a notation similar to React.createElement

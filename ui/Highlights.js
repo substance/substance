@@ -17,7 +17,7 @@ import without from '../util/without'
 */
 
 class Highlights extends EventEmitter {
-  constructor(doc) {
+  constructor (doc) {
     super()
 
     this.doc = doc
@@ -29,7 +29,7 @@ class Highlights extends EventEmitter {
 
     @return {Object} Returns current highlights as a scoped object.
   */
-  get() {
+  get () {
     return this._highlights
   }
 
@@ -47,11 +47,11 @@ class Highlights extends EventEmitter {
       });
     ```
   */
-  set(highlights) {
+  set (highlights) {
     let oldHighlights = this._highlights
     let doc = this.doc
     // Iterate over scopes of provided highlights
-    forEach(highlights, function(newScopedHighlights, scope) {
+    forEach(highlights, function (newScopedHighlights, scope) {
       let oldScopedHighlights = oldHighlights[scope] || []
 
       // old [1,2,3]  -> new [2,4,5]
@@ -61,7 +61,7 @@ class Highlights extends EventEmitter {
       let toBeAdded = without(newScopedHighlights, oldScopedHighlights)
 
       // if (scopedHighlights) {
-      forEach(toBeDeleted, function(nodeId) {
+      forEach(toBeDeleted, function (nodeId) {
         let node = doc.get(nodeId)
         // Node could have been deleted in the meanwhile
         if (node) {
@@ -73,7 +73,7 @@ class Highlights extends EventEmitter {
         }
       })
 
-      forEach(toBeAdded, function(nodeId) {
+      forEach(toBeAdded, function (nodeId) {
         let node = doc.get(nodeId)
         if (node) {
           if (node.setHighlighted) {

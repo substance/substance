@@ -5,8 +5,8 @@ import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'codeblock',
-  configure: function(config) {
-    config.addNode(Codeblock);
+  configure: function (config) {
+    config.addNode(Codeblock)
     config.addComponent('codeblock', CodeblockComponent)
     config.addConverter('html', CodeblockHTMLConverter)
     config.addConverter('xml', CodeblockHTMLConverter)

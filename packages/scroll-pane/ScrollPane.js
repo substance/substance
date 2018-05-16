@@ -27,8 +27,7 @@ import Scrollbar from '../scrollbar/Scrollbar'
   ```
 */
 class ScrollPane extends AbstractScrollPane {
-
-  didMount() {
+  didMount () {
     super.didMount()
     if (this.refs.scrollbar && this.props.highlights) {
       this.props.highlights.on('highlights:updated', this.onHighlightsUpdated, this)
@@ -40,14 +39,14 @@ class ScrollPane extends AbstractScrollPane {
           subtree: true,
           attributes: true,
           characterData: true,
-          childList: true,
+          childList: true
         })
       }
       this.context.editorSession.onPosition(this._onPosition, this)
     }
   }
 
-  dispose() {
+  dispose () {
     super.dispose()
     if (this.props.highlights) {
       this.props.highlights.off(this)
@@ -59,7 +58,7 @@ class ScrollPane extends AbstractScrollPane {
     }
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div')
       .addClass('sc-scroll-pane')
 
@@ -89,7 +88,7 @@ class ScrollPane extends AbstractScrollPane {
 
       // Scanline is debugging purposes, display: none by default.
       el.append(
-        $$('div').ref("scanline").addClass('se-scanline')
+        $$('div').ref('scanline').addClass('se-scanline')
       )
     }
 
@@ -101,7 +100,7 @@ class ScrollPane extends AbstractScrollPane {
     return el
   }
 
-  renderContent($$) {
+  renderContent ($$) {
     let contentEl = $$('div').ref('content').addClass('se-content')
     contentEl.append(this.props.children)
     if (this.props.contextMenu === 'custom') {
@@ -110,30 +109,30 @@ class ScrollPane extends AbstractScrollPane {
     return contentEl
   }
 
-  _onContentChanged() {
+  _onContentChanged () {
     this._contentChanged = true
   }
 
-  _onPosition() {
+  _onPosition () {
     if (this.refs.scrollbar && this._contentChanged) {
       this._contentChanged = false
       this._updateScrollbar()
     }
   }
 
-  _updateScrollbar() {
+  _updateScrollbar () {
     if (this.refs.scrollbar) {
       this.refs.scrollbar.updatePositions()
     }
   }
 
-  onHighlightsUpdated(highlights) {
+  onHighlightsUpdated (highlights) {
     this.refs.scrollbar.extendProps({
       highlights: highlights
     })
   }
 
-  onScroll() {
+  onScroll () {
     let scrollPos = this.getScrollPosition()
     let scrollable = this.refs.scrollable
     if (this.props.onScroll) {
@@ -149,7 +148,7 @@ class ScrollPane extends AbstractScrollPane {
   /**
     Returns the height of scrollPane (inner content overflows)
   */
-  getHeight() {
+  getHeight () {
     let scrollableEl = this.getScrollableElement()
     return scrollableEl.height
   }
@@ -157,7 +156,7 @@ class ScrollPane extends AbstractScrollPane {
   /**
     Returns the cumulated height of a panel's content
   */
-  getContentHeight() {
+  getContentHeight () {
     let contentEl = this.refs.content.el.getNativeElement()
     // Important to use scrollHeight here (e.g. to consider overflowing
     // content, that stretches the content area, such as an overlay or
@@ -168,26 +167,26 @@ class ScrollPane extends AbstractScrollPane {
   /**
     Get the `.se-content` element
   */
-  getContentElement() {
+  getContentElement () {
     return this.refs.content.el
   }
 
   /**
     Get the `.se-scrollable` element
   */
-  getScrollableElement() {
+  getScrollableElement () {
     return this.refs.scrollable.el
   }
 
   /**
     Get current scroll position (scrollTop) of `.se-scrollable` element
   */
-  getScrollPosition() {
+  getScrollPosition () {
     let scrollableEl = this.getScrollableElement()
     return scrollableEl.getProperty('scrollTop')
   }
 
-  setScrollPosition(scrollPos) {
+  setScrollPosition (scrollPos) {
     let scrollableEl = this.getScrollableElement()
     scrollableEl.setProperty('scrollTop', scrollPos)
   }
@@ -197,7 +196,7 @@ class ScrollPane extends AbstractScrollPane {
 
     @param {DOMNode} el DOM node that lives inside the
   */
-  getPanelOffsetForElement(el) {
+  getPanelOffsetForElement (el) {
     let contentContainerEl = this.refs.content.el
     let rect = getRelativeBoundingRect(el, contentContainerEl)
     return rect.top
@@ -208,7 +207,7 @@ class ScrollPane extends AbstractScrollPane {
 
     @param {String} componentId component id, must be present in data-id attribute
   */
-  scrollTo(selector, onlyIfNotVisible) {
+  scrollTo (selector, onlyIfNotVisible) {
     let scrollableEl = this.getScrollableElement()
     let targetNode = scrollableEl.find(selector)
     if (targetNode) {
@@ -217,7 +216,7 @@ class ScrollPane extends AbstractScrollPane {
       if (onlyIfNotVisible) {
         const height = scrollableEl.height
         const oldOffset = scrollableEl.getProperty('scrollTop')
-        shouldScroll = (offset < oldOffset || oldOffset+height<offset)
+        shouldScroll = (offset < oldOffset || oldOffset + height < offset)
       }
       if (shouldScroll) {
         this.setScrollPosition(offset)
@@ -230,17 +229,15 @@ class ScrollPane extends AbstractScrollPane {
   /*
     Determines the selection bounding rectangle relative to the scrollpane's content.
   */
-  onSelectionPositioned(...args) {
+  onSelectionPositioned (...args) {
     super.onSelectionPositioned(...args)
     this._updateScrollbar()
   }
 
-  _onContextMenu(e) {
+  _onContextMenu (e) {
     super._onContextMenu(e)
     this._updateScrollbar()
   }
-
 }
-
 
 export default ScrollPane

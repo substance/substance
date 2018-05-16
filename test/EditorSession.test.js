@@ -4,21 +4,21 @@ import simple from './fixture/simple'
 
 const test = module('EditorSession')
 
-test("Keeping TransactionDocument up-to-date.", function(t) {
+test('Keeping TransactionDocument up-to-date.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
   editorSession.transaction((tx) => {
     const p = tx.get('foo')
-    t.notNil(p, "Stage should contain new paragraph node.")
-    t.equal(p.content, "foo")
+    t.notNil(p, 'Stage should contain new paragraph node.')
+    t.equal(p.content, 'foo')
   })
   t.end()
 })
 
-test("Undoing and redoing a change.", function(t) {
+test('Undoing and redoing a change.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
-  editorSession.transaction(function(tx) {
-    tx.update(['p1', 'content'], { type: 'insert', start: 3, text: "XXX" })
+  editorSession.transaction(function (tx) {
+    tx.update(['p1', 'content'], { type: 'insert', start: 3, text: 'XXX' })
   })
   t.equal(doc.get(['p1', 'content']), '012XXX3456789', 'Text should have been inserted.')
   t.equal(editorSession.canUndo(), true, 'Undo should be possible')
@@ -31,7 +31,7 @@ test("Undoing and redoing a change.", function(t) {
   t.end()
 })
 
-test("Selections after undo/redo.", function(t) {
+test('Selections after undo/redo.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
   var path = ['p1', 'content']
   editorSession.setSelection({
@@ -39,8 +39,8 @@ test("Selections after undo/redo.", function(t) {
     path: path,
     startOffset: 3
   })
-  editorSession.transaction(function(tx) {
-    tx.update(path, { type: 'insert', start: 3, text: "XXX" })
+  editorSession.transaction(function (tx) {
+    tx.update(path, { type: 'insert', start: 3, text: 'XXX' })
     tx.setSelection({
       type: 'property',
       path: path,
@@ -63,4 +63,3 @@ test("Selections after undo/redo.", function(t) {
   })), 'Selection should be set correctly after redo.')
   t.end()
 })
-

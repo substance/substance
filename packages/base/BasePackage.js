@@ -20,7 +20,7 @@ import ToolPanelPackage from '../tool-panel/ToolPanelPackage'
 
 export default {
   name: 'base',
-  configure: function(config) {
+  configure: function (config) {
     config.import(FilePackage)
     config.import(ScrollPanePackage)
     config.import(BodyScrollPanePackage)

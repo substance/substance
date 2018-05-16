@@ -1,12 +1,7 @@
 import DocumentNode from './DocumentNode'
 
 class FileNode extends DocumentNode {
-
-  constructor(...args) {
-    super(...args)
-  }
-
-  getUrl() {
+  getUrl () {
     if (this.proxy) {
       return this.proxy.getUrl()
     } else {
@@ -16,7 +11,7 @@ class FileNode extends DocumentNode {
     }
   }
 
-  setProxy(proxy) {
+  setProxy (proxy) {
     this.proxy = proxy
   }
 }

@@ -27,8 +27,8 @@ let keys = {
 }
 
 // Handle F1 to F24 keys
-for(let i=1;i<=24;i++) {
-  keys['F'+i] = 111 + i
+for (let i = 1; i <= 24; i++) {
+  keys['F' + i] = 111 + i
 }
 
 export default keys

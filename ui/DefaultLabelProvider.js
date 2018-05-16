@@ -2,13 +2,12 @@
  Default label provider implementation
 */
 class DefaultLabelProvider {
-
-  constructor(labels, lang) {
+  constructor (labels, lang) {
     this.lang = lang || 'en'
     this.labels = labels
   }
 
-  getLabel(name, params) {
+  getLabel (name, params) {
     let labels = this.labels[this.lang]
     if (!labels) return name
     let rawLabel = labels[name] || name
@@ -20,11 +19,11 @@ class DefaultLabelProvider {
     }
   }
 
-  setLanguage(lang) {
+  setLanguage (lang) {
     this.lang = lang || 'en'
   }
 
-  _evalTemplate(label, params) {
+  _evalTemplate (label, params) {
     let vars = this._extractVariables(label)
     vars.forEach((varName) => {
       let searchExp = new RegExp(`\\\${${varName}}`, 'g')
@@ -34,7 +33,7 @@ class DefaultLabelProvider {
     return label
   }
 
-  _extractVariables(rawLabel) {
+  _extractVariables (rawLabel) {
     let qualityRegex = /\${(\w+)}/g
     let matches
     let vars = []
@@ -44,7 +43,6 @@ class DefaultLabelProvider {
     }
     return vars
   }
-
 }
 
 export default DefaultLabelProvider

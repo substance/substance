@@ -1,7 +1,7 @@
 import AnnotationComponent from '../../ui/AnnotationComponent'
 
 class EmphasisComponent extends AnnotationComponent {
-  getTagName() {
+  getTagName () {
     return 'em'
   }
 }

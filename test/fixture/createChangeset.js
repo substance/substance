@@ -6,7 +6,7 @@ import { ChangeRecorder } from 'substance'
   Allows one or more functions to be passed, which will each represent a change
   in the result.
 */
-export default function createChangeset(doc, fns) {
+export default function createChangeset (doc, fns) {
   if (!doc._isDocument) {
     throw new Error('Illegal arguments')
   }

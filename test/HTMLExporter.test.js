@@ -12,15 +12,14 @@ if (platform.inBrowser) {
   htmlExporterTests('memory')
 }
 
-function htmlExporterTests(memory) {
-
-  const test = module('HTMLExporter' + ( memory ? ' [memory]' : ''), {
-    before: function(t) {
+function htmlExporterTests (memory) {
+  const test = module('HTMLExporter' + (memory ? ' [memory]' : ''), {
+    before: function (t) {
       t.elementFactory = memory ? MemoryDOMElement.createDocument('html') : DefaultDOMElement.createDocument('html')
     }
   })
 
-  test("Exporting paragraph", function(t) {
+  test('Exporting paragraph', function (t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     let el = exporter.convertNode(p1)
@@ -30,7 +29,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting paragraph with strong", function(t) {
+  test('Exporting paragraph with strong', function (t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     doc.create({
@@ -51,7 +50,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting h1", function(t) {
+  test('Exporting h1', function (t) {
     let { doc, exporter } = setup(t)
     let h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT })
     let el = exporter.convertNode(h1)
@@ -61,7 +60,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting h2", function(t) {
+  test('Exporting h2', function (t) {
     let { doc, exporter } = setup(t)
     let h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT })
     let el = exporter.convertNode(h2)
@@ -71,7 +70,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting simple document", function(t) {
+  test('Exporting simple document', function (t) {
     let { doc, exporter } = setup(t, simple)
     let el = exporter.exportDocument(doc)
     let actual = el.html()
@@ -85,7 +84,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting a link", function(t) {
+  test('Exporting a link', function (t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     doc.create({
@@ -93,7 +92,7 @@ function htmlExporterTests(memory) {
       id: 'l1',
       start: {
         path: ['p1', 'content'],
-        offset: 4,
+        offset: 4
       },
       end: {
         offset: 7
@@ -104,9 +103,9 @@ function htmlExporterTests(memory) {
     let el = exporter.convertNode(p1)
     let childNodes = el.getChildNodes()
     t.equal(childNodes.length, 3, 'Exported paragraph should have 3 child nodes')
-    t.equal(childNodes[0].textContent, "0123", '.. 1. should have correct text')
-    t.equal(childNodes[1].textContent, "456", '.. 2. should have correct text')
-    t.equal(childNodes[2].textContent, "789", '.. 3. should have correct text')
+    t.equal(childNodes[0].textContent, '0123', '.. 1. should have correct text')
+    t.equal(childNodes[1].textContent, '456', '.. 2. should have correct text')
+    t.equal(childNodes[2].textContent, '789', '.. 3. should have correct text')
     let a = childNodes[1]
     t.equal(a.attr('data-id'), 'l1', '.. <a> should have data-id set')
     t.equal(a.attr('href'), 'foo', '.. and correct href attribute')
@@ -114,7 +113,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting an unordered list", function(t) {
+  test('Exporting an unordered list', function (t) {
     let { doc, exporter } = setup(t)
     let l1 = _l1(doc)
     let el = exporter.convertNode(l1)
@@ -122,14 +121,14 @@ function htmlExporterTests(memory) {
     t.equal(el.tagName, 'ul', 'Exported element should be a <ul>')
     t.equal(el.attr('data-id'), 'l1', '.. with correct id')
     t.equal(childNodes.length, 2, '.. and two child nodes')
-    t.equal(childNodes[0].tagName, "li", '.. a <li>')
+    t.equal(childNodes[0].tagName, 'li', '.. a <li>')
     t.equal(childNodes[0].textContent, 'Foo', ".. with content 'Foo'")
-    t.equal(childNodes[1].tagName, "li", '.. and a <li>')
+    t.equal(childNodes[1].tagName, 'li', '.. and a <li>')
     t.equal(childNodes[1].textContent, 'Bar', ".. with content 'Bar'")
     t.end()
   })
 
-  test("Exporting an ordered list", function(t) {
+  test('Exporting an ordered list', function (t) {
     let { doc, exporter } = setup(t)
     let ol = doc.create({
       type: 'list',
@@ -141,7 +140,7 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting a nested list", function(t) {
+  test('Exporting a nested list', function (t) {
     let { doc, exporter } = setup(t)
     let l = _l2(doc)
     let el = exporter.convertNode(l)
@@ -153,16 +152,15 @@ function htmlExporterTests(memory) {
     t.end()
   })
 
-  function setup(t, fixture) {
+  function setup (t, fixture) {
     let config = getTestConfig()
     let exporter = config.createExporter('html', {}, { elementFactory: t.elementFactory })
     let doc = createTestArticle(fixture)
     return { exporter, doc }
   }
-
 }
 
-function _li1(doc) {
+function _li1 (doc) {
   doc.create({
     type: 'list-item',
     id: 'li1',
@@ -171,7 +169,7 @@ function _li1(doc) {
   })
 }
 
-function _li2(doc) {
+function _li2 (doc) {
   doc.create({
     type: 'list-item',
     id: 'li2',
@@ -180,7 +178,7 @@ function _li2(doc) {
   })
 }
 
-function _l1(doc) {
+function _l1 (doc) {
   _li1(doc)
   _li2(doc)
   return doc.create({
@@ -191,7 +189,7 @@ function _l1(doc) {
   })
 }
 
-function _li3(doc) {
+function _li3 (doc) {
   doc.create({
     type: 'list-item',
     id: 'li3',
@@ -200,7 +198,7 @@ function _li3(doc) {
   })
 }
 
-function _li4(doc) {
+function _li4 (doc) {
   doc.create({
     type: 'list-item',
     id: 'li4',
@@ -209,7 +207,7 @@ function _li4(doc) {
   })
 }
 
-function _l2(doc) {
+function _l2 (doc) {
   _li1(doc)
   _li2(doc)
   _li3(doc)

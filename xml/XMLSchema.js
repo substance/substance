@@ -7,8 +7,7 @@ import _isTextNodeEmpty from './_isTextNodeEmpty'
 const { TEXT } = DFA
 
 export default class XMLSchema {
-
-  constructor(elementSchemas, startElement) {
+  constructor (elementSchemas, startElement) {
     if (!elementSchemas[startElement]) {
       throw new Error('startElement must be a valid element.')
     }
@@ -20,23 +19,23 @@ export default class XMLSchema {
     })
   }
 
-  getIdAttribute() {
+  getIdAttribute () {
     return 'id'
   }
 
-  getTagNames() {
+  getTagNames () {
     return Object.keys(this._elementSchemas)
   }
 
-  getElementSchema(name) {
+  getElementSchema (name) {
     return this._elementSchemas[name]
   }
 
-  getStartElement() {
+  getStartElement () {
     return this.startElement
   }
 
-  toJSON() {
+  toJSON () {
     let result = {
       start: this.getStartElement(),
       elements: {}
@@ -48,7 +47,7 @@ export default class XMLSchema {
   }
 
   // prints out a Markdown representation of the schema
-  toMD() {
+  toMD () {
     let result = []
     let elementNames = Object.keys(this._elementSchemas)
     elementNames.sort()
@@ -57,22 +56,22 @@ export default class XMLSchema {
       result.push(`# <${elementSchema.name}>`)
       result.push('')
       result.push(`type: ${elementSchema.type}`)
-      result.push('attributes: '+ map(elementSchema.attributes, (_, name) => { return name }).join(', '))
+      result.push('attributes: ' + map(elementSchema.attributes, (_, name) => { return name }).join(', '))
       result.push('children:')
-      result.push('  '+elementSchema.expr.toString())
+      result.push('  ' + elementSchema.expr.toString())
       result.push('')
     })
     return result.join('\n')
   }
 
-  validateElement(el) {
+  validateElement (el) {
     let tagName = el.tagName
     let elementSchema = this.getElementSchema(tagName)
     return _validateElement(elementSchema, el)
   }
 }
 
-XMLSchema.fromJSON = function(data) {
+XMLSchema.fromJSON = function (data) {
   let elementSchemas = {}
   forEach(data.elements, (elData) => {
     let elSchema = ElementSchema.fromJSON(elData)
@@ -82,8 +81,7 @@ XMLSchema.fromJSON = function(data) {
 }
 
 class ElementSchema {
-
-  constructor(name, type, attributes, expr) {
+  constructor (name, type, attributes, expr) {
     this.name = name
     this.type = type
     this.attributes = attributes
@@ -103,7 +101,7 @@ class ElementSchema {
     }
   }
 
-  toJSON() {
+  toJSON () {
     return {
       name: this.name,
       type: this.type,
@@ -112,29 +110,28 @@ class ElementSchema {
     }
   }
 
-  isAllowed(tagName) {
+  isAllowed (tagName) {
     return this.expr.isAllowed(tagName)
   }
 
-  isTextAllowed() {
+  isTextAllowed () {
     return this.expr.isAllowed(TEXT)
   }
 
-  printStructure() {
+  printStructure () {
     return `${this.name} ::= ${this.expr.toString()}`
   }
 
-  findFirstValidPos(el, newTag) {
+  findFirstValidPos (el, newTag) {
     return this.expr._findInsertPos(el, newTag, 'first')
   }
 
-  findLastValidPos(el, newTag) {
+  findLastValidPos (el, newTag) {
     return this.expr._findInsertPos(el, newTag, 'last')
   }
-
 }
 
-ElementSchema.fromJSON = function(data) {
+ElementSchema.fromJSON = function (data) {
   return new ElementSchema(
     data.name,
     data.type,
@@ -143,7 +140,7 @@ ElementSchema.fromJSON = function(data) {
   )
 }
 
-function _validateElement(elementSchema, el) {
+function _validateElement (elementSchema, el) {
   let errors = []
   let valid = true
   { // Attributes
@@ -153,21 +150,20 @@ function _validateElement(elementSchema, el) {
       valid = false
     }
   }
-  { // Elements
-    if (elementSchema.type === 'external') {
-      // skip
+  // Elements
+  if (elementSchema.type === 'external') {
+    // skip
+  } else {
+    // HACK: special treatment for our text elements which are not real DOM elements
+    let res
+    if (el._isXMLTextElement) {
+      res = _checkChildren(elementSchema, el.toXML())
     } else {
-      // HACK: special treatment for our text elements which are not real DOM elements
-      let res
-      if (el._isXMLTextElement) {
-        res = _checkChildren(elementSchema, el.toXML())
-      } else {
-        res = _checkChildren(elementSchema, el)
-      }
-      if (!res.ok) {
-        errors = errors.concat(res.errors)
-        valid = false
-      }
+      res = _checkChildren(elementSchema, el)
+    }
+    if (!res.ok) {
+      errors = errors.concat(res.errors)
+      valid = false
     }
   }
   return {
@@ -180,7 +176,7 @@ function _checkAttributes(elementSchema, el) { // eslint-disable-line
   return { ok: true }
 }
 
-function _checkChildren(elementSchema, el) {
+function _checkChildren (elementSchema, el) {
   // Don't validate external nodes
   // TODO: maybe we should do this too?
   if (elementSchema.type === 'external') {

@@ -11,13 +11,13 @@ const PLAINOBJ = {}
  * @private
  */
 class Registry {
-  constructor(entries, validator) {
+  constructor (entries, validator) {
     this.entries = {}
     this.names = []
     this.validator = validator
 
     if (entries) {
-      forEach(entries, function(entry, name) {
+      forEach(entries, function (entry, name) {
         this.add(name, entry)
       }.bind(this))
     }
@@ -30,7 +30,7 @@ class Registry {
    * @method contains
    * @memberof module:Basics.Registry.prototype
    */
-  contains(name) {
+  contains (name) {
     return this.entries.hasOwnProperty(name)
   }
 
@@ -42,12 +42,12 @@ class Registry {
    * @method add
    * @memberof module:Basics.Registry.prototype
    */
-  add(name, entry) {
+  add (name, entry) {
     if (this.validator) {
       this.validator(entry)
     }
     if (PLAINOBJ[name]) {
-      throw new Error('Illegal key: "'+name+'" is a property of Object which is thus not allowed as a key.')
+      throw new Error('Illegal key: "' + name + '" is a property of Object which is thus not allowed as a key.')
     }
     if (this.contains(name)) {
       this.remove(name)
@@ -63,7 +63,7 @@ class Registry {
    * @method remove
    * @memberof module:Basics.Registry.prototype
    */
-  remove(name) {
+  remove (name) {
     let pos = this.names.indexOf(name)
     if (pos >= 0) {
       this.names.splice(pos, 1)
@@ -75,7 +75,7 @@ class Registry {
    * @method clear
    * @memberof module:Basics.Registry.prototype
    */
-  clear() {
+  clear () {
     this.names = []
     this.entries = {}
   }
@@ -88,10 +88,10 @@ class Registry {
    * @method get
    * @memberof module:Basics.Registry.prototype
    */
-  get(name, strict) {
+  get (name, strict) {
     let result = this.entries[name]
     if (strict && !result) {
-      throw new Error('No entry registered for name '+name)
+      throw new Error('No entry registered for name ' + name)
     }
     return result
   }
@@ -101,7 +101,7 @@ class Registry {
 
     @param {Function} callback with signature function(entry, name)
    */
-  forEach(callback) {
+  forEach (callback) {
     for (let i = 0; i < this.names.length; i++) {
       let name = this.names[i]
       let _continue = callback(this.entries[name], name)
@@ -111,7 +111,7 @@ class Registry {
     }
   }
 
-  map(callback) {
+  map (callback) {
     let result = []
     this.forEach((entry, name) => {
       result.push(callback(entry, name))
@@ -119,9 +119,9 @@ class Registry {
     return result
   }
 
-  filter(callback) {
+  filter (callback) {
     let result = []
-    this.forEach(function(entry, name) {
+    this.forEach(function (entry, name) {
       if (callback(entry, name)) {
         result.push(entry)
       }
@@ -129,7 +129,7 @@ class Registry {
     return result
   }
 
-  values() {
+  values () {
     return this.filter(() => { return true })
   }
 }

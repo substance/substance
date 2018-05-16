@@ -1,12 +1,12 @@
 import Component from '../../ui/Component'
 
 class ToolSeparator extends Component {
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-tool-separator')
     return el
   }
 
-  hasEnabledTools() {
+  hasEnabledTools () {
     return false
   }
 }

@@ -3,8 +3,7 @@ import platform from '../util/platform'
 import Component from './Component'
 
 class AbstractIsolatedNodeComponent extends Component {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     this.name = this.props.node.id
@@ -18,12 +17,12 @@ class AbstractIsolatedNodeComponent extends Component {
     this.blockingMode = useBlocker ? 'closed' : 'open'
   }
 
-  getInitialState() {
+  getInitialState () {
     let selState = this.context.editorSession.getSelectionState()
     return this._deriveStateFromSelectionState(selState)
   }
 
-  getChildContext() {
+  getChildContext () {
     return {
       parentSurfaceId: this.getId(),
       isolatedNodeComponent: this,
@@ -33,22 +32,21 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-
-  didMount() {
+  didMount () {
     super.didMount()
 
     let editorSession = this.context.editorSession
     editorSession.onRender('selection', this._onSelectionChanged, this)
   }
 
-  dispose() {
+  dispose () {
     super.dispose.call(this)
 
     let editorSession = this.context.editorSession
     editorSession.off(this)
   }
 
-  renderContent($$, node, options = {}) {
+  renderContent ($$, node, options = {}) {
     let ComponentClass = this.ContentClass
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
@@ -64,59 +62,59 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  getId() {
+  getId () {
     // HACK: doing this lazily here instead of in the constructor.
     // This is because `getInitialState()` already needs this information
     if (!this._id) {
-      this._id = this.context.parentSurfaceId +'/'+ this.name
+      this._id = this.context.parentSurfaceId + '/' + this.name
     }
     return this._id
   }
 
-  get id() { return this.getId() }
+  get id () { return this.getId() }
 
-  getMode() {
+  getMode () {
     return this.state.mode
   }
 
-  isOpen() {
+  isOpen () {
     return this.blockingMode === 'open'
   }
 
-  isClosed() {
+  isClosed () {
     return this.blockingMode === 'closed'
   }
 
-  isNotSelected() {
+  isNotSelected () {
     return !this.state.mode
   }
 
-  isSelected() {
+  isSelected () {
     return this.state.mode === 'selected'
   }
 
-  isCoSelected() {
+  isCoSelected () {
     return this.state.mode === 'co-selected'
   }
 
-  isFocused() {
+  isFocused () {
     return this.state.mode === 'focused'
   }
 
-  isCoFocused() {
+  isCoFocused () {
     return this.state.mode === 'co-focused'
   }
 
-  getParentSurface() {
+  getParentSurface () {
     return this.context.surface
   }
 
-  escape() {
+  escape () {
     // console.log('Escaping from IsolatedNode', this.id)
     this.selectNode()
   }
 
-  _onSelectionChanged() {
+  _onSelectionChanged () {
     let editorSession = this.context.editorSession
     let newState = this._deriveStateFromSelectionState(editorSession.getSelectionState())
     if (!newState && this.state.mode) {
@@ -126,7 +124,7 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  onKeydown(event) {
+  onKeydown (event) {
     // console.log('####', event.keyCode, event.metaKey, event.ctrlKey, event.shiftKey);
     // TODO: while this works when we have an isolated node with input or CE,
     // there is no built-in way of receiving key events in other cases
@@ -138,7 +136,7 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  _getContentClass(node) {
+  _getContentClass (node) {
     let ComponentClass
     // first try to get the component registered for this node
     ComponentClass = this.getComponent(node.type, true)
@@ -149,7 +147,7 @@ class AbstractIsolatedNodeComponent extends Component {
     return ComponentClass
   }
 
-  _getSurface(selState) {
+  _getSurface (selState) {
     let surface = selState.get('surface')
     if (surface === undefined) {
       let sel = selState.getSelection()
@@ -166,7 +164,7 @@ class AbstractIsolatedNodeComponent extends Component {
 
   // compute the list of surfaces and isolated nodes
   // for the given selection
-  _getIsolatedNodes(selState) {
+  _getIsolatedNodes (selState) {
     let isolatedNodes = selState.get('isolatedNodes')
     if (!isolatedNodes) {
       let sel = selState.getSelection()
@@ -183,13 +181,13 @@ class AbstractIsolatedNodeComponent extends Component {
     return isolatedNodes
   }
 
-  _shouldConsumeEvent(event) {
+  _shouldConsumeEvent (event) {
     let comp = Component.unwrap(event.target)
     let isolatedNodeComponent = this._getIsolatedNode(comp)
     return (isolatedNodeComponent === this)
   }
 
-  _getIsolatedNode(comp) {
+  _getIsolatedNode (comp) {
     if (comp._isAbstractIsolatedNodeComponent) {
       return this
     } else if (comp.context.isolatedNodeComponent) {
@@ -198,7 +196,6 @@ class AbstractIsolatedNodeComponent extends Component {
       return comp.context.surface.context.isolatedNodeComponent
     }
   }
-
 }
 
 AbstractIsolatedNodeComponent.prototype._isAbstractIsolatedNodeComponent = true

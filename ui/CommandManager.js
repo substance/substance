@@ -10,8 +10,7 @@ import without from '../util/without'
   command contributing to the global application state.
 */
 export default class CommandManager {
-
-  constructor(context, commands) {
+  constructor (context, commands) {
     const editorSession = context.editorSession
     if (!editorSession) {
       throw new Error('EditorSession required.')
@@ -38,7 +37,7 @@ export default class CommandManager {
     this._updateCommandStates(this.editorSession)
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
   }
 
@@ -47,7 +46,7 @@ export default class CommandManager {
 
     Commands are run async if cmd.isAsync() returns true.
   */
-  executeCommand(commandName, userParams, cb) {
+  executeCommand (commandName, userParams, cb) {
     let cmd = this._getCommand(commandName)
     if (!cmd) {
       console.warn('command', commandName, 'not registered')
@@ -80,21 +79,21 @@ export default class CommandManager {
     }
   }
 
-  _initialize() {
+  _initialize () {
     this.commandRegistry = new Registry()
     forEach(this.commands, (command) => {
       this.commandRegistry.add(command.name, command)
     })
   }
 
-  _getCommand(commandName) {
+  _getCommand (commandName) {
     return this.commandRegistry.get(commandName)
   }
 
   /*
     Compute new command states object
   */
-  _updateCommandStates(editorSession) {
+  _updateCommandStates (editorSession) {
     const commandContext = this._getCommandContext()
     const params = this._getCommandParams()
     const surface = params.surface
@@ -134,7 +133,7 @@ export default class CommandManager {
     editorSession.setCommandStates(commandStates)
   }
 
-  _onSessionUpdate(editorSession) {
+  _onSessionUpdate (editorSession) {
     // TODO: the first condition does not make sense
     // as 'change' is not a valid resource
     if (
@@ -146,11 +145,11 @@ export default class CommandManager {
     }
   }
 
-  _getCommandContext() {
+  _getCommandContext () {
     return this.context
   }
 
-  _getCommandParams() {
+  _getCommandParams () {
     let editorSession = this.context.editorSession
     let selectionState = editorSession.getSelectionState()
     let sel = selectionState.getSelection()
@@ -159,7 +158,7 @@ export default class CommandManager {
       editorSession: editorSession,
       selectionState: selectionState,
       surface: surface,
-      selection: sel,
+      selection: sel
     }
   }
 }

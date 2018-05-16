@@ -2,11 +2,10 @@
   A document selection. Refers to a Substance document model, not to the DOM.
 */
 class Selection {
-
-  constructor() {
+  constructor () {
     // Internal stuff
     var _internal = {}
-    Object.defineProperty(this, "_internal", {
+    Object.defineProperty(this, '_internal', {
       enumerable: false,
       value: _internal
     })
@@ -14,7 +13,7 @@ class Selection {
     _internal.doc = null
   }
 
-  clone() {
+  clone () {
     var newSel = this._clone()
     if (this._internal.doc) {
       newSel.attach(this._internal.doc)
@@ -25,7 +24,7 @@ class Selection {
   /**
     @returns {Document} The attached document instance
   */
-  getDocument() {
+  getDocument () {
     var doc = this._internal.doc
     if (!doc) {
       throw new Error('Selection is not attached to a document.')
@@ -33,7 +32,7 @@ class Selection {
     return doc
   }
 
-  isAttached() {
+  isAttached () {
     return Boolean(this._internal.doc)
   }
 
@@ -44,7 +43,7 @@ class Selection {
     @param {Document} doc document to attach
     @returns {this}
   */
-  attach(doc) {
+  attach (doc) {
     this._internal.doc = doc
     return this
   }
@@ -52,47 +51,47 @@ class Selection {
   /**
     @returns {Boolean} true when selection is null.
   */
-  isNull() { return false; }
+  isNull () { return false }
 
   /**
     @returns {Boolean} true for property selections
   */
-  isPropertySelection() { return false; }
+  isPropertySelection () { return false }
 
   /**
     @returns {Boolean} true if selection is a {@link model/ContainerSelection}
   */
-  isContainerSelection() { return false; }
+  isContainerSelection () { return false }
 
   /**
     @returns {Boolean} true if selection is a {@link model/NodeSelection}
   */
-  isNodeSelection() { return false; }
+  isNodeSelection () { return false }
 
-  isCustomSelection() { return false; }
+  isCustomSelection () { return false }
 
   /**
     @returns {Boolean} true when selection is collapsed
   */
-  isCollapsed() { return true; }
+  isCollapsed () { return true }
 
   /**
     @returns {Boolean} true if startOffset < endOffset
   */
-  isReverse() { return false; }
+  isReverse () { return false }
 
-  getType() {
+  getType () {
     throw new Error('Selection.getType() is abstract.')
   }
 
-  get type() {
+  get type () {
     return this.getType()
   }
 
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
-  equals(other) {
+  equals (other) {
     if (this === other) {
       return true
     } else if (!other) {
@@ -111,8 +110,8 @@ class Selection {
   /**
     @returns {String} This selection as human readable string.
   */
-  toString() {
-    return "null"
+  toString () {
+    return 'null'
   }
 
   /**
@@ -121,11 +120,11 @@ class Selection {
     @abstract
     @returns {Object}
   */
-  toJSON() {
+  toJSON () {
     throw new Error('This method is abstract.')
   }
 
-  createWith(update) {
+  createWith (update) {
     let SelectionClass = this.constructor
     let data = this.toJSON()
     Object.assign(data, update)
@@ -142,20 +141,19 @@ Selection.prototype._isSelection = true
   @internal
 */
 class NullSelection extends Selection {
-
-  isNull() {
+  isNull () {
     return true
   }
 
-  getType() {
+  getType () {
     return 'null'
   }
 
-  toJSON() {
+  toJSON () {
     return null
   }
 
-  clone() {
+  clone () {
     return this
   }
 }

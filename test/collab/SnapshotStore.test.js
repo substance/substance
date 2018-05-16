@@ -4,7 +4,7 @@ import testSnapshotStore from './testSnapshotStore'
 
 const test = module('collab/SnapshotStore')
 
-function createEmptySnapshotStore() {
+function createEmptySnapshotStore () {
   return new SnapshotStore()
 }
 

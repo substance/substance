@@ -15,14 +15,13 @@ const BROWSER_DELAY = platform.isFF ? 1 : 0
    Dances with contenteditable, so you don't have to.
 */
 export default class Surface extends Component {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     this._initialize()
   }
 
-  _initialize() {
+  _initialize () {
     // EditorSession instance must be provided either as a prop
     // or via dependency-injection
     this.editorSession = this.props.editorSession || this.context.editorSession
@@ -52,7 +51,7 @@ export default class Surface extends Component {
     }
   }
 
-  getChildContext() {
+  getChildContext () {
     return {
       surface: this,
       parentSurfaceId: this.getId(),
@@ -63,7 +62,7 @@ export default class Surface extends Component {
     }
   }
 
-  didMount() {
+  didMount () {
     const editorSession = this.getEditorSession()
     const surfaceManager = this.getSurfaceManager()
     if (surfaceManager) {
@@ -75,8 +74,7 @@ export default class Surface extends Component {
     globalEventHandler.addEventListener('keydown', this._muteNativeHandlers, this)
   }
 
-
-  dispose() {
+  dispose () {
     const editorSession = this.getEditorSession()
     const surfaceManager = this.getSurfaceManager()
     editorSession.off(this)
@@ -88,11 +86,11 @@ export default class Surface extends Component {
     globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
   }
 
-  didUpdate() {
+  didUpdate () {
     this._updateContentEditableState()
   }
 
-  render($$) {
+  render ($$) {
     let tagName = this.props.tagName || 'div'
     let el = $$(tagName)
       .addClass('sc-surface')
@@ -134,7 +132,7 @@ export default class Surface extends Component {
     return el
   }
 
-  renderNode($$, node) {
+  renderNode ($$, node) {
     let componentRegistry = this.getComponentRegistry()
     let ComponentClass = componentRegistry.get(node.type)
     if (!ComponentClass) {
@@ -144,92 +142,92 @@ export default class Surface extends Component {
     return $$(ComponentClass, this._extractNodeProps(node)).ref(node.id)
   }
 
-  getComponentRegistry() {
+  getComponentRegistry () {
     return this.context.componentRegistry || this.props.componentRegistry
   }
 
-  getName() {
+  getName () {
     return this.name
   }
 
-  getId() {
+  getId () {
     return this._surfaceId
   }
 
-  getSurfaceId() {
+  getSurfaceId () {
     return this._surfaceId
   }
 
-  isDisabled() {
+  isDisabled () {
     return this.props.disabled
   }
 
-  isEditable() {
-    return (this.props.editing === "full" || this.props.editing === undefined)
+  isEditable () {
+    return (this.props.editing === 'full' || this.props.editing === undefined)
   }
 
-  isSelectable() {
-    return (this.props.editing === "selection" || this.props.editing === "full")
+  isSelectable () {
+    return (this.props.editing === 'selection' || this.props.editing === 'full')
   }
 
-  isReadonly() {
-    return this.props.editing === "readonly"
+  isReadonly () {
+    return this.props.editing === 'readonly'
   }
 
-  getElement() {
+  getElement () {
     return this.el
   }
 
-  getDocument() {
+  getDocument () {
     return this.getEditorSession().getDocument()
   }
 
-  getEditorSession() {
+  getEditorSession () {
     return this.editorSession
   }
 
-  getSurfaceManager() {
+  getSurfaceManager () {
     return this.context.surfaceManager
   }
 
-  isEnabled() {
+  isEnabled () {
     return !this.state.disabled
   }
 
-  isContainerEditor() {
+  isContainerEditor () {
     return false
   }
 
-  isCustomEditor() {
+  isCustomEditor () {
     return false
   }
 
-  hasNativeSpellcheck() {
+  hasNativeSpellcheck () {
     return this.props.spellcheck === 'native'
   }
 
-  getContainerId() {
+  getContainerId () {
     return null
   }
 
-  focus() {
+  focus () {
     if (this.getEditorSession().getFocusedSurface() !== this) {
       this.selectFirst()
     }
   }
 
-  blur() {
+  blur () {
     if (this.getEditorSession().getFocusedSurface() === this) {
       this.getEditorSession().setSelection(null)
     }
   }
 
-  selectFirst() {
+  selectFirst () {
     throw new Error('This method is abstract.')
   }
 
   // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
-  rerenderDOMSelection() {
+  rerenderDOMSelection () {
     if (this.isDisabled()) return
     if (platform.inBrowser) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
@@ -247,8 +245,8 @@ export default class Surface extends Component {
     }
   }
 
-  getDomNodeForId(nodeId) {
-    return this.el.getNativeElement().querySelector('*[data-id="'+nodeId+'"]')
+  getDomNodeForId (nodeId) {
+    return this.el.getNativeElement().querySelector('*[data-id="' + nodeId + '"]')
   }
 
   /* Event handlers */
@@ -256,18 +254,18 @@ export default class Surface extends Component {
   /*
    * Handle document key down events.
    */
-  onKeyDown(event) {
+  onKeyDown (event) {
     if (!this._shouldConsumeEvent(event)) return
     // console.log('Surface.onKeyDown()', this.getId(), event);
 
     // ignore fake IME events (emitted in IE and Chromium)
-    if ( event.key === 'Dead' ) return
+    if (event.key === 'Dead') return
 
     // keyboard shortcuts
     let custom = this.getEditorSession().keyboardManager.onKeydown(event)
     if (!custom) {
       // core handlers for cursor movements and editor interactions
-      switch ( event.keyCode ) {
+      switch (event.keyCode) {
         // Cursor movements
         case keys.LEFT:
         case keys.RIGHT:
@@ -299,7 +297,7 @@ export default class Surface extends Component {
     }
   }
 
-  onTextInput(event) {
+  onTextInput (event) {
     if (!this._shouldConsumeEvent(event)) return
     // console.log("Surface.onTextInput():", event);
     event.preventDefault()
@@ -315,7 +313,7 @@ export default class Surface extends Component {
   }
 
   // Handling Dead-keys under OSX
-  onCompositionStart(event) {
+  onCompositionStart (event) {
     if (!this._shouldConsumeEvent(event)) return
     // console.log("Surface.onCompositionStart():", event);
     // EXPERIMENTAL:
@@ -330,12 +328,12 @@ export default class Surface extends Component {
       if (sel.isPropertySelection() && sel.isCollapsed()) {
         // console.log("Overwriting composed character")
         let offset = sel.start.offset
-        this.getEditorSession().setSelection(sel.createWithNewRange(offset-l, offset))
+        this.getEditorSession().setSelection(sel.createWithNewRange(offset - l, offset))
       }
     }
   }
 
-  onCompositionEnd(event) {
+  onCompositionEnd (event) {
     if (!this._shouldConsumeEvent(event)) return
     // console.log("Surface.onCompositionEnd():", event);
     // Firefox does not fire textinput events at the end of compositions,
@@ -356,7 +354,7 @@ export default class Surface extends Component {
   }
 
   // TODO: do we need this anymore?
-  onTextInputShim(event) {
+  onTextInputShim (event) {
     if (!this._shouldConsumeEvent(event)) return
     // Filter out non-character keys
     if (
@@ -365,7 +363,7 @@ export default class Surface extends Component {
       // Opera 12 doesn't always adhere to that convention
       event.keyCode === keys.TAB || event.keyCode === keys.ESCAPE ||
       // prevent combinations with meta keys, but not alt-graph which is represented as ctrl+alt
-      Boolean(event.metaKey) || (Boolean(event.ctrlKey)^Boolean(event.altKey))
+      Boolean(event.metaKey) || (Boolean(event.ctrlKey) ^ Boolean(event.altKey))
     ) {
       return
     }
@@ -376,7 +374,7 @@ export default class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!this.getEditorSession().keyboardManager.onTextInput(character)) {
-      if (character.length>0) {
+      if (character.length > 0) {
         this.getEditorSession().transaction((tx) => {
           tx.insertText(character)
         }, { action: 'type' })
@@ -389,7 +387,7 @@ export default class Surface extends Component {
   // though, there are some things which do not work well cross-browser
   // particularly, double- and triple clicks.
   // also it turned out to be problematic to react on mouse down instantly
-  onMouseDown(event) {
+  onMouseDown (event) {
     if (!this._shouldConsumeEvent(event)) {
       // console.log('skipping mousedown', this.id)
       return
@@ -416,12 +414,12 @@ export default class Surface extends Component {
     }
 
     // TODO: what is this exactly?
-    if ( event.button !== 0 ) {
+    if (event.button !== 0) {
       return
     }
 
     // special treatment for triple clicks
-    if (!(platform.isIE && platform.version<12) && event.detail >= 3) {
+    if (!(platform.isIE && platform.version < 12) && event.detail >= 3) {
       let sel = this.getEditorSession().getSelection()
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path)
@@ -448,7 +446,7 @@ export default class Surface extends Component {
     }
   }
 
-  onMouseUp(e) {
+  onMouseUp (e) {
     // console.log('Surface.onMouseup', this.id);
     // ATTENTION: filtering events does not make sense here,
     // as we need to make sure that pick the selection even
@@ -468,39 +466,39 @@ export default class Surface extends Component {
   // When a user right clicks the DOM selection is updated (in Chrome the nearest
   // word gets selected). Like we do with the left mouse clicks we need to sync up
   // our model selection.
-  onContextMenu(event) {
+  onContextMenu (event) {
     if (!this._shouldConsumeEvent(event)) return
     let sel = this.domSelection.getSelection()
     this._setSelection(sel)
   }
 
-  onNativeBlur() {
+  onNativeBlur () {
     // console.log('Native blur on surface', this.getId());
     let _state = this._state
     _state.hasNativeFocus = false
   }
 
-  onNativeFocus() {
+  onNativeFocus () {
     // console.log('Native focus on surface', this.getId());
     let _state = this._state
     _state.hasNativeFocus = true
   }
 
-  _onCopy(e) {
+  _onCopy (e) {
     this.clipboard.onCopy(e)
   }
 
-  _onCut(e) {
+  _onCut (e) {
     this.clipboard.onCut(e)
   }
 
-  _onPaste(e) {
+  _onPaste (e) {
     this.clipboard.onPaste(e)
   }
 
   // Internal implementations
 
-  _onSelectionChanged(selection) {
+  _onSelectionChanged (selection) {
     let newMode = this._deriveModeFromSelection(selection)
     if (this.state.mode !== newMode) {
       this.extendState({
@@ -510,7 +508,7 @@ export default class Surface extends Component {
   }
 
   // helper to manage surface mode which is derived from the current selection
-  _deriveModeFromSelection(sel) {
+  _deriveModeFromSelection (sel) {
     if (!sel) return null
     let surfaceId = sel.surfaceId
     let id = this.getId()
@@ -525,7 +523,7 @@ export default class Surface extends Component {
     return mode
   }
 
-  _updateContentEditableState() {
+  _updateContentEditableState () {
     // NOTE: managing contenteditable is difficult in
     // order to achieve a correct behavior for IsolatedNodes
     // For 'closed' isolated nodes it is important that the parents'
@@ -554,13 +552,13 @@ export default class Surface extends Component {
     }
   }
 
-  _blur() {
+  _blur () {
     if (this.el) {
       this.el.blur()
     }
   }
 
-  _focus() {
+  _focus () {
     if (this.isDisabled()) return
     // console.log('Focusing surface %s explicitly with Surface.focus()', this.getId());
     // NOTE: FF is causing problems with dynamically activated contenteditables
@@ -572,7 +570,7 @@ export default class Surface extends Component {
     this._focusElement()
   }
 
-  _focusElement() {
+  _focusElement () {
     this._state.hasNativeFocus = true
     // HACK: we must not focus explicitly in Chrome/Safari
     // as otherwise we get a crazy auto-scroll
@@ -582,12 +580,12 @@ export default class Surface extends Component {
       this._state.skipNextFocusEvent = true
       // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
       // in some browsers
-      this.el.focus();
+      this.el.focus()
       this._state.skipNextFocusEvent = false
     }
   }
 
-  _handleLeftOrRightArrowKey(event) {
+  _handleLeftOrRightArrowKey (event) {
     event.stopPropagation()
     let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
     // Note: we need this timeout so that CE updates the DOM selection first
@@ -597,7 +595,7 @@ export default class Surface extends Component {
     })
   }
 
-  _handleUpOrDownArrowKey(event) {
+  _handleUpOrDownArrowKey (event) {
     event.stopPropagation()
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
@@ -609,7 +607,7 @@ export default class Surface extends Component {
     })
   }
 
-  _handleHomeOrEndKey(event) {
+  _handleHomeOrEndKey (event) {
     event.stopPropagation()
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
@@ -621,7 +619,7 @@ export default class Surface extends Component {
     })
   }
 
-  _handlePageUpOrDownKey(event) {
+  _handlePageUpOrDownKey (event) {
     event.stopPropagation()
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
@@ -633,7 +631,7 @@ export default class Surface extends Component {
     })
   }
 
-  _handleSpaceKey(event) {
+  _handleSpaceKey (event) {
     event.stopPropagation()
     event.preventDefault()
     const text = ' '
@@ -644,7 +642,7 @@ export default class Surface extends Component {
     }
   }
 
-  _handleTabKey(event) {
+  _handleTabKey (event) {
     event.stopPropagation()
     this.el.emit('tab', {
       altKey: event.altKey,
@@ -660,7 +658,7 @@ export default class Surface extends Component {
     }
   }
 
-  __handleTab() {
+  __handleTab () {
     // in many cases we let the browser do the TAB
     // and then record the changed selection
     this._delayed(() => {
@@ -668,7 +666,7 @@ export default class Surface extends Component {
     })
   }
 
-  _handleEnterKey(event) {
+  _handleEnterKey (event) {
     event.preventDefault()
     event.stopPropagation()
     this.getEditorSession().transaction((tx) => {
@@ -676,9 +674,9 @@ export default class Surface extends Component {
     }, { action: 'break' })
   }
 
-  _handleEscapeKey() {}
+  _handleEscapeKey () {}
 
-  _handleDeleteKey(event) {
+  _handleDeleteKey (event) {
     event.preventDefault()
     event.stopPropagation()
     let direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right'
@@ -687,11 +685,11 @@ export default class Surface extends Component {
     }, { action: 'delete' })
   }
 
-  _hasNativeFocus() {
+  _hasNativeFocus () {
     return Boolean(this._state.hasNativeFocus)
   }
 
-  _setSelection(sel) {
+  _setSelection (sel) {
     // Since we allow the surface be blurred natively when clicking
     // on tools we now need to make sure that the element is focused natively
     // when we set the selection
@@ -706,7 +704,7 @@ export default class Surface extends Component {
     this.getEditorSession().setSelection(sel)
   }
 
-  _updateModelSelection(options) {
+  _updateModelSelection (options) {
     let sel = this.domSelection.getSelection(options)
     // console.log('Surface: updating model selection', sel.toString());
     // NOTE: this will also lead to a rerendering of the selection
@@ -714,7 +712,7 @@ export default class Surface extends Component {
     this._setSelection(sel)
   }
 
-  _selectProperty(path) {
+  _selectProperty (path) {
     let doc = this.getDocument()
     let text = doc.get(path)
     this._setSelection(doc.createSelection({
@@ -727,7 +725,7 @@ export default class Surface extends Component {
 
   // TODO: we could integrate container node rendering into this helper
   // TODO: this helper should be available also in non surface context
-  _renderNode($$, nodeId) {
+  _renderNode ($$, nodeId) {
     let doc = this.getDocument()
     let node = doc.get(nodeId)
     let componentRegistry = this.context.componentRegistry || this.props.componentRegistry
@@ -742,7 +740,7 @@ export default class Surface extends Component {
     })
   }
 
-  _extractNodeProps(node) {
+  _extractNodeProps (node) {
     let doc = this.getDocument()
     return {
       placeholder: this.props.placeholder,
@@ -752,40 +750,40 @@ export default class Surface extends Component {
   }
 
   // only take care of events which are emitted on targets which belong to this surface
-  _shouldConsumeEvent(event) {
+  _shouldConsumeEvent (event) {
     // console.log('should consume?', event.target, this.id)
     let comp = Component.unwrap(event.target)
     return (comp && (comp === this || comp.context.surface === this))
   }
 
   // Experimental: used by DragManager
-  getSelectionFromEvent(event) {
+  getSelectionFromEvent (event) {
     let domRange = getDOMRangeFromEvent(event)
     let sel = this.domSelection.getSelectionForDOMRange(domRange)
     sel.surfaceId = this.getId()
-    return sel;
+    return sel
   }
 
-  setSelectionFromEvent(event) {
+  setSelectionFromEvent (event) {
     let sel = this.getSelectionFromEvent(event)
     if (sel) {
       this._state.skipNextFocusEvent = true
       this._setSelection(sel)
     } else {
-      console.error('Could not create a selection from event.');
+      console.error('Could not create a selection from event.')
     }
   }
 
-  get id() {
+  get id () {
     return this._surfaceId
   }
 
-  _delayed(fn) {
+  _delayed (fn) {
     window.setTimeout(fn, BROWSER_DELAY)
   }
 
   // prevent the native behavior of contenteditable key shorcuts
-  _muteNativeHandlers(event) {
+  _muteNativeHandlers (event) {
     let contentEditableShortcuts
 
     if (platform.isMac) {
@@ -803,11 +801,10 @@ export default class Surface extends Component {
     }
 
     const key = parseKeyEvent(event)
-    if(contentEditableShortcuts.indexOf(key) > -1) {
+    if (contentEditableShortcuts.indexOf(key) > -1) {
       event.preventDefault()
     }
   }
-
 }
 
 Surface.prototype._isSurface = true
@@ -825,7 +822,7 @@ Surface.prototype._isSurface = true
   - figure caption: 'body/fig1/fig1-caption.content'
   - nested containers: 'body/section1'
 */
-Surface.createSurfaceId = function(surface) {
+Surface.createSurfaceId = function (surface) {
   let parentSurfaceId = surface.context.parentSurfaceId
   if (parentSurfaceId) {
     return parentSurfaceId + '/' + surface.name

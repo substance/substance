@@ -11,13 +11,13 @@ import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
 
 const COMPONENT_FACTORY = {
-  createComponent(ComponentClass, parent, props) {
+  createComponent (ComponentClass, parent, props) {
     return new ComponentClass(parent, props)
   },
-  createElementComponent(parent, virtualElement) {
+  createElementComponent (parent, virtualElement) {
     return new ElementComponent(parent, virtualElement)
   },
-  createTextNodeComponent(parent, virtualElement) {
+  createTextNodeComponent (parent, virtualElement) {
     return new TextNodeComponent(parent, virtualElement)
   }
 }
@@ -116,7 +116,7 @@ class Component extends EventEmitter {
     @param {Object} props     Properties against which this class must
                               be rendered the first time.
   */
-  constructor(parent, props = {}, options = {}) {
+  constructor (parent, props = {}, options = {}) {
     super()
 
     // TODO: it turned out that the signature is sub-optimal
@@ -168,11 +168,11 @@ class Component extends EventEmitter {
     Object.freeze(this.state)
   }
 
-  getId() {
+  getId () {
     return this.__id__
   }
 
-  setId() {
+  setId () {
     throw new Error("'id' is readonly")
   }
 
@@ -207,7 +207,7 @@ class Component extends EventEmitter {
 
     @return {Object} the child context
   */
-  getChildContext() {
+  getChildContext () {
     return this.childContext || {}
   }
 
@@ -219,7 +219,7 @@ class Component extends EventEmitter {
 
     @return {Object} the initial state
   */
-  getInitialState() {
+  getInitialState () {
     return {}
   }
 
@@ -228,7 +228,7 @@ class Component extends EventEmitter {
 
     @return {Component} the parent component or null if this component does not have a parent.
   */
-  getParent() {
+  getParent () {
     return this.parent
   }
 
@@ -237,7 +237,7 @@ class Component extends EventEmitter {
     {@link ui/Component.mount}
     @return {Component} The root component
   */
-  getRoot() {
+  getRoot () {
     var comp = this
     var parent = comp
     while (parent) {
@@ -247,11 +247,11 @@ class Component extends EventEmitter {
     return comp
   }
 
-  getElement() {
+  getElement () {
     return this.el
   }
 
-  getNativeElement() {
+  getNativeElement () {
     return this.el.getNativeElement()
   }
 
@@ -268,13 +268,13 @@ class Component extends EventEmitter {
     }
     ```
   */
-  getLabel(name, ...args) {
+  getLabel (name, ...args) {
     let labelProvider = this.getLabelProvider()
     if (!labelProvider) throw new Error('Missing labelProvider.')
     return labelProvider.getLabel(name, ...args)
   }
 
-  getLabelProvider() {
+  getLabelProvider () {
     return this.context.labelProvider
   }
 
@@ -298,7 +298,7 @@ class Component extends EventEmitter {
     @param  {Boolean} maybe if `true` then does not throw when no Component is found
     @return {Class}                The ComponentClass
   */
-  getComponent(componentName, maybe) {
+  getComponent (componentName, maybe) {
     let componentRegistry = this.getComponentRegistry()
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
     const ComponentClass = componentRegistry.get(componentName)
@@ -308,11 +308,11 @@ class Component extends EventEmitter {
     return ComponentClass
   }
 
-  getComponentRegistry() {
+  getComponentRegistry () {
     return this.props.componentRegistry || this.context.componentRegistry
   }
 
-  getFlow() {
+  getFlow () {
     return this.context.flow
   }
 
@@ -327,7 +327,7 @@ class Component extends EventEmitter {
     @param {Function} $$ method to create components
     @return {VirtualElement} VirtualElement created using {@param $$}
   */
-  render($$) {
+  render ($$) {
     /* istanbul ignore next */
     return $$('div')
   }
@@ -344,7 +344,7 @@ class Component extends EventEmitter {
     }, document.body)
     ```
   */
-  mount(el) {
+  mount (el) {
     if (!el) {
       throw new Error('Element is required.')
     }
@@ -380,11 +380,11 @@ class Component extends EventEmitter {
 
     Call this to manually trigger a rerender.
   */
-  rerender() {
+  rerender () {
     this._rerender(this.props, this.state)
   }
 
-  _rerender(oldProps, oldState) {
+  _rerender (oldProps, oldState) {
     this._render(oldProps, oldState)
     // when this component is not mounted still trigger didUpdate()
     if (!this.isMounted()) {
@@ -392,7 +392,7 @@ class Component extends EventEmitter {
     }
   }
 
-  _render(oldProps, oldState) {
+  _render (oldProps, oldState) {
     if (this.__isRendering__) {
       throw new Error('Component is rendering already.')
     }
@@ -425,7 +425,7 @@ class Component extends EventEmitter {
     comp.triggerDidMount()
     ```
   */
-  triggerDidMount() {
+  triggerDidMount () {
     // TODO: discuss and leave the decision here as a statement
     // while rendering is done bottom up, IMO  it makes
     // sense to propagate didMount() from top to down.
@@ -437,7 +437,7 @@ class Component extends EventEmitter {
       this.didMount()
     }
     // Trigger didMount for the children first
-    this.getChildren().forEach(function(child) {
+    this.getChildren().forEach(function (child) {
       // We pass isMounted=true to save costly calls to Component.isMounted
       // for each child / grandchild
       child.triggerDidMount(true)
@@ -476,18 +476,18 @@ class Component extends EventEmitter {
     component.mount($('body')[0])
     ```
   */
-  didMount() {}
+  didMount () {}
 
   /**
     Hook which is called after state or props have been updated and the implied
     rerender is completed.
   */
-  didUpdate() {}
+  didUpdate () {}
 
   /**
     @return {boolean} indicating if this component has been mounted
    */
-  isMounted() {
+  isMounted () {
     return this.__isMounted__
   }
 
@@ -496,8 +496,8 @@ class Component extends EventEmitter {
 
    @private
   */
-  triggerDispose() {
-    this.getChildren().forEach(function(child) {
+  triggerDispose () {
+    this.getChildren().forEach(function (child) {
       child.triggerDispose()
     })
     this.dispose()
@@ -510,13 +510,13 @@ class Component extends EventEmitter {
 
     Remember to unsubscribe all change listeners here.
   */
-  dispose() {}
+  dispose () {}
 
   /*
     Attention: this is used when a preserved component is relocated.
     E.g., rendered with a new parent.
   */
-  _setParent(newParent) {
+  _setParent (newParent) {
     this.parent = newParent
     this.context = this._getContext() || {}
     Object.freeze(this.context)
@@ -531,10 +531,10 @@ class Component extends EventEmitter {
     @returns {Boolean} true if the action was handled, false otherwise
     @example
   */
-  send(action) {
+  send (action) {
     // We start looking for handlers at the parent level
     var comp = this.getParent()
-    while(comp) {
+    while (comp) {
       if (comp._actionHandlers && comp._actionHandlers[action]) {
         comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1))
         return true
@@ -568,8 +568,8 @@ class Component extends EventEmitter {
     }
     ```
   */
-  handleActions(actionHandlers) {
-    forEach(actionHandlers, function(method, actionName) {
+  handleActions (actionHandlers) {
+    forEach(actionHandlers, function (method, actionName) {
       this.handleAction(actionName, method)
     }.bind(this))
     return this
@@ -581,7 +581,7 @@ class Component extends EventEmitter {
     @param {String} action name
     @param {Functon} a function of this component.
   */
-  handleAction(name, handler) {
+  handleAction (name, handler) {
     if (!name || !handler || !isFunction(handler)) {
       throw new Error('Illegal arguments.')
     }
@@ -594,7 +594,7 @@ class Component extends EventEmitter {
 
     @return {Object} the current state
   */
-  getState() {
+  getState () {
     return this.state
   }
 
@@ -612,7 +612,7 @@ class Component extends EventEmitter {
     Note: Usually this is used by the component itself.
     @param {object} newState an object with a partial update.
   */
-  setState(newState) {
+  setState (newState) {
     var oldProps = this.props
     var oldState = this.state
     // Note: while setting props it is allowed to call this.setState()
@@ -636,7 +636,7 @@ class Component extends EventEmitter {
 
     @param {object} newState an object with a partial update.
   */
-  extendState(newState) {
+  extendState (newState) {
     newState = extend({}, this.state, newState)
     this.setState(newState)
   }
@@ -652,7 +652,7 @@ class Component extends EventEmitter {
 
     @return {Object} the current state
   */
-  getProps() {
+  getProps () {
     return this.props
   }
 
@@ -661,7 +661,7 @@ class Component extends EventEmitter {
 
     @param {object} an object with properties
   */
-  setProps(newProps) {
+  setProps (newProps) {
     var oldProps = this.props
     var oldState = this.state
     var needRerender = this.shouldRerender(newProps, this.state)
@@ -673,7 +673,7 @@ class Component extends EventEmitter {
     }
   }
 
-  _setProps(newProps) {
+  _setProps (newProps) {
     newProps = newProps || {}
     // set a flag so that this.setState() can omit triggering render
     this.__isSettingProps__ = true
@@ -692,7 +692,7 @@ class Component extends EventEmitter {
 
     @param {object} an object with properties
   */
-  extendProps(updatedProps) {
+  extendProps (updatedProps) {
     var newProps = extend({}, this.props, updatedProps)
     this.setProps(newProps)
   }
@@ -706,153 +706,153 @@ class Component extends EventEmitter {
   willReceiveProps(newProps) { // eslint-disable-line
   }
 
-  getTextContent() {
+  getTextContent () {
     if (this.el) {
       return this.el.textContent
     }
   }
 
-  get textContent() {
+  get textContent () {
     return this.getTextContent()
   }
 
-  getInnerHTML() {
+  getInnerHTML () {
     if (this.el) {
       return this.el.getInnerHTML()
     }
   }
 
-  get innerHTML() {
+  get innerHTML () {
     return this.getInnerHTML()
   }
 
-  getOuterHTML() {
+  getOuterHTML () {
     if (this.el) {
       return this.el.getOuterHTML()
     }
   }
 
-  get outerHTML() {
+  get outerHTML () {
     return this.getOuterHTML()
   }
 
-  getAttribute(name) {
+  getAttribute (name) {
     if (this.el) {
       return this.el.getAttribute(name)
     }
   }
 
-  setAttribute(name, val) {
+  setAttribute (name, val) {
     if (this.el) {
       this.el.setAttribute(name, val)
     }
     return this
   }
 
-  getProperty(name) {
+  getProperty (name) {
     if (this.el) {
       return this.el.getProperty(name)
     }
   }
 
-  setProperty(name, val) {
+  setProperty (name, val) {
     if (this.el) {
       this.el.setProperty(name, val)
     }
     return this
   }
 
-  hasClass(name) {
+  hasClass (name) {
     if (this.el) {
       return this.el.hasClass(name)
     }
   }
 
-  addClass(name) {
+  addClass (name) {
     if (this.el) {
       this.el.addClass(name)
     }
     return this
   }
 
-  removeClass(name) {
+  removeClass (name) {
     if (this.el) {
       this.el.removeClass(name)
     }
     return this
   }
 
-  getStyle(name) {
+  getStyle (name) {
     if (this.el) {
       return this.el.getStyle(name)
     }
   }
 
-  setStyle(name, val) {
+  setStyle (name, val) {
     if (this.el) {
       return this.el.setStyle(name, val)
     }
     return this
   }
 
-  getValue() {
+  getValue () {
     if (this.el) {
       return this.el.getValue()
     }
   }
 
-  setValue(val) {
+  setValue (val) {
     if (this.el) {
       this.el.setValue(val)
     }
     return this
   }
 
-  getChildCount() {
+  getChildCount () {
     if (!this.el) return 0
     return this.el.getChildCount()
   }
 
-  get childNodes() {
+  get childNodes () {
     return this.getChildNodes()
   }
 
-  getChildNodes() {
+  getChildNodes () {
     if (!this.el) return []
     var childNodes = this.el.getChildNodes()
     childNodes = childNodes.map(_unwrapComp).filter(Boolean)
     return childNodes
   }
 
-  getChildren() {
+  getChildren () {
     if (!this.el) return []
     let children = this.el.getChildren()
     children = children.map(_unwrapComp).filter(Boolean)
     return children
   }
 
-  getChildAt(pos) {
+  getChildAt (pos) {
     let node = this.el.getChildAt(pos)
     if (node) {
       return _unwrapCompStrict(node)
     }
   }
 
-  find(cssSelector) {
+  find (cssSelector) {
     var el = this.el.find(cssSelector)
     return _unwrapComp(el)
   }
 
-  findAll(cssSelector) {
+  findAll (cssSelector) {
     var els = this.el.findAll(cssSelector)
     return els.map(_unwrapComp).filter(Boolean)
   }
 
-  appendChild(child) {
+  appendChild (child) {
     this.insertAt(this.getChildCount(), child)
   }
 
-  insertAt(pos, childEl) {
+  insertAt (pos, childEl) {
     if (isString(childEl)) {
       childEl = new VirtualElement.TextNode(childEl)
     }
@@ -864,7 +864,7 @@ class Component extends EventEmitter {
     _mountChild(this, child)
   }
 
-  removeAt(pos) {
+  removeAt (pos) {
     var childEl = this.el.getChildAt(pos)
     if (childEl) {
       var child = _unwrapCompStrict(childEl)
@@ -873,7 +873,7 @@ class Component extends EventEmitter {
     }
   }
 
-  removeChild(child) {
+  removeChild (child) {
     if (!child || !child._isComponent) {
       throw new Error('removeChild(): Illegal arguments. Expecting a Component instance.')
     }
@@ -882,7 +882,7 @@ class Component extends EventEmitter {
     this.el.removeChild(child.el)
   }
 
-  replaceChild(oldChild, newChild) {
+  replaceChild (oldChild, newChild) {
     if (!newChild || !oldChild ||
         !newChild._isComponent || !oldChild._isComponent) {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
@@ -901,15 +901,15 @@ class Component extends EventEmitter {
   // impossible to achieve.
   // TODO: Thus we may consider to rename it, or take
   // other measure to warn the the user about this problem
-  empty() {
+  empty () {
     this._clear()
     return this
   }
 
-  _clear() {
+  _clear () {
     let el = this.el
     if (el) {
-      this.getChildNodes().forEach(function(child) {
+      this.getChildNodes().forEach(function (child) {
         _disposeChild(child)
       })
       el.empty()
@@ -918,30 +918,30 @@ class Component extends EventEmitter {
     this.__foreignRefs__ = {}
   }
 
-  remove() {
+  remove () {
     _disposeChild(this)
     this.el.remove()
   }
 
-  addEventListener() {
-    throw new Error("Not supported.")
+  addEventListener () {
+    throw new Error('Not supported.')
   }
 
-  removeEventListener() {
-    throw new Error("Not supported.")
+  removeEventListener () {
+    throw new Error('Not supported.')
   }
 
-  insertBefore() {
-    throw new Error("Not supported.")
+  insertBefore () {
+    throw new Error('Not supported.')
   }
 
-  click() {
+  click () {
     if (this.el) {
       this.el.click()
     }
   }
 
-  getComponentPath() {
+  getComponentPath () {
     let path = []
     let comp = this
     while (comp) {
@@ -951,7 +951,7 @@ class Component extends EventEmitter {
     return path
   }
 
-  _getContext() {
+  _getContext () {
     var context = {}
     var parent = this.getParent()
     if (parent) {
@@ -962,7 +962,6 @@ class Component extends EventEmitter {
     }
     return context
   }
-
 }
 
 Component.prototype._isComponent = true
@@ -981,7 +980,7 @@ Component.prototype.append = DOMElement.prototype.append
 
 Component.unwrap = _unwrapComp
 
-Component.render = function(props) {
+Component.render = function (props) {
   props = props || {}
   var ComponentClass = this
   var comp = new ComponentClass(null, props)
@@ -989,7 +988,7 @@ Component.render = function(props) {
   return comp
 }
 
-Component.mount = function(props, el) {
+Component.mount = function (props, el) {
   if (arguments.length === 1) {
     el = props
     props = {}
@@ -1000,33 +999,33 @@ Component.mount = function(props, el) {
     if (platform.inBrowser) {
       el = window.document.querySelector(selector)
     } else {
-      throw new Error("This selector is not supported on server side.")
+      throw new Error('This selector is not supported on server side.')
     }
   }
-  el = new DefaultDOMElement.wrap(el)
+  el = DefaultDOMElement.wrap(el)
   const ComponentClass = this
   let comp = new ComponentClass(null, props)
   comp.mount(el)
   return comp
 }
 
-Component.getComponentForDOMElement = function(el) {
+Component.getComponentForDOMElement = function (el) {
   return _unwrapComp(el)
 }
 
-Component.unwrapDOMElement = function(el) {
+Component.unwrapDOMElement = function (el) {
   console.warn('DEPRECATED: Use Component.getComponentForDOMElement')
   return Component.getComponentForDOMElement(el)
 }
 
-Component.getComponentFromNativeElement = function(nativeEl) {
+Component.getComponentFromNativeElement = function (nativeEl) {
   // while it sounds strange to wrap a native element
   // first, it makes sense after all, as DefaultDOMElement.wrap()
   // provides the DOMElement instance of a previously wrapped native element.
   return _unwrapComp(DefaultDOMElement.wrap(nativeEl))
 }
 
-Component.createRenderingEngine = function(elementFactory) {
+Component.createRenderingEngine = function (elementFactory) {
   return new RenderingEngine({
     componentFactory: COMPONENT_FACTORY,
     elementFactory
@@ -1034,7 +1033,7 @@ Component.createRenderingEngine = function(elementFactory) {
 }
 
 // NOTE: this is used for incremental updates only
-function _disposeChild(child) {
+function _disposeChild (child) {
   child.triggerDispose()
   if (child._owner && child._ref) {
     console.assert(child._owner.refs[child._ref] === child, "Owner's ref should point to this child instance.")
@@ -1043,7 +1042,7 @@ function _disposeChild(child) {
 }
 
 // NOTE: this is used for incremental updates only
-function _mountChild(parent, child) {
+function _mountChild (parent, child) {
   if (parent.isMounted()) {
     child.triggerDidMount(true)
   }
@@ -1053,38 +1052,26 @@ function _mountChild(parent, child) {
 }
 
 // NOTE: we keep a reference to the component in all DOMElement instances
-function _unwrapComp(el) {
+function _unwrapComp (el) {
   if (el) {
     if (!el._isDOMElement) el = DefaultDOMElement.unwrap(el)
     if (el) return el._comp
   }
 }
 
-function _unwrapCompStrict(el) {
+function _unwrapCompStrict (el) {
   let comp = _unwrapComp(el)
-  if (!comp) throw new Error("Expecting a back-link to the component instance.")
+  if (!comp) throw new Error('Expecting a back-link to the component instance.')
   return comp
 }
 
-
-class ElementComponent extends Component {
-
-  constructor(parent) {
-    super(parent)
-  }
-
-}
+class ElementComponent extends Component {}
 
 ElementComponent.prototype._isElementComponent = true
 ElementComponent.prototype._SKIP_COMPONENT_INIT = true
 
 class TextNodeComponent extends Component {
-
-  constructor(parent) {
-    super(parent)
-  }
-
-  setTextContent(text) {
+  setTextContent (text) {
     if (!this.el) {
       throw new Error('Component must be rendered first.')
     }
@@ -1093,14 +1080,13 @@ class TextNodeComponent extends Component {
     }
   }
 
-  getChildNodes() {
+  getChildNodes () {
     return []
   }
 
-  getChildren() {
+  getChildren () {
     return []
   }
-
 }
 
 TextNodeComponent.prototype._isTextNodeComponent = true

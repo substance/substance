@@ -13,14 +13,13 @@ import CoordinateOperation from './CoordinateOperation'
   @internal
  */
 class IncrementalData extends Data {
-
   /**
     Create a new node.
 
     @param {object} nodeData
     @returns {ObjectOperation} The applied operation.
    */
-  create(nodeData) {
+  create (nodeData) {
     if (nodeData._isNode) {
       nodeData = nodeData.toJSON()
     }
@@ -35,7 +34,7 @@ class IncrementalData extends Data {
     @param {String} nodeId
     @returns {ObjectOperation} The applied operation.
    */
-  delete(nodeId) {
+  delete (nodeId) {
     var op = null
     var node = this.get(nodeId)
     if (node) {
@@ -61,7 +60,7 @@ class IncrementalData extends Data {
     @param {object} diff
     @returns {ObjectOperation} The applied operation.
   */
-  update(path, diff) {
+  update (path, diff) {
     var diffOp = this._getDiffOp(path, diff)
     var op = ObjectOperation.Update(path, diffOp)
     this.apply(op)
@@ -75,7 +74,7 @@ class IncrementalData extends Data {
     @param {Object} newValue
     @returns {ObjectOperation} The applied operation.
    */
-  set(path, newValue) {
+  set (path, newValue) {
     var oldValue = this.get(path)
     var op = ObjectOperation.Set(path, oldValue, newValue)
     this.apply(op)
@@ -87,7 +86,7 @@ class IncrementalData extends Data {
 
     @param {ObjectOperation} op
    */
-  apply(op) {
+  apply (op) {
     if (op.type === ObjectOperation.NOP) return
     else if (op.type === ObjectOperation.CREATE) {
       // clone here as the operations value must not be changed
@@ -98,29 +97,29 @@ class IncrementalData extends Data {
       var oldVal = this.get(op.path)
       var diff = op.diff
       if (op.propertyType === 'array') {
-        if (! (diff._isArrayOperation) ) {
+        if (!(diff._isArrayOperation)) {
           diff = ArrayOperation.fromJSON(diff)
         }
         // array ops work inplace
         diff.apply(oldVal)
       } else if (op.propertyType === 'string') {
-        if (!(diff._isTextOperation) ) {
+        if (!(diff._isTextOperation)) {
           diff = TextOperation.fromJSON(diff)
         }
         var newVal = diff.apply(oldVal)
         super.set(op.path, newVal)
       } else if (op.propertyType === 'coordinate') {
-        if (!(diff._isCoordinateOperation) ) {
+        if (!(diff._isCoordinateOperation)) {
           diff = CoordinateOperation.fromJSON(diff)
         }
         diff.apply(oldVal)
       } else {
-        throw new Error("Unsupported type for operational update.")
+        throw new Error('Unsupported type for operational update.')
       }
     } else if (op.type === ObjectOperation.SET) {
       super.set(op.path, op.val)
     } else {
-      throw new Error("Illegal state.")
+      throw new Error('Illegal state.')
     }
     this.emit('operation:applied', op, this)
   }
@@ -133,7 +132,7 @@ class IncrementalData extends Data {
     @returns {ObjectOperation} operation.
     @private
   */
-  _getDiffOp(path, diff) {
+  _getDiffOp (path, diff) {
     var diffOp = null
     if (diff.isOperation) {
       diffOp = diff
@@ -184,7 +183,6 @@ class IncrementalData extends Data {
     }
     return diffOp
   }
-
 }
 
 export default IncrementalData

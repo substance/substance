@@ -3,13 +3,12 @@ import getRelativeBoundingRect from '../../util/getRelativeBoundingRect'
 import Component from '../../ui/Component'
 
 export default class Dropzones extends Component {
-
-  didMount() {
+  didMount () {
     this.context.dragManager.on('drag:started', this.onDragStarted, this)
     this.context.dragManager.on('drag:finished', this.onDragFinished, this)
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-dropzones')
 
     if (this.state.dropzones) {
@@ -68,7 +67,7 @@ export default class Dropzones extends Component {
   }
 
   // triggered by DragManager
-  onDragStarted(dragState) {
+  onDragStarted (dragState) {
     let dropzones = this._computeDropzones(dragState)
     setTimeout(() => {
       this.setState({
@@ -78,16 +77,16 @@ export default class Dropzones extends Component {
   }
 
   // triggered by DragManager
-  onDragFinished() {
+  onDragFinished () {
     this.setState({})
   }
 
-  onDragEnter(e) {
+  onDragEnter (e) {
     // console.log('onDragEnter', e.target)
     e.target.parentNode.classList.add('sm-over')
   }
 
-  onDragLeave(e) {
+  onDragLeave (e) {
     // console.log('onDragLeave', e.target)
     e.target.parentNode.classList.remove('sm-over')
   }
@@ -98,7 +97,7 @@ export default class Dropzones extends Component {
     e.preventDefault()
   }
 
-  onDrop(e) {
+  onDrop (e) {
     // console.log('Dropzones.onDrop()', e.target)
     // HACK: try if this is really necessary
     e.__reserved__ = true
@@ -129,14 +128,14 @@ export default class Dropzones extends Component {
   /*
     Get bounding rect for a component (relative to scrollPane content element)
   */
-  _getBoundingRect(comp) {
+  _getBoundingRect (comp) {
     let scrollPane = comp.context.scrollPane
     let contentElement = scrollPane.getContentElement()
     let rect = getRelativeBoundingRect(comp.el, contentElement)
     return rect
   }
 
-  _computeDropzones(dragState) {
+  _computeDropzones (dragState) {
     let scrollPaneName = this.context.scrollPane.getName()
     let surfaces = dragState.scrollPanes[scrollPaneName].surfaces
     let scopedDropzones = {}
@@ -179,7 +178,7 @@ export default class Dropzones extends Component {
           })
         } else {
           // Drop zone in between two components
-          let upperComp = this._getBoundingRect(components[i-1])
+          let upperComp = this._getBoundingRect(components[i - 1])
           let lowerComp = this._getBoundingRect(components[i])
           let topBound = upperComp.top + upperComp.height / 2
           let bottomBound = lowerComp.top + lowerComp.height / 2
@@ -229,7 +228,7 @@ export default class Dropzones extends Component {
     return scopedDropzones
   }
 
-  _renderDropTeaser(hints) {
+  _renderDropTeaser (hints) {
     if (hints.visible) {
       this.el.removeClass('sm-hidden')
       this.el.css('top', hints.rect.top)
@@ -239,5 +238,4 @@ export default class Dropzones extends Component {
       this.el.addClass('sm-hidden')
     }
   }
-
 }

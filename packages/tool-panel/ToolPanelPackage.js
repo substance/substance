@@ -7,7 +7,7 @@ import ToolSeparator from './ToolSeparator'
 
 export default {
   name: 'tool-panel',
-  configure(config) {
+  configure (config) {
     config.addComponent('tool-panel', ToolPanel)
     config.addComponent('tool-dropdown', ToolDropdown)
     config.addComponent('tool-group', ToolGroup)

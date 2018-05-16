@@ -7,9 +7,8 @@ if (platform.inBrowser) {
 
 DOMElementTests('MemoryDOMElement')
 
-function DOMElementTests(impl) {
-
-  const test = module('DefaultDOMElement ('+impl+')', {
+function DOMElementTests (impl) {
+  const test = module('DefaultDOMElement (' + impl + ')', {
     before: () => {
       if (impl === 'MemoryDOMElement') platform.inBrowser = false
     },
@@ -18,7 +17,7 @@ function DOMElementTests(impl) {
     }
   })
 
-  test("Wrapping a native element", (t) => {
+  test('Wrapping a native element', (t) => {
     let doc
     if (impl === 'BrowserDOMElement') {
       doc = window.document
@@ -36,7 +35,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Creating an HTML document", (t) => {
+  test('Creating an HTML document', (t) => {
     const doc = DefaultDOMElement.createDocument('html')
     t.notNil(doc.find('head'), 'Document should have a <head>')
     t.notNil(doc.find('body'), '.. and a <body>')
@@ -44,14 +43,14 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Creating an XML document", (t) => {
+  test('Creating an XML document', (t) => {
     const doc = DefaultDOMElement.createDocument('xml')
     t.equal(doc.getContentType(), 'application/xml', 'Document should have correct content type')
     t.equal(doc.children.length, 0, '.. and should be empty')
     t.end()
   })
 
-  test("Parsing a full HTML document", function(t) {
+  test('Parsing a full HTML document', function (t) {
     const html = '<html><head><title>TEST</title></head><body>TEST</body></html>'
     const doc = DefaultDOMElement.parseHTML(html)
     const head = doc.find('head')
@@ -67,7 +66,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing one HTML element", function(t) {
+  test('Parsing one HTML element', function (t) {
     const html = '<p>TEST</p>'
     const p = DefaultDOMElement.parseSnippet(html, 'html')
     t.notNil(p, 'HTML should get parsed.')
@@ -76,7 +75,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing multiple HTML elements", function(t) {
+  test('Parsing multiple HTML elements', function (t) {
     const html = '<p>TEST</p><p>TEST2</p>'
     const els = DefaultDOMElement.parseSnippet(html, 'html')
     t.notNil(els, 'HTML should get parsed.')
@@ -88,7 +87,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing annotated HTML text", function(t) {
+  test('Parsing annotated HTML text', function (t) {
     const html = '123<b>456</b>789'
     const els = DefaultDOMElement.parseSnippet(html, 'html')
     t.equal(els.length, 3, 'there are three elements')
@@ -102,8 +101,8 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing an XML document", function(t) {
-    const xml = "<mydoc><myhead><mytitle>TEST</mytitle></myhead><mybody>TEST</mybody></mydoc>"
+  test('Parsing an XML document', function (t) {
+    const xml = '<mydoc><myhead><mytitle>TEST</mytitle></myhead><mybody>TEST</mybody></mydoc>'
     const doc = DefaultDOMElement.parseXML(xml)
     const head = doc.find('myhead')
     t.notNil(head, '<myhead> should be there')
@@ -116,7 +115,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing an incomplete HTML document", (t) => {
+  test('Parsing an incomplete HTML document', (t) => {
     const doc = DefaultDOMElement.parseHTML('<title>Foo</title><p>TEST</p>')
     const head = doc.find('head')
     const title = head.find('title')
@@ -128,7 +127,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing an HTML document with comments", (t) => {
+  test('Parsing an HTML document with comments', (t) => {
     let doc = DefaultDOMElement.parseHTML('<body><!--TEST--></body>')
     let body = doc.find('body')
     let comment = body.firstChild
@@ -156,7 +155,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing an XML document with CDATA", (t) => {
+  test('Parsing an XML document with CDATA', (t) => {
     let foo = DefaultDOMElement.parseSnippet(`<foo><![CDATA[TEST]]></foo>`, 'xml')
     let cdata = foo.firstChild
     t.notNil(cdata, 'there should a child element')
@@ -165,7 +164,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("Parsing void and self-closing elements", (t) => {
+  test('Parsing void and self-closing elements', (t) => {
     t.throws(() => {
       DefaultDOMElement.parseSnippet(`<foo>`, 'xml')
     }, 'should not allow void elements in XML')
@@ -178,5 +177,4 @@ function DOMElementTests(impl) {
     }, 'in HTML there are some allowed void elements, such as <input>')
     t.end()
   })
-
 }

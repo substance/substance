@@ -1,26 +1,25 @@
 class MacroManager {
-
-  constructor(context, macros) {
+  constructor (context, macros) {
     this.context = context
     this.macros = macros
     this.context.editorSession.onFinalize('document', this.onDocumentChanged, this)
   }
 
-  dispose() {
+  dispose () {
     this.context.editorSession.off(this)
   }
 
-  onDocumentChanged(change, info) {
+  onDocumentChanged (change, info) {
     this.executeMacros(change, info)
   }
 
-  executeMacros(change, info) {
+  executeMacros (change, info) {
     let doc = this.context.editorSession.getDocument()
     let nodeId, node, text, start, end
     let path
     // HACK: we exploit the information of the internal structure
     // of this document changes
-    switch(info.action) {
+    switch (info.action) {
       case 'type': {
         let op = change.ops[0]
         if (op.type === 'update' && op.diff._isTextOperation) {
@@ -29,7 +28,7 @@ class MacroManager {
           node = doc.get(nodeId)
           text = doc.get(path)
           start = op.diff.pos
-          end = start+op.diff.getLength()
+          end = start + op.diff.getLength()
         }
         break
       }
@@ -65,7 +64,7 @@ class MacroManager {
             if (!node.isText()) return
             text = node.getText()
             start = op.diff.pos
-            end = start+op.diff.getLength()
+            end = start + op.diff.getLength()
           }
         }
         break
@@ -94,7 +93,6 @@ class MacroManager {
         }
       }
     })
-
   }
 }
 

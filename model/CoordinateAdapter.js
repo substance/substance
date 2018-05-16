@@ -9,46 +9,45 @@ import Coordinate from './Coordinate'
   @internal
 */
 class CoordinateAdapter extends Coordinate {
-
-  constructor(owner, pathProperty, offsetProperty) {
+  constructor (owner, pathProperty, offsetProperty) {
     super('SKIP')
 
-    this._owner = owner;
-    this._pathProp = pathProperty;
-    this._offsetProp = offsetProperty;
-    Object.freeze(this);
+    this._owner = owner
+    this._pathProp = pathProperty
+    this._offsetProp = offsetProperty
+    Object.freeze(this)
   }
 
-  equals(other) {
+  equals (other) {
     return (other === this ||
-      (isArrayEqual(other.path, this.path) && other.offset === this.offset) )
+      (isArrayEqual(other.path, this.path) && other.offset === this.offset))
   }
 
-  get path() {
-    return this._owner[this._pathProp];
+  get path () {
+    return this._owner[this._pathProp]
   }
 
-  set path(path) {
-    this._owner[this._pathProp] = path;
+  set path (path) {
+    this._owner[this._pathProp] = path
   }
 
-  get offset() {
-    return this._owner[this._offsetProp];
+  get offset () {
+    return this._owner[this._offsetProp]
   }
 
-  set offset(offset) {
-    this._owner[this._offsetProp] = offset;
+  set offset (offset) {
+    this._owner[this._offsetProp] = offset
   }
 
-  toJSON() {
+  toJSON () {
     return {
       path: this.path,
       offset: this.offset
     }
   }
 
-  toString() {
-    return "(" + this.path.join('.') + ", " + this.offset + ")"
+  toString () {
+    return '(' + this.path.join('.') + ', ' + this.offset + ')'
   }
 }
 

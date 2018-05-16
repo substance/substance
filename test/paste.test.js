@@ -5,7 +5,7 @@ import simple from './fixture/simple'
 
 const test = module('paste')
 
-test("Pasting plain text", function(t) {
+test('Pasting plain text', function (t) {
   let { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
@@ -18,7 +18,7 @@ test("Pasting plain text", function(t) {
   t.end()
 })
 
-test("Pasting a single paragraph", function(t) {
+test('Pasting a single paragraph', function (t) {
   let { tx } = _fixture(simple)
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -40,7 +40,7 @@ test("Pasting a single paragraph", function(t) {
   t.end()
 })
 
-test("Pasting annotated text", function(t) {
+test('Pasting annotated text', function (t) {
   let { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
@@ -61,7 +61,7 @@ test("Pasting annotated text", function(t) {
     id: 's1',
     start: {
       path: [p.id, 'content'],
-      offset: 2,
+      offset: 2
     },
     end: {
       offset: 4
@@ -76,7 +76,7 @@ test("Pasting annotated text", function(t) {
   t.end()
 })
 
-test("Pasting two paragraphs", function(t) {
+test('Pasting two paragraphs', function (t) {
   let { tx } = _fixture(simple)
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -108,7 +108,7 @@ test("Pasting two paragraphs", function(t) {
   t.end()
 })
 
-function _fixture(seed) {
+function _fixture (seed) {
   let doc = fixture(seed)
   let tx = new EditingInterface(doc)
   return { doc: doc, tx: tx }

@@ -1,8 +1,7 @@
 import isPlainObject from '../util/isPlainObject'
 
 class Range {
-
-  constructor(start, end, reverse, containerId, surfaceId) {
+  constructor (start, end, reverse, containerId, surfaceId) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
@@ -21,11 +20,11 @@ class Range {
     }
   }
 
-  isCollapsed() {
+  isCollapsed () {
     return this.start.equals(this.end)
   }
 
-  equals(other) {
+  equals (other) {
     if (this === other) return true
     else {
       return (
@@ -36,24 +35,23 @@ class Range {
     }
   }
 
-  isReverse() {
+  isReverse () {
     return this.reverse
   }
 
-  toString() {
+  toString () {
     let str = [this.start.toString(), '->', this.end.toString()]
     if (this.isReverse()) {
       str.push('[reverse]')
     }
     if (this.containerId) {
-      str.push('[container='+this.containerId+']')
+      str.push('[container=' + this.containerId + ']')
     }
     if (this.surfaceId) {
-      str.push('[surface='+this.surfaceId+']')
+      str.push('[surface=' + this.surfaceId + ']')
     }
     return str.join('')
   }
-
 }
 
 Range.prototype._isRange = true

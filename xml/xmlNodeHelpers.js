@@ -1,16 +1,16 @@
 import DOM from '../dom/DefaultDOMElement'
 import Fragmenter from '../model/Fragmenter'
 
-export function appendChild(xmlNode, child) {
+export function appendChild (xmlNode, child) {
   insertAt(xmlNode, xmlNode._childNodes.length, child)
   return xmlNode
 }
 
-export function getChildPos(xmlNode, child) {
+export function getChildPos (xmlNode, child) {
   return xmlNode._childNodes.indexOf(child.id)
 }
 
-export function removeChild(xmlNode, child) {
+export function removeChild (xmlNode, child) {
   const childPos = getChildPos(xmlNode, child)
   if (childPos >= 0) {
     removeAt(xmlNode, childPos)
@@ -20,7 +20,7 @@ export function removeChild(xmlNode, child) {
   return xmlNode
 }
 
-export function insertBefore(xmlNode, newChild, ref) {
+export function insertBefore (xmlNode, newChild, ref) {
   if (!ref) {
     appendChild(xmlNode, newChild)
   } else {
@@ -33,7 +33,7 @@ export function insertBefore(xmlNode, newChild, ref) {
   return xmlNode
 }
 
-export function insertAt(xmlNode, pos, child) {
+export function insertAt (xmlNode, pos, child) {
   const length = xmlNode._childNodes.length
   if (pos >= 0 && pos <= length) {
     const doc = xmlNode.getDocument()
@@ -44,7 +44,7 @@ export function insertAt(xmlNode, pos, child) {
   return xmlNode
 }
 
-export function removeAt(xmlNode, pos) {
+export function removeAt (xmlNode, pos) {
   const length = xmlNode._childNodes.length
   if (pos >= 0 && pos < length) {
     const doc = xmlNode.getDocument()
@@ -55,7 +55,7 @@ export function removeAt(xmlNode, pos) {
   return xmlNode
 }
 
-export function getInnerXML(xmlNode) {
+export function getInnerXML (xmlNode) {
   if (xmlNode._childNodes) {
     return xmlNode.getChildNodes().map(child => {
       return child.toXML().serialize()
@@ -66,7 +66,7 @@ export function getInnerXML(xmlNode) {
   return ''
 }
 
-export function getChildAt(xmlNode, idx) {
+export function getChildAt (xmlNode, idx) {
   let childId = xmlNode._childNodes[idx]
   if (childId) {
     return xmlNode.getDocument().get(childId)
@@ -74,16 +74,16 @@ export function getChildAt(xmlNode, idx) {
 }
 
 // converts a node into an XML DOM node
-export function node2element(node) {
+export function node2element (node) {
   // It is important to specify 'xml' as the document type
   let dom = DOM.createDocument('xml')
   let el = _node2element(dom, node)
   return el
 }
 
-function _node2element(dom, node) {
+function _node2element (dom, node) {
   let el
-  switch(node._elementType) {
+  switch (node._elementType) {
     case 'text': {
       el = _renderTextNode(dom, node)
       break
@@ -109,20 +109,20 @@ function _node2element(dom, node) {
   return el
 }
 
-function _createElement(dom, node) {
+function _createElement (dom, node) {
   let el = dom.createElement(node.type)
   el.attr('id', node.id)
   el.attr(node.attributes)
   return el
 }
 
-function _renderElementNode(dom, node) {
+function _renderElementNode (dom, node) {
   let el = _createElement(dom, node)
   el.append(node.getChildren().map(child => _node2element(dom, child)))
   return el
 }
 
-function _renderTextNode(dom, node) {
+function _renderTextNode (dom, node) {
   const annos = node.getAnnotations()
   const text = node.getText()
   let el = _createElement(dom, node)
@@ -143,7 +143,7 @@ function _renderTextNode(dom, node) {
       onExit: (fragment, context, parentContext) => {
         parentContext.el.append(context.el)
       }
-    });
+    })
     fragmenter.start({ el, node }, text, annos)
   } else {
     el.append(text)

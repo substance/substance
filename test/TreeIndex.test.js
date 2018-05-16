@@ -3,7 +3,7 @@ import { TreeIndex } from 'substance'
 
 const test = module('TreeIndex')
 
-test("Setting and getting values from a TreeIndex", function(t) {
+test('Setting and getting values from a TreeIndex', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a'], 1)
   adapter.set(['c', 'b'], 2)
@@ -12,7 +12,7 @@ test("Setting and getting values from a TreeIndex", function(t) {
   t.end()
 })
 
-test("Getting with invalid arguments", function(t) {
+test('Getting with invalid arguments', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a'], 1)
   adapter.set(['c', 'b'], 2)
@@ -36,7 +36,7 @@ test("Getting with invalid arguments", function(t) {
 //   t.deepEqual(adapter.get('a'), mine.a, 'Get on first level should return plain content.')
 // })
 
-test("Getting values recursively", function(t) {
+test('Getting values recursively', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a', 'b'], 'foo')
   adapter.set(['a', 'c', 'd'], 'bar')
@@ -44,9 +44,9 @@ test("Getting values recursively", function(t) {
   t.end()
 })
 
-test("Arrays: basic usage", function(t) {
+test('Arrays: basic usage', function (t) {
   var adapter = new TreeIndex.Arrays()
-  t.throws(function() {
+  t.throws(function () {
     adapter.set('a', [])
   }, 'TreeIndex.set is not allowed for array type')
   adapter.add('a', 1)
@@ -57,7 +57,7 @@ test("Arrays: basic usage", function(t) {
   adapter.add(['a', 'b'], 3)
   adapter.remove(['a', 'b'], 2)
   t.deepEqual(adapter.get(['a', 'b']), [3], 'Only one value should be left after removal.')
-  adapter.delete(['a','b'])
+  adapter.delete(['a', 'b'])
   t.isNil(adapter.get(['a', 'b']), 'Value should now be deleted.')
   t.end()
 })

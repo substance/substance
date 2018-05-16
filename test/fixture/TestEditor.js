@@ -1,15 +1,14 @@
 import { AbstractEditor, ContainerEditor } from 'substance'
 
 class TestEditor extends AbstractEditor {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
     this.handleActions({
-      domSelectionRendered: function() {}
+      domSelectionRendered: function () {}
     })
   }
 
-  render($$) {
+  render ($$) {
     let doc = this.editorSession.getDocument()
     let el = $$('div')
     let body = $$(ContainerEditor, {

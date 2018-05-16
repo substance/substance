@@ -3,19 +3,18 @@ import renderListNode from '../../util/renderListNode'
 import { walk } from '../../dom/domHelpers'
 
 export default class ListHTMLConverter {
+  get type () { return 'list' }
 
-  get type() { return "list" }
-
-  matchElement(el) {
+  matchElement (el) {
     return el.is('ul') || el.is('ol')
   }
 
-  import(el, node, converter) {
+  import (el, node, converter) {
     this._santizeNestedLists(el)
 
     let items = []
     let config = []
-    walk(el, ((el, level) => {
+    walk(el, (el, level) => {
       if (!el.isElementNode()) return
       if (el.is('li')) {
         items.push({ el, level })
@@ -23,12 +22,12 @@ export default class ListHTMLConverter {
         if (el.is('ul')) config[level] = 'bullet'
         else if (el.is('ol')) config[level] = 'order'
       }
-    }))
+    })
     this._createItems(converter, node, items, config)
   }
 
   // this is specific to the node model defined in ListNode
-  _createItems(converter, node, items, levelTypes) {
+  _createItems (converter, node, items, levelTypes) {
     node.items = items.map(d => {
       let listItem = converter.convertElement(d.el)
       listItem.level = d.level
@@ -37,9 +36,9 @@ export default class ListHTMLConverter {
     node.listType = levelTypes.join(',')
   }
 
-  export(node, el, converter) {
+  export (node, el, converter) {
     let $$ = converter.$$
-    let _createElement = function(arg) {
+    let _createElement = function (arg) {
       if (isString(arg)) {
         return $$(arg)
       } else {
@@ -55,7 +54,7 @@ export default class ListHTMLConverter {
     return el
   }
 
-  _santizeNestedLists(root) {
+  _santizeNestedLists (root) {
     // pulling out uls from <li> to simplify the problem
     /*
       E.g.
@@ -64,12 +63,12 @@ export default class ListHTMLConverter {
       `<ul><li>Foo:</li><ul>...</ul></ul>`
     */
     let nestedLists = root.findAll('ol,ul')
-    nestedLists.forEach((el)=>{
+    nestedLists.forEach((el) => {
       while (!el.parentNode.is('ol,ul')) {
         let parent = el.parentNode
         let grandParent = parent.parentNode
         let pos = grandParent.getChildIndex(parent)
-        grandParent.insertAt(pos+1, el)
+        grandParent.insertAt(pos + 1, el)
       }
     })
   }

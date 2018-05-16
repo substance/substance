@@ -8,7 +8,7 @@ import IndentListCommand from './IndentListCommand'
 
 export default {
   name: 'list',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(ListNode)
     config.addNode(ListItemNode)
     config.addComponent('list', ListComponent)
@@ -53,7 +53,6 @@ export default {
       de: 'Einrückung verringern'
     })
     config.addIcon('dedent-list', { 'fontawesome': 'fa-dedent' })
-
   },
   ListNode,
   ListItemNode,

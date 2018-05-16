@@ -4,7 +4,7 @@ import Component from '../../ui/Component'
   Simple component for realizing grid layouts
 */
 class Grid extends Component {
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-grid')
     if (this.props.mobile) {
       el.addClass('sm-mobile')
@@ -18,7 +18,7 @@ class Grid extends Component {
   A grid row
 */
 class Row extends Component {
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('se-row')
     el.append(this.props.children)
     return el
@@ -29,9 +29,9 @@ class Row extends Component {
   A grid cell
 */
 class Cell extends Component {
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('se-cell')
-    el.addClass('sm-column-'+this.props.columns)
+    el.addClass('sm-column-' + this.props.columns)
     el.append(this.props.children)
     return el
   }

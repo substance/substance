@@ -19,7 +19,7 @@
 */
 
 class SubstanceError extends Error {
-  constructor(name, options) {
+  constructor (name, options) {
     super(name, options)
     this.name = name
     this.message = options.message
@@ -32,7 +32,7 @@ class SubstanceError extends Error {
     }
   }
 
-  inspect() {
+  inspect () {
     var parts = []
 
     // This gives us a full node.js error including error name + message + stack trace
@@ -59,8 +59,7 @@ class SubstanceError extends Error {
   }
 }
 
-
-SubstanceError.fromJSON = function(err) {
+SubstanceError.fromJSON = function (err) {
   if (!err) return null
   var error = new SubstanceError(err.name, {
     message: err.message,

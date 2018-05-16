@@ -24,20 +24,19 @@ import isArray from '../util/isArray'
 */
 
 export default class ParentNodeHook {
-
-  constructor(doc) {
+  constructor (doc) {
     this.doc = doc
     this.table = {}
     doc.data.on('operation:applied', this._onOperationApplied, this)
   }
 
-  _onOperationApplied(op) {
+  _onOperationApplied (op) {
     const doc = this.doc
     const table = this.table
     let node = doc.get(op.path[0])
     // TODO: instead of hard coding this here we should compile a matcher
     // based on the document schema
-    switch(op.type) {
+    switch (op.type) {
       case 'create': {
         switch (node.type) {
           case 'list':
@@ -63,7 +62,7 @@ export default class ParentNodeHook {
         // ATTENTION: we only set parents but don't remove when they are deleted
         // assuming that if the parent gets deleted, the children get deleted too
         let update = op.diff
-        switch(node.type) {
+        switch (node.type) {
           case 'list':
             if (op.path[1] === 'items') {
               if (update.isInsert()) {
@@ -84,7 +83,7 @@ export default class ParentNodeHook {
         break
       }
       case 'set': {
-        switch(node.type) {
+        switch (node.type) {
           case 'list':
             if (op.path[1] === 'items') {
               _setParent(node, op.getValue())
@@ -104,7 +103,7 @@ export default class ParentNodeHook {
         //
     }
 
-    function _setParent(parent, ids) {
+    function _setParent (parent, ids) {
       if (ids) {
         if (isArray(ids)) {
           ids.forEach(_set)
@@ -112,7 +111,7 @@ export default class ParentNodeHook {
           _set(ids)
         }
       }
-      function _set(id) {
+      function _set (id) {
         // Note: it can happen, e.g. during deserialization, that the child node
         // is created later than the parent node
         // so we store the parent for later
@@ -123,7 +122,7 @@ export default class ParentNodeHook {
         }
       }
     }
-    function _setRegisteredParent(child) {
+    function _setRegisteredParent (child) {
       let parent = table[child.id]
       if (parent) {
         child.parent = parent
@@ -132,6 +131,6 @@ export default class ParentNodeHook {
   }
 }
 
-ParentNodeHook.register = function(doc) {
+ParentNodeHook.register = function (doc) {
   return new ParentNodeHook(doc)
 }

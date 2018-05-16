@@ -2,8 +2,7 @@ import Document from '../../model/Document'
 
 export default
 class ProseArticle extends Document {
-
-  _initialize() {
+  _initialize () {
     super._initialize()
 
     this.create({
@@ -12,5 +11,4 @@ class ProseArticle extends Document {
       nodes: []
     })
   }
-
 }

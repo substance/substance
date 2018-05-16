@@ -14,46 +14,45 @@ import InlineNodeComponent from './InlineNodeComponent'
 */
 
 class AnnotatedTextComponent extends Component {
-
-  render($$) {
+  render ($$) {
     let el = this._renderContent($$)
       .addClass('sc-annotated-text')
-      .css({ whiteSpace: "pre-wrap" })
+      .css({ whiteSpace: 'pre-wrap' })
     return el
   }
 
-  getPath() {
+  getPath () {
     return this.props.path
   }
 
-  getText() {
+  getText () {
     return this.getDocument().get(this.props.path) || ''
   }
 
-  isEmpty() {
+  isEmpty () {
     return !(this.getText())
   }
 
-  getAnnotations() {
+  getAnnotations () {
     return this.getDocument().getIndex('annotations').get(this.props.path)
   }
 
-  getDocument() {
+  getDocument () {
     return this.props.doc || this.context.doc
   }
 
-  _getTagName() {
+  _getTagName () {
     return this.props.tagName
   }
 
-  _onDocumentChange(update) {
+  _onDocumentChange (update) {
     if (update.change && update.change.updated[this.getPath()]) {
       this.rerender()
     }
   }
 
-  _renderContent($$) {
-    let text = this.getText();
+  _renderContent ($$) {
+    let text = this.getText()
     let annotations = this.getAnnotations()
     let el = $$(this._getTagName() || 'span')
     if (annotations && annotations.length > 0) {
@@ -61,7 +60,7 @@ class AnnotatedTextComponent extends Component {
         onText: this._renderTextNode.bind(this),
         onEnter: this._renderFragment.bind(this, $$),
         onExit: this._finishFragment.bind(this)
-      });
+      })
       fragmenter.start(el, text, annotations)
     } else {
       el.append(text)
@@ -69,22 +68,22 @@ class AnnotatedTextComponent extends Component {
     return el
   }
 
-  _renderTextNode(context, text) {
+  _renderTextNode (context, text) {
     if (text && text.length > 0) {
       context.append(text)
     }
   }
 
-  _renderFragment($$, fragment) {
+  _renderFragment ($$, fragment) {
     let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
     // TODO: fix support for container annotations
-    if (node.type === "container-annotation-fragment") {
+    if (node.type === 'container-annotation-fragment') {
       // return $$(AnnotationComponent, { doc: doc, node: node })
       //   .addClass("se-annotation-fragment")
       //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-    } else if (node.type === "container-annotation-anchor") {
+    } else if (node.type === 'container-annotation-anchor') {
       // return $$(AnnotationComponent, { doc: doc, node: node })
       //   .addClass("se-anchor")
       //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
@@ -103,10 +102,9 @@ class AnnotatedTextComponent extends Component {
     }
   }
 
-  _finishFragment(fragment, context, parentContext) {
+  _finishFragment (fragment, context, parentContext) {
     parentContext.append(context)
   }
-
 }
 
 export default AnnotatedTextComponent

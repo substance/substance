@@ -11,7 +11,7 @@ import isArray from './isArray'
   @param {DOMElement} containerEl relative parent used as a reference point
   @return {object} rectangle description with left, top, right, bottom, width and height
 */
-export default function getRelativeBoundingRect(els, containerEl) {
+export default function getRelativeBoundingRect (els, containerEl) {
   let nativeCotainerEl
   if (containerEl._isDOMElement) {
     nativeCotainerEl = containerEl.getNativeElement()
@@ -49,7 +49,7 @@ export default function getRelativeBoundingRect(els, containerEl) {
 
   @param {object[]}
 */
-function _getBoundingRect(rects) {
+function _getBoundingRect (rects) {
   var bounds = {
     left: Number.POSITIVE_INFINITY,
     top: Number.POSITIVE_INFINITY,
@@ -59,7 +59,7 @@ function _getBoundingRect(rects) {
     height: Number.NaN
   }
 
-  forEach(rects, function(rect) {
+  forEach(rects, function (rect) {
     if (rect.left < bounds.left) {
       bounds.left = rect.left
     }
@@ -88,7 +88,7 @@ function _getBoundingRect(rects) {
   @param {HTMLElement} el native DOM element to get the bounding rectangle for
   @param {HTMLElement} relativeParentEl native DOM element used as a reference point
 */
-function _getBoundingOffsetsRect(el, relativeParentEl) {
+function _getBoundingOffsetsRect (el, relativeParentEl) {
   var relativeParentElRect = relativeParentEl.getBoundingClientRect()
   var elRect = _getBoundingRect(el.getClientRects())
 

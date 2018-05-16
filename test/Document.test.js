@@ -5,14 +5,14 @@ import simple from './fixture/simple'
 
 const test = module('Document')
 
-test("Create null selection.", function(t) {
+test('Create null selection.', function (t) {
   let doc = fixture(simple)
   let sel = doc.createSelection(null)
   t.ok(sel.isNull(), 'Selection should be null.')
   t.end()
 })
 
-test("Create collapsed property selection.", function(t) {
+test('Create collapsed property selection.', function (t) {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'property',
@@ -26,7 +26,7 @@ test("Create collapsed property selection.", function(t) {
   t.end()
 })
 
-test("Create expanded property selection.", function(t) {
+test('Create expanded property selection.', function (t) {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'property',
@@ -42,7 +42,7 @@ test("Create expanded property selection.", function(t) {
   t.end()
 })
 
-test("Node.toJSON() should not export undefined optional properties", function(t) {
+test('Node.toJSON() should not export undefined optional properties', function (t) {
   let doc = fixture(simple)
   let p = doc.create({
     type: 'paragraph',

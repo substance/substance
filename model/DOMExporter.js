@@ -5,15 +5,14 @@ import encodeXMLEntities from '../util/encodeXMLEntities'
 import Fragmenter from './Fragmenter'
 
 class DOMExporter {
-
-  constructor(config, context) {
+  constructor (config, context) {
     this.context = context || {}
     if (!config.converters) {
       throw new Error('config.converters is mandatory')
     }
     if (!config.converters._isRegistry) {
       this.converters = new Registry()
-      config.converters.forEach(function(Converter) {
+      config.converters.forEach(function (Converter) {
         let converter = isFunction(Converter) ? new Converter() : Converter
         if (!converter.type) {
           console.error('Converter must provide the type of the associated node.', converter)
@@ -38,7 +37,7 @@ class DOMExporter {
     this.$$ = this.createElement.bind(this)
   }
 
-  exportDocument(doc) {
+  exportDocument (doc) {
     // TODO: this is no left without much functionality
     // still, it would be good to have a consistent top-level API
     // i.e. converter.importDocument(el) and converter.exportDocument(doc)
@@ -67,7 +66,7 @@ class DOMExporter {
     throw new Error('This method is abstract')
   }
 
-  convertContainer(container) {
+  convertContainer (container) {
     if (!container) {
       throw new Error('Illegal arguments: container is mandatory.')
     }
@@ -82,7 +81,7 @@ class DOMExporter {
     return elements
   }
 
-  convertNode(node) {
+  convertNode (node) {
     if (isString(node)) {
       // Assuming this.state.doc has been set by convertDocument
       node = this.state.doc.get(node)
@@ -113,55 +112,55 @@ class DOMExporter {
     return el
   }
 
-  convertProperty(doc, path, options) {
+  convertProperty (doc, path, options) {
     this.initialize(doc, options)
     var wrapper = this.$$('div')
       .append(this.annotatedText(path))
     return wrapper.innerHTML
   }
 
-  annotatedText(path) {
+  annotatedText (path) {
     var doc = this.state.doc
     var text = doc.get(path)
     var annotations = doc.getIndex('annotations').get(path)
     return this._annotatedText(text, annotations)
   }
 
-  getNodeConverter(node) {
+  getNodeConverter (node) {
     return this.converters.get(node.type)
   }
 
-  getDefaultBlockConverter() {
+  getDefaultBlockConverter () {
     throw new Error('This method is abstract.')
   }
 
-  getDefaultPropertyAnnotationConverter() {
+  getDefaultPropertyAnnotationConverter () {
     throw new Error('This method is abstract.')
   }
 
-  getDocument() {
+  getDocument () {
     return this.state.doc
   }
 
-  createElement(str) {
+  createElement (str) {
     return this._elementFactory.createElement(str)
   }
 
-  _annotatedText(text, annotations) {
+  _annotatedText (text, annotations) {
     var self = this
 
     var annotator = new Fragmenter()
-    annotator.onText = function(context, text) {
+    annotator.onText = function (context, text) {
       context.children.push(encodeXMLEntities(text))
     }
-    annotator.onEnter = function(fragment) {
+    annotator.onEnter = function (fragment) {
       var anno = fragment.node
       return {
         annotation: anno,
         children: []
       }
     }
-    annotator.onExit = function(fragment, context, parentContext) {
+    annotator.onExit = function (fragment, context, parentContext) {
       var anno = context.annotation
       var converter = self.getNodeConverter(anno)
       if (!converter) {
@@ -191,13 +190,12 @@ class DOMExporter {
     Still it makes sense to be able to export just a fragment containing just
     the annotation element.
   */
-  _convertPropertyAnnotation(anno) {
+  _convertPropertyAnnotation (anno) {
     // take only the annotations within the range of the anno
     var wrapper = this.$$('div').append(this.annotatedText(anno.path))
-    var el = wrapper.find('['+this.config.idAttribute+'="'+anno.id+'"]')
+    var el = wrapper.find('[' + this.config.idAttribute + '="' + anno.id + '"]')
     return el
   }
-
 }
 
 export default DOMExporter

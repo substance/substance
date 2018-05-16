@@ -9,8 +9,7 @@ import ObjectOperation from './ObjectOperation'
 import { fromJSON as selectionFromJSON } from './selectionHelpers'
 
 class DocumentChange {
-
-  constructor(ops, before, after) {
+  constructor (ops, before, after) {
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
       let data = arguments[0]
       // a unique id for the change
@@ -21,7 +20,7 @@ class DocumentChange {
       this.before = data.before || {}
       // array of operations
       this.ops = data.ops
-      this.info = data.info; // custom change info
+      this.info = data.info // custom change info
       // application state after the change was applied
       this.after = data.after || {}
     } else if (arguments.length === 3) {
@@ -46,7 +45,7 @@ class DocumentChange {
     Extract aggregated information about which nodes and properties have been affected.
     This gets called by Document after applying the change.
   */
-  _extractInformation(doc) {
+  _extractInformation (doc) {
     // TODO: we should instead clean-up EditorSession et. al
     // For now we allow this method to be called multiple times, but only extract the details the first time
     if (this._extracted) return
@@ -58,10 +57,10 @@ class DocumentChange {
     let affectedContainerAnnos = []
 
     // TODO: we will introduce a special operation type for coordinates
-    function _checkAnnotation(op) {
+    function _checkAnnotation (op) {
       switch (op.type) {
-        case "create":
-        case "delete": {
+        case 'create':
+        case 'delete': {
           let node = op.val
           if (node.hasOwnProperty('start')) {
             updated[node.start.path] = true
@@ -71,8 +70,8 @@ class DocumentChange {
           }
           break
         }
-        case "update":
-        case "set": {
+        case 'update':
+        case 'set': {
           // HACK: detecting annotation changes in an opportunistic way
           let node = doc.get(op.path[0])
           if (node) {
@@ -92,15 +91,15 @@ class DocumentChange {
 
     for (let i = 0; i < ops.length; i++) {
       let op = ops[i]
-      if (op.type === "create") {
+      if (op.type === 'create') {
         created[op.val.id] = op.val
         delete deleted[op.val.id]
       }
-      if (op.type === "delete") {
+      if (op.type === 'delete') {
         delete created[op.val.id]
         deleted[op.val.id] = op.val
       }
-      if (op.type === "set" || op.type === "update") {
+      if (op.type === 'set' || op.type === 'update') {
         updated[op.path] = true
         // also mark the node itself as dirty
         updated[op.path[0]] = true
@@ -108,7 +107,7 @@ class DocumentChange {
       _checkAnnotation(op)
     }
 
-    affectedContainerAnnos.forEach(function(anno) {
+    affectedContainerAnnos.forEach(function (anno) {
       let container = doc.get(anno.containerId, 'strict')
       let startPos = container.getPosition(anno.start.path[0])
       let endPos = container.getPosition(anno.end.path[0])
@@ -127,8 +126,8 @@ class DocumentChange {
     })
 
     // remove all deleted nodes from updated
-    if(Object.keys(deleted).length > 0) {
-      forEach(updated, function(_, key) {
+    if (Object.keys(deleted).length > 0) {
+      forEach(updated, function (_, key) {
         let nodeId = key.split(',')[0]
         if (deleted[nodeId]) {
           delete updated[key]
@@ -143,7 +142,7 @@ class DocumentChange {
     this._extracted = true
   }
 
-  invert() {
+  invert () {
     // shallow cloning this
     let copy = this.toJSON()
     copy.ops = []
@@ -161,53 +160,53 @@ class DocumentChange {
   }
 
   /* istanbul ignore start */
-  isAffected(path) {
+  isAffected (path) {
     console.error('DEPRECATED: use change.hasUpdated() instead')
     return this.hasUpdated(path)
   }
 
-  isUpdated(path) {
+  isUpdated (path) {
     console.error('DEPRECATED: use change.hasUpdated() instead')
     return this.hasUpdated(path)
   }
   /* istanbul ignore end */
 
-  hasUpdated(path) {
+  hasUpdated (path) {
     return this.updated[path]
   }
 
-  hasDeleted(id) {
+  hasDeleted (id) {
     return this.deleted[id]
   }
 
-  serialize() {
+  serialize () {
     // TODO serializers and deserializers should allow
     // for application data in 'after' and 'before'
 
     let opSerializer = new OperationSerializer()
     let data = this.toJSON()
-    data.ops = this.ops.map(function(op) {
+    data.ops = this.ops.map(function (op) {
       return opSerializer.serialize(op)
     })
     return JSON.stringify(data)
   }
 
-  clone() {
+  clone () {
     return DocumentChange.fromJSON(this.toJSON())
   }
 
-  toJSON() {
+  toJSON () {
     let data = {
       // to identify this change
       sha: this.sha,
       // before state
       before: clone(this.before),
-      ops: map(this.ops, function(op) {
+      ops: map(this.ops, function (op) {
         return op.toJSON()
       }),
       info: this.info,
       // after state
-      after: clone(this.after),
+      after: clone(this.after)
     }
 
     // Just to make sure rich selection objects don't end up
@@ -227,10 +226,10 @@ class DocumentChange {
   }
 }
 
-DocumentChange.deserialize = function(str) {
+DocumentChange.deserialize = function (str) {
   let opSerializer = new OperationSerializer()
   let data = JSON.parse(str)
-  data.ops = data.ops.map(function(opData) {
+  data.ops = data.ops.map(function (opData) {
     return opSerializer.deserialize(opData)
   })
   if (data.before.selection) {
@@ -242,10 +241,10 @@ DocumentChange.deserialize = function(str) {
   return new DocumentChange(data)
 }
 
-DocumentChange.fromJSON = function(data) {
+DocumentChange.fromJSON = function (data) {
   // Don't write to original object on deserialization
   let change = cloneDeep(data)
-  change.ops = data.ops.map(function(opData) {
+  change.ops = data.ops.map(function (opData) {
     return ObjectOperation.fromJSON(opData)
   })
   change.before.selection = selectionFromJSON(data.before.selection)

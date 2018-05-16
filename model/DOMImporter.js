@@ -9,10 +9,10 @@ const WS_RIGHT = /\s+$/g
 const WS_ALL = /\s+/g
 // var ALL_WS_NOTSPACE_LEFT = /^[\t\n]+/g
 // var ALL_WS_NOTSPACE_RIGHT = /[\t\n]+$/g
-const SPACE = " "
+const SPACE = ' '
 const TABS_OR_NL = /[\t\n\r]+/g
 
-const INVISIBLE_CHARACTER = "\u200B"
+const INVISIBLE_CHARACTER = '\u200B'
 
 /**
   A generic base implementation for XML/HTML importers.
@@ -22,8 +22,7 @@ const INVISIBLE_CHARACTER = "\u200B"
   @param {object[]} config.converters
  */
 export default class DOMImporter {
-
-  constructor(config, context) {
+  constructor (config, context) {
     this.context = context || {}
 
     if (!config.schema) {
@@ -52,7 +51,7 @@ export default class DOMImporter {
     Goes through all converters, checks their consistency
     and registers them depending on the type in different sets.
   */
-  _initialize() {
+  _initialize () {
     const schema = this.schema
     const defaultTextType = schema.getDefaultTextType()
     const converters = this.converters
@@ -90,7 +89,7 @@ export default class DOMImporter {
     }
   }
 
-  dispose() {
+  dispose () {
     if (this.state.doc) {
       this.state.doc.dispose()
     }
@@ -102,7 +101,7 @@ export default class DOMImporter {
     Make sure to either create a new importer instance or call this method
     when you want to generate nodes belonging to different documents.
   */
-  reset() {
+  reset () {
     if (this.state.doc) {
       this.state.doc.dispose()
     }
@@ -110,7 +109,7 @@ export default class DOMImporter {
     this.state.doc = this._createDocument()
   }
 
-  getDocument() {
+  getDocument () {
     return this.state.doc
   }
 
@@ -121,12 +120,12 @@ export default class DOMImporter {
     @param {String} containerId The id of the target container node.
     @returns {Container} the container node
    */
-  convertContainer(elements, containerId) {
+  convertContainer (elements, containerId) {
     if (!this.state.doc) this.reset()
     const state = this.state
     const iterator = new ArrayIterator(elements)
     const nodeIds = []
-    while(iterator.hasNext()) {
+    while (iterator.hasNext()) {
       const el = iterator.next()
       let node
       const blockTypeConverter = this._getConverterForElement(el, 'block')
@@ -166,7 +165,7 @@ export default class DOMImporter {
     @param {ui/DOMElement} el the HTML element
     @returns {object} the created node as JSON
    */
-  convertElement(el) {
+  convertElement (el) {
     if (!this.state.doc) this.reset()
     let isTopLevel = !this.state.isConverting
     if (isTopLevel) {
@@ -186,8 +185,7 @@ export default class DOMImporter {
       // not clear, which property the annotation should be attached to.
       if (NodeClass.isInline) {
         nodeData = this._convertInlineNode(el, nodeData, converter)
-      }
-      else if (NodeClass.prototype._isPropertyAnnotation) {
+      } else if (NodeClass.prototype._isPropertyAnnotation) {
         nodeData = this._convertPropertyAnnotation(el, nodeData)
       } else {
         nodeData = converter.import(el, nodeData, this) || nodeData
@@ -195,7 +193,7 @@ export default class DOMImporter {
       let context = this.state.popContext()
       annos = context.annos
     } else {
-      throw new Error('No converter found for '+el.tagName)
+      throw new Error('No converter found for ' + el.tagName)
     }
     // create the node
     const node = this._createNode(nodeData)
@@ -206,7 +204,7 @@ export default class DOMImporter {
 
     // HACK: to allow using an importer stand-alone
     // i.e. creating detached elements
-    if (this.config["stand-alone"] && isTopLevel) {
+    if (this.config['stand-alone'] && isTopLevel) {
       this.state.isConverting = false
       this.reset()
     }
@@ -229,7 +227,7 @@ export default class DOMImporter {
     p.content = converter.annotatedText(pEl, [p.id, 'content'])
     ```
    */
-  annotatedText(el, path, options={}) {
+  annotatedText (el, path, options = {}) {
     if (!path) {
       throw new Error('path is mandatory')
     }
@@ -245,7 +243,7 @@ export default class DOMImporter {
     if (options.preserveWhitespace) {
       state.preserveWhitespace = true
     }
-    state.stack.push({ path: path, offset: 0, text: "", annos: []})
+    state.stack.push({ path: path, offset: 0, text: '', annos: [] })
     // IMO we should reset the last char, as it is only relevant within one
     // annotated text property. This feature is mainly used to eat up
     // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
@@ -269,7 +267,7 @@ export default class DOMImporter {
     @param {ui/DOMElement} el
     @returns {String} The plain text
    */
-  plainText(el) {
+  plainText (el) {
     var state = this.state
     var text = el.textContent
     if (state.stack.length > 0) {
@@ -290,7 +288,7 @@ export default class DOMImporter {
     @private
     @param {String}
    */
-  _customText(text) {
+  _customText (text) {
     var state = this.state
     if (state.stack.length > 0) {
       var context = last(state.stack)
@@ -306,7 +304,7 @@ export default class DOMImporter {
     @param {String} a prefix
     @return {String} the generated id
    */
-  nextId(prefix) {
+  nextId (prefix) {
     // TODO: we could create more beautiful ids?
     // however we would need to be careful as there might be another
     // element in the HTML coming with that id
@@ -314,31 +312,30 @@ export default class DOMImporter {
     return this.state.uuid(prefix)
   }
 
-  _getNextId(dom, type) {
+  _getNextId (dom, type) {
     let id = this.nextId(type)
-    while (this.state.ids[id] || dom.find('#'+id)) {
+    while (this.state.ids[id] || dom.find('#' + id)) {
       id = this.nextId(type)
     }
     return id
   }
 
-  _getIdForElement(el, type) {
+  _getIdForElement (el, type) {
     let id = el.getAttribute(this.config.idAttribute)
     if (id && !this.state.ids[id]) return id
     return this._getNextId(el.getOwnerDocument(), type)
   }
 
-
   // Note: this is e.g. shared by ClipboardImporter which has a different
   // implementation of this.createDocument()
-  _createDocument() {
+  _createDocument () {
     // create an empty document and initialize the container if not present
     const schema = this.config.schema
     const DocumentClass = schema.getDocumentClass()
     return new DocumentClass(schema)
   }
 
-  _convertPropertyAnnotation(el, nodeData) {
+  _convertPropertyAnnotation (el, nodeData) {
     const path = [nodeData.id, '_content']
     // if there is no context, this is called stand-alone
     // i.e., user tries to convert an annotation element
@@ -349,7 +346,7 @@ export default class DOMImporter {
     return nodeData
   }
 
-  _convertInlineNode(el, nodeData, converter) {
+  _convertInlineNode (el, nodeData, converter) {
     const path = [nodeData.id, '_content']
     if (converter.import) {
       nodeData = converter.import(el, nodeData, this) || nodeData
@@ -360,7 +357,7 @@ export default class DOMImporter {
     return nodeData
   }
 
-  _createNodeData(el, type) {
+  _createNodeData (el, type) {
     if (!type) {
       throw new Error('type is mandatory.')
     }
@@ -372,7 +369,7 @@ export default class DOMImporter {
     return nodeData
   }
 
-  _createNode(nodeData) {
+  _createNode (nodeData) {
     let doc = this.state.doc
     // NOTE: if your Document implementation adds default nodes in the constructor
     // and you have exported the node, we need to remove the default version first
@@ -385,27 +382,27 @@ export default class DOMImporter {
     return doc.create(nodeData)
   }
 
-  getChildNodeIterator(el) {
+  getChildNodeIterator (el) {
     return el.getChildNodeIterator()
   }
 
-  _defaultElementMatcher(el) {
+  _defaultElementMatcher (el) {
     return el.is(this.tagName)
   }
 
   /*
     Internal function for parsing annotated text
   */
-  _annotatedText(iterator) {
+  _annotatedText (iterator) {
     const state = this.state
     const context = last(state.stack)
     /* istanbul ignore next */
     if (!context) {
       throw new Error('Illegal state: context is null.')
     }
-    while(iterator.hasNext()) {
+    while (iterator.hasNext()) {
       var el = iterator.next()
-      var text = ""
+      var text = ''
       /* istanbul ignore else */
       // Plain text nodes...
       if (el.isTextNode()) {
@@ -444,7 +441,7 @@ export default class DOMImporter {
         let stackFrame = {
           path: context.path,
           offset: startOffset,
-          text: "",
+          text: '',
           annos: []
         }
         state.stack.push(stackFrame)
@@ -498,12 +495,12 @@ export default class DOMImporter {
     return context.text
   }
 
-  _getConverterForElement(el, mode) {
+  _getConverterForElement (el, mode) {
     var converters
-    if (mode === "block") {
+    if (mode === 'block') {
       if (!el.tagName) return null
       converters = this._blockConverters
-    } else if (mode === "inline") {
+    } else if (mode === 'inline') {
       converters = this._propertyAnnotationConverters
     } else {
       converters = this._allConverters
@@ -518,7 +515,7 @@ export default class DOMImporter {
     return converter
   }
 
-  _converterCanBeApplied(converter, el) {
+  _converterCanBeApplied (converter, el) {
     return converter.matchElement(el, this)
   }
 
@@ -529,7 +526,7 @@ export default class DOMImporter {
     @param {DOMImporter.ChildIterator} childIterator
     @returns {object} node data
    */
-  _wrapInlineElementsIntoBlockElement(childIterator) {
+  _wrapInlineElementsIntoBlockElement (childIterator) {
     if (!childIterator.hasNext()) return
 
     const converter = this._defaultBlockConverter
@@ -539,7 +536,7 @@ export default class DOMImporter {
 
     let dom = childIterator.peek().getOwnerDocument()
     let wrapper = dom.createElement('wrapper')
-    while(childIterator.hasNext()) {
+    while (childIterator.hasNext()) {
       const el = childIterator.next()
       // if there is a block node we finish this wrapper
       const blockTypeConverter = this._getConverterForElement(el, 'block')
@@ -569,7 +566,7 @@ export default class DOMImporter {
   // TODO: after recent work with XML we found that
   // doing white-space handling here is not optimal
   // instead it should be done as a preprocessing step
-  _prepareText(text) {
+  _prepareText (text) {
     const state = this.state
     if (state.preserveWhitespace) {
       return text
@@ -595,7 +592,7 @@ export default class DOMImporter {
     if (this.config.REMOVE_INNER_WS || state.removeInnerWhitespace) {
       text = text.replace(WS_ALL, SPACE)
     }
-    state.lastChar = text[text.length-1] || state.lastChar
+    state.lastChar = text[text.length - 1] || state.lastChar
     return text
   }
 
@@ -605,7 +602,7 @@ export default class DOMImporter {
     Attention: this is not yet implemented fully. Atm, trimming is only done
     on the first and last text node (if they exist).
    */
-  _trimTextContent(el) {
+  _trimTextContent (el) {
     var nodes = el.getChildNodes()
     var firstNode = nodes[0]
     var lastNode = last(nodes)
@@ -624,23 +621,21 @@ export default class DOMImporter {
     return el
   }
 
-  _trimLeft(text) {
-    return text.replace(WS_LEFT, "")
+  _trimLeft (text) {
+    return text.replace(WS_LEFT, '')
   }
 
-  _trimRight(text) {
-    return text.replace(WS_RIGHT, "")
+  _trimRight (text) {
+    return text.replace(WS_RIGHT, '')
   }
-
 }
 
 class DOMImporterState {
-
-  constructor() {
+  constructor () {
     this.reset()
   }
 
-  reset() {
+  reset () {
     this.preserveWhitespace = false
     this.nodes = []
     this.annotations = []
@@ -651,7 +646,7 @@ class DOMImporterState {
     this.contexts = []
     // stack for reentrant calls into annotatedText()
     this.stack = []
-    this.lastChar = ""
+    this.lastChar = ''
     this.skipTypes = {}
     this.ignoreAnnotations = false
     this.isConverting = false
@@ -661,18 +656,17 @@ class DOMImporterState {
     this.uuid = createCountingIdGenerator()
   }
 
-  pushContext(tagName, converter) {
-    this.contexts.push({ tagName: tagName, converter: converter, annos: []})
+  pushContext (tagName, converter) {
+    this.contexts.push({ tagName: tagName, converter: converter, annos: [] })
   }
 
-  popContext() {
+  popContext () {
     return this.contexts.pop()
   }
 
-  getCurrentContext() {
+  getCurrentContext () {
     return last(this.contexts)
   }
-
 }
 
 DOMImporter.State = DOMImporterState

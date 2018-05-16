@@ -1,12 +1,12 @@
 import TextBlockComponent from '../../ui/TextBlockComponent'
 
 class ParagraphComponent extends TextBlockComponent {
-  render($$) {
+  render ($$) {
     let el = super.render($$)
     return el.addClass('sc-paragraph')
   }
 
-  getTagName() {
+  getTagName () {
     return 'p'
   }
 }

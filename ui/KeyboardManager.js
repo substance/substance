@@ -4,8 +4,7 @@ import platform from '../util/platform'
 import ExecuteCommandHandler from './ExecuteCommandHandler'
 
 export default class KeyboardManager {
-
-  constructor(editorSession, bindings, options) {
+  constructor (editorSession, bindings, options) {
     this.editorSession = editorSession
     this.context = options.context || {}
     this.keydownBindings = {}
@@ -14,7 +13,7 @@ export default class KeyboardManager {
     bindings.forEach(({ key, spec }) => {
       // default combos are evaluated on keydown
       let type = spec.type || 'keydown'
-      if(spec.command) {
+      if (spec.command) {
         let handler = new ExecuteCommandHandler(editorSession, spec.command)
         let hook = handler.execute.bind(handler)
         if (type === 'keydown') {
@@ -31,7 +30,7 @@ export default class KeyboardManager {
     })
   }
 
-  onKeydown(event) {
+  onKeydown (event) {
     let key = parseKeyEvent(event)
     let hooks = this.keydownBindings[key]
     if (hooks) {
@@ -49,8 +48,7 @@ export default class KeyboardManager {
     }
   }
 
-
-  onTextInput(text) {
+  onTextInput (text) {
     let hook = this.textinputBindings[text]
     if (hook) {
       let params = this._getParams()
@@ -58,7 +56,7 @@ export default class KeyboardManager {
     }
   }
 
-  _getParams() {
+  _getParams () {
     let editorSession = this.editorSession
     let selectionState = editorSession.getSelectionState()
     let sel = selectionState.getSelection()
@@ -67,20 +65,19 @@ export default class KeyboardManager {
       editorSession: editorSession,
       selectionState: selectionState,
       surface: surface,
-      selection: sel,
+      selection: sel
     }
   }
-
 }
 
-function parseCombo(combo) {
+function parseCombo (combo) {
   let frags = combo.split('+')
   let data = {
     keyCode: -1
   }
   for (var i = 0; i < frags.length; i++) {
     let frag = frags[i].toUpperCase()
-    switch(frag) {
+    switch (frag) {
       case 'ALT': {
         data.altKey = true
         break
@@ -136,7 +133,7 @@ function parseCombo(combo) {
         } else if (keys.hasOwnProperty(frag)) {
           data.keyCode = keys[frag]
         } else {
-          throw new Error('Unsupported keyboard command: '+ combo)
+          throw new Error('Unsupported keyboard command: ' + combo)
         }
     }
   }

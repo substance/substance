@@ -2,8 +2,7 @@ import NodeComponent from './NodeComponent'
 import TextProperty from './TextPropertyComponent'
 
 class TextBlockComponent extends NodeComponent {
-
-  didMount(...args) {
+  didMount (...args) {
     super.didMount(...args)
 
     let node = this.props.node
@@ -12,12 +11,12 @@ class TextBlockComponent extends NodeComponent {
     })
   }
 
-  dispose(...args) {
+  dispose (...args) {
     super.dispose(...args)
     this.context.editorSession.off(this)
   }
 
-  render($$) {
+  render ($$) {
     let el = super.render($$)
     el.addClass('sc-text-block')
 
@@ -29,7 +28,7 @@ class TextBlockComponent extends NodeComponent {
       el.attr('dir', node.direction)
     }
     if (node.textAlign) {
-      el.addClass('sm-align-'+node.textAlign)
+      el.addClass('sm-align-' + node.textAlign)
     }
     el.append($$(TextProperty, {
       placeholder: this.props.placeholder,
@@ -38,7 +37,6 @@ class TextBlockComponent extends NodeComponent {
     }))
     return el
   }
-
 }
 
 export default TextBlockComponent

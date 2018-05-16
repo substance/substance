@@ -5,20 +5,19 @@
   @param {Array} arr
  */
 class ArrayIterator {
-
-  constructor(arr) {
+  constructor (arr) {
     this.arr = arr
     this.pos = -1
   }
 
-  get _isArrayIterator() {
+  get _isArrayIterator () {
     return true
   }
 
   /**
     @returns {Boolean} true if there is another child node left.
    */
-  hasNext() {
+  hasNext () {
     return this.pos < this.arr.length - 1
   }
 
@@ -27,7 +26,7 @@ class ArrayIterator {
 
     @returns {HTMLElement} The next child node.
    */
-  next() {
+  next () {
     this.pos += 1
     var next = this.arr[this.pos]
     return next
@@ -36,17 +35,16 @@ class ArrayIterator {
   /**
     Decrements the iterator.
    */
-  back() {
+  back () {
     if (this.pos >= 0) {
       this.pos -= 1
     }
     return this
   }
 
-  peek() {
-    return this.arr[this.pos+1]
+  peek () {
+    return this.arr[this.pos + 1]
   }
-
 }
 
 export default ArrayIterator

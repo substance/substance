@@ -3,7 +3,7 @@ import DefaultFileProxy from '../../model/DefaultFileProxy'
 class ImageProxy extends DefaultFileProxy {}
 
 // to detect that this class should take responsibility for a fileNode
-ImageProxy.match = function(fileNode) {
+ImageProxy.match = function (fileNode) {
   return fileNode.fileType === 'image'
 }
 

@@ -7,8 +7,7 @@ var __id__ = 0
 */
 
 class TestServerWebSocket extends EventEmitter {
-
-  constructor(messageQueue, serverId, clientId) {
+  constructor (messageQueue, serverId, clientId) {
     super()
 
     this.__id__ = __id__++
@@ -17,24 +16,24 @@ class TestServerWebSocket extends EventEmitter {
     this.clientId = clientId
 
     this._isSimulated = true
-    this.readyState = 1; // consider always connected
+    this.readyState = 1 // consider always connected
   }
 
-  connect() {
+  connect () {
     this.messageQueue.connectServerSocket(this)
   }
 
   /**
     Gets called by the message queue to handle a message
   */
-  _onMessage(data) {
+  _onMessage (data) {
     this.emit('message', data)
   }
 
   /**
     Gets called by the message queue to handle a message
   */
-  send(data) {
+  send (data) {
     var msg = {
       from: this.serverId,
       to: this.clientId

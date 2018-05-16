@@ -1,4 +1,4 @@
-export default function(tx) {
+export default function (tx) {
   var body = tx.get('body')
   tx.create({
     id: 'p1',

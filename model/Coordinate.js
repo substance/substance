@@ -6,12 +6,11 @@ import isNumber from '../util/isNumber'
   @internal
 */
 class Coordinate {
-
   /**
    @param {Array} path the address of a property, such as ['text_1', 'content']
    @param {int} offset the position in the property
   */
-  constructor(path, offset) {
+  constructor (path, offset) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
     if (arguments.length === 1) {
@@ -30,47 +29,47 @@ class Coordinate {
     }
   }
 
-  equals(other) {
+  equals (other) {
     return (other === this ||
-      (isArrayEqual(other.path, this.path) && other.offset === this.offset) )
+      (isArrayEqual(other.path, this.path) && other.offset === this.offset))
   }
 
-  withCharPos(offset) {
+  withCharPos (offset) {
     return new Coordinate(this.path, offset)
   }
 
-  getNodeId() {
+  getNodeId () {
     return this.path[0]
   }
 
-  getPath() {
+  getPath () {
     return this.path
   }
 
-  getOffset() {
+  getOffset () {
     return this.offset
   }
 
-  toJSON() {
+  toJSON () {
     return {
       path: this.path.slice(),
       offset: this.offset
     }
   }
 
-  toString() {
-    return "(" + this.path.join('.') + ", " + this.offset + ")"
+  toString () {
+    return '(' + this.path.join('.') + ', ' + this.offset + ')'
   }
 
-  isPropertyCoordinate() {
+  isPropertyCoordinate () {
     return this.path.length > 1
   }
 
-  isNodeCoordinate() {
+  isNodeCoordinate () {
     return this.path.length === 1
   }
 
-  hasSamePath(other) {
+  hasSamePath (other) {
     return isArrayEqual(this.path, other.path)
   }
 }

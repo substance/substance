@@ -3,7 +3,7 @@ export default {
   tagName: 'meta',
   type: 'meta',
 
-  import: function(el, node, converter) {
+  import: function (el, node, converter) {
     node.id = 'meta'
     var titleEl = el.find('title')
     if (titleEl) {
@@ -13,7 +13,7 @@ export default {
     }
   },
 
-  export: function(node, el, converter) {
+  export: function (node, el, converter) {
     el.append(el.createElement('title').append(
       converter.annotatedText(['meta', 'title'])
     ))

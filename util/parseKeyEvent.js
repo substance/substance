@@ -1,6 +1,6 @@
 export {default as keys} from './keys'
 
-export default function parseKeyEvent(event, onlyModifiers) {
+export default function parseKeyEvent (event, onlyModifiers) {
   let frags = []
   if (event.altKey) {
     if (event.code === 'AltRight') {

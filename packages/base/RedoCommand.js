@@ -2,8 +2,7 @@ import Command from '../../ui/Command'
 
 export default
 class Redo extends Command {
-
-  getCommandState(params) {
+  getCommandState (params) {
     let editorSession = params.editorSession
     return {
       disabled: !editorSession.canRedo(),
@@ -11,7 +10,7 @@ class Redo extends Command {
     }
   }
 
-  execute(params) {
+  execute (params) {
     let editorSession = params.editorSession
     if (editorSession.canRedo()) {
       editorSession.redo()
@@ -20,5 +19,4 @@ class Redo extends Command {
       return false
     }
   }
-
 }

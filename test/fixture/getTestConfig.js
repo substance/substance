@@ -3,7 +3,7 @@ import {
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
   ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage,
   SubscriptPackage, SuperscriptPackage
-  //InlineWrapperPackage,
+  // InlineWrapperPackage,
 } from 'substance'
 
 import TestNode from './TestNode'
@@ -24,7 +24,7 @@ import TestArticle from './TestArticle'
 
 // const { InlineWrapper, InlineWrapperComponent } = InlineWrapperPackage
 
-export default function getTestConfig() {
+export default function getTestConfig () {
   let config = new Configurator()
   config.defineSchema({
     name: 'test-article',
@@ -65,7 +65,6 @@ export default function getTestConfig() {
 
   // config.addNode(InlineWrapper)
   // config.addComponent(InlineWrapper.type, InlineWrapperComponent)
-
 
   config.addImporter('html', TestHTMLImporter)
   config.addImporter('xml', TestXMLImporter)

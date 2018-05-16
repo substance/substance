@@ -1,12 +1,11 @@
 import { Component, ContainerEditor } from 'substance'
 
 class TestContainerEditor extends Component {
-
-  getChildContext() {
+  getChildContext () {
     return this.props.context
   }
 
-  render($$) {
+  render ($$) {
     return $$('div').append(
       $$(ContainerEditor, {
         node: this.props.node,

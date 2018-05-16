@@ -2,7 +2,7 @@ import DragAndDropHandler from '../../ui/DragAndDropHandler'
 
 export default
 class MoveNode extends DragAndDropHandler {
-  match(dragState) {
+  match (dragState) {
     let {type, insertPos} = dragState.dropParams
     return type === 'move' && insertPos >= 0
   }
@@ -15,7 +15,7 @@ class MoveNode extends DragAndDropHandler {
     - determine node selection based on given insertPos
     - paste node at new insert position
   */
-  drop(tx, dragState) {
+  drop (tx, dragState) {
     let { insertPos } = dragState.dropParams
     tx.setSelection(dragState.sourceSelection)
     let copy = tx.copySelection()
@@ -29,7 +29,7 @@ class MoveNode extends DragAndDropHandler {
     let targetNodeId = container.getNodeIdAt(insertPos)
     let insertMode = 'before'
     if (!targetNodeId) {
-      targetNodeId = container.getNodeIdAt(insertPos-1)
+      targetNodeId = container.getNodeIdAt(insertPos - 1)
       insertMode = 'after'
     }
     tx.setSelection({

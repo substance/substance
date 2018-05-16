@@ -1,8 +1,7 @@
 import Marker from '../../model/Marker'
 
 class FindAndReplaceManager {
-
-  constructor(context) {
+  constructor (context) {
     if (!context.editorSession) {
       throw new Error('EditorSession required.')
     }
@@ -31,14 +30,14 @@ class FindAndReplaceManager {
     this._requestFocusSearchString = false
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
   }
 
   /*
     NOTE: We remember findString and replaceString for the next search action
   */
-  _resetState() {
+  _resetState () {
     this._state.disabled = true
     this._state.matches = []
     this._state.selectedMatch = undefined
@@ -47,7 +46,7 @@ class FindAndReplaceManager {
   /*
     Derive command state for FindAndReplaceTool
   */
-  getCommandState() {
+  getCommandState () {
     let state = this._state
     let commandState = {
       disabled: state.disabled,
@@ -60,20 +59,20 @@ class FindAndReplaceManager {
     return commandState
   }
 
-  enable() {
+  enable () {
     this._state.disabled = false
     this._requestFocusSearchString = true
     // Attempts to start a find immediately
     this.startFind(this._state.findString)
   }
 
-  disable() {
+  disable () {
     this._state.disabled = true
     this._resetState()
     this._propagateUpdate()
   }
 
-  _onDocumentChanged() {
+  _onDocumentChanged () {
     if (!this._state.disabled) {
       this._computeMatches()
       this._state.selectedMatch = 0
@@ -84,7 +83,7 @@ class FindAndReplaceManager {
   /*
     Start find and replace workflow
   */
-  startFind(findString) {
+  startFind (findString) {
     this._state.findString = findString
     this._computeMatches()
     let closestMatch = this._getClosestMatch()
@@ -92,10 +91,9 @@ class FindAndReplaceManager {
     this._requestLookupMatch = true
     this._setSelection()
     this._propagateUpdate()
-
   }
 
-  setReplaceString(replaceString) {
+  setReplaceString (replaceString) {
     // NOTE: We don't trigger any updates here
     this._state.replaceString = replaceString
   }
@@ -103,7 +101,7 @@ class FindAndReplaceManager {
   /*
     Find next match.
   */
-  findNext() {
+  findNext () {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
@@ -116,7 +114,7 @@ class FindAndReplaceManager {
   /*
     Find previous match
   */
-  findPrevious() {
+  findPrevious () {
     let index = this._state.selectedMatch
     let totalMatches = this._state.matches.length
     if (totalMatches === 0) return
@@ -126,7 +124,7 @@ class FindAndReplaceManager {
     this._propagateUpdate()
   }
 
-  _setSelection() {
+  _setSelection () {
     let match = this._state.matches[this._state.selectedMatch]
     if (!match) return
     // NOTE: We need to make sure no additional flow is triggered when
@@ -138,18 +136,18 @@ class FindAndReplaceManager {
   /*
     Replace next occurence
   */
-  replaceNext() {
+  replaceNext () {
     let index = this._state.selectedMatch
     let match = this._state.matches[index]
     let totalMatches = this._state.matches.length
-    if(match !== undefined) {
+    if (match !== undefined) {
       this.editorSession.transaction((tx, args) => {
         tx.setSelection(match.getSelection())
         tx.insertText(this._state.replaceString)
         return args
       })
       this._computeMatches()
-      if(index + 1 < totalMatches) {
+      if (index + 1 < totalMatches) {
         this._state.selectedMatch = index
       }
       this._requestLookupMatch = true
@@ -161,7 +159,7 @@ class FindAndReplaceManager {
   /*
     Replace all occurences
   */
-  replaceAll() {
+  replaceAll () {
     // Reverse matches order,
     // so the replace operations later are side effect free.
     let matches = this._state.matches.reverse()
@@ -180,13 +178,13 @@ class FindAndReplaceManager {
   /*
     Get closest match to current cursor position
   */
-  _getClosestMatch() {
+  _getClosestMatch () {
     let doc = this.editorSession.getDocument()
     let nodeIds = Object.keys(doc.getNodes())
     let sel = this.editorSession.getSelection()
     let closest = 0
 
-    if(!sel.isNull()) {
+    if (!sel.isNull()) {
       let startOffset = sel.start.offset
       let selStartNode = sel.start.path[0]
       let selStartNodePos = nodeIds.indexOf(selStartNode)
@@ -197,12 +195,12 @@ class FindAndReplaceManager {
         let markerStartOffset = markerSel.start.offset
         let markerStartNode = markerSel.start.path[0]
         let markerStartNodePos = nodeIds.indexOf(markerStartNode)
-        if(selStartNodePos > markerStartNodePos) {
+        if (selStartNodePos > markerStartNodePos) {
           return false
         } else if (selStartNodePos < markerStartNodePos) {
           return true
         } else {
-          if(startOffset <= markerStartOffset) {
+          if (startOffset <= markerStartOffset) {
             return true
           } else {
             return false
@@ -214,7 +212,7 @@ class FindAndReplaceManager {
     return closest
   }
 
-  _computeMatches() {
+  _computeMatches () {
     let currentMatches = this._state.matches
     let currentTotal = currentMatches === undefined ? 0 : currentMatches.length
 
@@ -225,16 +223,15 @@ class FindAndReplaceManager {
     // If there are no matches we should remove index
     let newMatches = this._state.matches
 
-    if(newMatches.length !== currentTotal) {
+    if (newMatches.length !== currentTotal) {
       this._state.selectedMatch = newMatches.length > 0 ? 0 : undefined
     }
   }
 
-
   /*
     Returns all matches
   */
-  _findAllMatches() {
+  _findAllMatches () {
     let textProperties = this._getAllAffectedTextPropertiesInOrder()
     const pattern = this._state.findString
     let matches = []
@@ -257,7 +254,7 @@ class FindAndReplaceManager {
     (e.g. FigureCaptionEditor). Moreover visual order is reflected, which
     is important for a seamless UX.
   */
-  _getAllAffectedTextPropertiesInOrder() {
+  _getAllAffectedTextPropertiesInOrder () {
     let textProperties = []
     const editor = this.editorSession.getEditor()
     // Where to look for text properties?
@@ -273,7 +270,7 @@ class FindAndReplaceManager {
     Method returns an array of matches, each match is represented as
     a PropertySelection
   */
-  _findInTextProperty({path, findString}) {
+  _findInTextProperty ({path, findString}) {
     const doc = this.doc
     const text = doc.get(path)
 
@@ -298,14 +295,14 @@ class FindAndReplaceManager {
     return matches
   }
 
-  _propagateUpdate() {
+  _propagateUpdate () {
     // HACK: we make commandStates dirty in order to trigger re-evaluation
     this._updateMarkers()
     this.editorSession._setDirty('commandStates')
     this.editorSession.startFlow()
   }
 
-  _updateMarkers() {
+  _updateMarkers () {
     const state = this._state
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
@@ -323,12 +320,11 @@ class FindAndReplaceManager {
       rootElement: '.sc-article'
     })
   */
-  getRootElementSelector() {
+  getRootElementSelector () {
     let configurator = this.editorSession.getConfigurator()
     let config = configurator.getFindAndReplaceConfig()
     return config.rootElement
   }
-
 }
 
 export default FindAndReplaceManager

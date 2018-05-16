@@ -17,8 +17,7 @@ import Marker from '../model/Marker'
   and dispatches them to all relevant components.
 */
 class MarkersManager {
-
-  constructor(editorSession) {
+  constructor (editorSession) {
     this.editorSession = editorSession
 
     // registry
@@ -35,17 +34,17 @@ class MarkersManager {
     editorSession.onRender(this._updateProperties, this)
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
     this._markers.dispose()
   }
 
-  setMarkers(key, markers) {
+  setMarkers (key, markers) {
     this.clearMarkers(key)
     markers.forEach(m => this.addMarker(key, m))
   }
 
-  addMarker(key, marker) {
+  addMarker (key, marker) {
     marker._key = key
     if (!marker._isMarker) {
       marker = new Marker(this.editorSession.getDocument(), marker)
@@ -53,14 +52,14 @@ class MarkersManager {
     this._markers.add(marker)
   }
 
-  clearMarkers(key) {
+  clearMarkers (key) {
     this._markers.clear(key)
   }
 
   /*
     Used internally by TextPropertyComponent to register for updates.
   */
-  register(textProperyComponent) {
+  register (textProperyComponent) {
     let path = String(textProperyComponent.getPath())
     // console.log('registering property', path)
     let textProperties = this._textProperties[path]
@@ -70,8 +69,7 @@ class MarkersManager {
     textProperties.push(textProperyComponent)
   }
 
-
-  deregister(textProperyComponent) {
+  deregister (textProperyComponent) {
     let path = String(textProperyComponent.getPath())
     // console.log('deregistering property', path)
     let textProperties = this._textProperties[path]
@@ -85,7 +83,7 @@ class MarkersManager {
     }
   }
 
-  getMarkers(path, opts) {
+  getMarkers (path, opts) {
     opts = opts || {}
     let doc = this.editorSession.getDocument()
     let annos = doc.getAnnotations(path) || []
@@ -93,7 +91,7 @@ class MarkersManager {
     return annos.concat(markers)
   }
 
-  _onChange(editorSession) {
+  _onChange (editorSession) {
     if (editorSession.hasDocumentChanged()) {
       const change = editorSession.getChange()
       this._markers._onDocumentChange(change)
@@ -101,7 +99,7 @@ class MarkersManager {
     }
   }
 
-  _recordDirtyTextProperties(change) {
+  _recordDirtyTextProperties (change) {
     // mark all updated props per se as dirty
     forEach(change.updated, (val, id) => {
       this._dirtyProps[id] = true
@@ -111,7 +109,7 @@ class MarkersManager {
   /*
     Trigger rerendering of all dirty text properties.
   */
-  _updateProperties() {
+  _updateProperties () {
     // console.log('MarkersManager._updateProperties()')
     Object.keys(this._dirtyProps).forEach((path) => {
       let textProperties = this._textProperties[path]
@@ -125,7 +123,7 @@ class MarkersManager {
   /*
     Here a dirty text property is rerendered via calling setState()
   */
-  _updateTextProperty(textPropertyComponent) {
+  _updateTextProperty (textPropertyComponent) {
     let path = textPropertyComponent.getPath()
     let markers = this.getMarkers(path, {
       surfaceId: textPropertyComponent.getSurfaceId(),
@@ -136,15 +134,13 @@ class MarkersManager {
       markers: markers
     })
   }
-
 }
 
 /*
   A DocumentIndex implementation for keeping track of markers
 */
 class MarkersIndex {
-
-  constructor(manager) {
+  constructor (manager) {
     this._manager = manager
 
     this._byKey = new ArrayTree()
@@ -153,7 +149,7 @@ class MarkersIndex {
     this._containerMarkers = {}
   }
 
-  get(path, surfaceId) {
+  get (path, surfaceId) {
     let markers = this._documentMarkers[path] || []
     if (surfaceId && this._surfaceMarkers[surfaceId]) {
       let surfaceMarkers = this._surfaceMarkers[surfaceId][path]
@@ -163,28 +159,28 @@ class MarkersIndex {
     return markers
   }
 
-  add(marker) {
+  add (marker) {
     const key = marker._key
     this._byKey.add(key, marker)
     this._add(marker)
   }
 
   // used to remove a single marker when invalidated
-  remove(marker) {
+  remove (marker) {
     const key = marker._key
     this._byKey.remove(key, marker)
     this._remove(marker)
   }
 
   // remove all markers for a given key
-  clear(key) {
+  clear (key) {
     let markers = this._byKey.get(key)
     markers.forEach((marker) => {
       this._remove(marker)
     })
   }
 
-  _add(marker) {
+  _add (marker) {
     const dirtyProps = this._manager._dirtyProps
     // console.log('Indexing marker', marker)
     const scope = marker.scope || 'document'
@@ -214,7 +210,7 @@ class MarkersIndex {
     }
   }
 
-  _remove(marker) {
+  _remove (marker) {
     const dirtyProps = this._manager._dirtyProps
     const scope = marker.scope || 'document'
     switch (scope) {
@@ -243,9 +239,9 @@ class MarkersIndex {
   }
 
   // used for applying transformations
-  _getAllCustomMarkers(path) {
+  _getAllCustomMarkers (path) {
     let markers = this._documentMarkers[path] || []
-    for(let surfaceId in this._surfaceMarkers) {
+    for (let surfaceId in this._surfaceMarkers) {
       if (!this._surfaceMarkers.hasOwnProperty(surfaceId)) continue
       let surfaceMarkers = this._surfaceMarkers[surfaceId][path]
       if (surfaceMarkers) markers = markers.concat(surfaceMarkers)
@@ -254,7 +250,7 @@ class MarkersIndex {
     return markers
   }
 
-  _onDocumentChange(change) {
+  _onDocumentChange (change) {
     change.ops.forEach((op) => {
       if (op.type === 'update' && op.diff._isTextOperation) {
         let markers = this._getAllCustomMarkers(op.path)
@@ -273,16 +269,16 @@ class MarkersIndex {
     })
   }
 
-  _transformInsert(markers, op) {
+  _transformInsert (markers, op) {
     const pos = op.pos
     const length = op.str.length
     if (length === 0) return
     markers.forEach((marker) => {
       // console.log('Transforming marker after insert')
-      var start = marker.start.offset;
-      var end = marker.end.offset;
-      var newStart = start;
-      var newEnd = end;
+      var start = marker.start.offset
+      var end = marker.end.offset
+      var newStart = start
+      var newEnd = end
       if (pos >= end) return
       if (pos <= start) {
         newStart += length
@@ -292,7 +288,7 @@ class MarkersIndex {
         return
       }
       if (pos < end) {
-        newEnd += length;
+        newEnd += length
         marker.end.offset = newEnd
         // NOTE: right now, any change inside a marker
         // removes the marker, as opposed to changes before
@@ -302,32 +298,31 @@ class MarkersIndex {
     })
   }
 
-  _transformDelete(markers, op) {
+  _transformDelete (markers, op) {
     const pos1 = op.pos
     const length = op.str.length
     const pos2 = pos1 + length
     if (pos1 === pos2) return
     markers.forEach((marker) => {
-      var start = marker.start.offset;
-      var end = marker.end.offset;
-      var newStart = start;
-      var newEnd = end;
+      var start = marker.start.offset
+      var end = marker.end.offset
+      var newStart = start
+      var newEnd = end
       if (pos2 <= start) {
-        newStart -= length;
-        newEnd -= length;
+        newStart -= length
+        newEnd -= length
         marker.start.offset = newStart
         marker.end.offset = newEnd
       } else if (pos1 >= end) {
-        // nothing
-      }
+
       // the marker needs to be changed
       // now, there might be cases where the marker gets invalid, such as a spell-correction
-      else {
+      } else {
         if (pos1 <= start) {
-          newStart = start - Math.min(pos2-pos1, start-pos1);
+          newStart = start - Math.min(pos2 - pos1, start - pos1)
         }
         if (pos1 <= end) {
-          newEnd = end - Math.min(pos2-pos1, end-pos1);
+          newEnd = end - Math.min(pos2 - pos1, end - pos1)
         }
         // TODO: we should do something special when the change occurred inside the marker
         if (start !== end && newStart === newEnd) {
@@ -344,7 +339,6 @@ class MarkersIndex {
       }
     })
   }
-
 }
 
 export default MarkersManager

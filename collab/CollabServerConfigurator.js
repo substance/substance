@@ -1,58 +1,58 @@
 import DocumentEngine from './DocumentEngine'
 
 class CollabServerConfigurator {
-  constructor() {
+  constructor () {
     this.config = {
-      heartbeat: 30*1000,
+      heartbeat: 30 * 1000,
       documentStore: undefined,
       changeStore: undefined,
       snapshotStore: undefined
     }
   }
 
-  setHost(host) {
+  setHost (host) {
     this.config.host = host
   }
 
-  setPort(port) {
+  setPort (port) {
     this.config.port = port
   }
 
   // Record phase API
   // ------------------------
 
-  setDocumentStore(documentStore) {
+  setDocumentStore (documentStore) {
     this.config.documentStore = documentStore
   }
 
-  setChangeStore(changeStore) {
+  setChangeStore (changeStore) {
     this.config.changeStore = changeStore
   }
 
-  setSnapshotStore(snapshotStore) {
+  setSnapshotStore (snapshotStore) {
     this.config.snapshotStore = snapshotStore
   }
 
   // Config Interpreter API
   // ------------------------
 
-  getHost() {
+  getHost () {
     return this.config.host
   }
 
-  getPort() {
+  getPort () {
     return this.config.port
   }
 
-  getDocumentStore() {
+  getDocumentStore () {
     return this.config.documentStore
   }
 
-  getChangeStore() {
+  getChangeStore () {
     return this.config.changeStore
   }
 
-  getSnapshotStore() {
+  getSnapshotStore () {
     return this.config.snapshotStore
   }
 
@@ -60,7 +60,7 @@ class CollabServerConfigurator {
     TODO: We should discuss if it is a good idea that the configurator 'owns'
     instances. Don't see a better solution for now though.
   */
-  getDocumentEngine() {
+  getDocumentEngine () {
     if (!this.documentEngine) {
       this.documentEngine = new DocumentEngine({
         documentStore: this.config.documentStore,
@@ -81,11 +81,10 @@ class CollabServerConfigurator {
     @return {configurator}   returns the configurator instance to make it easy
                              to chain calls to import.
    */
-  import(pkg, options) {
+  import (pkg, options) {
     pkg.configure(this, options || {})
     return this
   }
-
 }
 
 export default CollabServerConfigurator

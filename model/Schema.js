@@ -8,12 +8,11 @@ import Node from './Node'
   @internal
  */
 class Schema {
-
   /**
     @param {String} name
     @param {String} version
   */
-  constructor(name, version) {
+  constructor (name, version) {
     if (!name) {
       throw new Error("'name' is mandatory")
     }
@@ -49,9 +48,9 @@ class Schema {
 
     @param {Array} nodes Array of Node classes
   */
-  addNodes(nodes) {
+  addNodes (nodes) {
     if (!nodes) return
-    forEach(nodes, function(NodeClass) {
+    forEach(nodes, function (NodeClass) {
       if (!NodeClass.prototype._isNode) {
         console.error('Illegal node class: ', NodeClass)
       } else {
@@ -60,7 +59,7 @@ class Schema {
     }.bind(this))
   }
 
-  addNode(NodeClass) {
+  addNode (NodeClass) {
     this.nodeRegistry.register(NodeClass)
     if (NodeClass.tocType) {
       this.tocTypes.push(NodeClass.type)
@@ -73,7 +72,7 @@ class Schema {
     @param {String} name
     @returns {Class}
   */
-  getNodeClass(name) {
+  getNodeClass (name) {
     return this.nodeRegistry.get(name)
   }
 
@@ -83,7 +82,7 @@ class Schema {
     @private
     @returns {Node[]} An array of Node classes.
   */
-  getBuiltIns() {
+  getBuiltIns () {
     return []
   }
 
@@ -94,7 +93,7 @@ class Schema {
     @param {String} parentType
     @returns {Boolean} true if type is and instance of parentType.
   */
-  isInstanceOf(type, parentType) {
+  isInstanceOf (type, parentType) {
     var NodeClass = this.getNodeClass(type)
     if (NodeClass) {
       return Node.isInstanceOf(NodeClass, parentType)
@@ -110,25 +109,25 @@ class Schema {
     @param {Function} callback
     @param {Object} context
   */
-  each() {
+  each () {
     this.nodeRegistry.each.apply(this.nodeRegistry, arguments)
   }
 
   /**
     @returns {Node[]} list of types that should appear in a TOC
   */
-  getTocTypes() {
+  getTocTypes () {
     return this.tocTypes
   }
 
   /**
     @returns {String} the name of the default textish node (e.g. 'paragraph')
   */
-  getDefaultTextType() {
+  getDefaultTextType () {
     throw new Error('Schmema.prototype.getDefaultTextType() must be overridden.')
   }
 
-  getNodeSchema(type) {
+  getNodeSchema (type) {
     var NodeClass = this.getNodeClass(type)
     if (!NodeClass) {
       console.error('Unknown node type ', type)

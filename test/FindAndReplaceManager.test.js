@@ -20,7 +20,7 @@ body:
 
 const test = module('FindAndReplaceManager')
 
-test("Find matches and select first after current selection", function(t) {
+test('Find matches and select first after current selection', function (t) {
   let { editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 7, endOffset: 7 })
@@ -37,7 +37,7 @@ test("Find matches and select first after current selection", function(t) {
   t.end()
 })
 
-test("Select next match", function(t) {
+test('Select next match', function (t) {
   let { editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
 
@@ -56,7 +56,7 @@ test("Select next match", function(t) {
   t.end()
 })
 
-test("Select previous match", function(t) {
+test('Select previous match', function (t) {
   let { editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
@@ -71,7 +71,7 @@ test("Select previous match", function(t) {
   t.end()
 })
 
-test("Replace first match", function(t) {
+test('Replace first match', function (t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 1, endOffset: 1 })
@@ -90,7 +90,7 @@ test("Replace first match", function(t) {
   t.end()
 })
 
-test("Replace second match", function(t) {
+test('Replace second match', function (t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
@@ -109,7 +109,7 @@ test("Replace second match", function(t) {
   t.end()
 })
 
-test("Replace match with longer string", function(t) {
+test('Replace match with longer string', function (t) {
   let { editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
@@ -125,7 +125,7 @@ test("Replace match with longer string", function(t) {
   t.end()
 })
 
-test("Replace all one by one from third match", function(t) {
+test('Replace all one by one from third match', function (t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   editorSession.setSelection({ type: 'property', path: ['p3', 'content'], startOffset: 1, endOffset: 1 })
@@ -154,7 +154,7 @@ test("Replace all one by one from third match", function(t) {
   t.end()
 })
 
-test("Replace all matches", function(t) {
+test('Replace all matches', function (t) {
   let { doc, editorSession } = setupEditor(t, simple)
   let manager = new TestFindAndReplaceManager({editorSession})
   manager.startFind('123')
@@ -164,8 +164,8 @@ test("Replace all matches", function(t) {
   t.equal(manager._state.matches.length, 0, 'There should be no matches remaining')
   t.equal(manager._state.selectedMatch, undefined, 'selectedMatch should be undefined')
   let nodes = doc.getNodes()
-  for(let nodeId in nodes){
-    if(nodes[nodeId].isText()) {
+  for (let nodeId in nodes) {
+    if (nodes[nodeId].isText()) {
       let content = doc.get([nodeId, 'content'])
       t.equal(content, '0XXX456789', nodeId + ' content should be 0XXX456789')
     }

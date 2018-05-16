@@ -3,8 +3,7 @@ import isEqual from '../util/isEqual'
 import Selection from './Selection'
 
 class CustomSelection extends Selection {
-
-  constructor(customType, data, surfaceId) {
+  constructor (customType, data, surfaceId) {
     super()
 
     if (arguments.length === 1) {
@@ -14,59 +13,59 @@ class CustomSelection extends Selection {
       surfaceId = _data.surfaceId
     }
 
-    this.customType = customType;
-    this.data = data || {};
-    this.surfaceId = surfaceId;
+    this.customType = customType
+    this.data = data || {}
+    this.surfaceId = surfaceId
   }
 
-  isCustomSelection() {
-    return true;
+  isCustomSelection () {
+    return true
   }
 
-  getType() {
-    return 'custom';
+  getType () {
+    return 'custom'
   }
 
-  getCustomType() {
-    return this.customType;
+  getCustomType () {
+    return this.customType
   }
 
-  toJSON() {
+  toJSON () {
     return {
       type: 'custom',
       customType: this.customType,
       data: cloneDeep(this.data),
       surfaceId: this.surfaceId
-    };
+    }
   }
 
-  toString() {
+  toString () {
     /* istanbul ignore next */
     return [
       'CustomSelection(',
-      this.customType,', ',
+      this.customType, ', ',
       JSON.stringify(this.data),
-      ")"
-    ].join('');
+      ')'
+    ].join('')
   }
 
-  equals(other) {
+  equals (other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       other.isCustomSelection() &&
       isEqual(this.data, other.data)
-    );
+    )
   }
 
-  _clone() {
+  _clone () {
     return new CustomSelection(this)
   }
 }
 
 CustomSelection.prototype._isCustomSelection = true
 
-CustomSelection.fromJSON = function(json) {
-  return new CustomSelection(json);
+CustomSelection.fromJSON = function (json) {
+  return new CustomSelection(json)
 }
 
 export default CustomSelection

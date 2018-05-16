@@ -82,7 +82,7 @@ test('import all packages', (t) => {
     TextInputPackage,
     ToolbarPackage
   ].forEach((p) => {
-    t.doesNotThrow(()=>{
+    t.doesNotThrow(() => {
       let configurator = new Configurator()
       configurator.import(p)
     })

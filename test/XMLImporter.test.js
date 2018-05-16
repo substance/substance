@@ -7,20 +7,20 @@ const test = module('XMLImporter')
 
 const CONTENT = '0123456789'
 
-test("Importing paragraph", function(t) {
+test('Importing paragraph', function (t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">' + CONTENT + '</p>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
-    id: "p1",
-    type: "paragraph",
+    id: 'p1',
+    type: 'paragraph',
     content: CONTENT
   })
   t.end()
 })
 
-test("Importing paragraph with strong", function(t) {
+test('Importing paragraph with strong', function (t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">0123<strong id="s1">456</strong>789</p>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -32,35 +32,35 @@ test("Importing paragraph with strong", function(t) {
   t.end()
 })
 
-test("Importing h1", function(t) {
+test('Importing h1', function (t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h1 id="h1">' + CONTENT + '</h1>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
-    id: "h1",
-    type: "heading",
+    id: 'h1',
+    type: 'heading',
     level: 1,
     content: CONTENT
   })
   t.end()
 })
 
-test("Importing h2", function(t) {
+test('Importing h2', function (t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h2 id="h2">' + CONTENT + '</h2>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
   let node = importer.convertElement(el)
   checkValues(t, node, {
-    id: "h2",
-    type: "heading",
+    id: 'h2',
+    type: 'heading',
     level: 2,
     content: CONTENT
   })
   t.end()
 })
 
-test("Importing meta", function(t) {
+test('Importing meta', function (t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<meta><title>' + CONTENT + '</title></meta>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -74,7 +74,7 @@ test("Importing meta", function(t) {
 })
 
 // FIXME: broken since introduction of file nodes
-test("Importing image", function(t) {
+test('Importing image', function (t) {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<img id="img1" src="someimage.png"></img>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -87,7 +87,7 @@ test("Importing image", function(t) {
   t.end()
 })
 
-function _setupImporter(options = {}) {
+function _setupImporter (options = {}) {
   let config = getTestConfig()
   let importer = config.createImporter('xml', {}, options)
   return importer

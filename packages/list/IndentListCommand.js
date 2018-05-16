@@ -1,8 +1,7 @@
 import Command from '../../ui/Command'
 
 export default class IndentListCommand extends Command {
-
-  getCommandState(params) {
+  getCommandState (params) {
     let editorSession = this._getEditorSession(params)
     let doc = editorSession.getDocument()
     let sel = this._getSelection(params)
@@ -28,7 +27,7 @@ export default class IndentListCommand extends Command {
 
     let editorSession = params.editorSession
     let action = this.config.spec.action
-    switch(action) {
+    switch (action) {
       case 'indent': {
         editorSession.transaction((tx) => {
           tx.indent()

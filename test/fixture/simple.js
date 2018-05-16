@@ -9,7 +9,7 @@
     p4: '0123456789'
   ```
 */
-export default function simple(doc) {
+export default function simple (doc) {
   let body = doc.get('body')
   doc.create({
     type: 'paragraph',

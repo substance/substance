@@ -6,7 +6,7 @@ import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'heading',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Heading)
     config.addComponent(Heading.type, HeadingComponent)
     config.addConverter('html', HeadingHTMLConverter)

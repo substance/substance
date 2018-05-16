@@ -6,7 +6,7 @@ const ParagraphComponent = ParagraphPackage.ParagraphComponent
 const HeadingComponent = HeadingPackage.HeadingComponent
 const InlineWrapperComponent = InlineWrapperPackage.InlineWrapperComponent
 
-export default function createTestComponentRegistry() {
+export default function createTestComponentRegistry () {
   var componentRegistry = new Registry()
   componentRegistry.add('paragraph', ParagraphComponent)
   componentRegistry.add('heading', HeadingComponent)

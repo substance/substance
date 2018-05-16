@@ -5,7 +5,7 @@ import SuperscriptHTMLConverter from './SuperscriptHTMLConverter'
 
 export default {
   name: 'superscript',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Superscript)
     config.addConverter('html', SuperscriptHTMLConverter)
     config.addConverter('xml', SuperscriptHTMLConverter)

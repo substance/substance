@@ -28,25 +28,23 @@ import AnnotationMixin from './AnnotationMixin'
  */
 
 class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
-
-  setHighlighted(highlighted, scope) {
+  setHighlighted (highlighted, scope) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted
       this.highlightedScope = scope
       this.emit('highlighted', highlighted, scope)
-      forEach(this.fragments, function(frag) {
+      forEach(this.fragments, function (frag) {
         frag.emit('highlighted', highlighted, scope)
       })
     }
   }
-
 }
 
 ContainerAnnotation.schema = {
-  type: "container-annotation",
-  containerId: "string",
-  start: "coordinate",
-  end: "coordinate"
+  type: 'container-annotation',
+  containerId: 'string',
+  start: 'coordinate',
+  end: 'coordinate'
 }
 
 ContainerAnnotation.prototype._isAnnotation = true

@@ -2,14 +2,13 @@ import isString from '../util/isString'
 import isNumber from '../util/isNumber'
 import Conflict from './Conflict'
 
-const INSERT = "insert"
-const DELETE = "delete"
+const INSERT = 'insert'
+const DELETE = 'delete'
 
 class TextOperation {
-
-  constructor(data) {
+  constructor (data) {
     if (!data || data.type === undefined || data.pos === undefined || data.str === undefined) {
-      throw new Error("Illegal argument: insufficient data.")
+      throw new Error('Illegal argument: insufficient data.')
     }
     // 'insert' or 'delete'
     this.type = data.type
@@ -18,32 +17,31 @@ class TextOperation {
     // the string to delete or insert
     this.str = data.str
     // sanity checks
-    if(!this.isInsert() && !this.isDelete()) {
-      throw new Error("Illegal type.")
+    if (!this.isInsert() && !this.isDelete()) {
+      throw new Error('Illegal type.')
     }
     if (!isString(this.str)) {
-      throw new Error("Illegal argument: expecting string.")
+      throw new Error('Illegal argument: expecting string.')
     }
     if (!isNumber(this.pos) || this.pos < 0) {
-      throw new Error("Illegal argument: expecting positive number as pos.")
+      throw new Error('Illegal argument: expecting positive number as pos.')
     }
   }
 
-  apply(str) {
+  apply (str) {
     if (this.isEmpty()) return str
     if (this.type === INSERT) {
       if (str.length < this.pos) {
-        throw new Error("Provided string is too short.")
+        throw new Error('Provided string is too short.')
       }
       if (str.splice) {
         return str.splice(this.pos, 0, this.str)
       } else {
         return str.slice(0, this.pos).concat(this.str).concat(str.slice(this.pos))
       }
-    }
-    else /* if (this.type === DELETE) */ {
+    } else /* if (this.type === DELETE) */ {
       if (str.length < this.pos + this.str.length) {
-        throw new Error("Provided string is too short.")
+        throw new Error('Provided string is too short.')
       }
       if (str.splice) {
         return str.splice(this.pos, this.str.length)
@@ -53,27 +51,27 @@ class TextOperation {
     }
   }
 
-  clone() {
+  clone () {
     return new TextOperation(this)
   }
 
-  isNOP() {
-    return this.type === "NOP" || this.str.length === 0
+  isNOP () {
+    return this.type === 'NOP' || this.str.length === 0
   }
 
-  isInsert() {
+  isInsert () {
     return this.type === INSERT
   }
 
-  isDelete() {
+  isDelete () {
     return this.type === DELETE
   }
 
-  getLength() {
+  getLength () {
     return this.str.length
   }
 
-  invert() {
+  invert () {
     var data = {
       type: this.isInsert() ? DELETE : INSERT,
       pos: this.pos,
@@ -82,15 +80,15 @@ class TextOperation {
     return new TextOperation(data)
   }
 
-  hasConflict(other) {
+  hasConflict (other) {
     return _hasConflict(this, other)
   }
 
-  isEmpty() {
+  isEmpty () {
     return this.str.length === 0
   }
 
-  toJSON() {
+  toJSON () {
     return {
       type: this.type,
       pos: this.pos,
@@ -98,15 +96,15 @@ class TextOperation {
     }
   }
 
-  toString() {
-    return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.pos, ",'", this.str, "')"].join('')
+  toString () {
+    return ['(', (this.isInsert() ? INSERT : DELETE), ',', this.pos, ",'", this.str, "')"].join('')
   }
 }
 
 TextOperation.prototype._isOperation = true
 TextOperation.prototype._isTextOperation = true
 
-function _hasConflict(a, b) {
+function _hasConflict (a, b) {
   // Insert vs Insert:
   //
   // Insertions are conflicting iff their insert position is the same.
@@ -133,14 +131,12 @@ function _hasConflict(a, b) {
 // Transforms two Insertions
 // --------
 
-function transform_insert_insert(a, b) {
+function transformInsertInsert (a, b) {
   if (a.pos === b.pos) {
     b.pos += a.str.length
-  }
-  else if (a.pos < b.pos) {
+  } else if (a.pos < b.pos) {
     b.pos += a.str.length
-  }
-  else {
+  } else {
     a.pos += b.str.length
   }
 }
@@ -149,13 +145,13 @@ function transform_insert_insert(a, b) {
 // --------
 //
 
-function transform_delete_delete(a, b, first) {
+function transformDeleteDelete (a, b, first) {
   // reduce to a normalized case
   if (a.pos > b.pos) {
-    return transform_delete_delete(b, a, !first)
+    return transformDeleteDelete(b, a, !first)
   }
   if (a.pos === b.pos && a.str.length > b.str.length) {
-    return transform_delete_delete(b, a, !first)
+    return transformDeleteDelete(b, a, !first)
   }
   // take out overlapping parts
   if (b.pos < a.pos + a.str.length) {
@@ -174,32 +170,30 @@ function transform_delete_delete(a, b, first) {
 // --------
 //
 
-function transform_insert_delete(a, b) {
+function transformInsertDelete (a, b) {
   if (a.type === DELETE) {
-    return transform_insert_delete(b, a)
+    return transformInsertDelete(b, a)
   }
   // we can assume, that a is an insertion and b is a deletion
   // a is before b
   if (a.pos <= b.pos) {
     b.pos += a.str.length
-  }
   // a is after b
-  else if (a.pos >= b.pos + b.str.length) {
+  } else if (a.pos >= b.pos + b.str.length) {
     a.pos -= b.str.length
-  }
   // Note: this is a conflict case the user should be noticed about
   // If applied still, the deletion takes precedence
   // a.pos > b.pos && <= b.pos + b.length
-  else {
+  } else {
     var s = a.pos - b.pos
     b.str = b.str.slice(0, s) + a.str + b.str.slice(s)
-    a.str = ""
+    a.str = ''
   }
 }
 
-function transform(a, b, options) {
+function transform (a, b, options) {
   options = options || {}
-  if (options["no-conflict"] && _hasConflict(a, b)) {
+  if (options['no-conflict'] && _hasConflict(a, b)) {
     throw new Conflict(a, b)
   }
   if (!options.inplace) {
@@ -207,35 +201,33 @@ function transform(a, b, options) {
     b = b.clone()
   }
   if (a.type === INSERT && b.type === INSERT) {
-    transform_insert_insert(a, b)
-  }
-  else if (a.type === DELETE && b.type === DELETE) {
-    transform_delete_delete(a, b, true)
-  }
-  else {
-    transform_insert_delete(a,b)
+    transformInsertInsert(a, b)
+  } else if (a.type === DELETE && b.type === DELETE) {
+    transformDeleteDelete(a, b, true)
+  } else {
+    transformInsertDelete(a, b)
   }
   return [a, b]
 }
 
-TextOperation.transform = function() {
+TextOperation.transform = function () {
   return transform.apply(null, arguments)
 }
 
 /* Factories */
 
-TextOperation.Insert = function(pos, str) {
+TextOperation.Insert = function (pos, str) {
   return new TextOperation({ type: INSERT, pos: pos, str: str })
 }
 
-TextOperation.Delete = function(pos, str) {
+TextOperation.Delete = function (pos, str) {
   return new TextOperation({ type: DELETE, pos: pos, str: str })
 }
 
 TextOperation.INSERT = INSERT
 TextOperation.DELETE = DELETE
 
-TextOperation.fromJSON = function(data) {
+TextOperation.fromJSON = function (data) {
   return new TextOperation(data)
 }
 

@@ -1,7 +1,7 @@
 import { cloneDeep, ObjectOperation } from 'substance'
 
 // NOTE: this is essentially a copy of ../../collab/computeSnapshot
-export default function computeSnapshot(jsonDoc, changeset) {
+export default function computeSnapshot (jsonDoc, changeset) {
   jsonDoc = cloneDeep(jsonDoc)
   let nodes = jsonDoc.nodes
   changeset.forEach((change) => {

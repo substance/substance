@@ -12,15 +12,14 @@ if (platform.inBrowser) {
   XMLExporterTests('memory')
 }
 
-function XMLExporterTests(memory) {
-
-  const test = module('XMLExporter' + ( memory ? ' [memory]' : ''), {
-    before: function(t) {
+function XMLExporterTests (memory) {
+  const test = module('XMLExporter' + (memory ? ' [memory]' : ''), {
+    before: function (t) {
       t.elementFactory = memory ? MemoryDOMElement.createDocument('xml') : DefaultDOMElement.createDocument('xml')
     }
   })
 
-  test("Exporting paragraph", function(t) {
+  test('Exporting paragraph', function (t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     let el = exporter.convertNode(p1)
@@ -30,7 +29,7 @@ function XMLExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting paragraph with strong", function(t) {
+  test('Exporting paragraph with strong', function (t) {
     let { doc, exporter } = setup(t)
     let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     doc.create({
@@ -51,7 +50,7 @@ function XMLExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting h1", function(t) {
+  test('Exporting h1', function (t) {
     let { doc, exporter } = setup(t)
     let h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT })
     let el = exporter.convertNode(h1)
@@ -61,7 +60,7 @@ function XMLExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting h2", function(t) {
+  test('Exporting h2', function (t) {
     let { doc, exporter } = setup(t)
     let h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT })
     let el = exporter.convertNode(h2)
@@ -71,7 +70,7 @@ function XMLExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting simple document", function(t) {
+  test('Exporting simple document', function (t) {
     let { doc, exporter } = setup(t, simple)
     let rootEl = exporter.exportDocument(doc)
     let actual = rootEl.serialize()
@@ -87,11 +86,11 @@ function XMLExporterTests(memory) {
     t.end()
   })
 
-  test("Exporting meta", function(t) {
+  test('Exporting meta', function (t) {
     let { doc, exporter } = setup(t)
     let meta = doc.create({
-      type: "meta",
-      id: "meta",
+      type: 'meta',
+      id: 'meta',
       title: 'Untitled'
     })
     let el = exporter.convertNode(meta)
@@ -113,7 +112,7 @@ function XMLExporterTests(memory) {
   //   t.end()
   // })
 
-  function setup(t, fixture) {
+  function setup (t, fixture) {
     let config = getTestConfig()
     let exporter = config.createExporter('xml', {}, { elementFactory: t.elementFactory })
     let doc = createTestArticle(fixture)

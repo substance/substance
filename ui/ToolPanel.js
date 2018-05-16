@@ -1,12 +1,11 @@
 import Component from './Component'
 
 export default class ToolPanel extends Component {
-
-  didMount() {
+  didMount () {
     this.context.editorSession.onRender(this._onCommandStatesChanged, this)
   }
 
-  dispose() {
+  dispose () {
     this.context.editorSession.off(this)
   }
 
@@ -19,7 +18,7 @@ export default class ToolPanel extends Component {
 
     Override to customize.
   */
-  getEntryTypeComponents() {
+  getEntryTypeComponents () {
     return {
       'tool-group': this.getComponent('tool-group'),
       'tool-dropdown': this.getComponent('tool-dropdown'),
@@ -28,7 +27,7 @@ export default class ToolPanel extends Component {
     }
   }
 
-  renderEntries($$) {
+  renderEntries ($$) {
     return this.props.toolPanel.map(entry => {
       let entryTypeComponents = this.getEntryTypeComponents()
       let ComponentClass = entryTypeComponents[entry.type]
@@ -40,7 +39,7 @@ export default class ToolPanel extends Component {
     })
   }
 
-  hasEnabledTools() {
+  hasEnabledTools () {
     let entriesContainer = this.refs.entriesContainer
     let entries = entriesContainer.childNodes
     let hasEnabledTools = false
@@ -52,29 +51,28 @@ export default class ToolPanel extends Component {
     return hasEnabledTools
   }
 
-  getActiveToolGroupNames() {
+  getActiveToolGroupNames () {
     throw new Error('Abstract method')
   }
 
-  showDisabled() {
+  showDisabled () {
     return false
   }
 
   /*
     Override if you just want to use a different style
   */
-  getToolStyle() {
+  getToolStyle () {
     throw new Error('Abstract method')
   }
 
-  getTheme() {
+  getTheme () {
     return this.props.theme || 'dark'
   }
 
-  _onCommandStatesChanged(editorSession) {
+  _onCommandStatesChanged (editorSession) {
     if (editorSession.hasChanged('commandStates')) {
       this.rerender()
     }
   }
-
 }

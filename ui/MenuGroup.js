@@ -16,13 +16,12 @@ import MenuItem from './MenuItem'
   ```
 */
 export default class MenuGroup extends ToolGroup {
-
-  _getToolClass(commandName) {
+  _getToolClass (commandName) {
     let tools = this.context.tools
     return tools[commandName] || MenuItem
   }
 
-  _getClassNames() {
+  _getClassNames () {
     return 'sc-menu-group'
   }
 }

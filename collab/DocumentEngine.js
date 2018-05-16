@@ -5,7 +5,7 @@ import SnapshotEngine from './SnapshotEngine'
   DocumentEngine
 */
 class DocumentEngine extends EventEmitter {
-  constructor(config) {
+  constructor (config) {
     super()
     this.changeStore = config.changeStore
     this.snapshotStore = config.snapshotStore
@@ -23,7 +23,7 @@ class DocumentEngine extends EventEmitter {
 
     A valid document must have at least one valid change
   */
-  createDocument(documentId, initialChange, cb) {
+  createDocument (documentId, initialChange, cb) {
     this.addChange(documentId, initialChange, cb)
   }
 
@@ -31,7 +31,7 @@ class DocumentEngine extends EventEmitter {
     Get a document snapshot for a given version. If no version
     is provivded, the latest version is returned
   */
-  getDocument(documentId, version, cb) {
+  getDocument (documentId, version, cb) {
     if (typeof version === 'function') {
       cb = version
       version = undefined
@@ -52,7 +52,7 @@ class DocumentEngine extends EventEmitter {
   /*
     Delete document by documentId
   */
-  deleteDocument(documentId, cb) {
+  deleteDocument (documentId, cb) {
     this.changeStore.deleteChanges(documentId, (err) => {
       if (err) {
         return cb(new Error('Deleting changes failed'))
@@ -63,8 +63,9 @@ class DocumentEngine extends EventEmitter {
   /*
     Check if a given document exists
   */
-  documentExists(documentId, cb) {
+  documentExists (documentId, cb) {
     this.getVersion(documentId, (err, version) => {
+      if (err) return cb(err)
       if (version >= 0) {
         cb(null, true)
       } else {
@@ -76,14 +77,14 @@ class DocumentEngine extends EventEmitter {
   /*
     Get changes based on documentId, sinceVersion
   */
-  getChanges(documentId, sinceVersion, toVersion, cb) {
+  getChanges (documentId, sinceVersion, toVersion, cb) {
     this.changeStore.getChanges(documentId, sinceVersion, toVersion, cb)
   }
 
   /*
     Get version for given documentId
   */
-  getVersion(documentId, cb) {
+  getVersion (documentId, cb) {
     this.changeStore.getVersion(documentId, cb)
   }
 
@@ -92,7 +93,7 @@ class DocumentEngine extends EventEmitter {
     It may be a good strategy to only create a snaphot for every 10th version.
     However for now we will just snapshot each change to keep things simple.
   */
-  requestSnapshot(documentId, version, cb) {
+  requestSnapshot (documentId, version, cb) {
     if (version % this.snapshotFrequency === 0) {
       this.snapshotEngine.createSnapshot(documentId, version, cb)
     } else {
@@ -105,7 +106,7 @@ class DocumentEngine extends EventEmitter {
 
     Snapshot creation is requested on each change to be stored.
   */
-  addChange(documentId, change, cb) {
+  addChange (documentId, change, cb) {
     this.changeStore.addChange(documentId, change, (err, newVersion) => {
       if (err) return cb(err)
 

@@ -25,8 +25,7 @@ import Toolbar from '../toolbar/Toolbar'
   ```
 */
 class ProseEditor extends AbstractEditor {
-
-  render($$) {
+  render ($$) {
     let SplitPane = this.componentRegistry.get('split-pane')
     let el = $$('div').addClass('sc-prose-editor')
     let toolbar = this._renderToolbar($$)
@@ -66,7 +65,7 @@ class ProseEditor extends AbstractEditor {
     return el
   }
 
-  _renderToolbar($$) {
+  _renderToolbar ($$) {
     let configurator = this.getConfigurator()
     return $$('div').addClass('se-toolbar-wrapper').append(
       $$(Toolbar, {
@@ -75,7 +74,7 @@ class ProseEditor extends AbstractEditor {
     )
   }
 
-  _renderEditor($$) {
+  _renderEditor ($$) {
     let configurator = this.getConfigurator()
     return $$(ContainerEditor, {
       disabled: this.props.disabled,

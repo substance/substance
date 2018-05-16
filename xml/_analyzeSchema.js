@@ -5,7 +5,7 @@ import { DFAExpr, InterleaveExpr } from './RegularLanguage'
 
 const { TEXT } = DFA
 
-export default function analyze(elementSchemas) {
+export default function analyze (elementSchemas) {
   forEach(elementSchemas, (elementSchema) => {
     Object.assign(elementSchema, {
       children: {},
@@ -25,7 +25,7 @@ export default function analyze(elementSchemas) {
  element is used as a text node or an element node,
  or both at the same time.
 */
-function _analyzeElementSchema(elementSchema, elementSchemas) {
+function _analyzeElementSchema (elementSchema, elementSchemas) {
   const expr = elementSchema.expr
   const name = elementSchema.name
   if (!expr) return

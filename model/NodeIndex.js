@@ -10,7 +10,6 @@ import forEach from '../util/forEach'
 
  */
 class NodeIndex {
-
   /*
     Check if a node should be indexed.
 
@@ -19,11 +18,11 @@ class NodeIndex {
     @param {Node}
     @returns {Boolean} true if the given node should be added to the index.
    */
-  select(node) { // eslint-disable-line no-unused-vars
+  select (node) { // eslint-disable-line no-unused-vars
     throw new Error('This method is abstract.')
   }
 
-  clear() {
+  clear () {
     throw new Error('This method is abstract')
   }
 
@@ -32,7 +31,7 @@ class NodeIndex {
 
     @param {Node} node
    */
-  create(node) { // eslint-disable-line no-unused-vars
+  create (node) { // eslint-disable-line no-unused-vars
     throw new Error('This method is abstract.')
   }
 
@@ -41,11 +40,11 @@ class NodeIndex {
 
     @param {model/data/Node} node
    */
-  delete(node) { // eslint-disable-line no-unused-vars
+  delete (node) { // eslint-disable-line no-unused-vars
     throw new Error('This method is abstract.')
   }
 
-  set(node, path, newValue, oldValue) {
+  set (node, path, newValue, oldValue) {
     this.update(node, path, newValue, oldValue)
   }
 
@@ -55,7 +54,7 @@ class NodeIndex {
     @private
     @param {Node} node
    */
-  update(node, path, newValue, oldValue) { // eslint-disable-line no-unused-vars
+  update (node, path, newValue, oldValue) { // eslint-disable-line no-unused-vars
     throw new Error('This method is abstract.')
   }
 
@@ -64,7 +63,7 @@ class NodeIndex {
 
     @private
    */
-  reset(data) {
+  reset (data) {
     this.clear()
     this._initialize(data)
   }
@@ -74,14 +73,14 @@ class NodeIndex {
 
     @return A cloned NodeIndex.
    */
-  clone() {
+  clone () {
     var NodeIndexClass = this.constructor
     var clone = new NodeIndexClass()
     return clone
   }
 
-  _initialize(data) {
-    forEach(data.getNodes(), function(node) {
+  _initialize (data) {
+    forEach(data.getNodes(), function (node) {
       if (this.select(node)) {
         this.create(node)
       }
@@ -95,9 +94,9 @@ class NodeIndex {
   @param {Object} prototype
   @returns {NodeIndex} A customized NodeIndex.
  */
-NodeIndex.create = function(prototype) {
+NodeIndex.create = function (prototype) {
   var index = Object.assign(new NodeIndex(), prototype)
-  index.clone = function() {
+  index.clone = function () {
     return NodeIndex.create(prototype)
   }
   return index
@@ -109,8 +108,8 @@ NodeIndex.create = function(prototype) {
   @param {String} type
   @returns {function}
  */
-NodeIndex.filterByType = function(type) {
-  return function(node) {
+NodeIndex.filterByType = function (type) {
+  return function (node) {
     return node.isInstanceOf(type)
   }
 }

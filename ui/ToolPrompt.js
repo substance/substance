@@ -14,8 +14,7 @@ import ToolGroup from './ToolGroup'
   ```
 */
 export default class ToolPrompt extends ToolGroup {
-
-  _getClassNames() {
+  _getClassNames () {
     return 'sc-tool-prompt'
   }
 }

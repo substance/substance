@@ -21,22 +21,21 @@ import Component from './Component'
 */
 
 class AnnotationComponent extends Component {
-
   // TODO: we should avoid to have a didMount hook on an abstract base class
-  didMount() {
+  didMount () {
     let node = this.props.node
     node.on('highlighted', this.onHighlightedChanged, this)
   }
 
   // TODO: we should avoid to have a didMount hook on an abstract base class
-  dispose() {
+  dispose () {
     let node = this.props.node
     node.off(this)
   }
 
-  render($$) {
+  render ($$) {
     let el = $$(this.getTagName())
-      .attr("data-id", this.props.node.id)
+      .attr('data-id', this.props.node.id)
       .addClass(this.getClassNames())
     if (this.props.node.highlighted) {
       el.addClass('sm-highlighted')
@@ -45,11 +44,11 @@ class AnnotationComponent extends Component {
     return el
   }
 
-  getClassNames() {
-    return 'sc-'+this.props.node.type
+  getClassNames () {
+    return 'sc-' + this.props.node.type
   }
 
-  onHighlightedChanged() {
+  onHighlightedChanged () {
     if (this.props.node.highlighted) {
       this.el.addClass('sm-highlighted')
     } else {
@@ -57,10 +56,9 @@ class AnnotationComponent extends Component {
     }
   }
 
-  getTagName() {
+  getTagName () {
     return 'span'
   }
-
 }
 
 export default AnnotationComponent

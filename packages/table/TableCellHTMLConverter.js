@@ -3,7 +3,7 @@ export default {
   type: 'table-cell',
   tagName: 'td',
 
-  import: function(el, node, converter) {
+  import: function (el, node, converter) {
     node.content = converter.annotatedText(el, [node.id, 'content'])
     let colspan = el.attr('colspan')
     let rowspan = el.attr('rowspan')
@@ -15,7 +15,7 @@ export default {
     }
   },
 
-  export: function(node, el, converter) {
+  export: function (node, el, converter) {
     el.append(converter.annotatedText([node.id, 'content']))
     if (node.rowspan > 0) {
       el.attr('rowspan', node.rowspan)

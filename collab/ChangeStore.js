@@ -3,7 +3,7 @@
   No integrity checks are made, as this is the task of DocumentEngine
 */
 class ChangeStore {
-  constructor(seed) {
+  constructor (seed) {
     this._changes = seed || {}
   }
 
@@ -14,7 +14,7 @@ class ChangeStore {
     @param {Number} sinceVersion since which change (optional)
     @param {Number} toVersion up to and including version (optional)
   */
-  getChanges(documentId, sinceVersion, toVersion, cb) {
+  getChanges (documentId, sinceVersion, toVersion, cb) {
     if (typeof sinceVersion === 'function') {
       cb = sinceVersion
       sinceVersion = 0
@@ -34,7 +34,7 @@ class ChangeStore {
   /*
     Add a change object to the database
   */
-  addChange(documentId, change, cb) {
+  addChange (documentId, change, cb) {
     if (!documentId || !change) {
       throw new Error('Invalid arguments')
     }
@@ -46,7 +46,7 @@ class ChangeStore {
   /*
     Delete changes for a given documentId
   */
-  deleteChanges(documentId, cb) {
+  deleteChanges (documentId, cb) {
     var deletedChanges = this._deleteChanges(documentId)
     cb(null, deletedChanges.length)
   }
@@ -54,29 +54,29 @@ class ChangeStore {
   /*
     Gets the version number for a document
   */
-  getVersion(id, cb) {
+  getVersion (id, cb) {
     cb(null, this._getVersion(id))
   }
 
   // Handy synchronous helpers
   // -------------------------
 
-  _deleteChanges(documentId) {
+  _deleteChanges (documentId) {
     var changes = this._getChanges(documentId)
     delete this._changes[documentId]
     return changes
   }
 
-  _getVersion(documentId) {
+  _getVersion (documentId) {
     var changes = this._changes[documentId]
     return changes ? changes.length : 0
   }
 
-  _getChanges(documentId) {
+  _getChanges (documentId) {
     return this._changes[documentId] || []
   }
 
-  _addChange(documentId, change) {
+  _addChange (documentId, change) {
     if (!this._changes[documentId]) {
       this._changes[documentId] = []
     }

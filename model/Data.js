@@ -10,12 +10,11 @@ import EventEmitter from '../util/EventEmitter'
   It forms the underlying implementation for {@link Document}.
  */
 class Data extends EventEmitter {
-
   /**
     @param {Schema} schema
     @param {Object} [options]
   */
-  constructor(schema, nodeFactory) {
+  constructor (schema, nodeFactory) {
     super()
 
     /* istanbul ignore start */
@@ -43,7 +42,7 @@ class Data extends EventEmitter {
 
     @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
-  contains(id) {
+  contains (id) {
     return Boolean(this.nodes[id])
   }
 
@@ -53,21 +52,21 @@ class Data extends EventEmitter {
     @param {String|String[]} path node id or path to property.
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
-  get(path, strict) {
+  get (path, strict) {
     let result = this._get(path)
     if (strict && result === undefined) {
       if (isString(path)) {
-        throw new Error("Could not find node with id '"+path+"'.")
+        throw new Error("Could not find node with id '" + path + "'.")
       } else if (!this.contains(path[0])) {
-        throw new Error("Could not find node with id '"+path[0]+"'.")
+        throw new Error("Could not find node with id '" + path[0] + "'.")
       } else {
-        throw new Error("Property for path '"+path+"' us undefined.")
+        throw new Error("Property for path '" + path + "' us undefined.")
       }
     }
     return result
   }
 
-  _get(path) {
+  _get (path) {
     if (!path) return undefined
     let result
     if (isString(path)) {
@@ -76,12 +75,12 @@ class Data extends EventEmitter {
       result = this.nodes[path[0]]
     } else if (path.length > 1) {
       let context = this.nodes[path[0]]
-      for (let i = 1; i < path.length-1; i++) {
+      for (let i = 1; i < path.length - 1; i++) {
         if (!context) return undefined
         context = context[path[i]]
       }
       if (!context) return undefined
-      result = context[path[path.length-1]]
+      result = context[path[path.length - 1]]
     }
     return result
   }
@@ -91,7 +90,7 @@ class Data extends EventEmitter {
 
     @return The internal node storage.
    */
-  getNodes() {
+  getNodes () {
     return this.nodes
   }
 
@@ -100,16 +99,16 @@ class Data extends EventEmitter {
 
     @return {Node} The created node.
    */
-  create(nodeData) {
+  create (nodeData) {
     var node = this.nodeFactory.create(nodeData.type, nodeData)
     if (!node) {
       throw new Error('Illegal argument: could not create node for data:', nodeData)
     }
     if (this.contains(node.id)) {
-      throw new Error("Node already exists: " + node.id)
+      throw new Error('Node already exists: ' + node.id)
     }
     if (!node.id || !node.type) {
-      throw new Error("Node id and type are mandatory.")
+      throw new Error('Node id and type are mandatory.')
     }
     this.nodes[node.id] = node
 
@@ -133,7 +132,7 @@ class Data extends EventEmitter {
     @param {String} nodeId
     @returns {Node} The deleted node.
    */
-  delete(nodeId) {
+  delete (nodeId) {
     var node = this.nodes[nodeId]
     if (!node) return
     node.dispose()
@@ -141,7 +140,7 @@ class Data extends EventEmitter {
 
     var change = {
       type: 'delete',
-      node: node,
+      node: node
     }
 
     if (this.__QUEUE_INDEXING__) {
@@ -160,7 +159,7 @@ class Data extends EventEmitter {
     @param {Object} newValue
     @returns {Node} The deleted node.
    */
-  set(path, newValue) {
+  set (path, newValue) {
     let node = this.get(path[0])
     let oldValue = this._set(path, newValue)
     var change = {
@@ -178,7 +177,7 @@ class Data extends EventEmitter {
     return oldValue
   }
 
-  _set(path, newValue) {
+  _set (path, newValue) {
     let oldValue = _setValue(this.nodes, path, newValue)
     return oldValue
   }
@@ -190,7 +189,7 @@ class Data extends EventEmitter {
     @param {Object} diff
     @returns {any} The value before applying the update.
   */
-  update(path, diff) {
+  update (path, diff) {
     var realPath = this.getRealPath(path)
     if (!realPath) {
       console.error('Could not resolve path', path)
@@ -206,7 +205,7 @@ class Data extends EventEmitter {
       if (isString(oldValue)) {
         switch (diff.type) {
           case 'delete': {
-            newValue = oldValue.split('').splice(diff.start, diff.end-diff.start).join('')
+            newValue = oldValue.split('').splice(diff.start, diff.end - diff.start).join('')
             break
           }
           case 'insert': {
@@ -266,7 +265,7 @@ class Data extends EventEmitter {
   }
 
   // normalize to support legacy formats
-  _normalizeDiff(value, diff) {
+  _normalizeDiff (value, diff) {
     if (isString(value)) {
       // legacy
       if (diff['delete']) {
@@ -319,9 +318,9 @@ class Data extends EventEmitter {
     @internal
     @deprecated
    */
-  toJSON() {
+  toJSON () {
     let nodes = {}
-    forEach(this.nodes, (node)=>{
+    forEach(this.nodes, (node) => {
       nodes[node.id] = node.toJSON()
     })
     return {
@@ -330,7 +329,7 @@ class Data extends EventEmitter {
     }
   }
 
-  reset() {
+  reset () {
     this.clear()
   }
 
@@ -339,7 +338,7 @@ class Data extends EventEmitter {
 
     @internal
    */
-  clear() {
+  clear () {
     this.nodes = {}
     forEach(this.indexes, index => index.clear())
   }
@@ -350,7 +349,7 @@ class Data extends EventEmitter {
     @param {String} name
     @param {NodeIndex} index
    */
-  addIndex(name, index) {
+  addIndex (name, index) {
     if (this.indexes[name]) {
       console.error('Index with name %s already exists.', name)
     }
@@ -365,7 +364,7 @@ class Data extends EventEmitter {
     @param {String} name
     @returns {NodeIndex} The node index.
    */
-  getIndex(name) {
+  getIndex (name) {
     return this.indexes[name]
   }
 
@@ -374,9 +373,9 @@ class Data extends EventEmitter {
 
     @param {Object} change
    */
-  _updateIndexes(change) {
+  _updateIndexes (change) {
     if (!change || this.__QUEUE_INDEXING__) return
-    forEach(this.indexes, function(index) {
+    forEach(this.indexes, function (index) {
       if (index.select(change.node)) {
         if (!index[change.type]) {
           console.error('Contract: every NodeIndex must implement ' + change.type)
@@ -391,7 +390,7 @@ class Data extends EventEmitter {
 
     @private
   */
-  _stopIndexing() {
+  _stopIndexing () {
     this.__QUEUE_INDEXING__ = true
   }
 
@@ -400,25 +399,24 @@ class Data extends EventEmitter {
 
     @private
   */
-  _startIndexing() {
+  _startIndexing () {
     this.__QUEUE_INDEXING__ = false
-    while(this.queue.length >0) {
+    while (this.queue.length > 0) {
       var change = this.queue.shift()
       this._updateIndexes(change)
     }
   }
-
 }
 
-function _setValue(root, path, newValue) {
+function _setValue (root, path, newValue) {
   let ctx = root
   let L = path.length
-  for (let i = 0; i < L-1; i++) {
+  for (let i = 0; i < L - 1; i++) {
     ctx = ctx[path[i]]
     if (!ctx) throw new Error('Can not set value.')
   }
-  let oldValue = ctx[path[L-1]]
-  ctx[path[L-1]] = newValue
+  let oldValue = ctx[path[L - 1]]
+  ctx[path[L - 1]] = newValue
   return oldValue
 }
 

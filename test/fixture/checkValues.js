@@ -1,6 +1,6 @@
 import { forEach, isPlainObject, isArray, isObject } from 'substance'
 
-export default function checkValues(t, actual, expected) {
+export default function checkValues (t, actual, expected) {
   if (!isObject(actual)) {
     t.fail('Provided object is invalid: actual=' + String(actual))
     return

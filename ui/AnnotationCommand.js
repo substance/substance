@@ -24,8 +24,7 @@ import Command from './Command'
 */
 
 class AnnotationCommand extends Command {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     if (!this.config.nodeType) {
@@ -38,11 +37,11 @@ class AnnotationCommand extends Command {
 
     @returns {String} The annotation's type.
    */
-  getAnnotationType() {
+  getAnnotationType () {
     return this.config.nodeType
   }
 
-  getType() {
+  getType () {
     return this.getAnnotationType()
   }
 
@@ -51,7 +50,7 @@ class AnnotationCommand extends Command {
 
     @returns {Object} The annotation's data.
    */
-  getAnnotationData() {
+  getAnnotationData () {
     return {}
   }
 
@@ -63,12 +62,12 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not command could be executed.
    */
-  isDisabled(sel, params) {
+  isDisabled (sel, params) {
     let selectionState = params.selectionState
     let isBlurred = params.editorSession.isBlurred()
     // TODO: Container selections should be valid if the annotation type
     // is a container annotation. Currently we only allow property selections.
-    if (isBlurred || !sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection()||
+    if (isBlurred || !sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection() ||
         sel.isNodeSelection() || sel.isContainerSelection() || selectionState.isInlineNodeSelection()) {
       return true
     }
@@ -79,7 +78,7 @@ class AnnotationCommand extends Command {
     When cursor is not collapsed tool may be displayed in context (e.g. in an
     overlay)
   */
-  showInContext(sel/*, params*/) {
+  showInContext (sel/*, params */) {
     return !sel.isCollapsed()
   }
 
@@ -93,7 +92,7 @@ class AnnotationCommand extends Command {
     @returns {Boolean} Whether or not annotation could be created.
    */
   // When there's no existing annotation overlapping, we create a new one.
-  canCreate(annos, sel) {
+  canCreate (annos, sel) {
     return (annos.length === 0 && !sel.isCollapsed())
   }
 
@@ -106,7 +105,7 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotations could be fused.
    */
-  canFuse(annos, sel) {
+  canFuse (annos, sel) {
     // When more than one annotation overlaps with the current selection
     return (annos.length >= 2 && !sel.isCollapsed())
   }
@@ -120,7 +119,7 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be deleted.
    */
-  canDelete(annos, sel) {
+  canDelete (annos, sel) {
     // When the cursor or selection is inside an existing annotation
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
@@ -137,7 +136,7 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be expanded.
    */
-  canExpand(annos, sel) {
+  canExpand (annos, sel) {
     // When there's some overlap with only a single annotation we do an expand
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
@@ -154,7 +153,7 @@ class AnnotationCommand extends Command {
 
     @returns {Boolean} Whether or not annotation could be truncated.
    */
-  canTruncate(annos, sel) {
+  canTruncate (annos, sel) {
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
 
@@ -210,14 +209,14 @@ class AnnotationCommand extends Command {
     @returns {Object} info object with execution details.
   */
   // Execute command and trigger transformations
-  execute(params) {
+  execute (params) {
     // Disabled the next line as I believe it is
     // always passed via params already
     // params.selection = this._getSelection(params)
     let commandState = params.commandState
 
     if (commandState.disabled) return false
-    switch(commandState.mode) {
+    switch (commandState.mode) {
       case 'create':
         return this.executeCreate(params)
       case 'fuse':
@@ -234,7 +233,7 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeCreate(params) {
+  executeCreate (params) {
     let annos = this._getAnnotationsForSelection(params)
     this._checkPrecondition(params, annos, this.canCreate)
     let editorSession = this._getEditorSession(params)
@@ -250,10 +249,10 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeFuse(params) {
-    let annos = this._getAnnotationsForSelection(params);
-    this._checkPrecondition(params, annos, this.canFuse);
-    this._applyTransform(params, function(tx) {
+  executeFuse (params) {
+    let annos = this._getAnnotationsForSelection(params)
+    this._checkPrecondition(params, annos, this.canFuse)
+    this._applyTransform(params, function (tx) {
       annotationHelpers.fuseAnnotation(tx, annos)
     })
     return {
@@ -262,11 +261,11 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeTruncate(params) {
+  executeTruncate (params) {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canTruncate)
-    this._applyTransform(params, function(tx) {
+    this._applyTransform(params, function (tx) {
       annotationHelpers.truncateAnnotation(tx, anno, params.selection)
     })
     return {
@@ -275,11 +274,11 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeExpand(params) {
+  executeExpand (params) {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canExpand)
-    this._applyTransform(params, function(tx) {
+    this._applyTransform(params, function (tx) {
       annotationHelpers.expandAnnotation(tx, anno, params.selection)
     })
     return {
@@ -288,11 +287,11 @@ class AnnotationCommand extends Command {
     }
   }
 
-  executeDelete(params) {
+  executeDelete (params) {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canDelete)
-    this._applyTransform(params, function(tx) {
+    this._applyTransform(params, function (tx) {
       return tx.delete(anno.id)
     })
     return {
@@ -301,18 +300,18 @@ class AnnotationCommand extends Command {
     }
   }
 
-  isAnnotationCommand() {
+  isAnnotationCommand () {
     return true
   }
 
-  _checkPrecondition(params, annos, checker) {
+  _checkPrecondition (params, annos, checker) {
     let sel = this._getSelection(params)
     if (!checker.call(this, annos, sel)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString())
     }
   }
 
-  _getAnnotationsForSelection(params) {
+  _getAnnotationsForSelection (params) {
     return params.selectionState.getAnnotationsForType(this.getAnnotationType())
   }
 
@@ -321,20 +320,19 @@ class AnnotationCommand extends Command {
 
     @returns {Object} transformed annotations.
    */
-  _applyTransform(params, transformFn) {
+  _applyTransform (params, transformFn) {
     let sel = this._getSelection(params)
     if (sel.isNull()) return
 
     let editorSession = this._getEditorSession(params)
     let result // to store transform result
     editorSession.setSelection(sel)
-    editorSession.transaction(function(tx) {
+    editorSession.transaction(function (tx) {
       let out = transformFn(tx, params)
       if (out) result = out.result
     })
     return result
   }
-
 }
 
 export default AnnotationCommand

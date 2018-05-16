@@ -2,7 +2,7 @@ import Grid from './Grid'
 
 export default {
   name: 'grid',
-  configure: function(config) {
+  configure: function (config) {
     config.addComponent('grid', Grid)
   },
   Grid

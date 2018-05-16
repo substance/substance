@@ -11,8 +11,7 @@ import Command from './Command'
   ```
 */
 class SwitchTextTypeCommand extends Command {
-
-  constructor(config) {
+  constructor (config) {
     super(config)
     if (!config.spec) {
       throw new Error("'config.spec' is mandatory")
@@ -22,11 +21,11 @@ class SwitchTextTypeCommand extends Command {
     }
   }
 
-  getType() {
+  getType () {
     return this.config.spec.type
   }
 
-  getCommandState(params) {
+  getCommandState (params) {
     let doc = params.editorSession.getDocument()
     let sel = params.selection
     let isBlurred = params.editorSession.isBlurred()
@@ -57,7 +56,7 @@ class SwitchTextTypeCommand extends Command {
   /**
     Perform a switchTextType transformation based on the current selection
   */
-  execute(params) {
+  execute (params) {
     let surface = params.surface
     let editorSession = params.editorSession
     if (!surface) {
@@ -69,10 +68,9 @@ class SwitchTextTypeCommand extends Command {
     })
   }
 
-  isSwitchTypeCommand() {
+  isSwitchTypeCommand () {
     return true
   }
-
 }
 
 export default SwitchTextTypeCommand

@@ -9,8 +9,7 @@ import ContainerMixin from './ContainerMixin'
   or spanning annotations so called ContainerAnnotations.
 */
 class Container extends ContainerMixin(DocumentNode) {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     // NOTE: we are caching positions as they are queried very often,
@@ -19,18 +18,17 @@ class Container extends ContainerMixin(DocumentNode) {
     this._enableCaching()
   }
 
-  dispose() {
+  dispose () {
     this.document.off(this)
   }
 
-  getContentPath() {
+  getContentPath () {
     return [this.id, 'nodes']
   }
 
-  getContent() {
+  getContent () {
     return this.nodes
   }
-
 }
 
 Container.prototype._isContainer = true

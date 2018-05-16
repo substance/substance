@@ -4,19 +4,18 @@ import isArray from '../util/isArray'
   Maintains links to the parent node, but only for children of ElementNodes.
 */
 class ParentNodeHook {
-
-  constructor(doc) {
+  constructor (doc) {
     this.doc = doc
     // parents by id of child nodes
     this.parents = {}
     doc.data.on('operation:applied', this._onOperationApplied, this)
   }
 
-  _onOperationApplied(op) {
+  _onOperationApplied (op) {
     const doc = this.doc
     const parents = this.parents
     let node = doc.get(op.path[0])
-    switch(op.type) {
+    switch (op.type) {
       case 'create': {
         if (node._childNodes) {
           _setParent(node, node._childNodes)
@@ -48,7 +47,7 @@ class ParentNodeHook {
         //
     }
 
-    function _setParent(parent, ids) {
+    function _setParent (parent, ids) {
       if (ids) {
         if (isArray(ids)) {
           ids.forEach(_set)
@@ -56,7 +55,7 @@ class ParentNodeHook {
           _set(ids)
         }
       }
-      function _set(id) {
+      function _set (id) {
         // Note: it can happen, e.g. during deserialization, that the child node
         // is created later than the parent node
         // so we store the parent for later
@@ -67,7 +66,7 @@ class ParentNodeHook {
         }
       }
     }
-    function _setRegisteredParent(child) {
+    function _setRegisteredParent (child) {
       let parent = parents[child.id]
       if (parent) {
         child.parentNode = parent
@@ -76,7 +75,7 @@ class ParentNodeHook {
   }
 }
 
-ParentNodeHook.register = function(doc) {
+ParentNodeHook.register = function (doc) {
   return new ParentNodeHook(doc)
 }
 

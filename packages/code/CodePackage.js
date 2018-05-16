@@ -5,8 +5,8 @@ import CodeHTMLConverter from './CodeHTMLConverter'
 
 export default {
   name: 'code',
-  configure: function(config) {
-    config.addNode(Code);
+  configure: function (config) {
+    config.addNode(Code)
     config.addConverter('html', CodeHTMLConverter)
     config.addConverter('xml', CodeHTMLConverter)
     config.addComponent('code', AnnotationComponent)

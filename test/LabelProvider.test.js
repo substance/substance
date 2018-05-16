@@ -60,7 +60,7 @@ test('switch language', (t) => {
   t.end()
 })
 
-function _simple() {
+function _simple () {
   let config = new Configurator()
   config.addLabel('fox', {
     en: 'Fox',
@@ -69,7 +69,7 @@ function _simple() {
   return config
 }
 
-function _items() {
+function _items () {
   let config = new Configurator()
   config.addLabel('n_items_found', {
     en: '${n} items found'
@@ -77,7 +77,7 @@ function _items() {
   return config
 }
 
-function _custom() {
+function _custom () {
   let config = new Configurator()
   config.setLabelProviderClass(CustomLabelProvider)
   config.addLabel('fox', {
@@ -87,7 +87,7 @@ function _custom() {
   return config
 }
 
-function _createEditorSession(configurator) {
+function _createEditorSession (configurator) {
   let schema = new DocumentSchema({ name: 'stub', version: '1', DocumentClass: Document })
   let doc = new Document(schema)
   let editorSession = new EditorSession(doc, { configurator })
@@ -95,7 +95,7 @@ function _createEditorSession(configurator) {
 }
 
 class Editor1 extends AbstractEditor {
-  render($$) {
+  render ($$) {
     return $$('div').append(
       $$('div').addClass('fox').text(this.getLabel('fox')).ref('label')
     )
@@ -103,32 +103,30 @@ class Editor1 extends AbstractEditor {
 }
 
 class Editor2 extends AbstractEditor {
-  render($$) {
+  render ($$) {
     return $$('div').append(
       $$('div').addClass('msg').text(this.getLabel('n_items_found', { n: 5 })).ref('label')
     )
   }
 }
 
-
 // just for demonstration
 class CustomLabelProvider {
-
-  constructor(labels, lang) {
+  constructor (labels, lang) {
     this.lang = lang || 'en'
     this.labels = labels
   }
 
-  getLabel(name, params) {
+  getLabel (name, params) {
     let parts = [name]
     forEach(params, (val, key) => {
-      parts.push(key+'='+val)
+      parts.push(key + '=' + val)
     })
     parts.push(this.lang)
     return parts.join('@')
   }
 
-  setLanguage(lang) {
+  setLanguage (lang) {
     this.lang = lang || 'en'
   }
 }

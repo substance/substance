@@ -2,11 +2,10 @@ import XMLNodeConverter from './XMLNodeConverter'
 
 export default
 class ElementNodeConverter extends XMLNodeConverter {
-
-  import(el, node, converter) {
+  import (el, node, converter) {
     let it = converter.getChildNodeIterator(el)
     let childNodeIds = []
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       const childEl = it.next()
       if (childEl.isElementNode()) {
         let childNode = converter.convertElement(childEl)
@@ -16,7 +15,7 @@ class ElementNodeConverter extends XMLNodeConverter {
     node._childNodes = childNodeIds
   }
 
-  export(node, el, converter) {
+  export (node, el, converter) {
     el.tagName = this.tagNameNS
     el.setAttributes(node.attributes)
     el.childNodes.forEach((childNode) => {
@@ -24,5 +23,4 @@ class ElementNodeConverter extends XMLNodeConverter {
       el.appendChild(childEl)
     })
   }
-
 }

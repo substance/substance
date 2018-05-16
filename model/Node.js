@@ -14,11 +14,10 @@ import Property from './Property'
   @prop {String} id an id that is unique within this data
  */
 class Node extends EventEmitter {
-
   /**
     @param {Object} properties
   */
-  constructor() {
+  constructor () {
     super()
 
     // NOTE: this indirection allows us to implement a overridable initializer
@@ -26,7 +25,7 @@ class Node extends EventEmitter {
     this._initialize.apply(this, arguments)
   }
 
-  _initialize(data) {
+  _initialize (data) {
     const NodeClass = this.constructor
 
     let schema = NodeClass.schema
@@ -38,7 +37,7 @@ class Node extends EventEmitter {
       const propIsGiven = (data[name] !== undefined)
       const hasDefault = prop.hasDefault()
       const isOptional = prop.isOptional()
-      if ( (!isOptional && !hasDefault) && !propIsGiven) {
+      if ((!isOptional && !hasDefault) && !propIsGiven) {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
@@ -51,11 +50,11 @@ class Node extends EventEmitter {
     }
   }
 
-  dispose() {
+  dispose () {
     this._disposed = true
   }
 
-  isDisposed() {
+  isDisposed () {
     return Boolean(this._disposed)
   }
 
@@ -65,11 +64,11 @@ class Node extends EventEmitter {
     @param {String} typeName
     @returns {Boolean} true if the node has a parent with given type, false otherwise.
   */
-  isInstanceOf(typeName) {
+  isInstanceOf (typeName) {
     return Node.isInstanceOf(this.constructor, typeName)
   }
 
-  getSchema() {
+  getSchema () {
     return this.constructor.schema
   }
 
@@ -78,10 +77,10 @@ class Node extends EventEmitter {
 
     @returns {String[]} An array of type names.
    */
-  getTypeNames() {
+  getTypeNames () {
     var typeNames = []
     var NodeClass = this.constructor
-    while (NodeClass.type !== "node") {
+    while (NodeClass.type !== 'node') {
       typeNames.push(NodeClass.type)
       NodeClass = Object.getPrototypeOf(NodeClass)
     }
@@ -94,7 +93,7 @@ class Node extends EventEmitter {
    * @param {String} propertyName
    * @returns The property's type.
    */
-  getPropertyType(propertyName) {
+  getPropertyType (propertyName) {
     var schema = this.constructor.schema
     return schema[propertyName].type
   }
@@ -104,7 +103,7 @@ class Node extends EventEmitter {
 
     @returns {Object} JSON representation of node.
    */
-  toJSON() {
+  toJSON () {
     var data = {
       type: this.type
     }
@@ -120,18 +119,17 @@ class Node extends EventEmitter {
     return data
   }
 
-  get type() {
+  get type () {
     return this.constructor.type
   }
-
 }
 
 Node.prototype._isNode = true
 
 // NOTE: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
 Object.defineProperty(Node, 'schema', {
-  get() { return this._schema },
-  set(schema) {
+  get () { return this._schema },
+  set (schema) {
     let NodeClass = this
     // TODO: discuss if we want this. Is a bit more convenient
     // ATM we transfer 'type' to the static property
@@ -145,12 +143,12 @@ Object.defineProperty(Node, 'schema', {
   }
 })
 
-Node.define = Node.defineSchema = function define(schema) {
+Node.define = Node.defineSchema = function define (schema) {
   this.schema = schema
 }
 
 Node.schema = {
-  type: "node",
+  type: 'node',
   id: 'string'
 }
 
@@ -161,9 +159,9 @@ Node.schema = {
   @private
   @returns {Boolean}
  */
-Node.isInstanceOf = function(NodeClass, typeName) {
+Node.isInstanceOf = function (NodeClass, typeName) {
   var type = NodeClass.type
-  while (type !== "node") {
+  while (type !== 'node') {
     if (type === typeName) return true
     var _super = Object.getPrototypeOf(NodeClass.prototype).constructor
     if (_super && _super.type) {
@@ -178,11 +176,11 @@ Node.isInstanceOf = function(NodeClass, typeName) {
 
 // ### Internal implementation
 
-function compileSchema(NodeClass, schema) {
+function compileSchema (NodeClass, schema) {
   let compiledSchema = _compileSchema(schema)
   let schemas = [compiledSchema]
   let clazz = NodeClass
-  while(clazz) {
+  while (clazz) {
     var parentProto = Object.getPrototypeOf(clazz.prototype)
     if (!parentProto) {
       break
@@ -196,9 +194,9 @@ function compileSchema(NodeClass, schema) {
   return Object.assign.apply(null, schemas)
 }
 
-function _compileSchema(schema) {
+function _compileSchema (schema) {
   let compiledSchema = {}
-  forEach(schema, function(definition, name) {
+  forEach(schema, function (definition, name) {
     // skip 'type'
     if (name === 'type') {
       return
@@ -213,14 +211,14 @@ function _compileSchema(schema) {
   return compiledSchema
 }
 
-function _compileDefintion(definition) {
+function _compileDefintion (definition) {
   let result = definition
-  if (isArray(definition.type) && definition.type[0] !== "array") {
+  if (isArray(definition.type) && definition.type[0] !== 'array') {
     definition.targetTypes = definition.type
-    definition.type = [ "array", "id" ]
+    definition.type = [ 'array', 'id' ]
   } else if (definition.type === 'text') {
     result = {
-      type: "string",
+      type: 'string',
       default: '',
       _isText: true
     }
@@ -228,11 +226,11 @@ function _compileDefintion(definition) {
   return result
 }
 
-function _checked(prop, value) {
+function _checked (prop, value) {
   let type
   let name = prop.name
   if (prop.isArray()) {
-    type = "array"
+    type = 'array'
   } else {
     type = prop.type
   }
@@ -246,12 +244,12 @@ function _checked(prop, value) {
   if (value === undefined) {
     throw new Error('Value for property ' + name + ' is undefined.')
   }
-  if (type === "string" && !isString(value) ||
-      type === "boolean" && !isBoolean(value) ||
-      type === "number" && !isNumber(value) ||
-      type === "array" && !isArray(value) ||
-      type === "id" && !isString(value) ||
-      type === "object" && !isObject(value)) {
+  if ((type === 'string' && !isString(value)) ||
+      (type === 'boolean' && !isBoolean(value)) ||
+      (type === 'number' && !isNumber(value)) ||
+      (type === 'array' && !isArray(value)) ||
+      (type === 'id' && !isString(value)) ||
+      (type === 'object' && !isObject(value))) {
     throw new Error('Illegal value type for property ' + name + ': expected ' + type + ', was ' + (typeof value))
   }
   return value

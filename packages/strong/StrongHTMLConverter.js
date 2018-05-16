@@ -1,10 +1,10 @@
 export default {
 
-  type: "strong",
-  tagName: "strong",
+  type: 'strong',
+  tagName: 'strong',
 
-  matchElement: function(el) {
-    return el.is("strong, b")
+  matchElement: function (el) {
+    return el.is('strong, b')
   }
 
 }

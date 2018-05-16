@@ -9,14 +9,14 @@ import Parser from '../vendor/htmlparser2'
   - format: 'html' or 'xml'
   - ownerDocument: an MemoryDOMElement instance of type 'document'
 */
-export default function parseMarkup(markup, options) {
+export default function parseMarkup (markup, options) {
   let format = options.ownerDocument ? options.ownerDocument.format : options.format
   /* istanbul ignore next */
   if (!format) {
     throw new Error("Either 'ownerDocument' or 'format' must be set.")
   }
   let parserOptions = Object.assign({}, options, {
-    xmlMode : (format === 'xml'),
+    xmlMode: (format === 'xml')
   })
   let handler = new DomHandler({ format, elementFactory: options.elementFactory })
   let parser = new Parser(handler, parserOptions)
@@ -24,16 +24,14 @@ export default function parseMarkup(markup, options) {
   return handler.document
 }
 
-
-const re_whitespace = /\s+/g
-const re_doctype = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"]+)["])?)\s*$/
+const RE_WHITESPACE = /\s+/g
+const RE_DOCTYPE = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"]+)["])?)\s*$/
 
 /*
   Customized implementation of [DomHandler](https://github.com/fb55/domhandler).
 */
 class DomHandler {
-
-  constructor(options = {}) {
+  constructor (options = {}) {
     this.elementFactory = options.elementFactory
     if (!this.elementFactory) throw new Error("'elementFactory' is required")
     this.options = options
@@ -42,27 +40,27 @@ class DomHandler {
   }
 
   // called directly after construction of Parser and at the end of Parser.reset()
-  onparserinit(){
+  onparserinit () {
     this.document = this.elementFactory('document', { format: this.options.format })
     this._tagStack = [this.document]
   }
 
-  onend(){
+  onend () {
     // TODO: would be nice to generate a good error message
-    if (this._tagStack.length>1) {
+    if (this._tagStack.length > 1) {
       throw new Error(`Unexpected EOF. Tag was opened but not closed.`)
     }
   }
 
-  onerror(error) {
+  onerror (error) {
     throw new Error(error)
   }
 
-  onclosetag() {
+  onclosetag () {
     this._tagStack.pop()
   }
 
-  _addDomElement(element) {
+  _addDomElement (element) {
     let parent = this._tagStack[this._tagStack.length - 1]
     if (!parent.childNodes) parent.childNodes = []
     let siblings = parent.childNodes
@@ -70,7 +68,7 @@ class DomHandler {
     let previousSibling = siblings[siblings.length - 1]
     // set up next/previous link
     element.next = null
-    if(previousSibling){
+    if (previousSibling) {
       element.prev = previousSibling
       previousSibling.next = element
     } else {
@@ -81,7 +79,7 @@ class DomHandler {
     element.parent = parent || null
   }
 
-  onopentag(name, attributes) {
+  onopentag (name, attributes) {
     let element = this.document.createElement(name)
     forEach(attributes, (val, key) => {
       element.setAttribute(key, val)
@@ -90,9 +88,9 @@ class DomHandler {
     this._tagStack.push(element)
   }
 
-  ontext(text) {
+  ontext (text) {
     if (this.options.normalizeWhitespace) {
-      text = text.replace(re_whitespace, " ")
+      text = text.replace(RE_WHITESPACE, ' ')
     }
     let lastTag
     let _top = this._tagStack[this._tagStack.length - 1]
@@ -105,9 +103,9 @@ class DomHandler {
     }
   }
 
-  oncomment(data) {
+  oncomment (data) {
     var lastTag = this._tagStack[this._tagStack.length - 1]
-    if(lastTag && lastTag.type === ElementType.Comment){
+    if (lastTag && lastTag.type === ElementType.Comment) {
       lastTag.data += data
     } else {
       let element = this.document.createComment(data)
@@ -116,33 +114,32 @@ class DomHandler {
     }
   }
 
-  oncommentend() {
+  oncommentend () {
     this._tagStack.pop()
   }
 
-  oncdatastart(data) {
+  oncdatastart (data) {
     let element = this.document.createCDATASection(data)
     this._addDomElement(element)
     this._tagStack.push(element)
   }
 
-  oncdataend() {
+  oncdataend () {
     this._tagStack.pop()
   }
 
-  onprocessinginstruction(name, data) {
+  onprocessinginstruction (name, data) {
     let element = this.document.createProcessingInstruction(name, data)
     this._addDomElement(element)
   }
 
-  ondeclaration(data) {
+  ondeclaration (data) {
     if (data.startsWith('DOCTYPE')) {
-      let m = re_doctype.exec(data)
+      let m = RE_DOCTYPE.exec(data)
       if (!m) throw new Error('Could not parse DOCTYPE element: ' + data)
       this.document.setDoctype(m[1], m[2], m[3])
     } else {
-      throw new Error('Not implemented: parse declaration '+data)
+      throw new Error('Not implemented: parse declaration ' + data)
     }
   }
-
 }

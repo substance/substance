@@ -2,8 +2,7 @@ import Component from '../../ui/Component'
 import keys from '../../util/keys'
 
 export default class Input extends Component {
-
-  render($$) {
+  render ($$) {
     let val = this._getDocumentValue()
 
     let el = $$('input').attr({
@@ -24,13 +23,13 @@ export default class Input extends Component {
     return el
   }
 
-  _onChange() {
+  _onChange () {
     let editorSession = this.context.editorSession
     let path = this.props.path
     let newVal = this.el.val()
     let oldVal = this._getDocumentValue()
     if (newVal !== oldVal) {
-      editorSession.transaction(function(tx) {
+      editorSession.transaction(function (tx) {
         tx.set(path, newVal)
       })
       if (this.props.retainFocus) {
@@ -41,7 +40,7 @@ export default class Input extends Component {
     }
   }
 
-  _getDocumentValue() {
+  _getDocumentValue () {
     if (this.props.val) {
       return this.props.val
     } else {
@@ -51,7 +50,7 @@ export default class Input extends Component {
     }
   }
 
-  _onKeydown(event) {
+  _onKeydown (event) {
     if (event.keyCode === keys.ESCAPE) {
       event.stopPropagation()
       event.preventDefault()

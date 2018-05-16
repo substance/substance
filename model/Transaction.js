@@ -19,11 +19,10 @@ import DocumentChange from './DocumentChange'
 */
 export default
 class Transaction {
-
   /*
     @param {Document} doc
   */
-  constructor(master) {
+  constructor (master) {
     // using a different name internally
     this.master = master
     this.stage = master.newInstance().createFromDocument(master)
@@ -40,29 +39,29 @@ class Transaction {
     master._ops.length = 0
   }
 
-  dispose() {
+  dispose () {
     this.stage.dispose()
   }
 
   // internal API
 
-  get ops() {
+  get ops () {
     return this.stage._ops
   }
 
-  set ops(ops) {
+  set ops (ops) {
     this.stage._ops = ops
   }
 
-  getSelection() {
+  getSelection () {
     return this.tx.getSelection()
   }
 
-  setSelection(sel) {
+  setSelection (sel) {
     this.tx.setSelection(sel)
   }
 
-  _reset() {
+  _reset () {
     this._before = {}
     this._after = {}
     this.stage._ops.length = 0
@@ -87,7 +86,7 @@ class Transaction {
     })
     ```
   */
-  _recordChange(transformation, selection, info) {
+  _recordChange (transformation, selection, info) {
     if (this._isTransacting) throw new Error('Nested transactions are not supported.')
     if (!isFunction(transformation)) throw new Error('Document.transaction() requires a transformation function.')
     let hasFinished = false
@@ -117,7 +116,7 @@ class Transaction {
             let res = this.stage._validateChange(change)
             if (!res.ok) {
               // TODO: we need a helper to generate nice error messages
-              throw new Error('Transaction is violating the schema: \n' + res.errors.map(err=>err.msg).join('\n'))
+              throw new Error('Transaction is violating the schema: \n' + res.errors.map(err => err.msg).join('\n'))
             }
           }
         }
@@ -132,7 +131,7 @@ class Transaction {
     return change
   }
 
-  _sync() {
+  _sync () {
     const master = this.master
     const stage = this.stage
     let ops = master._ops
@@ -143,7 +142,7 @@ class Transaction {
   }
 
   // HACK: we are not doing well with updating the stage
-  __applyChange__(change) {
+  __applyChange__ (change) {
     const stage = this.stage
     const ops = change.ops
     for (let i = 0; i < ops.length; i++) {
@@ -151,7 +150,7 @@ class Transaction {
     }
   }
 
-  _rollback() {
+  _rollback () {
     const stage = this.stage
     let ops = stage._ops
     for (let i = ops.length - 1; i >= 0; i--) {
@@ -159,5 +158,4 @@ class Transaction {
     }
     ops.length = 0
   }
-
 }

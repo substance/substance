@@ -4,7 +4,7 @@ import request from '../util/request'
   HTTP client for talking with DocumentServer
 */
 class DocumentClient {
-  constructor(config) {
+  constructor (config) {
     this.config = config
   }
 
@@ -22,7 +22,7 @@ class DocumentClient {
       }
     });
   */
-  createDocument(newDocument, cb) {
+  createDocument (newDocument, cb) {
     request('POST', this.config.httpUrl, newDocument, cb)
   }
 
@@ -36,8 +36,8 @@ class DocumentClient {
     ```
   */
 
-  getDocument(documentId, cb) {
-    request('GET', this.config.httpUrl+documentId, null, cb)
+  getDocument (documentId, cb) {
+    request('GET', this.config.httpUrl + documentId, null, cb)
   }
 
   /*
@@ -50,10 +50,9 @@ class DocumentClient {
     ```
   */
 
-  deleteDocument(documentId, cb) {
-    request('DELETE', this.config.httpUrl+documentId, null, cb)
+  deleteDocument (documentId, cb) {
+    request('DELETE', this.config.httpUrl + documentId, null, cb)
   }
-
 }
 
 export default DocumentClient

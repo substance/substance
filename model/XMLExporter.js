@@ -10,22 +10,20 @@ import DOMExporter from './DOMExporter'
   exchange format see {@link model/HTMLExporter}.
 */
 class XMLExporter extends DOMExporter {
-
-  constructor(config, context) {
+  constructor (config, context) {
     super(_defaultConfig(config), context)
   }
 
-  getDefaultBlockConverter() {
+  getDefaultBlockConverter () {
     return defaultBlockConverter // eslint-disable-line no-use-before-define
   }
 
-  getDefaultPropertyAnnotationConverter() {
+  getDefaultPropertyAnnotationConverter () {
     return defaultAnnotationConverter // eslint-disable-line no-use-before-define
   }
-
 }
 
-function _defaultConfig(config) {
+function _defaultConfig (config) {
   config = Object.assign({
     idAttribute: 'id'
   }, config)
@@ -37,10 +35,10 @@ function _defaultConfig(config) {
 
 const defaultAnnotationConverter = {
   tagName: 'annotation',
-  export: function(node, el) {
+  export: function (node, el) {
     el.attr('type', node.type)
     const properties = node.toJSON()
-    forEach(properties, function(value, name) {
+    forEach(properties, function (value, name) {
       if (name === 'id' || name === 'type') return
       if (isString(value) || isNumber(value) || isBoolean(value)) {
         el.attr(name, value)
@@ -51,10 +49,10 @@ const defaultAnnotationConverter = {
 
 const defaultBlockConverter = {
   tagName: 'block',
-  export: function(node, el, converter) {
+  export: function (node, el, converter) {
     el.attr('type', node.type)
     const properties = node.toJSON()
-    forEach(properties, function(value, name) {
+    forEach(properties, function (value, name) {
       if (name === 'id' || name === 'type') {
         return
       }

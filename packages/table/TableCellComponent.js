@@ -2,8 +2,7 @@ import Component from '../../ui/Component'
 import TextPropertyEditor from '../../ui/TextPropertyEditor'
 
 export default class TableCellComponent extends Component {
-
-  render($$) {
+  render ($$) {
     let node = this.props.node
     let el = $$('td').addClass('sc-table-cell')
     el.append(
@@ -21,7 +20,7 @@ export default class TableCellComponent extends Component {
     return el
   }
 
-  grabFocus() {
+  grabFocus () {
     let node = this.props.node
     this.context.editorSession.setSelection({
       type: 'property',

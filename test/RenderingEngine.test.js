@@ -13,11 +13,9 @@ RenderingEngineTests()
 // runs RenderingEngine in debug mode
 RenderingEngineTests('debug')
 
-
-function RenderingEngineTests(debug) {
-
+function RenderingEngineTests (debug) {
   const test = module('RenderingEngine' + (debug ? ' [debug-mode]' : ''), {
-    before: function() {
+    before: function () {
       substanceGlobals.DEBUG_RENDERING = Boolean(debug)
     }
   })
@@ -29,8 +27,8 @@ function RenderingEngineTests(debug) {
   // by RenderingEnging to know, that a component can be reused. I.e.,
   // the VirtualComponent has been mapped successfully to a Component
 
-  test('Components without refs are not mapped', function(t) {
-    var comp = TestComponent.create(function($$) {
+  test('Components without refs are not mapped', function (t) {
+    var comp = TestComponent.create(function ($$) {
       return $$('div').append($$(Simple))
     })
     var vc = _capture(comp)
@@ -38,8 +36,8 @@ function RenderingEngineTests(debug) {
     t.end()
   })
 
-  test('A component with ref is mapped', function(t) {
-    var comp = TestComponent.create(function($$) {
+  test('A component with ref is mapped', function (t) {
+    var comp = TestComponent.create(function ($$) {
       return $$('div').append($$(Simple).ref('foo'))
     })
     var vc = _capture(comp)
@@ -54,8 +52,8 @@ function RenderingEngineTests(debug) {
   // __isRelocated__ is an internal state variable that is used
   // when a reused component has been rendered with a different parent
 
-  test('Detecting relocation when injecting a new parent element', function(t) {
-    function _render($$) {
+  test('Detecting relocation when injecting a new parent element', function (t) {
+    function _render ($$) {
       var el = $$('div')
       var parent = el
       if (this.props.extraLayer) {
@@ -83,7 +81,7 @@ function RenderingEngineTests(debug) {
     t.end()
   })
 
-  test('Detecting relocation when injecting components (TextProperty use-case)', function(t) {
+  test('Detecting relocation when injecting components (TextProperty use-case)', function (t) {
     /*
       This simulates a situation found often when rendering a TextProperty.
       Say a text property contains an inline node.
@@ -99,7 +97,7 @@ function RenderingEngineTests(debug) {
       where the inline node needs to be attached to varying parent
       elements.
     */
-    function _render($$) {
+    function _render ($$) {
       var el = $$('div')
       var parent = el
       el.append('AAAA')
@@ -142,7 +140,7 @@ function RenderingEngineTests(debug) {
       data.push(row)
     }
     class Matrix extends Component {
-      render($$) {
+      render ($$) {
         let el = $$('table').css({
           overflow: 'auto',
           height: '100px'
@@ -174,23 +172,23 @@ function RenderingEngineTests(debug) {
   })
 }
 
-function _capture(comp) {
+function _capture (comp) {
   var vc = internal._wrap(comp)
   let renderingEngine = Component.createRenderingEngine()
   var state = renderingEngine._createState()
   internal._capture(state, vc, 'force')
   vc._state = state
-  vc._isMapped = function(o) { return state.isMapped(o); }
-  vc._isRelocated = function(o) { return state.isRelocated(o); }
-  vc._getRef = function(ref) { return _getRef(vc, ref); }
+  vc._isMapped = function (o) { return state.isMapped(o) }
+  vc._isRelocated = function (o) { return state.isRelocated(o) }
+  vc._getRef = function (ref) { return _getRef(vc, ref) }
   return vc
 }
 
-function _getRef(vc, ref) {
+function _getRef (vc, ref) {
   return vc._content._context.refs[ref] || {}
 }
 
-function _setProps(comp, props) {
+function _setProps (comp, props) {
   comp.props = props
   Object.freeze(props)
 }

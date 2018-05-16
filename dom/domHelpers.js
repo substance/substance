@@ -1,44 +1,44 @@
 import DefaultDOMElement from './DefaultDOMElement'
 
-export function findParentDOMElement(nativeEl) {
-  while(nativeEl) {
+export function findParentDOMElement (nativeEl) {
+  while (nativeEl) {
     let el = DefaultDOMElement.unwrap(nativeEl)
     if (el) return el
     nativeEl = nativeEl.parentNode
   }
 }
 
-export function findParent(el, selector) {
-  while(el) {
+export function findParent (el, selector) {
+  while (el) {
     if (el.is(selector)) return el
     el = el.getParent()
   }
 }
 
-export function stop(event) {
+export function stop (event) {
   event.stopPropagation()
 }
 
-export function stopAndPrevent(event) {
+export function stopAndPrevent (event) {
   event.stopPropagation()
   event.preventDefault()
 }
 
-export function walk(el, cb) {
+export function walk (el, cb) {
   _walk(el, cb, 0)
 }
 
-function _walk(el, cb, level) {
+function _walk (el, cb, level) {
   cb(el, level)
   if (el.getChildCount() > 0) {
     let it = el.getChildNodeIterator()
-    while(it.hasNext()) {
-      _walk(it.next(), cb, level+1)
+    while (it.hasNext()) {
+      _walk(it.next(), cb, level + 1)
     }
   }
 }
 
-export function isRightButton(event) {
+export function isRightButton (event) {
   let isRightButton = false
   if ('which' in event) {
     isRightButton = (event.which === 3)
@@ -48,7 +48,7 @@ export function isRightButton(event) {
   return isRightButton
 }
 
-export function getBoundingRect(el) {
+export function getBoundingRect (el) {
   let _rect = el.getNativeElement().getBoundingClientRect()
   return {
     top: _rect.top,
@@ -58,7 +58,7 @@ export function getBoundingRect(el) {
   }
 }
 
-export function getBoundingRectForRects(...rects) {
+export function getBoundingRectForRects (...rects) {
   let top, left, bottom, right
   if (rects.length > 0) {
     let first = rects[0]
@@ -70,8 +70,8 @@ export function getBoundingRectForRects(...rects) {
       let r = rects[i]
       top = Math.min(top, r.top)
       left = Math.min(left, r.left)
-      bottom = Math.max(bottom, r.top+r.height)
-      right = Math.max(right, r.left+r.width)
+      bottom = Math.max(bottom, r.top + r.height)
+      right = Math.max(right, r.left + r.width)
     }
   }
   return {
@@ -79,15 +79,15 @@ export function getBoundingRectForRects(...rects) {
     left,
     right,
     bottom,
-    height: bottom-top,
-    width: right-left
+    height: bottom - top,
+    width: right - left
   }
 }
 
-export function isXInside(x, rect) {
-  return x >= rect.left && x <= rect.left+rect.width
+export function isXInside (x, rect) {
+  return x >= rect.left && x <= rect.left + rect.width
 }
 
-export function isYInside(y, rect) {
-  return y >= rect.top && y <= rect.top+rect.height
+export function isYInside (y, rect) {
+  return y >= rect.top && y <= rect.top + rect.height
 }

@@ -3,60 +3,58 @@ import ListMixin from '../../model/ListMixin'
 
 export default
 class ListNode extends ListMixin(DocumentNode) {
-
   // specific implementation
 
-  createListItem(text) {
-    return this.getDocument().create( { type: 'list-item', content: text })
+  createListItem (text) {
+    return this.getDocument().create({ type: 'list-item', content: text })
   }
 
-  getItems() {
+  getItems () {
     const doc = this.getDocument()
     return this.items.map((id) => {
       return doc.get(id)
     })
   }
 
-  getItemsPath() {
+  getItemsPath () {
     return [this.id, 'items']
   }
 
-  insertItemAt(pos, item) {
+  insertItemAt (pos, item) {
     const doc = this.getDocument()
     const id = item.id
     doc.update(this.getItemsPath(), { type: 'insert', pos: pos, value: id })
   }
 
-  removeItemAt(pos) {
+  removeItemAt (pos) {
     const doc = this.getDocument()
     doc.update(this.getItemsPath(), { type: 'delete', pos: pos })
   }
 
   // overridden
 
-  getItemAt(idx) {
+  getItemAt (idx) {
     return this.getDocument().get(this.items[idx])
   }
 
-  getItemPosition(item) {
+  getItemPosition (item) {
     const id = item.id
     let pos = this.items.indexOf(id)
     if (pos < 0) throw new Error('Item is not within this list: ' + id)
     return pos
   }
 
-  getLength() {
+  getLength () {
     return this.items.length
   }
 
-  getListTypeString() {
+  getListTypeString () {
     return this.listType
   }
 
-  setListTypeString(levelTypeStr) {
+  setListTypeString (levelTypeStr) {
     this.getDocument().set([this.id, 'listType'], levelTypeStr)
   }
-
 }
 
 ListNode.type = 'list'

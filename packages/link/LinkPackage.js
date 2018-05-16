@@ -7,7 +7,7 @@ import EditLinkTool from './EditLinkTool'
 
 export default {
   name: 'link',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
     config.addConverter('html', LinkHTMLConverter)
@@ -21,7 +21,7 @@ export default {
       commandGroup: 'prompt'
     })
     config.addTool('edit-link', EditLinkTool)
-    config.addIcon('link', { 'fontawesome': 'fa-link'})
+    config.addIcon('link', { 'fontawesome': 'fa-link' })
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' })
     config.addLabel('link', {
       en: 'Link',

@@ -10,8 +10,7 @@ import EditorSession from '../ui/EditorSession'
   Requires a connected and authenticated collabClient.
 */
 class CollabSession extends EditorSession {
-
-  constructor(doc, config) {
+  constructor (doc, config) {
     super(doc, config)
     config = config || {}
     this.config = config
@@ -32,7 +31,7 @@ class CollabSession extends EditorSession {
     if (!this.documentId) {
       throw new Err('InvalidArgumentsError', {message: 'documentId is mandatory'})
     }
-    if (typeof this.version === undefined) {
+    if (typeof this.version === 'undefined') {
       throw new Err('InvalidArgumentsError', {message: 'version is mandatory'})
     }
     // Internal state
@@ -59,7 +58,7 @@ class CollabSession extends EditorSession {
     Unregister event handlers. Call this before throwing away
     a CollabSession reference. Otherwise you will leak memory
   */
-  dispose() {
+  dispose () {
     this.disconnect()
     this.collabClient.off(this)
   }
@@ -67,7 +66,7 @@ class CollabSession extends EditorSession {
   /*
     Explicit disconnect initiated by user
   */
-  disconnect() {
+  disconnect () {
     // Let the server know we no longer want to edit this document
     let msg = {
       type: 'disconnect',
@@ -81,7 +80,7 @@ class CollabSession extends EditorSession {
   /*
     Synchronize with collab server
   */
-  sync() {
+  sync () {
     // If there is something to sync and there is no running sync
     if (this.__canSync()) {
       let nextChange = this._nextChange
@@ -105,19 +104,19 @@ class CollabSession extends EditorSession {
     }
   }
 
-  getCollaborators() {
+  getCollaborators () {
     return this.collaborators
   }
 
-  isConnected() {
+  isConnected () {
     return this._connected
   }
 
-  serializeChange(change) {
+  serializeChange (change) {
     return change.toJSON()
   }
 
-  deserializeChange(serializedChange) {
+  deserializeChange (serializedChange) {
     return DocumentChange.fromJSON(serializedChange)
   }
 
@@ -127,7 +126,7 @@ class CollabSession extends EditorSession {
   /*
     Dispatching of remote messages.
   */
-  _onMessage(msg) {
+  _onMessage (msg) {
     // Skip if message is not addressing this document
     if (msg.documentId !== this.documentId) {
       return false
@@ -162,7 +161,7 @@ class CollabSession extends EditorSession {
 
     Returns true if sent, false if not sent (e.g. when not connected)
   */
-  _send(msg) {
+  _send (msg) {
     if (this.collabClient.isConnected()) {
       this.collabClient.send(msg)
       return true
@@ -182,7 +181,7 @@ class CollabSession extends EditorSession {
     If we are currently in the middle of a sync or have local changes we just
     ignore the update. We will receive all server updates on the next syncDone.
   */
-  update(args) {
+  update (args) {
     // console.log('CollabSession.update(): received remote update', args);
     let serverChange = args.change
     let serverVersion = args.version
@@ -197,7 +196,7 @@ class CollabSession extends EditorSession {
       }
       this.startFlow()
     } else {
-      console.info('skipped remote update. Pending sync or local changes.');
+      console.info('skipped remote update. Pending sync or local changes.')
     }
   }
 
@@ -207,7 +206,7 @@ class CollabSession extends EditorSession {
     We apply server changes that happened in the meanwhile and we update
     the collaborators (=selections etc.)
   */
-  syncDone(args) {
+  syncDone (args) {
     // console.log('syncDone', args)
     let serverChange = args.serverChange
     let serverVersion = args.version
@@ -233,12 +232,12 @@ class CollabSession extends EditorSession {
   /*
     Handle sync error
   */
-  syncError(error) {
+  syncError (error) {
     console.info('SyncError occured. Aborting sync', error)
     this._abortSync()
   }
 
-  disconnectDone() {
+  disconnectDone () {
     // console.log('disconnect done');
     // Let the server know we no longer want to edit this document
     this._afterDisconnected()
@@ -248,7 +247,7 @@ class CollabSession extends EditorSession {
     Handle errors. This gets called if any request produced
     an error on the server.
   */
-  error(message) {
+  error (message) {
     let error = message.error
     let errorFn = this[error.name]
     let err = Err.fromJSON(error)
@@ -263,11 +262,10 @@ class CollabSession extends EditorSession {
     errorFn(err)
   }
 
-
   /* Event handlers
      ============== */
 
-  afterDocumentChange(change, info) {
+  afterDocumentChange (change, info) {
     // Record local changes into nextCommit
     if (!info.remote) {
       this._recordChange(change)
@@ -279,7 +277,7 @@ class CollabSession extends EditorSession {
 
     This happens in a reconnect scenario.
   */
-  onCollabClientConnected() {
+  onCollabClientConnected () {
     // console.log('CollabClient connected');
     if (this.autoSync) {
       this.sync()
@@ -289,7 +287,7 @@ class CollabSession extends EditorSession {
   /*
     Implicit disconnect (server connection drop out)
   */
-  onCollabClientDisconnected() {
+  onCollabClientDisconnected () {
     // console.log('CollabClient disconnected');
     this._abortSync()
     if (this._connected) {
@@ -300,7 +298,7 @@ class CollabSession extends EditorSession {
   /* Internal methods
      ================ */
 
-  _commit(change, info) {
+  _commit (change, info) {
     this._commitChange(change, info)
     this.startFlow()
   }
@@ -308,7 +306,7 @@ class CollabSession extends EditorSession {
   /*
     Apply a change to the document
   */
-  _applyRemoteChange(change) {
+  _applyRemoteChange (change) {
     // console.log('CollabSession: applying remote change');
     if (change.ops.length > 0) {
       this._transaction.__applyChange__(change)
@@ -326,7 +324,7 @@ class CollabSession extends EditorSession {
   /*
     We record all local changes into a single change (aka commit) that
   */
-  _recordChange(change) {
+  _recordChange (change) {
     if (!this._nextChange) {
       this._nextChange = change
     } else {
@@ -337,14 +335,14 @@ class CollabSession extends EditorSession {
     this._requestSync()
   }
 
-  __canSync() {
+  __canSync () {
     return this.collabClient.isConnected() && !this._pendingSync
   }
 
   /*
     Triggers a new sync if there is a new change and no pending sync
   */
-  _requestSync() {
+  _requestSync () {
     if (this._nextChange && this.__canSync()) {
       this.sync()
     }
@@ -356,7 +354,7 @@ class CollabSession extends EditorSession {
     This is called _onDisconnect and could be called after a sync request
     times out (not yet implemented)
   */
-  _abortSync() {
+  _abortSync () {
     let newNextChange = this._nextChange
 
     if (this._pendingChange) {
@@ -377,7 +375,7 @@ class CollabSession extends EditorSession {
     Sets the correct state after a collab session has been disconnected
     either explicitly or triggered by a connection drop out.
   */
-  _afterDisconnected() {
+  _afterDisconnected () {
     this._connected = false
     this.emit('disconnected')
   }
@@ -385,10 +383,9 @@ class CollabSession extends EditorSession {
   /*
     Returns true if there are local changes
   */
-  _hasLocalChanges() {
+  _hasLocalChanges () {
     return this._nextChange && this._nextChange.ops.length > 0
   }
-
 }
 
 export default CollabSession

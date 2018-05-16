@@ -13,7 +13,7 @@ import XMLContainerNode from './XMLContainerNode'
 import XMLNodeConverter from './XMLNodeConverter'
 import XMLDocumentImporter from './XMLDocumentImporter'
 
-export default function registerSchema(config, xmlSchema, DocumentClass, options = {}) {
+export default function registerSchema (config, xmlSchema, DocumentClass, options = {}) {
   const schemaName = xmlSchema.getName()
   let defaultTextType
   // Some schemas don't require a defaultTextType, still we need to provide
@@ -100,7 +100,7 @@ export default function registerSchema(config, xmlSchema, DocumentClass, options
 
 const BUILTIN_ATTRS = ['id', 'type', 'attributes', '_childNodes', '_content']
 
-function _defineAttribute(Node, attributeName) {
+function _defineAttribute (Node, attributeName) {
   let name = attributeName.replace(':', '_')
   name = camelCase(name)
   if (BUILTIN_ATTRS.indexOf(name) >= 0) {
@@ -108,10 +108,10 @@ function _defineAttribute(Node, attributeName) {
     return
   }
   Object.defineProperty(Node.prototype, name, {
-    get() {
+    get () {
       return this.getAttribute(attributeName)
     },
-    set(val) {
+    set (val) {
       this.setAttribute(attributeName, val)
       return this
     }

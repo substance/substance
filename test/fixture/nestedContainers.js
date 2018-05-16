@@ -1,4 +1,4 @@
-export default function nestedContainers(tx) {
+export default function nestedContainers (tx) {
   var body = tx.get('body')
 
   var p1 = tx.create({

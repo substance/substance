@@ -19,7 +19,7 @@ import ProseArticleImporter from './ProseArticleImporter'
 
 export default {
   name: 'prose-editor',
-  configure: function(config) {
+  configure: function (config) {
     config.defineSchema({
       name: 'prose-article',
       DocumentClass: ProseArticle,

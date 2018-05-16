@@ -1,10 +1,9 @@
 class ChangeHistory {
-
-  constructor() {
+  constructor () {
     this.reset()
   }
 
-  reset() {
+  reset () {
     // undo list
     this.doneChanges = []
     // redo list
@@ -13,19 +12,18 @@ class ChangeHistory {
     this.lastChange = null
   }
 
-  canUndo() {
+  canUndo () {
     return this.doneChanges.length > 0
   }
 
-  canRedo() {
+  canRedo () {
     return this.undoneChanges.length > 0
   }
 
-  push(change) {
+  push (change) {
     this.doneChanges.push(change)
     this.undoneChanges = []
   }
-
 }
 
 export default ChangeHistory

@@ -18,9 +18,9 @@ test('flattenOften should stop at max', (t) => {
 })
 
 test('isEqual on primitives', (t) => {
-  t.ok(isEqual(1,1), '1 === 1')
-  t.ok(isEqual("foo", "foo"), '"foo" === "foo"')
-  t.notOk(isEqual("foo", "bar"), '"foo" !== "bar"')
+  t.ok(isEqual(1, 1), '1 === 1')
+  t.ok(isEqual('foo', 'foo'), '"foo" === "foo"')
+  t.notOk(isEqual('foo', 'bar'), '"foo" !== "bar"')
   t.notOk(isEqual(null, undefined), 'null !== undefined')
   t.end()
 })

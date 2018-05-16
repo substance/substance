@@ -23,8 +23,7 @@ import PropertySelection from './PropertySelection'
   ```
 */
 class ContainerSelection extends Selection {
-
-  constructor(containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
+  constructor (containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
     super()
 
     if (arguments.length === 1) {
@@ -54,29 +53,29 @@ class ContainerSelection extends Selection {
 
   /* istanbul ignore start */
 
-  get startPath() {
+  get startPath () {
     console.warn('DEPRECATED: use sel.start.path instead.')
     return this.start.path
   }
 
-  get startOffset() {
+  get startOffset () {
     console.warn('DEPRECATED: use sel.start.offset instead.')
     return this.start.offset
   }
 
-  get endPath() {
+  get endPath () {
     console.warn('DEPRECATED: use sel.end.path instead.')
     return this.end.path
   }
 
-  get endOffset() {
+  get endOffset () {
     console.warn('DEPRECATED: use sel.end.offset instead.')
     return this.end.offset
   }
 
   /* istanbul ignore end */
 
-  toJSON() {
+  toJSON () {
     return {
       type: 'container',
       containerId: this.containerId,
@@ -89,27 +88,27 @@ class ContainerSelection extends Selection {
     }
   }
 
-  isContainerSelection() {
+  isContainerSelection () {
     return true
   }
 
-  getType() {
+  getType () {
     return 'container'
   }
 
-  isNull() {
+  isNull () {
     return false
   }
 
-  isCollapsed() {
+  isCollapsed () {
     return this.start.equals(this.end)
   }
 
-  isReverse() {
+  isReverse () {
     return this.reverse
   }
 
-  equals(other) {
+  equals (other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       this.containerId === other.containerId &&
@@ -117,31 +116,31 @@ class ContainerSelection extends Selection {
     )
   }
 
-  toString() {
+  toString () {
     /* istanbul ignore next */
     return [
-      "ContainerSelection(",
-      this.containerId, ", ",
-      JSON.stringify(this.start.path), ", ", this.start.offset,
-      " -> ",
-      JSON.stringify(this.end.path), ", ", this.end.offset,
-      (this.reverse?", reverse":""),
-      (this.surfaceId?(", "+this.surfaceId):""),
-      ")"
+      'ContainerSelection(',
+      this.containerId, ', ',
+      JSON.stringify(this.start.path), ', ', this.start.offset,
+      ' -> ',
+      JSON.stringify(this.end.path), ', ', this.end.offset,
+      (this.reverse ? ', reverse' : ''),
+      (this.surfaceId ? (', ' + this.surfaceId) : ''),
+      ')'
     ].join('')
   }
 
   /**
     @return {model/Container} The container node instance for this selection.
   */
-  getContainer() {
+  getContainer () {
     if (!this._internal.container) {
       this._internal.container = this.getDocument().get(this.containerId)
     }
     return this._internal.container
   }
 
-  isInsideOf(other, strict) {
+  isInsideOf (other, strict) {
     // Note: this gets called from PropertySelection.contains()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false
@@ -152,7 +151,7 @@ class ContainerSelection extends Selection {
       r1.end.isBefore(r2.end, strict))
   }
 
-  contains(other, strict) {
+  contains (other, strict) {
     // Note: this gets called from PropertySelection.isInsideOf()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false
@@ -163,7 +162,7 @@ class ContainerSelection extends Selection {
       r2.end.isBefore(r1.end, strict))
   }
 
-  containsNode(nodeId, strict) {
+  containsNode (nodeId, strict) {
     const container = this.getContainer()
     if (!container.contains(nodeId)) return false
     const coor = new Coordinate([nodeId], 0)
@@ -178,7 +177,7 @@ class ContainerSelection extends Selection {
     return contained
   }
 
-  overlaps(other) {
+  overlaps (other) {
     let r1 = this._range(this)
     let r2 = this._range(other)
     // it overlaps if they are not disjunct
@@ -186,13 +185,13 @@ class ContainerSelection extends Selection {
       r2.end.isBefore(r1.start, false))
   }
 
-  isLeftAlignedWith(other) {
+  isLeftAlignedWith (other) {
     let r1 = this._range(this)
     let r2 = this._range(other)
     return r1.start.isEqual(r2.start)
   }
 
-  isRightAlignedWith(other) {
+  isRightAlignedWith (other) {
     let r1 = this._range(this)
     let r2 = this._range(other)
     return r1.end.isEqual(r2.end)
@@ -204,7 +203,7 @@ class ContainerSelection extends Selection {
     @param {String} direction either left of right
     @returns {PropertySelection}
   */
-  collapse(direction) {
+  collapse (direction) {
     let coor
     if (direction === 'left') {
       coor = this.start
@@ -214,7 +213,7 @@ class ContainerSelection extends Selection {
     return _createNewSelection(this, coor, coor)
   }
 
-  expand(other) {
+  expand (other) {
     let r1 = this._range(this)
     let r2 = this._range(other)
     let start
@@ -238,7 +237,7 @@ class ContainerSelection extends Selection {
     return _createNewSelection(this, start, end)
   }
 
-  truncateWith(other) {
+  truncateWith (other) {
     if (other.isInsideOf(this, 'strict')) {
       // the other selection should overlap only on one side
       throw new Error('Can not truncate with a contained selections')
@@ -284,11 +283,11 @@ class ContainerSelection extends Selection {
 
     @returns {String[]} an array of ids
   */
-  getNodeIds() {
+  getNodeIds () {
     const container = this.getContainer()
     const startPos = container.getPosition(this.start.path[0])
     const endPos = container.getPosition(this.end.path[0])
-    return container.getContent().slice(startPos, endPos+1)
+    return container.getContent().slice(startPos, endPos + 1)
   }
 
   /**
@@ -296,10 +295,10 @@ class ContainerSelection extends Selection {
 
     @returns {PropertySelection[]}
   */
-  splitIntoPropertySelections() {
+  splitIntoPropertySelections () {
     let sels = []
     let fragments = this.getFragments()
-    fragments.forEach(function(fragment) {
+    fragments.forEach(function (fragment) {
       if (fragment instanceof Selection.Fragment) {
         sels.push(
           new PropertySelection(fragment.path, fragment.startOffset,
@@ -310,11 +309,11 @@ class ContainerSelection extends Selection {
     return sels
   }
 
-  _clone() {
+  _clone () {
     return new ContainerSelection(this)
   }
 
-  _range(sel) {
+  _range (sel) {
     // EXPERIMENTAL: caching the internal address based range
     // as we use it very often.
     // However, this is dangerous as this data can get invalid by a change
@@ -340,20 +339,19 @@ class ContainerSelection extends Selection {
     return addressRange
   }
 
-  get path() {
+  get path () {
     throw new Error('ContainerSelection has no path property. Use startPath and endPath instead')
   }
-
 }
 
 ContainerSelection.prototype._isContainerSelection = true
 
-ContainerSelection.fromJSON = function(properties) {
+ContainerSelection.fromJSON = function (properties) {
   let sel = new ContainerSelection(properties)
   return sel
 }
 
-function _createNewSelection(containerSel, start, end) {
+function _createNewSelection (containerSel, start, end) {
   let newSel
 
   if (start === end) {

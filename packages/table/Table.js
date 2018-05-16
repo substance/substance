@@ -1,12 +1,11 @@
 import BlockNode from '../../model/BlockNode'
 
 class Table extends BlockNode {
-
-  getRowCount() {
+  getRowCount () {
     return this.cells.length
   }
 
-  getColCount() {
+  getColCount () {
     if (this.cells.length > 0) {
       return this.cells[0].length
     } else {
@@ -14,13 +13,12 @@ class Table extends BlockNode {
     }
   }
 
-  getCellAt(row, col) {
+  getCellAt (row, col) {
     let cellId = this.cells[row][col]
     if (cellId) {
       return this.document.get(cellId)
     }
   }
-
 }
 
 Table.schema = {

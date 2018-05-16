@@ -4,7 +4,7 @@ import SpellCheckManager from './SpellCheckManager'
 
 export default {
   name: 'spell-check',
-  configure: function(config) {
+  configure: function (config) {
     config.addCommand('correction', SpellCheckCommand, {
       commandGroup: 'spell-check'
     })

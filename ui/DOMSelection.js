@@ -20,8 +20,7 @@ const DEBUG = false
   @param {Editor} Editor component
  */
 class DOMSelection {
-
-  constructor(editor) {
+  constructor (editor) {
     this.editor = editor
     if (platform.inBrowser) {
       this.wRange = window.document.createRange()
@@ -39,7 +38,7 @@ class DOMSelection {
       - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
     @returns {model/Selection}
   */
-  getSelection(options) {
+  getSelection (options) {
     // HACK: ignore this if not Browser (e.g. when running the test suite in node)
     if (!platform.inBrowser) return
     let range = this.mapDOMSelection(options)
@@ -48,7 +47,7 @@ class DOMSelection {
     return doc._createSelectionFromRange(range)
   }
 
-  getSelectionForDOMRange(wrange) {
+  getSelectionForDOMRange (wrange) {
     let range = this.mapDOMRange(wrange)
     let doc = this.editor.getDocument()
     return doc._createSelectionFromRange(range)
@@ -61,13 +60,13 @@ class DOMSelection {
       - `direction`: `left` or `right`; a hint for disambiguations, used by Surface during cursor navigation.
     @returns {model/Range}
   */
-  mapDOMSelection(options) {
+  mapDOMSelection (options) {
     let wSel = window.getSelection()
     let state = this.state
     let range
     // Use this log whenever the mapping goes wrong to analyze what
     // is actually being provided by the browser
-    if (DEBUG) console.info('DOM->Model: ', wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset);
+    if (DEBUG) console.info('DOM->Model: ', wSel.anchorNode, wSel.anchorOffset, wSel.focusNode, wSel.focusOffset)
     if (wSel.rangeCount === 0) return _null()
     let anchorNode = DefaultDOMElement.wrapNativeElement(wSel.anchorNode)
     if (wSel.isCollapsed) {
@@ -77,8 +76,7 @@ class DOMSelection {
         start: coor,
         end: coor
       })
-    }
-    else {
+    } else {
       let focusNode = DefaultDOMElement.wrapNativeElement(wSel.focusNode)
       range = this._getRange(anchorNode, wSel.anchorOffset, focusNode, wSel.focusOffset, options)
     }
@@ -86,7 +84,7 @@ class DOMSelection {
     state.model = range
     return range
 
-    function _null() {
+    function _null () {
       state.dom = null
       state.model = null
       return null
@@ -98,7 +96,7 @@ class DOMSelection {
 
     @param {model/Selection} sel
   */
-  setSelection(sel) {
+  setSelection (sel) {
     // HACK: ignore this if not Browser (e.g. when running the test suite in node)
     if (!platform.inBrowser) return
     let state = this.state
@@ -119,7 +117,7 @@ class DOMSelection {
     }
     _set(state.dom)
 
-    function _set({anchorNode, anchorOffset, focusNode, focusOffset}) {
+    function _set ({anchorNode, anchorOffset, focusNode, focusOffset}) {
       wSel.removeAllRanges()
       wRange.setStart(anchorNode, anchorOffset)
       wRange.setEnd(anchorNode, anchorOffset)
@@ -130,8 +128,8 @@ class DOMSelection {
     }
   }
 
-  mapModelToDOMCoordinates(sel) {
-    if (DEBUG) console.info('Model->DOM: sel =', sel.toString());
+  mapModelToDOMCoordinates (sel) {
+    if (DEBUG) console.info('Model->DOM: sel =', sel.toString())
     let rootEl
     let surface = this.editor.getSurfaceManager().getSurface(sel.surfaceId)
     if (!surface) {
@@ -161,7 +159,7 @@ class DOMSelection {
         }
       }
     } else if (sel.isNodeSelection()) {
-      let comp = Component.unwrap(rootEl.find('*[data-id="'+sel.getNodeId()+'"]'))
+      let comp = Component.unwrap(rootEl.find('*[data-id="' + sel.getNodeId() + '"]'))
       if (!comp) {
         console.error('Could not find component with id', sel.getNodeId())
         return {}
@@ -185,14 +183,15 @@ class DOMSelection {
         }
       }
     }
-    if (DEBUG) console.info('Model->DOM:', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse());
-    return {start,end}
+    if (DEBUG) console.info('Model->DOM:', start.container, start.offset, end.container, end.offset, 'isReverse?', sel.isReverse())
+    return {start, end}
   }
 
-  _getDOMCoordinate(rootEl, coor) {
-    let comp, domCoor = null
+  _getDOMCoordinate (rootEl, coor) {
+    let domCoor = null
+    let comp
     if (coor.isNodeCoordinate()) {
-      comp = Component.unwrap(rootEl.find('*[data-id="'+coor.getNodeId()+'"]'))
+      comp = Component.unwrap(rootEl.find('*[data-id="' + coor.getNodeId() + '"]'))
       if (comp) {
         if (comp._isIsolatedNodeComponent) {
           domCoor = IsolatedNodeComponent.getDOMCoordinate(comp, coor)
@@ -208,7 +207,7 @@ class DOMSelection {
         }
       }
     } else {
-      comp = Component.unwrap(rootEl.find('.sc-text-property[data-path="'+coor.path.join('.')+'"]'))
+      comp = Component.unwrap(rootEl.find('.sc-text-property[data-path="' + coor.path.join('.') + '"]'))
       if (comp) {
         domCoor = comp.getDOMCoordinate(coor.offset)
       }
@@ -222,7 +221,7 @@ class DOMSelection {
     @param {Range} range
     @returns {model/Range}
   */
-  mapDOMRange(wRange, options) {
+  mapDOMRange (wRange, options) {
     return this._getRange(
       DefaultDOMElement.wrapNativeElement(wRange.startContainer),
       wRange.startOffset,
@@ -233,13 +232,13 @@ class DOMSelection {
   /*
     Clear the DOM selection.
   */
-  clear() {
+  clear () {
     window.getSelection().removeAllRanges()
     this.state.dom = null
     this.state.model = null
   }
 
-  collapse(dir) {
+  collapse (dir) {
     let wSel = window.getSelection()
     let wRange
     if (wSel.rangeCount > 0) {
@@ -250,7 +249,7 @@ class DOMSelection {
     }
   }
 
-  select(el) {
+  select (el) {
     let wSel = window.getSelection()
     let wRange = window.document.createRange()
     wRange.selectNode(el.getNativeElement())
@@ -258,12 +257,12 @@ class DOMSelection {
     wSel.addRange(wRange)
   }
 
-  extend(el, offset) {
+  extend (el, offset) {
     let wSel = window.getSelection()
     wSel.extend(el.getNativeElement(), offset)
   }
 
-  setCursor(el, offset) {
+  setCursor (el, offset) {
     let wSel = window.getSelection()
     let wRange = window.document.createRange()
     wRange.setStart(el.getNativeElement(), offset)
@@ -280,7 +279,7 @@ class DOMSelection {
     @param {number} focusOffset
     @returns {model/Range}
   */
-  _getRange(anchorNode, anchorOffset, focusNode, focusOffset, options = {}) {
+  _getRange (anchorNode, anchorOffset, focusNode, focusOffset, options = {}) {
     let isReverse = DefaultDOMElement.isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
     let isCollapsed = (anchorNode === focusNode && anchorOffset === focusOffset)
     let start, end
@@ -330,7 +329,7 @@ class DOMSelection {
     Moving `left` would provide the previous address, `right` would provide the next address.
     The default direction is `right`.
   */
-  _getCoordinate(nodeEl, offset, options={}) {
+  _getCoordinate (nodeEl, offset, options = {}) {
     let coor = null
     // this deals with a cursor in a TextProperty
     if (!coor) {
@@ -348,17 +347,16 @@ class DOMSelection {
     if (!coor) {
       // as in #354: sometimes anchor or focus is the surface itself
       if (comp && comp._isContainerEditor) {
-        let childIdx = (offset === 0) ? 0 : offset-1
+        let childIdx = (offset === 0) ? 0 : offset - 1
         let isBefore = (offset === 0)
         let container = comp.getContainer()
         let childNode = container.getNodeAt(childIdx)
         let childComp = comp.getChildAt(childIdx)
-        coor = new Coordinate([childNode.id], isBefore?0:1 )
+        coor = new Coordinate([childNode.id], isBefore ? 0 : 1)
         coor._comp = childComp
-      }
       // sometimes anchor or focus is a Node component with TextPropertyComponents as children (all TextNode Components)
-      else if (nodeEl.isElementNode() && nodeEl.getChildCount() > 0) {
-        let child = (offset > 0) ? nodeEl.getChildAt(offset-1) : nodeEl.firstChild
+      } else if (nodeEl.isElementNode() && nodeEl.getChildCount() > 0) {
+        let child = (offset > 0) ? nodeEl.getChildAt(offset - 1) : nodeEl.firstChild
         let prop
         let childComp = Component.unwrap(child)
         if (childComp && childComp._isTextPropertyComponent) {
@@ -372,7 +370,6 @@ class DOMSelection {
     }
     return coor
   }
-
 }
 
 /*
@@ -385,7 +382,7 @@ class DOMSelection {
  and only at the end exploit the fact deriving an isReverse flag
  and bringing start and end in the correct order.
 */
-function _createRange({start, end, isReverse}) {
+function _createRange ({start, end, isReverse}) {
   if (isReverse) {
     [start, end] = [end, start]
   }

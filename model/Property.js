@@ -6,16 +6,15 @@ import Coordinate from './Coordinate'
   Internal helper class used by model/data/Node.
 */
 export default class Property {
-
-  constructor(definition) {
+  constructor (definition) {
     this.definition = definition
   }
 
-  isArray() {
+  isArray () {
     return isArray(this.definition.type)
   }
 
-  isReference() {
+  isReference () {
     if (this.isArray()) {
       return last(this.definition.type) === 'id'
     } else {
@@ -23,35 +22,35 @@ export default class Property {
     }
   }
 
-  isText() {
+  isText () {
     return Boolean(this.definition._isText)
   }
 
-  isOwned() {
+  isOwned () {
     return Boolean(this.definition.owned)
   }
 
-  isOptional() {
+  isOptional () {
     return Boolean(this.definition.optional)
   }
 
-  isNotNull() {
+  isNotNull () {
     return Boolean(this.definition.notNull)
   }
 
-  hasDefault() {
+  hasDefault () {
     return this.definition.hasOwnProperty('default')
   }
 
-  getDefault() {
+  getDefault () {
     return this.definition.default
   }
 
-  createDefaultValue() {
+  createDefaultValue () {
     if (isArray(this.definition.type)) {
       return []
     }
-    switch(this.definition.type) {
+    switch (this.definition.type) {
       case 'object':
         return {}
       case 'number':
@@ -69,11 +68,11 @@ export default class Property {
     }
   }
 
-  get type() {
+  get type () {
     return this.definition.type
   }
 
-  get name() {
+  get name () {
     return this.definition.name
   }
 }

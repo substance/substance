@@ -2,7 +2,7 @@ import TextAlignCommand from './TextAlignCommand'
 
 export default {
   name: 'text-align',
-  configure: function(config) {
+  configure: function (config) {
     config.addCommand('align-left', TextAlignCommand, {
       textAlign: 'left',
       commandGroup: 'text-align'

@@ -1,4 +1,4 @@
-import ElementType from 'domelementtype';
+import ElementType from 'domelementtype'
 
 /*
   EXPERIMENTAL:
@@ -20,9 +20,9 @@ const _encodeXMLContent = ((obj) => {
   let replacer = getInverseReplacer(invObj)
   return getInverse(invObj, replacer)
 })({
-  amp: "&",
-  gt: ">",
-  lt: "<",
+  amp: '&',
+  gt: '>',
+  lt: '<'
 })
 
 const _encodeXMLAttr = ((obj) => {
@@ -30,61 +30,58 @@ const _encodeXMLAttr = ((obj) => {
   let replacer = getInverseReplacer(invObj)
   return getInverse(invObj, replacer)
 })({
-  quot: "\"",
+  quot: '"'
 })
 
-function getInverseObj(obj){
-  return Object.keys(obj).sort().reduce(function(inverse, name){
-    inverse[obj[name]] = "&" + name + ";";
-    return inverse;
-  }, {});
+function getInverseObj (obj) {
+  return Object.keys(obj).sort().reduce(function (inverse, name) {
+    inverse[obj[name]] = '&' + name + ';'
+    return inverse
+  }, {})
 }
 
-function getInverseReplacer(inverse){
-  var single = [],
-    multiple = [];
+function getInverseReplacer (inverse) {
+  let single = []
+  let multiple = []
 
-  Object.keys(inverse).forEach(function(k){
-    if(k.length === 1){
-      single.push("\\" + k);
+  Object.keys(inverse).forEach(function (k) {
+    if (k.length === 1) {
+      single.push('\\' + k)
     } else {
-      multiple.push(k);
+      multiple.push(k)
     }
-  });
+  })
 
+  multiple.unshift('[' + single.join('') + ']')
 
-  multiple.unshift("[" + single.join("") + "]");
-
-  return new RegExp(multiple.join("|"), "g");
+  return new RegExp(multiple.join('|'), 'g')
 }
 
-var re_nonASCII = /[^\0-\x7F]/g;
-var re_astralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+const RE_NON_ASCII = /[^\0-\x7F]/g
+const RE_ASTRAL_SYMBOLS = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g
 
-function singleCharReplacer(c){
-  return "&#x" + c.charCodeAt(0).toString(16).toUpperCase() + ";";
+function singleCharReplacer (c) {
+  return '&#x' + c.charCodeAt(0).toString(16).toUpperCase() + ';'
 }
 
-function astralReplacer(c){
-
-  var high = c.charCodeAt(0);
-  var low = c.charCodeAt(1);
-  var codePoint = (high - 0xD800) * 0x400 + low - 0xDC00 + 0x10000;
-  return "&#x" + codePoint.toString(16).toUpperCase() + ";";
+function astralReplacer (c) {
+  var high = c.charCodeAt(0)
+  var low = c.charCodeAt(1)
+  var codePoint = (high - 0xD800) * 0x400 + low - 0xDC00 + 0x10000
+  return '&#x' + codePoint.toString(16).toUpperCase() + ';'
 }
 
-function getInverse(inverse, re){
-  function func(name){
-    return inverse[name];
+function getInverse (inverse, re) {
+  function func (name) {
+    return inverse[name]
   }
-  return function(data){
+  return function (data) {
     return data
       .replace(re, func)
-      .replace(re_astralSymbols, astralReplacer)
-      .replace(re_nonASCII, singleCharReplacer);
-  };
+      .replace(RE_ASTRAL_SYMBOLS, astralReplacer)
+      .replace(RE_NON_ASCII, singleCharReplacer)
+  }
 }
-
 
 const booleanAttributes = {
   __proto__: null,
@@ -110,7 +107,7 @@ const booleanAttributes = {
   seamless: true,
   selected: true,
   typemustmatch: true
-};
+}
 
 const unencodedElements = {
   __proto__: null,
@@ -122,7 +119,7 @@ const unencodedElements = {
   noframes: true,
   plaintext: true,
   noscript: true
-};
+}
 
 const singleTag = {
   __proto__: null,
@@ -144,165 +141,163 @@ const singleTag = {
   param: true,
   source: true,
   track: true,
-  wbr: true,
-};
-
+  wbr: true
+}
 
 export default class DomUtils {
-
-  isTag(elem) {
+  isTag (elem) {
     return ElementType.isTag(elem)
   }
 
-  removeElement(elem){
-    if(elem.prev) elem.prev.next = elem.next;
-    if(elem.next) elem.next.prev = elem.prev;
-    if(elem.parent){
-      var childs = elem.parent.childNodes;
-      let pos = childs.lastIndexOf(elem);
+  removeElement (elem) {
+    if (elem.prev) elem.prev.next = elem.next
+    if (elem.next) elem.next.prev = elem.prev
+    if (elem.parent) {
+      var childs = elem.parent.childNodes
+      let pos = childs.lastIndexOf(elem)
       if (pos < 0) throw new Error('Invalid state')
-      childs.splice(pos, 1);
-      elem.parent = null;
+      childs.splice(pos, 1)
+      elem.parent = null
     }
   }
 
-  replaceElement(elem, replacement){
-    if (replacement.parent) this.removeElement(replacement);
-    var prev = replacement.prev = elem.prev;
-    if(prev){
-      prev.next = replacement;
+  replaceElement (elem, replacement) {
+    if (replacement.parent) this.removeElement(replacement)
+    var prev = replacement.prev = elem.prev
+    if (prev) {
+      prev.next = replacement
     }
 
-    var next = replacement.next = elem.next;
-    if(next){
-      next.prev = replacement;
+    var next = replacement.next = elem.next
+    if (next) {
+      next.prev = replacement
     }
 
-    var parent = replacement.parent = elem.parent;
-    if(parent){
-      var childs = parent.childNodes;
-      let pos = childs.lastIndexOf(elem);
+    var parent = replacement.parent = elem.parent
+    if (parent) {
+      var childs = parent.childNodes
+      let pos = childs.lastIndexOf(elem)
       if (pos < 0) throw new Error('Invalid state')
-      childs[pos] = replacement;
+      childs[pos] = replacement
     }
   }
 
-  appendChild(elem, child){
-    if (child.parent) this.removeElement(child);
-    child.parent = elem;
+  appendChild (elem, child) {
+    if (child.parent) this.removeElement(child)
+    child.parent = elem
 
-    if(elem.childNodes.push(child) !== 1){
-      var sibling = elem.childNodes[elem.childNodes.length - 2];
-      sibling.next = child;
-      child.prev = sibling;
-      child.next = null;
+    if (elem.childNodes.push(child) !== 1) {
+      var sibling = elem.childNodes[elem.childNodes.length - 2]
+      sibling.next = child
+      child.prev = sibling
+      child.next = null
     }
   }
 
-  append(elem, next){
-    if (next.parent) this.removeElement(next);
-    var parent = elem.parent,
-      currNext = elem.next;
+  append (elem, next) {
+    if (next.parent) this.removeElement(next)
+    let parent = elem.parent
+    let currNext = elem.next
 
-    next.next = currNext;
-    next.prev = elem;
-    elem.next = next;
-    next.parent = parent;
+    next.next = currNext
+    next.prev = elem
+    elem.next = next
+    next.parent = parent
 
-    if(currNext){
-      currNext.prev = next;
-      if(parent){
-        var childs = parent.childNodes;
-        let pos = childs.lastIndexOf(currNext);
+    if (currNext) {
+      currNext.prev = next
+      if (parent) {
+        var childs = parent.childNodes
+        let pos = childs.lastIndexOf(currNext)
         if (pos < 0) throw new Error('Invalid state')
-        childs.splice(pos, 0, next);
+        childs.splice(pos, 0, next)
       }
-    } else if(parent){
-      parent.childNodes.push(next);
+    } else if (parent) {
+      parent.childNodes.push(next)
     }
   }
 
-  prepend(elem, prev){
-    if (prev.parent) this.removeElement(prev);
-    var parent = elem.parent;
-    if(parent){
-      var childs = parent.childNodes;
-      let pos = childs.lastIndexOf(elem);
+  prepend (elem, prev) {
+    if (prev.parent) this.removeElement(prev)
+    var parent = elem.parent
+    if (parent) {
+      var childs = parent.childNodes
+      let pos = childs.lastIndexOf(elem)
       if (pos < 0) throw new Error('Invalid state')
-      childs.splice(pos, 0, prev);
+      childs.splice(pos, 0, prev)
     }
 
-    if(elem.prev){
-      elem.prev.next = prev;
+    if (elem.prev) {
+      elem.prev.next = prev
     }
 
-    prev.parent = parent;
-    prev.prev = elem.prev;
-    prev.next = elem;
-    elem.prev = prev;
+    prev.parent = parent
+    prev.prev = elem.prev
+    prev.next = elem
+    elem.prev = prev
   }
 
+  filter (test, element, recurse, limit) {
+    if (!Array.isArray(element)) element = [element]
 
-  filter(test, element, recurse, limit){
-    if(!Array.isArray(element)) element = [element];
-
-    if(typeof limit !== "number" || !isFinite(limit)){
-      limit = Infinity;
+    if (typeof limit !== 'number' || !isFinite(limit)) {
+      limit = Infinity
     }
-    return this.find(test, element, recurse !== false, limit);
+    return this.find(test, element, recurse !== false, limit)
   }
 
-  find(test, elems, recurse, limit){
-    var result = [], childs;
+  find (test, elems, recurse, limit) {
+    let result = []
+    let childs
 
-    for(var i = 0, j = elems.length; i < j; i++){
-      if(test(elems[i])){
-        result.push(elems[i]);
-        if(--limit <= 0) break;
+    for (var i = 0, j = elems.length; i < j; i++) {
+      if (test(elems[i])) {
+        result.push(elems[i])
+        if (--limit <= 0) break
       }
 
-      childs = this.getChildren(elems[i]);
-      if(recurse && childs && childs.length > 0){
-        childs = this.find(test, childs, recurse, limit);
-        result = result.concat(childs);
-        limit -= childs.length;
-        if(limit <= 0) break;
+      childs = this.getChildren(elems[i])
+      if (recurse && childs && childs.length > 0) {
+        childs = this.find(test, childs, recurse, limit)
+        result = result.concat(childs)
+        limit -= childs.length
+        if (limit <= 0) break
       }
     }
 
-    return result;
+    return result
   }
 
-  findOneChild(test, elems){
-    for(var i = 0, l = elems.length; i < l; i++){
-      if(test(elems[i])) return elems[i];
+  findOneChild (test, elems) {
+    for (var i = 0, l = elems.length; i < l; i++) {
+      if (test(elems[i])) return elems[i]
     }
 
-    return null;
+    return null
   }
 
-  findOne(test, elems){
-    var elem = null;
+  findOne (test, elems) {
+    var elem = null
 
-    for(var i = 0, l = elems.length; i < l && !elem; i++){
-      const child = elems[i];
-      if(!this.isTag(child)){
-        continue;
-      } else if(test(child)){
-        elem = child;
+    for (var i = 0, l = elems.length; i < l && !elem; i++) {
+      const child = elems[i]
+      if (!this.isTag(child)) {
+        continue
+      } else if (test(child)) {
+        elem = child
       } else {
         const childNodes = this.getChildren(child)
         if (childNodes.length > 0) {
-          elem = this.findOne(test, childNodes);
+          elem = this.findOne(test, childNodes)
         }
       }
     }
 
-    return elem;
+    return elem
   }
 
-  existsOne(test, elems){
-    for(var i = 0, l = elems.length; i < l; i++){
+  existsOne (test, elems) {
+    for (var i = 0, l = elems.length; i < l; i++) {
       const elem = elems[i]
       // test only elements
       if (!this.isTag(elem)) continue
@@ -312,24 +307,24 @@ export default class DomUtils {
       const childNodes = this.getChildren(elem)
       if (childNodes.length > 0 && this.existsOne(test, childNodes)) return true
     }
-    return false;
+    return false
   }
 
-  findAll(test, elems){
-    var result = [];
-    for(var i = 0, j = elems.length; i < j; i++){
+  findAll (test, elems) {
+    var result = []
+    for (var i = 0, j = elems.length; i < j; i++) {
       const elem = elems[i]
-      if(!this.isTag(elem)) continue;
-      if(test(elem)) result.push(elem);
+      if (!this.isTag(elem)) continue
+      if (test(elem)) result.push(elem)
       const childNodes = this.getChildren(elem)
-      if(childNodes.length > 0){
-        result = result.concat(this.findAll(test, childNodes));
+      if (childNodes.length > 0) {
+        result = result.concat(this.findAll(test, childNodes))
       }
     }
-    return result;
+    return result
   }
 
-  getAttributes(el) {
+  getAttributes (el) {
     let attribs = el.getAttributes()
     // HACK: this is a bit confusing, because MemoryDOMElement and BrowserDOMElement are
     // not 100% compatible yet regarding getAttributes()
@@ -346,24 +341,24 @@ export default class DomUtils {
     }
   }
 
-  formatAttribs(el, opts = {}) {
-    let output = [];
+  formatAttribs (el, opts = {}) {
+    let output = []
     const attributes = this.getAttributes(el)
     attributes.forEach(([key, value]) => {
       if (!value && booleanAttributes[key]) {
-        output.push(key);
+        output.push(key)
       } else {
-        output.push(key + '="' + (opts.decodeEntities ? _encodeXMLAttr(value) : value) + '"');
+        output.push(key + '="' + (opts.decodeEntities ? _encodeXMLAttr(value) : value) + '"')
       }
-    });
+    })
     return output.join(' ')
   }
 
-  render(dom, opts) {
+  render (dom, opts) {
     if (!Array.isArray(dom)) dom = [dom]
     opts = opts || {}
     let output = []
-    for(var i = 0; i < dom.length; i++){
+    for (var i = 0; i < dom.length; i++) {
       let elem = dom[i]
       switch (elem.type) {
         case 'root':
@@ -394,7 +389,7 @@ export default class DomUtils {
           break
         }
         case ElementType.Text: {
-          output.push(this.renderText(elem, opts));
+          output.push(this.renderText(elem, opts))
           break
         }
         default:
@@ -404,81 +399,81 @@ export default class DomUtils {
     return output.join('')
   }
 
-  renderTag(elem, opts) {
+  renderTag (elem, opts) {
     const name = this.getName(elem)
-    if (name === "svg") opts = {decodeEntities: opts.decodeEntities, xmlMode: true};
+    if (name === 'svg') opts = {decodeEntities: opts.decodeEntities, xmlMode: true}
     let tag = '<' + name
-    let attribs = this.formatAttribs(elem, opts);
+    let attribs = this.formatAttribs(elem, opts)
     if (attribs) {
-      tag += ' ' + attribs;
+      tag += ' ' + attribs
     }
     const childNodes = this.getChildren(elem)
     if (opts.xmlMode && childNodes.length === 0) {
-      tag += '/>';
+      tag += '/>'
     } else {
-      tag += '>';
+      tag += '>'
       if (childNodes.length > 0) {
-        tag += this.render(childNodes, opts);
+        tag += this.render(childNodes, opts)
       }
       if (!singleTag[name] || opts.xmlMode) {
-        tag += '</' + name + '>';
+        tag += '</' + name + '>'
       }
     }
     return tag
   }
 
-  renderDirective(elem) {
+  renderDirective (elem) {
     return '<?' + this.getData(elem) + '?>'
   }
 
-  renderDoctype(elem) {
+  renderDoctype (elem) {
     const { name, publicId, systemId } = this.getData(elem)
     let frags = ['DOCTYPE', name]
     if (publicId) {
       frags.push('PUBLIC')
-      frags.push('"'+publicId+'"')
-      if (systemId) frags.push('"'+systemId+'"')
+      frags.push('"' + publicId + '"')
+      if (systemId) frags.push('"' + systemId + '"')
     }
-    return '<!' + frags.join(" ") + '>'
+    return '<!' + frags.join(' ') + '>'
   }
 
-  renderText(elem, opts) {
-    let text = this.getText(elem);
+  renderText (elem, opts) {
+    let text = this.getText(elem)
     if (opts.decodeEntities) {
       const parent = this.getParent(elem)
       if (!(parent && this.getName(parent) in unencodedElements)) {
-        text = _encodeXMLContent(text);
+        text = _encodeXMLContent(text)
       }
     }
     return text
   }
 
-  renderCdata(elem) {
+  renderCdata (elem) {
     return '<![CDATA[' + this.getData(elem) + ']]>'
   }
 
-  renderComment(elem) {
+  renderComment (elem) {
     return '<!--' + this.getData(elem) + '-->'
   }
 
-  getInnerHTML(elem, opts){
+  getInnerHTML (elem, opts) {
     const childNodes = this.getChildren(elem)
     return childNodes.map((child) => {
-      return this.render(child, opts);
-    }).join("")
+      return this.render(child, opts)
+    }).join('')
   }
 
-  getOuterHTML(elem, opts) {
+  getOuterHTML (elem, opts) {
     return this.render(elem, opts)
   }
 
-  getData(elem) {
+  getData (elem) {
     return elem.data
   }
 
-  getText(elem, sub){
-    if(Array.isArray(elem)) return elem.map(e => this.getText(e, sub)).join("");
-    switch(elem.type) {
+  getText (elem, sub) {
+    if (Array.isArray(elem)) return elem.map(e => this.getText(e, sub)).join('')
+    switch (elem.type) {
       case ElementType.Tag:
       case ElementType.Script:
       case ElementType.Style:
@@ -490,41 +485,40 @@ export default class DomUtils {
         // comments are not rendered
         // into the textContent of parentNodes
         if (sub) {
-          return ""
+          return ''
         }
         return elem.data
       default:
-        return ""
+        return ''
     }
   }
 
-  getChildren(elem) {
-    return elem.childNodes;
+  getChildren (elem) {
+    return elem.childNodes
   }
 
-  getParent(elem){
-    return elem.parent;
+  getParent (elem) {
+    return elem.parent
   }
 
-  getSiblings(elem){
-    var parent = this.getParent(elem);
-    return parent ? this.getChildren(parent) : [elem];
+  getSiblings (elem) {
+    var parent = this.getParent(elem)
+    return parent ? this.getChildren(parent) : [elem]
   }
 
-  getAttributeValue(elem, name){
-    return elem.getAttribute(name);
+  getAttributeValue (elem, name) {
+    return elem.getAttribute(name)
   }
 
-  hasAttrib(elem, name){
-    return elem.hasAttribute(name);
+  hasAttrib (elem, name) {
+    return elem.hasAttribute(name)
   }
 
-  getName(elem){
+  getName (elem) {
     return elem.name
   }
 
-  getNameWithoutNS(elem){
+  getNameWithoutNS (elem) {
     return elem.nameWithoutNS
   }
-
 }

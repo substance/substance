@@ -5,8 +5,7 @@ import ObjectOperation from './ObjectOperation'
 const MAXIMUM_CHANGE_DURATION = 1500
 
 class DefaultChangeCompressor {
-
-  shouldMerge(lastChange, newChange) {
+  shouldMerge (lastChange, newChange) {
     return false
     // var now = Date.now()
     // // var shouldMerge = (now - lastChange.timestamp < MAXIMUM_CHANGE_DURATION)
@@ -40,7 +39,7 @@ class DefaultChangeCompressor {
     @param {DocumentChange} second
     @returns {boolean} `true` if the second could be merged into the first, `false` otherwise
   */
-  merge(first, second) {
+  merge (first, second) {
     // we are only interested in compressing subsequent operations while typing
     // TODO: we could make our lifes easier by just tagging these changes
     var firstOp = first.ops[0]
@@ -49,18 +48,17 @@ class DefaultChangeCompressor {
     var secondDiff = secondOp.diff
     var mergedOp = false
     if (firstDiff.isInsert()) {
-      if (firstDiff.pos+firstDiff.getLength() === secondDiff.pos) {
+      if (firstDiff.pos + firstDiff.getLength() === secondDiff.pos) {
         mergedOp = firstOp.toJSON()
         mergedOp.diff.str += secondDiff.str
       }
-    }
-    else if (firstDiff.isDelete()) {
+    } else if (firstDiff.isDelete()) {
       // TODO: here is one case not covered
       // "012345": del(3, '3') del(3, '4') -> del(3, '34')
       if (firstDiff.pos === secondDiff.pos) {
         mergedOp = firstOp.toJSON()
         mergedOp.diff.str += secondDiff.str
-      } else if (secondDiff.pos+secondDiff.getLength() === firstDiff.pos) {
+      } else if (secondDiff.pos + secondDiff.getLength() === firstDiff.pos) {
         mergedOp = firstOp.toJSON()
         mergedOp.diff = secondDiff
         mergedOp.diff.str += firstDiff.str
@@ -79,7 +77,6 @@ class DefaultChangeCompressor {
     }
     return false
   }
-
 }
 
 export default DefaultChangeCompressor

@@ -7,8 +7,7 @@ import findIndex from '../util/findIndex'
 */
 export default
 class DOMEventListener {
-
-  constructor(eventName, handler, options) {
+  constructor (eventName, handler, options) {
     /* istanbul ignore next */
     if (!isString(eventName) || !isFunction(handler)) {
       throw new Error("Illegal arguments: 'eventName' must be a String, and 'handler' must be a Function.")
@@ -34,12 +33,11 @@ class DOMEventListener {
     // set when this gets attached to a DOM element
     this._el = null
   }
-
 }
 
 DOMEventListener.prototype._isDOMEventListener = true
 
-DOMEventListener.findIndex = function(eventListeners, eventName, handler) {
+DOMEventListener.findIndex = function (eventListeners, eventName, handler) {
   var idx = -1
   if (arguments[1]._isDOMEventListener) {
     idx = eventListeners.indexOf(arguments[1])
@@ -54,12 +52,12 @@ DOMEventListener.findIndex = function(eventListeners, eventName, handler) {
   return idx
 }
 
-function _matches(l1, l2) {
+function _matches (l1, l2) {
   return l1.eventName === l2.eventName && l1.originalHandler === l2.originalHandler
 }
 
-function _once(listener, handler) {
-  return function(event) {
+function _once (listener, handler) {
+  return function (event) {
     handler(event)
     listener._el.removeEventListener(listener)
   }
