@@ -1,8 +1,7 @@
 import { Component, ContainerEditor } from 'substance'
 
 class TestContainerComponent extends Component {
-
-  render($$) {
+  render ($$) {
     var el = $$('div').addClass('sc-container')
     el.append(
       $$(ContainerEditor, {

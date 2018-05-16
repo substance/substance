@@ -3,38 +3,37 @@ import isEqual from '../util/isEqual'
 import isNumber from '../util/isNumber'
 import Conflict from './Conflict'
 
-const NOP = "NOP"
-const DELETE = "delete"
-const INSERT = "insert"
+const NOP = 'NOP'
+const DELETE = 'delete'
+const INSERT = 'insert'
 
 class ArrayOperation {
-
-  constructor(data) {
+  constructor (data) {
     if (!data || !data.type) {
-      throw new Error("Illegal argument: insufficient data.")
+      throw new Error('Illegal argument: insufficient data.')
     }
     this.type = data.type
     if (this.type === NOP) return
 
     if (this.type !== INSERT && this.type !== DELETE) {
-      throw new Error("Illegal type.")
+      throw new Error('Illegal type.')
     }
     // the position where to apply the operation
     this.pos = data.pos
     // the value to insert or delete
     this.val = data.val
     if (!isNumber(this.pos) || this.pos < 0) {
-      throw new Error("Illegal argument: expecting positive number as pos.")
+      throw new Error('Illegal argument: expecting positive number as pos.')
     }
   }
 
-  apply(array) {
+  apply (array) {
     if (this.type === NOP) {
       return array
     }
     if (this.type === INSERT) {
       if (array.length < this.pos) {
-        throw new Error("Provided array is too small.")
+        throw new Error('Provided array is too small.')
       }
       array.splice(this.pos, 0, this.val)
       return array
@@ -42,17 +41,17 @@ class ArrayOperation {
     // Delete
     else /* if (this.type === DELETE) */ {
       if (array.length < this.pos) {
-        throw new Error("Provided array is too small.")
+        throw new Error('Provided array is too small.')
       }
       if (!isEqual(array[this.pos], this.val)) {
-        throw Error("Unexpected value at position " + this.pos + ". Expected " + this.val + ", found " + array[this.pos])
+        throw Error('Unexpected value at position ' + this.pos + '. Expected ' + this.val + ', found ' + array[this.pos])
       }
       array.splice(this.pos, 1)
       return array
     }
   }
 
-  clone() {
+  clone () {
     var data = {
       type: this.type,
       pos: this.pos,
@@ -61,7 +60,7 @@ class ArrayOperation {
     return new ArrayOperation(data)
   }
 
-  invert() {
+  invert () {
     var data = this.toJSON()
     if (this.type === NOP) data.type = NOP
     else if (this.type === INSERT) data.type = DELETE
@@ -69,13 +68,13 @@ class ArrayOperation {
     return new ArrayOperation(data)
   }
 
-  hasConflict(other) {
+  hasConflict (other) {
     return ArrayOperation.hasConflict(this, other)
   }
 
-  toJSON() {
+  toJSON () {
     var result = {
-      type: this.type,
+      type: this.type
     }
     if (this.type === NOP) return result
     result.pos = this.pos
@@ -83,35 +82,35 @@ class ArrayOperation {
     return result
   }
 
-  isInsert() {
+  isInsert () {
     return this.type === INSERT
   }
 
-  isDelete() {
+  isDelete () {
     return this.type === DELETE
   }
 
-  getOffset() {
+  getOffset () {
     return this.pos
   }
 
-  getValue() {
+  getValue () {
     return this.val
   }
 
-  isNOP() {
+  isNOP () {
     return this.type === NOP
   }
 
-  toString() {
-    return ["(", (this.isInsert() ? INSERT : DELETE), ",", this.getOffset(), ",'", this.getValue(), "')"].join('')
+  toString () {
+    return ['(', (this.isInsert() ? INSERT : DELETE), ',', this.getOffset(), ",'", this.getValue(), "')"].join('')
   }
 }
 
 ArrayOperation.prototype._isOperation = true
 ArrayOperation.prototype._isArrayOperation = true
 
-function hasConflict(a, b) {
+function hasConflict (a, b) {
   if (a.type === NOP || b.type === NOP) return false
   if (a.type === INSERT && b.type === INSERT) {
     return a.pos === b.pos
@@ -120,7 +119,7 @@ function hasConflict(a, b) {
   }
 }
 
-function transform_insert_insert(a, b) {
+function transform_insert_insert (a, b) {
   if (a.pos === b.pos) {
     b.pos += 1
   }
@@ -134,7 +133,7 @@ function transform_insert_insert(a, b) {
   }
 }
 
-function transform_delete_delete(a, b) {
+function transform_delete_delete (a, b) {
   // turn the second of two concurrent deletes into a NOP
   if (a.pos === b.pos) {
     b.type = NOP
@@ -148,7 +147,7 @@ function transform_delete_delete(a, b) {
   }
 }
 
-function transform_insert_delete(a, b) {
+function transform_insert_delete (a, b) {
   // reduce to a normalized case
   if (a.type === DELETE) {
     var tmp = a
@@ -162,7 +161,7 @@ function transform_insert_delete(a, b) {
   }
 }
 
-var transform = function(a, b, options) {
+var transform = function (a, b, options) {
   options = options || {}
   // enable conflicts when you want to notify the user of potential problems
   // Note that even in these cases, there is a defined result.
@@ -176,14 +175,11 @@ var transform = function(a, b, options) {
   }
   if (a.type === NOP || b.type === NOP) {
     // nothing to transform
-  }
-  else if (a.type === INSERT && b.type === INSERT) {
+  } else if (a.type === INSERT && b.type === INSERT) {
     transform_insert_insert(a, b)
-  }
-  else if (a.type === DELETE && b.type === DELETE) {
+  } else if (a.type === DELETE && b.type === DELETE) {
     transform_delete_delete(a, b)
-  }
-  else {
+  } else {
     transform_insert_delete(a, b)
   }
   return [a, b]
@@ -194,15 +190,15 @@ ArrayOperation.hasConflict = hasConflict
 
 /* Factories */
 
-ArrayOperation.Insert = function(pos, val) {
-  return new ArrayOperation({type:INSERT, pos: pos, val: val})
+ArrayOperation.Insert = function (pos, val) {
+  return new ArrayOperation({type: INSERT, pos: pos, val: val})
 }
 
-ArrayOperation.Delete = function(pos, val) {
-  return new ArrayOperation({ type:DELETE, pos: pos, val: val })
+ArrayOperation.Delete = function (pos, val) {
+  return new ArrayOperation({ type: DELETE, pos: pos, val: val })
 }
 
-ArrayOperation.fromJSON = function(data) {
+ArrayOperation.fromJSON = function (data) {
   return new ArrayOperation(data)
 }
 

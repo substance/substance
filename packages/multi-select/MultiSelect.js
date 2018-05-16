@@ -27,12 +27,11 @@ import { orderBy } from '../../util'
   ```
 */
 class MultiSelect extends Component {
-
-  didMount() {
+  didMount () {
     this._recomputeOrder()
   }
 
-  getInitialState() {
+  getInitialState () {
     return {
       options: this.props.options,
       selectedOptions: this.props.selectedOptions,
@@ -40,7 +39,7 @@ class MultiSelect extends Component {
     }
   }
 
-  render($$) {
+  render ($$) {
     let options = this.state.options
     let maxItems = this.props.maxItems
     let selectedOptions = this.state.selectedOptions
@@ -50,7 +49,7 @@ class MultiSelect extends Component {
     let el = $$('div').addClass('sc-multi-select')
 
     let optionsEl = options.map((option, index) => {
-      if(!collapsed || index <= limit - 1) {
+      if (!collapsed || index <= limit - 1) {
         let optionEl = $$('div').addClass('se-select-option')
         let icon = selectedOptions.indexOf(option.id) > -1 ? 'selected-option' : 'unselected-option'
         optionEl.append(
@@ -68,8 +67,8 @@ class MultiSelect extends Component {
 
     let collapseLabelEl = $$('div').addClass('se-multi-collapse-label')
 
-    if(options.length > limit) {
-      if(collapsed) {
+    if (options.length > limit) {
+      if (collapsed) {
         let leftItems = options.length - limit
         collapseLabelEl.append(
           this.getLabel('expand-options') + ' (' + leftItems + ')'
@@ -86,16 +85,16 @@ class MultiSelect extends Component {
     return el
   }
 
-  renderIcon($$, icon) {
+  renderIcon ($$, icon) {
     let iconEl = this.context.iconProvider.renderIcon($$, icon)
     return iconEl
   }
 
-  getSelectedOptions() {
+  getSelectedOptions () {
     return this.state.selectedOptions
   }
 
-  _recomputeOrder() {
+  _recomputeOrder () {
     let options = this.state.options
     let selectedOptions = this.state.selectedOptions
 
@@ -106,11 +105,11 @@ class MultiSelect extends Component {
     this.extendState({options: sortedOptions})
   }
 
-  _onToggleCheckbox(id) {
+  _onToggleCheckbox (id) {
     let selectedOptions = this.state.selectedOptions
     let index = selectedOptions.indexOf(id)
 
-    if(index > -1) {
+    if (index > -1) {
       selectedOptions.splice(index, 1)
     } else {
       selectedOptions.push(id)
@@ -120,13 +119,12 @@ class MultiSelect extends Component {
     this.el.emit('change')
   }
 
-  _onToggleExpand() {
+  _onToggleExpand () {
     let collapsed = this.state.collapsed
 
     this._recomputeOrder()
     this.extendState({collapsed: !collapsed})
   }
-
 }
 
 export default MultiSelect

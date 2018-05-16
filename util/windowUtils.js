@@ -1,14 +1,13 @@
 import isNil from './isNil'
 import platform from './platform'
 
-export function getDOMRangeFromEvent(evt) {
+export function getDOMRangeFromEvent (evt) {
   let range, x = evt.clientX, y = evt.clientY
   // Try the simple IE way first
   if (document.body.createTextRange) {
     range = document.body.createTextRange()
     range.moveToPoint(x, y)
-  }
-  else if (!isNil(document.createRange)) {
+  } else if (!isNil(document.createRange)) {
     // Try Mozilla's rangeOffset and rangeParent properties,
     // which are exactly what we want
     if (!isNil(evt.rangeParent)) {
@@ -34,7 +33,7 @@ export function getDOMRangeFromEvent(evt) {
 /*
   Get selection rectangle relative to panel content element
 */
-export function getSelectionRect(parentRect) {
+export function getSelectionRect (parentRect) {
   if (platform.inBrowser) {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
@@ -48,7 +47,7 @@ export function getSelectionRect(parentRect) {
   }
 }
 
-function _fixForCursorRectBug() {
+function _fixForCursorRectBug () {
   let wsel = window.getSelection()
   let el = wsel.anchorNode
   if (!el) return
@@ -67,7 +66,7 @@ function _fixForCursorRectBug() {
   }
 }
 
-export function getRelativeRect(parentRect, childRect) {
+export function getRelativeRect (parentRect, childRect) {
   var left = childRect.left - parentRect.left
   var top = childRect.top - parentRect.top
   return {
@@ -80,7 +79,7 @@ export function getRelativeRect(parentRect, childRect) {
   }
 }
 
-export function isMouseInsideDOMSelection(e) {
+export function isMouseInsideDOMSelection (e) {
   let wsel = window.getSelection()
   if (wsel.rangeCount === 0) {
     return false
@@ -93,7 +92,7 @@ export function isMouseInsideDOMSelection(e) {
          e.clientY <= selectionRect.bottom
 }
 
-export function setDOMSelection(startNode, startOffset, endNode, endOffset) {
+export function setDOMSelection (startNode, startOffset, endNode, endOffset) {
   let wsel = window.getSelection()
   let wrange = window.document.createRange()
   if (startNode._isDOMElement) {
@@ -112,10 +111,10 @@ export function setDOMSelection(startNode, startOffset, endNode, endOffset) {
   wsel.addRange(wrange)
 }
 
-export function getQueryStringParam(param, url) {
+export function getQueryStringParam (param, url) {
   if (typeof window === 'undefined') return null
-  let href = url ? url : window.location.href;
-  let reg = new RegExp( '[?&]' + param + '=([^&#]*)', 'i' );
-  let string = reg.exec(href);
-  return string ? decodeURIComponent(string[1]) : null;
+  let href = url || window.location.href
+  let reg = new RegExp('[?&]' + param + '=([^&#]*)', 'i')
+  let string = reg.exec(href)
+  return string ? decodeURIComponent(string[1]) : null
 }

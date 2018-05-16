@@ -5,8 +5,7 @@ import FileProxy from './FileProxy'
   any file type
 */
 class DefaultFileProxy extends FileProxy {
-
-  constructor(fileNode, context) {
+  constructor (fileNode, context) {
     super(fileNode, context)
 
     // used locally e.g. after drop or file dialog
@@ -17,7 +16,7 @@ class DefaultFileProxy extends FileProxy {
     this.url = fileNode.url
   }
 
-  getUrl() {
+  getUrl () {
     // if we have fetched the url already, just serve it here
     if (this.url) {
       return this.url
@@ -30,7 +29,7 @@ class DefaultFileProxy extends FileProxy {
     return ''
   }
 
-  sync() {
+  sync () {
     if (!this.url) {
       console.info('Simulating file upload. Creating blob url instead.', this._fileUrl)
       this.url = this._fileUrl

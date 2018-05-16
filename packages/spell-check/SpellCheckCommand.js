@@ -6,9 +6,7 @@ import Command from '../../ui/Command'
   @class
 */
 class SpellCheckCommand extends Command {
-
-  getCommandState(params) {
-
+  getCommandState (params) {
     let state = params.selectionState
     let markers = state.getMarkers()
     if (markers.length === 0) {
@@ -16,7 +14,7 @@ class SpellCheckCommand extends Command {
         disabled: true
       }
     }
-    markers = markers.filter(function(m) {
+    markers = markers.filter(function (m) {
       return m.type === 'spell-error'
     })
 

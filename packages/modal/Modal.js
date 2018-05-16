@@ -18,8 +18,7 @@ import Component from '../../ui/Component'
   ```
 */
 class Modal extends Component {
-
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-modal')
 
     // TODO: don't think that this is good enough. Right the modal is closed by any unhandled click.
@@ -27,7 +26,7 @@ class Modal extends Component {
     el.on('click', this._closeModal)
 
     if (this.props.width) {
-      el.addClass('sm-width-'+this.props.width)
+      el.addClass('sm-width-' + this.props.width)
     }
 
     el.append(
@@ -38,13 +37,12 @@ class Modal extends Component {
     return el
   }
 
-  _closeModal(e) {
+  _closeModal (e) {
     let closeSurfaceClick = e.target.classList.contains('sc-modal')
     if (closeSurfaceClick) {
       this.send('closeModal')
     }
   }
-
 }
 
 export default Modal

@@ -19,34 +19,33 @@ import platform from '../util/platform'
   to window.document.
 */
 
-const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup' , 'copy' ]
+const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup', 'copy' ]
 
 class GlobalEventHandler {
-
-  constructor(editorSession, surfaceManager) {
+  constructor (editorSession, surfaceManager) {
     this.editorSession = editorSession
     this.surfaceManager = surfaceManager
     this.listeners = []
     this.initialize()
   }
 
-  initialize() {
+  initialize () {
     if (platform.inBrowser) {
       let document = DefaultDOMElement.wrapNativeElement(window.document)
-      events.forEach(function(name) {
+      events.forEach(function (name) {
         document.on(name, this._dispatch.bind(this, name), this)
       }.bind(this))
     }
   }
 
-  dispose() {
+  dispose () {
     if (platform.inBrowser) {
       let document = DefaultDOMElement.wrapNativeElement(window.document)
       document.off(this)
     }
   }
 
-  addEventListener(eventName, handler, options) {
+  addEventListener (eventName, handler, options) {
     if (!options.id) {
       throw new Error("GlobalEventHandler can only be used with option 'id'")
     }
@@ -54,18 +53,18 @@ class GlobalEventHandler {
     this.listeners.push(listener)
   }
 
-  removeEventListener(listener) {
-    let idx = this.listeners.indexOf(listener);
+  removeEventListener (listener) {
+    let idx = this.listeners.indexOf(listener)
     if (idx > -1) {
       this.listeners.splice(idx, 1)
     }
   }
 
-  getEventListeners() {
+  getEventListeners () {
     return this.listeners
   }
 
-  _getActiveListener(eventName) {
+  _getActiveListener (eventName) {
     let editorSession = this.editorSession
     let sel = editorSession.getSelection()
     if (sel) {
@@ -79,7 +78,7 @@ class GlobalEventHandler {
     }
   }
 
-  _dispatch(eventName, e) {
+  _dispatch (eventName, e) {
     let listener = this._getActiveListener(eventName)
     if (listener) {
       listener.handler(e)

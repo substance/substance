@@ -16,8 +16,7 @@ import MenuItem from './MenuItem'
   ```
 */
 class Menu extends Component {
-
-  render($$) {
+  render ($$) {
     let commandState = this.props.commandStates
     let el = $$('div').addClass('sc-menu')
     this.props.items.forEach((item) => {

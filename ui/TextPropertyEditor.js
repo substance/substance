@@ -27,8 +27,7 @@ import TextPropertyComponent from './TextPropertyComponent'
 */
 
 class TextPropertyEditor extends Surface {
-
-  constructor(parent, props) {
+  constructor (parent, props) {
     // making props.name optional
     props.name = props.name || props.path.join('.')
     super(parent, props)
@@ -38,9 +37,9 @@ class TextPropertyEditor extends Surface {
     }
   }
 
-  render($$) {
+  render ($$) {
     let el = super.render.apply(this, arguments)
-    el.addClass("sc-text-property-editor")
+    el.addClass('sc-text-property-editor')
 
     if (!this.props.disabled) {
       el.addClass('sm-enabled')
@@ -52,7 +51,7 @@ class TextPropertyEditor extends Surface {
     el.append(
       $$(TextPropertyComponent, {
         placeholder: this.props.placeholder,
-        tagName: this.props.tagName || "div",
+        tagName: this.props.tagName || 'div',
         path: this.props.path,
         markers: this.props.markers,
         withoutBreak: this.props.withoutBreak
@@ -62,20 +61,20 @@ class TextPropertyEditor extends Surface {
     return el
   }
 
-  selectFirst() {
+  selectFirst () {
     this.editorSession.setSelection({
-      type: "property",
+      type: 'property',
       path: this.getPath(),
       startOffset: 0,
       surfaceId: this.id
     })
   }
 
-  getPath() {
+  getPath () {
     return this.props.path
   }
 
-  _handleEnterKey(event) {
+  _handleEnterKey (event) {
     event.stopPropagation()
     if (this.props.handleEnter === false || !this.props.multiLine) {
       event.preventDefault()
@@ -91,7 +90,7 @@ class TextPropertyEditor extends Surface {
 
   // TODO: this is somewhat manually, maybe we find a better way to
 
-  _handleEscapeKey(event) {
+  _handleEscapeKey (event) {
     this.el.emit('escape', {
       altKey: event.altKey,
       ctrlKey: event.ctrlKey,

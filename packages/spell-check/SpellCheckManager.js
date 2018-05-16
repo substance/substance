@@ -5,8 +5,7 @@ import sendRequest from '../../util/sendRequest'
 const DEFAULT_API_URL = 'http://localhost:4777/api/check'
 
 class SpellCheckManager {
-
-  constructor(editorSession, options) {
+  constructor (editorSession, options) {
     options = options || {}
     let wait = options.wait || 750
 
@@ -23,22 +22,22 @@ class SpellCheckManager {
     editorSession.onFinalize('document', this._onDocumentChange, this)
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
   }
 
-  check(path) {
+  check (path) {
     this._runSpellCheck(String(path))
   }
 
-  runGlobalCheck() {
+  runGlobalCheck () {
     let paths = Object.keys(this.textPropertyManager._textProperties)
     paths.forEach((p) => {
       this._runSpellCheck(p)
     })
   }
 
-  _onDocumentChange(change, info) {
+  _onDocumentChange (change, info) {
     if (info.spellcheck) return
     // Note: instead of analyzing the model, we consider
     // all existing TextPropertyComponents instead
@@ -49,7 +48,7 @@ class SpellCheckManager {
     })
   }
 
-  _runSpellCheck(pathStr) {
+  _runSpellCheck (pathStr) {
     // console.log('Running spell-checker on', pathStr)
     let path = pathStr.split(',')
     let text = this.editorSession.getDocument().get(path)
@@ -59,7 +58,7 @@ class SpellCheckManager {
       method: 'POST',
       url: this.apiURL,
       header: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json; charset=UTF-8'
       },
       data: {
         text: text,
@@ -68,7 +67,7 @@ class SpellCheckManager {
     }).then((data) => {
       data = JSON.parse(data)
       this._addSpellErrors(path, data)
-    }).catch(function(err) {
+    }).catch(function (err) {
       console.error(err)
     })
   }
@@ -78,12 +77,12 @@ class SpellCheckManager {
 
     Removes all spell errors on the given path first.
   */
-  _addSpellErrors(path, data) {
+  _addSpellErrors (path, data) {
     const editorSession = this.editorSession
     const markersManager = editorSession.markersManager
     // NOTE: we have one set of markers for each text property
     // as we analyze each text block one by one
-    const key = 'spell-error:'+path.join('.')
+    const key = 'spell-error:' + path.join('.')
     const markers = data.map((m) => {
       return {
         type: 'spell-error',

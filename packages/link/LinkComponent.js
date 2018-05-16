@@ -1,8 +1,7 @@
 import AnnotationComponent from '../../ui/AnnotationComponent'
 
 class LinkComponent extends AnnotationComponent {
-
-  didMount(...args) {
+  didMount (...args) {
     super.didMount(...args)
 
     let node = this.props.node
@@ -11,7 +10,7 @@ class LinkComponent extends AnnotationComponent {
     })
   }
 
-  dispose(...args) {
+  dispose (...args) {
     super.dispose(...args)
 
     this.context.editorSession.off(this)
@@ -28,9 +27,8 @@ class LinkComponent extends AnnotationComponent {
       titleComps.push(this.props.node.title)
     }
 
-    return el.attr("title", titleComps.join(' | '))
+    return el.attr('title', titleComps.join(' | '))
   }
-
 }
 
 export default LinkComponent

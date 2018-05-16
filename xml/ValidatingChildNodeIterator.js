@@ -6,8 +6,7 @@ import _isTextNodeEmpty from './_isTextNodeEmpty'
 const { TEXT } = DFA
 
 export default class ValidatingChildNodeIterator {
-
-  constructor(el, it, expr) {
+  constructor (el, it, expr) {
     this.el = el
     this.it = it
     this.expr = expr
@@ -15,11 +14,11 @@ export default class ValidatingChildNodeIterator {
     this._oldStates = []
   }
 
-  hasNext() {
+  hasNext () {
     return this.it.hasNext()
   }
 
-  next() {
+  next () {
     const state = this.state
     const expr = this.expr
     let next = this.it.next()
@@ -48,14 +47,13 @@ export default class ValidatingChildNodeIterator {
     }
   }
 
-  back() {
+  back () {
     this.it.back()
     this.state = this._oldStates.pop()
     return this
   }
 
-  peek() {
+  peek () {
     return this.it.peek()
   }
-
 }

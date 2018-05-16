@@ -6,7 +6,7 @@ import EventEmitter from '../util/EventEmitter'
   Communicates via websocket for real-time operations
 */
 class CollabClient extends EventEmitter {
-  constructor(config) {
+  constructor (config) {
     super()
 
     this.config = config
@@ -26,35 +26,35 @@ class CollabClient extends EventEmitter {
     this.connection.on('message', this._onMessage)
   }
 
-  _onConnectionClose() {
+  _onConnectionClose () {
     this.emit('disconnected')
   }
 
-  _onConnectionOpen() {
+  _onConnectionOpen () {
     this.emit('connected')
   }
 
   /*
     Delegate incoming messages from the connection
   */
-  _onMessage(msg) {
+  _onMessage (msg) {
     if (msg.scope === this.scope) {
-      this.emit('message', msg);
+      this.emit('message', msg)
     } else if (msg.scope !== '_internal') {
-      console.info('Message ignored. Not sent in hub scope', msg);
+      console.info('Message ignored. Not sent in hub scope', msg)
     }
   }
 
   /*
     Send message via websocket channel
   */
-  send(msg) {
+  send (msg) {
     if (!this.connection.isOpen()) {
       console.warn('Message could not be sent. Connection not open.', msg)
       return
     }
 
-    msg.scope = this.scope;
+    msg.scope = this.scope
     if (this.config.enhanceMessage) {
       msg = this.config.enhanceMessage(msg)
     }
@@ -64,11 +64,11 @@ class CollabClient extends EventEmitter {
   /*
     Returns true if websocket connection is open
   */
-  isConnected() {
+  isConnected () {
     return this.connection.isOpen()
   }
 
-  dispose() {
+  dispose () {
     this.connection.off(this)
   }
 }

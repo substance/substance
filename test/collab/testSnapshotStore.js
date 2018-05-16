@@ -2,8 +2,7 @@ import { series } from '../../util/async'
 
 let EXAMPLE_SNAPSHOT = {test: 'test'}
 
-function testSnapshotStore(createEmptySnapshotStore, test) {
-
+function testSnapshotStore (createEmptySnapshotStore, test) {
   /*
     Save snapshot
   */
@@ -22,15 +21,15 @@ function testSnapshotStore(createEmptySnapshotStore, test) {
   test('Retrieve snapshot for test-doc', (t) => {
     let snapshotStore = createEmptySnapshotStore()
 
-    function _create(cb) {
+    function _create (cb) {
       snapshotStore.saveSnapshot('test-doc', 3, EXAMPLE_SNAPSHOT, cb)
     }
 
-    function _get(cb) {
+    function _get (cb) {
       snapshotStore.getSnapshot('test-doc', 3, cb)
     }
 
-    function _verify(err, snapshot) {
+    function _verify (err, snapshot) {
       t.notOk(err, 'should not error')
       t.equal(snapshot, EXAMPLE_SNAPSHOT)
       t.end()
@@ -45,19 +44,19 @@ function testSnapshotStore(createEmptySnapshotStore, test) {
   test('Get all available versions for a document', (t) => {
     let snapshotStore = createEmptySnapshotStore()
 
-    function _createV1(cb) {
+    function _createV1 (cb) {
       snapshotStore.saveSnapshot('test-doc', 1, EXAMPLE_SNAPSHOT, cb)
     }
 
-    function _createV3(cb) {
+    function _createV3 (cb) {
       snapshotStore.saveSnapshot('test-doc', 3, EXAMPLE_SNAPSHOT, cb)
     }
 
-    function _getVersions(cb) {
+    function _getVersions (cb) {
       snapshotStore.getVersions('test-doc', cb)
     }
 
-    function _verify(err, versions) {
+    function _verify (err, versions) {
       t.notOk(err, 'should not error')
       t.deepEqual(versions, ['1', '3'])
       t.end()
@@ -72,15 +71,15 @@ function testSnapshotStore(createEmptySnapshotStore, test) {
   test('Delete snapshot', (t) => {
     let snapshotStore = createEmptySnapshotStore()
 
-    function _create(cb) {
+    function _create (cb) {
       snapshotStore.saveSnapshot('test-doc', 4, EXAMPLE_SNAPSHOT, cb)
     }
 
-    function _delete(cb) {
+    function _delete (cb) {
       snapshotStore.deleteSnapshot('test-doc', 4, cb)
     }
 
-    function _verify(err) {
+    function _verify (err) {
       t.notOk(err, 'should not error')
       snapshotStore.getSnapshot('test-doc', 4, (err, snapshot) => {
         t.notOk(snapshot, 'snapshot should be undefined')

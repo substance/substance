@@ -1,4 +1,4 @@
-export default function headersAndParagraphs(tx) {
+export default function headersAndParagraphs (tx) {
   var body = tx.get('body')
   tx.create({
     type: 'heading',
@@ -31,7 +31,7 @@ export default function headersAndParagraphs(tx) {
     id: 'em1',
     start: {
       path: ['p2', 'content'],
-      offset: 15,
+      offset: 15
     },
     end: {
       offset: 25

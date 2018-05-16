@@ -1,7 +1,7 @@
 import AnnotationComponent from '../../ui/AnnotationComponent'
 
 class StrongComponent extends AnnotationComponent {
-  getTagName() {
+  getTagName () {
     return 'strong'
   }
 }

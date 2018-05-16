@@ -9,8 +9,7 @@ const DISABLED = Object.freeze({
   to inhibit commands which are not allowed at the current position.
 */
 export default class SchemaDrivenCommandManager extends CommandManager {
-
-  _initialize() {
+  _initialize () {
     // NOTE: So far insert inline commands fall into the annotationCommands
     // category (e.g. InsertXrefCommand)
     const annotationCommands = new Map()
@@ -35,7 +34,7 @@ export default class SchemaDrivenCommandManager extends CommandManager {
     this.otherCommands = otherCommands
   }
 
-  _getCommand(commandName) {
+  _getCommand (commandName) {
     let cmd = this.annotationCommands.get(commandName) ||
       this.insertCommands.get(commandName) ||
       this.switchTypeCommands.get(commandName) ||
@@ -43,7 +42,7 @@ export default class SchemaDrivenCommandManager extends CommandManager {
     return cmd
   }
 
-  _updateCommandStates(editorSession) {
+  _updateCommandStates (editorSession) {
     const commandStates = {}
     const annotationCommands = this.annotationCommands
     const insertCommands = this.insertCommands
@@ -117,18 +116,18 @@ export default class SchemaDrivenCommandManager extends CommandManager {
     // and make it more consistent
     editorSession.setCommandStates(commandStates)
 
-    function _disableEditingCommands() {
+    function _disableEditingCommands () {
       _disable(annotationCommands)
       _disable(insertCommands)
       _disable(switchTypeCommands)
     }
 
-    function _disable(commands) {
+    function _disable (commands) {
       commands.forEach((cmd, name) => {
         commandStates[name] = DISABLED
       })
     }
-    function _evaluateTyped(commands, elementSchema) {
+    function _evaluateTyped (commands, elementSchema) {
       commands.forEach((cmd, name) => {
         const type = cmd.getType()
         if (elementSchema.isAllowed(type)) {
@@ -138,11 +137,10 @@ export default class SchemaDrivenCommandManager extends CommandManager {
         }
       })
     }
-    function _evaluateUntyped(commands) {
+    function _evaluateUntyped (commands) {
       commands.forEach((cmd, name) => {
         commandStates[name] = cmd.getCommandState(params, commandContext)
       })
     }
-
   }
 }

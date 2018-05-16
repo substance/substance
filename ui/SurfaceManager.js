@@ -2,8 +2,7 @@ import platform from '../util/platform'
 
 export default
 class SurfaceManager {
-
-  constructor(editorSession) {
+  constructor (editorSession) {
     this.editorSession = editorSession
     this.surfaces = {}
     this._state = {
@@ -13,7 +12,7 @@ class SurfaceManager {
     editorSession.onPostRender(this._recoverDOMSelection, this)
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
   }
 
@@ -23,7 +22,7 @@ class SurfaceManager {
    * @param {String} name Name under which the surface is registered
    * @return {ui/Surface} The surface instance
    */
-  getSurface(name) {
+  getSurface (name) {
     if (name) {
       // DEBUG
       // if (!this.surfaces.hasOwnProperty(name)) {
@@ -38,14 +37,14 @@ class SurfaceManager {
    *
    * @return {ui/Surface} Surface instance
    */
-  getFocusedSurface() {
+  getFocusedSurface () {
     const sel = this._state.selection
     if (sel && sel.surfaceId) {
       return this.getSurface(sel.surfaceId)
     }
   }
 
-  getSurfaces() {
+  getSurfaces () {
     // HACK: not yet. we would need a polyfill
     // return Object.values(this.surfaces)
     return Object.keys(this.surfaces).map(key => this.surfaces[key])
@@ -56,7 +55,7 @@ class SurfaceManager {
    *
    * @param surface {ui/Surface} A new surface instance to register
    */
-  registerSurface(surface) {
+  registerSurface (surface) {
     const id = surface.getId()
     if (this.surfaces[id]) {
       console.error(`A surface with id ${id} has already been registered.`)
@@ -69,7 +68,7 @@ class SurfaceManager {
    *
    * @param surface {ui/Surface} A surface instance to unregister
    */
-  unregisterSurface(surface) {
+  unregisterSurface (surface) {
     surface.off(this)
     let surfaceId = surface.getId()
     // Note: in an earlier stage we did something like this here
@@ -89,7 +88,7 @@ class SurfaceManager {
     }
   }
 
-  _onSelectionChanged(selection) {
+  _onSelectionChanged (selection) {
     const state = this._state
     state.selection = selection
     // HACK: removing DOM selection *and* blurring when having a CustomSelection
@@ -105,7 +104,7 @@ class SurfaceManager {
     At the end of the update flow, make sure the surface is focused
     and displays the right DOM selection
   */
-  _recoverDOMSelection() {
+  _recoverDOMSelection () {
     // do not rerender the selection if the editorSession has
     // been blurred, e.g., while some component, such as Find-And-Replace
     // dialog has the focus

@@ -15,7 +15,7 @@ import { isEntirelySelected } from './selectionHelpers'
   @return {PropertyAnnotation[]} An array of property annotations.
           Returns an empty array when selection is a container selection.
 */
-export function getPropertyAnnotationsForSelection(doc, sel, options) {
+export function getPropertyAnnotationsForSelection (doc, sel, options) {
   options = options || {}
   if (!sel.isPropertySelection()) {
     return []
@@ -37,7 +37,7 @@ export function getPropertyAnnotationsForSelection(doc, sel, options) {
   @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
 */
-export function getContainerAnnotationsForSelection(doc, sel, containerId, options) {
+export function getContainerAnnotationsForSelection (doc, sel, containerId, options) {
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
@@ -51,7 +51,7 @@ export function getContainerAnnotationsForSelection(doc, sel, containerId, optio
   let annotations = []
   if (index) {
     annotations = index.get(containerId, options.type)
-    annotations = filter(annotations, function(anno) {
+    annotations = filter(annotations, function (anno) {
       return sel.overlaps(anno.getSelection())
     })
   }
@@ -63,7 +63,7 @@ export function getContainerAnnotationsForSelection(doc, sel, containerId, optio
   @param {String} type
   @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
 */
-export function isContainerAnnotation(doc, type) {
+export function isContainerAnnotation (doc, type) {
   let schema = doc.getSchema()
   return schema.isInstanceOf(type, 'container-annotation')
 }
@@ -75,9 +75,9 @@ export function isContainerAnnotation(doc, type) {
   @param {Selection} sel
   @return {string} text enclosed by the annotation
 */
-export function getTextForSelection(doc, sel) {
+export function getTextForSelection (doc, sel) {
   if (!sel || sel.isNull()) {
-    return ""
+    return ''
   } else if (sel.isPropertySelection()) {
     let text = doc.get(sel.start.path)
     return text.substring(sel.start.offset, sel.end.offset)
@@ -90,7 +90,7 @@ export function getTextForSelection(doc, sel) {
       let node = doc.get(id)
       if (node.isText()) {
         let text = node.getText()
-        if (i === L-1) {
+        if (i === L - 1) {
           text = text.slice(0, sel.end.offset)
         }
         if (i === 0) {
@@ -103,13 +103,13 @@ export function getTextForSelection(doc, sel) {
   }
 }
 
-export function getMarkersForSelection(doc, sel) {
+export function getMarkersForSelection (doc, sel) {
   // only PropertySelections are supported right now
   if (!sel || !sel.isPropertySelection()) return []
   const path = sel.getPath()
   // markers are stored as one hash for each path, grouped by marker key
   let markers = doc.getIndex('markers').get(path)
-  const filtered = filter(markers, function(m) {
+  const filtered = filter(markers, function (m) {
     return m.containsSelection(sel)
   })
   return filtered
@@ -119,7 +119,7 @@ export function getMarkersForSelection(doc, sel) {
   Deletes a node and its children and attached annotations
   and removes it from a given container
 */
-export function deleteNode(doc, node) {
+export function deleteNode (doc, node) {
   /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
@@ -158,7 +158,7 @@ export function deleteNode(doc, node) {
 
   @param {DocumentNode} node
 */
-export function copyNode(node) {
+export function copyNode (node) {
   let nodes = []
   // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
   let nodeSchema = node.getSchema()
@@ -174,14 +174,14 @@ export function copyNode(node) {
   nodes.push(node.toJSON())
   let annotationIndex = node.getDocument().getIndex('annotations')
   let annotations = annotationIndex.get([node.id])
-  forEach(annotations, function(anno) {
+  forEach(annotations, function (anno) {
     nodes.push(anno.toJSON())
   })
   let result = flatten(nodes).filter(Boolean)
   // console.log('copyNode()', node, result)
   return result
 
-  function _copyChildren(val) {
+  function _copyChildren (val) {
     if (!val) return null
     if (isArray(val)) {
       return flatten(val.map(_copyChildren))
@@ -205,7 +205,7 @@ export function copyNode(node) {
   V: <-|->-|       :   move end by diff to start
   VI: <-|--|->     :   move end by total span
 */
-export function deleteTextRange(doc, start, end) {
+export function deleteTextRange (doc, start, end) {
   if (!start) {
     start = {
       path: end.path,
@@ -225,51 +225,50 @@ export function deleteTextRange(doc, start, end) {
     throw new Error('start and end must be on one property')
   }
   let startOffset = start.offset
-  if (startOffset < 0) throw new Error("start offset must be >= 0")
+  if (startOffset < 0) throw new Error('start offset must be >= 0')
   let endOffset = end.offset
-  if (endOffset > text.length) throw new Error("end offset must be smaller than the text length")
+  if (endOffset > text.length) throw new Error('end offset must be smaller than the text length')
 
   doc.update(path, { type: 'delete', start: startOffset, end: endOffset })
   // update annotations
   let annos = doc.getAnnotations(path)
-  annos.forEach(function(anno) {
+  annos.forEach(function (anno) {
     let annoStart = anno.start.offset
     let annoEnd = anno.end.offset
     // I anno is before
-    if (annoEnd<=startOffset) {
-      return
+    if (annoEnd <= startOffset) {
+
     }
     // II anno is after
-    else if (annoStart>=endOffset) {
-      doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset })
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+    else if (annoStart >= endOffset) {
+      doc.update([anno.id, 'start'], { type: 'shift', value: startOffset - endOffset })
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset })
     }
     // III anno is deleted
-    else if (annoStart>=startOffset && annoEnd<=endOffset) {
+    else if (annoStart >= startOffset && annoEnd <= endOffset) {
       doc.delete(anno.id)
     }
     // IV anno.start between and anno.end after
-    else if (annoStart>=startOffset && annoEnd>=endOffset) {
-      if (annoStart>startOffset) {
-        doc.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart })
+    else if (annoStart >= startOffset && annoEnd >= endOffset) {
+      if (annoStart > startOffset) {
+        doc.update([anno.id, 'start'], { type: 'shift', value: startOffset - annoStart })
       }
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset })
     }
     // V anno.start before and anno.end between
-    else if (annoStart<=startOffset && annoEnd<=endOffset) {
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd })
+    else if (annoStart <= startOffset && annoEnd <= endOffset) {
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - annoEnd })
     }
     // VI anno.start before and anno.end after
-    else if (annoStart<startOffset && annoEnd >= endOffset) {
-      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset })
-    }
-    else {
+    else if (annoStart < startOffset && annoEnd >= endOffset) {
+      doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset })
+    } else {
       console.warn('TODO: handle annotation update case.')
     }
   })
 }
 
-export function deleteListRange(doc, list, start, end) {
+export function deleteListRange (doc, list, start, end) {
   if (doc !== list.getDocument()) {
     list = doc.get(list.id)
   }
@@ -303,7 +302,7 @@ export function deleteListRange(doc, list, start, end) {
   if (startPos > endPos) {
     [start, end] = [end, start];
     [startPos, endPos] = [endPos, startPos];
-    [startItem, endItem] = [endItem, startItem];
+    [startItem, endItem] = [endItem, startItem]
   }
   let firstEntirelySelected = isEntirelySelected(doc, startItem, start, null)
   let lastEntirelySelected = isEntirelySelected(doc, endItem, null, end)
@@ -318,7 +317,7 @@ export function deleteListRange(doc, list, start, end) {
 
   // delete inner nodes
   let items = list.getItems()
-  for (let i = endPos-1; i > startPos; i--) {
+  for (let i = endPos - 1; i > startPos; i--) {
     let item = items[i]
     list.removeItemAt(i)
     deleteNode(doc, item)
@@ -340,16 +339,16 @@ export function deleteListRange(doc, list, start, end) {
   }
 }
 
-export function mergeListItems(doc, listId, itemPos) {
+export function mergeListItems (doc, listId, itemPos) {
   // HACK: make sure that the list is really from the doc
   let list = doc.get(listId)
   let targetItem = list.getItemAt(itemPos)
   let targetPath = targetItem.getPath()
   let targetLength = targetItem.getLength()
-  let sourceItem = list.getItemAt(itemPos+1)
+  let sourceItem = list.getItemAt(itemPos + 1)
   let sourcePath = sourceItem.getPath()
   // hide source
-  list.removeItemAt(itemPos+1)
+  list.removeItemAt(itemPos + 1)
   // append the text
   doc.update(targetPath, { type: 'insert', start: targetLength, text: sourceItem.getText() })
   // transfer annotations
@@ -357,7 +356,7 @@ export function mergeListItems(doc, listId, itemPos) {
   deleteNode(doc, sourceItem)
 }
 
-export function getNodes(doc, ids) {
+export function getNodes (doc, ids) {
   return ids.map((id) => {
     return doc.get(id, 'strict')
   })
@@ -365,5 +364,5 @@ export function getNodes(doc, ids) {
 
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
-export const SNIPPET_ID = "snippet"
-export const TEXT_SNIPPET_ID = "text-snippet"
+export const SNIPPET_ID = 'snippet'
+export const TEXT_SNIPPET_ID = 'text-snippet'

@@ -2,7 +2,7 @@ export default {
 
   appliesTo: ['paragraph'],
 
-  execute: function(props) {
+  execute: function (props) {
     if (this.appliesTo.indexOf(props.node.type) === -1) {
       return false
     }
@@ -16,7 +16,7 @@ export default {
       let sel = editorSession.getSelection()
       let path = sel.start.path
       let startOffset = sel.start.offset
-      editorSession.transaction(function(tx) {
+      editorSession.transaction(function (tx) {
         tx.setSelection({
           type: 'property',
           path: path,

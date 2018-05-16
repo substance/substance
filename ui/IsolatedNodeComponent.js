@@ -23,12 +23,11 @@ const SLASH = '/'.charCodeAt(0)
       into one of the surfaces, or set a CustomSelection.
 */
 class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
   }
 
-  render($$) {
+  render ($$) {
     let node = this.props.node
     let ContentClass = this.ContentClass
     let disabled = this.props.disabled
@@ -37,13 +36,13 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     let el = $$('div')
     el.addClass(this.getClassNames())
       .addClass('sc-isolated-node')
-      .addClass('sm-'+this.props.node.type)
-      .attr("data-id", node.id)
+      .addClass('sm-' + this.props.node.type)
+      .attr('data-id', node.id)
     if (disabled) {
       el.addClass('sm-disabled')
     }
     if (this.state.mode) {
-      el.addClass('sm-'+this.state.mode)
+      el.addClass('sm-' + this.state.mode)
     }
     if (!ContentClass.noStyle) {
       el.addClass('sm-default-style')
@@ -86,15 +85,15 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     return el
   }
 
-  getClassNames() {
+  getClassNames () {
     return ''
   }
 
-  getContent() {
+  getContent () {
     return this.refs.content
   }
 
-  selectNode() {
+  selectNode () {
     // console.log('IsolatedNodeComponent: selecting node.');
     let editorSession = this.context.editorSession
     let surface = this.context.surface
@@ -109,17 +108,17 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   // EXPERIMENTAL: trying to catch clicks not handler by the
   // content when this is unblocked
-  onClick(event) {
+  onClick (event) {
     // console.log('### Clicked on IsolatedNode', this.id, event.target)
     event.stopPropagation()
   }
 
-  onDblClick(event) {
+  onDblClick (event) {
     // console.log('### DblClicked on IsolatedNode', this.id, event.target)
     event.stopPropagation()
   }
 
-  grabFocus(event) {
+  grabFocus (event) {
     let content = this.refs.content
     if (content.grabFocus) {
       content.grabFocus(event)
@@ -129,17 +128,17 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   // EXPERIMENTAL: Surface and IsolatedNodeComponent communicate via flag on the mousedown event
   // and only reacting on click or mouseup when the mousedown has been reserved
-  _reserveMousedown(event) {
+  _reserveMousedown (event) {
     if (event.__reserved__) {
       // console.log('%s: mousedown already reserved by %s', this.id, event.__reserved__.id)
-      return
+
     } else {
       // console.log('%s: taking mousedown ', this.id)
       event.__reserved__ = this
     }
   }
 
-  _deriveStateFromSelectionState(selState) {
+  _deriveStateFromSelectionState (selState) {
     let surface = this._getSurface(selState)
     let newState = { mode: null, unblocked: null}
     if (!surface) return newState
@@ -167,7 +166,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
       let surfaceId = sel.surfaceId
       let id = this.getId()
       if (id.length < surfaceId.length && surfaceId.startsWith(id) && surfaceId.charCodeAt(id.length) === SLASH) {
-        let tail = surfaceId.slice(id.length+1)
+        let tail = surfaceId.slice(id.length + 1)
         if (tail.indexOf('/') > 0) {
           newState.mode = 'co-focused'
           newState.unblocked = true
@@ -179,20 +178,19 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     }
     return newState
   }
-
 }
 
 IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
 
 IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
 
-IsolatedNodeComponent.getDOMCoordinate = function(comp, coor) {
+IsolatedNodeComponent.getDOMCoordinate = function (comp, coor) {
   let { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
   if (coor.offset === 0) return start
   else return end
 }
 
-IsolatedNodeComponent.getDOMCoordinates = function(comp) {
+IsolatedNodeComponent.getDOMCoordinates = function (comp) {
   const left = comp.refs.left
   const right = comp.refs.right
   return {
@@ -207,7 +205,7 @@ IsolatedNodeComponent.getDOMCoordinates = function(comp) {
   }
 }
 
-IsolatedNodeComponent.getCoordinate = function(nodeEl, options) {
+IsolatedNodeComponent.getCoordinate = function (nodeEl, options) {
   let comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
   let offset = null
   if (options.direction === 'left' || nodeEl === comp.refs.left.el) {
@@ -224,8 +222,7 @@ IsolatedNodeComponent.getCoordinate = function(nodeEl, options) {
 }
 
 class Blocker extends Component {
-
-  render($$) {
+  render ($$) {
     return $$('div').addClass('sc-isolated-node-blocker')
       .attr('draggable', true)
       .attr('contenteditable', false)
@@ -233,7 +230,7 @@ class Blocker extends Component {
       .on('dblclick', this.onDblClick)
   }
 
-  onClick(event) {
+  onClick (event) {
     if (event.target !== this.getNativeElement()) return
     // console.log('Clicked on Blocker of %s', this._getIsolatedNodeComponent().id, event)
     event.stopPropagation()
@@ -242,15 +239,14 @@ class Blocker extends Component {
     comp.selectNode()
   }
 
-  onDblClick(event) {
+  onDblClick (event) {
     // console.log('DblClicked on Blocker of %s', this.getParent().id, event)
     event.stopPropagation()
   }
 
-  _getIsolatedNodeComponent() {
+  _getIsolatedNodeComponent () {
     return this.context.isolatedNodeComponent
   }
-
 }
 
 export default IsolatedNodeComponent

@@ -12,8 +12,7 @@ import * as operationHelpers from '../model/operationHelpers'
 
 export default
 class EditorSession extends EventEmitter {
-
-  constructor(doc, options) {
+  constructor (doc, options) {
     super()
     options = options || {}
 
@@ -69,15 +68,14 @@ class EditorSession extends EventEmitter {
     const MarkersManager = configurator.getMarkersManagerClass()
     const SurfaceManager = configurator.getSurfaceManagerClass()
 
-
     // surface manager takes care of surfaces, keeps track of the currently focused surface
     // and makes sure the DOM selection is rendered properly at the end of a flow
     this.surfaceManager = new SurfaceManager(this)
     // this context is provided to commands, tools, etc.
     this._context = {
       editorSession: this,
-      //legacy
-      surfaceManager: this.surfaceManager,
+      // legacy
+      surfaceManager: this.surfaceManager
     }
     // to expose custom context just provide optios.context
     if (options.context) {
@@ -130,7 +128,7 @@ class EditorSession extends EventEmitter {
     this.editingBehavior = editingBehavior
   }
 
-  dispose() {
+  dispose () {
     this._transaction.dispose()
     this.surfaceManager.dispose()
     this.fileManager.dispose()
@@ -147,33 +145,32 @@ class EditorSession extends EventEmitter {
     })
   }
 
-
-  hasChanged(resource) {
+  hasChanged (resource) {
     return this._dirtyFlags[resource]
   }
 
-  hasDocumentChanged() {
+  hasDocumentChanged () {
     return this.hasChanged('document')
   }
 
-  hasSelectionChanged() {
+  hasSelectionChanged () {
     return this.hasChanged('selection')
   }
 
-  hasCommandStatesChanged() {
+  hasCommandStatesChanged () {
     return this.hasChanged('commandStates')
   }
 
-  hasLanguageChanged() {
+  hasLanguageChanged () {
     return this.hasChanged('lang')
   }
 
-  hasTextDirectionChanged() {
+  hasTextDirectionChanged () {
     return this.hasChanged('dir')
   }
 
-  get(resourceName) {
-    switch(resourceName) {
+  get (resourceName) {
+    switch (resourceName) {
       case 'document':
         return this.getDocument()
       case 'selection':
@@ -191,63 +188,63 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  getConfigurator() {
+  getConfigurator () {
     return this.configurator
   }
 
-  getContext() {
+  getContext () {
     return this._context
   }
 
-  getDocument() {
+  getDocument () {
     return this.document
   }
 
-  getManager(name) {
+  getManager (name) {
     return this._managers[name]
   }
 
-  getSelection() {
+  getSelection () {
     return this.getSelectionState().getSelection()
   }
 
-  getSelectionState() {
+  getSelectionState () {
     return this._selectionState
   }
 
-  getCommandStates() {
+  getCommandStates () {
     return this._commandStates
   }
 
-  getChange() {
+  getChange () {
     return this._change
   }
 
-  getChangeInfo() {
+  getChangeInfo () {
     return this._info
   }
 
-  getFocusedSurface() {
+  getFocusedSurface () {
     return this.surfaceManager.getFocusedSurface()
   }
 
-  getSurface(surfaceId) {
+  getSurface (surfaceId) {
     return this.surfaceManager.getSurface(surfaceId)
   }
 
-  getLanguage() {
+  getLanguage () {
     return this._lang
   }
 
-  getTextDirection() {
+  getTextDirection () {
     return this._dir
   }
 
-  canUndo() {
+  canUndo () {
     return this._history.canUndo()
   }
 
-  canRedo() {
+  canRedo () {
     return this._history.canRedo()
   }
 
@@ -255,7 +252,7 @@ class EditorSession extends EventEmitter {
     There are cases when we want to explicitly reset the change history of
     an editor session
   */
-  resetHistory() {
+  resetHistory () {
     this._history.reset()
     this._setDirty('commandStates')
     if (!this._flowing) {
@@ -263,26 +260,26 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  executeCommand(...args) {
+  executeCommand (...args) {
     this.commandManager.executeCommand(...args)
   }
 
   /*
     Set EditorComponent associated with this editorSession
   */
-  attachEditor(editor) {
+  attachEditor (editor) {
     this.editor = editor
   }
 
-  detachEditor() {
+  detachEditor () {
     this.editor = undefined
   }
 
-  getEditor() {
+  getEditor () {
     return this.editor
   }
 
-  setSelection(sel, skipFlow) {
+  setSelection (sel, skipFlow) {
     // console.log('EditorSession.setSelection()', sel)
     if (sel && isPlainObject(sel)) {
       sel = this.getDocument().createSelection(sel)
@@ -305,7 +302,7 @@ class EditorSession extends EventEmitter {
     return sel
   }
 
-  selectNode(nodeId) {
+  selectNode (nodeId) {
     let surface = this.getFocusedSurface()
     this.setSelection({
       type: 'node',
@@ -315,12 +312,12 @@ class EditorSession extends EventEmitter {
     })
   }
 
-  setCommandStates(commandStates) {
+  setCommandStates (commandStates) {
     this._commandStates = commandStates
     this._setDirty('commandStates')
   }
 
-  setLanguage(lang) {
+  setLanguage (lang) {
     if (this._lang !== lang) {
       this._lang = lang
       this._setDirty('lang')
@@ -328,7 +325,7 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  setTextDirection(dir) {
+  setTextDirection (dir) {
     if (this._dir !== dir) {
       this._dir = dir
       this._setDirty('dir')
@@ -336,12 +333,12 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  createSelection() {
+  createSelection () {
     const doc = this.getDocument()
     return doc.createSelection.apply(doc, arguments)
   }
 
-  getCollaborators() {
+  getCollaborators () {
     return null
   }
 
@@ -350,7 +347,7 @@ class EditorSession extends EventEmitter {
 
     E.g. if saveHandler not available at construction
   */
-  setSaveHandler(saveHandler) {
+  setSaveHandler (saveHandler) {
     this.saveHandler = saveHandler
   }
 
@@ -369,7 +366,7 @@ class EditorSession extends EventEmitter {
     })
     ```
   */
-  transaction(transformation, info) {
+  transaction (transformation, info) {
     const t = this._transaction
     info = info || {}
     t._sync()
@@ -384,17 +381,17 @@ class EditorSession extends EventEmitter {
     return change
   }
 
-  undo() {
+  undo () {
     this._undoRedo('undo')
   }
 
-  redo() {
+  redo () {
     this._undoRedo('redo')
   }
 
-  /* eslint-disable no-invalid-this*/
+  /* eslint-disable no-invalid-this */
 
-  on(...args) {
+  on (...args) {
     let name = args[0]
     if (this._flowStages.indexOf(name) >= 0) {
       // remove the stage name from the args
@@ -411,7 +408,7 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  off(...args) {
+  off (...args) {
     if (args.length === 1) {
       let observer = args[0]
       super.off(...args)
@@ -446,11 +443,11 @@ class EditorSession extends EventEmitter {
     @param {Object} [options] options for the resource handler
 
   */
-  onUpdate(...args) {
+  onUpdate (...args) {
     return this._registerObserver('update', args)
   }
 
-  onPreRender(...args) {
+  onPreRender (...args) {
     return this._registerObserver('pre-render', args)
   }
 
@@ -484,7 +481,7 @@ class EditorSession extends EventEmitter {
     }
     ```
   */
-  onRender(...args) {
+  onRender (...args) {
     return this._registerObserver('render', args)
   }
 
@@ -501,7 +498,7 @@ class EditorSession extends EventEmitter {
     @param {Object} context owner of the handler
     @param {Object} [options] options for the resource handler
   */
-  onPostRender(...args) {
+  onPostRender (...args) {
     return this._registerObserver('post-render', args)
   }
 
@@ -518,15 +515,15 @@ class EditorSession extends EventEmitter {
     @param {Object} [options] options for the resource handler
 
   */
-  onPosition(...args) {
+  onPosition (...args) {
     return this._registerObserver('position', args)
   }
 
-  onFinalize(...args) {
+  onFinalize (...args) {
     return this._registerObserver('finalize', args)
   }
 
-  _setSelection(sel) {
+  _setSelection (sel) {
     // Note: we can't prevent selections with an unregistered surface id here,
     // because this happens initially, or when a change is applied that creates
     // a surface and puts the selection into the new node,
@@ -538,7 +535,7 @@ class EditorSession extends EventEmitter {
     return hasChanged
   }
 
-  _undoRedo(which) {
+  _undoRedo (which) {
     const doc = this.getDocument()
     var from, to
     if (which === 'redo') {
@@ -561,37 +558,37 @@ class EditorSession extends EventEmitter {
       // finally trigger the flow
       this.startFlow()
     } else {
-      console.warn('No change can be %s.', (which === 'undo'? 'undone':'redone'))
+      console.warn('No change can be %s.', (which === 'undo' ? 'undone' : 'redone'))
     }
   }
 
-  _transformLocalChangeHistory(externalChange) {
+  _transformLocalChangeHistory (externalChange) {
     // Transform the change history
     // Note: using a clone as the transform is done inplace
     // which is ok for the changes in the undo history, but not
     // for the external change
     var clone = {
-      ops: externalChange.ops.map(function(op) { return op.clone(); })
+      ops: externalChange.ops.map(function (op) { return op.clone() })
     }
     operationHelpers.transformDocumentChange(clone, this._history.doneChanges)
     operationHelpers.transformDocumentChange(clone, this._history.undoneChanges)
   }
 
-  _transformSelection(change) {
+  _transformSelection (change) {
     var oldSelection = this.getSelection()
     var newSelection = operationHelpers.transformSelection(oldSelection, change)
     // console.log('Transformed selection', change, oldSelection.toString(), newSelection.toString())
     return newSelection
   }
 
-  _commit(change, info) {
+  _commit (change, info) {
     this._commitChange(change, info)
     // TODO: Not sure this is the best place to mark the session dirty
     this._hasUnsavedChanges = true
     this.startFlow()
   }
 
-  _commitChange(change, info) {
+  _commitChange (change, info) {
     change.timestamp = Date.now()
     this._applyChange(change, info)
     if (info['history'] !== false && !info['hidden']) {
@@ -608,7 +605,7 @@ class EditorSession extends EventEmitter {
     this.emit('commit', change)
   }
 
-  _applyChange(change, info) {
+  _applyChange (change, info) {
     if (!change) {
       console.error('FIXME: change is null.')
       return
@@ -621,7 +618,7 @@ class EditorSession extends EventEmitter {
     this._info = info
   }
 
-  _applyRemoteChange(change) {
+  _applyRemoteChange (change) {
     // console.log('EditorSession: applying remote change');
     if (change.ops.length > 0) {
       this._applyChange(change, { remote: true })
@@ -636,14 +633,14 @@ class EditorSession extends EventEmitter {
   /*
     Are there unsaved changes?
   */
-  hasUnsavedChanges() {
+  hasUnsavedChanges () {
     return this._hasUnsavedChanges
   }
 
   /*
     Save session / document
   */
-  save() {
+  save () {
     var saveHandler = this.saveHandler
 
     if (this._hasUnsavedChanges && !this._isSaving) {
@@ -655,19 +652,19 @@ class EditorSession extends EventEmitter {
           fileManager: this.fileManager
         }
         return saveHandler.saveDocument(saveParams)
-        .then(() => {
-          this._hasUnsavedChanges = false
-          // We update the selection, just so a selection update flow is
-          // triggered (which will update the save tool)
-          // TODO: model this kind of update more explicitly. It could be an 'update' to the
-          // document resource (hasChanges was modified)
-          this.setSelection(this.getSelection())
-        })
-        .catch((err) => {
-          console.error('Error during save', err)
-        }).then(() => { // finally
-          this._isSaving = false
-        })
+          .then(() => {
+            this._hasUnsavedChanges = false
+            // We update the selection, just so a selection update flow is
+            // triggered (which will update the save tool)
+            // TODO: model this kind of update more explicitly. It could be an 'update' to the
+            // document resource (hasChanges was modified)
+            this.setSelection(this.getSelection())
+          })
+          .catch((err) => {
+            console.error('Error during save', err)
+          }).then(() => { // finally
+            this._isSaving = false
+          })
       } else {
         console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to editorSession')
         return Promise.reject()
@@ -685,7 +682,7 @@ class EditorSession extends EventEmitter {
 
     @internal
   */
-  startFlow() {
+  startFlow () {
     if (this._flowing) {
       throw new Error('Already in a flow. You need to postpone the update.')
     }
@@ -702,8 +699,8 @@ class EditorSession extends EventEmitter {
     const postponed = this._postponed
     const self = this
     this._postponed = []
-    setTimeout(function() {
-      postponed.forEach(function(fn) {
+    setTimeout(function () {
+      postponed.forEach(function (fn) {
         fn(self)
       })
     }, 0)
@@ -714,17 +711,17 @@ class EditorSession extends EventEmitter {
 
     @internal
   */
-  performFlow() {
+  performFlow () {
     this._flowStages.forEach((stage) => {
       this._notifyObservers(stage)
     })
   }
 
-  postpone(fn) {
+  postpone (fn) {
     this._postponed.push(fn)
   }
 
-  _parseObserverArgs(args) {
+  _parseObserverArgs (args) {
     let params = { stage: null, resource: null, handler: null, context: null, options: {} }
     // first can be a string
     let idx = 0
@@ -756,7 +753,7 @@ class EditorSession extends EventEmitter {
 
   // TODO: this needs to be refactored
 
-  _registerObserver(stage, args) {
+  _registerObserver (stage, args) {
     // this produces a record containing:
     // { resource, handler, context, options }
     let record = this._parseObserverArgs(args)
@@ -764,7 +761,7 @@ class EditorSession extends EventEmitter {
     this.__registerObserver(stage, record)
   }
 
-  __registerObserver(stage, record) {
+  __registerObserver (stage, record) {
     // HACK: storing the observer record information
     // in the observer itself
     if (record.context) {
@@ -782,13 +779,13 @@ class EditorSession extends EventEmitter {
   }
 
   // TODO: this needs to be revisited
-  _deregisterObserver(stage, method, observer) {
+  _deregisterObserver (stage, method, observer) {
     let self = this // eslint-disable-line no-invalid-this
     if (arguments.length === 1) {
       // TODO: we should optimize this, as ATM this needs to traverse
       // a lot of registered listeners
       forEach(self._observers, (observers) => {
-        for (let i = observers.length-1; i >=0 ; i--) {
+        for (let i = observers.length - 1; i >= 0; i--) {
           const o = observers[i]
           if (o.context === observer) {
             observers.splice(i, 1)
@@ -803,7 +800,7 @@ class EditorSession extends EventEmitter {
       if (!observers) {
         EventEmitter.prototype.off.apply(self, arguments)
       } else {
-        for (let i = observers.length-1; i >= 0; i--) {
+        for (let i = observers.length - 1; i >= 0; i--) {
           let o = observers[i]
           if (o.handler === method && o.context === observer) {
             observers.splice(i, 1)
@@ -814,12 +811,12 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  __deregisterObserver(record) {
+  __deregisterObserver (record) {
     const stage = record.stage
     const observers = this._observers[stage]
     const observer = record.context
     const method = record.handler
-    for (let i = observers.length-1; i >= 0; i--) {
+    for (let i = observers.length - 1; i >= 0; i--) {
       let o = observers[i]
       if (o.handler === method && o.context === observer) {
         observers.splice(i, 1)
@@ -828,7 +825,7 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  _notifyObservers(stage) {
+  _notifyObservers (stage) {
     // TODO: this is not hierarchical anymore
     // i.e. probably we have to expect degradation of performance
     // with huuuge documents, as the number of listeners is
@@ -865,11 +862,11 @@ class EditorSession extends EventEmitter {
     }
   }
 
-  _setDirty(resource) {
+  _setDirty (resource) {
     this._dirtyFlags[resource] = true
   }
 
-  _resetFlow() {
+  _resetFlow () {
     Object.keys(this._dirtyFlags).forEach((resource) => {
       this._dirtyFlags[resource] = false
     })
@@ -886,21 +883,20 @@ class EditorSession extends EventEmitter {
     the blurred states in order to rerender the tools (see FindAndReplaceTool._onFocus)
   */
 
-  setBlurred(blurred) {
+  setBlurred (blurred) {
     this._blurred = blurred
     // NOTE: We need to re-evaluate command states when blurred state is changed
     this.commandManager._updateCommandStates(this)
     this._setDirty('commandStates')
   }
 
-  isBlurred() {
+  isBlurred () {
     return Boolean(this._blurred)
   }
-
 }
 
-function _patchTxSetSelection(tx, editorSession) {
-  tx.setSelection = function(sel) {
+function _patchTxSetSelection (tx, editorSession) {
+  tx.setSelection = function (sel) {
     sel = Transaction.prototype.setSelection.call(tx, sel)
     _addSurfaceId(sel, editorSession)
     _addContainerId(sel, editorSession)
@@ -912,7 +908,7 @@ function _patchTxSetSelection(tx, editorSession) {
   Complements selection data according to the given Editor state.
   I.e., if no
 */
-function _addSurfaceId(sel, editorSession) {
+function _addSurfaceId (sel, editorSession) {
   if (sel && !sel.isNull() && !sel.surfaceId) {
     // TODO: We could check if the selection is valid within the given surface
     let surface = editorSession.getFocusedSurface()
@@ -925,7 +921,7 @@ function _addSurfaceId(sel, editorSession) {
   }
 }
 
-function _addContainerId(sel, editorSession) {
+function _addContainerId (sel, editorSession) {
   if (sel && !sel.isNull() && sel.surfaceId && !sel.containerId) {
     let surface = editorSession.getSurface(sel.surfaceId)
     if (surface) {

@@ -14,12 +14,11 @@ const EPSILON = DFA.EPSILON
   sub-DFAs.
 */
 export default class DFABuilder {
-
-  constructor(transitions) {
+  constructor (transitions) {
     this.transitions = transitions
   }
 
-  addTransition(from, to, tokens) {
+  addTransition (from, to, tokens) {
     if (!this.transitions) this.transitions = {}
     if (!isArray(tokens)) tokens = [tokens]
     tokens.forEach(token => _addTransition(this.transitions, from, to, token))
@@ -39,7 +38,7 @@ export default class DFABuilder {
             S - [A] -> N - [B] -> E
     ```
   */
-  append(other) {
+  append (other) {
     if (this.transitions && other.transitions) {
       let t1 = cloneDeep(this.transitions)
       let t2 = cloneDeep(other.transitions)
@@ -117,7 +116,7 @@ export default class DFABuilder {
 
     ```
   */
-  merge(other) {
+  merge (other) {
     if (this.transitions && other.transitions) {
       let t1 = this.transitions
       let t2 = other.transitions
@@ -146,7 +145,7 @@ export default class DFABuilder {
                -  ε  -
     ```
   */
-  optional() {
+  optional () {
     let dfa = new DFABuilder(cloneDeep(this.transitions))
     if (this.transitions) {
       dfa.addTransition(START, END, EPSILON)
@@ -170,7 +169,7 @@ export default class DFABuilder {
 
     ```
   */
-  kleene() {
+  kleene () {
     let dfa = this.plus()
     return dfa.optional()
   }
@@ -190,7 +189,7 @@ export default class DFABuilder {
 
     ```
   */
-  plus() {
+  plus () {
     let dfa
     if (this.transitions) {
       let t1 = cloneDeep(this.transitions)
@@ -227,12 +226,12 @@ export default class DFABuilder {
     return dfa
   }
 
-  toJSON() {
+  toJSON () {
     return cloneDeep(this.transitions)
   }
 
   // creates a copy of this DFA, with new state IDS
-  copy() {
+  copy () {
     let t = cloneDeep(this.transitions)
     if (this.transitions) {
       let states = Object.keys(t)
@@ -255,16 +254,15 @@ export default class DFABuilder {
     }
     return new DFABuilder(t)
   }
-
 }
 
-DFABuilder.singleToken = function(token) {
+DFABuilder.singleToken = function (token) {
   let dfa = new DFABuilder()
   dfa.addTransition(START, END, token)
   return dfa
 }
 
-function _addTransition(transitions, from, to, token) {
+function _addTransition (transitions, from, to, token) {
   let T = transitions[from]
   if (!T) {
     transitions[from] = T = {}

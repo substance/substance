@@ -2,8 +2,7 @@ import CollabSession from '../../collab/CollabSession'
 import DocumentChange from '../../model/DocumentChange'
 
 class TestCollabSession extends CollabSession {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
     this._incomingMessages = []
     this._outgoingMessages = []
@@ -13,7 +12,7 @@ class TestCollabSession extends CollabSession {
     We log received messages so we can later dump the session
     history and replay in test cases.
   */
-  _onMessage(...args) {
+  _onMessage (...args) {
     if (this.config.logging) {
       this._incomingMessages.push(args[0])
     }
@@ -24,7 +23,7 @@ class TestCollabSession extends CollabSession {
     We log sent messages so we can later dump the session
     history and replay in test cases.
   */
-  _onSend(...args) {
+  _onSend (...args) {
     if (this.config.logging) {
       this._outgoingMessages = []
       this._outgoingMessages.push(args[0])
@@ -32,27 +31,27 @@ class TestCollabSession extends CollabSession {
     super._onSend(...args)
   }
 
-  dumpIncomingMessages() {
+  dumpIncomingMessages () {
     return JSON.stringify(this._incomingMessages, null, '  ')
   }
 
-  dumpOutgoingMessages() {
+  dumpOutgoingMessages () {
     return JSON.stringify(this._outgoingMessages, null, '  ')
   }
 
-  serializeMessage(msg) {
+  serializeMessage (msg) {
     return msg
   }
 
-  deserializeMessage(msg) {
+  deserializeMessage (msg) {
     return msg
   }
 
-  serializeChange(change) {
+  serializeChange (change) {
     return change.toJSON()
   }
 
-  deserializeChange(serializedChange) {
+  deserializeChange (serializedChange) {
     return DocumentChange.fromJSON(serializedChange)
   }
 }

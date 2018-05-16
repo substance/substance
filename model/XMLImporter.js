@@ -9,22 +9,20 @@ import DOMImporter from './DOMImporter'
 */
 
 export default class XMLImporter extends DOMImporter {
-
-  constructor(config, context) {
+  constructor (config, context) {
     super(Object.assign({ idAttribute: 'id' }, config), context)
   }
 
-  importDocument(xml) {
+  importDocument (xml) {
     this.reset()
     let dom = DefaultDOMElement.parseXML(xml)
     this.convertDocument(dom)
     return this.state.doc
   }
 
-  convertDocument(xmlDocument) {
+  convertDocument (xmlDocument) {
     let rootNode = xmlDocument.children[0]
     if (!rootNode) throw new Error('XML Root node could not be found.')
     this.convertElement(rootNode)
   }
-
 }

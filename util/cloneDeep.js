@@ -3,9 +3,9 @@ import isArray from './isArray'
 import forEach from './forEach'
 import platform from './platform'
 
-function cloneDeep(val) {
+function cloneDeep (val) {
   if (isArray(val)) {
-    return _cloneArrayDeep(val);
+    return _cloneArrayDeep(val)
   }
   // HACK: should we clone Files?
   // ATM we only use it when creating FileNodes
@@ -21,7 +21,7 @@ function cloneDeep(val) {
   return val
 }
 
-function _cloneObjectDeep(obj) {
+function _cloneObjectDeep (obj) {
   let res = {}
   forEach(obj, (val, key) => {
     res[key] = cloneDeep(val)
@@ -29,7 +29,7 @@ function _cloneObjectDeep(obj) {
   return res
 }
 
-function _cloneArrayDeep(arr) {
+function _cloneArrayDeep (arr) {
   return arr.map(cloneDeep)
 }
 

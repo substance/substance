@@ -12,13 +12,13 @@ class NodeRegistry extends Registry {
 
     @param {Class} nodeClass
    */
-  register(nodeClazz) {
+  register (nodeClazz) {
     var type = nodeClazz.prototype.type
-    if ( typeof type !== 'string' || type === '' ) {
-      throw new Error( 'Node names must be strings and must not be empty')
+    if (typeof type !== 'string' || type === '') {
+      throw new Error('Node names must be strings and must not be empty')
     }
-    if (!( nodeClazz.prototype._isNode)) {
-      throw new Error( 'Nodes must be subclasses of Substance.Data.Node' )
+    if (!(nodeClazz.prototype._isNode)) {
+      throw new Error('Nodes must be subclasses of Substance.Data.Node')
     }
     if (this.contains(type)) {
       // throw new Error('Node class is already registered: ' + type)
@@ -27,7 +27,6 @@ class NodeRegistry extends Registry {
     }
     this.add(type, nodeClazz)
   }
-
 }
 
 export default NodeRegistry

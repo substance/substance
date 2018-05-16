@@ -1,7 +1,7 @@
 import TextBlockComponent from '../../ui/TextBlockComponent'
 
 class CodeblockComponent extends TextBlockComponent {
-  render($$) {
+  render ($$) {
     let el = super.render.call(this, $$)
     return el.addClass('sc-codeblock')
   }

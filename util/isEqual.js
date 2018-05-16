@@ -1,7 +1,7 @@
 import isPlainObject from './isPlainObject'
 import isArray from './isArray'
 
-export default function isEqual(a, b) {
+export default function isEqual (a, b) {
   if (a === b) return true
   if (isArray(a) && isArray(b)) {
     if (a.length !== b.length) return false

@@ -2,8 +2,7 @@ import last from '../../util/last'
 import Command from '../../ui/Command'
 
 class SelectAll extends Command {
-
-  getCommandState(params) {
+  getCommandState (params) {
     let editorSession = params.editorSession
     let isBlurred = editorSession.isBlurred()
     let surface = params.surface || editorSession.getFocusedSurface()
@@ -18,7 +17,7 @@ class SelectAll extends Command {
     return { disabled }
   }
 
-  execute(params) {
+  execute (params) {
     let editorSession = params.editorSession
     let doc = editorSession.getDocument()
     let surface = params.surface || editorSession.getFocusedSurface()

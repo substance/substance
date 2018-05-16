@@ -3,7 +3,7 @@ import forEach from '../util/forEach'
 import EventEmitter from '../util/EventEmitter'
 
 class Router extends EventEmitter {
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
     this.__isStarted__ = false
   }
@@ -11,7 +11,7 @@ class Router extends EventEmitter {
   /*
     Starts listening for hash-changes
   */
-  start() {
+  start () {
     let window = DefaultDOMElement.getBrowserWindow()
     window.on('hashchange', this._onHashChange, this)
     this.__isStarted__ = true
@@ -20,7 +20,7 @@ class Router extends EventEmitter {
   /*
     Reads out the current route
   */
-  readRoute() {
+  readRoute () {
     if (!this.__isStarted__) this.start()
     return this.parseRoute(this.getRouteString())
   }
@@ -28,17 +28,17 @@ class Router extends EventEmitter {
   /*
     Writes out a given route as a string url
   */
-  writeRoute(route, opts) {
+  writeRoute (route, opts) {
     opts = opts || {}
     let routeString = this.stringifyRoute(route)
     if (!routeString) {
-      this.clearRoute(opts);
+      this.clearRoute(opts)
     } else {
-      this._writeRoute(routeString, opts);
+      this._writeRoute(routeString, opts)
     }
   }
 
-  dispose() {
+  dispose () {
     let window = DefaultDOMElement.getBrowserWindow()
     window.off(this)
   }
@@ -49,7 +49,7 @@ class Router extends EventEmitter {
     @abstract
     @param String route content of the URL's hash fragment
   */
-  parseRoute(routeString) {
+  parseRoute (routeString) {
     return Router.routeStringToObject(routeString)
   }
 
@@ -60,32 +60,32 @@ class Router extends EventEmitter {
 
     @abstract
   */
-  stringifyRoute(route) {
+  stringifyRoute (route) {
     return Router.objectToRouteString(route)
   }
 
-  getRouteString() {
+  getRouteString () {
     return window.location.hash.slice(1)
   }
 
-  _writeRoute(route, opts) {
+  _writeRoute (route, opts) {
     this.__isSaving__ = true
     try {
       if (opts.replace) {
-        window.history.replaceState({} , '', '#'+route)
+        window.history.replaceState({}, '', '#' + route)
       } else {
-        window.history.pushState({} , '', '#'+route)
+        window.history.pushState({}, '', '#' + route)
       }
     } finally {
       this.__isSaving__ = false
     }
   }
 
-  clearRoute(opts) {
+  clearRoute (opts) {
     this._writeRoute('', opts)
   }
 
-  _onHashChange() {
+  _onHashChange () {
     // console.log('_onHashChange');
     if (this.__isSaving__) {
       return
@@ -94,7 +94,7 @@ class Router extends EventEmitter {
       console.error('FIXME: router is currently applying a route.')
       return
     }
-    this.__isLoading__ = true;
+    this.__isLoading__ = true
     try {
       let routeString = this.getRouteString()
       let route = this.parseRoute(routeString)
@@ -103,23 +103,22 @@ class Router extends EventEmitter {
       this.__isLoading__ = false
     }
   }
-
 }
 
-Router.objectToRouteString = function(obj) {
+Router.objectToRouteString = function (obj) {
   let route = []
-  forEach(obj, function(val, key) {
-    route.push(key+'='+val)
+  forEach(obj, function (val, key) {
+    route.push(key + '=' + val)
   })
   return route.join(',')
 }
 
-Router.routeStringToObject = function(routeStr) {
-  let obj = {};
+Router.routeStringToObject = function (routeStr) {
+  let obj = {}
   // Empty route maps to empty route object
   if (!routeStr) return obj
   let params = routeStr.split(',')
-  params.forEach(function(param) {
+  params.forEach(function (param) {
     let tuple = param.split('=')
     if (tuple.length !== 2) {
       throw new Error('Illegal route.')

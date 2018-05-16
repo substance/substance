@@ -1,4 +1,4 @@
-export default function(tx, file) {
+export default function (tx, file) {
   // Create file node for the image
   let imageFile = tx.create({
     type: 'file',

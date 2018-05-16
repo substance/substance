@@ -2,7 +2,7 @@ import SaveCommand from './SaveCommand'
 
 export default {
   name: 'persistence',
-  configure: function(config) {
+  configure: function (config) {
     config.addCommand('save', SaveCommand, {
       commandGroup: 'persistence'
     })
@@ -12,7 +12,6 @@ export default {
       de: 'Speichern'
     })
     config.addKeyboardShortcut('CommandOrControl+S', { command: 'save' })
-
   },
   SaveCommand: SaveCommand
 }

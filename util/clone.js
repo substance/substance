@@ -1,7 +1,7 @@
 import isObject from './isObject'
 import isArray from './isArray'
 
-function clone(val) {
+function clone (val) {
   if (isArray(val)) {
     return val.slice(0)
   }

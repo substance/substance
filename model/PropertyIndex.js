@@ -4,8 +4,7 @@ import TreeIndex from '../util/TreeIndex'
 import NodeIndex from './NodeIndex'
 
 class PropertyIndex extends NodeIndex {
-
-  constructor(property) {
+  constructor (property) {
     super()
 
     this._property = property || 'id'
@@ -18,7 +17,7 @@ class PropertyIndex extends NodeIndex {
     @param {Array<String>} path
     @returns A node or an object with ids and nodes as values.
    */
-  get(path) {
+  get (path) {
     return this.index.get(path) || {}
   }
 
@@ -27,11 +26,11 @@ class PropertyIndex extends NodeIndex {
 
     @returns An object with ids as keys and nodes as values.
    */
-  getAll(path) {
+  getAll (path) {
     return this.index.getAll(path)
   }
 
-  clear() {
+  clear () {
     this.index.clear()
   }
 
@@ -56,12 +55,12 @@ class PropertyIndex extends NodeIndex {
     @private
     @param {Node} node
    */
-  create(node) {
+  create (node) {
     var values = node[this._property]
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function(value) {
+    forEach(values, function (value) {
       this.index.set([value, node.id], node)
     }.bind(this))
   }
@@ -74,12 +73,12 @@ class PropertyIndex extends NodeIndex {
    * @private
    * @param {model/data/Node} node
    */
-  delete(node) {
+  delete (node) {
     var values = node[this._property]
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function(value) {
+    forEach(values, function (value) {
       this.index.delete([value, node.id])
     }.bind(this))
   }
@@ -92,36 +91,35 @@ class PropertyIndex extends NodeIndex {
     @private
     @param {Node} node
    */
-  update(node, path, newValue, oldValue) {
+  update (node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this._property) return
     var values = oldValue
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function(value) {
+    forEach(values, function (value) {
       this.index.delete([value, node.id])
     }.bind(this))
     values = newValue
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function(value) {
+    forEach(values, function (value) {
       this.index.set([value, node.id], node)
     }.bind(this))
   }
 
-  set(node, path, newValue, oldValue) {
+  set (node, path, newValue, oldValue) {
     this.update(node, path, newValue, oldValue)
   }
 
-  _initialize(data) {
-    forEach(data.getNodes(), function(node) {
+  _initialize (data) {
+    forEach(data.getNodes(), function (node) {
       if (this.select(node)) {
         this.create(node)
       }
     }.bind(this))
   }
 }
-
 
 export default PropertyIndex

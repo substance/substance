@@ -1,21 +1,19 @@
 import CollabServer from '../../collab/CollabServer'
 
 class TestCollabServer extends CollabServer {
-
-  constructor(config) {
+  constructor (config) {
     super(config)
 
     this.config.scope = 'substance/collab'
   }
 
-  serializeMessage(msg) {
+  serializeMessage (msg) {
     return msg
   }
 
-  deserializeMessage(msg) {
+  deserializeMessage (msg) {
     return msg
   }
-
 }
 
 export default TestCollabServer

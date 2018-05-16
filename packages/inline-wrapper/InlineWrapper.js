@@ -1,7 +1,7 @@
 import InlineNode from '../../model/InlineNode'
 
 class InlineWrapper extends InlineNode {
-  getWrappedNode() {
+  getWrappedNode () {
     return this.getDocument().get(this.wrappedNode)
   }
 }

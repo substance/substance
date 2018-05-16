@@ -1,15 +1,14 @@
 import Component from './Component'
 
 export default class CustomSurface extends Component {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     this._name = this._getCustomResourceId()
     this._surfaceId = this._createSurfaceId()
   }
 
-  getChildContext() {
+  getChildContext () {
     return {
       surface: this,
       parentSurfaceId: this.getId()
@@ -19,58 +18,57 @@ export default class CustomSurface extends Component {
     }
   }
 
-
-  didMount() {
+  didMount () {
     const surfaceManager = this.context.editorSession.surfaceManager
     surfaceManager.registerSurface(this)
   }
 
-  dispose() {
+  dispose () {
     const surfaceManager = this.context.editorSession.surfaceManager
     surfaceManager.unregisterSurface(this)
   }
 
-  rerenderDOMSelection() {
+  rerenderDOMSelection () {
     // nothing by default
   }
 
-  get name() {
+  get name () {
     return this._name
   }
 
-  getId() {
+  getId () {
     return this._surfaceId
   }
 
-  getSurfaceId() {
+  getSurfaceId () {
     return this.getId()
   }
 
-  getContainer() {
+  getContainer () {
     return undefined
   }
 
-  getContainerId() {
+  getContainerId () {
     return undefined
   }
 
-  isContainerEditor() {
+  isContainerEditor () {
     return false
   }
 
-  isCustomEditor() {
+  isCustomEditor () {
     return true
   }
 
-  isDisabled() {
+  isDisabled () {
     return Boolean(this.props.disabled)
   }
 
-  _focus() {
+  _focus () {
     // nothing by default
   }
 
-  _createSurfaceId() {
+  _createSurfaceId () {
     let isolatedNodeComponent = this.context.isolatedNodeComponent
     if (isolatedNodeComponent) {
       let parentSurface = isolatedNodeComponent.context.surface
@@ -80,8 +78,7 @@ export default class CustomSurface extends Component {
     }
   }
 
-  _getCustomResourceId() {
+  _getCustomResourceId () {
     throw new Error('This method needs to be implemented by a CustomSurface')
   }
-
 }

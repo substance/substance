@@ -13,14 +13,13 @@ const { UndoCommand, RedoCommand, SelectAllCommand } = BasePackage
 // from the parent is leaking through to the children
 export default
 class TextInput extends AbstractEditor {
-
-  constructor(parent, props = {}) {
+  constructor (parent, props = {}) {
     super(parent, _createEditorSession(props))
 
     this.doc = this.editorSession.getDocument()
   }
 
-  render($$) {
+  render ($$) {
     let el = $$(this._getTagName()).addClass('sc-text-input')
     el.append(
       $$(TextInputEditor, {
@@ -32,47 +31,46 @@ class TextInput extends AbstractEditor {
     return el
   }
 
-  didMount() {
+  didMount () {
     // set the cursor at the end of the content
     this.refs.input.selectLast()
   }
 
-  dispose() {
+  dispose () {
     super.dispose()
     this.doc.dispose()
     this.editorSession.dispose()
   }
 
   // this component manages itself
-  shouldRerender() {
+  shouldRerender () {
     return false
   }
 
-  getContent() {
+  getContent () {
     return this.getDocument().getContent()
   }
 
-  _getDocument() {
+  _getDocument () {
     return this.context.editorSession.getDocument()
   }
 
-  _getTagName() {
+  _getTagName () {
     return this.props.tagName || 'div'
   }
 
-  _onEnter(event) {
+  _onEnter (event) {
     event.stopPropagation()
     this.el.emit('confirm')
   }
 
-  _onEscape(event) {
+  _onEscape (event) {
     event.stopPropagation()
     this.el.emit('cancel')
   }
-
 }
 
-function _createEditorSession(props) {
+function _createEditorSession (props) {
   let config = new Configurator()
   config.addNode(TextNode)
   config.addCommand('undo', UndoCommand)
@@ -89,7 +87,7 @@ function _createEditorSession(props) {
     defaultTextType: 'text',
     // FIXME: the name 'ArticleClass' is not general enough
     // plus: the configurator does not fail when this is not specified
-    ArticleClass: TextInputDocument,
+    ArticleClass: TextInputDocument
   })
   if (props.package) {
     config.import(props.package)
@@ -107,7 +105,7 @@ function _createEditorSession(props) {
 }
 
 class TextInputDocument extends Document {
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     this.create({
@@ -116,10 +114,10 @@ class TextInputDocument extends Document {
       content: ''
     })
   }
-  getContentNode() {
+  getContentNode () {
     return this.get('input')
   }
-  getContent() {
+  getContent () {
     return this.getContentNode().getText()
   }
 }
@@ -127,8 +125,7 @@ class TextInputDocument extends Document {
 // TODO: would be good if there were some events triggered by
 // Surfaces
 class TextInputEditor extends TextPropertyEditor {
-
-  onKeyDown(event) {
+  onKeyDown (event) {
     let handled = false
     if (event.keyCode === 27) {
       handled = true
@@ -142,7 +139,7 @@ class TextInputEditor extends TextPropertyEditor {
     }
   }
 
-  selectLast() {
+  selectLast () {
     const doc = this.getDocument()
     const input = doc.getContentNode()
     this.editorSession.setSelection({
@@ -153,7 +150,7 @@ class TextInputEditor extends TextPropertyEditor {
     })
   }
 
-  selectAll() {
+  selectAll () {
     const doc = this.getDocument()
     const input = doc.getContentNode()
     this.editorSession.setSelection({
@@ -165,7 +162,7 @@ class TextInputEditor extends TextPropertyEditor {
     })
   }
 
-  _handleEnterKey(...args) {
+  _handleEnterKey (...args) {
     super._handleEnterKey(...args)
     this.el.emit('enter')
   }

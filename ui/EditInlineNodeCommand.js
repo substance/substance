@@ -1,14 +1,14 @@
 import Command from './Command'
 
 class EditInlineNodeCommand extends Command {
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
     if (!this.config.nodeType) {
       throw new Error('Every AnnotationCommand must have a nodeType')
     }
   }
 
-  getCommandState(params) {
+  getCommandState (params) {
     let sel = params.selection
     let newState = {
       disabled: true,
@@ -33,10 +33,9 @@ class EditInlineNodeCommand extends Command {
 
   }
 
-  _getAnnotationsForSelection(params) {
+  _getAnnotationsForSelection (params) {
     return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
-
 }
 
 export default EditInlineNodeCommand

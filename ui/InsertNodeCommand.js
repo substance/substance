@@ -2,8 +2,7 @@ import forEach from '../util/forEach'
 import Command from './Command'
 
 class InsertNodeCommand extends Command {
-
-  constructor(config) {
+  constructor (config) {
     super(config)
 
     // Note: we want to know about the node which this command is producing
@@ -14,11 +13,11 @@ class InsertNodeCommand extends Command {
     }
   }
 
-  getType() {
+  getType () {
     return this.config.nodeType
   }
 
-  getCommandState(params) {
+  getCommandState (params) {
     let sel = params.selection
     let newState = {
       disabled: true,
@@ -31,16 +30,16 @@ class InsertNodeCommand extends Command {
     return newState
   }
 
-  showInContext(sel, params) {
+  showInContext (sel, params) {
     let selectionState = params.selectionState
     return sel.isCollapsed() && selectionState.isFirst() && selectionState.isLast()
   }
 
-  isInsertCommand() {
+  isInsertCommand () {
     return true
   }
 
-  execute(params, context) {
+  execute (params, context) {
     var state = params.commandState
     if (state.disabled) return
     let editorSession = this._getEditorSession(params, context)
@@ -51,7 +50,7 @@ class InsertNodeCommand extends Command {
     })
   }
 
-  createNodeData(tx, params, context) {
+  createNodeData (tx, params, context) {
     const type = params.type
     if (!type) throw new Error("'type' is mandatory")
     const doc = context.editorSession.getDocument()
@@ -65,7 +64,7 @@ class InsertNodeCommand extends Command {
     return nodeData
   }
 
-  setSelection(tx, node) {
+  setSelection (tx, node) {
     if (node.isText()) {
       tx.selection = {
         type: 'property',

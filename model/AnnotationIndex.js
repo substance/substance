@@ -21,25 +21,24 @@ import DocumentIndex from './DocumentIndex'
     aIndex.get(["text_1", "content"], 23, 45)
 */
 class AnnotationIndex extends DocumentIndex {
-
-  constructor() {
+  constructor () {
     super()
 
     this.byPath = new TreeIndex()
     this.byType = new TreeIndex()
   }
 
-  select(node) {
+  select (node) {
     return node.isPropertyAnnotation()
   }
 
-  clear() {
+  clear () {
     this.byPath.clear()
     this.byType.clear()
   }
 
   // TODO: use object interface? so we can combine filters (path and type)
-  get(path, start, end, type) {
+  get (path, start, end, type) {
     var annotations
     if (isString(path) || path.length === 1) {
       annotations = this.byPath.getAll(path) || {}
@@ -56,7 +55,7 @@ class AnnotationIndex extends DocumentIndex {
     return annotations
   }
 
-  create(anno) {
+  create (anno) {
     const path = anno.start.path
     this.byType.set([anno.type, anno.id], anno)
     if (path && path.length > 0) {
@@ -64,28 +63,28 @@ class AnnotationIndex extends DocumentIndex {
     }
   }
 
-  delete(anno) {
+  delete (anno) {
     this._delete(anno.type, anno.id, anno.start.path)
   }
 
-  _delete(type, id, path) {
+  _delete (type, id, path) {
     this.byType.delete([type, id])
     if (path && path.length > 0) {
       this.byPath.delete(path.concat([id]))
     }
   }
 
-  update(node, path, newValue, oldValue) {
+  update (node, path, newValue, oldValue) {
     // TODO: this should better be a coordinate op
-    if (this.select(node) && path[1] === 'start' && path[2] === "path") {
+    if (this.select(node) && path[1] === 'start' && path[2] === 'path') {
       this._delete(node.type, node.id, oldValue)
       this.create(node)
     }
   }
 }
 
-AnnotationIndex.filterByRange = function(start, end) {
-  return function(anno) {
+AnnotationIndex.filterByRange = function (start, end) {
+  return function (anno) {
     var aStart = anno.start.offset
     var aEnd = anno.end.offset
     var overlap = (aEnd >= start)

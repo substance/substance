@@ -14,8 +14,7 @@ import { augmentSelection } from './selectionHelpers'
   Higher-level manipulations involve complex manipulations keeping the selection in a correct state.
  */
 class EditingInterface {
-
-  constructor(doc, options = {}) {
+  constructor (doc, options = {}) {
     this._document = doc
     this._selection = null
     // TODO: allow for custom editing implementation
@@ -23,49 +22,49 @@ class EditingInterface {
     this._direction = null
   }
 
-  dispose() {}
+  dispose () {}
 
-  getDocument() {
+  getDocument () {
     return this._document
   }
 
   /* low-level API */
 
-  get(...args) {
+  get (...args) {
     return this._document.get(...args)
   }
 
-  contains(id) {
+  contains (id) {
     return this._document.contains(id)
   }
 
-  create(nodeData) {
+  create (nodeData) {
     return this._document.create(nodeData)
   }
 
-  createDefaultTextNode(content) {
+  createDefaultTextNode (content) {
     return this._document.createDefaultTextNode(content, this._direction)
   }
 
-  delete(nodeId) {
+  delete (nodeId) {
     return this._document.delete(nodeId)
   }
 
-  set(path, value) {
+  set (path, value) {
     return this._document.set(path, value)
   }
 
-  update(path, diffOp) {
+  update (path, diffOp) {
     return this._document.update(path, diffOp)
   }
 
-  updateNode(id, newProps) {
+  updateNode (id, newProps) {
     return this._document.updateNode(id, newProps)
   }
 
   /* Selection API */
 
-  createSelection(selData) {
+  createSelection (selData) {
     // TODO: we need to rethink this
     // I'd like to make it convenient for the 99% use cases
     // which means reusing containerId and surfaceId
@@ -77,7 +76,7 @@ class EditingInterface {
     return this._document.createSelection(selData)
   }
 
-  setSelection(sel) {
+  setSelection (sel) {
     if (!sel) {
       sel = Selection.nullSelection
     } else if (isPlainObject(sel)) {
@@ -89,15 +88,15 @@ class EditingInterface {
     return sel
   }
 
-  getSelection() {
+  getSelection () {
     return this._selection
   }
 
-  get selection() {
+  get selection () {
     return this._selection
   }
 
-  set selection(sel) {
+  set selection (sel) {
     this.setSelection(sel)
   }
 
@@ -105,44 +104,44 @@ class EditingInterface {
     ATTENTION/TODO: text direction could be different on different paragraphs
     I.e. it should probably be a TextNode property
   */
-  get textDirection() {
+  get textDirection () {
     return this._direction
   }
 
-  set textDirection(dir) {
+  set textDirection (dir) {
     this._direction = dir
   }
 
   /* High-level editing */
 
-  annotate(annotationData) {
+  annotate (annotationData) {
     const sel = this._selection
     if (sel && (sel.isPropertySelection() || sel.isContainerSelection())) {
       return this._impl.annotate(this, annotationData)
     }
   }
 
-  break() {
+  break () {
     if (this._selection && !this._selection.isNull()) {
       this._impl.break(this)
     }
   }
 
-  copySelection() {
+  copySelection () {
     const sel = this._selection
     if (sel && !sel.isNull() && !sel.isCollapsed()) {
       return copySelection(this.getDocument(), this._selection)
     }
   }
 
-  deleteSelection(options) {
+  deleteSelection (options) {
     const sel = this._selection
     if (sel && !sel.isNull() && !sel.isCollapsed()) {
       this._impl.delete(this, 'right', options)
     }
   }
 
-  deleteCharacter(direction) {
+  deleteCharacter (direction) {
     const sel = this._selection
     if (!sel || sel.isNull()) {
       // nothing
@@ -153,7 +152,7 @@ class EditingInterface {
     }
   }
 
-  insertText(text) {
+  insertText (text) {
     const sel = this._selection
     if (sel && !sel.isNull()) {
       this._impl.insertText(this, text)
@@ -161,49 +160,49 @@ class EditingInterface {
   }
 
   // insert an inline node with given data at the current selection
-  insertInlineNode(inlineNode) {
+  insertInlineNode (inlineNode) {
     const sel = this._selection
     if (sel && !sel.isNull() && sel.isPropertySelection()) {
       return this._impl.insertInlineNode(this, inlineNode)
     }
   }
 
-  insertBlockNode(blockNode) {
+  insertBlockNode (blockNode) {
     const sel = this._selection
     if (sel && !sel.isNull()) {
       return this._impl.insertBlockNode(this, blockNode)
     }
   }
 
-  paste(content) {
+  paste (content) {
     const sel = this._selection
     if (sel && !sel.isNull() && !sel.isCustomSelection()) {
       return this._impl.paste(this, content)
     }
   }
 
-  switchTextType(nodeData) {
+  switchTextType (nodeData) {
     const sel = this._selection
     if (sel && !sel.isNull()) {
       return this._impl.switchTextType(this, nodeData)
     }
   }
 
-  toggleList(params) {
+  toggleList (params) {
     const sel = this._selection
     if (sel && !sel.isNull()) {
       return this._impl.toggleList(this, params)
     }
   }
 
-  indent() {
+  indent () {
     const sel = this._selection
     if (sel && !sel.isNull()) {
       return this._impl.indent(this)
     }
   }
 
-  dedent() {
+  dedent () {
     const sel = this._selection
     if (sel && !sel.isNull()) {
       return this._impl.dedent(this)
@@ -212,22 +211,21 @@ class EditingInterface {
 
   /* Legacy low-level API */
 
-  getIndex(...args) {
+  getIndex (...args) {
     return this._document.getIndex(...args)
   }
 
-  getAnnotations(...args) {
+  getAnnotations (...args) {
     return this._document.getAnnotations(...args)
   }
 
-  getSchema() {
+  getSchema () {
     return this._document.getSchema()
   }
 
-  createSnippet() {
+  createSnippet () {
     return this._document.createSnippet()
   }
-
 }
 
 export default EditingInterface

@@ -1,19 +1,18 @@
 import TextBlock from '../../model/TextBlock'
 
 class Heading extends TextBlock {
-
-  isHeading() {
+  isHeading () {
     return true
   }
 
-  getLevel() {
+  getLevel () {
     return this.level
   }
 }
 
 Heading.schema = {
-  type: "heading",
-  level: { type: "number", default: 1 }
+  type: 'heading',
+  level: { type: 'number', default: 1 }
 }
 
 export default Heading

@@ -1,16 +1,15 @@
 import Component from './Component'
 
 class NodeComponent extends Component {
-
-  didMount() {
+  didMount () {
     this.context.editorSession.onRender('document', this.rerender, this, { path: [this.props.node.id]})
   }
 
-  dispose() {
+  dispose () {
     this.context.editorSession.off(this)
   }
 
-  render($$) {
+  render ($$) {
     let tagName = this.getTagName()
     let el = $$(tagName)
       .attr('data-id', this.props.node.id)
@@ -18,20 +17,19 @@ class NodeComponent extends Component {
     return el
   }
 
-  getTagName() {
+  getTagName () {
     return 'div'
   }
 
-  getClassNames() {
+  getClassNames () {
     return ''
   }
 
-  rerender(...args) {
+  rerender (...args) {
     // skip if this node has been disposed already
     if (this.props.node.isDisposed()) return
     super.rerender(...args)
   }
-
 }
 
 export default NodeComponent

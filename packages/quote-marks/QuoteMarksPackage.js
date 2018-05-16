@@ -4,7 +4,7 @@ export default {
 
   name: 'quote-marks',
 
-  configure: function(config) {
+  configure: function (config) {
     config.addCommand('insert-quote-marks', InsertQuoteMarkCommand, {
       commandGroup: 'text-macros'
     })

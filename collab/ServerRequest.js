@@ -1,5 +1,5 @@
 class ServerRequest {
-  constructor(message, ws) {
+  constructor (message, ws) {
     this.message = message
     this.ws = ws
     this.isAuthenticated = false
@@ -9,7 +9,7 @@ class ServerRequest {
   /*
     Marks a request as authenticated
   */
-  setAuthenticated(session) {
+  setAuthenticated (session) {
     this.isAuthenticated = true
     this.session = session
   }
@@ -17,7 +17,7 @@ class ServerRequest {
   /*
     Marks a request as authorized (authorizationData is optional)
   */
-  setAuthorized(authorizationData) {
+  setAuthorized (authorizationData) {
     this.isAuthorized = true
     this.authorizationData = authorizationData
   }
@@ -25,7 +25,7 @@ class ServerRequest {
   /*
     Sets the isEnhanced flag
   */
-  setEnhanced() {
+  setEnhanced () {
     this.isEnhanced = true
   }
 }

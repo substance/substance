@@ -4,7 +4,7 @@ import testChangeStore from './testChangeStore'
 
 const test = module('collab/ChangeStore')
 
-function createChangeStore() {
+function createChangeStore () {
   return new ChangeStore()
 }
 

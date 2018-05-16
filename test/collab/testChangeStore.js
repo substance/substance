@@ -10,14 +10,13 @@ let EXAMPLE_CHANGE = {
 /*
   Util for seeding
 */
-function _addChange(store, change) {
-  return function(cb) {
+function _addChange (store, change) {
+  return function (cb) {
     store.addChange('test-doc', change, cb)
   }
 }
 
-function testChangeStore(createEmptyChangeStore, test) {
-
+function testChangeStore (createEmptyChangeStore, test) {
   /*
     Add change
   */
@@ -94,7 +93,7 @@ function testChangeStore(createEmptyChangeStore, test) {
   test('Should return no changes if sinceVersion = actual version', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
-      _addChange(changeStore, EXAMPLE_CHANGE),
+      _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
       changeStore.getChanges('test-doc', 1, (err, changes, version) => {
         t.notOk(err, 'Should not error')
@@ -109,10 +108,10 @@ function testChangeStore(createEmptyChangeStore, test) {
     Get version
   */
 
-  test('Return version of test-doc', function(t) {
+  test('Return version of test-doc', function (t) {
     let changeStore = createEmptyChangeStore()
     async.series([
-      _addChange(changeStore, EXAMPLE_CHANGE),
+      _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
       changeStore.getVersion('test-doc', (err, version) => {
         t.notOk(err, 'Should not error')
@@ -122,7 +121,7 @@ function testChangeStore(createEmptyChangeStore, test) {
     })
   })
 
-  test("Return version=0 if no changes are found", (t) => {
+  test('Return version=0 if no changes are found', (t) => {
     let changeStore = createEmptyChangeStore()
     changeStore.getVersion('not-existing-doc', (err, version) => {
       t.notOk(err, 'Should not error')
@@ -141,7 +140,7 @@ function testChangeStore(createEmptyChangeStore, test) {
       _addChange(changeStore, EXAMPLE_CHANGE),
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
-      changeStore.deleteChanges('test-doc', function(err, changeCount) {
+      changeStore.deleteChanges('test-doc', function (err, changeCount) {
         t.notOk(err, 'Should not error')
         t.equal(changeCount, 2, 'There should be 2 deleted change')
         changeStore.getChanges('test-doc', (err, changes, version) => {
@@ -154,7 +153,7 @@ function testChangeStore(createEmptyChangeStore, test) {
     })
   })
 
-  test("Delete changes of not existing doc", (t) => {
+  test('Delete changes of not existing doc', (t) => {
     let changeStore = createEmptyChangeStore()
     changeStore.deleteChanges('not-existing-doc', (err, changeCount) => {
       t.notOk(err, 'Should not error')

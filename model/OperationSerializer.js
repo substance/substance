@@ -54,13 +54,12 @@ Primitive type operations:
     ```
 */
 
-class OperationSerializer{
-
-  constructor() {
+class OperationSerializer {
+  constructor () {
     this.SEPARATOR = '\t'
   }
 
-  serialize(op) {
+  serialize (op) {
     var out = []
     switch (op.type) {
       case 'create':
@@ -90,7 +89,7 @@ class OperationSerializer{
     return out
   }
 
-  serializePrimitiveOp(op) {
+  serializePrimitiveOp (op) {
     var out = []
     if (op._isTextOperation) {
       if (op.isInsert()) {
@@ -122,7 +121,7 @@ class OperationSerializer{
     return out
   }
 
-  deserialize(str, tokenizer) {
+  deserialize (str, tokenizer) {
     if (!tokenizer) {
       tokenizer = new Tokenizer(str, this.SEPARATOR)
     }
@@ -151,12 +150,12 @@ class OperationSerializer{
         op = ObjectOperation.Update(path, diff)
         break
       default:
-        throw new Error('Illegal type for ObjectOperation: '+ type)
+        throw new Error('Illegal type for ObjectOperation: ' + type)
     }
     return op
   }
 
-  deserializePrimitiveOp(str, tokenizer) {
+  deserializePrimitiveOp (str, tokenizer) {
     if (!tokenizer) {
       tokenizer = new Tokenizer(str, this.SEPARATOR)
     }
@@ -195,7 +194,7 @@ class OperationSerializer{
 }
 
 class Tokenizer {
-  constructor(str, sep) {
+  constructor (str, sep) {
     if (isArray(arguments[0])) {
       this.tokens = arguments[0]
     } else {
@@ -204,11 +203,11 @@ class Tokenizer {
     this.pos = -1
   }
 
-  error(msg) {
+  error (msg) {
     throw new Error('Parsing error: ' + msg + '\n' + this.tokens[this.pos])
   }
 
-  getString() {
+  getString () {
     this.pos++
     var str = this.tokens[this.pos]
     if (str[0] === '"') {
@@ -217,7 +216,7 @@ class Tokenizer {
     return str
   }
 
-  getNumber() {
+  getNumber () {
     this.pos++
     var number
     var token = this.tokens[this.pos]
@@ -233,7 +232,7 @@ class Tokenizer {
     }
   }
 
-  getObject() {
+  getObject () {
     this.pos++
     var obj
     var token = this.tokens[this.pos]
@@ -249,13 +248,13 @@ class Tokenizer {
     }
   }
 
-  getAny() {
+  getAny () {
     this.pos++
     var token = this.tokens[this.pos]
     return token
   }
 
-  getPath() {
+  getPath () {
     var str = this.getString()
     return str.split('.')
   }

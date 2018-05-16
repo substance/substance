@@ -33,7 +33,7 @@ class InsertInlineNodeCommand extends Command {
   /**
     @param config Takes a config object, provided on registration in configurator
   */
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
   }
 
@@ -41,7 +41,7 @@ class InsertInlineNodeCommand extends Command {
     Determine command state for inline node insertion. Command is enabled
     if selection is a property selection.
   */
-  getCommandState(params) {
+  getCommandState (params) {
     let sel = params.selection
     let newState = {
       disabled: this.isDisabled(params),
@@ -55,11 +55,11 @@ class InsertInlineNodeCommand extends Command {
     When cursor is not collapsed tool may be displayed in context (e.g. in an
     overlay)
   */
-  showInContext(sel) {
+  showInContext (sel) {
     return !sel.isCollapsed()
   }
 
-  isDisabled(params) {
+  isDisabled (params) {
     let sel = params.selection
     let selectionState = params.editorSession.getSelectionState()
     if (!sel.isPropertySelection()) {
@@ -78,14 +78,14 @@ class InsertInlineNodeCommand extends Command {
     This is needed in order for SchemaDrivenCommandManager to categorise the
     the command.
   */
-  isAnnotationCommand() {
+  isAnnotationCommand () {
     return true
   }
 
   /**
     Insert new inline node at the current selection
   */
-  execute(params) {
+  execute (params) {
     let state = this.getCommandState(params)
     if (state.disabled) return
     let editorSession = this._getEditorSession(params)
@@ -98,7 +98,6 @@ class InsertInlineNodeCommand extends Command {
   createNodeData(tx) { // eslint-disable-line
     throw new Error('This method is abstract')
   }
-
 }
 
 export default InsertInlineNodeCommand

@@ -4,14 +4,12 @@ import ContainerAddress from './ContainerAddress'
 import { getNodes } from './documentHelpers'
 
 export default function (DocumentNode) {
-
   class AbstractContainer extends DocumentNode {
-
-    contains(nodeId) {
+    contains (nodeId) {
       return this.getPosition(nodeId) >= 0
     }
 
-    getPosition(node, strict) {
+    getPosition (node, strict) {
       if (isString(node)) {
         node = this.document.get(node)
       }
@@ -23,14 +21,14 @@ export default function (DocumentNode) {
       return pos
     }
 
-    getNodeAt(idx) {
+    getNodeAt (idx) {
       const nodeId = this.getNodeIdAt(idx)
       if (nodeId) {
         return this.getDocument().get(nodeId)
       }
     }
 
-    getNodeIdAt(idx) {
+    getNodeIdAt (idx) {
       let content = this.getContent()
       if (idx < 0 || idx >= content.length) {
         // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
@@ -40,12 +38,12 @@ export default function (DocumentNode) {
       }
     }
 
-    getNodes() {
+    getNodes () {
       const doc = this.getDocument()
       return this.getContent().map(id => doc.get(id)).filter(Boolean)
     }
 
-    show(nodeId, pos) {
+    show (nodeId, pos) {
       // allow to provide a node instance instead of nodeId
       const arg1 = arguments[0]
       if (!isString(arg1)) {
@@ -61,7 +59,7 @@ export default function (DocumentNode) {
       return this.showAt(pos, nodeId)
     }
 
-    showAt(pos, nodeId) {
+    showAt (pos, nodeId) {
       const doc = this.getDocument()
       const length = this.getLength()
       if (!isNumber(pos) || pos < 0 || pos > length) {
@@ -77,12 +75,12 @@ export default function (DocumentNode) {
       doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
     }
 
-    hide(nodeId) {
+    hide (nodeId) {
       const pos = this.getPosition(nodeId)
       this.hideAt(pos)
     }
 
-    hideAt(pos) {
+    hideAt (pos) {
       const length = this.getLength()
       if (pos >= 0 && pos < length) {
         const doc = this.getDocument()
@@ -92,7 +90,7 @@ export default function (DocumentNode) {
       }
     }
 
-    getAddress(coor) {
+    getAddress (coor) {
       if (!coor._isCoordinate) {
         // we have broken with an earlier version of this API
         throw new Error('Illegal argument: Container.getAddress(coor) expects a Coordinate instance.')
@@ -112,15 +110,15 @@ export default function (DocumentNode) {
       return new ContainerAddress(nodePos, offset)
     }
 
-    getLength() {
+    getLength () {
       return this.getContent().length
     }
 
-    get length() {
+    get length () {
       return this.getLength()
     }
 
-    _getPosition(node) {
+    _getPosition (node) {
       if (this._isCaching) {
         return this._getCachedPosition(node)
       } else {
@@ -128,7 +126,7 @@ export default function (DocumentNode) {
       }
     }
 
-    _getCachedPosition(node) {
+    _getCachedPosition (node) {
       let cache = this._cachedPositions || this._fillCache()
       let nodeId = node.id
       let pos = -1
@@ -141,7 +139,7 @@ export default function (DocumentNode) {
       return pos
     }
 
-    _fillCache() {
+    _fillCache () {
       let positions = {}
       this.nodes.forEach((id, pos) => {
         positions[id] = pos
@@ -150,18 +148,18 @@ export default function (DocumentNode) {
       return positions
     }
 
-    _invalidateCache() {
+    _invalidateCache () {
       this._cachedPositions = null
     }
 
-    _lookupPosition(node) {
+    _lookupPosition (node) {
       if (node.hasParent()) {
         node = node.getContainerRoot()
       }
       return this.getContent().indexOf(node.id)
     }
 
-    _enableCaching() {
+    _enableCaching () {
       // this hook is used to invalidate cached positions
       if (this.document) {
         this.document.data.on('operation:applied', this._onOperationApplied, this)
@@ -169,7 +167,7 @@ export default function (DocumentNode) {
       }
     }
 
-    _onOperationApplied(op) {
+    _onOperationApplied (op) {
       if (op.type === 'set' || op.type === 'update') {
         if (op.path[0] === this.id) {
           this._invalidateCache()
@@ -177,7 +175,7 @@ export default function (DocumentNode) {
       }
     }
 
-    _onDocumentChange(change) {
+    _onDocumentChange (change) {
       if (change.hasUpdated(this.getContentPath())) {
         this._invalidateCache()
       }
@@ -186,31 +184,29 @@ export default function (DocumentNode) {
     // NOTE: this has been in ParentNodeMixin before
     // TODO: try to get rid of this
 
-    hasChildren() {
+    hasChildren () {
       return this.getContent().length > 0
     }
 
-    getChildIndex(child) {
+    getChildIndex (child) {
       return this.getContent().indexOf(child.id)
     }
 
-    getChildren() {
+    getChildren () {
       return getNodes(this.getDocument(), this.getContent())
     }
 
-    getChildAt(idx) {
+    getChildAt (idx) {
       var childrenIds = this.getContent()
       if (idx < 0 || idx >= childrenIds.length) {
-        throw new Error('Array index out of bounds: ' + idx + ", " + childrenIds.length)
+        throw new Error('Array index out of bounds: ' + idx + ', ' + childrenIds.length)
       }
       return this.getDocument().get(childrenIds[idx], 'strict')
     }
 
-    getChildCount() {
+    getChildCount () {
       return this.getContent().length
     }
-
   }
   return AbstractContainer
-
 }

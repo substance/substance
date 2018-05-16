@@ -1,8 +1,7 @@
 import { Component, TextPropertyEditor } from 'substance'
 
 class TestStructuredNodeComponent extends Component {
-
-  render($$) {
+  render ($$) {
     var node = this.props.node
     var el = $$('div').addClass('sc-structured-node')
     el.append(

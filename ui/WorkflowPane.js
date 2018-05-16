@@ -1,8 +1,7 @@
 import ToolPanel from './ToolPanel'
 
 class WorkflowPane extends ToolPanel {
-
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-workflow-pane')
     el.append(
       $$('div').addClass('se-active-tools').append(
@@ -12,7 +11,7 @@ class WorkflowPane extends ToolPanel {
     return el
   }
 
-  getTheme() {
+  getTheme () {
     return this.props.theme || 'light'
   }
 }

@@ -10,7 +10,6 @@ const COUNT_MSG = '%s listeners registered in the whole system.'
   Event support.
 */
 class EventEmitter {
-
   /**
     Emit an event.
 
@@ -18,7 +17,7 @@ class EventEmitter {
     @param ...arguments
     @return true if a listener was notified, false otherwise.
    */
-  emit(event) {
+  emit (event) {
     if (event in this.__events__) {
       // console.log("Emitting event %s (%d listeners) on", event, this.__events__[event].length, this)
       // Clone the list of bindings so that handlers can remove or add handlers during the call.
@@ -47,7 +46,7 @@ class EventEmitter {
     @param {Function} method
     @param {Object} context
    */
-  on(event, method, context) {
+  on (event, method, context) {
     // TODO: we could add options like 'once'
     _on.call(this, event, method, context)
   }
@@ -59,7 +58,7 @@ class EventEmitter {
     @param {Function} method
     @param {Object} context
    */
-  off(event, method, context) { // eslint-disable-line no-unused-vars
+  off (event, method, context) { // eslint-disable-line no-unused-vars
     if (arguments.length === 1 && isObject(arguments[0])) {
       _disconnect.call(this, arguments[0])
     } else {
@@ -67,22 +66,21 @@ class EventEmitter {
     }
   }
 
-  _debugEvents() {
+  _debugEvents () {
     /* eslint-disable no-console */
     console.log('### EventEmitter: ', this)
     forEach(this.__events__, (handlers, name) => {
-      console.log("- %s listeners for %s: ", handlers.length, name, handlers)
+      console.log('- %s listeners for %s: ', handlers.length, name, handlers)
     })
     /* eslint-enable no-console */
   }
 
-  get __events__() {
+  get __events__ () {
     if (!this.___events___) {
       this.___events___ = {}
     }
     return this.___events___
   }
-
 }
 
 /*
@@ -92,10 +90,10 @@ class EventEmitter {
   @param {Function} method
   @param {Object} context
  */
-function _on(event, method, context) {
+function _on (event, method, context) {
   /* eslint-disable no-invalid-this */
   var bindings
-  validateMethod( method, context )
+  validateMethod(method, context)
   if (this.__events__.hasOwnProperty(event)) {
     bindings = this.__events__[event]
   } else {
@@ -113,7 +111,7 @@ function _on(event, method, context) {
     console.info(COUNT_MSG, count)
   }
   return this
-  /*eslint-enable no-invalid-this */
+  /* eslint-enable no-invalid-this */
 }
 
 /*
@@ -123,7 +121,7 @@ function _on(event, method, context) {
   @param {Function} method
   @param {Object} context
  */
-function _off(event, method, context) {
+function _off (event, method, context) {
   /* eslint-disable no-invalid-this */
   if (arguments.length === 0) {
     if (DEBUG) {
@@ -159,7 +157,7 @@ function _off(event, method, context) {
   }
   // Remove matching handlers
   let bindings = this.__events__[event]
-  for (let i = bindings.length-1; i >= 0; i--) {
+  for (let i = bindings.length - 1; i >= 0; i--) {
     const b = bindings[i]
     if (b.method === method && b.context === context) {
       bindings.splice(i, 1)
@@ -176,11 +174,11 @@ function _off(event, method, context) {
 }
 
 // removes a listener from all events
-function _disconnect(context) {
+function _disconnect (context) {
   /* eslint-disable no-invalid-this */
   // Remove all connections to the context
   forEach(this.__events__, (bindings, event) => {
-    for (let i = bindings.length-1; i>=0; i--) {
+    for (let i = bindings.length - 1; i >= 0; i--) {
       // bindings[i] may have been removed by the previous steps
       // so check it still exists
       if (bindings[i] && bindings[i].context === context) {
@@ -192,25 +190,25 @@ function _disconnect(context) {
   /* eslint-enable no-invalid-this */
 }
 
-function validateMethod(method, context) {
+function validateMethod (method, context) {
   // Validate method and context
   if (typeof method === 'string') {
     // Validate method
     if (context === undefined || context === null) {
-      throw new Error( 'Method name "' + method + '" has no context.' )
+      throw new Error('Method name "' + method + '" has no context.')
     }
     if (!(method in context)) {
       // Technically the method does not need to exist yet: it could be
       // added before call time. But this probably signals a typo.
-      throw new Error( 'Method not found: "' + method + '"' )
+      throw new Error('Method not found: "' + method + '"')
     }
     if (typeof context[method] !== 'function') {
       // Technically the property could be replaced by a function before
       // call time. But this probably signals a typo.
-      throw new Error( 'Property "' + method + '" is not a function' )
+      throw new Error('Property "' + method + '" is not a function')
     }
   } else if (typeof method !== 'function') {
-    throw new Error( 'Invalid callback. Function or method name expected.' )
+    throw new Error('Invalid callback. Function or method name expected.')
   }
 }
 

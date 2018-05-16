@@ -18,11 +18,10 @@ import forEach from '../util/forEach'
   ```
 */
 export default class ToolGroup extends Component {
-
   /*
     Determine wether a tool should be shown or not
   */
-  isToolEnabled(commandName, commandState) {
+  isToolEnabled (commandName, commandState) {
     let enabled = true
     if (this.props.contextual && !commandState.showInContext) {
       enabled = false
@@ -36,7 +35,7 @@ export default class ToolGroup extends Component {
   /*
     Returns true if at least one command is enabled
   */
-  hasEnabledTools(commandStates) {
+  hasEnabledTools (commandStates) {
     if (!commandStates) {
       commandStates = this._getCommandStates()
     }
@@ -49,10 +48,10 @@ export default class ToolGroup extends Component {
     return hasEnabledTools
   }
 
-  render($$) {
+  render ($$) {
     let commandStates = this._getCommandStates()
     let el = $$('div').addClass(this._getClassNames())
-    el.addClass('sm-'+this.props.name)
+    el.addClass('sm-' + this.props.name)
     forEach(commandStates, (commandState, commandName) => {
       if (this.isToolEnabled(commandName, commandState) || this.props.showDisabled) {
         let ToolClass = this._getToolClass(commandName)
@@ -72,7 +71,7 @@ export default class ToolGroup extends Component {
   /*
     We map an array of command groups to array command states
   */
-  _getCommandStates() {
+  _getCommandStates () {
     let commandStates = this.context.editorSession.getCommandStates()
     let commandGroups = this.context.commandGroups
     let filteredCommandStates = {} // command states objects of that group
@@ -97,11 +96,11 @@ export default class ToolGroup extends Component {
     return filteredCommandStates
   }
 
-  _getClassNames() {
+  _getClassNames () {
     return 'sc-tool-group'
   }
 
-  _getToolClass(commandName) {
+  _getToolClass (commandName) {
     let tools = this.context.tools
     let DefaultToolClass
     if (this.props.style === 'descriptive') {

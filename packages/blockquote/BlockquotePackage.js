@@ -5,7 +5,7 @@ import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'blockquote',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Blockquote)
     config.addComponent(Blockquote.type, BlockquoteComponent)
     config.addConverter('html', BlockquoteHTMLConverter)

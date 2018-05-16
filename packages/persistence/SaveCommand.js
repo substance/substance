@@ -1,11 +1,11 @@
 import Command from '../../ui/Command'
 
 class SaveCommand extends Command {
-  constructor() {
+  constructor () {
     super({ name: 'save' })
   }
 
-  getCommandState(params) {
+  getCommandState (params) {
     let dirty = params.editorSession.hasUnsavedChanges()
     return {
       disabled: !dirty,
@@ -13,7 +13,7 @@ class SaveCommand extends Command {
     }
   }
 
-  execute(params) {
+  execute (params) {
     let editorSession = params.editorSession
     editorSession.save()
     return {

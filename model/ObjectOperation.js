@@ -8,15 +8,14 @@ import ArrayOperation from './ArrayOperation'
 import CoordinateOperation from './CoordinateOperation'
 import Conflict from './Conflict'
 
-const NOP = "NOP"
-const CREATE = "create"
+const NOP = 'NOP'
+const CREATE = 'create'
 const DELETE = 'delete'
 const UPDATE = 'update'
 const SET = 'set'
 
 class ObjectOperation {
-
-  constructor(data) {
+  constructor (data) {
     /* istanbul ignore next */
     if (!data) {
       throw new Error('Data of ObjectOperation is missing.')
@@ -38,8 +37,7 @@ class ObjectOperation {
         throw new Error('Invalid data: value is missing.')
       }
       this.val = data.val
-    }
-    else if (this.type === UPDATE) {
+    } else if (this.type === UPDATE) {
       if (data.diff) {
         this.diff = data.diff
         if (data.diff._isTextOperation) {
@@ -52,18 +50,17 @@ class ObjectOperation {
           throw new Error('Invalid data: diff must be a TextOperation or an ArrayOperation.')
         }
       } else {
-        throw new Error("Invalid data: diff is mandatory for update operation.")
+        throw new Error('Invalid data: diff is mandatory for update operation.')
       }
-    }
-    else if (this.type === SET) {
+    } else if (this.type === SET) {
       this.val = data.val
       this.original = data.original
     } else {
-      throw new Error('Invalid type: '+ data.type)
+      throw new Error('Invalid type: ' + data.type)
     }
   }
 
-  apply(obj) {
+  apply (obj) {
     if (this.type === NOP) return obj
     var adapter
     if (obj._isPathObject) {
@@ -76,9 +73,8 @@ class ObjectOperation {
       return obj
     }
     if (this.type === DELETE) {
-      adapter.delete(this.path, "strict")
-    }
-    else if (this.type === UPDATE) {
+      adapter.delete(this.path, 'strict')
+    } else if (this.type === UPDATE) {
       var diff = this.diff
       switch (this.propertyType) {
         case 'array': {
@@ -95,28 +91,26 @@ class ObjectOperation {
         }
         case 'coordinate': {
           let coor = adapter.get(this.path)
-          if (!coor) throw new Error('No coordinate with path '+this.path)
+          if (!coor) throw new Error('No coordinate with path ' + this.path)
           diff.apply(coor)
           break
         }
         default:
           throw new Error('Invalid state.')
       }
-    }
-    else if (this.type === SET) {
+    } else if (this.type === SET) {
       // clone here as the operations value must not be changed
       adapter.set(this.path, cloneDeep(this.val))
-    }
-    else {
+    } else {
       throw new Error('Invalid type.')
     }
     return obj
   }
 
-  clone() {
+  clone () {
     var data = {
       type: this.type,
-      path: this.path,
+      path: this.path
     }
     if (this.val) {
       data.val = cloneDeep(this.val)
@@ -127,20 +121,20 @@ class ObjectOperation {
     return new ObjectOperation(data)
   }
 
-  isNOP() {
+  isNOP () {
     if (this.type === NOP) return true
     else if (this.type === UPDATE) return this.diff.isNOP()
   }
 
-  isCreate() {
+  isCreate () {
     return this.type === CREATE
   }
 
-  isDelete() {
+  isDelete () {
     return this.type === DELETE
   }
 
-  isUpdate(propertyType) {
+  isUpdate (propertyType) {
     if (propertyType) {
       return (this.type === UPDATE && this.propertyType === propertyType)
     } else {
@@ -148,22 +142,20 @@ class ObjectOperation {
     }
   }
 
-  isSet() {
+  isSet () {
     return this.type === SET
   }
 
-  invert() {
+  invert () {
     if (this.type === NOP) {
       return new ObjectOperation({ type: NOP })
     }
     var result = new ObjectOperation(this)
     if (this.type === CREATE) {
       result.type = DELETE
-    }
-    else if (this.type === DELETE) {
+    } else if (this.type === DELETE) {
       result.type = CREATE
-    }
-    else if (this.type === UPDATE) {
+    } else if (this.type === UPDATE) {
       var invertedDiff
       if (this.diff._isTextOperation) {
         invertedDiff = TextOperation.fromJSON(this.diff.toJSON()).invert()
@@ -175,81 +167,78 @@ class ObjectOperation {
         throw new Error('Illegal type')
       }
       result.diff = invertedDiff
-    }
-    else /* if (this.type === SET) */ {
+    } else /* if (this.type === SET) */ {
       result.val = this.original
       result.original = this.val
     }
     return result
   }
 
-  hasConflict(other) {
+  hasConflict (other) {
     return ObjectOperation.hasConflict(this, other)
   }
 
-  toJSON() {
+  toJSON () {
     if (this.type === NOP) {
       return { type: NOP }
     }
     var data = {
       type: this.type,
-      path: this.path,
+      path: this.path
     }
     if (this.type === CREATE || this.type === DELETE) {
       data.val = this.val
-    }
-    else if (this.type === UPDATE) {
+    } else if (this.type === UPDATE) {
       if (this.diff._isTextOperation) {
-        data.propertyType = "string"
+        data.propertyType = 'string'
       } else if (this.diff._isArrayOperation) {
-        data.propertyType = "array"
+        data.propertyType = 'array'
       } else if (this.diff._isCoordinateOperation) {
-        data.propertyType = "coordinate"
+        data.propertyType = 'coordinate'
       } else {
         throw new Error('Invalid property type.')
       }
       data.diff = this.diff.toJSON()
-    }
-    else /* if (this.type === SET) */ {
+    } else /* if (this.type === SET) */ {
       data.val = this.val
       data.original = this.original
     }
     return data
   }
 
-  getType() {
+  getType () {
     return this.type
   }
 
-  getPath() {
+  getPath () {
     return this.path
   }
 
-  getValue() {
+  getValue () {
     return this.val
   }
 
-  getOldValue() {
+  getOldValue () {
     return this.original
   }
 
-  getValueOp() {
+  getValueOp () {
     return this.diff
   }
 
   /* istanbul ignore next */
-  toString() {
+  toString () {
     switch (this.type) {
       case CREATE:
-        return ["(+,", JSON.stringify(this.path), JSON.stringify(this.val), ")"].join('')
+        return ['(+,', JSON.stringify(this.path), JSON.stringify(this.val), ')'].join('')
       case DELETE:
-        return ["(-,", JSON.stringify(this.path), JSON.stringify(this.val), ")"].join('')
+        return ['(-,', JSON.stringify(this.path), JSON.stringify(this.val), ')'].join('')
       case UPDATE:
-        return ["(>>,", JSON.stringify(this.path), this.propertyType, this.diff.toString(), ")"].join('')
+        return ['(>>,', JSON.stringify(this.path), this.propertyType, this.diff.toString(), ')'].join('')
       case SET:
-        return ["(=,", JSON.stringify(this.path), this.val, this.original, ")"].join('')
+        return ['(=,', JSON.stringify(this.path), this.val, this.original, ')'].join('')
       case NOP:
-        return "NOP"
+        return 'NOP'
       default:
         throw new Error('Invalid type')
     }
@@ -261,27 +250,27 @@ ObjectOperation.prototype._isObjectOperation = true
 
 /* Low level implementation */
 
-function hasConflict(a, b) {
+function hasConflict (a, b) {
   if (a.type === NOP || b.type === NOP) return false
   return isEqual(a.path, b.path)
 }
 
-function transform_delete_delete(a, b) {
+function transform_delete_delete (a, b) {
   // both operations have the same effect.
   // the transformed operations are turned into NOPs
   a.type = NOP
   b.type = NOP
 }
 
-function transform_create_create() {
-  throw new Error("Can not transform two concurring creates of the same property")
+function transform_create_create () {
+  throw new Error('Can not transform two concurring creates of the same property')
 }
 
-function transform_delete_create() {
+function transform_delete_create () {
   throw new Error('Illegal state: can not create and delete a value at the same time.')
 }
 
-function transform_delete_update(a, b, flipped) {
+function transform_delete_update (a, b, flipped) {
   if (a.type !== DELETE) {
     return transform_delete_update(b, a, true)
   }
@@ -312,15 +301,15 @@ function transform_delete_update(a, b, flipped) {
   }
 }
 
-function transform_create_update() {
+function transform_create_update () {
   // it is not possible to reasonably transform this.
-  throw new Error("Can not transform a concurring create and update of the same property")
+  throw new Error('Can not transform a concurring create and update of the same property')
 }
 
-function transform_update_update(a, b) {
+function transform_update_update (a, b) {
   // Note: this is a conflict the user should know about
   var op_a, op_b, t
-  switch(b.propertyType) {
+  switch (b.propertyType) {
     case 'string':
       op_a = TextOperation.fromJSON(a.diff)
       op_b = TextOperation.fromJSON(b.diff)
@@ -343,11 +332,11 @@ function transform_update_update(a, b) {
   b.diff = t[1]
 }
 
-function transform_create_set() {
+function transform_create_set () {
   throw new Error('Illegal state: can not create and set a value at the same time.')
 }
 
-function transform_delete_set(a, b, flipped) {
+function transform_delete_set (a, b, flipped) {
   if (a.type !== DELETE) return transform_delete_set(b, a, true)
   if (!flipped) {
     a.type = NOP
@@ -359,11 +348,11 @@ function transform_delete_set(a, b, flipped) {
   }
 }
 
-function transform_update_set() {
-  throw new Error("Unresolvable conflict: update + set.")
+function transform_update_set () {
+  throw new Error('Unresolvable conflict: update + set.')
 }
 
-function transform_set_set(a, b) {
+function transform_set_set (a, b) {
   a.type = NOP
   b.original = a.val
 }
@@ -376,7 +365,7 @@ const _SET = 8
 
 const CODE = (() => {
   const c = {}
-  c[NOP] =_NOP
+  c[NOP] = _NOP
   c[CREATE] = _CREATE
   c[DELETE] = _DELETE
   c[UPDATE] = _UPDATE
@@ -401,7 +390,7 @@ const __transform__ = (() => {
   return t
 })()
 
-function transform(a, b, options) {
+function transform (a, b, options) {
   options = options || {}
   if (options['no-conflict'] && hasConflict(a, b)) {
     throw new Conflict(a, b)
@@ -416,7 +405,7 @@ function transform(a, b, options) {
   var sameProp = isEqual(a.path, b.path)
   // without conflict: a' = a, b' = b
   if (sameProp) {
-    __transform__[CODE[a.type] | CODE[b.type]](a,b)
+    __transform__[CODE[a.type] | CODE[b.type]](a, b)
   }
   return [a, b]
 }
@@ -426,7 +415,7 @@ ObjectOperation.hasConflict = hasConflict
 
 /* Factories */
 
-ObjectOperation.Create = function(idOrPath, val) {
+ObjectOperation.Create = function (idOrPath, val) {
   var path
   if (isString(idOrPath)) {
     path = [idOrPath]
@@ -436,7 +425,7 @@ ObjectOperation.Create = function(idOrPath, val) {
   return new ObjectOperation({type: CREATE, path: path, val: val})
 }
 
-ObjectOperation.Delete = function(idOrPath, val) {
+ObjectOperation.Delete = function (idOrPath, val) {
   var path
   if (isString(idOrPath)) {
     path = [idOrPath]
@@ -446,7 +435,7 @@ ObjectOperation.Delete = function(idOrPath, val) {
   return new ObjectOperation({type: DELETE, path: path, val: val})
 }
 
-ObjectOperation.Update = function(path, op) {
+ObjectOperation.Update = function (path, op) {
   return new ObjectOperation({
     type: UPDATE,
     path: path,
@@ -454,7 +443,7 @@ ObjectOperation.Update = function(path, op) {
   })
 }
 
-ObjectOperation.Set = function(path, oldVal, newVal) {
+ObjectOperation.Set = function (path, oldVal, newVal) {
   return new ObjectOperation({
     type: SET,
     path: path,
@@ -463,21 +452,21 @@ ObjectOperation.Set = function(path, oldVal, newVal) {
   })
 }
 
-ObjectOperation.fromJSON = function(data) {
+ObjectOperation.fromJSON = function (data) {
   data = cloneDeep(data)
-  if (data.type === "update") {
+  if (data.type === 'update') {
     switch (data.propertyType) {
-      case "string":
+      case 'string':
         data.diff = TextOperation.fromJSON(data.diff)
         break
-      case "array":
+      case 'array':
         data.diff = ArrayOperation.fromJSON(data.diff)
         break
-      case "coordinate":
+      case 'coordinate':
         data.diff = CoordinateOperation.fromJSON(data.diff)
         break
       default:
-        throw new Error("Unsupported update diff:" + JSON.stringify(data.diff))
+        throw new Error('Unsupported update diff:' + JSON.stringify(data.diff))
     }
   }
   var op = new ObjectOperation(data)

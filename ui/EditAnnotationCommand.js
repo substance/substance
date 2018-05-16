@@ -6,8 +6,7 @@ import Command from './Command'
   @class
 */
 class EditAnnotationCommand extends Command {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     if (!this.config.nodeType) {
@@ -20,11 +19,11 @@ class EditAnnotationCommand extends Command {
 
     @return {Object} object with `disabled` and `node` properties
   */
-  getCommandState(params) {
+  getCommandState (params) {
     let sel = this._getSelection(params)
     let annos = this._getAnnotationsForSelection(params)
     let newState = {
-      disabled: true,
+      disabled: true
     }
     if (annos.length === 1 && sel.isPropertySelection() && sel.isCollapsed()) {
       newState.disabled = false
@@ -36,7 +35,7 @@ class EditAnnotationCommand extends Command {
 
   execute(params) { } // eslint-disable-line
 
-  _getAnnotationsForSelection(params) {
+  _getAnnotationsForSelection (params) {
     return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
 }

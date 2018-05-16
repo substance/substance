@@ -1,51 +1,50 @@
 import NodeComponent from '../../ui/NodeComponent'
 
 class ImageComponent extends NodeComponent {
-
-  didMount() {
+  didMount () {
     super.didMount.call(this)
     this.context.editorSession.onRender('document', this._onDocumentChange, this)
   }
 
-  dispose() {
+  dispose () {
     super.dispose.call(this)
     this.context.editorSession.off(this)
   }
 
   // TODO: verify if this check is correct and efficient
-  _onDocumentChange(change) {
+  _onDocumentChange (change) {
     if (change.hasUpdated(this.props.node.id) ||
       change.hasUpdated(this.props.node.imageFile)) {
       this.rerender()
     }
   }
 
-  render($$) {
+  render ($$) {
     let el = super.render($$)
     el.addClass('sc-image')
     el.append(
       $$('img').attr({
-        src: this.props.node.getUrl(),
+        src: this.props.node.getUrl()
       }).ref('image')
     )
     return el
   }
 
   /* Custom dropzone protocol */
-  getDropzoneSpecs() {
+  getDropzoneSpecs () {
     return [
       {
         component: this.refs['image'],
         message: 'Replace Image',
         dropParams: {
           action: 'replace-image',
-          nodeId: this.props.node.id,
+          nodeId: this.props.node.id
         }
       }
     ]
   }
 
-  handleDrop(tx, dragState) {
+  handleDrop (tx, dragState) {
     let newImageFile = dragState.data.files[0]
     if (dragState.external) {
       let imageFile = tx.create({
@@ -65,10 +64,7 @@ class ImageComponent extends NodeComponent {
         tx.set([this.props.node.id, 'imageFile'], node.imageFile)
       }
     }
-
-
   }
-
 }
 
 export default ImageComponent

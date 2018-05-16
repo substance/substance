@@ -35,12 +35,11 @@ const ANCHOR = -2
 // Currently, in such cases the first element that is opened earlier is preserved.
 
 class Fragmenter {
-
-  constructor(options) {
+  constructor (options) {
     Object.assign(this, options)
   }
 
-  start(rootContext, text, annotations) {
+  start (rootContext, text, annotations) {
     if (!isString(text)) {
       throw new Error("Illegal argument: 'text' must be a String, but was " + text)
     }
@@ -58,20 +57,20 @@ class Fragmenter {
   onExit(entry, context, parentContext) { // eslint-disable-line
   }
 
-  _enter(entry, parentContext) {
+  _enter (entry, parentContext) {
     entry.counter++
     return this.onEnter(entry, parentContext)
   }
 
-  _exit(entry, context, parentContext) {
+  _exit (entry, context, parentContext) {
     this.onExit(entry, context, parentContext)
   }
 
-  _createText(context, text, entry) {
+  _createText (context, text, entry) {
     this.onText(context, text, entry)
   }
 
-  _start(rootContext, text, annotations) {
+  _start (rootContext, text, annotations) {
     var entries = _extractEntries.call(this, annotations)
     var stack = [{context: rootContext, entry: null}]
 
@@ -81,7 +80,7 @@ class Fragmenter {
       var textFragment = text.substring(pos, entry.pos)
       if (textFragment) {
         // add the last text to the current element
-        this._createText(stack[stack.length-1].context, textFragment, entry)
+        this._createText(stack[stack.length - 1].context, textFragment, entry)
       }
 
       pos = entry.pos
@@ -95,11 +94,11 @@ class Fragmenter {
         }
         // create elements which are open, and are now stacked ontop of the
         // entered entry
-        for (idx = stack.length-1; idx >= stackLevel; idx--) {
+        for (idx = stack.length - 1; idx >= stackLevel; idx--) {
           _entry = stack[idx].entry
           // compute number of characters since last 'enter'
           _entry.length = pos - _entry.pos
-          this._exit(_entry, stack[idx].context, stack[idx-1].context)
+          this._exit(_entry, stack[idx].context, stack[idx - 1].context)
         }
         stack.splice(stackLevel, 0, {entry: entry})
         // create new elements for all lower entries
@@ -107,7 +106,7 @@ class Fragmenter {
           _entry = stack[idx].entry
           // bump 'enter' pos
           _entry.pos = pos
-          stack[idx].context = this._enter(_entry, stack[idx-1].context)
+          stack[idx].context = this._enter(_entry, stack[idx - 1].context)
         }
       }
       if (entry.mode === EXIT || entry.mode === ANCHOR) {
@@ -117,11 +116,11 @@ class Fragmenter {
             break
           }
         }
-        for (idx = stack.length-1; idx >= stackLevel; idx--) {
+        for (idx = stack.length - 1; idx >= stackLevel; idx--) {
           _entry = stack[idx].entry
           // compute number of characters since last 'enter'
           _entry.length = pos - _entry.pos
-          this._exit(_entry, stack[idx].context, stack[idx-1].context)
+          this._exit(_entry, stack[idx].context, stack[idx - 1].context)
         }
         stack.splice(stackLevel, 1)
         // create new elements for all lower entries
@@ -129,7 +128,7 @@ class Fragmenter {
           _entry = stack[idx].entry
           // bump 'enter' pos
           _entry.pos = pos
-          stack[idx].context = this._enter(_entry, stack[idx-1].context)
+          stack[idx].context = this._enter(_entry, stack[idx - 1].context)
         }
       }
     }
@@ -140,7 +139,6 @@ class Fragmenter {
       this._createText(rootContext, trailingText)
     }
   }
-
 }
 
 Fragmenter.SHOULD_NOT_SPLIT = 0
@@ -186,10 +184,10 @@ Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE
 //   Removes 'idea1' from stack and creates a new 'bold1'
 //
 
-function _extractEntries(annotations) {
+function _extractEntries (annotations) {
   var openers = []
   var closers = []
-  forEach(annotations, function(a) {
+  forEach(annotations, function (a) {
     var isAnchor = (a.isAnchor ? a.isAnchor() : false)
     // special treatment for zero-width annos such as ContainerAnnotation.Anchors
     if (isAnchor) {
@@ -232,7 +230,7 @@ function _extractEntries(annotations) {
         type: a.type,
         node: a,
         length: 0,
-        counter: -1,
+        counter: -1
       }
       openers.push(opener)
       closers.push({
@@ -255,13 +253,13 @@ function _extractEntries(annotations) {
   }
   closers.sort(_compareClosers)
   // merge openers and closers, sorted by pos
-  var entries = new Array(openers.length+closers.length)
+  var entries = new Array(openers.length + closers.length)
   var idx = 0
   var idx1 = 0
   var idx2 = 0
   var opener = openers[idx1]
   var closer = closers[idx2]
-  while(opener || closer) {
+  while (opener || closer) {
     if (opener && closer) {
       // close before open
       if (closer.pos <= opener.pos && closer.opener !== opener) {
@@ -285,7 +283,7 @@ function _extractEntries(annotations) {
   return entries
 }
 
-function _compareOpeners(a, b) {
+function _compareOpeners (a, b) {
   if (a.pos < b.pos) return -1
   if (a.pos > b.pos) return 1
   if (a.mode < b.mode) return -1
@@ -298,7 +296,7 @@ function _compareOpeners(a, b) {
 }
 
 // sort in inverse order of openers
-function _compareClosers(a, b) {
+function _compareClosers (a, b) {
   if (a.pos < b.pos) return -1
   if (a.pos > b.pos) return 1
   // this makes closer be sorted in inverse order of openers

@@ -9,14 +9,14 @@ import ServerResponse from './ServerResponse'
   Implements a generic layered architecture
 */
 class Server extends EventEmitter {
-  constructor(config) {
+  constructor (config) {
     super()
 
     this.config = config
     this._onConnection = this._onConnection.bind(this)
   }
 
-  bind(wss) {
+  bind (wss) {
     if (this.wss) {
       throw new Error('Server is already bound to a websocket')
     }
@@ -35,7 +35,7 @@ class Server extends EventEmitter {
   /*
     NOTE: This method is yet untested
   */
-  unbind() {
+  unbind () {
     if (this._bound) {
       this.wss.off('connection', this._onConnection)
     } else {
@@ -46,14 +46,14 @@ class Server extends EventEmitter {
   /*
     Hook called when a collaborator connects
   */
-  onConnection(/*collaboratorId*/) {
+  onConnection (/* collaboratorId */) {
     // noop
   }
 
   /*
     Hook called when a collaborator disconnects
   */
-  onDisconnect(/*collaboratorId*/) {
+  onDisconnect (/* collaboratorId */) {
     // noop
   }
 
@@ -62,7 +62,7 @@ class Server extends EventEmitter {
 
     Implement your own as a hook
   */
-  authenticate(req, res) {
+  authenticate (req, res) {
     req.setAuthenticated()
     this.next(req, res)
   }
@@ -72,16 +72,15 @@ class Server extends EventEmitter {
 
     Implement your own as a hook
   */
-  authorize(req, res) {
+  authorize (req, res) {
     req.setAuthorized()
     this.next(req, res)
   }
 
-
   /*
     Ability to enrich the request data
   */
-  enhanceRequest(req, res) {
+  enhanceRequest (req, res) {
     req.setEnhanced()
     this.next(req, res)
   }
@@ -91,14 +90,14 @@ class Server extends EventEmitter {
 
     Implement your own as a hook
   */
-  execute(/*req, res*/) {
+  execute (/* req, res */) {
     throw new Error('This method needs to be specified')
   }
 
   /*
     Ability to enrich the response data
   */
-  enhanceResponse(req, res) {
+  enhanceResponse (req, res) {
     res.setEnhanced()
     this.next(req, res)
   }
@@ -106,7 +105,7 @@ class Server extends EventEmitter {
   /*
     When a new collaborator connects we generate a unique id for them
   */
-  _onConnection(ws) {
+  _onConnection (ws) {
     let collaboratorId = uuid()
     let connection = {
       collaboratorId: collaboratorId
@@ -125,7 +124,7 @@ class Server extends EventEmitter {
   /*
     When websocket connection closes
   */
-  _onClose(ws) {
+  _onClose (ws) {
     let conn = this._connections.get(ws)
     let collaboratorId = conn.collaboratorId
 
@@ -148,40 +147,40 @@ class Server extends EventEmitter {
     __error           -> sendError          -> __done
     __done // end state
   */
-  __initial(req, res) {
+  __initial (req, res) {
     return !req.isAuthenticated && !req.isAuthorized && !res.isReady
   }
 
-  __authenticated(req, res) {
+  __authenticated (req, res) {
     return req.isAuthenticated && !req.isAuthorized && !res.isReady
   }
 
-  __authorized(req, res) {
+  __authorized (req, res) {
     return req.isAuthenticated && req.isAuthorized && !req.isEnhanced && !res.isReady
   }
 
-  __requestEnhanced(req, res) {
+  __requestEnhanced (req, res) {
     return req.isAuthenticated && req.isAuthorized && req.isEnhanced && !res.isReady
   }
 
-  __executed(req, res) {
+  __executed (req, res) {
     // excecute must call res.send() so res.data is set
     return req.isAuthenticated && req.isAuthorized && res.isReady && res.data && !res.isEnhanced
   }
 
-  __enhanced(req, res) {
+  __enhanced (req, res) {
     return res.isReady && res.isEnhanced && !res.isSent
   }
 
-  __error(req, res) {
+  __error (req, res) {
     return res.err && !res.isSent
   }
 
-  __done(req, res) {
+  __done (req, res) {
     return res.isSent
   }
 
-  next(req, res) {
+  next (req, res) {
     if (this.__initial(req, res)) {
       this.authenticate(req, res)
     } else if (this.__authenticated(req, res)) {
@@ -196,7 +195,7 @@ class Server extends EventEmitter {
       this.sendResponse(req, res)
     } else if (this.__error(req, res)) {
       this.sendError(req, res)
-    } else if (this.__done(req,res)) {
+    } else if (this.__done(req, res)) {
       // console.log('We are done with processing the request.');
     }
   }
@@ -204,7 +203,7 @@ class Server extends EventEmitter {
   /*
     Send error response
   */
-  sendError(req, res) {
+  sendError (req, res) {
     let collaboratorId = req.message.collaboratorId
     let msg = res.err
     this.send(collaboratorId, msg)
@@ -215,33 +214,33 @@ class Server extends EventEmitter {
   /*
     Sends a heartbeat message to all connected collaborators
   */
-  _sendHeartbeat() {
-    Object.keys(this._collaborators).forEach(function(collaboratorId) {
+  _sendHeartbeat () {
+    Object.keys(this._collaborators).forEach(function (collaboratorId) {
       this.send(collaboratorId, {
         type: 'highfive',
         scope: '_internal'
-      });
+      })
     }.bind(this))
   }
 
   /*
     Send response
   */
-  sendResponse(req, res) {
+  sendResponse (req, res) {
     let collaboratorId = req.message.collaboratorId
     this.send(collaboratorId, res.data)
     res.setSent()
     this.next(req, res)
   }
 
-  _isWebsocketOpen(ws) {
+  _isWebsocketOpen (ws) {
     return ws && ws.readyState === 1
   }
 
   /*
     Send message to collaborator
   */
-  send(collaboratorId, message) {
+  send (collaboratorId, message) {
     if (!message.scope && this.config.scope) {
       message.scope = this.config.scope
     }
@@ -257,14 +256,14 @@ class Server extends EventEmitter {
   /*
     Send message to collaborator
   */
-  broadCast(collaborators, message) {
-    collaborators.forEach(function(collaboratorId) {
+  broadCast (collaborators, message) {
+    collaborators.forEach(function (collaboratorId) {
       this.send(collaboratorId, message)
     }.bind(this))
   }
 
   // Takes a request object
-  _processRequest(req) {
+  _processRequest (req) {
     let res = new ServerResponse()
     this.next(req, res)
   }
@@ -281,7 +280,7 @@ class Server extends EventEmitter {
     The first argument is always the websocket so we can respond to messages
     after some operations have been performed.
   */
-  _onMessage(ws, msg) {
+  _onMessage (ws, msg) {
     // Retrieve the connection data
     let conn = this._connections.get(ws)
     msg = this.deserializeMessage(msg)
@@ -294,14 +293,13 @@ class Server extends EventEmitter {
     }
   }
 
-  serializeMessage(msg) {
+  serializeMessage (msg) {
     return JSON.stringify(msg)
   }
 
-  deserializeMessage(msg) {
+  deserializeMessage (msg) {
     return JSON.parse(msg)
   }
-
 }
 
 export default Server

@@ -3,7 +3,7 @@ export default {
   type: 'emphasis',
   tagName: 'em',
 
-  matchElement: function(el) {
+  matchElement: function (el) {
     return el.is('em, i')
   }
 

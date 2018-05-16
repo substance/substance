@@ -1,3 +1,3 @@
-export default function flatten(arr) {
+export default function flatten (arr) {
   return Array.prototype.concat.apply([], arr)
 }

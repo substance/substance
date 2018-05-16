@@ -1,7 +1,7 @@
 import TextBlockComponent from '../../ui/TextBlockComponent'
 
 class BlockquoteComponent extends TextBlockComponent {
-  render($$) {
+  render ($$) {
     let el = super.render.call(this, $$)
     return el.addClass('sc-blockquote')
   }

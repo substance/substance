@@ -5,8 +5,7 @@ import { EventEmitter } from 'substance'
 */
 
 class MessageQueue extends EventEmitter {
-
-  constructor() {
+  constructor () {
     super()
 
     this.connections = {}
@@ -17,39 +16,39 @@ class MessageQueue extends EventEmitter {
   /*
     Starts queue processing
   */
-  start() {
+  start () {
     this._interval = setInterval(this._processMessage.bind(this), 100)
   }
 
   /*
     Stops the queue processing
   */
-  stop() {
+  stop () {
     clearInterval(this._interval)
   }
 
-  flush() {
+  flush () {
     while (this.messages.length) {
       this._processMessage()
     }
   }
 
-  clear() {
+  clear () {
     this.messages = []
   }
 
-  tick() {
+  tick () {
     this._processMessage()
   }
 
-  connectServer(server) {
-    if(this.connections[server.serverId]) {
+  connectServer (server) {
+    if (this.connections[server.serverId]) {
       throw new Error('Server already registered:' + server.serverId)
     }
     this.connections[server.serverId] = {
       type: 'server',
       serverId: server.serverId,
-      server : server,
+      server: server,
       sockets: {}
     }
   }
@@ -57,11 +56,11 @@ class MessageQueue extends EventEmitter {
   /*
     A new client connects to the message queue
   */
-  connectClientSocket(ws) {
+  connectClientSocket (ws) {
     var serverId = ws.serverId
     var clientId = ws.clientId
     var conn = this.connections[serverId]
-    if (!conn || conn.type !== "server") {
+    if (!conn || conn.type !== 'server') {
       throw new Error('Can not connect to server. Unknown server id.')
     }
     this.connections[ws.clientId] = {
@@ -74,12 +73,12 @@ class MessageQueue extends EventEmitter {
   /*
     A client disconnects from the message queue
   */
-  disconnectClientSocket(ws) {
+  disconnectClientSocket (ws) {
     var serverId = ws.serverId
     var clientId = ws.clientId
     var conn = this.connections[serverId]
 
-    if (!conn || conn.type !== "server") {
+    if (!conn || conn.type !== 'server') {
       throw new Error('Unknown server id.')
     }
     conn.server.handleDisconnectRequest(clientId)
@@ -91,7 +90,7 @@ class MessageQueue extends EventEmitter {
     connection:requested. ws is the server-side end of
     the communication channel
   */
-  connectServerSocket(ws) {
+  connectServerSocket (ws) {
     var server = this.connections[ws.serverId]
     if (!server) {
       throw new Error('Server is not connected:' + ws.serverId)
@@ -104,7 +103,7 @@ class MessageQueue extends EventEmitter {
 
     Really needed? Isn't this done already in TestWebSocketServer?
   */
-  disconnectServerSocket(ws) {
+  disconnectServerSocket (ws) {
     var server = this.connections[ws.serverId]
     if (!server) {
       throw new Error('Server is not connected:' + ws.serverId)
@@ -115,7 +114,7 @@ class MessageQueue extends EventEmitter {
   /*
     Adds a message to the queue
   */
-  pushMessage(message) {
+  pushMessage (message) {
     this.messages.push(message)
     this._log.push(message)
     this.emit('messages:updated', this.messages)
@@ -124,15 +123,15 @@ class MessageQueue extends EventEmitter {
   /*
     Takes one message off the queue and delivers it to the recipient
   */
-  _processMessage() {
+  _processMessage () {
     var message = this.messages.shift()
-    if (!message) return; // nothing to process
+    if (!message) return // nothing to process
     this.emit('messages:updated', this.messages)
     var from = message.from
     var to = message.to
     var recipient = this.connections[to]
     var socket
-    if (recipient.type === "server") {
+    if (recipient.type === 'server') {
       socket = recipient.sockets[from]
     } else {
       socket = recipient.socket

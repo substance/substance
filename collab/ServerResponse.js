@@ -1,5 +1,5 @@
 class ServerResponse {
-  constructor() {
+  constructor () {
     this.isReady = false // once the response has been set using send
     this.isEnhanced = false // after response has been enhanced by enhancer
     this.isSent = false // after response has been sent
@@ -20,7 +20,7 @@ class ServerResponse {
     });
     ```
   */
-  error(err) {
+  error (err) {
     this.err = err
     this.isReady = true
   }
@@ -28,7 +28,7 @@ class ServerResponse {
   /*
     Send response data
   */
-  send(data) {
+  send (data) {
     this.data = data
     this.isReady = true
   }
@@ -36,11 +36,11 @@ class ServerResponse {
   /*
     Sets the isEnhanced flag
   */
-  setEnhanced() {
+  setEnhanced () {
     this.isEnhanced = true
   }
 
-  setSent() {
+  setSent () {
     this.isSent = true
   }
 }

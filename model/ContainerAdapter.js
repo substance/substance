@@ -1,8 +1,7 @@
 import Container from './Container'
 
 class ContainerAdapter extends Container {
-
-  constructor(doc, path) {
+  constructor (doc, path) {
     super(doc, { id: String(path) })
     this.document = doc
     this.path = path
@@ -12,14 +11,13 @@ class ContainerAdapter extends Container {
     doc.data.nodes[this.id] = this
   }
 
-  getContentPath() {
+  getContentPath () {
     return this.path
   }
 
-  get nodes() {
+  get nodes () {
     return this.document.get(this.path)
   }
-
 }
 
 ContainerAdapter.prototype._isDocumentNode = false

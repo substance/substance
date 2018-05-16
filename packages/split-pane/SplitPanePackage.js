@@ -2,7 +2,7 @@ import SplitPane from './SplitPane'
 
 export default {
   name: 'split-pane',
-  configure: function(config) {
+  configure: function (config) {
     config.addComponent('split-pane', SplitPane)
   },
   SplitPane

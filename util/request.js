@@ -15,14 +15,14 @@
   });
   ```
 */
-export default function request(method, url, data, cb) {
+export default function request (method, url, data, cb) {
   var request = new XMLHttpRequest()
   request.open(method, url, true)
   request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8')
-  request.onload = function() {
+  request.onload = function () {
     if (request.status >= 200 && request.status < 400) {
       var res = request.responseText
-      if(isJson(res)) res = JSON.parse(res)
+      if (isJson(res)) res = JSON.parse(res)
       cb(null, res)
     } else {
       return cb(new Error('Request failed. Returned status: ' + request.status))
@@ -36,7 +36,7 @@ export default function request(method, url, data, cb) {
   }
 }
 
-function isJson(str) {
+function isJson (str) {
   try {
     JSON.parse(str)
   } catch (e) {

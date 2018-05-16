@@ -5,7 +5,7 @@ import SwitchTextTypeCommand from '../../ui/SwitchTextTypeCommand'
 
 export default {
   name: 'paragraph',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Paragraph)
     config.addComponent(Paragraph.type, ParagraphComponent)
     config.addConverter('html', ParagraphHTMLConverter)

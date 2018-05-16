@@ -3,33 +3,32 @@ import isNumber from '../util/isNumber'
 const SHIFT = 'shift'
 
 class CoordinateOperation {
-
-  constructor(data) {
+  constructor (data) {
     if (!data || data.type === undefined) {
-      throw new Error("Illegal argument: insufficient data.")
+      throw new Error('Illegal argument: insufficient data.')
     }
     // 'shift'
     this.type = data.type
     // the position where to apply the operation
     this.val = data.val
     // sanity checks
-    if(!this.isShift()) {
-      throw new Error("Illegal type.")
+    if (!this.isShift()) {
+      throw new Error('Illegal type.')
     }
     if (!isNumber(this.val)) {
-      throw new Error("Illegal argument: expecting number as shift value.")
+      throw new Error('Illegal argument: expecting number as shift value.')
     }
   }
 
-  apply(coor) {
+  apply (coor) {
     coor.offset = coor.offset + this.val
   }
 
-  isShift() {
+  isShift () {
     return this.type === SHIFT
   }
 
-  isNOP() {
+  isNOP () {
     switch (this.type) {
       case SHIFT: {
         return this.val === 0
@@ -39,11 +38,11 @@ class CoordinateOperation {
     }
   }
 
-  clone() {
+  clone () {
     return new CoordinateOperation(this)
   }
 
-  invert() {
+  invert () {
     let data
     switch (this.type) {
       case SHIFT:
@@ -58,33 +57,32 @@ class CoordinateOperation {
     return new CoordinateOperation(data)
   }
 
-  hasConflict() {
+  hasConflict () {
     // TODO: support conflict detection?
     return false
   }
 
-  toJSON() {
+  toJSON () {
     return {
       type: this.type,
       val: this.val
     }
   }
 
-  toString() {
-    return ["(", (this.type), ",", this.val, "')"].join('')
+  toString () {
+    return ['(', (this.type), ',', this.val, "')"].join('')
   }
-
 }
 
 CoordinateOperation.prototype._isOperation = true
 CoordinateOperation.prototype._isCoordinateOperation = true
 
-function transform_shift_shift(a, b) {
+function transform_shift_shift (a, b) {
   a.val += b.val
   b.val += a.val
 }
 
-function transform(a, b, options) {
+function transform (a, b, options) {
   options = options || {}
   // TODO: support conflict detection?
   if (!options.inplace) {
@@ -93,22 +91,21 @@ function transform(a, b, options) {
   }
   if (a.type === SHIFT && b.type === SHIFT) {
     transform_shift_shift(a, b)
-  }
-  else {
+  } else {
     throw new Error('Illegal type')
   }
   return [a, b]
 }
 
-CoordinateOperation.transform = function(...args) {
+CoordinateOperation.transform = function (...args) {
   return transform(...args)
 }
 
-CoordinateOperation.fromJSON = function(json) {
+CoordinateOperation.fromJSON = function (json) {
   return new CoordinateOperation(json)
 }
 
-CoordinateOperation.Shift = function(val) {
+CoordinateOperation.Shift = function (val) {
   return new CoordinateOperation({
     type: SHIFT,
     val: val

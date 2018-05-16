@@ -1,24 +1,24 @@
-export default function(SuperClass) {
+export default function (SuperClass) {
   class TextNodeMixin extends SuperClass {
-    getTextPath() {
+    getTextPath () {
       // TODO: deprecate this
       console.warn('DEPRECATED: use node.getPath()')
       return this.getPath()
     }
 
-    getText() {
+    getText () {
       return this.content
     }
 
-    isEmpty() {
+    isEmpty () {
       return !this.getText()
     }
 
-    getLength() {
+    getLength () {
       return this.getText().length
     }
 
-    getAnnotations() {
+    getAnnotations () {
       return this.getDocument().getIndex('annotations').get(this.getPath())
     }
   }

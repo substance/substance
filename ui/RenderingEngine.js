@@ -87,15 +87,14 @@ import VirtualElement from './VirtualElement'
 */
 export default
 class RenderingEngine {
-
-  constructor(options = {}) {
+  constructor (options = {}) {
     this.componentFactory = options.componentFactory
     if (!this.componentFactory) throw new Error("'componentFactory' is mandatory")
     this.elementFactory = options.elementFactory || DefaultDOMElement.createDocument('html')
     if (!this.elementFactory) throw new Error("'elementFactory' is mandatory")
   }
 
-  _render(comp, oldProps, oldState) {
+  _render (comp, oldProps, oldState) {
     // var t0 = Date.now()
     var vel = _createWrappingVirtualComponent(comp)
     var state = this._createState()
@@ -118,7 +117,6 @@ class RenderingEngine {
       // console.log('### ... finished in %s ms', Date.now()-t0)
 
       _triggerUpdate(state, vel)
-
     } finally {
       state.dispose()
     }
@@ -126,7 +124,7 @@ class RenderingEngine {
   }
 
   // this is used together with the incremental Component API
-  _renderChild(comp, vel) {
+  _renderChild (comp, vel) {
     // HACK: to make this work with the rest of the implementation
     // we ingest a fake parent
     var state = this._createState()
@@ -140,22 +138,21 @@ class RenderingEngine {
     }
   }
 
-  _createState() {
+  _createState () {
     return new RenderingState(this.componentFactory, this.elementFactory)
   }
 }
 
-
-function _create(state, vel) {
+function _create (state, vel) {
   var comp = vel._comp
-  console.assert(!comp, "Component instance should not exist when this method is used.")
+  console.assert(!comp, 'Component instance should not exist when this method is used.')
   var parent = vel.parent._comp
   // making sure the parent components have been instantiated
   if (!parent) {
     parent = _create(state, vel.parent)
   }
   if (vel._isVirtualComponent) {
-    console.assert(parent, "A Component should have a parent.")
+    console.assert(parent, 'A Component should have a parent.')
     comp = state.componentFactory.createComponent(vel.ComponentClass, parent, vel.props)
     // HACK: making sure that we have the right props
     vel.props = comp.props
@@ -175,7 +172,7 @@ function _create(state, vel) {
   return comp
 }
 
-function _capture(state, vel, forceCapture) {
+function _capture (state, vel, forceCapture) {
   if (state.isCaptured(vel)) {
     return vel
   }
@@ -208,10 +205,10 @@ function _capture(state, vel, forceCapture) {
       var context = new CaptureContext(vel)
       var content = comp.render(context.$$)
       if (!content) {
-        throw new Error("Component.render() returned nil.")
+        throw new Error('Component.render() returned nil.')
       }
       if (!content._isVirtualHTMLElement) {
-        throw new Error("Component.render() must return a plain element.")
+        throw new Error('Component.render() must return a plain element.')
       }
 
       if (comp.__htmlConfig__) {
@@ -270,7 +267,7 @@ function _capture(state, vel, forceCapture) {
   return vel
 }
 
-function _render(state, vel) {
+function _render (state, vel) {
   if (state.isSkipped(vel)) return
   // console.log('... rendering', vel._ref)
 
@@ -282,7 +279,7 @@ function _render(state, vel) {
   // Still we should find a consistent way
 
   let comp = vel._comp
-  console.assert(comp && comp._isComponent, "A captured VirtualElement must have a component instance attached.")
+  console.assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
 
   // VirtualComponents apply changes to its content element
   if (vel._isVirtualComponent) {
@@ -320,7 +317,7 @@ function _render(state, vel) {
     // this happened in Edge every 1s. Don't know why.
     // With this implementation all external DOM mutations will be eliminated
     var oldChildren = []
-    comp.el.getChildNodes().forEach(function(node) {
+    comp.el.getChildNodes().forEach(function (node) {
       var childComp = node._comp
 
       // TODO: to allow mounting a prerendered DOM element
@@ -336,7 +333,7 @@ function _render(state, vel) {
       }
     })
 
-    while(pos1 < oldChildren.length || pos2 < newChildren.length) {
+    while (pos1 < oldChildren.length || pos2 < newChildren.length) {
       // skip detached components
       // Note: components get detached when preserved nodes
       // are found in a swapped order. Then the only way is
@@ -358,7 +355,7 @@ function _render(state, vel) {
       // Try to reuse TextNodes to avoid unnecesary DOM manipulations
       if (oldComp && oldComp.el.isTextNode() &&
           virtualComp && virtualComp._isVirtualTextNode &&
-          oldComp.el.textContent === virtualComp.text ) {
+          oldComp.el.textContent === virtualComp.text) {
         continue
       }
 
@@ -398,12 +395,10 @@ function _render(state, vel) {
           _removeChild(state, comp, oldComp)
           pos2--
         }
-      }
-      else if (state.isMapped(oldComp)) {
+      } else if (state.isMapped(oldComp)) {
         _insertChildBefore(state, comp, newComp, oldComp)
         pos1--
-      }
-      else {
+      } else {
         // both elements are not mapped
         // TODO: we could try to reuse components if they are of same type
         // However, this needs a better mapping strategy, not only
@@ -416,7 +411,7 @@ function _render(state, vel) {
   state.setRendered(vel)
 }
 
-function _triggerUpdate(state, vel) {
+function _triggerUpdate (state, vel) {
   if (vel._isVirtualComponent) {
     if (!state.isSkipped(vel)) {
       vel._content.children.forEach(_triggerUpdate.bind(null, state))
@@ -429,12 +424,12 @@ function _triggerUpdate(state, vel) {
   }
 }
 
-function _appendChild(state, parent, child) {
+function _appendChild (state, parent, child) {
   parent.el.appendChild(child.el)
   _triggerDidMount(state, parent, child)
 }
 
-function _replaceChild(state, parent, oldChild, newChild) {
+function _replaceChild (state, parent, oldChild, newChild) {
   parent.el.replaceChild(oldChild.el, newChild.el)
   if (!state.isDetached(oldChild)) {
     oldChild.triggerDispose()
@@ -442,19 +437,19 @@ function _replaceChild(state, parent, oldChild, newChild) {
   _triggerDidMount(state, parent, newChild)
 }
 
-function _insertChildBefore(state, parent, child, before) {
+function _insertChildBefore (state, parent, child, before) {
   parent.el.insertBefore(child.el, before.el)
   _triggerDidMount(state, parent, child)
 }
 
-function _removeChild(state, parent, child) {
+function _removeChild (state, parent, child) {
   parent.el.removeChild(child.el)
   if (!state.isDetached(child)) {
     child.triggerDispose()
   }
 }
 
-function _triggerDidMount(state, parent, child) {
+function _triggerDidMount (state, parent, child) {
   if (!state.isDetached(child) &&
       parent.isMounted() && !child.isMounted()) {
     child.triggerDidMount(true)
@@ -468,7 +463,7 @@ function _triggerDidMount(state, parent, child) {
   It sets the _comp references in the new version where its ancestors
   can be mapped to corresponding virtual components in the old version.
 */
-function _prepareVirtualComponent(state, comp, vc) {
+function _prepareVirtualComponent (state, comp, vc) {
   var newRefs = {}
   var foreignRefs = {}
   // TODO: iron this out. refs are stored on the context
@@ -482,11 +477,11 @@ function _prepareVirtualComponent(state, comp, vc) {
   var oldRefs = comp.refs
   var oldForeignRefs = comp.__foreignRefs__
   // map virtual components to existing ones
-  forEach(newRefs, function(vc, ref) {
+  forEach(newRefs, function (vc, ref) {
     var comp = oldRefs[ref]
     if (comp) _mapComponents(state, comp, vc)
   })
-  forEach(foreignRefs, function(vc, ref) {
+  forEach(foreignRefs, function (vc, ref) {
     var comp = oldForeignRefs[ref]
     if (comp) _mapComponents(state, comp, vc)
   })
@@ -500,7 +495,7 @@ function _prepareVirtualComponent(state, comp, vc) {
   mapping of parent elements, which makes
 */
 
-function _mapComponents(state, comp, vc) {
+function _mapComponents (state, comp, vc) {
   if (!comp && !vc) return true
   if (!comp || !vc) return false
   // Stop if one them has been mapped already
@@ -550,7 +545,7 @@ function _mapComponents(state, comp, vc) {
   return canMapParent
 }
 
-function _isOfSameType(comp, vc) {
+function _isOfSameType (comp, vc) {
   return (
     (comp._isElementComponent && vc._isVirtualHTMLElement) ||
     (comp._isComponent && vc._isVirtualComponent && comp.constructor === vc.ComponentClass) ||
@@ -558,7 +553,7 @@ function _isOfSameType(comp, vc) {
   )
 }
 
-function _createElement(state, vel) {
+function _createElement (state, vel) {
   var el
   if (vel._isVirtualTextNode) {
     el = state.elementFactory.createTextNode(vel.text)
@@ -568,7 +563,7 @@ function _createElement(state, vel) {
   return el
 }
 
-function _updateElement(comp, vel) {
+function _updateElement (comp, vel) {
   if (comp._isTextNodeComponent) {
     comp.setTextContent(vel.text)
     return
@@ -582,20 +577,20 @@ function _updateElement(comp, vel) {
   _updateHash({
     oldHash: el.getAttributes(),
     newHash: vel.getAttributes(),
-    update: function(key, val) {
+    update: function (key, val) {
       el.setAttribute(key, val)
     },
-    remove: function(key) {
+    remove: function (key) {
       el.removeAttribute(key)
     }
   })
   _updateHash({
     oldHash: el.htmlProps,
     newHash: vel.htmlProps,
-    update: function(key, val) {
+    update: function (key, val) {
       el.setProperty(key, val)
     },
-    remove: function(key) {
+    remove: function (key) {
       el.removeProperty(key)
     }
   })
@@ -621,7 +616,7 @@ function _updateElement(comp, vel) {
   }
 }
 
-function _updateHash(args) {
+function _updateHash (args) {
   const newHash = args.newHash
   const oldHash = args.oldHash || {}
   const update = args.update
@@ -655,25 +650,24 @@ function _updateHash(args) {
   }
 }
 
-function _updateListeners(args) {
+function _updateListeners (args) {
   var el = args.el
   // NOTE: considering the low number of listeners
   // it is quicker to just remove all
   // and add again instead of computing the minimal update
   var newListeners = args.newListeners || []
   el.removeAllEventListeners()
-  for (var i=0; i<newListeners.length;i++) {
+  for (var i = 0; i < newListeners.length; i++) {
     el.addEventListener(newListeners[i])
   }
 }
-
 
 /*
   Descending Context Used by RenderingEngine
 */
 
 class DescendingContext {
-  constructor(state, captureContext) {
+  constructor (state, captureContext) {
     this.state = state
     this.owner = captureContext.owner
     this.refs = {}
@@ -686,7 +680,7 @@ class DescendingContext {
     this.$$ = this._createComponent.bind(this)
   }
 
-  _createComponent() {
+  _createComponent () {
     var state = this.state
     var vel = this.elements[this.pos++]
     // only capture VirtualComponent's with a captured parent
@@ -708,22 +702,22 @@ class DescendingContext {
     vel._owner = this.owner
     // Note: important to deactivate these methods as otherwise the captured
     // element will be damaged when calling el.append()
-    vel._attach = function() {}
-    vel._detach = function() {}
+    vel._attach = function () {}
+    vel._detach = function () {}
     return vel
   }
 
-  hasPendingCaptures() {
+  hasPendingCaptures () {
     return this.updates > 0 && this.remaining > 0
   }
 
-  reset() {
+  reset () {
     this.pos = 0
     this.updates = 0
     this.refs = {}
   }
 
-  _ancestorsReady(vel) {
+  _ancestorsReady (vel) {
     while (vel) {
       if (this.state.isCaptured(vel) ||
           // TODO: iron this out
@@ -734,17 +728,15 @@ class DescendingContext {
     }
     return false
   }
-
-
 }
 
 RenderingEngine._internal = {
   _capture: _capture,
-  _wrap: _createWrappingVirtualComponent,
+  _wrap: _createWrappingVirtualComponent
 }
 
 class CaptureContext {
-  constructor(owner) {
+  constructor (owner) {
     this.owner = owner
     this.refs = {}
     this.foreignRefs = {}
@@ -754,7 +746,7 @@ class CaptureContext {
     this.$$.capturing = true
   }
 
-  _createComponent() {
+  _createComponent () {
     var vel = VirtualElement.createElement.apply(this, arguments)
     vel._context = this
     vel._owner = this.owner
@@ -767,8 +759,7 @@ class CaptureContext {
   }
 }
 
-
-function _createWrappingVirtualComponent(comp) {
+function _createWrappingVirtualComponent (comp) {
   var vel = new VirtualElement.Component(comp.constructor)
   vel._comp = comp
   if (comp.__htmlConfig__) {
@@ -777,29 +768,27 @@ function _createWrappingVirtualComponent(comp) {
   return vel
 }
 
-RenderingEngine.createContext = function(comp) {
+RenderingEngine.createContext = function (comp) {
   var vel = _createWrappingVirtualComponent(comp)
   return new CaptureContext(vel)
 }
 
-
 class RenderingState {
-
-  constructor(componentFactory, elementFactory) {
+  constructor (componentFactory, elementFactory) {
     this.componentFactory = componentFactory
     this.elementFactory = elementFactory
     this.poluted = []
-    this.id = "__"+uuid()
+    this.id = '__' + uuid()
   }
 
-  dispose() {
+  dispose () {
     var id = this.id
-    this.poluted.forEach(function(obj) {
+    this.poluted.forEach(function (obj) {
       delete obj[id]
     })
   }
 
-  set(obj, key, val) {
+  set (obj, key, val) {
     var info = obj[this.id]
     if (!info) {
       info = {}
@@ -809,93 +798,92 @@ class RenderingState {
     info[key] = val
   }
 
-  get(obj, key) {
+  get (obj, key) {
     var info = obj[this.id]
     if (info) {
       return info[key]
     }
   }
 
-  setMapped(c) {
+  setMapped (c) {
     this.set(c, 'mapped', true)
   }
 
-
-  isMapped(c) {
+  isMapped (c) {
     return Boolean(this.get(c, 'mapped'))
   }
 
   // 'relocated' means a node with ref
   // has been attached to a new parent node
-  setRelocated(c) {
+  setRelocated (c) {
     this.set(c, 'relocated', true)
   }
 
-  isRelocated(c) {
+  isRelocated (c) {
     return Boolean(this.get(c, 'relocated'))
   }
 
-  setDetached(c) {
+  setDetached (c) {
     this.set(c, 'detached', true)
   }
 
-  isDetached(c) {
+  isDetached (c) {
     return Boolean(this.get(c, 'detached'))
   }
 
-  setCaptured(vc) {
+  setCaptured (vc) {
     this.set(vc, 'captured', true)
   }
 
-  isCaptured(vc) {
+  isCaptured (vc) {
     return Boolean(this.get(vc, 'captured'))
   }
 
-  setNew(vc) {
+  setNew (vc) {
     this.set(vc, 'created', true)
   }
 
-  isNew(vc) {
+  isNew (vc) {
     return Boolean(this.get(vc, 'created'))
   }
 
-  setUpdated(vc) {
+  setUpdated (vc) {
     this.set(vc, 'updated', true)
   }
 
-  isUpdated(vc) {
+  isUpdated (vc) {
     return Boolean(this.get(vc, 'updated'))
   }
 
-  setSkipped(vc) {
+  setSkipped (vc) {
     this.set(vc, 'skipped', true)
   }
 
-  isSkipped(vc) {
+  isSkipped (vc) {
     return Boolean(this.get(vc, 'skipped'))
   }
 
-  setRendered(vc) {
+  setRendered (vc) {
     this.set(vc, 'rendered', true)
   }
 
-  isRendered(vc) {
+  isRendered (vc) {
     return Boolean(this.get(vc, 'rendered'))
   }
 
-  setOldProps(vc, oldProps) {
+  setOldProps (vc, oldProps) {
     this.set(vc, 'oldProps', oldProps)
   }
 
-  getOldProps(vc) {
+  getOldProps (vc) {
     return this.get(vc, 'oldProps')
   }
 
-  setOldState(vc, oldState) {
+  setOldState (vc, oldState) {
     this.set(vc, 'oldState', oldState)
   }
 
-  getOldState(vc) {
+  getOldState (vc) {
     return this.get(vc, 'oldState')
   }
 }

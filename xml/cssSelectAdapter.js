@@ -3,37 +3,36 @@ import DomUtils from '../vendor/domutils'
 import nameWithoutNS from './nameWithoutNS'
 
 class Adapter extends DomUtils.DomUtils {
-
   // we only have nodes which correspond to DOM elements
-  isTag() {
+  isTag () {
     return true
   }
 
-  getChildren(elem){
+  getChildren (elem) {
     return elem.getChildren() || []
   }
 
-  getAttributeValue(elem, name){
+  getAttributeValue (elem, name) {
     return elem.getAttribute(name)
   }
 
-  getAttributes(elem) {
-    return ['id', elem.id].concat(map(elem.attributes, (val, key) => { return [key,val] }))
+  getAttributes (elem) {
+    return ['id', elem.id].concat(map(elem.attributes, (val, key) => { return [key, val] }))
   }
 
-  hasAttrib(elem, name){
+  hasAttrib (elem, name) {
     return name === 'id' || elem.attributes.hasOwnProperty(name)
   }
 
-  getName(elem){
+  getName (elem) {
     return elem.type
   }
 
-  getNameWithoutNS(elem){
+  getNameWithoutNS (elem) {
     return nameWithoutNS(this.getName(elem))
   }
 
-  getText(elem) {
+  getText (elem) {
     if (elem._elementType === 'text') {
       return elem.getText()
     }

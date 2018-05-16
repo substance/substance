@@ -9,7 +9,7 @@ import isArray from './isArray'
   The default implementation overwrites elements.
    get concatenated rather than overwritten.
 */
-export default function merge(a, b, options) {
+export default function merge (a, b, options) {
   options = options || {}
   var _with = null
   if (options.array === 'replace') {
@@ -24,7 +24,7 @@ export default function merge(a, b, options) {
   }
 }
 
-function _concatArrays(objValue, srcValue) {
+function _concatArrays (objValue, srcValue) {
   if (isArray(objValue)) {
     return objValue.concat(srcValue)
   } else {
@@ -32,7 +32,7 @@ function _concatArrays(objValue, srcValue) {
   }
 }
 
-function _replaceArrays(objValue, srcValue) {
+function _replaceArrays (objValue, srcValue) {
   if (isArray(objValue)) {
     return srcValue
   } else {

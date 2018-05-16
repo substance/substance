@@ -7,7 +7,7 @@ import EditLinkTool from './EditLinkTool'
 
 export default {
   name: 'link',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Link)
     config.addComponent('link', LinkComponent)
     config.addConverter('html', LinkHTMLConverter)

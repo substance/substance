@@ -3,8 +3,7 @@ import { FindAndReplacePackage } from 'substance'
 const { FindAndReplaceManager } = FindAndReplacePackage
 
 export default class TestFindAndReplaceManager extends FindAndReplaceManager {
-
-  _getAllAffectedTextPropertiesInOrder() {
+  _getAllAffectedTextPropertiesInOrder () {
     return [
       ['p1', 'content'],
       ['p2', 'content'],

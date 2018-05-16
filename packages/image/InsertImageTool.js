@@ -1,29 +1,27 @@
 import ToggleTool from '../../ui/ToggleTool'
 
 class InsertImageTool extends ToggleTool {
-
-  getClassNames() {
+  getClassNames () {
     return 'sc-insert-image-tool'
   }
 
-  renderButton($$) {
+  renderButton ($$) {
     let button = super.renderButton($$)
     let input = $$('input').attr('type', 'file').ref('input')
       .on('change', this.onFileSelect)
     return [button, input]
   }
 
-  onClick() {
+  onClick () {
     this.refs.input.click()
   }
 
-  onFileSelect(e) {
+  onFileSelect (e) {
     let files = e.currentTarget.files
     this.executeCommand({
       files: Array.prototype.slice.call(files)
     })
   }
-
 }
 
 export default InsertImageTool

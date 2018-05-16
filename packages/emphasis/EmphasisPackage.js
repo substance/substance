@@ -5,7 +5,7 @@ import EmphasisComponent from './EmphasisComponent'
 
 export default {
   name: 'emphasis',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Emphasis)
     config.addConverter('html', EmphasisHTMLConverter)
     config.addConverter('xml', EmphasisHTMLConverter)
@@ -14,7 +14,7 @@ export default {
       nodeType: Emphasis.type,
       commandGroup: 'annotations'
     })
-    config.addIcon('emphasis', { 'fontawesome': 'fa-italic' });
+    config.addIcon('emphasis', { 'fontawesome': 'fa-italic' })
     config.addLabel('emphasis', {
       en: 'Emphasis',
       de: 'Betonung'

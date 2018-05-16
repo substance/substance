@@ -2,26 +2,25 @@ import { spy } from 'substance-test'
 import { Component } from 'substance'
 
 class TestComponent extends Component {
-
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
     this._enableSpies()
   }
 
-  _enableSpies() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach((name) => {
+  _enableSpies () {
+    ['didMount', 'didUpdate', 'dispose', 'shouldRerender', 'render'].forEach((name) => {
       spy(this, name)
     })
   }
 
-  _disableSpies() {
-    ['didMount','didUpdate','dispose','shouldRerender','render'].forEach((name) => {
+  _disableSpies () {
+    ['didMount', 'didUpdate', 'dispose', 'shouldRerender', 'render'].forEach((name) => {
       this[name].restore()
     })
   }
 }
 
-TestComponent.create = function(renderFunc, props) {
+TestComponent.create = function (renderFunc, props) {
   const comp = new TestComponent(null, props)
   if (renderFunc) {
     comp.render = renderFunc
@@ -35,8 +34,7 @@ TestComponent.create = function(renderFunc, props) {
 }
 
 class SimpleComponent extends TestComponent {
-
-  render($$) {
+  render ($$) {
     var el = $$('div').addClass('simple-component')
     if (this.props.children) {
       el.append(this.props.children)

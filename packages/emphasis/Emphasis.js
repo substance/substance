@@ -3,7 +3,7 @@ import Fragmenter from '../../model/Fragmenter'
 
 class Emphasis extends PropertyAnnotation {}
 
-Emphasis.type = "emphasis"
+Emphasis.type = 'emphasis'
 
 // hint for rendering in presence of overlapping annotations
 Emphasis.fragmentation = Fragmenter.ANY

@@ -4,7 +4,7 @@ import ObjectOperation from '../model/ObjectOperation'
 /*
   Compute snapshot based on a given doc (JSON) and a set of changes
 */
-export default function computeSnapshot(jsonDoc, changeset) {
+export default function computeSnapshot (jsonDoc, changeset) {
   // Clone the doc to make sure we don't manipulate in-place
   jsonDoc = cloneDeep(jsonDoc)
   let nodes = jsonDoc.nodes

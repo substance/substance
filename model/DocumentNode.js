@@ -27,16 +27,15 @@ import isString from '../util/isString'
 */
 export default
 class DocumentNode extends DataNode {
-
   /**
     @param {Document} doc A document instance
     @param {object} node properties
   */
-  constructor(doc, props) {
+  constructor (doc, props) {
     super(doc, props)
   }
 
-  _initialize(doc, props) {
+  _initialize (doc, props) {
     this.document = doc
     super._initialize(props)
   }
@@ -46,7 +45,7 @@ class DocumentNode extends DataNode {
 
     @returns {Document}
   */
-  getDocument() {
+  getDocument () {
     return this.document
   }
 
@@ -57,14 +56,14 @@ class DocumentNode extends DataNode {
 
     @returns {Boolean}
   */
-  hasParent() {
+  hasParent () {
     return Boolean(this.parent)
   }
 
   /**
     @returns {DocumentNode} the parent node
   */
-  getParent() {
+  getParent () {
     if (isString(this.parent)) return this.document.get(this.parent)
     return this.parent
   }
@@ -77,17 +76,17 @@ class DocumentNode extends DataNode {
 
     @returns {DocumentNode}
   */
-  getRoot() {
+  getRoot () {
     let node = this
-    while(node.parent) {
+    while (node.parent) {
       node = node.parent
     }
     return node
   }
 
-  getContainerRoot() {
+  getContainerRoot () {
     let node = this
-    while(node.parent) {
+    while (node.parent) {
       // stop if node is immediate child of a container
       if (node.parent.isContainer()) return node
       // oherwise traverse up
@@ -101,7 +100,7 @@ class DocumentNode extends DataNode {
 
     @returns {Boolean} default: false
   */
-  hasChildren() {
+  hasChildren () {
     return false
   }
 
@@ -128,7 +127,7 @@ class DocumentNode extends DataNode {
 
     @returns {Number} default: 0
   */
-  getChildCount() {
+  getChildCount () {
     return 0
   }
 
@@ -140,50 +139,49 @@ class DocumentNode extends DataNode {
   /**
     @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
   */
-  isBlock() {
+  isBlock () {
     return Boolean(this.constructor.isBlock)
   }
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
-  isText() {
+  isText () {
     return Boolean(this.constructor.isText)
   }
 
-  isList() {
+  isList () {
     return Boolean(this.constructor.isList)
   }
 
-  isListItem() {
+  isListItem () {
     return Boolean(this.constructor.isListItem)
   }
 
-  isContainer() {
+  isContainer () {
     return Boolean(this._isContainer)
   }
 
   // annotation categories
 
-  isAnnotation() {
+  isAnnotation () {
     return Boolean(this._isAnnotation)
   }
 
-  isPropertyAnnotation() {
+  isPropertyAnnotation () {
     return Boolean(this._isPropertyAnnotation)
   }
 
-  isContainerAnnotation() {
+  isContainerAnnotation () {
     return Boolean(this._isContainerAnnotation)
   }
 
   /**
     @returns {Boolean} true if node is an inline node (e.g. Citation)
   */
-  isInline() {
+  isInline () {
     return Boolean(this.constructor.isInline)
   }
-
 }
 
 DocumentNode.prototype._isDocumentNode = true

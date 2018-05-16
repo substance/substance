@@ -4,7 +4,7 @@ import Fragmenter from '../../model/Fragmenter'
 class Link extends PropertyAnnotation {}
 
 Link.schema = {
-  type: "link",
+  type: 'link',
   title: { type: 'string', optional: true },
   url: { type: 'string', 'default': ''}
 }

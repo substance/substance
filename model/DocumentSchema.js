@@ -5,8 +5,7 @@ import PropertyAnnotation from './PropertyAnnotation'
 import ContainerAnnotation from './ContainerAnnotation'
 
 class DocumentSchema extends Schema {
-
-  constructor(schemaSpec) {
+  constructor (schemaSpec) {
     super(schemaSpec.name, schemaSpec.version)
     /* istanbul ignore next */
     if (!schemaSpec.DocumentClass) {
@@ -15,24 +14,23 @@ class DocumentSchema extends Schema {
     Object.assign(this, schemaSpec)
   }
 
-  getDocumentClass() {
+  getDocumentClass () {
     return this.DocumentClass
   }
 
   /*
     @override
   */
-  getDefaultTextType() {
+  getDefaultTextType () {
     return this.defaultTextType
   }
 
   /*
     @override
   */
-  getBuiltIns() {
+  getBuiltIns () {
     return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation]
   }
-
 }
 
 export default DocumentSchema

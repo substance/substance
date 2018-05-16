@@ -1,4 +1,4 @@
-export default function(tx) {
+export default function (tx) {
   let body = tx.get('body')
   tx.create({
     type: 'paragraph',
@@ -25,7 +25,7 @@ export default function(tx) {
     id: 'a1',
     start: {
       path: ['p1', 'content'],
-      offset: 5,
+      offset: 5
     },
     end: {
       path: ['p3', 'content'],
@@ -38,7 +38,7 @@ export default function(tx) {
     id: 'a2',
     start: {
       path: ['p1', 'content'],
-      offset: 0,
+      offset: 0
     },
     end: {
       offset: 2

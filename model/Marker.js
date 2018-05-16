@@ -10,8 +10,7 @@ import PropertyAnnotation from './PropertyAnnotation'
   Note: we extend PropertyAnnotation to inherit the same API.
 */
 class Marker extends PropertyAnnotation {
-
-  _initialize(doc, props) {
+  _initialize (doc, props) {
     this.document = doc
     this.type = props.type
     if (!props.type) {
@@ -27,8 +26,8 @@ class Marker extends PropertyAnnotation {
   }
 
   // TODO: we should use the Coordinate comparison API here
-  containsSelection(sel) {
-    if (sel.isNull()) return false;
+  containsSelection (sel) {
+    if (sel.isNull()) return false
     if (sel.isPropertySelection()) {
       return (isArrayEqual(this.start.path, sel.start.path) &&
         this.start.offset <= sel.start.offset &&
@@ -38,14 +37,13 @@ class Marker extends PropertyAnnotation {
     }
   }
 
-  get type() {
+  get type () {
     return this._type
   }
 
-  set type(type) {
+  set type (type) {
     this._type = type
   }
-
 }
 
 // while having the same interface, Markers should still be treated differently, e.g. not go into the AnnotationIndex

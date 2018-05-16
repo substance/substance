@@ -11,11 +11,11 @@ import ObjectOperation from './ObjectOperation'
   v_n          v_n+1
      \ B - A' /
 */
-export function transformDocumentChange(A, B) {
+export function transformDocumentChange (A, B) {
   _transformInplaceBatch(A, B)
 }
 
-export function transformSelection(sel, a) {
+export function transformSelection (sel, a) {
   let newSel = sel.clone()
   let hasChanged = _transformSelectionInplace(newSel, a)
   if (hasChanged) {
@@ -25,7 +25,7 @@ export function transformSelection(sel, a) {
   }
 }
 
-function _transformInplaceSingle(a, b) {
+function _transformInplaceSingle (a, b) {
   for (let i = 0; i < a.ops.length; i++) {
     let a_op = a.ops[i]
     for (let j = 0; j < b.ops.length; j++) {
@@ -49,7 +49,7 @@ function _transformInplaceSingle(a, b) {
   }
 }
 
-function _transformInplaceBatch(A, B) {
+function _transformInplaceBatch (A, B) {
   if (!isArray(A)) {
     A = [A]
   }
@@ -60,19 +60,19 @@ function _transformInplaceBatch(A, B) {
     let a = A[i]
     for (let j = 0; j < B.length; j++) {
       let b = B[j]
-      _transformInplaceSingle(a,b)
+      _transformInplaceSingle(a, b)
     }
   }
 }
 
-function _transformSelectionInplace(sel, a) {
-  if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection()) ) {
+function _transformSelectionInplace (sel, a) {
+  if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection())) {
     return false
   }
   let ops = a.ops
   let hasChanged = false
   let isCollapsed = sel.isCollapsed()
-  for(let i=0; i<ops.length; i++) {
+  for (let i = 0; i < ops.length; i++) {
     let op = ops[i]
     hasChanged |= _transformCoordinateInplace(sel.start, op)
     if (!isCollapsed) {
@@ -87,7 +87,7 @@ function _transformSelectionInplace(sel, a) {
   return hasChanged
 }
 
-function _transformCoordinateInplace(coor, op) {
+function _transformCoordinateInplace (coor, op) {
   if (!isEqual(op.path, coor.path)) return false
   let hasChanged = false
   if (op.type === 'update' && op.propertyType === 'string') {

@@ -7,15 +7,14 @@ const TEXT = 'TEXT'
 
 export default
 class DFA {
-
-  constructor(transitions) {
+  constructor (transitions) {
     if (!transitions || Object.keys(transitions).length === 0) {
       transitions = { START: { EPSILON: END } }
     }
     this.transitions = transitions
   }
 
-  consume(state, id) {
+  consume (state, id) {
     const T = this.transitions
     // e.g. this happens, if the state is already END
     // and more tokens are coming
@@ -24,7 +23,7 @@ class DFA {
     if (nextState !== undefined) {
       return nextState
     }
-    while(T[state][EPSILON] !== undefined) {
+    while (T[state][EPSILON] !== undefined) {
       state = T[state][EPSILON]
       if (state === END) {
         return -1
@@ -37,17 +36,17 @@ class DFA {
     return -1
   }
 
-  canConsume(state, id) {
+  canConsume (state, id) {
     let nextState = this.consume(state, id)
     return (nextState !== -1)
   }
 
-  isFinished(state) {
+  isFinished (state) {
     const T = this.transitions
     if (state === 'END') return true
     // if the state is invalid
     if (!T[state]) return false
-    while(T[state][EPSILON] !== undefined) {
+    while (T[state][EPSILON] !== undefined) {
       state = T[state][EPSILON]
       if (state === 'END') return true
     }
@@ -57,7 +56,7 @@ class DFA {
   // Helpers to analyze
 
   // generates all sets of tokens, reached on all different paths
-  _tokensByPath() {
+  _tokensByPath () {
     const result = []
     const transitions = this.transitions
     if (!transitions) return []
@@ -82,7 +81,7 @@ class DFA {
         }
       })
       let stack = [state]
-      while(stack.length > 0) {
+      while (stack.length > 0) {
         let from = stack.pop()
         if (state === END) continue
         visited[from] = true
@@ -105,7 +104,6 @@ class DFA {
     })
     return result
   }
-
 }
 
 DFA.START = START

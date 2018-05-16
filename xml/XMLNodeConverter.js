@@ -5,20 +5,18 @@ import nameWithoutNS from './nameWithoutNS'
 */
 export default
 class XMLNodeConverter {
-
-  constructor(type) {
+  constructor (type) {
     this.type = type
     this.tagName = nameWithoutNS(type)
     this.tagNameNS = type
   }
 
-  matchElement(el) {
+  matchElement (el) {
     return (el.tagName === this.tagNameNS)
   }
 
-  export(node, el) {
+  export (node, el) {
     el.tagName = this.tagNameNS
     el.setAttributes(node.attributes)
   }
-
 }

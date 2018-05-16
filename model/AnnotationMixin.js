@@ -5,11 +5,9 @@ import { getTextForSelection } from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 
-export default function(DocumentNode) {
-
+export default function (DocumentNode) {
   class AbstractAnnotation extends DocumentNode {
-
-    constructor(doc, props) {
+    constructor (doc, props) {
       super(doc, _normalizedProps(props))
 
       // making sure that coordinates are Coordinate instances
@@ -19,51 +17,51 @@ export default function(DocumentNode) {
 
     /* istanbul ignore start */
 
-    get path() {
+    get path () {
       console.warn('DEPRECATED: use annotation.start.path instead')
       return this.start.path
     }
 
-    getPath() {
+    getPath () {
       return this.start.path
     }
 
-    get startPath() {
+    get startPath () {
       console.warn('DEPRECATED: use annotation.start.path instead.')
       return this.start.path
     }
 
-    set startPath(path) {
+    set startPath (path) {
       console.warn('DEPRECATED: use annotation.start.path instead.')
       this.start.path = path
     }
 
-    get startOffset() {
+    get startOffset () {
       console.warn('DEPRECATED: use annotation.start.offset instead.')
       return this.start.offset
     }
 
-    set startOffset(offset) {
+    set startOffset (offset) {
       console.warn('DEPRECATED: use annotation.start.offset instead.')
       this.start.offset = offset
     }
 
-    get endPath() {
+    get endPath () {
       console.warn('DEPRECATED: use annotation.end.path instead.')
       return this.end.path
     }
 
-    set endPath(path) {
+    set endPath (path) {
       console.warn('DEPRECATED: use annotation.end.path instead.')
       this.end.path = path
     }
 
-    get endOffset() {
+    get endOffset () {
       console.warn('DEPRECATED: use annotation.end.offset instead.')
       return this.end.offset
     }
 
-    set endOffset(offset) {
+    set endOffset (offset) {
       console.warn('DEPRECATED: use annotation.end.offset instead.')
       this.end.offset = offset
     }
@@ -75,16 +73,16 @@ export default function(DocumentNode) {
 
       @return {String}
     */
-    getText() {
+    getText () {
       var doc = this.getDocument()
       if (!doc) {
         console.warn('Trying to use a Annotation which is not attached to the document.')
-        return ""
+        return ''
       }
       return getTextForSelection(doc, this.getSelection())
     }
 
-    isAnnotation() {
+    isAnnotation () {
       return true
     }
 
@@ -96,7 +94,7 @@ export default function(DocumentNode) {
       For certain annotation types,you may want to the annotation truncated
       rather than split, where you need to override this method returning `false`.
     */
-    canSplit() {
+    canSplit () {
       return true
     }
 
@@ -109,7 +107,7 @@ export default function(DocumentNode) {
 
       @returns {Boolean}
     */
-    isAnchor() {
+    isAnchor () {
       return false
     }
 
@@ -118,7 +116,7 @@ export default function(DocumentNode) {
 
       @return {model/ContainerSelection}
     */
-    getSelection() {
+    getSelection () {
       const doc = this.getDocument()
       // Guard: when this is called while this node has been detached already.
       if (!doc) {
@@ -127,7 +125,7 @@ export default function(DocumentNode) {
       }
       if (this._isContainerAnnotation) {
         return doc.createSelection({
-          type: "container",
+          type: 'container',
           containerId: this.containerId,
           startPath: this.start.path,
           startOffset: this.start.offset,
@@ -144,7 +142,7 @@ export default function(DocumentNode) {
       }
     }
 
-    _updateRange(tx, sel) {
+    _updateRange (tx, sel) {
       if (sel.isContainerSelection()) {
         // TODO: use coordinate ops
         if (!isEqual(this.start.path, sel.start.path)) {
@@ -179,14 +177,14 @@ export default function(DocumentNode) {
   AbstractAnnotation.prototype._isAnnotation = true
 
   AbstractAnnotation.schema = {
-    start: { type: "coordinate", default: { path: [], offset: 0 } },
-    end: { type: "coordinate", default: { path: [], offset: 0 } }
+    start: { type: 'coordinate', default: { path: [], offset: 0 } },
+    end: { type: 'coordinate', default: { path: [], offset: 0 } }
   }
 
   return AbstractAnnotation
 }
 
-function _normalizedProps(props) {
+function _normalizedProps (props) {
   // in the beginning we used startPath + endPath etc.
   // now we use coodinates start and end where each coordinate has path + offset
   if (!props.hasOwnProperty('start')) {

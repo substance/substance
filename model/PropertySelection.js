@@ -17,7 +17,6 @@ import Coordinate from './Coordinate'
   })
 */
 class PropertySelection extends Selection {
-
   /**
     @param {array} path
     @param {int} startOffset
@@ -26,7 +25,7 @@ class PropertySelection extends Selection {
     @param {string} [containerId]
     @param {string} [surfaceId]
   */
-  constructor(path, startOffset, endOffset, reverse, containerId, surfaceId) {
+  constructor (path, startOffset, endOffset, reverse, containerId, surfaceId) {
     super()
 
     if (arguments.length === 1) {
@@ -40,7 +39,7 @@ class PropertySelection extends Selection {
     }
 
     if (!path || !isNumber(startOffset)) {
-      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory');
+      throw new Error('Invalid arguments: `path` and `startOffset` are mandatory')
     }
 
     this.start = new Coordinate(path, startOffset)
@@ -58,19 +57,19 @@ class PropertySelection extends Selection {
       Identifier of the surface this selection should be active in.
       @type {String}
     */
-    this.surfaceId = surfaceId;
+    this.surfaceId = surfaceId
   }
 
-  get path() {
+  get path () {
     return this.start.path
   }
 
-  get startOffset() {
+  get startOffset () {
     console.warn('DEPRECATED: Use sel.start.offset instead')
     return this.start.offset
   }
 
-  get endOffset() {
+  get endOffset () {
     console.warn('DEPRECATED: Use sel.end.offset instead')
     return this.end.offset
   }
@@ -80,7 +79,7 @@ class PropertySelection extends Selection {
 
     @returns {Object}
   */
-  toJSON() {
+  toJSON () {
     return {
       type: 'property',
       path: this.start.path,
@@ -92,41 +91,41 @@ class PropertySelection extends Selection {
     }
   }
 
-  isPropertySelection() {
+  isPropertySelection () {
     return true
   }
 
-  getType() {
+  getType () {
     return 'property'
   }
 
-  isNull() {
+  isNull () {
     return false
   }
 
-  isCollapsed() {
-    return this.start.offset === this.end.offset;
+  isCollapsed () {
+    return this.start.offset === this.end.offset
   }
 
-  isReverse() {
+  isReverse () {
     return this.reverse
   }
 
-  equals(other) {
+  equals (other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       (this.start.equals(other.start) && this.end.equals(other.end))
     )
   }
 
-  toString() {
+  toString () {
     /* istanbul ignore next */
     return [
-      "PropertySelection(", JSON.stringify(this.path), ", ",
-      this.start.offset, " -> ", this.end.offset,
-      (this.reverse?", reverse":""),
-      (this.surfaceId?(", "+this.surfaceId):""),
-      ")"
+      'PropertySelection(', JSON.stringify(this.path), ', ',
+      this.start.offset, ' -> ', this.end.offset,
+      (this.reverse ? ', reverse' : ''),
+      (this.surfaceId ? (', ' + this.surfaceId) : ''),
+      ')'
     ].join('')
   }
 
@@ -136,12 +135,12 @@ class PropertySelection extends Selection {
     @param {String} direction either left of right
     @returns {PropertySelection}
   */
-  collapse(direction) {
+  collapse (direction) {
     var offset
     if (direction === 'left') {
-      offset = this.start.offset;
+      offset = this.start.offset
     } else {
-      offset = this.end.offset;
+      offset = this.end.offset
     }
     return this.createWithNewRange(offset, offset)
   }
@@ -154,12 +153,12 @@ class PropertySelection extends Selection {
 
     @returns {String[]} path
   */
-  getPath() {
-    return this.start.path;
+  getPath () {
+    return this.start.path
   }
 
-  getNodeId() {
-    return this.start.path[0];
+  getNodeId () {
+    return this.start.path[0]
   }
 
   /**
@@ -169,7 +168,7 @@ class PropertySelection extends Selection {
     @param {Boolean} [strict] true if should check that it is strictly inside the other
     @returns {Boolean}
   */
-  isInsideOf(other, strict) {
+  isInsideOf (other, strict) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
       return other.contains(this, strict)
@@ -177,11 +176,11 @@ class PropertySelection extends Selection {
     if (strict) {
       return (isArrayEqual(this.path, other.path) &&
         this.start.offset > other.start.offset &&
-        this.end.offset < other.end.offset);
+        this.end.offset < other.end.offset)
     } else {
       return (isArrayEqual(this.path, other.path) &&
         this.start.offset >= other.start.offset &&
-        this.end.offset <= other.end.offset);
+        this.end.offset <= other.end.offset)
     }
   }
 
@@ -192,7 +191,7 @@ class PropertySelection extends Selection {
     @param {Boolean} [strict] true if should check that it is strictly contains the other
     @returns {Boolean}
   */
-  contains(other, strict) {
+  contains (other, strict) {
     if (other.isNull()) return false
     return other.isInsideOf(this, strict)
   }
@@ -204,7 +203,7 @@ class PropertySelection extends Selection {
     @param {Boolean} [strict] true if should check that it is strictly overlaps the other
     @returns {Boolean}
   */
-  overlaps(other, strict) {
+  overlaps (other, strict) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
       // console.log('PropertySelection.overlaps: delegating to ContainerSelection.overlaps...')
@@ -212,9 +211,9 @@ class PropertySelection extends Selection {
     }
     if (!isArrayEqual(this.path, other.path)) return false
     if (strict) {
-      return (! (this.start.offset>=other.end.offset||this.end.offset<=other.start.offset) );
+      return (!(this.start.offset >= other.end.offset || this.end.offset <= other.start.offset))
     } else {
-      return (! (this.start.offset>other.end.offset||this.end.offset<other.start.offset) );
+      return (!(this.start.offset > other.end.offset || this.end.offset < other.start.offset))
     }
   }
 
@@ -224,14 +223,14 @@ class PropertySelection extends Selection {
     @param {Selection} other
     @returns {Boolean}
   */
-  isRightAlignedWith(other) {
+  isRightAlignedWith (other) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
       // console.log('PropertySelection.isRightAlignedWith: delegating to ContainerSelection.isRightAlignedWith...')
       return other.isRightAlignedWith(this)
     }
     return (isArrayEqual(this.path, other.path) &&
-      this.end.offset === other.end.offset);
+      this.end.offset === other.end.offset)
   }
 
   /**
@@ -240,14 +239,14 @@ class PropertySelection extends Selection {
     @param {Selection} other
     @returns {Boolean}
   */
-  isLeftAlignedWith(other) {
+  isLeftAlignedWith (other) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
       // console.log('PropertySelection.isLeftAlignedWith: delegating to ContainerSelection.isLeftAlignedWith...')
       return other.isLeftAlignedWith(this)
     }
     return (isArrayEqual(this.path, other.path) &&
-      this.start.offset === other.start.offset);
+      this.start.offset === other.start.offset)
   }
 
   /**
@@ -256,7 +255,7 @@ class PropertySelection extends Selection {
     @param {Selection} other
     @returns {Selection} a new selection
   */
-  expand(other) {
+  expand (other) {
     if (other.isNull()) return this
 
     // if the other is a ContainerSelection
@@ -268,9 +267,9 @@ class PropertySelection extends Selection {
     if (!isArrayEqual(this.path, other.path)) {
       throw new Error('Can not expand PropertySelection to a different property.')
     }
-    var newStartOffset = Math.min(this.start.offset, other.start.offset);
-    var newEndOffset = Math.max(this.end.offset, other.end.offset);
-    return this.createWithNewRange(newStartOffset, newEndOffset);
+    var newStartOffset = Math.min(this.start.offset, other.start.offset)
+    var newEndOffset = Math.max(this.end.offset, other.end.offset)
+    return this.createWithNewRange(newStartOffset, newEndOffset)
   }
 
   /**
@@ -279,7 +278,7 @@ class PropertySelection extends Selection {
     @param {Selection} other
     @returns {Selection} a new selection
   */
-  truncateWith(other) {
+  truncateWith (other) {
     if (other.isNull()) return this
     if (other.isInsideOf(this, 'strict')) {
       // the other selection should overlap only on one side
@@ -290,45 +289,45 @@ class PropertySelection extends Selection {
     }
     var otherStartOffset, otherEndOffset
     if (other.isPropertySelection()) {
-      otherStartOffset = other.start.offset;
-      otherEndOffset = other.end.offset;
+      otherStartOffset = other.start.offset
+      otherEndOffset = other.end.offset
     } else if (other.isContainerSelection()) {
       // either the startPath or the endPath must be the same
       if (isArrayEqual(other.start.path, this.start.path)) {
-        otherStartOffset = other.start.offset;
+        otherStartOffset = other.start.offset
       } else {
-        otherStartOffset = this.start.offset;
+        otherStartOffset = this.start.offset
       }
       if (isArrayEqual(other.end.path, this.start.path)) {
-        otherEndOffset = other.end.offset;
+        otherEndOffset = other.end.offset
       } else {
-        otherEndOffset = this.end.offset;
+        otherEndOffset = this.end.offset
       }
     } else {
       return this
     }
 
-    var newStartOffset;
-    var newEndOffset;
+    var newStartOffset
+    var newEndOffset
     if (this.start.offset > otherStartOffset && this.end.offset > otherEndOffset) {
-      newStartOffset = otherEndOffset;
-      newEndOffset = this.end.offset;
+      newStartOffset = otherEndOffset
+      newEndOffset = this.end.offset
     } else if (this.start.offset < otherStartOffset && this.end.offset < otherEndOffset) {
-      newStartOffset = this.start.offset;
-      newEndOffset = otherStartOffset;
+      newStartOffset = this.start.offset
+      newEndOffset = otherStartOffset
     } else if (this.start.offset === otherStartOffset) {
       if (this.end.offset <= otherEndOffset) {
-        return Selection.nullSelection;
+        return Selection.nullSelection
       } else {
-        newStartOffset = otherEndOffset;
-        newEndOffset = this.end.offset;
+        newStartOffset = otherEndOffset
+        newEndOffset = this.end.offset
       }
     } else if (this.end.offset === otherEndOffset) {
       if (this.start.offset >= otherStartOffset) {
-        return Selection.nullSelection;
+        return Selection.nullSelection
       } else {
-        newStartOffset = this.start.offset;
-        newEndOffset = otherStartOffset;
+        newStartOffset = this.start.offset
+        newEndOffset = otherStartOffset
       }
     } else if (other.contains(this)) {
       return Selection.nullSelection
@@ -346,7 +345,7 @@ class PropertySelection extends Selection {
     @param {Number} endOffset
     @returns {Selection} a new selection
   */
-  createWithNewRange(startOffset, endOffset) {
+  createWithNewRange (startOffset, endOffset) {
     var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerId, this.surfaceId)
     var doc = this._internal.doc
     if (doc) {
@@ -355,13 +354,12 @@ class PropertySelection extends Selection {
     return sel
   }
 
-  _clone() {
-    return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerId, this.surfaceId);
+  _clone () {
+    return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerId, this.surfaceId)
   }
-
 }
 
-PropertySelection.fromJSON = function(json) {
+PropertySelection.fromJSON = function (json) {
   return new PropertySelection(json)
 }
 

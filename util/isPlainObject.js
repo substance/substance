@@ -1,3 +1,3 @@
-export default function isPlainObject(o) {
+export default function isPlainObject (o) {
   return Boolean(o) && o.constructor === {}.constructor
 }

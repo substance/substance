@@ -1,14 +1,13 @@
 import Command from '../../ui/Command'
 
 class ToggleFindAndReplaceCommand extends Command {
-
-  getCommandState() {
+  getCommandState () {
     return {
       disabled: false
     }
   }
 
-  execute({editorSession}) {
+  execute ({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
     let surface = editorSession.getFocusedSurface()
     if (surface) {

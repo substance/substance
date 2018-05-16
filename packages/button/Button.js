@@ -11,7 +11,7 @@ import Component from '../../ui/Component'
   ```
 */
 class Button extends Component {
-  render($$) {
+  render ($$) {
     let el = $$('button')
       .addClass('sc-button')
 
@@ -30,7 +30,7 @@ class Button extends Component {
       el.addClass('sm-active')
     }
     if (this.props.theme) {
-      el.addClass('sm-theme-'+this.props.theme)
+      el.addClass('sm-theme-' + this.props.theme)
     }
 
     if (this.props.disabled) {
@@ -47,24 +47,24 @@ class Button extends Component {
     return el
   }
 
-  renderIcon($$) {
+  renderIcon ($$) {
     let iconEl = this.context.iconProvider.renderIcon($$, this.props.icon)
     return iconEl
   }
 
-  renderDropdownIcon($$) {
+  renderDropdownIcon ($$) {
     let iconEl = this.context.iconProvider.renderIcon($$, 'dropdown')
     iconEl.addClass('se-dropdown')
     return iconEl
   }
 
-  renderLabel($$) {
+  renderLabel ($$) {
     return $$('span').addClass('se-label').append(
       this.getLabel(this.props.label)
     )
   }
 
-  getLabel(name) {
+  getLabel (name) {
     let labelProvider = this.context.labelProvider
     return labelProvider.getLabel(name, this.props.commandState)
   }

@@ -28,8 +28,7 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 */
 
 class TextPropertyComponent extends AnnotatedTextComponent {
-
-  getInitialState() {
+  getInitialState () {
     const markersManager = this.context.markersManager
     let path = this.getPath()
     let markers
@@ -49,7 +48,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
   }
 
-  didMount() {
+  didMount () {
     // TODO: this is problematic as it interferes with OSX's special character menu
     // if (this.context.surface && this.context.surface.hasNativeSpellcheck()) {
     //   this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
@@ -57,7 +56,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     // }
   }
 
-  dispose() {
+  dispose () {
     if (this.context.markersManager) {
       this.context.markersManager.deregister(this)
     }
@@ -66,10 +65,8 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
   }
 
-  render($$) {
+  render ($$) {
     let path = this.getPath()
-
-
 
     let el = this._renderContent($$)
       .addClass('sc-text-property')
@@ -98,7 +95,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return el
   }
 
-  getAnnotations() {
+  getAnnotations () {
     if (this.props.markers) {
       return this.state.markers.concat(this.props.markers)
     } else {
@@ -106,7 +103,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
   }
 
-  _renderFragment($$, fragment) {
+  _renderFragment ($$, fragment) {
     let node = fragment.node
     let id = node.id
     let el
@@ -124,7 +121,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     return el
   }
 
-  _onDomMutations(mutations) {
+  _onDomMutations (mutations) {
     // console.log('Observed DOM mutation on', this.props.path, mutations)
     // HACK: only detecting mutations that are coming from the native spell-correction
     if (mutations.length === 2 && mutations[0].target === mutations[1].target) {
@@ -138,7 +135,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     this.rerender()
   }
 
-  _applyTextMutation(textEl, oldText) {
+  _applyTextMutation (textEl, oldText) {
     // find the offset
     let offset = _getCharPos(textEl, 0)
     let newText = textEl.textContent
@@ -146,8 +143,8 @@ class TextPropertyComponent extends AnnotatedTextComponent {
 
     let editorSession = this.context.editorSession
     let path = this.getPath()
-    editorSession.transaction(function(tx) {
-      changes.forEach(function(change) {
+    editorSession.transaction(function (tx) {
+      changes.forEach(function (change) {
         // NOTE: atomic text replace is not supported currently
         if (change.type === 'replace') {
           tx.update(path, { type: 'delete', start: change.start, end: change.end })
@@ -159,41 +156,40 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     })
   }
 
-  getSurface() {
+  getSurface () {
     return this.props.surface || this.context.surface
   }
 
-  getSurfaceId() {
+  getSurfaceId () {
     let surface = this.getSurface()
     return surface ? surface.id : null
   }
 
-  getContainerId() {
+  getContainerId () {
     let surface = this.getSurface()
     return surface ? surface.getContainerId() : null
   }
 
-  isEditable() {
+  isEditable () {
     const surface = this.getSurface()
     return surface ? surface.isEditable() : false
   }
 
-  isReadonly() {
+  isReadonly () {
     const surface = this.getSurface()
     return surface ? surface.isReadonly() : true
   }
 
-  getDOMCoordinate(charPos) {
+  getDOMCoordinate (charPos) {
     return this._getDOMCoordinate(this.el, charPos)
   }
 
-
-  _finishFragment(fragment, context, parentContext) {
+  _finishFragment (fragment, context, parentContext) {
     context.attr('data-length', fragment.length)
     parentContext.append(context)
   }
 
-  _getDOMCoordinate(el, charPos) {
+  _getDOMCoordinate (el, charPos) {
     let l
     let idx = 0
     if (charPos === 0) {
@@ -211,7 +207,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
             offset: charPos
           }
         } else {
-          charPos -= l;
+          charPos -= l
         }
       } else if (child.isElementNode()) {
         let length = child.getAttribute('data-length')
@@ -244,11 +240,9 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       }
     }
   }
-
 }
 
 TextPropertyComponent.prototype._isTextPropertyComponent = true
-
 
 // Helpers for DOM selection mapping
 
@@ -259,7 +253,7 @@ TextPropertyComponent.prototype._isTextPropertyComponent = true
   If found it computes the character position, counting chars and using the hints, data-length and data-offset,
   rendered by the TextPropertyComponent
 */
-TextPropertyComponent.getCoordinate = function(root, el, offset) {
+TextPropertyComponent.getCoordinate = function (root, el, offset) {
   let context = _getPropertyContext(root, el, offset)
   if (!context) {
     return null
@@ -284,7 +278,7 @@ TextPropertyComponent.getCoordinate = function(root, el, offset) {
   }
 }
 
-function _getPropertyContext(root, node, offset) {
+function _getPropertyContext (root, node, offset) {
   let result = {
     comp: null,
     el: null,
@@ -299,7 +293,7 @@ function _getPropertyContext(root, node, offset) {
         result.comp = comp
         result.el = node
         result.path = comp.getPath()
-        return result;
+        return result
       }
       // we need to normalize situations where the DOM coordinate
       // is inside an inline node, which we have observed
@@ -316,7 +310,7 @@ function _getPropertyContext(root, node, offset) {
   return null
 }
 
-function _getCharPos(node, offset) {
+function _getCharPos (node, offset) {
   let charPos = offset
   let parent, childIdx
 
@@ -377,21 +371,21 @@ function _getCharPos(node, offset) {
     // Unsupported case
     return null
   }
-  return charPos;
+  return charPos
 }
 
-function _countCharacters(el, maxIdx) {
+function _countCharacters (el, maxIdx) {
   let charPos = 0
   // inline elements have a length of 1
   if (el.getAttribute('data-inline')) {
-    return maxIdx === 0 ? 0 : 1;
+    return maxIdx === 0 ? 0 : 1
   }
   let l = el.getChildCount()
   if (arguments.length === 1) {
-    maxIdx = l;
+    maxIdx = l
   }
   maxIdx = Math.min(l, maxIdx)
-  for (let i=0, child = el.getFirstChild(); i < maxIdx; child = child.getNextSibling(), i++) {
+  for (let i = 0, child = el.getFirstChild(); i < maxIdx; child = child.getNextSibling(), i++) {
     if (child.isTextNode()) {
       charPos += child.getTextContent().length
     } else if (child.isElementNode()) {

@@ -27,125 +27,124 @@ class TreeIndex {
    * obj.get(['b', 'b1']);
    * => b1Val
    */
-  get(path) {
+  get (path) {
     if (arguments.length > 1) {
-      path = Array.prototype.slice(arguments, 0);
+      path = Array.prototype.slice(arguments, 0)
     }
     if (isString(path)) {
-      path = [path];
+      path = [path]
     }
-    return get(this, path);
+    return get(this, path)
   }
 
-  getAll(path) {
+  getAll (path) {
     if (arguments.length > 1) {
-      path = Array.prototype.slice(arguments, 0);
+      path = Array.prototype.slice(arguments, 0)
     }
     if (isString(path)) {
-      path = [path];
+      path = [path]
     }
     if (!isArray(path)) {
-      throw new Error('Illegal argument for TreeIndex.get()');
+      throw new Error('Illegal argument for TreeIndex.get()')
     }
-    var node = get(this, path);
-    return this._collectValues(node);
+    var node = get(this, path)
+    return this._collectValues(node)
   }
 
-  set(path, value) {
+  set (path, value) {
     if (isString(path)) {
-      path = [path];
+      path = [path]
     }
-    setWith(this, path, value, function(val) {
-      if (!val) return new TreeNode();
-    });
+    setWith(this, path, value, function (val) {
+      if (!val) return new TreeNode()
+    })
   }
 
-  delete(path) {
+  delete (path) {
     if (isString(path)) {
-      delete this[path];
-    } else if(path.length === 1) {
-      delete this[path[0]];
+      delete this[path]
+    } else if (path.length === 1) {
+      delete this[path[0]]
     } else {
-      var key = path[path.length-1];
-      path = path.slice(0, -1);
-      var parent = get(this, path);
+      var key = path[path.length - 1]
+      path = path.slice(0, -1)
+      var parent = get(this, path)
       if (parent) {
-        delete parent[key];
+        delete parent[key]
       }
     }
   }
 
-  clear() {
-    var root = this;
+  clear () {
+    var root = this
     for (var key in root) {
       if (root.hasOwnProperty(key)) {
-        delete root[key];
+        delete root[key]
       }
     }
   }
 
-  traverse(fn) {
-    this._traverse(this, [], fn);
+  traverse (fn) {
+    this._traverse(this, [], fn)
   }
 
-  forEach(...args) {
+  forEach (...args) {
     this.traverse(...args)
   }
 
-  _traverse(root, path, fn) {
-    var id;
+  _traverse (root, path, fn) {
+    var id
     for (id in root) {
-      if (!root.hasOwnProperty(id)) continue;
-      var child = root[id];
-      var childPath = path.concat([id]);
+      if (!root.hasOwnProperty(id)) continue
+      var child = root[id]
+      var childPath = path.concat([id])
       if (child instanceof TreeNode) {
-        this._traverse(child, childPath, fn);
+        this._traverse(child, childPath, fn)
       } else {
-        fn(child, childPath);
+        fn(child, childPath)
       }
     }
   }
 
-  _collectValues(root) {
+  _collectValues (root) {
     // TODO: don't know if this is the best solution
     // We use this only for indexes, e.g., to get all annotation on one node
-    var vals = {};
-    this._traverse(root, [], function(val, path) {
-      var key = path[path.length-1];
-      vals[key] = val;
-    });
-    return vals;
+    var vals = {}
+    this._traverse(root, [], function (val, path) {
+      var key = path[path.length - 1]
+      vals[key] = val
+    })
+    return vals
   }
 }
 
 class TreeIndexArrays extends TreeIndex {
-
-  contains(path) {
+  contains (path) {
     let val = super.get(path)
     return Boolean(val)
   }
 
-  get(path) {
+  get (path) {
     let val = super.get(path)
     if (val instanceof TreeNode) {
-      val = val.__values__ || [];
+      val = val.__values__ || []
     }
-    return val;
+    return val
   }
 
-  set(path, arr) {
+  set (path, arr) {
     let val = super.get(path)
     val.__values__ = arr
   }
 
-  add(path, value) {
+  add (path, value) {
     if (isString(path)) {
-      path = [path];
+      path = [path]
     }
     if (!isArray(path)) {
-      throw new Error('Illegal arguments.');
+      throw new Error('Illegal arguments.')
     }
-    var arr;
+    var arr
 
     // We are using setWith, as it allows us to create nodes on the way down
     // setWith can be controlled via a hook called for each key in the path
@@ -153,34 +152,34 @@ class TreeIndexArrays extends TreeIndex {
     // If val is defined, then we must return undefined to keep the original tree node
     // __dummy__ is necessary as setWith is used to set a value, but we want
     // to append to the array
-    setWith(this, path.concat(['__values__','__dummy__']), undefined, function(val, key) {
+    setWith(this, path.concat(['__values__', '__dummy__']), undefined, function (val, key) {
       if (key === '__values__') {
-        if (!val) val = [];
-        arr = val;
+        if (!val) val = []
+        arr = val
       } else if (!val) {
-        val = new TreeNode();
+        val = new TreeNode()
       }
-      return val;
+      return val
     })
     delete arr.__dummy__
     arr.push(value)
   }
 
-  remove(path, value) {
-    var arr = get(this, path);
+  remove (path, value) {
+    var arr = get(this, path)
     if (arr instanceof TreeNode) {
       if (arguments.length === 1) {
         delete arr.__values__
       } else {
-        deleteFromArray(arr.__values__, value);
+        deleteFromArray(arr.__values__, value)
       }
     }
   }
 
-  _collectValues(root) {
+  _collectValues (root) {
     var vals = []
-    this._traverse(root, [], function(val) {
-      vals.push(val);
+    this._traverse(root, [], function (val) {
+      vals.push(val)
     })
     vals = Array.prototype.concat.apply([], vals)
     return vals
@@ -189,4 +188,4 @@ class TreeIndexArrays extends TreeIndex {
 
 TreeIndex.Arrays = TreeIndexArrays
 
-export default TreeIndex;
+export default TreeIndex

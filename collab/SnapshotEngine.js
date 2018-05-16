@@ -6,7 +6,7 @@ const EMPTY_DOC = { nodes: {} }
   API for creating and retrieving document snapshots
 */
 class SnapshotEngine {
-  constructor(config) {
+  constructor (config) {
     this.changeStore = config.changeStore
     this.snapshotStore = config.snapshotStore
   }
@@ -18,7 +18,7 @@ class SnapshotEngine {
     Now getClosestSnapshot will give us version 15. This requires us to fetch
     the changes since version 16 and apply those, plus the very new change.
   */
-  getSnapshot(documentId, version, cb) {
+  getSnapshot (documentId, version, cb) {
     let jsonDoc = EMPTY_DOC
     this._getClosestSnapshot(documentId, version, (err, snapshot, closestVersion) => {
       if (err) {
@@ -41,7 +41,7 @@ class SnapshotEngine {
       this.changeStore.getChanges(documentId, knownVersion, version, (err, changes) => {
         if (err) return cb(err)
         if (changes.length < (version - knownVersion)) {
-          return cb('Changes missing for reconstructing version '+ version)
+          return cb('Changes missing for reconstructing version ' + version)
         }
         jsonDoc = computeSnapshot(jsonDoc, changes)
         cb(null, jsonDoc, version)
@@ -52,20 +52,20 @@ class SnapshotEngine {
   /*
     Creates a snapshot
   */
-  createSnapshot(documentId, version, cb) {
+  createSnapshot (documentId, version, cb) {
     this.getSnapshot(documentId, version, (err, snapshot) => {
       if (err) return cb(err)
       this.snapshotStore.saveSnapshot(documentId, version, snapshot, cb)
     })
   }
 
-  _getClosestSnapshot(documentId, version, cb) {
+  _getClosestSnapshot (documentId, version, cb) {
     let closestVersion
 
     this.snapshotStore.getVersions(documentId, (err, versions) => {
       if (err) return cb(err)
 
-      if(versions.length === 0) {
+      if (versions.length === 0) {
         return cb(null, undefined)
       }
 
@@ -73,7 +73,7 @@ class SnapshotEngine {
         closestVersion = version
       } else {
         // We don't have a snaphot for that requested version
-        let smallerVersions = versions.filter(function(v) {
+        let smallerVersions = versions.filter(function (v) {
           return parseInt(v, 10) < version
         })
         // Take the closest version if there is any

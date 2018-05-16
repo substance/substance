@@ -15,7 +15,7 @@ const TEXT = DFA.TEXT
   and compile it into our internal format.
 */
 export default
-function compileRNG(fs, searchDirs, entry) {
+function compileRNG (fs, searchDirs, entry) {
   let rng
   // used for testing
   if (arguments.length === 1 && isString(arguments[0])) {
@@ -40,10 +40,9 @@ function compileRNG(fs, searchDirs, entry) {
   return xmlSchema
 }
 
-
 /* Registration of <define> elements */
 
-function _registerDefinitions(grammar) {
+function _registerDefinitions (grammar) {
   let defs = {}
   // NOTE: definitions are only considered on the top level
   grammar.children.forEach((child) => {
@@ -55,7 +54,7 @@ function _registerDefinitions(grammar) {
   grammar.defs = defs
 }
 
-function _processDefine(el, defs) {
+function _processDefine (el, defs) {
   const name = el.attr('name')
   const combine = el.attr('combine')
   if (combine === 'interleave') {
@@ -74,7 +73,7 @@ function _processDefine(el, defs) {
 
 /* Transformation of RNG into internal representation */
 
-function _transformRNG(grammar) { // eslint-disable-line no-unused-vars
+function _transformRNG (grammar) { // eslint-disable-line no-unused-vars
   // expanding all element definitions
   const elements = {}
   const defs = grammar.defs
@@ -108,7 +107,7 @@ function _transformRNG(grammar) { // eslint-disable-line no-unused-vars
   return newGrammar
 }
 
-function _transformElementDefinition(doc, name, orig, defs) {
+function _transformElementDefinition (doc, name, orig, defs) {
   let el = doc.createElement('element').attr('name', name)
   // NOTE: setting type to implicit by default
   // this is refined when calling analyzeSchema
@@ -167,13 +166,13 @@ function _transformElementDefinition(doc, name, orig, defs) {
   return el
 }
 
-function _transformBlock(doc, block, defs, visiting={}) {
+function _transformBlock (doc, block, defs, visiting = {}) {
   // if a block is a <ref> return the expanded children
   // otherwise clone the block and descend recursively
   const tagName = block.tagName
   switch (tagName) {
     case 'element': {
-      return [doc.createElement('element').attr('name',block.attr('name'))]
+      return [doc.createElement('element').attr('name', block.attr('name'))]
     }
     case 'ref': {
       return _expandRef(doc, block, defs, visiting)
@@ -192,7 +191,7 @@ function _transformBlock(doc, block, defs, visiting={}) {
   }
 }
 
-function _expandRef(doc, ref, defs, visiting={}) {
+function _expandRef (doc, ref, defs, visiting = {}) {
   const name = ref.attr('name')
   // Acquire semaphore against cyclic refs
   if (visiting[name]) {
@@ -215,7 +214,7 @@ function _expandRef(doc, ref, defs, visiting={}) {
   return expanded
 }
 
-function _extractStart(grammar) {
+function _extractStart (grammar) {
   // for now this is hard wired to work with the start
   // element as defined in JATS 1.1
   const start = grammar.find('start')
@@ -232,9 +231,9 @@ function _extractStart(grammar) {
   return name
 }
 
-function _compile(grammar) {
+function _compile (grammar) {
   const schemas = {}
-  const elements = grammar.children.filter(el=>el.tagName==='element')
+  const elements = grammar.children.filter(el => el.tagName === 'element')
   elements.forEach((element) => {
     const name = element.attr('name')
     const attributes = _collectAttributes(element.find('attributes'))
@@ -260,7 +259,7 @@ function _compile(grammar) {
   return new XMLSchema(schemas, startElement)
 }
 
-function _processChildren(el, grammar) {
+function _processChildren (el, grammar) {
   let blocks = _processBlocks(el.children, grammar)
   if (blocks.length === 1) {
     return blocks[0]
@@ -269,12 +268,12 @@ function _processChildren(el, grammar) {
   }
 }
 
-function _processBlocks(children, grammar) {
+function _processBlocks (children, grammar) {
   const blocks = []
   for (var i = 0; i < children.length; i++) {
     const child = children[i]
     // const name = child.attr('name')
-    switch(child.tagName) {
+    switch (child.tagName) {
       // skip these
       case 'attribute':
       case 'empty':
@@ -331,21 +330,21 @@ function _processBlocks(children, grammar) {
   return blocks
 }
 
-function _processSequence(el, grammar) {
+function _processSequence (el, grammar) {
   if (el.expr) return el.expr.copy()
   const blocks = _processBlocks(el.children, grammar)
   el.expr = new Sequence(blocks)
   return el.expr
 }
 
-function _processChoice(el, grammar) {
+function _processChoice (el, grammar) {
   if (el.expr) return el.expr.copy()
   let blocks = _processBlocks(el.children, grammar)
   el.expr = new Choice(blocks)
   return el.expr
 }
 
-function _processReference(ref, grammar) {
+function _processReference (ref, grammar) {
   const name = ref.attr('name')
   const def = grammar.defs[name]
   if (!def) throw new Error(`Illegal ref: ${name} is not defined.`)
@@ -362,7 +361,7 @@ function _processReference(ref, grammar) {
   return def.expr
 }
 
-function _collectAttributes(el, grammar, attributes = {}) {
+function _collectAttributes (el, grammar, attributes = {}) {
   // ATTENTION: RNG supports more than we do here
   // We just collect all attributes, infering no rules
   let children = el.children
@@ -389,7 +388,7 @@ function _collectAttributes(el, grammar, attributes = {}) {
   return attributes
 }
 
-function _transformAttribute(el) {
+function _transformAttribute (el) {
   const name = el.attr('name')
   // TODO: extract all the attribute specs
   return {

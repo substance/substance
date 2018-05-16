@@ -24,19 +24,19 @@ import ChangeRecorder from './ChangeRecorder'
   myDocFactory.createChangeset();
 */
 export default
-function createDocumentFactory(ArticleClass, create) {
+function createDocumentFactory (ArticleClass, create) {
   return {
     ArticleClass: ArticleClass,
-    createEmptyArticle: function() {
+    createEmptyArticle: function () {
       const doc = new ArticleClass()
       return doc
     },
-    createArticle: function() {
+    createArticle: function () {
       const doc = new ArticleClass()
       create(doc)
       return doc
     },
-    createChangeset: function() {
+    createChangeset: function () {
       const doc = new ArticleClass()
       const tx = new ChangeRecorder(doc)
       create(tx)

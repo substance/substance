@@ -1,8 +1,7 @@
 import Command from '../../ui/Command'
 
 class Undo extends Command {
-
-  getCommandState(params) {
+  getCommandState (params) {
     let editorSession = params.editorSession
     return {
       disabled: !editorSession.canUndo(),
@@ -10,14 +9,13 @@ class Undo extends Command {
     }
   }
 
-  execute(params) {
+  execute (params) {
     let editorSession = params.editorSession
     if (editorSession.canUndo()) {
       editorSession.undo()
     }
     return true
   }
-
 }
 
 export default Undo

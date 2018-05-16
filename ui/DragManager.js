@@ -8,8 +8,7 @@ import Component from './Component'
 import DragAndDropHandler from './DragAndDropHandler'
 
 class DragManager extends EventEmitter {
-
-  constructor(customDropHandlers, context) {
+  constructor (customDropHandlers, context) {
     super()
 
     this.context = context
@@ -43,7 +42,7 @@ class DragManager extends EventEmitter {
       new InsertNodes(dropAssetHandlers, this.context),
       // dynamic custom handler, activated via custom dropzone
       // not via configuration
-      new CustomHandler(),
+      new CustomHandler()
     ]
     if (platform.inBrowser) {
       this.el = DefaultDOMElement.wrapNativeElement(document)
@@ -56,19 +55,19 @@ class DragManager extends EventEmitter {
     }
   }
 
-  dispose() {
+  dispose () {
     if (this.el) {
       this.el.off(this)
     }
   }
 
-  onDragStart(e) {
+  onDragStart (e) {
     // console.log('#### DragManager.onDragStart')
     this._initDrag(e, { external: false })
     // Ensure we have a small dragIcon, so dragged content does not eat up
     // all screen space.
-    var img = document.createElement("img")
-    img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    var img = document.createElement('img')
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
     e.dataTransfer.setDragImage(img, 0, 0)
     // TODO: the following might probably not work in FF as it disallows setting the drag data
     // Note: setData('text/html', ... ) is necessary so that the browser shows
@@ -89,14 +88,14 @@ class DragManager extends EventEmitter {
   /*
     When drag starts externally, e.g. draggin a file into the workspace
   */
-  onDragEnter(e) {
+  onDragEnter (e) {
     if (!this.dragState) {
       // console.log('onDragEnter(e)', e)
       this._initDrag(e, {external: true})
     }
   }
 
-  onDragEnd(event) {
+  onDragEnd (event) {
     if (event.__reserved__) return
     // console.log('onDragEnd', event)
     if (this.dragState) {
@@ -108,7 +107,7 @@ class DragManager extends EventEmitter {
     }
   }
 
-  onDragExit(e) {
+  onDragExit (e) {
     if (platform.isFF) {
       // FF fires this quite rapidly
     } else {
@@ -119,20 +118,20 @@ class DragManager extends EventEmitter {
     }
   }
 
-  extendDragState(extState) {
+  extendDragState (extState) {
     Object.assign(this.dragState, extState)
   }
 
   // used to at least reset on the next mousedown
   // TODO: figure out if we could make this only 'once'
-  onMousedown(event) {
+  onMousedown (event) {
     if (this.dragState) {
       this.dragState = null
       this._onDragEnd(event)
     }
   }
 
-  _onDragEnd(event) {
+  _onDragEnd (event) {
     if (!this.dragState) {
       // TODO: There are cases where _onDragEnd is called manually via
       // handleDrop and another time via the native dragend event. check
@@ -148,7 +147,7 @@ class DragManager extends EventEmitter {
   /*
     Called by Dropzones component after drop received
   */
-  _handleDrop(e) {
+  _handleDrop (e) {
     let dragState = this.dragState
     let i, handler
     let match = false
@@ -175,7 +174,7 @@ class DragManager extends EventEmitter {
 
     ATTENTION: This can not be debugged properly in Chrome
   */
-  _initDrag(event, options) {
+  _initDrag (event, options) {
     // TODO: we need to figure out how to enable dragging cursors
     // e.g., when dragging an inline node containing an img, it looks
     // nice, showing the target caret and a dragging cursor.
@@ -228,7 +227,7 @@ class DragManager extends EventEmitter {
     if (!isolatedNodeComponent) return _stop()
     let surface = isolatedNodeComponent.context.surface
     // dragging an InlineNode
-    if(isolatedNodeComponent._isInlineNodeComponent) {
+    if (isolatedNodeComponent._isInlineNodeComponent) {
       let inlineNode = isolatedNodeComponent.props.node
       dragState.inline = true
       dragState.selectionDrag = true
@@ -259,14 +258,14 @@ class DragManager extends EventEmitter {
     // console.log('... emitting dragstart for Dropzones')
     this.emit('drag:started', dragState)
 
-    function _stop() {
+    function _stop () {
       // console.log('.... NOPE')
       event.preventDefault()
       event.stopPropagation()
     }
   }
 
-  _getSurfacesGroupedByScrollPane() {
+  _getSurfacesGroupedByScrollPane () {
     // We need to determine all ContainerEditors and their scrollPanes; those have the drop
     // zones attached
     let surfaces = this.context.surfaceManager.getSurfaces()
@@ -288,18 +287,18 @@ class DragManager extends EventEmitter {
     return scrollPanes
   }
 
-  _getSelection() {
+  _getSelection () {
     return this.context.editorSession.getSelection()
   }
 
-  _getComponents(targetEl) {
+  _getComponents (targetEl) {
     let res = []
     let curr = targetEl
     while (curr) {
       let comp = Component.getComponentForDOMElement(curr)
       if (comp) {
         res.unshift(comp)
-        if(comp._isSurface) {
+        if (comp._isSurface) {
           return res
         }
       }
@@ -308,11 +307,11 @@ class DragManager extends EventEmitter {
     return null
   }
 
-  _getIsolatedNodeOrContainerChild(targetEl) {
+  _getIsolatedNodeOrContainerChild (targetEl) {
     let parent, current
     current = targetEl
     parent = current.parentNode
-    while(parent) {
+    while (parent) {
       if (parent._comp && parent._comp._isContainerEditor) {
         return current._comp
       } else if (current._comp && current._comp._isIsolatedNode) {
@@ -328,11 +327,11 @@ class DragManager extends EventEmitter {
 
     See: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Recommended_Drag_Types#link
   */
-  _extractUris(dataTransfer) {
+  _extractUris (dataTransfer) {
     let uris = []
     let rawUriList = dataTransfer.getData('text/uri-list')
     if (rawUriList) {
-      uris = rawUriList.split('\n').filter(function(item) {
+      uris = rawUriList.split('\n').filter(function (item) {
         return !item.startsWith('#')
       })
     }
@@ -342,7 +341,7 @@ class DragManager extends EventEmitter {
   /*
     Extracts information from e.dataTransfer (files, uris, text, html)
   */
-  _getData(e) {
+  _getData (e) {
     let dataTransfer = e.dataTransfer
     if (dataTransfer) {
       return {
@@ -361,8 +360,7 @@ class DragManager extends EventEmitter {
   Used as a drop handler for internal drags with NodeSelections.
 */
 class MoveBlockNode extends DragAndDropHandler {
-
-  match(dragState) {
+  match (dragState) {
     let {insertPos} = dragState.dropParams
     // - sourceSeletion must be a NodeSelection
     return (!dragState.external && dragState.nodeDrag &&
@@ -370,7 +368,7 @@ class MoveBlockNode extends DragAndDropHandler {
     )
   }
 
-  drop(tx, dragState) {
+  drop (tx, dragState) {
     // - remember current selection (node that is dragged)
     // - delete current selection (removes node from original position)
     // - determine node selection based on given insertPos
@@ -386,7 +384,7 @@ class MoveBlockNode extends DragAndDropHandler {
     let targetNodeId = container.getNodeIdAt(insertPos)
     let insertMode = 'before'
     if (!targetNodeId) {
-      targetNodeId = container.getNodeIdAt(insertPos-1)
+      targetNodeId = container.getNodeIdAt(insertPos - 1)
       insertMode = 'after'
     }
     tx.setSelection({
@@ -401,12 +399,11 @@ class MoveBlockNode extends DragAndDropHandler {
 }
 
 class MoveInline extends DragAndDropHandler {
-
-  match(dragState) {
+  match (dragState) {
     return !dragState.external && dragState.inline
   }
 
-  drop(tx, dragState) {
+  drop (tx, dragState) {
     let event = dragState.event
     let sourceSel = dragState.sourceSelection
     let wrange = getDOMRangeFromEvent(event)
@@ -429,17 +426,17 @@ class MoveInline extends DragAndDropHandler {
 }
 
 class InsertNodes extends DragAndDropHandler {
-  constructor(assetHandlers, context) {
+  constructor (assetHandlers, context) {
     super()
     this.assetHandlers = assetHandlers
     this.context = context
   }
 
-  match(dragState) {
+  match (dragState) {
     return dragState.dropType === 'place' && dragState.external
   }
 
-  drop(tx, dragState) {
+  drop (tx, dragState) {
     let { insertPos } = dragState.dropParams
     let files = dragState.data.files
     let uris = dragState.data.uris
@@ -449,7 +446,7 @@ class InsertNodes extends DragAndDropHandler {
     let targetNode = container.getNodeIdAt(insertPos)
     let insertMode = 'before'
     if (!targetNode) {
-      targetNode = container.getNodeIdAt(insertPos-1)
+      targetNode = container.getNodeIdAt(insertPos - 1)
       insertMode = 'after'
     }
     tx.setSelection({
@@ -478,8 +475,8 @@ class InsertNodes extends DragAndDropHandler {
     }
   }
 
-  _callHandlers(tx, params) {
-    let i, handler;
+  _callHandlers (tx, params) {
+    let i, handler
     for (i = 0; i < this.assetHandlers.length; i++) {
       handler = this.assetHandlers[i]
 
@@ -497,12 +494,11 @@ class InsertNodes extends DragAndDropHandler {
   on the component (e.g. see ImageComponent).
 */
 class CustomHandler extends DragAndDropHandler {
-
-  match(dragState) {
+  match (dragState) {
     return dragState.dropType === 'custom'
   }
 
-  drop(tx, dragState) {
+  drop (tx, dragState) {
     // Delegate handling to component which set up the custom dropzone
     dragState.component.handleDrop(tx, dragState)
   }

@@ -8,7 +8,7 @@ import ImageFileProxy from './ImageFileProxy'
 
 export default {
   name: 'image',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(ImageNode)
     config.addComponent('image', ImageComponent)
     config.addConverter('html', ImageHTMLConverter)

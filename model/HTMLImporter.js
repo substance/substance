@@ -9,15 +9,14 @@ import DOMImporter from './DOMImporter'
   @abstract
 */
 export default class HTMLImporter extends DOMImporter {
-
-  constructor(config) {
+  constructor (config) {
     super(Object.assign({ idAttribute: 'data-id' }, config))
 
     // only used internally for creating wrapper elements
     this._el = DefaultDOMElement.parseHTML('<html></html>')
   }
 
-  importDocument(html) {
+  importDocument (html) {
     this.reset()
     var parsed = DefaultDOMElement.parseHTML(html)
     this.convertDocument(parsed)
@@ -58,5 +57,4 @@ export default class HTMLImporter extends DOMImporter {
   convertDocument(documentEl) { // eslint-disable-line
     throw new Error('This method is abstract')
   }
-
 }

@@ -13,15 +13,14 @@ import Tooltip from './Tooltip'
   Usually instantiated in a Toolbar or an Overlay. Usage:
 */
 export default class ToggleTool extends Component {
-
-  get _isTool() {
+  get _isTool () {
     return true
   }
 
   /**
     Default tool rendering. You can override this method to provide your custom markup
   */
-  render($$) {
+  render ($$) {
     let el = $$('div')
       .addClass('sc-toggle-tool')
 
@@ -43,7 +42,7 @@ export default class ToggleTool extends Component {
     return el
   }
 
-  renderButton($$) {
+  renderButton ($$) {
     let commandState = this.props.commandState
     let Button = this.getComponent('button')
     let btn = $$(Button, {
@@ -55,23 +54,23 @@ export default class ToggleTool extends Component {
     return btn
   }
 
-  getClassNames() {
+  getClassNames () {
     return ''
   }
 
-  getCommandName() {
+  getCommandName () {
     return this.getName()
   }
 
-  getName() {
+  getName () {
     return this.props.name
   }
 
-  getIconName() {
+  getIconName () {
     return this.props.name
   }
 
-  onClick(e) {
+  onClick (e) {
     e.preventDefault()
     e.stopPropagation()
     if (!this.props.disabled) {
@@ -79,7 +78,7 @@ export default class ToggleTool extends Component {
     }
   }
 
-  _getTooltipText() {
+  _getTooltipText () {
     let name = this.props.name
     let label = this.context.labelProvider.getLabel(name)
     let keyboardShortcuts = this.context.keyboardShortcuts
@@ -93,7 +92,7 @@ export default class ToggleTool extends Component {
   /**
     Executes the associated command
   */
-  executeCommand(props) {
+  executeCommand (props) {
     props = Object.assign({ mode: this.props.mode }, props)
     this.context.commandManager.executeCommand(this.getCommandName(), props)
   }

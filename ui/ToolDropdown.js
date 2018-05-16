@@ -15,19 +15,18 @@ import forEach from '../util/forEach'
   ```
 */
 class ToolDropdown extends ToolGroup {
-
   /*
     Make sure the dropdown is closed each time we receive new props
   */
-  willReceiveProps() {
+  willReceiveProps () {
     this.setState({showChoices: false})
   }
 
-  render($$) {
+  render ($$) {
     let Button = this.getComponent('button')
     let commandStates = this._getCommandStates()
     let el = $$('div').addClass('sc-tool-dropdown')
-    el.addClass('sm-'+this.props.name)
+    el.addClass('sm-' + this.props.name)
 
     // Used to resolve icon / label
     const toggleName = this._getToggleName(commandStates) || this.props.name
@@ -53,7 +52,7 @@ class ToolDropdown extends ToolGroup {
           theme: this.props.theme
         }).on('click', this._toggleChoices)
       } else {
-        throw new Error('Style '+this.props.style+' not supported')
+        throw new Error('Style ' + this.props.style + ' not supported')
       }
       el.append(toggleButton)
 
@@ -76,7 +75,7 @@ class ToolDropdown extends ToolGroup {
     return el
   }
 
-  _renderToolTip($$) {
+  _renderToolTip ($$) {
     let labelProvider = this.context.labelProvider
     return $$(Tooltip, {
       text: labelProvider.getLabel(this.props.name)
@@ -86,14 +85,14 @@ class ToolDropdown extends ToolGroup {
   /*
     This can be overridden to control the label
   */
-  _getToggleName(commandStates) {
+  _getToggleName (commandStates) {
     return this._getActiveCommandName(commandStates)
   }
 
   /*
     Turn commandStates into menu items
   */
-  _getMenuItems(commandStates) {
+  _getMenuItems (commandStates) {
     const showDisabled = this.props.showDisabled
     let menuItems = []
     forEach(commandStates, (commandState, commandName) => {
@@ -108,7 +107,7 @@ class ToolDropdown extends ToolGroup {
     return menuItems
   }
 
-  _getActiveCommandName(commandStates) {
+  _getActiveCommandName (commandStates) {
     let activeCommand
 
     forEach(commandStates, (commandState, commandName) => {
@@ -119,7 +118,7 @@ class ToolDropdown extends ToolGroup {
     return activeCommand
   }
 
-  _toggleChoices() {
+  _toggleChoices () {
     this.setState({
       showChoices: !(this.state.showChoices)
     })

@@ -6,7 +6,7 @@ import _isTextNodeEmpty from './_isTextNodeEmpty'
   Schema drive pretty-printer, that inserts indentation for
   structural elements, and preserves white-spaces for text nodes and inline-elements
 */
-export default function prettyPrintXML(xml) {
+export default function prettyPrintXML (xml) {
   let dom
   if (isString(xml)) {
     dom = DOM.parseXML(xml)
@@ -20,8 +20,8 @@ export default function prettyPrintXML(xml) {
   return result.join('\n')
 }
 
-function _prettyPrint(result, el, level) {
-  let indent = new Array(level*2).fill(' ').join('')
+function _prettyPrint (result, el, level) {
+  let indent = new Array(level * 2).fill(' ').join('')
   if (el.isElementNode()) {
     const isMixed = _isMixed(el)
     const containsCDATA = _containsCDATA(el)
@@ -33,12 +33,12 @@ function _prettyPrint(result, el, level) {
       let tagStr = [`<${tagName}`]
       el.getAttributes().forEach((val, name) => {
         tagStr.push(`${name}="${val}"`)
-      });
+      })
       if (children.length > 0) {
         result.push(indent + tagStr.join(' ') + '>')
         el.children.forEach((child) => {
-          _prettyPrint(result, child, level+1)
-        });
+          _prettyPrint(result, child, level + 1)
+        })
         result.push(indent + `</${tagName}>`)
       } else {
         result.push(indent + tagStr.join(' ') + ' />')
@@ -49,7 +49,7 @@ function _prettyPrint(result, el, level) {
   }
 }
 
-function _isMixed(el) {
+function _isMixed (el) {
   const childNodes = el.childNodes
   for (let i = 0; i < childNodes.length; i++) {
     let child = childNodes[i]
@@ -59,7 +59,7 @@ function _isMixed(el) {
   }
 }
 
-function _containsCDATA(el) {
+function _containsCDATA (el) {
   const childNodes = el.childNodes
   for (let i = 0; i < childNodes.length; i++) {
     let child = childNodes[i]

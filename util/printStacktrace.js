@@ -1,7 +1,7 @@
-export default function printStacktrace() {
+export default function printStacktrace () {
   try {
-    throw new Error();
+    throw new Error()
   } catch (err) {
-    console.error(err.stack);
+    console.error(err.stack)
   }
 }

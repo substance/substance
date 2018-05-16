@@ -15,7 +15,6 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 */
 export default
 class DOMElement {
-
   /*
     The element's id.
     @property {String} DOMElement#id
@@ -69,7 +68,7 @@ class DOMElement {
   /**
     @returns the native element
   */
-  getNativeElement() {
+  getNativeElement () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -79,7 +78,7 @@ class DOMElement {
 
     @returns {Boolean} true if the element is of type `Node.TEXT_NODE`
    */
-  isTextNode() {
+  isTextNode () {
     /* istanbul ignore next */
     return false
   }
@@ -89,7 +88,7 @@ class DOMElement {
 
     @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
    */
-  isElementNode() {
+  isElementNode () {
     /* istanbul ignore next */
     return false
   }
@@ -99,7 +98,7 @@ class DOMElement {
 
     @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
    */
-  isCommentNode() {
+  isCommentNode () {
     /* istanbul ignore next */
     return false
   }
@@ -109,7 +108,7 @@ class DOMElement {
 
     @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
    */
-  isDocumentNode() {
+  isDocumentNode () {
     /* istanbul ignore next */
     return false
   }
@@ -121,7 +120,7 @@ class DOMElement {
     @note Considered as private API, in favor of the property {DOMElement.prototype.tagName}
     @returns {String} the tag name in lower-case.
    */
-  getTagName() {
+  getTagName () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -134,7 +133,7 @@ class DOMElement {
     @param {String} tagName the new tag name
     @returns {this}
   */
-  setTagName(tagName) { // eslint-disable-line no-unused-vars
+  setTagName (tagName) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -146,7 +145,7 @@ class DOMElement {
     @note Considered as private API, in favor of the property {DOMElement.prototype.id}
     @returns {String} the id.
    */
-  getId() {
+  getId () {
     return this.getAttribute('id')
   }
 
@@ -158,7 +157,7 @@ class DOMElement {
     @param {String} id the new id
     @returns {this}
   */
-  setId(id) {
+  setId (id) {
     this.setAttribute('id', id)
     return this
   }
@@ -169,7 +168,7 @@ class DOMElement {
     @param {String} className
     @returns {Boolean} true if the CSS class is set
   */
-  hasClass(className) { // eslint-disable-line no-unused-vars
+  hasClass (className) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -180,7 +179,7 @@ class DOMElement {
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  addClass(classString) { // eslint-disable-line no-unused-vars
+  addClass (classString) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -191,12 +190,12 @@ class DOMElement {
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  removeClass(classString) { // eslint-disable-line no-unused-vars
+  removeClass (classString) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  hasAttribute(name) {
+  hasAttribute (name) {
     return Boolean(this.getAttribute(name))
   }
 
@@ -207,12 +206,12 @@ class DOMElement {
     @param {String} [value] if present the attribute will be set
     @returns {String|this} if used as getter the attribute value, otherwise this element for chaining
    */
-  attr() {
+  attr () {
     if (arguments.length === 1) {
       if (isString(arguments[0])) {
         return this.getAttribute(arguments[0])
       } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
+        forEach(arguments[0], function (value, name) {
           this.setAttribute(name, value)
         }.bind(this))
       }
@@ -228,12 +227,12 @@ class DOMElement {
     @param {String} name
     @returns {this}
   */
-  removeAttr(name) {
+  removeAttr (name) {
     var names = name.split(/\s+/)
     if (names.length === 1) {
       this.removeAttribute(name)
     } else {
-      names.forEach(function(name) {
+      names.forEach(function (name) {
         this.removeAttribute(name)
       }.bind(this))
     }
@@ -245,7 +244,7 @@ class DOMElement {
 
     @returns {String} the attribute's value.
   */
-  getAttribute(name) { // eslint-disable-line no-unused-vars
+  getAttribute (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -256,17 +255,17 @@ class DOMElement {
     @param {String} the attribute's value.
     @returns {this}
   */
-  setAttribute(name, value) { // eslint-disable-line no-unused-vars
+  setAttribute (name, value) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeAttribute(name) { // eslint-disable-line no-unused-vars
+  removeAttribute (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getAttributes() {
+  getAttributes () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -278,12 +277,12 @@ class DOMElement {
     @param {String} [value] if present the property will be set
     @returns {String|this} if used as getter the property value, otherwise this element for chaining
    */
-  htmlProp() {
+  htmlProp () {
     if (arguments.length === 1) {
       if (isString(arguments[0])) {
         return this.getProperty(arguments[0])
       } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
+        forEach(arguments[0], function (value, name) {
           this.setProperty(name, value)
         }.bind(this))
       }
@@ -293,12 +292,12 @@ class DOMElement {
     return this
   }
 
-  getProperty(name) { // eslint-disable-line no-unused-vars
+  getProperty (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setProperty(name, value) { // eslint-disable-line no-unused-vars
+  setProperty (name, value) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -309,7 +308,7 @@ class DOMElement {
     @param {String} [value] The value to set.
     @returns {String|this} the value if used as a getter, `this` otherwise
   */
-  val(value) {
+  val (value) {
     if (arguments.length === 0) {
       return this.getValue()
     } else {
@@ -318,11 +317,11 @@ class DOMElement {
     }
   }
 
-  getValue() {
+  getValue () {
     return this.getProperty('value')
   }
 
-  setValue(value) {
+  setValue (value) {
     this.setProperty('value', value)
     return this
   }
@@ -334,14 +333,14 @@ class DOMElement {
     @param {String} [value] the style value
     @returns {String|this} the style value or this if used as a setter
   */
-  css() {
+  css () {
     /* istanbul ignore else */
     if (arguments.length === 1) {
       /* istanbul ignore else */
       if (isString(arguments[0])) {
         return this.getStyle(arguments[0])
       } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
+        forEach(arguments[0], function (value, name) {
           this.setStyle(name, value)
         }.bind(this))
       } else {
@@ -355,12 +354,12 @@ class DOMElement {
     return this
   }
 
-  getStyle(name) { // eslint-disable-line no-unused-vars
+  getStyle (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setStyle(name, value) { // eslint-disable-line no-unused-vars
+  setStyle (name, value) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -371,7 +370,7 @@ class DOMElement {
     @param {String} [text] The text content to set.
     @returns {String|this} The text content if used as a getter, `this` otherwise
   */
-  text(text) {
+  text (text) {
     if (arguments.length === 0) {
       return this.getTextContent()
     } else {
@@ -387,7 +386,7 @@ class DOMElement {
     @note Considered as private API, in favor of the property {DOMElement.prototype.innerHTML}
     @returns {String}
   */
-  getTextContent() {
+  getTextContent () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -400,7 +399,7 @@ class DOMElement {
     @param {String} text the new text content
     @returns {this}
   */
-  setTextContent(text) { // eslint-disable-line no-unused-vars
+  setTextContent (text) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -411,7 +410,7 @@ class DOMElement {
     @param {String} [html] The html to set.
     @returns {String|this} the inner html if used as a getter, `this` otherwise
    */
-  html(html) {
+  html (html) {
     if (arguments.length === 0) {
       return this.getInnerHTML()
     } else {
@@ -427,7 +426,7 @@ class DOMElement {
     @note Considered as private API, in favor of the property {@link DOMElement.prototype.innerHTML}
     @returns {String}
   */
-  getInnerHTML() {
+  getInnerHTML () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -436,7 +435,7 @@ class DOMElement {
     Just an alias for getInnerHTML() which feels
     better when working with XML DOMs
   */
-  getInnerXML() {
+  getInnerXML () {
     return this.getInnerHTML()
   }
 
@@ -448,12 +447,12 @@ class DOMElement {
     @param {String} text the new text content
     @returns {this}
   */
-  setInnerHTML(html) { // eslint-disable-line no-unused-vars
+  setInnerHTML (html) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setInnerXML(xml) {
+  setInnerXML (xml) {
     return this.setInnerHTML(xml)
   }
 
@@ -464,12 +463,12 @@ class DOMElement {
     @note Considered as private API, in favor of the property {@link DOMElement.prototype.outerHTML}
     @returns {String}
   */
-  getOuterHTML() {
+  getOuterHTML () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getOuterXML() {
+  getOuterXML () {
     return this.getOuterHTML()
   }
 
@@ -483,7 +482,7 @@ class DOMElement {
     @param {Object} [options.capture] to register the event in the event's capture phase (bubbling top-down)
     @returns {this}
   */
-  on(eventName, handler, context, options) {
+  on (eventName, handler, context, options) {
     /* istanbul ignore next */
     if (!isString(eventName)) {
       throw new Error('Illegal argument: "event" must be a String.')
@@ -506,13 +505,13 @@ class DOMElement {
     @param {String} event The event name.
     @returns {this}
   */
-  off(eventName, handler) {
+  off (eventName, handler) {
     // el.off(this): disconnect all listeners bound to the given context
     if (arguments.length === 1 && !isString(eventName)) {
       let context = arguments[0]
-      this.getEventListeners().filter(function(l) {
+      this.getEventListeners().filter(function (l) {
         return l.context === context
-      }).forEach(function(l) {
+      }).forEach(function (l) {
         this.removeEventListener(l)
       }.bind(this))
     } else {
@@ -521,7 +520,7 @@ class DOMElement {
     return this
   }
 
-  addEventListener(eventName, handler, options = {}) {
+  addEventListener (eventName, handler, options = {}) {
     let listener
     if (arguments.length === 1 && arguments[0]) {
       listener = arguments[0]
@@ -537,13 +536,13 @@ class DOMElement {
     return this
   }
 
-  _createEventListener(eventName, handler, options) {
+  _createEventListener (eventName, handler, options) {
     return new DOMEventListener(eventName, handler, options)
   }
 
   _addEventListenerNative(listener) {} // eslint-disable-line
 
-  removeEventListener(eventName, handler) {
+  removeEventListener (eventName, handler) {
     if (!this.eventListeners) return
     // console.log('removing event listener', eventName, handler);
     let listener = null, idx = -1
@@ -560,7 +559,7 @@ class DOMElement {
 
   _removeEventListenerNative(listener) {} // eslint-disable-line
 
-  removeAllEventListeners() {
+  removeAllEventListeners () {
     if (!this.eventListeners) return
     for (let i = 0; i < this.eventListeners.length; i++) {
       let listener = this.eventListeners[i]
@@ -571,7 +570,7 @@ class DOMElement {
     delete this.eventListeners
   }
 
-  getEventListeners() {
+  getEventListeners () {
     return this.eventListeners || []
   }
 
@@ -582,17 +581,17 @@ class DOMElement {
     @note Considered as private API, in favor of the property {@link DOMElement.prototype.nodeType}
     @returns {String}
   */
-  getNodeType() {
+  getNodeType () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getContentType() {
+  getContentType () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildCount() {
+  getChildCount () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -606,7 +605,7 @@ class DOMElement {
     @private Considered as private API, in favor of the property {DOMElement.prototype.childNodes}
     @returns {Array<DOMElement>}
    */
-  getChildNodes() {
+  getChildNodes () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -620,41 +619,41 @@ class DOMElement {
     @private Considered as private API, in favor of the property {DOMElement.prototype.children}
     @returns {Array<DOMElement>}
    */
-  getChildren() {
+  getChildren () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildAt(pos) { // eslint-disable-line no-unused-vars
+  getChildAt (pos) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildIndex(child) { // eslint-disable-line no-unused-vars
+  getChildIndex (child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildNodeIterator() {
+  getChildNodeIterator () {
     return new ArrayIterator(this.getChildNodes())
   }
 
-  getLastChild() {
+  getLastChild () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getFirstChild() {
+  getFirstChild () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getNextSibling() {
+  getNextSibling () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getPreviousSibling() {
+  getPreviousSibling () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -675,27 +674,27 @@ class DOMElement {
     @param {String} str a tag name or an HTML element as string.
     @returns {DOMElement}
   */
-  createElement(str) { // eslint-disable-line no-unused-vars
+  createElement (str) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createTextNode(text) { // eslint-disable-line no-unused-vars
+  createTextNode (text) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createComment(data) { // eslint-disable-line no-unused-vars
+  createComment (data) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createProcessingInstruction(name, data) { // eslint-disable-line no-unused-vars
+  createProcessingInstruction (name, data) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createCDATASection(data) { // eslint-disable-line no-unused-vars
+  createCDATASection (data) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -710,7 +709,7 @@ class DOMElement {
     @param {String} cssSelector
     @returns {Boolean}
    */
-  is(cssSelector) { // eslint-disable-line no-unused-vars
+  is (cssSelector) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -720,7 +719,7 @@ class DOMElement {
 
     @returns {DOMElement} the parent element
    */
-  getParent() {
+  getParent () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -730,7 +729,7 @@ class DOMElement {
 
     @returns {DOMElement} the document element
   */
-  getOwnerDocument() {
+  getOwnerDocument () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -738,7 +737,7 @@ class DOMElement {
   /*
     @returns {DOMElement} the doctype element `<!DOCTYPE <name> PUBLIC "<publicId>" "<systemId>" >`; null if not present
   */
-  getDoctype() {
+  getDoctype () {
     /* istanbul ignore next */
     throw new Error('NOT_IMPLEMENTED')
   }
@@ -747,7 +746,7 @@ class DOMElement {
     throw new Error('NOT_IMPLEMENTED')
   }
 
-  setDocType(...args) {
+  setDocType (...args) {
     console.error('DEPRECATED: use setDoctype() instead')
     return this.setDoctype(...args)
   }
@@ -763,7 +762,7 @@ class DOMElement {
     @param {String} cssSelector
     @returns {DOMElement} found element
    */
-  find(cssSelector) { // eslint-disable-line no-unused-vars
+  find (cssSelector) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -778,7 +777,7 @@ class DOMElement {
     @param {String} cssSelector
     @returns {Array<DOMElement>} found elements
    */
-  findAll(cssSelector) { // eslint-disable-line no-unused-vars
+  findAll (cssSelector) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -789,7 +788,7 @@ class DOMElement {
     @param {DOMElement|String} child An element or text to append
     @returns {this}
    */
-  append(child) {
+  append (child) {
     var children
     if (arguments.length === 1) {
       if (isArray(child)) {
@@ -807,7 +806,7 @@ class DOMElement {
     return this
   }
 
-  appendChild(child) { // eslint-disable-line no-unused-vars
+  appendChild (child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -819,12 +818,12 @@ class DOMElement {
     @param {DOMElement|String} child The child element or text to insert.
     @returns {this}
   */
-  insertAt(pos, child) { // eslint-disable-line no-unused-vars
+  insertAt (pos, child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  insertBefore(newChild, before) { // eslint-disable-line no-unused-vars
+  insertBefore (newChild, before) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -835,17 +834,17 @@ class DOMElement {
     @param {Number} pos
     @returns {this}
   */
-  removeAt(pos) { // eslint-disable-line no-unused-vars
+  removeAt (pos) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeChild(child) { // eslint-disable-line no-unused-vars
+  removeChild (child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  replaceChild(oldChild, newChild) { // eslint-disable-line no-unused-vars
+  replaceChild (oldChild, newChild) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -854,7 +853,7 @@ class DOMElement {
     Removes this element from its parent.
     @returns {this}
   */
-  remove() {
+  remove () {
     var parent = this.getParent()
     if (parent) {
       parent.removeChild(this)
@@ -866,18 +865,18 @@ class DOMElement {
 
     @returns {this}
   */
-  empty() {
+  empty () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  serialize() {
+  serialize () {
     return this.getOuterHTML()
   }
 
-  isInDocument() {
+  isInDocument () {
     let el = this
-    while(el) {
+    while (el) {
       if (el.isDocumentNode()) {
         return true
       }
@@ -891,7 +890,7 @@ class DOMElement {
     **Attention: this makes only sense for elements which are rendered in the browser**
 
   */
-  focus() {
+  focus () {
     /* istanbul ignore next */
     return this
   }
@@ -899,7 +898,7 @@ class DOMElement {
   /**
     Selects this element.
   */
-  select() {
+  select () {
     /* istanbul ignore next */
     return this
   }
@@ -907,7 +906,7 @@ class DOMElement {
   /**
     Blur this element.
   */
-  blur() {
+  blur () {
     /* istanbul ignore next */
     return this
   }
@@ -915,19 +914,19 @@ class DOMElement {
   /**
     Trigger a click event on this element.
   */
-  click() {
+  click () {
     /* istanbul ignore next */
     return this
   }
 
   /* API to retrieve layout information */
 
-  getWidth() {
+  getWidth () {
     /* istanbul ignore next */
     return 0
   }
 
-  getHeight() {
+  getHeight () {
     /* istanbul ignore next */
     return 0
   }
@@ -935,7 +934,7 @@ class DOMElement {
   /**
     Outer height as provided by $.outerHeight(withMargin)
   */
-  getOuterHeight(withMargin) { // eslint-disable-line no-unused-vars
+  getOuterHeight (withMargin) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     return 0
   }
@@ -943,7 +942,7 @@ class DOMElement {
   /**
     Offset values as provided by $.offset()
   */
-  getOffset() {
+  getOffset () {
     /* istanbul ignore next */
     return { top: 0, left: 0 }
   }
@@ -951,7 +950,7 @@ class DOMElement {
   /**
     Position values as provided by $.position()
   */
-  getPosition() {
+  getPosition () {
     /* istanbul ignore next */
     return { top: 0, left: 0 }
   }
@@ -964,7 +963,7 @@ class DOMElement {
     var $$ = el.getElementFactory()
     $$('div').append('bla')
   */
-  getElementFactory() {
+  getElementFactory () {
     return this.createElement.bind(this)
   }
 
@@ -981,91 +980,91 @@ class DOMElement {
 
   // properties
 
-  get id() {
+  get id () {
     return this.getId()
   }
 
-  set id(id) {
+  set id (id) {
     this.setId(id)
   }
 
-  get tagName() {
+  get tagName () {
     return this.getTagName()
   }
 
-  set tagName(tagName) {
+  set tagName (tagName) {
     this.setTagName(tagName)
   }
 
-  get nodeName() {
+  get nodeName () {
     return this.getTagName()
   }
 
-  get nodeType() {
+  get nodeType () {
     return this.getNodeType()
   }
 
-  get className() {
+  get className () {
     return this.getAttribute('class')
   }
 
-  set className(className) {
+  set className (className) {
     this.setAttribute('class', className)
   }
 
-  get textContent() {
+  get textContent () {
     return this.getTextContent()
   }
 
-  set textContent(text) {
+  set textContent (text) {
     this.setTextContent(text)
   }
 
-  get innerHTML() {
+  get innerHTML () {
     return this.getInnerHTML()
   }
 
-  set innerHTML(html) {
+  set innerHTML (html) {
     this.setInnerHTML(html)
   }
 
-  get outerHTML() {
+  get outerHTML () {
     return this.getOuterHTML()
   }
 
-  get firstChild() {
+  get firstChild () {
     return this.getFirstChild()
   }
 
-  get lastChild() {
+  get lastChild () {
     return this.getLastChild()
   }
 
-  get nextSibling() {
+  get nextSibling () {
     return this.getNextSibling()
   }
 
-  get previousSibling() {
+  get previousSibling () {
     return this.getPreviousSibling()
   }
 
-  get parentNode() {
+  get parentNode () {
     return this.getParent()
   }
 
-  get height() {
+  get height () {
     return this.getHeight()
   }
 
-  get width() {
+  get width () {
     return this.getWidth()
   }
 
-  get value() {
+  get value () {
     return this.getValue()
   }
 
-  set value(value) {
+  set value (value) {
     return this.setValue(value)
   }
 }

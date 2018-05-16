@@ -5,30 +5,29 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from '../ui/Component'
 
 class AbstractScrollPane extends Component {
-
   /*
     Expose scrollPane as a child context
   */
-  getChildContext() {
+  getChildContext () {
     return {
       scrollPane: this
     }
   }
 
-  didMount() {
+  didMount () {
     if (platform.inBrowser) {
       this.windowEl = DefaultDOMElement.wrapNativeElement(window)
       this.windowEl.on('resize', this.onSelectionPositioned, this)
     }
   }
 
-  dispose() {
+  dispose () {
     if (this.windowEl) {
       this.windowEl.off(this)
     }
   }
 
-  getName() {
+  getName () {
     return this.props.name
   }
 
@@ -36,7 +35,7 @@ class AbstractScrollPane extends Component {
     Determine selection rectangle relative to content element
     and emit a selection:positioned event with positioning hints
   */
-  onSelectionPositioned() {
+  onSelectionPositioned () {
     let contentRect = this._getContentRect()
     let selectionRect = this._getSelectionRect()
     if (!selectionRect) return
@@ -48,7 +47,7 @@ class AbstractScrollPane extends Component {
     this._scrollSelectionIntoView(selectionRect)
   }
 
-  _emitSelectionPositioned(hints) {
+  _emitSelectionPositioned (hints) {
     // Allows overlays to do positioning relative to the current
     // selection bounding rectangle.
     this.emit('selection:positioned', hints)
@@ -60,7 +59,7 @@ class AbstractScrollPane extends Component {
     Determine mouse bounds relative to content element
     and emit context-menu:opened event with positioning hints
   */
-  _onContextMenu(e) {
+  _onContextMenu (e) {
     e.preventDefault()
     let mouseBounds = this._getMouseBounds(e)
     this.emit('context-menu:opened', {
@@ -68,7 +67,7 @@ class AbstractScrollPane extends Component {
     })
   }
 
-  _scrollSelectionIntoView(selectionRect) {
+  _scrollSelectionIntoView (selectionRect) {
     let upperBound = this.getScrollPosition()
     let lowerBound = upperBound + this.getHeight()
     let selTop = selectionRect.top
@@ -82,18 +81,18 @@ class AbstractScrollPane extends Component {
   /**
     Returns the height of scrollPane (inner content overflows)
   */
-  getHeight() {
+  getHeight () {
     throw new Error('Abstract method')
   }
 
   /**
     Returns the cumulated height of a panel's content
   */
-  getContentHeight() {
+  getContentHeight () {
     throw new Error('Abstract method')
   }
 
-  getContentElement() {
+  getContentElement () {
     // TODO: should be wrapped in DefaultDOMElement
     throw new Error('Abstract method')
   }
@@ -101,18 +100,18 @@ class AbstractScrollPane extends Component {
   /**
     Get the `.se-scrollable` element
   */
-  getScrollableElement() {
+  getScrollableElement () {
     throw new Error('Abstract method')
   }
 
   /**
     Get current scroll position (scrollTop) of `.se-scrollable` element
   */
-  getScrollPosition() {
+  getScrollPosition () {
     throw new Error('Abstract method')
   }
 
-  setScrollPosition() {
+  setScrollPosition () {
     throw new Error('Abstract method')
   }
 
@@ -134,21 +133,20 @@ class AbstractScrollPane extends Component {
     throw new Error('Abstract method')
   }
 
-  _getContentRect() {
+  _getContentRect () {
     return this.getContentElement().getNativeElement().getBoundingClientRect()
   }
 
   /*
     Get selection rectangle relative to panel content element
   */
-  _getSelectionRect() {
+  _getSelectionRect () {
     return getSelectionRect(this._getContentRect())
   }
 
-  _getMouseBounds(e) {
+  _getMouseBounds (e) {
     return getRelativeMouseBounds(e, this.getContentElement().getNativeElement())
   }
-
 }
 
 export default AbstractScrollPane

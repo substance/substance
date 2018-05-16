@@ -8,8 +8,7 @@ import map from '../util/map'
   so that it is possible to pick up a file after undo+redo.
 */
 class FileManager {
-
-  constructor(editorSession, extensions, context) {
+  constructor (editorSession, extensions, context) {
     this.editorSession = editorSession
     this.extensions = extensions
     this.proxies = {}
@@ -23,11 +22,11 @@ class FileManager {
     this.editorSession.onUpdate('document', this._onDocumentChange, this)
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
   }
 
-  storeFile(fileNode) {
+  storeFile (fileNode) {
     let proxy = this.proxies[fileNode.id]
     // don't adapt the file if we already have it
     if (!proxy) {
@@ -51,11 +50,11 @@ class FileManager {
     console.error('No file adapter found for ', fileNode)
   }
 
-  getProxy(fileNode) {
+  getProxy (fileNode) {
     return this.proxies[fileNode.id]
   }
 
-  sync() {
+  sync () {
     // Note: potentially this could be a bi-directional sync
     // ATM, we only consider upload
     let promises = map(this.proxies, (proxy) => {
@@ -64,7 +63,7 @@ class FileManager {
     return Promise.all(promises)
   }
 
-  _onDocumentChange(change) {
+  _onDocumentChange (change) {
     let doc = this.editorSession.getDocument()
     forEach(change.created, (_, id) => {
       let node = doc.get(id)

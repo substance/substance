@@ -11,21 +11,20 @@ import { get, setWith, unset } from 'lodash-es'
 */
 
 class PathObject {
-
   /*
     @param {object} [root] An object to operate on
   */
-  constructor(root) {
+  constructor (root) {
     if (root) {
       this.__root__ = root
     }
   }
 
-  contains(id) {
+  contains (id) {
     return Boolean(this.getRoot()[id])
   }
 
-  getRoot() {
+  getRoot () {
     if (this.__root__) {
       return this.__root__
     } else {
@@ -43,7 +42,7 @@ class PathObject {
     obj.get(['b', 'b1'])
     => b1Val
   */
-  get(path) {
+  get (path) {
     if (!path) {
       return undefined
     }
@@ -59,7 +58,7 @@ class PathObject {
     return get(this.getRoot(), path)
   }
 
-  set(path, value) {
+  set (path, value) {
     if (!path) {
       throw new Error('Illegal argument: PathObject.set(>path<, value) - path is mandatory.')
     }
@@ -70,7 +69,7 @@ class PathObject {
     }
   }
 
-  delete(path) {
+  delete (path) {
     if (isString(path)) {
       delete this.getRoot()[path]
     } else if (path.length === 1) {
@@ -83,7 +82,7 @@ class PathObject {
     }
   }
 
-  clear() {
+  clear () {
     var root = this.getRoot()
     for (var key in root) {
       if (root.hasOwnProperty(key)) {
@@ -91,7 +90,6 @@ class PathObject {
       }
     }
   }
-
 }
 
 PathObject.prototype._isPathObject = true

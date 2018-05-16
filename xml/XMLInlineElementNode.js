@@ -3,13 +3,12 @@ import * as xmlNodeHelpers from './xmlNodeHelpers'
 
 export default
 class XMLInlineElementNode extends XMLAnnotationNode {
-
   /*
     Note: InlineElements can be used in structured context,
     If path is specified, parent is implicitly given.
     Otherwise it is set explictly by ParentNodeHook.
   */
-  get parentNode() {
+  get parentNode () {
     const path = this.start.path
     if (path[0]) {
       const doc = this.getDocument()
@@ -18,7 +17,7 @@ class XMLInlineElementNode extends XMLAnnotationNode {
     return this._parentNode
   }
 
-  set parentNode(parent) {
+  set parentNode (parent) {
     const path = this.start.path
     if (path[0]) {
       throw new Error('parent of inline-element is implicitly given')
@@ -26,31 +25,31 @@ class XMLInlineElementNode extends XMLAnnotationNode {
     this._parentNode = parent
   }
 
-  getChildAt(idx) {
+  getChildAt (idx) {
     return xmlNodeHelpers.getChildAt(this, idx)
   }
 
-  appendChild(child) {
+  appendChild (child) {
     return xmlNodeHelpers.appendChild(this, child)
   }
 
-  removeChild(child) {
+  removeChild (child) {
     return xmlNodeHelpers.removeChild(this, child)
   }
 
-  insertBefore(newChild, ref) {
+  insertBefore (newChild, ref) {
     return xmlNodeHelpers.insertBefore(this, newChild, ref)
   }
 
-  insertAt(pos, child) {
+  insertAt (pos, child) {
     return xmlNodeHelpers.insertAt(this, pos, child)
   }
 
-  removeAt(pos) {
+  removeAt (pos) {
     return xmlNodeHelpers.removeAt(this, pos)
   }
 
-  getInnerXML() {
+  getInnerXML () {
     return this.getChildren().map(child => {
       return child.toXML().outerHTML
     }).join('')
@@ -64,9 +63,8 @@ XMLInlineElementNode.prototype._elementType = 'inline-element'
 XMLInlineElementNode.prototype._isInlineNode = true
 XMLInlineElementNode.isInline = true
 
-
 XMLInlineElementNode.type = 'inline-element'
 
 XMLInlineElementNode.schema = {
-  _childNodes: { type: ['array', 'id'], default: [], owned: true},
+  _childNodes: { type: ['array', 'id'], default: [], owned: true}
 }

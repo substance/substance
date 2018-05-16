@@ -7,65 +7,64 @@ var __id__ = 0
 */
 
 class TestWebSocket extends EventEmitter {
-
-  constructor(config) {
+  constructor (config) {
     super()
 
     this.__id__ = __id__++
     this.messageQueue = config.messageQueue
     this.clientId = config.clientId || uuid()
-    this.serverId = config.serverId || "server"
+    this.serverId = config.serverId || 'server'
 
     // We consider our TestWebSocket WebSocket.CLOSED at the beginning
     this.readyState = 3
     this._isSimulated = true
   }
 
-  connect() {
+  connect () {
     this.messageQueue.connectClientSocket(this)
-    this.readyState = 1; // WebSocket.OPEN
+    this.readyState = 1 // WebSocket.OPEN
     this.triggerOpen()
   }
 
-  disconnect() {
+  disconnect () {
     this.messageQueue.disconnectClientSocket(this)
-    this.readyState = 3; // WebSocket.CLOSED
+    this.readyState = 3 // WebSocket.CLOSED
     this.triggerClose()
   }
 
   /*
     Emulating native addEventListener API
   */
-  addEventListener(eventName, handler) {
-    if (this['on'+eventName]) {
+  addEventListener (eventName, handler) {
+    if (this['on' + eventName]) {
       // For simplicity we only support a single handler per event atm
-      console.warn('on'+eventName, ' is already set. Overriding handler.')
+      console.warn('on' + eventName, ' is already set. Overriding handler.')
     }
-    this['on'+eventName] = handler
+    this['on' + eventName] = handler
   }
 
   /*
     This can is called by the messageQueue once the connection is established
   */
-  triggerOpen() {
+  triggerOpen () {
     if (this.onopen) this.onopen()
   }
 
-  triggerClose() {
+  triggerClose () {
     if (this.onclose) this.onclose()
   }
 
   /*
     Emulating native removeEventListener API
   */
-  removeEventListener(eventName) {
-    delete this['on'+eventName]
+  removeEventListener (eventName) {
+    delete this['on' + eventName]
   }
 
   /**
     Gets called by the message queue to handle a message
   */
-  _onMessage(data) {
+  _onMessage (data) {
     // Handler must be provided by user
     this.onmessage({data: data})
   }
@@ -73,7 +72,7 @@ class TestWebSocket extends EventEmitter {
   /**
     Gets called by the message queue to handle a message
   */
-  send(data) {
+  send (data) {
     var msg = {
       from: this.clientId,
       to: this.serverId
@@ -83,7 +82,6 @@ class TestWebSocket extends EventEmitter {
     }
     this.messageQueue.pushMessage(msg)
   }
-
 }
 
 export default TestWebSocket

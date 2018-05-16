@@ -5,8 +5,7 @@ import { isFirst, isLast } from './selectionHelpers'
 // import printStacktrace from '../util/printStacktrace'
 
 class SelectionState {
-
-  constructor(doc) {
+  constructor (doc) {
     this.document = doc
 
     this.selection = Selection.nullSelection
@@ -14,7 +13,7 @@ class SelectionState {
     this._resetState()
   }
 
-  setSelection(sel) {
+  setSelection (sel) {
     // printStacktrace()
     if (!sel) {
       sel = Selection.nullSelection
@@ -28,11 +27,11 @@ class SelectionState {
     return true
   }
 
-  getSelection() {
+  getSelection () {
     return this.selection
   }
 
-  getAnnotationsForType(type) {
+  getAnnotationsForType (type) {
     const state = this._state
     if (state.annosByType) {
       return state.annosByType.get(type) || []
@@ -40,54 +39,54 @@ class SelectionState {
     return []
   }
 
-  getMarkers() {
+  getMarkers () {
     // returns markers under the current selection
     return this._state.markers || []
   }
 
-  isInlineNodeSelection() {
+  isInlineNodeSelection () {
     return this._state.isInlineNodeSelection
   }
 
-  getContainer() {
+  getContainer () {
     return this._state.container
   }
 
-  getPreviousNode() {
+  getPreviousNode () {
     return this._state.previousNode
   }
 
-  getNextNode() {
+  getNextNode () {
     return this._state.nextNode
   }
 
   /*
     @returns if the previous node is one char away
   */
-  isFirst() {
+  isFirst () {
     return Boolean(this._state.isFirst)
   }
 
   /*
     @returns if the next node is one char away
   */
-  isLast() {
+  isLast () {
     return Boolean(this._state.isLast)
   }
 
-  get(key) {
+  get (key) {
     return this._state[key]
   }
 
   // used to store custom states (e.g. IsolatedNodeComponent uses this)
-  set(key, value) {
+  set (key, value) {
     if (this._state[key]) {
       throw new Error(`State ${key} is already set`)
     }
     this._state[key] = value
   }
 
-  _deriveState(sel) {
+  _deriveState (sel) {
     this._resetState()
     this._deriveContainerSelectionState(sel)
     this._deriveAnnoState(sel)
@@ -97,7 +96,7 @@ class SelectionState {
     // console.log('SelectionState:', this._state)
   }
 
-  _deriveContainerSelectionState(sel) {
+  _deriveContainerSelectionState (sel) {
     let state = this._state
     let doc = this.document
     if (sel.containerId) {
@@ -108,7 +107,7 @@ class SelectionState {
       let startNode = doc.get(startId).getContainerRoot()
       let startPos = container.getPosition(startNode)
       if (startPos > 0) {
-        state.previousNode = container.getNodeAt(startPos-1)
+        state.previousNode = container.getNodeAt(startPos - 1)
       }
       state.isFirst = isFirst(doc, sel.start)
       let endNode, endPos
@@ -119,21 +118,21 @@ class SelectionState {
         endNode = doc.get(endId).getContainerRoot()
         endPos = container.getPosition(endNode)
       }
-      if (endPos < container.getLength()-1) {
-        state.nextNode = container.getNodeAt(endPos+1)
+      if (endPos < container.getLength() - 1) {
+        state.nextNode = container.getNodeAt(endPos + 1)
       }
       state.isLast = isLast(doc, sel.end)
     }
   }
 
-  _deriveAnnoState(sel) {
+  _deriveAnnoState (sel) {
     const doc = this.document
     const state = this._state
 
     // create a mapping by type for the currently selected annotations
     let annosByType = new TreeIndex.Arrays()
     const propAnnos = getPropertyAnnotationsForSelection(doc, sel)
-    propAnnos.forEach(function(anno) {
+    propAnnos.forEach(function (anno) {
       annosByType.add(anno.type, anno)
     })
 
@@ -144,21 +143,21 @@ class SelectionState {
     const containerId = sel.containerId
     if (containerId) {
       const containerAnnos = getContainerAnnotationsForSelection(doc, sel, containerId)
-      containerAnnos.forEach(function(anno) {
+      containerAnnos.forEach(function (anno) {
         annosByType.add(anno.type, anno)
       })
     }
     state.annosByType = annosByType
   }
 
-  _deriveMarkerState(sel) {
+  _deriveMarkerState (sel) {
     const doc = this.document
     let state = this._state
     let markers = getMarkersForSelection(doc, sel)
     state.markers = markers
   }
 
-  _resetState() {
+  _resetState () {
     this._state = {
       // all annotations under the current selection
       annosByType: null,

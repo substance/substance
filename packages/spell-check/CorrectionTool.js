@@ -1,8 +1,7 @@
 import { default as Tool } from '../../ui/ToggleTool'
 
 class CorrectionTool extends Tool {
-
-  render($$) {
+  render ($$) {
     let node = this.props.node
     let Button = this.getComponent('button')
     let el = $$('div').addClass('sc-correction-tool')
@@ -30,7 +29,7 @@ class CorrectionTool extends Tool {
     return el
   }
 
-  _applyCorrection(suggestion) {
+  _applyCorrection (suggestion) {
     let editorSession = this.context.editorSession
     let node = this.props.node
     editorSession.transaction((tx) => {

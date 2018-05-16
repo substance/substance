@@ -21,9 +21,9 @@ const List = ListPackage.ListNode
 const ListItem = ListPackage.ListItemNode
 const InlineWrapper = InlineWrapperPackage.InlineWrapper
 
-var schema = new Schema("test-article", "1.0.0")
+var schema = new Schema('test-article', '1.0.0')
 
-schema.getDefaultTextType = function() {
+schema.getDefaultTextType = function () {
   return 'paragraph'
 }
 

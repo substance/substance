@@ -7,7 +7,7 @@ import CollabEngine from './CollabEngine'
   Implements Substance CollabServer API.
 */
 class CollabServer extends Server {
-  constructor(config) {
+  constructor (config) {
     super(config)
 
     this.scope = 'substance/collab'
@@ -19,13 +19,13 @@ class CollabServer extends Server {
   /*
     Send an error
   */
-  _error(req, res, err) {
+  _error (req, res, err) {
     console.error(err)
     res.error({
       scope: this.scope,
       type: 'error',
       error: {
-        name: req.message.type+'Error',
+        name: req.message.type + 'Error',
         cause: {
           name: err.name
         }
@@ -38,7 +38,7 @@ class CollabServer extends Server {
   /*
     Configurable authenticate method
   */
-  authenticate(req, res) {
+  authenticate (req, res) {
     if (this.config.authenticate) {
       this.config.authenticate(req, (err, session) => {
         if (err) {
@@ -51,14 +51,14 @@ class CollabServer extends Server {
         this.next(req, res)
       })
     } else {
-      super.authenticate.apply(this, arguments);
+      super.authenticate.apply(this, arguments)
     }
   }
 
   /*
     Configureable enhanceRequest method
   */
-  enhanceRequest(req, res) {
+  enhanceRequest (req, res) {
     if (this.config.enhanceRequest) {
       this.config.enhanceRequest(req, (err) => {
         if (err) {
@@ -77,11 +77,11 @@ class CollabServer extends Server {
   /*
     Called when a collaborator disconnects
   */
-  onDisconnect(collaboratorId) {
+  onDisconnect (collaboratorId) {
     // console.info('CollabServer.onDisconnect ', collaboratorId)
     // All documents collaborator is currently collaborating to
     let documentIds = this.collabEngine.getDocumentIds(collaboratorId)
-    documentIds.forEach(function(documentId) {
+    documentIds.forEach(function (documentId) {
       this._disconnectDocument(collaboratorId, documentId)
     }.bind(this))
   }
@@ -89,7 +89,7 @@ class CollabServer extends Server {
   /*
     Execute CollabServer API method based on msg.type
   */
-  execute(req, res) {
+  execute (req, res) {
     let msg = req.message
     let method = this[msg.type]
 
@@ -103,7 +103,7 @@ class CollabServer extends Server {
   /*
     Client initiates a sync
   */
-  sync(req, res) {
+  sync (req, res) {
     let args = req.message
 
     // Takes an optional argument collaboratorInfo
@@ -123,7 +123,7 @@ class CollabServer extends Server {
         type: 'syncDone',
         documentId: args.documentId,
         version: result.version,
-        serverChange: result.serverChange,
+        serverChange: result.serverChange
       })
 
       // We need to broadcast a new change if there is one
@@ -143,7 +143,7 @@ class CollabServer extends Server {
   /*
     Expcicit disconnect. User wants to exit a collab session.
   */
-  disconnect(req, res) {
+  disconnect (req, res) {
     let args = req.message
     let collaboratorId = args.collaboratorId
     let documentId = args.documentId
@@ -157,14 +157,13 @@ class CollabServer extends Server {
     this.next(req, res)
   }
 
-  _disconnectDocument(collaboratorId, documentId) {
+  _disconnectDocument (collaboratorId, documentId) {
     // Exit from each document session
     this.collabEngine.disconnect({
       documentId: documentId,
       collaboratorId: collaboratorId
     })
   }
-
 }
 
 export default CollabServer

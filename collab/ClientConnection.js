@@ -5,7 +5,7 @@ import Err from '../util/SubstanceError'
   ClientConnection abstraction. Uses websockets internally
 */
 class ClientConnection extends EventEmitter {
-  constructor(config) {
+  constructor (config) {
     super()
 
     this.config = config
@@ -17,14 +17,14 @@ class ClientConnection extends EventEmitter {
     this._connect()
   }
 
-  _createWebSocket() {
+  _createWebSocket () {
     throw Err('AbstractMethodError')
   }
 
   /*
     Initializes a new websocket connection
   */
-  _connect() {
+  _connect () {
     this.ws = this._createWebSocket()
     this.ws.addEventListener('open', this._onConnectionOpen)
     this.ws.addEventListener('close', this._onConnectionClose)
@@ -34,7 +34,7 @@ class ClientConnection extends EventEmitter {
   /*
     Disposes the current websocket connection
   */
-  _disconnect() {
+  _disconnect () {
     this.ws.removeEventListener('message', this._onMessage)
     this.ws.removeEventListener('open', this._onConnectionOpen)
     this.ws.removeEventListener('close', this._onConnectionClose)
@@ -44,18 +44,18 @@ class ClientConnection extends EventEmitter {
   /*
     Emits open event when connection has been established
   */
-  _onConnectionOpen() {
+  _onConnectionOpen () {
     this.emit('open')
   }
 
   /*
     Trigger reconnect on connection close
   */
-  _onConnectionClose() {
+  _onConnectionClose () {
     this._disconnect()
     this.emit('close')
     console.info('websocket connection closed. Attempting to reconnect in 5s.')
-    setTimeout(function() {
+    setTimeout(function () {
       this._connect()
     }.bind(this), 5000)
   }
@@ -63,7 +63,7 @@ class ClientConnection extends EventEmitter {
   /*
     Delegate incoming websocket messages
   */
-  _onMessage(msg) {
+  _onMessage (msg) {
     msg = this.deserializeMessage(msg.data)
     this.emit('message', msg)
   }
@@ -71,7 +71,7 @@ class ClientConnection extends EventEmitter {
   /*
     Send message via websocket channel
   */
-  send(msg) {
+  send (msg) {
     if (!this.isOpen()) {
       console.warn('Message could not be sent. Connection is not open.', msg)
       return
@@ -82,18 +82,17 @@ class ClientConnection extends EventEmitter {
   /*
     Returns true if websocket connection is open
   */
-  isOpen() {
+  isOpen () {
     return this.ws && this.ws.readyState === 1
   }
 
-  serializeMessage(msg) {
+  serializeMessage (msg) {
     return JSON.stringify(msg)
   }
 
-  deserializeMessage(msg) {
+  deserializeMessage (msg) {
     return JSON.parse(msg)
   }
-
 }
 
 export default ClientConnection

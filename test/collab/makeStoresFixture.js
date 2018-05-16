@@ -9,8 +9,8 @@ const EMPTY_DOC = {nodes: {}}
 /*
   Some transforms for paragraph (p1)
 */
-function insertText(pos, text) {
-  return function(tx) {
+function insertText (pos, text) {
+  return function (tx) {
     tx.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: pos })
     tx.insertText(text)
   }
@@ -22,13 +22,13 @@ function insertText(pos, text) {
   @param {Number} numChanges number of available changes
   @param {Number[]} snapshots an array of version numbers
 */
-function makeStoresFixture(numChanges, snapshots) {
+function makeStoresFixture (numChanges, snapshots) {
   // available snapshots e.g. [1,2,5]
   snapshots = snapshots || []
 
   let changeFns = []
   if (numChanges > 0) changeFns.push(twoParagraphs)
-  for(var i=1; i < numChanges; i++) {
+  for (var i = 1; i < numChanges; i++) {
     changeFns.push(insertText(3, 'foo'))
   }
   let changes = createChangeset(createTestArticle(), changeFns)
@@ -39,7 +39,7 @@ function makeStoresFixture(numChanges, snapshots) {
   snapshots.forEach((version) => {
     snapshotSeed['test-doc'][version] = computeSnapshot(
       EMPTY_DOC,
-      changes.slice(0,version)
+      changes.slice(0, version)
     )
   })
   let snapshotStore = new SnapshotStore(snapshotSeed)

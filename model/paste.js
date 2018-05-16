@@ -13,10 +13,10 @@ import { setCursor } from './selectionHelpers'
   @return {Object} with updated `selection`
 */
 
-function paste(tx, args) {
+function paste (tx, args) {
   let sel = tx.selection
   if (!sel || sel.isNull() || sel.isCustomSelection()) {
-    throw new Error("Can not paste, without selection or a custom selection.")
+    throw new Error('Can not paste, without selection or a custom selection.')
   }
   args = args || {}
   args.text = args.text || ''
@@ -59,7 +59,7 @@ function paste(tx, args) {
 /*
   Splits plain text by lines and puts them into paragraphs.
 */
-function _convertPlainTextToDocument(tx, args) {
+function _convertPlainTextToDocument (tx, args) {
   let lines = args.text.split(/\s*\n\s*\n/)
   let pasteDoc = tx.getDocument().newInstance()
   let defaultTextType = pasteDoc.getSchema().getDefaultTextType()
@@ -83,13 +83,13 @@ function _convertPlainTextToDocument(tx, args) {
         type: defaultTextType,
         content: lines[i]
       })
-      container.show(node.id);
+      container.show(node.id)
     }
   }
   return pasteDoc
 }
 
-function _pasteAnnotatedText(tx, copy) {
+function _pasteAnnotatedText (tx, copy) {
   let sel = tx.selection
   const nodes = copy.get(SNIPPET_ID).nodes
   const firstId = nodes[0]
@@ -102,7 +102,7 @@ function _pasteAnnotatedText(tx, copy) {
   let offset = sel.start.offset
   tx.insertText(text)
   // copy annotations
-  forEach(annotations, function(anno) {
+  forEach(annotations, function (anno) {
     let data = anno.toJSON()
     data.start.path = path.slice(0)
     data.start.offset += offset
@@ -113,7 +113,7 @@ function _pasteAnnotatedText(tx, copy) {
   })
 }
 
-function _pasteDocument(tx, pasteDoc) {
+function _pasteDocument (tx, pasteDoc) {
   let sel = tx.selection
   let containerId = sel.containerId
   let container = tx.get(containerId)
@@ -129,7 +129,7 @@ function _pasteDocument(tx, pasteDoc) {
       insertPos = startPos
       container.hide(nodeId)
       deleteNode(tx, tx.get(nodeId))
-    } else if ( text.length === sel.start.offset ) {
+    } else if (text.length === sel.start.offset) {
       insertPos = startPos + 1
     } else {
       tx.break()
@@ -140,7 +140,7 @@ function _pasteDocument(tx, pasteDoc) {
     if (sel.isBefore()) {
       insertPos = nodePos
     } else if (sel.isAfter()) {
-      insertPos = nodePos+1
+      insertPos = nodePos + 1
     } else {
       throw new Error('Illegal state: the selection should be collapsed.')
     }
@@ -174,7 +174,7 @@ function _pasteDocument(tx, pasteDoc) {
 // Unfortunately, this can be difficult in some cases,
 // e.g. other nodes that have a reference to the re-named node
 // We only fix annotations for now.
-function _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited) {
+function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id, visited) {
   if (visited[id]) throw new Error('FIXME: dont call me twice')
   const node = sourceDoc.get(id, 'strict')
   let oldId = node.id
@@ -237,7 +237,7 @@ function _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited) {
   return node.id
 }
 
-function _transferArrayOfReferences(sourceDoc, targetDoc, arr, visited) {
+function _transferArrayOfReferences (sourceDoc, targetDoc, arr, visited) {
   for (let i = 0; i < arr.length; i++) {
     let val = arr[i]
     // multi-dimensional

@@ -7,7 +7,7 @@ import levenshtein from './levenshtein'
   @param {String} a
   @param {String} b
 */
-function diff(a, b, offset) {
+function diff (a, b, offset) {
   if (!isString(a) || !isString(b)) {
     throw new Error('Illegal arguments.')
   }
@@ -15,9 +15,9 @@ function diff(a, b, offset) {
   let changes = []
   if (a || b) {
     if (!a && b) {
-      changes.push({ type:'insert', start:offset, text:b })
+      changes.push({ type: 'insert', start: offset, text: b })
     } else if (a && !b) {
-      changes.push({ type:'delete', start:offset, end:offset+a.length })
+      changes.push({ type: 'delete', start: offset, end: offset + a.length })
     } else {
       let m = levenshtein(a, b)
       changes = _diff(a, b, m, offset)
@@ -26,51 +26,51 @@ function diff(a, b, offset) {
   return changes
 }
 
-function _diff(a, b, m, offset) {
+function _diff (a, b, m, offset) {
   let i = b.length
   let j = a.length
   let changes = []
   let current
-  while (i>0 && j>0) {
+  while (i > 0 && j > 0) {
     _next()
   }
   _commit()
   return changes
 
-  function _next() {
+  function _next () {
     let d = m[i][j]
-    let ib = i-1
-    let jb = j-1
+    let ib = i - 1
+    let jb = j - 1
     // substitute
-    if (m[ib][jb]<d) {
+    if (m[ib][jb] < d) {
       if (current && current.type === 'replace') {
         current.start--
         current.text.unshift(b.charAt(ib))
       } else {
         _commit()
-        current = { type:'replace', start:jb, end:j, text:[b.charAt(ib)] }
+        current = { type: 'replace', start: jb, end: j, text: [b.charAt(ib)] }
       }
       i--
       j--
     }
     // insert
-    else if (m[ib][j]<d) {
+    else if (m[ib][j] < d) {
       if (current && current.type === 'insert') {
         current.start--
         current.text.unshift(b.charAt(ib))
       } else {
         _commit()
-        current = { type:'insert', start:jb, text:[b.charAt(ib)] }
+        current = { type: 'insert', start: jb, text: [b.charAt(ib)] }
       }
       i--
     }
     // delete char
-    else if (m[i][jb]<d) {
+    else if (m[i][jb] < d) {
       if (current && current.type === 'delete') {
         current.start--
       } else {
         _commit()
-        current = { type:'delete', start:jb, end:j }
+        current = { type: 'delete', start: jb, end: j }
       }
       j--
     }
@@ -82,7 +82,7 @@ function _diff(a, b, m, offset) {
     }
   }
 
-  function _commit() {
+  function _commit () {
     if (current) {
       switch (current.type) {
         case 'insert':
@@ -105,7 +105,6 @@ function _diff(a, b, m, offset) {
       current = null
     }
   }
-
 }
 
 export default diff

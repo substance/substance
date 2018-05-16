@@ -1,14 +1,14 @@
 import { Document, EditorSession } from 'substance'
 import getTestConfig from './getTestConfig'
 
-export default function createEditorSession(...seeds) {
+export default function createEditorSession (...seeds) {
   let config = getTestConfig()
   let doc = new Document(config.getSchema())
   let body = doc.create({
     type: 'container',
     id: 'body'
   })
-  seeds.forEach((seed)=>{
+  seeds.forEach((seed) => {
     seed(doc, body)
   })
   let editorSession = new EditorSession(doc, { configurator: config })

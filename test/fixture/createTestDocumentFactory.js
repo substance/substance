@@ -1,12 +1,12 @@
 import createTestArticle from './createTestArticle'
 import createChangeset from './createChangeset'
 
-export default function createTestDocumentFactory() {
+export default function createTestDocumentFactory () {
   return {
-    createDocument: function() {
+    createDocument: function () {
       return createTestArticle()
     },
-    createChangeset: function() {
+    createChangeset: function () {
       var doc = createTestArticle()
       return createChangeset(doc)
     }

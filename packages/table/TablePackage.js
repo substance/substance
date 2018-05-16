@@ -7,7 +7,7 @@ import InsertTableCommand from './InsertTableCommand'
 
 export default {
   name: 'table',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Table)
     config.addNode(TableCell)
     config.addComponent('table', TableComponent)

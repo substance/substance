@@ -26,22 +26,21 @@
   ```
 */
 class Command {
-
   /**
     Construcutor is only used internally.
 
     @constructor
     @param {Object} config    Config provided during command registration
   */
-  constructor(config) {
+  constructor (config) {
     this.config = config || {}
     this.name = this.config.name
     if (!this.name) {
-      throw new Error("'name' is required");
+      throw new Error("'name' is required")
     }
   }
 
-  get isAsync() {
+  get isAsync () {
     return false
   }
 
@@ -49,7 +48,7 @@ class Command {
     Get the command name specified at command registration. See
     {@link Configurator#addCommand}
   */
-  getName() {
+  getName () {
     return this.name
   }
 
@@ -98,25 +97,25 @@ class Command {
   /*
     @returns true if this command is creating or editing an annotation
   */
-  isAnnotationCommand() {
+  isAnnotationCommand () {
     return false
   }
 
   /*
     @returns true if this command is inserting a node into a container
   */
-  isInsertCommand() {
+  isInsertCommand () {
     return false
   }
 
   /*
     @returns true if this command is switching the type of a block-level text node
   */
-  isSwitchTypeCommand() {
+  isSwitchTypeCommand () {
     return false
   }
 
-  _getEditorSession(params, context) {
+  _getEditorSession (params, context) {
     let editorSession = params.editorSession || context.editorSession
     if (!editorSession) {
       throw new Error("'editorSession' is required.")
@@ -124,14 +123,13 @@ class Command {
     return editorSession
   }
 
-  _getSelection(params) {
+  _getSelection (params) {
     let sel = params.selection || params.selectionState.getSelection()
     if (!sel) {
       throw new Error("'selection' is required.")
     }
     return sel
   }
-
 }
 
 Command.prototype._isCommand = true

@@ -3,8 +3,7 @@ import isString from '../util/isString'
 import FontAwesomeIcon from './FontAwesomeIcon'
 
 export default class FontAwesomeIconProvider {
-
-  constructor(icons) {
+  constructor (icons) {
     this.faMap = {}
     this.textMap = {}
     forEach(icons, (config, name) => {
@@ -22,7 +21,7 @@ export default class FontAwesomeIconProvider {
     })
   }
 
-  renderIcon($$, name) {
+  renderIcon ($$, name) {
     let faProps = this.faMap[name]
     let text = this.textMap[name]
     if (faProps) {
@@ -32,11 +31,11 @@ export default class FontAwesomeIconProvider {
     }
   }
 
-  addFAIcon(name, faClass) {
+  addFAIcon (name, faClass) {
     this.faMap[name] = faClass
   }
 
-  addTextIcon(name, text) {
+  addTextIcon (name, text) {
     this.textMap[name] = text
   }
 }

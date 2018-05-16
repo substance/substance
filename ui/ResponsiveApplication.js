@@ -4,7 +4,7 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
 
 class ResponsiveApplication extends Component {
-  constructor(...args) {
+  constructor (...args) {
     super(...args)
 
     this.pages = {}
@@ -14,14 +14,14 @@ class ResponsiveApplication extends Component {
     })
   }
 
-  getInitialState() {
+  getInitialState () {
     return {
       route: undefined,
       mobile: this._isMobile()
     }
   }
 
-  didMount() {
+  didMount () {
     if (platform.inBrowser) {
       let _window = DefaultDOMElement.getBrowserWindow()
       _window.on('resize', this._onResize, this)
@@ -34,7 +34,7 @@ class ResponsiveApplication extends Component {
     this.navigate(route, {replace: true})
   }
 
-  dispose() {
+  dispose () {
     this.router.off(this)
     this.router.dispose()
   }
@@ -46,25 +46,25 @@ class ResponsiveApplication extends Component {
     On app level, never use setState/extendState directly as this may
     lead to invalid states.
   */
-  navigate(route, opts) {
+  navigate (route, opts) {
     this.extendState({
       route: route
     })
     this.router.writeRoute(route, opts)
   }
 
-  _onRouteChanged(route) {
+  _onRouteChanged (route) {
     // console.log('NotesApp._onRouteChanged', route);
     this.navigate(route, {replace: true})
   }
 
-  _isMobile() {
+  _isMobile () {
     if (platform.inBrowser) {
       return window.innerWidth < 700
     }
   }
 
-  _onResize() {
+  _onResize () {
     if (this._isMobile()) {
       // switch to mobile
       if (!this.state.mobile) {
@@ -81,33 +81,33 @@ class ResponsiveApplication extends Component {
     }
   }
 
-  _getPage() {
+  _getPage () {
     return this.state.route.page || this.getDefaultPage()
   }
 
-  _getPageClass() {
+  _getPageClass () {
     let page = this._getPage()
     return this.pages[page]
   }
 
-  _getPageProps() {
+  _getPageProps () {
     let props = cloneDeep(this.state.route)
     delete props.page
     props.mobile = this.state.mobile
     return props
   }
 
-  addPage(pageName, PageClass) {
+  addPage (pageName, PageClass) {
     this.pages[pageName] = PageClass
   }
 
-  renderPage($$) {
+  renderPage ($$) {
     let PageClass = this._getPageClass()
     let pageName = this._getPage()
     return $$(PageClass, this._getPageProps()).ref(pageName)
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-responsive-application')
 
     if (this.state.route === undefined) {
@@ -121,7 +121,6 @@ class ResponsiveApplication extends Component {
 
     return el
   }
-
 }
 
 export default ResponsiveApplication

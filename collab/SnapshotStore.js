@@ -3,14 +3,14 @@
   No integrity checks are made, as this is the task of SnapshotEngine
 */
 class SnapshotStore {
-  constructor(seed) {
+  constructor (seed) {
     this._snapshots = seed || {}
   }
 
   /*
     Get all available versions for a document
   */
-  getVersions(documentId, cb) {
+  getVersions (documentId, cb) {
     let versions = this._getVersions(documentId)
     cb(null, versions)
   }
@@ -20,7 +20,7 @@ class SnapshotStore {
 
     Returns snapshot data and snaphot version
   */
-  getSnapshot(documentId, version, cb) {
+  getSnapshot (documentId, version, cb) {
     if (!arguments.length === 3) {
       throw new Error('Invalid Arguments')
     }
@@ -39,7 +39,7 @@ class SnapshotStore {
 
     Please note that an existing snapshot will be overwritten.
   */
-  saveSnapshot(documentId, version, data, cb) {
+  saveSnapshot (documentId, version, data, cb) {
     if (!documentId || !version || !data) {
       throw new Error('Invalid arguments')
     }
@@ -54,7 +54,7 @@ class SnapshotStore {
   /*
     Removes a snapshot for a given documentId + version
   */
-  deleteSnapshot(documentId, version, cb) {
+  deleteSnapshot (documentId, version, cb) {
     let docEntry = this._snapshots[documentId]
     if (!docEntry || !docEntry[version]) {
       return cb(new Error('Snapshot does not exist and can not be deleted'))
@@ -67,12 +67,11 @@ class SnapshotStore {
   /*
     Get versions for a given document
   */
-  _getVersions(documentId) {
+  _getVersions (documentId) {
     let docEntry = this._snapshots[documentId]
     if (!docEntry) return [] // no versions available
     return Object.keys(docEntry)
   }
-
 }
 
 export default SnapshotStore

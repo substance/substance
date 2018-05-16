@@ -5,7 +5,7 @@ import StrongComponent from './StrongComponent'
 
 export default {
   name: 'strong',
-  configure: function(config) {
+  configure: function (config) {
     config.addNode(Strong)
     config.addConverter('html', StrongHTMLConverter)
     config.addConverter('xml', StrongHTMLConverter)

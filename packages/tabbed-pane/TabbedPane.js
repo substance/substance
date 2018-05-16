@@ -26,20 +26,19 @@ import Component from '../../ui/Component'
 */
 
 class TabbedPane extends Component {
-
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-tabbed-pane')
     let tabsEl = $$('div').addClass('se-tabs')
-    forEach(this.props.tabs, function(tab) {
+    forEach(this.props.tabs, function (tab) {
       let tabEl = $$('a')
-        .addClass("se-tab")
+        .addClass('se-tab')
         .attr({
-          href: "#",
-          "data-id": tab.id,
+          href: '#',
+          'data-id': tab.id
         })
         .on('click', this.onTabClicked)
       if (tab.id === this.props.activeTab) {
-        tabEl.addClass("sm-active")
+        tabEl.addClass('sm-active')
       }
       tabEl.append(
         $$('span').addClass('label').append(tab.name)
@@ -57,7 +56,7 @@ class TabbedPane extends Component {
     return el
   }
 
-  onTabClicked(e) {
+  onTabClicked (e) {
     e.preventDefault()
     let tabId = e.currentTarget.dataset.id
     this.send('switchTab', tabId)

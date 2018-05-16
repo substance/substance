@@ -20,12 +20,11 @@ import Component from '../../ui/Component'
   ```
 */
 class Layout extends Component {
-
-  render($$) {
+  render ($$) {
     let el = $$('div').addClass('sc-layout')
-    el.addClass('sm-width-'+this.props.width)
+    el.addClass('sm-width-' + this.props.width)
     if (this.props.textAlign) {
-      el.addClass('sm-text-align-'+this.props.textAlign)
+      el.addClass('sm-text-align-' + this.props.textAlign)
     }
 
     if (this.props.noPadding) {

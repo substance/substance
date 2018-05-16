@@ -1,3 +1,3 @@
-export default function isNumber(n) {
+export default function isNumber (n) {
   return typeof n === 'number'
 }

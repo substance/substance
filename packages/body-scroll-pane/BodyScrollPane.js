@@ -24,21 +24,20 @@ import platform from '../../util/platform'
   ```
 */
 class BodyScrollPane extends AbstractScrollPane {
-
   /*
     Expose scrollPane as a child context
   */
-  getChildContext() {
+  getChildContext () {
     return {
       scrollPane: this
     }
   }
 
-  getName() {
+  getName () {
     return 'body'
   }
 
-  render($$) {
+  render ($$) {
     let el = $$('div')
     if (this.props.contextMenu === 'custom') {
       el.on('contextmenu', this._onContextMenu)
@@ -50,7 +49,7 @@ class BodyScrollPane extends AbstractScrollPane {
   /**
     Returns the height of scrollPane (inner content overflows)
   */
-  getHeight() {
+  getHeight () {
     if (platform.inBrowser) {
       return window.innerHeight
     } else {
@@ -61,7 +60,7 @@ class BodyScrollPane extends AbstractScrollPane {
   /**
     Returns the cumulated height of a panel's content
   */
-  getContentHeight() {
+  getContentHeight () {
     if (platform.inBrowser) {
       return document.body.scrollHeight
     } else {
@@ -69,7 +68,7 @@ class BodyScrollPane extends AbstractScrollPane {
     }
   }
 
-  getContentElement() {
+  getContentElement () {
     if (platform.inBrowser) {
       return DefaultDOMElement.wrapNativeElement(window.document.body)
     } else {
@@ -80,7 +79,7 @@ class BodyScrollPane extends AbstractScrollPane {
   // /**
   //   Get the `.se-scrollable` element
   // */
-  getScrollableElement() {
+  getScrollableElement () {
     if (platform.inBrowser) {
       return document.body
     } else {
@@ -91,7 +90,7 @@ class BodyScrollPane extends AbstractScrollPane {
   /**
     Get current scroll position (scrollTop) of `.se-scrollable` element
   */
-  getScrollPosition() {
+  getScrollPosition () {
     if (platform.inBrowser) {
       return document.body.scrollTop
     } else {
@@ -99,7 +98,7 @@ class BodyScrollPane extends AbstractScrollPane {
     }
   }
 
-  setScrollPosition(scrollPos) {
+  setScrollPosition (scrollPos) {
     if (platform.inBrowser) {
       document.body.scrollTop = scrollPos
     }
@@ -122,7 +121,6 @@ class BodyScrollPane extends AbstractScrollPane {
   scrollTo(componentId, onlyIfNotVisible) { // eslint-disable-line
     console.warn('TODO: implement')
   }
-
 }
 
 export default BodyScrollPane

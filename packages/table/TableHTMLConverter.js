@@ -11,7 +11,7 @@ export default {
 
     TODO: Create test suite for this converter
   */
-  import: function(el, node, converter) {
+  import: function (el, node, converter) {
     let trs = el.find('tbody').getChildren()
     let colCount = 0
     let cells = []
@@ -44,7 +44,7 @@ export default {
     node.cells = cells
   },
 
-  export: function(node, el, converter) {
+  export: function (node, el, converter) {
     let $$ = converter.$$
     let rowCount = node.getRowCount()
     let colCount = node.getColCount()

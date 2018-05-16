@@ -4,8 +4,7 @@ import ClipboardImporter from '../model/ClipboardImporter'
 import ClipboardExporter from '../model/ClipboardExporter'
 
 export default class AbstractClipboard {
-
-  constructor(configurator) {
+  constructor (configurator) {
     let schema = configurator.getSchema()
     let converterRegistry = configurator.converterRegistry
     let htmlConverters = []
@@ -27,7 +26,7 @@ export default class AbstractClipboard {
 
     @param {Event} event
   */
-  onCopy(event) {
+  onCopy (event) {
     // console.log("Clipboard.onCopy", arguments);
     let clipboardData = this._copy()
     substanceGlobals._clipboardData = event.clipboardData
@@ -48,7 +47,7 @@ export default class AbstractClipboard {
 
     @param {Event} event
   */
-  onCut(event) {
+  onCut (event) {
     // preventing default behavior to avoid that contenteditable destroys our DOM
     event.preventDefault()
     // console.log("Clipboard.onCut", arguments);
@@ -62,7 +61,7 @@ export default class AbstractClipboard {
     @param {Event} event
   */
   // Works on Safari/Chrome/FF
-  onPaste(event) {
+  onPaste (event) {
     let clipboardData = event.clipboardData
 
     let types = {}
@@ -116,25 +115,25 @@ export default class AbstractClipboard {
     }
   }
 
-  _getImporter() {
+  _getImporter () {
     return new ClipboardImporter(this._config)
   }
 
-  _getExporter() {
+  _getExporter () {
     return new ClipboardExporter(this._config)
   }
 
   /*
     Copies selected content from document returning a new document instance.
   */
-  _copy() {
+  _copy () {
     throw new Error('This method is abstract.')
   }
 
   /*
     Removes the selected content from the document.
   */
-  _cut() {
+  _cut () {
     throw new Error('This method is abstract.')
   }
 
@@ -156,5 +155,4 @@ export default class AbstractClipboard {
   _pasteHtml(html, text) { // eslint-disable-line
     throw new Error('This method is abstract.')
   }
-
 }

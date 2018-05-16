@@ -10,21 +10,20 @@ import forEach from '../util/forEach'
 */
 
 class ResourceManager {
-
-  constructor(editorSession, context) {
+  constructor (editorSession, context) {
     this.editorSession = editorSession
     this.context = context
     this.editorSession.onRender('document', this._onDocumentChange, this)
   }
 
-  dispose() {
+  dispose () {
     this.editorSession.off(this)
   }
 
   /*
     Trigger fetch of a given resource
   */
-  triggerFetch(resource) {
+  triggerFetch (resource) {
     resource.fetchPayload(this.context, (err, props) => {
       if (err) {
         this._updateNode(resource.id, {
@@ -36,7 +35,7 @@ class ResourceManager {
     })
   }
 
-  _onDocumentChange(change) {
+  _onDocumentChange (change) {
     let doc = this.editorSession.getDocument()
     forEach(change.created, (_, id) => {
       let node = doc.get(id)
@@ -51,7 +50,7 @@ class ResourceManager {
   /*
       Fill in node payload
   */
-  _updateNode(nodeId, props) {
+  _updateNode (nodeId, props) {
     let editorSession = this.editorSession
     editorSession.transaction((tx) => {
       forEach(props, (val, key) => {
@@ -60,6 +59,5 @@ class ResourceManager {
     })
   }
 }
-
 
 export default ResourceManager

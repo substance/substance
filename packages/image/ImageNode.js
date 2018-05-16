@@ -1,14 +1,13 @@
 import DocumentNode from '../../model/DocumentNode'
 
 class ImageNode extends DocumentNode {
-
-  getImageFile() {
+  getImageFile () {
     if (this.imageFile) {
       return this.document.get(this.imageFile)
     }
   }
 
-  getUrl() {
+  getUrl () {
     let imageFile = this.getImageFile()
     if (imageFile) {
       return imageFile.getUrl()

@@ -11,27 +11,25 @@ import DOMExporter from './DOMExporter'
 */
 
 class HTMLExporter extends DOMExporter {
-
-  constructor(config, context) {
+  constructor (config, context) {
     super(_defaultConfig(config), context)
   }
 
-  exportDocument(doc) {
+  exportDocument (doc) {
     let htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
     return this.convertDocument(doc, htmlEl)
   }
 
-  getDefaultBlockConverter() {
+  getDefaultBlockConverter () {
     return defaultBlockConverter // eslint-disable-line no-use-before-define
   }
 
-  getDefaultPropertyAnnotationConverter() {
+  getDefaultPropertyAnnotationConverter () {
     return defaultAnnotationConverter // eslint-disable-line no-use-before-define
   }
-
 }
 
-function _defaultConfig(config) {
+function _defaultConfig (config) {
   config = Object.assign({
     idAttribute: 'data-id'
   }, config)
@@ -41,27 +39,26 @@ function _defaultConfig(config) {
   return config
 }
 
-
 const defaultAnnotationConverter = {
   tagName: 'span',
-  export: function(node, el) {
+  export: function (node, el) {
     el.tagName = 'span'
     el.attr('data-type', node.type)
     var properties = node.toJSON()
-    forEach(properties, function(value, name) {
+    forEach(properties, function (value, name) {
       if (name === 'id' || name === 'type') return
       if (isString(value) || isNumber(value) || isBoolean(value)) {
-        el.attr('data-'+name, value)
+        el.attr('data-' + name, value)
       }
     })
   }
 }
 
 const defaultBlockConverter = {
-  export: function(node, el, converter) {
+  export: function (node, el, converter) {
     el.attr('data-type', node.type)
     var properties = node.toJSON()
-    forEach(properties, function(value, name) {
+    forEach(properties, function (value, name) {
       if (name === 'id' || name === 'type') {
         return
       }

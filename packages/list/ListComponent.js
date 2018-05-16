@@ -4,14 +4,13 @@ import NodeComponent from '../../ui/NodeComponent'
 import ListItemComponent from './ListItemComponent'
 
 export default class ListComponent extends NodeComponent {
-
-  render($$) {
+  render ($$) {
     let node = this.props.node
     let el = renderListNode(node, (item) => {
       // item is either a list item node, or a tagName
       if (isString(item)) {
         return $$(item)
-      } else if(item.type === 'list-item') {
+      } else if (item.type === 'list-item') {
         let path = item.getPath()
         return $$(ListItemComponent, {
           path,

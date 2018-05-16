@@ -10,22 +10,21 @@ import ToggleTool from '../../ui/ToggleTool'
 */
 
 class EditLinkTool extends ToggleTool {
-
-  getUrlPath() {
+  getUrlPath () {
     let propPath = this.constructor.urlPropertyPath
     return [this.getNodeId()].concat(propPath)
   }
 
-  getNodeId() {
+  getNodeId () {
     return this.props.commandState.nodeId
   }
 
-  _openLink() {
+  _openLink () {
     let doc = this.context.editorSession.getDocument()
     window.open(doc.get(this.getUrlPath()), '_blank')
   }
 
-  render($$) {
+  render ($$) {
     let Input = this.getComponent('input')
     let Button = this.getComponent('button')
     let commandState = this.props.commandState
@@ -47,21 +46,21 @@ class EditLinkTool extends ToggleTool {
       }).ref('input'),
       $$(Button, {
         icon: 'open-link',
-        theme: this.props.theme,
+        theme: this.props.theme
       }).attr('title', this.getLabel('open-link'))
         .on('click', this._openLink),
 
       $$(Button, {
         icon: 'delete',
-        theme: this.props.theme,
+        theme: this.props.theme
       }).attr('title', this.getLabel('delete-link'))
         .on('click', this.onDelete)
     )
     return el
   }
 
-  onDelete(e) {
-    e.preventDefault();
+  onDelete (e) {
+    e.preventDefault()
     let nodeId = this.getNodeId()
     let sm = this.context.surfaceManager
     let surface = sm.getFocusedSurface()
@@ -70,7 +69,7 @@ class EditLinkTool extends ToggleTool {
       return
     }
     let editorSession = this.context.editorSession
-    editorSession.transaction(function(tx, args) {
+    editorSession.transaction(function (tx, args) {
       tx.delete(nodeId)
       return args
     })

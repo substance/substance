@@ -1,8 +1,7 @@
 import Component from './Component'
 
 class UnsupportedNodeComponent extends Component {
-
-  render($$) {
+  render ($$) {
     return $$('pre')
       .addClass('content-node unsupported')
       .attr({

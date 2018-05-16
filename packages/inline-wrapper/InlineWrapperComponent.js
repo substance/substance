@@ -1,13 +1,12 @@
 import InlineNodeComponent from '../../ui/InlineNodeComponent'
 
 class InlineWrapperComponent extends InlineNodeComponent {
-
-  getClassNames() {
+  getClassNames () {
     // ATTENTION: ATM it is necessary to add .sc-inline-node
     return 'sc-inline-wrapper sc-inline-node'
   }
 
-  renderContent($$) {
+  renderContent ($$) {
     let node = this.props.node
     let doc = node.getDocument()
 
@@ -19,7 +18,7 @@ class InlineWrapperComponent extends InlineNodeComponent {
       if (ComponentClass) {
         el.append($$(ComponentClass, {
           disabled: this.props.disabled,
-          node: wrappedNode,
+          node: wrappedNode
         }).ref('wrappedNode'))
       } else {
         console.error('No component registered for node type' + wrappedNode.type)
