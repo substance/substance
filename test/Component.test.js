@@ -30,12 +30,22 @@ function ComponentTests(debug, memory) {
   })
 
   test("Throw error when render method is not returning an element", function(t) {
-    class MyComponent extends TestComponent {
+    class NilRender extends TestComponent {
       render() {}
     }
     t.throws(function() {
-      MyComponent.render()
-    }, "Should throw an exception when render does not return an element")
+      NilRender.render()
+    }, "Should throw an exception when render does return nil")
+
+    class InvalidRender extends TestComponent {
+      render() {
+        return $$(Simple)
+      }
+    }
+    t.throws(function() {
+      InvalidRender.render()
+    }, "Should throw an exception when render does not return a low-level element but a Component")
+
     t.end()
   })
 
