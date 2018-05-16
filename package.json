@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "codecov": "^3.0.1",
-    "eslint": "^4.19.1",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
     "karma-coverage": "^1.1.1",
