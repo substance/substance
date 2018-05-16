@@ -122,7 +122,7 @@ export function selectNode (tx, nodeId, containerId) {
   tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerId }))
 }
 
-export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, surfaceId}) {
+export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, surfaceId }) {
   let node = doc.get(nodeId)
   if (!node) return Selection.nullSelection
   node = node.getContainerRoot()

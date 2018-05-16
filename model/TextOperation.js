@@ -131,7 +131,7 @@ function _hasConflict (a, b) {
 // Transforms two Insertions
 // --------
 
-function transform_insert_insert (a, b) {
+function transformInsertInsert (a, b) {
   if (a.pos === b.pos) {
     b.pos += a.str.length
   } else if (a.pos < b.pos) {
@@ -145,13 +145,13 @@ function transform_insert_insert (a, b) {
 // --------
 //
 
-function transform_delete_delete (a, b, first) {
+function transformDeleteDelete (a, b, first) {
   // reduce to a normalized case
   if (a.pos > b.pos) {
-    return transform_delete_delete(b, a, !first)
+    return transformDeleteDelete(b, a, !first)
   }
   if (a.pos === b.pos && a.str.length > b.str.length) {
-    return transform_delete_delete(b, a, !first)
+    return transformDeleteDelete(b, a, !first)
   }
   // take out overlapping parts
   if (b.pos < a.pos + a.str.length) {
@@ -170,23 +170,21 @@ function transform_delete_delete (a, b, first) {
 // --------
 //
 
-function transform_insert_delete (a, b) {
+function transformInsertDelete (a, b) {
   if (a.type === DELETE) {
-    return transform_insert_delete(b, a)
+    return transformInsertDelete(b, a)
   }
   // we can assume, that a is an insertion and b is a deletion
   // a is before b
   if (a.pos <= b.pos) {
     b.pos += a.str.length
-  }
   // a is after b
-  else if (a.pos >= b.pos + b.str.length) {
+  } else if (a.pos >= b.pos + b.str.length) {
     a.pos -= b.str.length
-  }
   // Note: this is a conflict case the user should be noticed about
   // If applied still, the deletion takes precedence
   // a.pos > b.pos && <= b.pos + b.length
-  else {
+  } else {
     var s = a.pos - b.pos
     b.str = b.str.slice(0, s) + a.str + b.str.slice(s)
     a.str = ''
@@ -203,11 +201,11 @@ function transform (a, b, options) {
     b = b.clone()
   }
   if (a.type === INSERT && b.type === INSERT) {
-    transform_insert_insert(a, b)
+    transformInsertInsert(a, b)
   } else if (a.type === DELETE && b.type === DELETE) {
-    transform_delete_delete(a, b, true)
+    transformDeleteDelete(a, b, true)
   } else {
-    transform_insert_delete(a, b)
+    transformInsertDelete(a, b)
   }
   return [a, b]
 }

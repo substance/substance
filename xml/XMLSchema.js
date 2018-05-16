@@ -150,21 +150,20 @@ function _validateElement (elementSchema, el) {
       valid = false
     }
   }
-  { // Elements
-    if (elementSchema.type === 'external') {
-      // skip
+  // Elements
+  if (elementSchema.type === 'external') {
+    // skip
+  } else {
+    // HACK: special treatment for our text elements which are not real DOM elements
+    let res
+    if (el._isXMLTextElement) {
+      res = _checkChildren(elementSchema, el.toXML())
     } else {
-      // HACK: special treatment for our text elements which are not real DOM elements
-      let res
-      if (el._isXMLTextElement) {
-        res = _checkChildren(elementSchema, el.toXML())
-      } else {
-        res = _checkChildren(elementSchema, el)
-      }
-      if (!res.ok) {
-        errors = errors.concat(res.errors)
-        valid = false
-      }
+      res = _checkChildren(elementSchema, el)
+    }
+    if (!res.ok) {
+      errors = errors.concat(res.errors)
+      valid = false
     }
   }
   return {

@@ -47,7 +47,7 @@ PropertyAnnotation.schema = {
   type: 'annotation',
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
-  _content: { type: 'string', optional: true}
+  _content: { type: 'string', optional: true }
 }
 
 export default PropertyAnnotation

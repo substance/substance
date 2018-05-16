@@ -314,11 +314,10 @@ class MarkersIndex {
         marker.start.offset = newStart
         marker.end.offset = newEnd
       } else if (pos1 >= end) {
-        // nothing
-      }
+
       // the marker needs to be changed
       // now, there might be cases where the marker gets invalid, such as a spell-correction
-      else {
+      } else {
         if (pos1 <= start) {
           newStart = start - Math.min(pos2 - pos1, start - pos1)
         }

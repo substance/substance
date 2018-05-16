@@ -15,7 +15,7 @@ class InsertTableCommand extends InsertNodeCommand {
       type: 'table',
       // null values mark merged cells
       cells: [
-        [a1.id, b1.id ],
+        [a1.id, b1.id],
         [a2.id, b2.id]
       ]
     }

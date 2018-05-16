@@ -21,7 +21,7 @@ export default {
       commandGroup: 'prompt'
     })
     config.addTool('edit-link', EditLinkTool)
-    config.addIcon('link', { 'fontawesome': 'fa-link'})
+    config.addIcon('link', { 'fontawesome': 'fa-link' })
     config.addIcon('open-link', { 'fontawesome': 'fa-external-link' })
     config.addLabel('link', {
       en: 'Link',

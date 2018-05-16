@@ -431,11 +431,10 @@ class BrowserDOMElement extends DOMElement {
 
     if (child instanceof window.Node) {
       child = BrowserDOMElement.wrap(child)
-    }
     // Note: element is owned by a different implementation.
     // Probably you are using two different versions of Substance on the same element.
     // Can't tell if this is bad. For now we continue by wrapping it again
-    else if (child._isBrowserDOMElement && !(child instanceof BrowserDOMElement)) {
+    } else if (child._isBrowserDOMElement && !(child instanceof BrowserDOMElement)) {
       child = BrowserDOMElement.wrap(child)
     } else if (isString(child) || isNumber(child)) {
       child = this.createTextNode(child)

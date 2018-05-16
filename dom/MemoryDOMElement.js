@@ -686,11 +686,10 @@ MemoryDOMElement.wrapNativeElement = function (el) {
     // we stub out window and document
     if (el === window || el === window.document) {
       return new DOMElementStub()
-    }
     // HACK: additionally, if a window.document.Node or a BrowserDOMElement is given
     // as it happens when trying to mount onto t.sandbox with DefaultDOMElement using MemoryDOMElement as default
     // we just return a new root element
-    else if (el instanceof window.Node || el._isBrowserDOMElement) {
+    } else if (el instanceof window.Node || el._isBrowserDOMElement) {
       // return MemoryDOMElement.createDocument('html').createElement('div')
     }
   }

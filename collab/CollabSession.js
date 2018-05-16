@@ -31,7 +31,7 @@ class CollabSession extends EditorSession {
     if (!this.documentId) {
       throw new Err('InvalidArgumentsError', {message: 'documentId is mandatory'})
     }
-    if (typeof this.version === undefined) {
+    if (typeof this.version === 'undefined') {
       throw new Err('InvalidArgumentsError', {message: 'version is mandatory'})
     }
     // Internal state

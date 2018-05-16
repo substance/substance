@@ -227,10 +227,6 @@ function _collectAllTokensFromDFA (dfa) {
 }
 
 export class InterleaveExpr extends Expression {
-  constructor (name, root) {
-    super(name, root)
-  }
-
   getInitialState () {
     const dfas = this.dfas
     const dfaStates = new Array(dfas.length)

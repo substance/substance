@@ -27,12 +27,12 @@ export function transformSelection (sel, a) {
 
 function _transformInplaceSingle (a, b) {
   for (let i = 0; i < a.ops.length; i++) {
-    let a_op = a.ops[i]
+    let opA = a.ops[i]
     for (let j = 0; j < b.ops.length; j++) {
-      let b_op = b.ops[j]
+      let opB = b.ops[j]
       // ATTENTION: order of arguments is important.
       // First argument is the dominant one, i.e. it is treated as if it was applied before
-      ObjectOperation.transform(a_op, b_op, {inplace: true})
+      ObjectOperation.transform(opA, opB, {inplace: true})
     }
   }
   if (a.before) {

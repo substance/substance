@@ -1,3 +1,4 @@
+/* global XMLHttpRequest */
 /**
   Performs an asynchronous HTTP request.
 

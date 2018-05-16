@@ -171,9 +171,8 @@ function transferAnnotations (doc, path, offset, newPath, newOffset) {
       // if after truncate the anno is empty, delete it
       if (newEndOffset === newStartOffset) {
         doc.delete(a.id)
-      }
       // ... otherwise update the range
-      else {
+      } else {
         // TODO: Use coordintate ops!
         if (newStartOffset !== start) {
           doc.set([a.id, 'start', 'offset'], newStartOffset)
@@ -182,9 +181,8 @@ function transferAnnotations (doc, path, offset, newPath, newOffset) {
           doc.set([a.id, 'end', 'offset'], newEndOffset)
         }
       }
-    }
     // 2. if the cursor is before an annotation then simply transfer the annotation to the new node
-    else if (a.start.offset >= offset) {
+    } else if (a.start.offset >= offset) {
       // TODO: Use coordintate ops!
       // Note: we are preserving the annotation so that anything which is connected to the annotation
       // remains valid.

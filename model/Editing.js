@@ -79,7 +79,7 @@ export default class Editing {
       let container = tx.get(containerId)
       let startNodeId = start.path[0]
       let nodePos = container.getPosition(startNodeId, 'strict')
-      this._deleteContainerSelection(tx, sel, {noMerge: true })
+      this._deleteContainerSelection(tx, sel, { noMerge: true })
       setCursor(tx, container.getNodeAt(nodePos + 1), containerId, 'before')
     }
   }
@@ -104,12 +104,11 @@ export default class Editing {
     /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
       this._deleteNodeSelection(tx, sel, direction)
-    }
     // TODO: what to do with custom selections?
-    else if (sel.isCustomSelection()) {} // eslint-disable-line no-empty
+    } else if (sel.isCustomSelection()) {
     // if the selection is collapsed this is the classical one-character deletion
     // either backwards (backspace) or forward (delete)
-    else if (sel.isCollapsed()) {
+    } else if (sel.isCollapsed()) {
       // Deletion of a single character leads to a merge
       // if cursor is at a text boundary (TextNode, ListItem)
       // and direction is towards that boundary
@@ -154,14 +153,12 @@ export default class Editing {
           containerId: sel.containerId
         })
       }
-    }
     // deleting a range of characters within a text property
-    else if (sel.isPropertySelection()) {
+    } else if (sel.isPropertySelection()) {
       deleteTextRange(tx, sel.start, sel.end)
       tx.setSelection(sel.collapse('left'))
-    }
     // deleting a range within a container (across multiple nodes)
-    else if (sel.isContainerSelection()) {
+    } else if (sel.isContainerSelection()) {
       this._deleteContainerSelection(tx, sel)
     } else {
       console.warn('Unsupported case: tx.delete(%)', direction, sel)
@@ -173,8 +170,8 @@ export default class Editing {
     let container = tx.get(sel.containerId)
     let nodePos = container.getPosition(nodeId, 'strict')
     if (sel.isFull() ||
-        sel.isBefore() && direction === 'right' ||
-        sel.isAfter() && direction === 'left') {
+        (sel.isBefore() && direction === 'right') ||
+        (sel.isAfter() && direction === 'left')) {
       // replace the node with default text node
       container.hideAt(nodePos)
       deleteNode(tx, tx.get(nodeId))
@@ -378,9 +375,8 @@ export default class Editing {
       // insert before
       if (sel.isBefore()) {
         container.showAt(nodePos, blockNode.id)
-      }
       // insert after
-      else if (sel.isAfter()) {
+      } else if (sel.isAfter()) {
         container.showAt(nodePos + 1, blockNode.id)
         tx.setSelection({
           type: 'node',
@@ -420,18 +416,15 @@ export default class Editing {
           deleteNode(tx, node)
           container.showAt(nodePos, blockNode.id)
           setCursor(tx, blockNode, container.id, 'after')
-        }
         // insert before
-        else if (sel.start.offset === 0) {
+        } else if (sel.start.offset === 0) {
           container.showAt(nodePos, blockNode.id)
-        }
         // insert after
-        else if (sel.start.offset === text.length) {
+        } else if (sel.start.offset === text.length) {
           container.showAt(nodePos + 1, blockNode.id)
           setCursor(tx, blockNode, container.id, 'before')
-        }
         // break
-        else {
+        } else {
           this.break(tx)
           container.showAt(nodePos + 1, blockNode.id)
           setCursor(tx, blockNode, container.id, 'after')
@@ -748,41 +741,35 @@ export default class Editing {
       // I anno is before
       if (annoEnd < startOffset) {
 
-      }
       // II anno is after
-      else if (annoStart >= endOffset) {
+      } else if (annoStart >= endOffset) {
         tx.update([anno.id, 'start'], { type: 'shift', value: startOffset - endOffset + L })
         tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset + L })
-      }
       // III anno is deleted
       // NOTE: InlineNodes only have a length of one character
       // so they are always 'covered', and as they can not expand
       // they are deleted
-      else if (
+      } else if (
         (annoStart >= startOffset && annoEnd < endOffset) ||
         (anno._isInlineNode && annoStart >= startOffset && annoEnd <= endOffset)
       ) {
         tx.delete(anno.id)
-      }
       // IV anno.start between and anno.end after
-      else if (annoStart >= startOffset && annoEnd >= endOffset) {
+      } else if (annoStart >= startOffset && annoEnd >= endOffset) {
         // do not move start if typing over
         if (annoStart > startOffset || !typeover) {
           tx.update([anno.id, 'start'], { type: 'shift', value: startOffset - annoStart + L })
         }
         tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset + L })
-      }
       // V anno.start before and anno.end between
-      else if (annoStart < startOffset && annoEnd < endOffset) {
+      } else if (annoStart < startOffset && annoEnd < endOffset) {
         // NOTE: here the anno gets expanded (that's the common way)
         tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - annoEnd + L })
-      }
       // VI
-      else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
+      } else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
         // skip
-      }
       // VII anno.start before and anno.end after
-      else if (annoStart < startOffset && annoEnd >= endOffset) {
+      } else if (annoStart < startOffset && annoEnd >= endOffset) {
         if (anno._isInlineNode) {
           // skip
         } else {
@@ -836,9 +823,8 @@ export default class Editing {
         startOffset: 0,
         containerId: container.id
       })
-    }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
-    else {
+    } else {
       const textPath = node.getPath()
       const textProp = textPath[1]
       const newId = uuid(node.type)
@@ -892,21 +878,18 @@ export default class Editing {
           container.hide(node.id)
           deleteNode(tx, node)
           container.showAt(nodePos, newTextNode.id)
-        }
         // if at the first list item, remove the item
-        else if (itemPos === 0) {
+        } else if (itemPos === 0) {
           node.removeItem(listItem)
           deleteNode(tx, listItem)
           container.showAt(nodePos, newTextNode.id)
-        }
         // if at the last list item, remove the item and append the paragraph
-        else if (itemPos >= L - 1) {
+        } else if (itemPos >= L - 1) {
           node.removeItem(listItem)
           deleteNode(tx, listItem)
           container.showAt(nodePos + 1, newTextNode.id)
-        }
         // otherwise create a new list
-        else {
+        } else {
           let tail = []
           const items = node.getItems().slice()
           for (let i = L - 1; i > itemPos; i--) {
@@ -926,9 +909,8 @@ export default class Editing {
           path: newTextNode.getPath(),
           startOffset: 0
         })
-      }
       // insert a new paragraph above the current one
-      else {
+      } else {
         newItemData[textProp] = ''
         let newItem = tx.create(newItemData)
         node.insertItemAt(itemPos, newItem)
@@ -938,9 +920,8 @@ export default class Editing {
           startOffset: 0
         })
       }
-    }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
-    else {
+    } else {
       newItemData[textProp] = text.substring(offset)
       let newItem = tx.create(newItemData)
       // Now we need to transfer annotations

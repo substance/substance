@@ -27,14 +27,6 @@ import isString from '../util/isString'
 */
 export default
 class DocumentNode extends DataNode {
-  /**
-    @param {Document} doc A document instance
-    @param {object} node properties
-  */
-  constructor (doc, props) {
-    super(doc, props)
-  }
-
   _initialize (doc, props) {
     this.document = doc
     super._initialize(props)

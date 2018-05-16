@@ -9,10 +9,6 @@ import Component from '../../ui/Component'
   @component
 */
 class GutterContainer extends Component {
-  constructor (...args) {
-    super(...args)
-  }
-
   render ($$) {
     let el = $$('div').addClass('sc-gutter-container sm-hidden')
     let gutterEl = this.props.gutter

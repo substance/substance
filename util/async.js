@@ -5,11 +5,11 @@
 */
 export function series (tasks, cb, i) {
   i = i || 0
-  tasks[i](function (err) {
+  tasks[i](function (err, ...args) {
     // Always stop execution on error
     if (err) return cb(err)
     if (i === tasks.length - 1) {
-      cb(...arguments) // we are done
+      cb(err, ...args) // we are done
     } else {
       series(tasks, cb, i + 1)
     }

@@ -66,5 +66,5 @@ XMLInlineElementNode.isInline = true
 XMLInlineElementNode.type = 'inline-element'
 
 XMLInlineElementNode.schema = {
-  _childNodes: { type: ['array', 'id'], default: [], owned: true}
+  _childNodes: { type: ['array', 'id'], default: [], owned: true }
 }

@@ -188,7 +188,8 @@ class DOMSelection {
   }
 
   _getDOMCoordinate (rootEl, coor) {
-    let comp, domCoor = null
+    let domCoor = null
+    let comp
     if (coor.isNodeCoordinate()) {
       comp = Component.unwrap(rootEl.find('*[data-id="' + coor.getNodeId() + '"]'))
       if (comp) {
@@ -353,9 +354,8 @@ class DOMSelection {
         let childComp = comp.getChildAt(childIdx)
         coor = new Coordinate([childNode.id], isBefore ? 0 : 1)
         coor._comp = childComp
-      }
       // sometimes anchor or focus is a Node component with TextPropertyComponents as children (all TextNode Components)
-      else if (nodeEl.isElementNode() && nodeEl.getChildCount() > 0) {
+      } else if (nodeEl.isElementNode() && nodeEl.getChildCount() > 0) {
         let child = (offset > 0) ? nodeEl.getChildAt(offset - 1) : nodeEl.firstChild
         let prop
         let childComp = Component.unwrap(child)

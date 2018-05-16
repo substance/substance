@@ -378,9 +378,8 @@ function _render (state, vel) {
       if (virtualComp && !oldComp) {
         _appendChild(state, comp, newComp)
         continue
-      }
       // Differential update
-      else if (state.isMapped(virtualComp)) {
+      } else if (state.isMapped(virtualComp)) {
         // identity
         if (newComp === oldComp) {
           // no structural change
@@ -389,9 +388,8 @@ function _render (state, vel) {
           state.setDetached(oldComp)
           _removeChild(state, comp, oldComp)
           pos2--
-        }
         // the old one could not be mapped, thus can be removed
-        else {
+        } else {
           _removeChild(state, comp, oldComp)
           pos2--
         }
@@ -527,12 +525,11 @@ function _mapComponents (state, comp, vc) {
   var parent = comp.getParent()
   if (vc.parent) {
     canMapParent = _mapComponents(state, parent, vc.parent)
-  }
   // to be able to support implicit retaining of elements
   // we need to propagate mapping through the 'preliminary' parent chain
   // i.e. not taking the real parents as rendered, but the Components into which
   // we have passed children (via vel.append() or vel.outlet().append())
-  else if (vc._preliminaryParent) {
+  } else if (vc._preliminaryParent) {
     while (parent && parent._isElementComponent) {
       parent = parent.getParent()
     }

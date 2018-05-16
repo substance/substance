@@ -77,7 +77,7 @@ class CoordinateOperation {
 CoordinateOperation.prototype._isOperation = true
 CoordinateOperation.prototype._isCoordinateOperation = true
 
-function transform_shift_shift (a, b) {
+function transformShiftShift (a, b) {
   a.val += b.val
   b.val += a.val
 }
@@ -90,7 +90,7 @@ function transform (a, b, options) {
     b = b.clone()
   }
   if (a.type === SHIFT && b.type === SHIFT) {
-    transform_shift_shift(a, b)
+    transformShiftShift(a, b)
   } else {
     throw new Error('Illegal type')
   }

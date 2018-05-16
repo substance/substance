@@ -209,9 +209,8 @@ function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id, visited) {
           node[name] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited)
         }
       }
-    }
     // Look for text properties and create annotations in the target doc accordingly
-    else if (prop.isText()) {
+    } else if (prop.isText()) {
       // This is really difficult in general
       // as we don't know where to look for.
       // TODO: ATM we only look for annotations.

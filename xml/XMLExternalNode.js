@@ -8,7 +8,7 @@ XMLExternalNode.prototype._elementType = 'external'
 XMLExternalNode.type = 'external'
 
 XMLExternalNode.schema = {
-  xml: { type: 'string', default: ''}
+  xml: { type: 'string', default: '' }
 }
 
 XMLExternalNode.isBlock = true

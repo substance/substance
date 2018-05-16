@@ -37,9 +37,8 @@ class ArrayOperation {
       }
       array.splice(this.pos, 0, this.val)
       return array
-    }
     // Delete
-    else /* if (this.type === DELETE) */ {
+    } else /* if (this.type === DELETE) */ {
       if (array.length < this.pos) {
         throw new Error('Provided array is too small.')
       }
@@ -119,21 +118,19 @@ function hasConflict (a, b) {
   }
 }
 
-function transform_insert_insert (a, b) {
+function transformInsertInsert (a, b) {
   if (a.pos === b.pos) {
     b.pos += 1
-  }
   // a before b
-  else if (a.pos < b.pos) {
+  } else if (a.pos < b.pos) {
     b.pos += 1
-  }
   // a after b
-  else {
+  } else {
     a.pos += 1
   }
 }
 
-function transform_delete_delete (a, b) {
+function transformDeleteDelete (a, b) {
   // turn the second of two concurrent deletes into a NOP
   if (a.pos === b.pos) {
     b.type = NOP
@@ -147,7 +144,7 @@ function transform_delete_delete (a, b) {
   }
 }
 
-function transform_insert_delete (a, b) {
+function transformInsertDelete (a, b) {
   // reduce to a normalized case
   if (a.type === DELETE) {
     var tmp = a
@@ -176,11 +173,11 @@ var transform = function (a, b, options) {
   if (a.type === NOP || b.type === NOP) {
     // nothing to transform
   } else if (a.type === INSERT && b.type === INSERT) {
-    transform_insert_insert(a, b)
+    transformInsertInsert(a, b)
   } else if (a.type === DELETE && b.type === DELETE) {
-    transform_delete_delete(a, b)
+    transformDeleteDelete(a, b)
   } else {
-    transform_insert_delete(a, b)
+    transformInsertDelete(a, b)
   }
   return [a, b]
 }

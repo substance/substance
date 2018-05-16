@@ -23,10 +23,6 @@ const SLASH = '/'.charCodeAt(0)
       into one of the surfaces, or set a CustomSelection.
 */
 class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
-  constructor (...args) {
-    super(...args)
-  }
-
   render ($$) {
     let node = this.props.node
     let ContentClass = this.ContentClass
@@ -140,7 +136,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   _deriveStateFromSelectionState (selState) {
     let surface = this._getSurface(selState)
-    let newState = { mode: null, unblocked: null}
+    let newState = { mode: null, unblocked: null }
     if (!surface) return newState
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (surface === this.context.surface) {

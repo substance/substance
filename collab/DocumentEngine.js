@@ -65,6 +65,7 @@ class DocumentEngine extends EventEmitter {
   */
   documentExists (documentId, cb) {
     this.getVersion(documentId, (err, version) => {
+      if (err) return cb(err)
       if (version >= 0) {
         cb(null, true)
       } else {

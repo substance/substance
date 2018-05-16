@@ -1,8 +1,8 @@
 import Component from './Component'
 
-class NodeComponent extends Component {
+export default class NodeComponent extends Component {
   didMount () {
-    this.context.editorSession.onRender('document', this.rerender, this, { path: [this.props.node.id]})
+    this.context.editorSession.onRender('document', this.rerender, this, { path: [this.props.node.id] })
   }
 
   dispose () {
@@ -31,5 +31,3 @@ class NodeComponent extends Component {
     super.rerender(...args)
   }
 }
-
-export default NodeComponent

@@ -41,8 +41,8 @@ function getInverseObj (obj) {
 }
 
 function getInverseReplacer (inverse) {
-  var single = [],
-    multiple = []
+  let single = []
+  let multiple = []
 
   Object.keys(inverse).forEach(function (k) {
     if (k.length === 1) {
@@ -57,8 +57,8 @@ function getInverseReplacer (inverse) {
   return new RegExp(multiple.join('|'), 'g')
 }
 
-var re_nonASCII = /[^\0-\x7F]/g
-var re_astralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g
+const RE_NON_ASCII = /[^\0-\x7F]/g
+const RE_ASTRAL_SYMBOLS = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g
 
 function singleCharReplacer (c) {
   return '&#x' + c.charCodeAt(0).toString(16).toUpperCase() + ';'
@@ -78,8 +78,8 @@ function getInverse (inverse, re) {
   return function (data) {
     return data
       .replace(re, func)
-      .replace(re_astralSymbols, astralReplacer)
-      .replace(re_nonASCII, singleCharReplacer)
+      .replace(RE_ASTRAL_SYMBOLS, astralReplacer)
+      .replace(RE_NON_ASCII, singleCharReplacer)
   }
 }
 
@@ -196,8 +196,8 @@ export default class DomUtils {
 
   append (elem, next) {
     if (next.parent) this.removeElement(next)
-    var parent = elem.parent,
-      currNext = elem.next
+    let parent = elem.parent
+    let currNext = elem.next
 
     next.next = currNext
     next.prev = elem
@@ -247,7 +247,8 @@ export default class DomUtils {
   }
 
   find (test, elems, recurse, limit) {
-    var result = [], childs
+    let result = []
+    let childs
 
     for (var i = 0, j = elems.length; i < j; i++) {
       if (test(elems[i])) {

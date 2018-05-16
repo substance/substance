@@ -666,8 +666,9 @@ class EditorSession extends EventEmitter {
             this._isSaving = false
           })
       } else {
-        console.error('Document saving is not handled at the moment. Make sure saveHandler instance provided to editorSession')
-        return Promise.reject()
+        let errMsg = 'Document saving is not handled at the moment. Make sure saveHandler instance provided to editorSession'
+        console.error(errMsg)
+        return Promise.reject(new Error(errMsg))
       }
     }
   }

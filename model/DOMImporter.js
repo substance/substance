@@ -243,7 +243,7 @@ export default class DOMImporter {
     if (options.preserveWhitespace) {
       state.preserveWhitespace = true
     }
-    state.stack.push({ path: path, offset: 0, text: '', annos: []})
+    state.stack.push({ path: path, offset: 0, text: '', annos: [] })
     // IMO we should reset the last char, as it is only relevant within one
     // annotated text property. This feature is mainly used to eat up
     // whitespace in XML/HTML at tag boundaries, produced by pretty-printed XML/HTML.
@@ -657,7 +657,7 @@ class DOMImporterState {
   }
 
   pushContext (tagName, converter) {
-    this.contexts.push({ tagName: tagName, converter: converter, annos: []})
+    this.contexts.push({ tagName: tagName, converter: converter, annos: [] })
   }
 
   popContext () {

@@ -2,7 +2,9 @@ import isNil from './isNil'
 import platform from './platform'
 
 export function getDOMRangeFromEvent (evt) {
-  let range, x = evt.clientX, y = evt.clientY
+  let range
+  let x = evt.clientX
+  let y = evt.clientY
   // Try the simple IE way first
   if (document.body.createTextRange) {
     range = document.body.createTextRange()
@@ -14,16 +16,14 @@ export function getDOMRangeFromEvent (evt) {
       range = document.createRange()
       range.setStart(evt.rangeParent, evt.rangeOffset)
       range.collapse(true)
-    }
     // Try the standards-based way next
-    else if (document.caretPositionFromPoint) {
+    } else if (document.caretPositionFromPoint) {
       let pos = document.caretPositionFromPoint(x, y)
       range = document.createRange()
       range.setStart(pos.offsetNode, pos.offset)
       range.collapse(true)
-    }
-    // Next, the WebKit way
-    else if (document.caretRangeFromPoint) {
+    // Try the standards-based way next
+    } else if (document.caretRangeFromPoint) {
       range = document.caretRangeFromPoint(x, y)
     }
   }

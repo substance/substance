@@ -238,29 +238,24 @@ export function deleteTextRange (doc, start, end) {
     // I anno is before
     if (annoEnd <= startOffset) {
 
-    }
     // II anno is after
-    else if (annoStart >= endOffset) {
+    } else if (annoStart >= endOffset) {
       doc.update([anno.id, 'start'], { type: 'shift', value: startOffset - endOffset })
       doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset })
-    }
     // III anno is deleted
-    else if (annoStart >= startOffset && annoEnd <= endOffset) {
+    } else if (annoStart >= startOffset && annoEnd <= endOffset) {
       doc.delete(anno.id)
-    }
     // IV anno.start between and anno.end after
-    else if (annoStart >= startOffset && annoEnd >= endOffset) {
+    } else if (annoStart >= startOffset && annoEnd >= endOffset) {
       if (annoStart > startOffset) {
         doc.update([anno.id, 'start'], { type: 'shift', value: startOffset - annoStart })
       }
       doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset })
-    }
     // V anno.start before and anno.end between
-    else if (annoStart <= startOffset && annoEnd <= endOffset) {
+    } else if (annoStart <= startOffset && annoEnd <= endOffset) {
       doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - annoEnd })
-    }
     // VI anno.start before and anno.end after
-    else if (annoStart < startOffset && annoEnd >= endOffset) {
+    } else if (annoStart < startOffset && annoEnd >= endOffset) {
       doc.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset })
     } else {
       console.warn('TODO: handle annotation update case.')

@@ -244,12 +244,12 @@ function _checked (prop, value) {
   if (value === undefined) {
     throw new Error('Value for property ' + name + ' is undefined.')
   }
-  if (type === 'string' && !isString(value) ||
-      type === 'boolean' && !isBoolean(value) ||
-      type === 'number' && !isNumber(value) ||
-      type === 'array' && !isArray(value) ||
-      type === 'id' && !isString(value) ||
-      type === 'object' && !isObject(value)) {
+  if ((type === 'string' && !isString(value)) ||
+      (type === 'boolean' && !isBoolean(value)) ||
+      (type === 'number' && !isNumber(value)) ||
+      (type === 'array' && !isArray(value)) ||
+      (type === 'id' && !isString(value)) ||
+      (type === 'object' && !isObject(value))) {
     throw new Error('Illegal value type for property ' + name + ': expected ' + type + ', was ' + (typeof value))
   }
   return value

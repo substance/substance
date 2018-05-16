@@ -41,7 +41,7 @@ class SnapshotEngine {
       this.changeStore.getChanges(documentId, knownVersion, version, (err, changes) => {
         if (err) return cb(err)
         if (changes.length < (version - knownVersion)) {
-          return cb('Changes missing for reconstructing version ' + version)
+          return cb(new Error('Changes missing for reconstructing version ' + version))
         }
         jsonDoc = computeSnapshot(jsonDoc, changes)
         cb(null, jsonDoc, version)

@@ -545,8 +545,8 @@ class DOMElement {
   removeEventListener (eventName, handler) {
     if (!this.eventListeners) return
     // console.log('removing event listener', eventName, handler);
-    let listener = null, idx = -1
-    idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
+    let listener = null
+    let idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
     listener = this.eventListeners[idx]
     if (idx > -1) {
       this.eventListeners.splice(idx, 1)

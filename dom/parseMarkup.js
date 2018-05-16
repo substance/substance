@@ -24,8 +24,8 @@ export default function parseMarkup (markup, options) {
   return handler.document
 }
 
-const re_whitespace = /\s+/g
-const re_doctype = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"]+)["])?)\s*$/
+const RE_WHITESPACE = /\s+/g
+const RE_DOCTYPE = /^DOCTYPE\s+([^\s]+)(?:\s+PUBLIC\s+["]([^"]+)["](?:\s+["]([^"]+)["])?)\s*$/
 
 /*
   Customized implementation of [DomHandler](https://github.com/fb55/domhandler).
@@ -90,7 +90,7 @@ class DomHandler {
 
   ontext (text) {
     if (this.options.normalizeWhitespace) {
-      text = text.replace(re_whitespace, ' ')
+      text = text.replace(RE_WHITESPACE, ' ')
     }
     let lastTag
     let _top = this._tagStack[this._tagStack.length - 1]
@@ -135,7 +135,7 @@ class DomHandler {
 
   ondeclaration (data) {
     if (data.startsWith('DOCTYPE')) {
-      let m = re_doctype.exec(data)
+      let m = RE_DOCTYPE.exec(data)
       if (!m) throw new Error('Could not parse DOCTYPE element: ' + data)
       this.document.setDoctype(m[1], m[2], m[3])
     } else {

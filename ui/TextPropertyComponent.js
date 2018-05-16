@@ -333,13 +333,11 @@ function _getCharPos (node, offset) {
       let parentOffset = parent.getAttribute('data-offset')
       if (parentPath) {
         charPos = offset
-      }
       // ... and we can stop if parent has an offset hint
-      else if (parentOffset) {
+      } else if (parentOffset) {
         charPos = parseInt(parentOffset, 10) + offset
-      }
       // ... otherwise we count the charPos by recursing up-tree
-      else {
+      } else {
         charPos = _getCharPos(parent, 0) + offset
       }
     } else {
@@ -354,16 +352,14 @@ function _getCharPos (node, offset) {
     // up to which we need to sum up all lengths
     if (pathStr) {
       charPos = _countCharacters(node, offset)
-    }
     // similar if node is the element of an annotation, and we can use the
     // element's offset
-    else if (offsetStr) {
+    } else if (offsetStr) {
       childIdx = parent.getChildIndex(node)
       charPos = parseInt(offsetStr, 10) + _countCharacters(node, offset)
-    }
     // for other elements we need to count characters in the child tree
     // adding the offset of this element which needs to be computed by recursing up-tree
-    else {
+    } else {
       childIdx = parent.getChildIndex(node)
       charPos = _getCharPos(parent, childIdx) + _countCharacters(node, offset)
     }

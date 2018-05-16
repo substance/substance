@@ -1002,7 +1002,7 @@ Component.mount = function (props, el) {
       throw new Error('This selector is not supported on server side.')
     }
   }
-  el = new DefaultDOMElement.wrap(el)
+  el = DefaultDOMElement.wrap(el)
   const ComponentClass = this
   let comp = new ComponentClass(null, props)
   comp.mount(el)
@@ -1065,20 +1065,12 @@ function _unwrapCompStrict (el) {
   return comp
 }
 
-class ElementComponent extends Component {
-  constructor (parent) {
-    super(parent)
-  }
-}
+class ElementComponent extends Component {}
 
 ElementComponent.prototype._isElementComponent = true
 ElementComponent.prototype._SKIP_COMPONENT_INIT = true
 
 class TextNodeComponent extends Component {
-  constructor (parent) {
-    super(parent)
-  }
-
   setTextContent (text) {
     if (!this.el) {
       throw new Error('Component must be rendered first.')

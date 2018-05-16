@@ -52,9 +52,8 @@ function _diff (a, b, m, offset) {
       }
       i--
       j--
-    }
     // insert
-    else if (m[ib][j] < d) {
+    } else if (m[ib][j] < d) {
       if (current && current.type === 'insert') {
         current.start--
         current.text.unshift(b.charAt(ib))
@@ -63,9 +62,8 @@ function _diff (a, b, m, offset) {
         current = { type: 'insert', start: jb, text: [b.charAt(ib)] }
       }
       i--
-    }
     // delete char
-    else if (m[i][jb] < d) {
+    } else if (m[i][jb] < d) {
       if (current && current.type === 'delete') {
         current.start--
       } else {
@@ -73,9 +71,8 @@ function _diff (a, b, m, offset) {
         current = { type: 'delete', start: jb, end: j }
       }
       j--
-    }
     // preserve
-    else {
+    } else {
       _commit()
       i--
       j--

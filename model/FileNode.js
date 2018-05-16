@@ -1,10 +1,6 @@
 import DocumentNode from './DocumentNode'
 
 class FileNode extends DocumentNode {
-  constructor (...args) {
-    super(...args)
-  }
-
   getUrl () {
     if (this.proxy) {
       return this.proxy.getUrl()

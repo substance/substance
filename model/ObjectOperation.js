@@ -255,24 +255,24 @@ function hasConflict (a, b) {
   return isEqual(a.path, b.path)
 }
 
-function transform_delete_delete (a, b) {
+function transformDeleteDelete (a, b) {
   // both operations have the same effect.
   // the transformed operations are turned into NOPs
   a.type = NOP
   b.type = NOP
 }
 
-function transform_create_create () {
+function transformCreateCreate () {
   throw new Error('Can not transform two concurring creates of the same property')
 }
 
-function transform_delete_create () {
+function transformDeleteCreate () {
   throw new Error('Illegal state: can not create and delete a value at the same time.')
 }
 
-function transform_delete_update (a, b, flipped) {
+function transformDeleteUpdate (a, b, flipped) {
   if (a.type !== DELETE) {
-    return transform_delete_update(b, a, true)
+    return transformDeleteUpdate(b, a, true)
   }
   var op
   switch (b.propertyType) {
@@ -293,37 +293,36 @@ function transform_delete_update (a, b, flipped) {
     a.type = NOP
     b.type = CREATE
     b.val = op.apply(a.val)
-  }
   // (UPDATE, DELETE): the delete is updated to delete the updated value
-  else {
+  } else {
     a.val = op.apply(a.val)
     b.type = NOP
   }
 }
 
-function transform_create_update () {
+function transformCreateUpdate () {
   // it is not possible to reasonably transform this.
   throw new Error('Can not transform a concurring create and update of the same property')
 }
 
-function transform_update_update (a, b) {
+function transformUpdateUpdate (a, b) {
   // Note: this is a conflict the user should know about
-  var op_a, op_b, t
+  let opA, opB, t
   switch (b.propertyType) {
     case 'string':
-      op_a = TextOperation.fromJSON(a.diff)
-      op_b = TextOperation.fromJSON(b.diff)
-      t = TextOperation.transform(op_a, op_b, {inplace: true})
+      opA = TextOperation.fromJSON(a.diff)
+      opB = TextOperation.fromJSON(b.diff)
+      t = TextOperation.transform(opA, opB, {inplace: true})
       break
     case 'array':
-      op_a = ArrayOperation.fromJSON(a.diff)
-      op_b = ArrayOperation.fromJSON(b.diff)
-      t = ArrayOperation.transform(op_a, op_b, {inplace: true})
+      opA = ArrayOperation.fromJSON(a.diff)
+      opB = ArrayOperation.fromJSON(b.diff)
+      t = ArrayOperation.transform(opA, opB, {inplace: true})
       break
     case 'coordinate':
-      op_a = CoordinateOperation.fromJSON(a.diff)
-      op_b = CoordinateOperation.fromJSON(b.diff)
-      t = CoordinateOperation.transform(op_a, op_b, {inplace: true})
+      opA = CoordinateOperation.fromJSON(a.diff)
+      opB = CoordinateOperation.fromJSON(b.diff)
+      t = CoordinateOperation.transform(opA, opB, {inplace: true})
       break
     default:
       throw new Error('Illegal type')
@@ -332,12 +331,12 @@ function transform_update_update (a, b) {
   b.diff = t[1]
 }
 
-function transform_create_set () {
+function transformCreateSet () {
   throw new Error('Illegal state: can not create and set a value at the same time.')
 }
 
-function transform_delete_set (a, b, flipped) {
-  if (a.type !== DELETE) return transform_delete_set(b, a, true)
+function transformDeleteSet (a, b, flipped) {
+  if (a.type !== DELETE) return transformDeleteSet(b, a, true)
   if (!flipped) {
     a.type = NOP
     b.type = CREATE
@@ -348,11 +347,11 @@ function transform_delete_set (a, b, flipped) {
   }
 }
 
-function transform_update_set () {
+function transformUpdateSet () {
   throw new Error('Unresolvable conflict: update + set.')
 }
 
-function transform_set_set (a, b) {
+function transformSetSet (a, b) {
   a.type = NOP
   b.original = a.val
 }
@@ -376,16 +375,16 @@ const CODE = (() => {
 const __transform__ = (() => {
   /* eslint-disable no-multi-spaces */
   const t = {}
-  t[_DELETE | _DELETE] = transform_delete_delete
-  t[_DELETE | _CREATE] = transform_delete_create
-  t[_DELETE | _UPDATE] = transform_delete_update
-  t[_CREATE | _CREATE] = transform_create_create
-  t[_CREATE | _UPDATE] = transform_create_update
-  t[_UPDATE | _UPDATE] = transform_update_update
-  t[_CREATE | _SET   ] = transform_create_set
-  t[_DELETE | _SET   ] = transform_delete_set
-  t[_UPDATE | _SET   ] = transform_update_set
-  t[_SET    | _SET   ] = transform_set_set
+  t[_DELETE | _DELETE] = transformDeleteDelete
+  t[_DELETE | _CREATE] = transformDeleteCreate
+  t[_DELETE | _UPDATE] = transformDeleteUpdate
+  t[_CREATE | _CREATE] = transformCreateCreate
+  t[_CREATE | _UPDATE] = transformCreateUpdate
+  t[_UPDATE | _UPDATE] = transformUpdateUpdate
+  t[_CREATE | _SET] = transformCreateSet
+  t[_DELETE | _SET] = transformDeleteSet
+  t[_UPDATE | _SET] = transformUpdateSet
+  t[_SET    | _SET] = transformSetSet
   /* eslint-enable no-multi-spaces */
   return t
 })()

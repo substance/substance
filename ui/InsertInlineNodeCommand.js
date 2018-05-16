@@ -31,13 +31,6 @@ import Command from './Command'
 
 class InsertInlineNodeCommand extends Command {
   /**
-    @param config Takes a config object, provided on registration in configurator
-  */
-  constructor (...args) {
-    super(...args)
-  }
-
-  /**
     Determine command state for inline node insertion. Command is enabled
     if selection is a property selection.
   */

@@ -122,6 +122,8 @@ class CollabEngine extends EventEmitter {
   */
   _sync ({documentId, version, change}, cb) {
     this.documentEngine.getVersion(documentId, (err, serverVersion) => {
+      if (err) return cb(err)
+
       if (version > serverVersion) {
         cb(new Err('InvalidVersionError', {
           message: 'Client version greater than server version'
@@ -140,8 +142,9 @@ class CollabEngine extends EventEmitter {
   }
 
   _syncPullOnly ({documentId, version, change}, cb) {
-    console.warn('This code is not yet tested')
     this.documentEngine.getChanges(documentId, version, (err, changes) => {
+      if (err) return cb(err)
+
       let serverChange
 
       // Collect ops from all changes to turn them into a single change
@@ -207,6 +210,8 @@ class CollabEngine extends EventEmitter {
   */
   _rebaseChange ({documentId, change, version}, cb) {
     this.documentEngine.getChanges(documentId, version, function (err, result, serverVersion) {
+      if (err) return cb(err)
+
       // HACK: it happened that result.changes was empty
       let B = result.map(this.deserializeChange)
       let a = this.deserializeChange(change)

@@ -17,47 +17,51 @@ const DIST = 'dist/'
 // -------
 // Doing the actual work
 
-function css() {
-  b.css('substance.css', DIST+'substance.css', { variables: true })
-  b.css('substance.css', DIST+'substance.next.css')
-  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.css', {variables: true})
-  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.next.css')
-  b.css('substance-reset.css', DIST+'substance-reset.css', {variables: true})
-  b.css('substance-reset.css', DIST+'substance-reset.next.css')
+function css () {
+  b.css('substance.css', DIST + 'substance.css', { variables: true })
+  b.css('substance.css', DIST + 'substance.next.css')
+  b.css('substance-pagestyle.css', DIST + 'substance-pagestyle.css', {variables: true})
+  b.css('substance-pagestyle.css', DIST + 'substance-pagestyle.next.css')
+  b.css('substance-reset.css', DIST + 'substance-reset.css', {variables: true})
+  b.css('substance-reset.css', DIST + 'substance-reset.next.css')
 }
 
-function buildLib(target, production) {
+function buildLib (target, production) {
   let targets = []
   const useStrict = production
   if (target === 'browser' || target === 'all') {
     targets.push({
-      file: DIST+'substance.js',
+      file: DIST + 'substance.js',
       format: 'umd',
       name: 'substance',
-      sourcemapRoot: __dirname, sourcemapPrefix: 'substance',
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
     })
   }
   if (target === 'browser:legacy') {
     targets.push({
-      file: DIST+'substance.es5.js',
+      file: DIST + 'substance.es5.js',
       format: 'umd',
       name: 'substance',
-      sourcemapRoot: __dirname, sourcemapPrefix: 'substance',
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance',
       strict: useStrict
     })
   }
   if (target === 'node' || target === 'all') {
     targets.push({
-      file: DIST+'substance.cjs.js',
+      file: DIST + 'substance.cjs.js',
       format: 'cjs',
-      sourcemapRoot: __dirname, sourcemapPrefix: 'substance'
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
     })
   }
   if (target === 'es' || target === 'all') {
     targets.push({
-      file: DIST+'substance.es.js',
+      file: DIST + 'substance.es.js',
       format: 'es',
-      sourcemapRoot: __dirname, sourcemapPrefix: 'substance'
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
     })
   }
   if (target === 'coverage') {
@@ -65,7 +69,8 @@ function buildLib(target, production) {
       file: 'tmp/substance.cov.js',
       format: 'umd',
       name: 'substance',
-      sourcemapRoot: __dirname, sourcemapPrefix: 'substance'
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
     })
   }
   const config = {
@@ -73,14 +78,14 @@ function buildLib(target, production) {
     alias: {
       'domutils': path.join(__dirname, 'vendor/domutils.js'),
       'entities': path.join(__dirname, 'vendor/entities.js'),
-      'lodash-es': path.join(__dirname, 'vendor/lodash-es.js'),
+      'lodash-es': path.join(__dirname, 'vendor/lodash-es.js')
     },
     commonjs: {
       include: [
         'node_modules/boolbase/**/*',
         'node_modules/css-what/**/*',
         'node_modules/domelementtype/**/*',
-        'node_modules/nth-check/**/*',
+        'node_modules/nth-check/**/*'
       ]
     }
   }
@@ -107,7 +112,7 @@ function buildLib(target, production) {
   b.js('./index.es.js', config)
 }
 
-function buildTestsBrowser() {
+function buildTestsBrowser () {
   b.js('test/**/*.test.js', {
     output: [{
       file: 'tmp/tests.js',
@@ -121,7 +126,7 @@ function buildTestsBrowser() {
   })
 }
 
-function buildTestsNode() {
+function buildTestsNode () {
   b.js('test/**/*.test.js', {
     output: [{
       file: 'tmp/tests.cjs.js',
@@ -134,7 +139,7 @@ function buildTestsNode() {
   })
 }
 
-function buildVendor() {
+function buildVendor () {
   install(b, 'uglify-es', UGLIFY_VERSION)
   const CLEANUP = true
   const MINIFY = false
@@ -188,7 +193,7 @@ function buildVendor() {
   })
 }
 
-function vendorRollup(name, opts = {}) {
+function vendorRollup (name, opts = {}) {
   let src = `./vendor/_${name}.js`
   let dest = `./vendor/${name}.js`
   let min = `./vendor/${name}.min.js`
@@ -246,7 +251,7 @@ b.task('lib', ['css', 'schema'], () => {
 })
 
 b.task('test:browser', ['lib:browser:dev'], buildTestsBrowser)
-.describe('builds the test-suite for the browser (open test/index.html)')
+  .describe('builds the test-suite for the browser (open test/index.html)')
 
 b.task('test:node', () => {
   buildLib('es')
@@ -254,19 +259,18 @@ b.task('test:node', () => {
   fork(b, require.resolve('substance-test/bin/test'),
     './tmp/tests.cjs.js', { verbose: true })
 })
-.describe('runs the test suite in nodejs')
+  .describe('runs the test suite in nodejs')
 
 b.task('cover', () => {
   buildLib('coverage')
   buildTestsBrowser()
   karma(b, {
-    browsers: process.env.TRAVIS?['ChromeTravis', 'Firefox']:['Chrome']
+    browsers: process.env.TRAVIS ? ['ChromeTravis', 'Firefox'] : ['Chrome']
   })
 })
 
-
 b.task('vendor', buildVendor)
-.describe('pre-bundles vendor libraries')
+  .describe('pre-bundles vendor libraries')
 
 b.task('default', ['clean', 'lib'])
 
@@ -276,7 +280,7 @@ b.task('publish', ['clean', 'lib'])
 b.task('dev', ['clean', 'lib:browser:dev', 'test:browser'])
 
 b.task('test', ['test:node', 'cover'])
-.describe('runs the test suite')
+  .describe('runs the test suite')
 
 b.setServerPort(4001)
 b.serve({ static: true, route: '/', folder: '.' })

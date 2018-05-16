@@ -42,7 +42,7 @@ XMLElementNode.prototype._elementType = 'element'
 XMLElementNode.type = 'element'
 
 XMLElementNode.schema = {
-  _childNodes: { type: ['array', 'id'], default: [], owned: true}
+  _childNodes: { type: ['array', 'id'], default: [], owned: true }
 }
 
 XMLElementNode.isBlock = true

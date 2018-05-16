@@ -413,8 +413,8 @@ class Document extends EventEmitter {
         case 'container': {
           let container = this.get(data.containerId, 'strict')
           if (!container) throw new Error('Can not create ContainerSelection: container "' + data.containerId + '" does not exist.')
-          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset})
-          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset})
+          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset })
+          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset })
           let startAddress = container.getAddress(start)
           let endAddress = container.getAddress(end)
           if (!startAddress) {
