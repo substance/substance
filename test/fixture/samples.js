@@ -127,7 +127,7 @@ export function _l13 (doc) {
   l1.appendItem(item)
 }
 
-export function _l1_empty (doc) {
+export function _l1Empty (doc) {
   const l1 = doc.get('l1')
   let item = doc.create({
     type: 'list-item',
@@ -176,7 +176,7 @@ export function _l22 (doc) {
   l2.appendItem(item)
 }
 
-export function _l1_single (doc, body) {
+export function _l1Single (doc, body) {
   doc.create({
     type: 'list-item',
     id: 'l1-1',
@@ -232,7 +232,7 @@ export function _t1 (doc, body) {
   }))
 }
 
-export function _t1_sparse (doc, body) {
+export function _t1Sparse (doc, body) {
   _t1(doc, body)
   doc.set(['t1', 'cells'], [['t1_a1', null], [null, 't1_b2']])
 }

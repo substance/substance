@@ -6,7 +6,7 @@ import getMountPoint from './fixture/getMountPoint'
 
 const test = module('TextPropertyComponent')
 
-test("Get coordinate of empty property", function(t) {
+test('Get coordinate of empty property', function (t) {
   var doc = fixture(simple)
   doc.create({
     type: 'paragraph',

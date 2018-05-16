@@ -54,6 +54,7 @@ function testChangeStore (createEmptyChangeStore, test) {
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
       changeStore.getChanges('test-doc', (err, changes, version) => {
+        if (err) t.fail()
         t.equal(changes.length, 2, 'There should be two changes in the db')
         t.equal(version, 2, 'Latest version should be 2')
         t.end()
@@ -68,6 +69,7 @@ function testChangeStore (createEmptyChangeStore, test) {
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
       changeStore.getChanges('test-doc', 1, (err, changes, version) => {
+        if (err) t.fail()
         t.equal(changes.length, 1, 'There should be two changes since version 1')
         t.equal(version, 2, 'Doc version should be 2')
         t.end()
@@ -83,6 +85,7 @@ function testChangeStore (createEmptyChangeStore, test) {
       _addChange(changeStore, EXAMPLE_CHANGE)
     ], () => {
       changeStore.getChanges('test-doc', 1, 2, (err, changes, version) => {
+        if (err) t.fail()
         t.equal(changes.length, 1, 'There should be two changes since version 1')
         t.equal(version, 3, 'Latest version should be 3')
         t.end()

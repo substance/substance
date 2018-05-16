@@ -118,8 +118,8 @@ test('Interleaving', (t) => {
   t.end()
 })
 
-function _compileRNG(rng, startElement) {
+function _compileRNG (rng, startElement) {
   let xmlSchema = compileRNG(rng)
-  xmlSchema.getStartElement = function() { return startElement }
+  xmlSchema.getStartElement = function () { return startElement }
   return xmlSchema
 }

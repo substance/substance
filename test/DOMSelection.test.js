@@ -6,7 +6,7 @@ import { _p1, _empty } from './fixture/samples'
 
 const test = module('DOMSelection')
 
-test.UI("Mapping a cursor inside a TextProperty from DOM to model", function(t) {
+test.UI('Mapping a cursor inside a TextProperty from DOM to model', function (t) {
   let { editor, surface } = setupEditor(t, _p1)
   let domSelection = surface.context.domSelection
   let node = editor.el.find('[data-path="p1.content"]').getFirstChild()
@@ -23,7 +23,7 @@ test.UI("Mapping a cursor inside a TextProperty from DOM to model", function(t) 
   t.end()
 })
 
-test.UI("Mapping a cursor in an empty paragraph from DOM to model", function(t) {
+test.UI('Mapping a cursor in an empty paragraph from DOM to model', function (t) {
   let { editor, surface } = setupEditor(t, _empty)
   let domSelection = surface.context.domSelection
   let node = editor.el.find('[data-path="empty.content"]').getFirstChild()
@@ -40,7 +40,7 @@ test.UI("Mapping a cursor in an empty paragraph from DOM to model", function(t) 
   t.end()
 })
 
-test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
+test.UI('Mapping a ContainerSelection from DOM to model', function (t) {
   let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
   let domSelection = surface.context.domSelection
   let p1Text = editor.el.find('[data-path="p1.content"]').getFirstChild()
@@ -60,7 +60,7 @@ test.UI("Mapping a ContainerSelection from DOM to model", function(t) {
   t.end()
 })
 
-test.FF("Issue #354: Wrong selection in FF when double clicking between lines", function(t) {
+test.FF('Issue #354: Wrong selection in FF when double clicking between lines', function (t) {
   let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
   let domSelection = surface.context.domSelection
   let surfaceEl = editor.el.find('[data-id="body"]')
@@ -78,7 +78,7 @@ test.FF("Issue #354: Wrong selection in FF when double clicking between lines", 
 })
 
 // happens when using the same selection as in #354 in Chrome
-test.UI("DOM selection that starts in a TextNode and ends in a paragraph on element level", function(t) {
+test.UI('DOM selection that starts in a TextNode and ends in a paragraph on element level', function (t) {
   let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
   let domSelection = surface.context.domSelection
   let p1Text = editor.el.find('[data-path="p1.content"]').getFirstChild()
@@ -98,7 +98,7 @@ test.UI("DOM selection that starts in a TextNode and ends in a paragraph on elem
   t.end()
 })
 
-test.UI("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
+test.UI('Issue #376: Wrong selection mapping at end of paragraph', function (t) {
   let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
   let domSelection = surface.context.domSelection
   let p1span = editor.el.find('[data-id="p1"] span')
@@ -118,7 +118,7 @@ test.UI("Issue #376: Wrong selection mapping at end of paragraph", function(t) {
   t.end()
 })
 
-test.UI("Rendering a ContainerSelection", function(t) {
+test.UI('Rendering a ContainerSelection', function (t) {
   let { editor, doc, surface } = setupEditor(t, surfaceWithParagraphs)
   let domSelection = surface.context.domSelection
   let sel = doc.createSelection({
@@ -143,7 +143,7 @@ test.UI("Rendering a ContainerSelection", function(t) {
   t.end()
 })
 
-test.UI("Rendering a cursor after inline node", function(t) {
+test.UI('Rendering a cursor after inline node', function (t) {
   let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
   let domSelection = surface.context.domSelection
   let sel = doc.createSelection({
@@ -163,7 +163,7 @@ test.UI("Rendering a cursor after inline node", function(t) {
   t.end()
 })
 
-test.UI("Rendering a cursor after inline node at the end of a property", function(t) {
+test.UI('Rendering a cursor after inline node at the end of a property', function (t) {
   let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
   let domSelection = surface.context.domSelection
   let sel = doc.createSelection({
@@ -222,7 +222,7 @@ test.UI("Rendering a cursor after inline node at the end of a property", functio
 //   t.end()
 // })
 
-function surfaceWithParagraphs(doc, body) {
+function surfaceWithParagraphs (doc, body) {
   let tx = new EditingInterface(doc)
   body.show(tx.create({
     type: 'paragraph',
@@ -241,7 +241,7 @@ function surfaceWithParagraphs(doc, body) {
   }))
 }
 
-function paragraphWithInlineNodes(doc, body) {
+function paragraphWithInlineNodes (doc, body) {
   let tx = new EditingInterface(doc)
   body.show(tx.create({
     type: 'paragraph',

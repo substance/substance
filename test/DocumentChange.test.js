@@ -5,7 +5,7 @@ import simple from './fixture/simple'
 
 const test = module('DocumentChange')
 
-test("hasUpdated()", (t) => {
+test('hasUpdated()', (t) => {
   let tx = setup(simple)
   let path = ['p1', 'content']
   // updating a property
@@ -36,7 +36,7 @@ test("hasUpdated()", (t) => {
   t.end()
 })
 
-test("serialize() and deserialize()", function(t) {
+test('serialize() and deserialize()', function (t) {
   let tx = setup(simple)
   let path = ['p1', 'content']
   // updating a property
@@ -60,10 +60,10 @@ test("serialize() and deserialize()", function(t) {
   t.end()
 })
 
-function setup(...seeds) {
+function setup (...seeds) {
   let config = getTestConfig()
   let doc = new Document(config.getSchema())
   doc.create({ id: 'body', type: 'container' })
-  seeds.forEach(s=>s(doc, doc.get('body')))
+  seeds.forEach(s => s(doc, doc.get('body')))
   return new ChangeRecorder(doc)
 }

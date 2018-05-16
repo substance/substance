@@ -7,12 +7,12 @@ const test = module('DOMImporter')
 const pConverter = {
   type: 'paragraph',
   tagName: 'p',
-  import(el, node, converter) {
+  import (el, node, converter) {
     node.content = converter.annotatedText(el, [node.id, 'content'])
   }
 }
 
-test("creating a DOMImporter", (t) => {
+test('creating a DOMImporter', (t) => {
   const schema = getTestConfig().getSchema()
   // fail without converters
   t.throws(() => {
@@ -24,25 +24,28 @@ test("creating a DOMImporter", (t) => {
   }, 'should throw if schema is not given')
   // fail if a converter has no associated type
   t.throws(() => {
-    new DOMImporter({ schema, converters: [{
-      matchElement() { return true }
-    }] })
+    new DOMImporter({ schema,
+      converters: [{
+        matchElement () { return true }
+      }] })
   }, 'should throw if a converter does not have associated type')
   // fail if a converter has no matcher
   t.throws(() => {
-    new DOMImporter({ schema, converters: [{
-      type: 'paragraph'
-    }] })
+    new DOMImporter({ schema,
+      converters: [{
+        type: 'paragraph'
+      }] })
   }, 'should throw if a converter does not have a matcher function')
   t.throws(() => {
-    new DOMImporter({ schema, converters: [{
-      type: 'foo', tagName: 'h1'
-    }] })
+    new DOMImporter({ schema,
+      converters: [{
+        type: 'foo', tagName: 'h1'
+      }] })
   }, 'should throw if a converter is associated with an unknown node type')
   t.end()
 })
 
-test("default matchElement()", (t) => {
+test('default matchElement()', (t) => {
   const testConverter = {
     type: 'paragraph', tagName: 'p'
   }
@@ -51,17 +54,17 @@ test("default matchElement()", (t) => {
   t.end()
 })
 
-test("using a Converter class", (t) => {
+test('using a Converter class', (t) => {
   class MyConverter {
-    get type() { return 'paragraph' }
-    get tagName() { return 'p' }
+    get type () { return 'paragraph' }
+    get tagName () { return 'p' }
   }
   const importer = createImporter([MyConverter])
   t.equal(importer._allConverters[0].tagName, 'p', 'there should be one converter registered for <p>')
   t.end()
 })
 
-test("convertElement() -- block element", (t) => {
+test('convertElement() -- block element', (t) => {
   const importer = createImporter()
   const el = DefaultDOMElement.parseSnippet('<p>TEST</p>', 'html')
   const node = importer.convertElement(el)
@@ -70,11 +73,11 @@ test("convertElement() -- block element", (t) => {
 })
 
 // Note: it is not common to convert inline nodes outside of their context -- that's why they are called inline
-test("convertElement() -- inline node", (t) => {
+test('convertElement() -- inline node', (t) => {
   const testConverter = {
     type: 'test-inline-node',
-    matchElement(el) { return el.is('[data-type=test-inline-node]') },
-    import(el, node) {
+    matchElement (el) { return el.is('[data-type=test-inline-node]') },
+    import (el, node) {
       node.content = el.textContent
     }
   }
@@ -86,7 +89,7 @@ test("convertElement() -- inline node", (t) => {
 })
 
 // Note: it is not common to convert annotations outside of their context
-test("convertElement() -- annotation element", (t) => {
+test('convertElement() -- annotation element', (t) => {
   const importer = createImporter()
   const el = DefaultDOMElement.parseSnippet('<b>TEST</b>', 'html')
   const node = importer.convertElement(el)
@@ -94,7 +97,7 @@ test("convertElement() -- annotation element", (t) => {
   t.end()
 })
 
-test("convertElement() should throw if no converter found", (t) => {
+test('convertElement() should throw if no converter found', (t) => {
   const importer = createImporter([pConverter])
   const el = DefaultDOMElement.parseSnippet('<h1>TEST</h1>', 'html')
   t.throws(() => {
@@ -103,10 +106,10 @@ test("convertElement() should throw if no converter found", (t) => {
   t.end()
 })
 
-test("converting paragraph with inline node", (t) => {
+test('converting paragraph with inline node', (t) => {
   const testConverter = {
     type: 'test-inline-node',
-    matchElement(el) { return el.is('[data-type=test-inline-node]') }
+    matchElement (el) { return el.is('[data-type=test-inline-node]') }
   }
   const importer = createImporter([pConverter, testConverter])
   const el = DefaultDOMElement.parseSnippet('<p>abc <span data-type="test-inline-node">TEST</span> def</p>', 'html')
@@ -115,7 +118,7 @@ test("converting paragraph with inline node", (t) => {
   t.end()
 })
 
-test("converting an annotated paragraph", (t) => {
+test('converting an annotated paragraph', (t) => {
   const importer = createImporter()
   const el = DefaultDOMElement.parseSnippet('<p>abc <b>TEST</b> def</p>', 'html')
   const node = importer.convertElement(el)
@@ -125,10 +128,9 @@ test("converting an annotated paragraph", (t) => {
   t.end()
 })
 
-
-test("plainText()", (t) => {
+test('plainText()', (t) => {
   const testConverter = Object.assign({}, pConverter, {
-    import(el, node, converter) {
+    import (el, node, converter) {
       node.content = converter.plainText(el)
     }
   })
@@ -139,16 +141,16 @@ test("plainText()", (t) => {
   t.end()
 })
 
-test("convertContainer() -- trailing text", (t) => {
+test('convertContainer() -- trailing text', (t) => {
   const importer = createImporter()
   const els = DefaultDOMElement.parseSnippet('<p>A paragraph</p> and some trailing text', 'html')
   let container = importer.convertContainer(els, 'body')
   t.equal(container.getLength(), 2, 'should have two nodes')
-  t.deepEqual(container.getNodes().map(n=>n.type), ['paragraph', 'paragraph'], 'both should be paragraphs')
+  t.deepEqual(container.getNodes().map(n => n.type), ['paragraph', 'paragraph'], 'both should be paragraphs')
   t.end()
 })
 
-test("resolving id collisions", (t) => {
+test('resolving id collisions', (t) => {
   // converter with 'tagName' gets a default matcher
   const importer = createImporter()
   const els = DefaultDOMElement.parseSnippet('<p id="foo">A paragraph</p><p id="foo">and another one with the same id</p>', 'html')
@@ -164,7 +166,7 @@ TODO:
   - import with options
 */
 
-function createImporter(converters) {
+function createImporter (converters) {
   const config = getTestConfig()
   const schema = config.getSchema()
   if (!converters) {

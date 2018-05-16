@@ -18,6 +18,7 @@ test('Should allow creation of a new document', function (t) {
     t.notOk(err, 'Should not error')
     t.equal(newVersion, 1, 'Initial version should be 1')
     documentEngine.getDocument('test-doc', (err, snapshot, headVersion) => {
+      if (err) t.fail()
       t.ok(snapshot, 'Should have a snaphot')
       t.equal(headVersion, 1, 'Head version should be 1')
       t.end()
@@ -33,6 +34,7 @@ test('Should allow adding a new change', function (t) {
     t.notOk(err, 'Should not error')
     t.equal(newVersion, 3, 'New version should be 3')
     documentEngine.getDocument('test-doc', (err, snapshot, headVersion) => {
+      if (err) t.fail()
       t.ok(snapshot, 'Should have a snaphot')
       t.equal(headVersion, 3, 'Latest snapshot version should be 3')
       t.end()
@@ -42,7 +44,8 @@ test('Should allow adding a new change', function (t) {
 
 test('Should be able to retrieve changes', function (t) {
   let documentEngine = _fixture(2) // 0 changes, no snapshots
-  documentEngine.getChanges('test-doc', function (err, changes) {
+  documentEngine.getChanges('test-doc', (err, changes) => {
+    if (err) t.fail()
     t.equal(changes.length, 2, 'Should have two changes')
     t.end()
   })

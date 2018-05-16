@@ -7,9 +7,8 @@ if (platform.inBrowser) {
 
 DOMElementTests('MemoryDOMElement')
 
-function DOMElementTests(impl) {
-
-  const test = module('DOMElement ('+impl+')', {
+function DOMElementTests (impl) {
+  const test = module('DOMElement (' + impl + ')', {
     before: () => {
       if (impl === 'MemoryDOMElement') platform.inBrowser = false
     },
@@ -18,7 +17,7 @@ function DOMElementTests(impl) {
     }
   })
 
-  test("getNativeElement()", (t) => {
+  test('getNativeElement()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     const nativeEl = el.getNativeElement()
@@ -32,7 +31,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getNodeType()", function(t) {
+  test('getNodeType()', function (t) {
     let doc = DefaultDOMElement.createDocument('html')
     t.equal(doc.getNodeType(), 'document', 'document should have correct node type')
     let el = doc.createElement('div')
@@ -54,7 +53,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getTagName()", function(t) {
+  test('getTagName()', function (t) {
     const el = DefaultDOMElement.parseSnippet('<p></p>', 'html')
     t.equal(el.getTagName(), 'p', 'should have correct tagName')
     t.equal(el.tagName, 'p', 'should also work with property accessor')
@@ -62,19 +61,19 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getTagName() in HTML is always lower case", function(t) {
+  test('getTagName() in HTML is always lower case', function (t) {
     const el = DefaultDOMElement.parseSnippet('<DIV></DIV>', 'html')
     t.equal(el.tagName, 'div', 'should bet lower case')
     t.end()
   })
 
-  test("getTagName() in XML does not change case", function(t) {
+  test('getTagName() in XML does not change case', function (t) {
     const el = DefaultDOMElement.parseSnippet('<myNode></myNode>', 'xml')
     t.equal(el.tagName, 'myNode', 'case should be changed')
     t.end()
   })
 
-  test("setTagName()", function(t) {
+  test('setTagName()', function (t) {
     const el = DefaultDOMElement.parseSnippet('<p></p>', 'html')
     // NOTE: in the browser this will be done by replacing the native element
     el.setTagName('div')
@@ -84,14 +83,14 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getId()", function(t) {
+  test('getId()', function (t) {
     const el = DefaultDOMElement.parseSnippet('<div id="foo"></div>', 'html')
     t.equal(el.getId(), 'foo', 'should have correct id')
     t.equal(el.id, 'foo', 'should also work with property accessor')
     t.end()
   })
 
-  test("setId()", function(t) {
+  test('setId()', function (t) {
     const el = DefaultDOMElement.parseSnippet('<div id="foo"></div>', 'html')
     el.setId('bar')
     t.equal(el.getId(), 'bar', 'should have changed id')
@@ -100,7 +99,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("setTagName", function(t) {
+  test('setTagName', function (t) {
     var el = DefaultDOMElement.parseSnippet('<p class="foo">ABC<b>DEF</b>GHI</p>', 'html')
     var onClick = spy()
     el.on('click', onClick)
@@ -116,7 +115,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("setTagName on XML should create XML elements", function(t) {
+  test('setTagName on XML should create XML elements', function (t) {
     var el = DefaultDOMElement.parseSnippet('<dummy></dummy>', 'xml')
     // this call is brutal as a new element needs to be created
     // and all the content and attributes be copied over
@@ -128,13 +127,13 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("hasClass()", function(t) {
+  test('hasClass()', function (t) {
     const el = DefaultDOMElement.parseSnippet('<div class="foo">TEST</div>', 'html')
     t.ok(el.hasClass('foo'), 'should have class "foo".')
     t.end()
   })
 
-  test("addClass()", function(t) {
+  test('addClass()', function (t) {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('div')
     el.addClass('foo')
@@ -151,74 +150,74 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("removeClass()", function(t) {
+  test('removeClass()', function (t) {
     const el = DefaultDOMElement.parseSnippet('<div class="foo">TEST</div>', 'html')
     el.removeClass('foo')
     t.notOk(el.hasClass('foo'), 'class should have been removed')
     t.end()
   })
 
-  test("hasAttribute()", (t) => {
+  test('hasAttribute()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="foo">TEST</div>', 'html')
     t.ok(el.hasAttribute('foo'), 'should have attribute "foo"')
     t.end()
   })
 
-  test("getAttribute()", (t) => {
+  test('getAttribute()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1">TEST</div>', 'html')
-    t.equal(el.getAttribute('foo'), "1", 'should have return attribute "foo"')
+    t.equal(el.getAttribute('foo'), '1', 'should have return attribute "foo"')
     t.end()
   })
 
-  test("setAttribute()", (t) => {
+  test('setAttribute()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('div')
     el.setAttribute('foo', 1)
-    t.equal(el.getAttribute('foo'), "1", 'should have set attribute')
+    t.equal(el.getAttribute('foo'), '1', 'should have set attribute')
     t.end()
   })
 
-  test("removeAttribute()", (t) => {
+  test('removeAttribute()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1">TEST</div>', 'html')
     el.removeAttribute('foo')
     t.isNil(el.getAttribute('foo'), 'should removed attribute')
     t.end()
   })
 
-  test("attr() - getter", (t) => {
+  test('attr() - getter', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1">TEST</div>', 'html')
-    t.equal(el.attr('foo'), "1", 'should return attribute value')
+    t.equal(el.attr('foo'), '1', 'should return attribute value')
     t.end()
   })
 
-  test("attr() - single attribute", (t) => {
+  test('attr() - single attribute', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('div')
     el.attr('foo', 1)
-    t.equal(el.getAttribute('foo'), "1", 'should have set attribute')
+    t.equal(el.getAttribute('foo'), '1', 'should have set attribute')
     t.end()
   })
 
-  test("attr() - multiple attributes", (t) => {
+  test('attr() - multiple attributes', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('div')
     el.attr({
       foo: 1,
       bar: 2
     })
-    t.equal(el.getAttribute('foo'), "1", 'should have set attribute')
-    t.equal(el.getAttribute('bar'), "2", 'should have set attribute')
+    t.equal(el.getAttribute('foo'), '1', 'should have set attribute')
+    t.equal(el.getAttribute('bar'), '2', 'should have set attribute')
     t.end()
   })
 
-  test("removeAttr() - single attribute", (t) => {
+  test('removeAttr() - single attribute', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1">TEST</div>', 'html')
     el.removeAttr('foo')
     t.isNil(el.getAttribute('foo'), 'should removed attribute')
     t.end()
   })
 
-  test("removeAttr() - multiple attributes", (t) => {
+  test('removeAttr() - multiple attributes', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1" bar="2">TEST</div>', 'html')
     el.removeAttr('foo bar')
     t.isNil(el.getAttribute('foo'), 'should removed attribute')
@@ -226,46 +225,46 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getAttributes()", (t) => {
+  test('getAttributes()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1" bar="2">TEST</div>', 'html')
     const attributes = el.getAttributes()
-    t.deepEqual(Array.from(attributes.entries()), [["foo", '1'], ["bar", '2']], 'should return all attributes')
-    t.deepEqual(Array.from(attributes.keys()), ["foo", "bar"], '.. keys() are correct')
+    t.deepEqual(Array.from(attributes.entries()), [['foo', '1'], ['bar', '2']], 'should return all attributes')
+    t.deepEqual(Array.from(attributes.keys()), ['foo', 'bar'], '.. keys() are correct')
     t.deepEqual(Array.from(attributes.values()), ['1', '2'], '.. values() are correct')
     t.end()
   })
 
-  test("getProperty()", (t) => {
+  test('getProperty()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<input type="text" value="foo">', 'html')
-    t.equal(el.getProperty('value'), "foo", 'should have correct value')
+    t.equal(el.getProperty('value'), 'foo', 'should have correct value')
     t.end()
   })
 
-  test("getProperty() -- input[type=checkbox]", (t) => {
+  test('getProperty() -- input[type=checkbox]', (t) => {
     const el = DefaultDOMElement.parseSnippet('<input type="checkbox" checked>', 'html')
     t.equal(el.getProperty('value'), 'on', 'should have correct value')
     t.equal(el.getProperty('checked'), true, 'should have correct "checked" property')
     t.end()
   })
 
-  test("setProperty()", (t) => {
+  test('setProperty()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('input')
     el.setProperty('value', 1)
-    t.equal(el.getProperty('value'), "1", 'should have set property')
+    t.equal(el.getProperty('value'), '1', 'should have set property')
     t.end()
   })
 
-  test("setProperty() on XML element is not allowed", (t) => {
+  test('setProperty() on XML element is not allowed', (t) => {
     let doc = DefaultDOMElement.createDocument('xml')
     const el = doc.createElement('foo')
-    t.throws(()=>{
+    t.throws(() => {
       el.setProperty('bar', 1)
     }, 'setProperty() on XML element is not allowed')
     t.end()
   })
 
-  test("unsetting a property", (t) => {
+  test('unsetting a property', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('div')
     el.setProperty('foo', 1)
@@ -274,60 +273,60 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("htmlProp() -- getter", (t) => {
+  test('htmlProp() -- getter', (t) => {
     const el = DefaultDOMElement.parseSnippet('<input type="text" value="foo">', 'html')
-    t.equal(el.htmlProp('value'), "foo", 'should return value')
+    t.equal(el.htmlProp('value'), 'foo', 'should return value')
     t.end()
   })
 
-  test("htmlProp() -- single property", (t) => {
+  test('htmlProp() -- single property', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('input')
     el.htmlProp('value', 1)
-    t.equal(el.getProperty('value'), "1", 'should have set property')
+    t.equal(el.getProperty('value'), '1', 'should have set property')
     t.end()
   })
 
-  test("htmlProp() -- multiple properties", (t) => {
+  test('htmlProp() -- multiple properties', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('input')
     el.htmlProp({
       'value': 1,
       'foo': 'foo'
     })
-    t.equal(el.getProperty('value'), "1", 'should have set property')
-    t.equal(el.getProperty('foo'), "foo", 'should have set property')
+    t.equal(el.getProperty('value'), '1', 'should have set property')
+    t.equal(el.getProperty('foo'), 'foo', 'should have set property')
     t.end()
   })
 
-  test("getValue()", (t) => {
+  test('getValue()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<input type="text" value="foo">', 'html')
-    t.equal(el.getValue(), "foo", 'should have correct value')
-    t.equal(el.val(), "foo", 'should work via jquery style getter')
-    t.equal(el.value, "foo", 'should work via property getter')
+    t.equal(el.getValue(), 'foo', 'should have correct value')
+    t.equal(el.val(), 'foo', 'should work via jquery style getter')
+    t.equal(el.value, 'foo', 'should work via property getter')
     t.end()
   })
 
-  test("setValue()", (t) => {
+  test('setValue()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     const el = doc.createElement('input')
     el.setValue(1)
-    t.equal(el.getValue(), "1", 'should have set value')
+    t.equal(el.getValue(), '1', 'should have set value')
     el.value = 2
-    t.equal(el.value, "2", 'should also work via property accessors')
+    t.equal(el.value, '2', 'should also work via property accessors')
     el.val(3)
-    t.equal(el.value, "3", 'should also work via jquery style setter')
+    t.equal(el.value, '3', 'should also work via jquery style setter')
     t.end()
   })
 
-  test("getStyle()", (t) => {
+  test('getStyle()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div style="color:blue"></div>', 'html')
     t.equal(el.getStyle('color'), 'blue', 'element should have style')
     t.equal(el.getAttribute('style'), 'color:blue', 'style can be retrieved via "style" attribute')
     t.end()
   })
 
-  test("setStyle()", (t) => {
+  test('setStyle()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     el.setStyle('color', 'blue')
@@ -337,7 +336,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("setStyle() -- px styles", (t) => {
+  test('setStyle() -- px styles', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     el.css({
@@ -357,7 +356,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("css()", (t) => {
+  test('css()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div style="color:blue"></div>', 'html')
     t.equal(el.css('color'), 'blue', 'can access style via jquery style getter')
     el.css('color', 'green')
@@ -370,7 +369,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("setTextContent", (t) => {
+  test('setTextContent', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     el.setTextContent('foo')
@@ -382,7 +381,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("innerHTML", (t) => {
+  test('innerHTML', (t) => {
     let el = DefaultDOMElement.parseSnippet('<p>abc<span class="foo" data-foo="foo">TEST</span>def</p>', 'html')
     t.equal(el.innerHTML, 'abc<span class="foo" data-foo="foo">TEST</span>def', 'el.innerHTML should give the HTML of the childNodes')
     el.innerHTML = 'TEST'
@@ -390,7 +389,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("innerHTML on XML", (t) => {
+  test('innerHTML on XML', (t) => {
     let el = DefaultDOMElement.parseSnippet('<foo>abc<bar bla="foo" blupp="foo">TEST</bar>def</foo>', 'xml')
     t.equal(el.innerHTML, 'abc<bar bla="foo" blupp="foo">TEST</bar>def', 'el.innerHTML should give the XML of the element content')
     el.innerHTML = 'TEST'
@@ -398,7 +397,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("html()", (t) => {
+  test('html()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div>TEST</div>', 'html')
     t.equal(el.html(), 'TEST', 'should return innerHTML')
     el.html('<span>FOO</span>')
@@ -406,26 +405,26 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("outerHTML", function(t) {
+  test('outerHTML', function (t) {
     var p = DefaultDOMElement.parseSnippet('<p class="foo">TEST</p>', 'html')
     t.equal(p.outerHTML, '<p class="foo">TEST</p>', 'outerHTML should be complete')
     t.end()
   })
 
-  test("outerHTML of XML with camelCase tagnames", function(t) {
+  test('outerHTML of XML with camelCase tagnames', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><myNode></myNode></dummy>', 'xml')
     t.equal(el.outerHTML, '<dummy><myNode/></dummy>', 'XML tags should be serialized preserving case.')
     t.end()
   })
 
-  test("find via tagname", function(t) {
+  test('find via tagname', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><foo></foo></dummy>', 'xml')
     let foo = el.find('foo')
     t.notNil(foo, 'Should find a <foo> element')
     t.end()
   })
 
-  test("find multiple elements", function(t) {
+  test('find multiple elements', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><foo>Bla</foo><foo>Blupp</foo></dummy>', 'xml')
     let foos = el.findAll('foo')
     t.equal(foos.length, 2, 'Should find two <foo> elements')
@@ -434,28 +433,28 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("find via #id", function(t) {
+  test('find via #id', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><bla id="foo"></bla></dummy>', 'xml')
     let foo = el.find('#foo')
     t.notNil(foo, 'Should find a #foo element')
     t.end()
   })
 
-  test("find via attr", function(t) {
+  test('find via attr', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><bla data-id="foo"></bla></dummy>', 'xml')
     let foo = el.find('[data-id=foo]')
     t.notNil(foo, 'Should find a element with data-id=foo')
     t.end()
   })
 
-  test("find in XML with camelCase tagnames", function(t) {
+  test('find in XML with camelCase tagnames', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><myNode myValue="foo"></myNode></dummy>', 'xml')
     t.notNil(el.find('myNode'), 'Should find a <myNode> element')
     t.notNil(el.find('[myValue="foo"]'), 'Should find a [myValue] element')
     t.end()
   })
 
-  test("find in XML with namespace tagnames", function(t) {
+  test('find in XML with namespace tagnames', function (t) {
     let xmlDoc = DefaultDOMElement.parseXML('<dummy xmlns:foo="foo"><foo:myNode></foo:myNode></dummy>')
     let myNode = xmlDoc.find('myNode')
     t.notNil(myNode, 'Should find a <foo:myNode> element')
@@ -463,7 +462,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("find element after changing tagName", function(t) {
+  test('find element after changing tagName', function (t) {
     let xmlDoc = DefaultDOMElement.parseXML('<dummy><foo></foo></dummy>')
     let foo = xmlDoc.find('foo')
     foo.tagName = 'bar'
@@ -472,7 +471,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("insertAt", function(t) {
+  test('insertAt', function (t) {
     let dummy = DefaultDOMElement.parseSnippet('<dummy><bla></bla></dummy>', 'xml')
     let doc = dummy.getOwnerDocument()
     let newChild = doc.createElement('blupp')
@@ -483,7 +482,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("reattaching an element via insertAt", function(t) {
+  test('reattaching an element via insertAt', function (t) {
     let dummy = DefaultDOMElement.parseSnippet('<dummy><bla><blupp></blupp></bla></dummy>', 'xml')
     let blupp = dummy.find('blupp')
     dummy.insertAt(0, blupp)
@@ -494,7 +493,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("reattaching an element via append", function(t) {
+  test('reattaching an element via append', function (t) {
     let dummy = DefaultDOMElement.parseSnippet('<dummy><bla><blupp></blupp></bla></dummy>', 'xml')
     let blupp = dummy.find('blupp')
     dummy.appendChild(blupp)
@@ -505,23 +504,23 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("children should only include elements", function(t) {
+  test('children should only include elements', function (t) {
     let dummy = DefaultDOMElement.parseSnippet('<dummy>bli<bla></bla>blupp</dummy>', 'xml')
-    dummy.children.forEach((c)=>{
+    dummy.children.forEach((c) => {
       t.ok(c.isElementNode(), 'child should be an element')
     })
     t.end()
   })
 
-  test("event listeners for custom events", (t) => {
+  test('event listeners for custom events', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     let event = null
-    let handleFoo = function(e) {
+    let handleFoo = function (e) {
       event = e
     }
     el.addEventListener('foo', handleFoo)
-    t.deepEqual(el.getEventListeners().map(l=>l.eventName), ['foo'], 'Element should have one listener')
+    t.deepEqual(el.getEventListeners().map(l => l.eventName), ['foo'], 'Element should have one listener')
     el.emit('foo', { bar: 'bar' })
     t.notNil(event, 'should have handled event')
     t.notNil(event.detail, 'event should have event.detail')
@@ -534,35 +533,35 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getChildNodes()", (t) => {
+  test('getChildNodes()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
     let childNodes = el.childNodes
-    t.deepEqual(childNodes.map(c => c.nodeType), ['text', 'element', 'text'], "should return all childNodes")
+    t.deepEqual(childNodes.map(c => c.nodeType), ['text', 'element', 'text'], 'should return all childNodes')
     t.end()
   })
 
-  test("getChildren()", (t) => {
+  test('getChildren()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
     let children = el.children
-    t.deepEqual(children.map(c => c.tagName), ['span'], "should return all children")
+    t.deepEqual(children.map(c => c.tagName), ['span'], 'should return all children')
     t.end()
   })
 
-  test("firstChild", (t) => {
+  test('firstChild', (t) => {
     let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
     let firstChild = el.firstChild
-    t.equal(firstChild.textContent, 'Foo', "should return all firstChild")
+    t.equal(firstChild.textContent, 'Foo', 'should return all firstChild')
     t.end()
   })
 
-  test("lastChild", (t) => {
+  test('lastChild', (t) => {
     let el = DefaultDOMElement.parseSnippet('<p>Foo<span>Bar</span>Baz</p>', 'html')
     let lastChild = el.lastChild
-    t.equal(lastChild.textContent, 'Baz', "should return all lastChild")
+    t.equal(lastChild.textContent, 'Baz', 'should return all lastChild')
     t.end()
   })
 
-  test("is()", (t) => {
+  test('is()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div').attr('data-id', 'foo')
     t.ok(el.is('div[data-id=foo]'))
@@ -570,7 +569,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("getOwnerDocument()", (t) => {
+  test('getOwnerDocument()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     t.equal(el.getOwnerDocument(), doc, 'should return the ownerDocument')
@@ -596,14 +595,14 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("serialize CDATA", (t) => {
+  test('serialize CDATA', (t) => {
     let doc = DefaultDOMElement.createDocument('xml')
     let el = doc.createCDATASection('x+5')
     t.equal(el.serialize(), '<![CDATA[x+5]]>', 'CDATA should be serialized correctly')
     t.end()
   })
 
-  test("Retain classes after cloning", (t) => {
+  test('Retain classes after cloning', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     el.addClass('foo')
@@ -619,7 +618,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("el.textContent should not show comments", (t) => {
+  test('el.textContent should not show comments', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
     let comment = doc.createComment('Hello')
@@ -628,7 +627,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("el.textContent should show CData", (t) => {
+  test('el.textContent should show CData', (t) => {
     let doc = DefaultDOMElement.createDocument('xml')
     let el = doc.createElement('foo')
     let cdata = doc.createCDATASection('x<y')
@@ -637,7 +636,7 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("doctype should be serialized (XML)", t => {
+  test('doctype should be serialized (XML)', t => {
     let doc = DefaultDOMElement.createDocument('xml')
     doc.setDoctype('foo', 'Foo 1.0', 'http://schema.org/foo.dtd')
     doc.append(doc.createElement('foo'))
@@ -645,23 +644,21 @@ function DOMElementTests(impl) {
     t.end()
   })
 
-  test("doctype should be parsed correctly", t => {
+  test('doctype should be parsed correctly', t => {
     let xml = '<!DOCTYPE foo PUBLIC "Foo 1.0" "http://schema.org/foo.dtd"><foo/>'
     let doc = DefaultDOMElement.parseXML(xml)
     let doctype = doc.getDoctype()
     t.deepEqual(
       { name: doctype.name, publicId: doctype.publicId, systemId: doctype.systemId },
-      { name: 'foo', publicId: "Foo 1.0", systemId: "http://schema.org/foo.dtd" },
-      "doctype should have been parsed correctly"
+      { name: 'foo', publicId: 'Foo 1.0', systemId: 'http://schema.org/foo.dtd' },
+      'doctype should have been parsed correctly'
     )
-    t.equal(doc.serialize(), xml, "doctype should have been serialized correctly")
+    t.equal(doc.serialize(), xml, 'doctype should have been serialized correctly')
     t.end()
   })
-
 }
 
 if (platform.inBrowser) {
-
   const test = module('DOMElement (comparison)')
 
   /*
@@ -701,7 +698,4 @@ if (platform.inBrowser) {
     }
     t.end()
   })
-
-
-
 }
