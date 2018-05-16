@@ -10,11 +10,11 @@ import {
   _s1, _empty, _il1,
   _block1, _block2,
   _in1, IN1_TITLE,
-  _l1, _l11, _l12, _l13, _l1_empty,
+  _l1, _l11, _l12, _l13, _l1Empty,
   _li1plus, _li2plus,
   LI1_TEXT, LI2_TEXT, LI3_TEXT,
   _l2, _l21, _l22,
-  _t1, _t1_sparse, T_CONTENT
+  _t1, _t1Sparse, T_CONTENT
 } from './fixture/samples'
 
 const test = module('Editing')
@@ -1617,7 +1617,7 @@ test('BR11: Breaking a ListItem with cursor at begin of text', (t) => {
 })
 
 test('BR12: Splitting a List by breaking an empty ListItem', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l1_empty, _l12)
+  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l1Empty, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1646,7 +1646,7 @@ test('BR12: Splitting a List by breaking an empty ListItem', (t) => {
 })
 
 test('BR13: Breaking the last empty list item', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _l1_empty)
+  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _l1Empty)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1671,7 +1671,7 @@ test('BR13: Breaking the last empty list item', (t) => {
 })
 
 test('BR14: Breaking a list with only one empty item', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l1_empty)
+  let { editorSession, doc } = setupEditor(t, _l1, _l1Empty)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1695,7 +1695,7 @@ test('BR14: Breaking a list with only one empty item', (t) => {
 })
 
 test('BR15: Breaking a list with a first empty item', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l1_empty, _l11)
+  let { editorSession, doc } = setupEditor(t, _l1, _l1Empty, _l11)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1747,7 +1747,7 @@ test('L5-1: Toggling the first item of a List using BACKSPACE', (t) => {
 })
 
 test('L8-1: Toggling a paragraph into a List', (t) => {
-  let { doc, editorSession} = setupEditor(t, _p1)
+  let { doc, editorSession } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1755,7 +1755,7 @@ test('L8-1: Toggling a paragraph into a List', (t) => {
     containerId: 'body'
   })
   editorSession.transaction((tx) => {
-    tx.toggleList({ ordered: false})
+    tx.toggleList({ ordered: false })
   })
   let body = doc.get('body')
   t.equal(body.getLength(), 1, 'There should be 1 node')
@@ -1768,7 +1768,7 @@ test('L8-1: Toggling a paragraph into a List', (t) => {
 })
 
 test('L8-2: Toggling first list-item into a paragraph', (t) => {
-  let { doc, editorSession} = setupEditor(t, _l1, _l11, _l12)
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1790,7 +1790,7 @@ test('L8-2: Toggling first list-item into a paragraph', (t) => {
 })
 
 test('L8-3: Toggling last list-item into a paragraph', (t) => {
-  let { doc, editorSession} = setupEditor(t, _l1, _l11, _l12)
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-2', 'content'],
@@ -1812,7 +1812,7 @@ test('L8-3: Toggling last list-item into a paragraph', (t) => {
 })
 
 test('L8-4: Toggling a middle list-item into a paragraph splitting the list', (t) => {
-  let { doc, editorSession} = setupEditor(t, _l1, _l11, _l13, _l12)
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l13, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-3', 'content'],
@@ -1837,7 +1837,7 @@ test('L8-4: Toggling a middle list-item into a paragraph splitting the list', (t
 })
 
 test('L8-5: Toggling the only list-item of a list into a paragraph', (t) => {
-  let { doc, editorSession} = setupEditor(t, _l1, _l11)
+  let { doc, editorSession } = setupEditor(t, _l1, _l11)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1856,7 +1856,7 @@ test('L8-5: Toggling the only list-item of a list into a paragraph', (t) => {
 })
 
 test('L9: Changing the list type', (t) => {
-  let { doc, editorSession} = setupEditor(t, _l1, _l11)
+  let { doc, editorSession } = setupEditor(t, _l1, _l11)
   editorSession.transaction((tx) => {
     let list = tx.get('l1')
     list.setListType(1, 'order')
@@ -1868,7 +1868,7 @@ test('L9: Changing the list type', (t) => {
 })
 
 test('L9-2: Changing nested list types', (t) => {
-  let { doc, editorSession} = setupEditor(t, _l1, _l11, _l12, _li2plus)
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _li2plus)
   let list = doc.get('l1')
   t.equal(list.getListType(1), 'bullet', 'first level should have correct list type')
   t.equal(list.getListType(2), 'bullet', 'second level should have correct list type')
@@ -2062,7 +2062,7 @@ test('CP7 Copying a table', (t) => {
 })
 
 test('CP8 Copying a sparse table', (t) => {
-  let { doc } = setupEditor(t, _t1_sparse)
+  let { doc } = setupEditor(t, _t1Sparse)
   let editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'node',

@@ -117,12 +117,13 @@ function buildTestsBrowser () {
     output: [{
       file: 'tmp/tests.js',
       format: 'umd',
-      name: 'tests'
+      name: 'tests',
+      globals: {
+        'substance': 'window.substance',
+        'substance-test': 'window.substanceTest'
+      }
     }],
-    external: {
-      'substance': 'window.substance',
-      'substance-test': 'window.substanceTest'
-    }
+    external: [ 'substance', 'substance-test' ]
   })
 }
 
