@@ -322,8 +322,6 @@ function DOMElementTests (impl) {
   test('getStyle()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div style="color:blue"></div>', 'html')
     let expected = 'blue'
-    // Note: in Edge the browser returned 'rgb(...)' instead
-    if (platform.inBrowser && platform.isEdge) expected = 'rgb(0, 0, 255)'
     t.equal(el.getStyle('color'), expected, 'element should have style')
     t.equal(el.getAttribute('style'), 'color:blue', 'style can be retrieved via "style" attribute')
     t.end()
@@ -332,15 +330,17 @@ function DOMElementTests (impl) {
   test('setStyle()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
+
     el.setStyle('color', 'blue')
+    let actual = el.getStyle('color')
     let expected = 'blue'
-    // Note: in Edge the browser returned 'rgb(...)' instead
-    if (platform.inBrowser && platform.isEdge) expected = 'rgb(0, 0, 255)'
-    t.equal(el.getStyle('color'), expected, 'element should have style set')
+    t.equal(actual, expected, 'element should have style set')
+
     el.setAttribute('style', 'color:green')
+    actual = el.getStyle('color')
     expected = 'green'
-    if (platform.inBrowser && platform.isEdge) expected = 'rgb(0, 128, 0)'
-    t.equal(el.getStyle('color'), expected, 'style can be set via attribute "style" too')
+    t.equal(actual, expected, 'style can be set via attribute "style" too')
+
     t.end()
   })
 
@@ -366,21 +366,23 @@ function DOMElementTests (impl) {
 
   test('css()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div style="color:blue"></div>', 'html')
+
+    let actual = el.css('color')
     let expected = 'blue'
-    if (platform.inBrowser && platform.isEdge) expected = 'rgb(0, 0, 255)'
-    t.equal(el.css('color'), expected, 'can access style via jquery style getter')
+    t.equal(actual, expected, 'can access style via jquery style getter')
+
     el.css('color', 'green')
+    actual = el.getStyle('color')
     expected = 'green'
-    if (platform.inBrowser && platform.isEdge) expected = 'rgb(0, 128, 0)'
-    t.equal(el.getStyle('color'), expected, 'can change style via jquery style setter')
+    t.equal(actual, expected, 'can change style via jquery style setter')
+
     el.css({
       color: 'red',
-      background: 'orange'
+      'background-color': 'orange'
     })
+    actual = [el.getStyle('color'), el.getStyle('background-color')]
     expected = ['red', 'orange']
-    // Notice this weird mix in Edge
-    if (platform.inBrowser && platform.isEdge) expected = ['rgb(255, 0, 0)', 'orange']
-    t.deepEqual([el.getStyle('color'), el.getStyle('background')], expected, 'can change multiple styles at once via jquery style setter')
+    t.deepEqual(actual, expected, 'can change multiple styles at once via jquery style setter')
     t.end()
   })
 
@@ -669,6 +671,8 @@ function DOMElementTests (impl) {
     let expected = '<!DOCTYPE foo PUBLIC "Foo 1.0" "http://schema.org/foo.dtd"><foo/>'
     // WORKAROUND: Edge inserts a whitespae before '/>'
     if (platform.inBrowser && platform.isEdge) actual = actual.replace(/\s\/>/g, '/>')
+    // WORKARONG: FF is adding a \n after DOCTYPE element
+    if (platform.inBrowser && platform.isFF) actual = actual.replace(/>\s+</g, '><')
     t.equal(actual, expected, 'doctype should have been serialized')
     t.end()
   })
@@ -685,6 +689,8 @@ function DOMElementTests (impl) {
     let actual = doc.serialize()
     // WORKAROUND: Edge inserts a whitespae before '/>'
     if (platform.inBrowser && platform.isEdge) actual = actual.replace(/\s\/>/g, '/>')
+    // WORKARONG: FF is adding a \n after DOCTYPE element
+    if (platform.inBrowser && platform.isFF) actual = actual.replace(/>\s+</g, '><')
     t.equal(actual, xml, 'doctype should have been serialized correctly')
     t.end()
   })
