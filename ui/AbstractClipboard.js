@@ -86,13 +86,6 @@ export default class AbstractClipboard {
 
     // console.log('onPaste(): html = ', html);
 
-    // WORKAROUND: FF does not provide HTML coming in from other applications
-    // so fall back to pasting plain text
-    if (platform.isFF && !html) {
-      this._pastePlainText(plainText)
-      return
-    }
-
     // if we have content given as HTML we let the importer assess the quality first
     // and fallback to plain text import if it's bad
     if (html) {
