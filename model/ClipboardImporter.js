@@ -134,23 +134,22 @@ class ClipboardImporter extends HTMLImporter {
       if (span.getStyle('font-style') === 'italic') nodeTypes.push('i')
       if (span.getStyle('vertical-align') === 'super') nodeTypes.push('sup')
       if (span.getStyle('vertical-align') === 'sub') nodeTypes.push('sub')
+      // remove the style so the element becomes cleaner
+      span.removeAttribute('style')
 
       function createInlineNodes (parentEl, isRoot) {
         if (nodeTypes.length > 0) {
           let el = parentEl.createElement(nodeTypes[0])
           if (nodeTypes.length === 1) el.append(span.textContent)
-
           if (isRoot) {
             parentEl.replaceChild(span, el)
           } else {
             parentEl.appendChild(el)
           }
-
           nodeTypes.shift()
           createInlineNodes(el)
         }
       }
-
       createInlineNodes(span.getParent(), true)
     })
 
