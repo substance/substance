@@ -6,14 +6,15 @@ import isNumber from '../util/isNumber'
 import isObject from '../util/isObject'
 import isString from '../util/isString'
 import EventEmitter from '../util/EventEmitter'
-import Property from './Property'
+import NodeProperty from './NodeProperty'
+import NodeSchema from './NodeSchema'
 
 /*
   Base node implementation.
 
   @prop {String} id an id that is unique within this data
  */
-class Node extends EventEmitter {
+export default class Node extends EventEmitter {
   /**
     @param {Object} properties
   */
@@ -29,21 +30,20 @@ class Node extends EventEmitter {
     const NodeClass = this.constructor
 
     let schema = NodeClass.schema
-    for (var name in schema) {
-      if (!schema.hasOwnProperty(name)) continue
-      let prop = schema[name]
+    for (let property of schema) {
+      let name = property.name
       // check integrity of provided data, such as type correctness,
       // and mandatory properties
       const propIsGiven = (data[name] !== undefined)
-      const hasDefault = prop.hasDefault()
-      const isOptional = prop.isOptional()
+      const hasDefault = property.hasDefault()
+      const isOptional = property.isOptional()
       if ((!isOptional && !hasDefault) && !propIsGiven) {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
-        this[name] = _checked(prop, data[name])
+        this[name] = _checked(property, data[name])
       } else if (hasDefault) {
-        this[name] = cloneDeep(_checked(prop, prop.getDefault()))
+        this[name] = cloneDeep(_checked(property, property.getDefault()))
       } else {
         // property is optional
       }
@@ -80,7 +80,7 @@ class Node extends EventEmitter {
   getTypeNames () {
     var typeNames = []
     var NodeClass = this.constructor
-    while (NodeClass.type !== 'node') {
+    while (NodeClass.type !== '@node') {
       typeNames.push(NodeClass.type)
       NodeClass = Object.getPrototypeOf(NodeClass)
     }
@@ -94,8 +94,7 @@ class Node extends EventEmitter {
    * @returns The property's type.
    */
   getPropertyType (propertyName) {
-    var schema = this.constructor.schema
-    return schema[propertyName].type
+    return this.constructor.schema.getProperty(propertyName).type
   }
 
   /**
@@ -108,14 +107,14 @@ class Node extends EventEmitter {
       type: this.type
     }
     const schema = this.getSchema()
-    forEach(schema, (prop, name) => {
-      let val = this[name]
-      if (prop.isOptional() && val === undefined) return
+    for (let prop of schema) {
+      let val = this[prop.name]
+      if (prop.isOptional() && val === undefined) continue
       if (isArray(val) || isObject(val)) {
         val = cloneDeep(val)
       }
       data[prop.name] = val
-    })
+    }
     return data
   }
 
@@ -148,7 +147,7 @@ Node.define = Node.defineSchema = function define (schema) {
 }
 
 Node.schema = {
-  type: 'node',
+  type: '@node',
   id: 'string'
 }
 
@@ -161,7 +160,7 @@ Node.schema = {
  */
 Node.isInstanceOf = function (NodeClass, typeName) {
   var type = NodeClass.type
-  while (type !== 'node') {
+  while (type !== '@node') {
     if (type === typeName) return true
     var _super = Object.getPrototypeOf(NodeClass.prototype).constructor
     if (_super && _super.type) {
@@ -182,16 +181,14 @@ function compileSchema (NodeClass, schema) {
   let clazz = NodeClass
   while (clazz) {
     var parentProto = Object.getPrototypeOf(clazz.prototype)
-    if (!parentProto) {
-      break
-    }
+    if (!parentProto) break
     clazz = parentProto.constructor
     if (clazz && clazz._schema) {
-      schemas.unshift(clazz._schema)
+      schemas.unshift(clazz._schema.properties)
     }
   }
   schemas.unshift({})
-  return Object.assign.apply(null, schemas)
+  return new NodeSchema(Object.assign.apply(null, schemas))
 }
 
 function _compileSchema (schema) {
@@ -206,7 +203,7 @@ function _compileSchema (schema) {
     }
     definition = _compileDefintion(definition)
     definition.name = name
-    compiledSchema[name] = new Property(definition)
+    compiledSchema[name] = new NodeProperty(name, definition)
   })
   return compiledSchema
 }
@@ -254,5 +251,3 @@ function _checked (prop, value) {
   }
   return value
 }
-
-export default Node

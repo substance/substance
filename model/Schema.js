@@ -7,7 +7,7 @@ import Node from './Node'
 
   @internal
  */
-class Schema {
+export default class Schema {
   /**
     @param {String} name
     @param {String} version
@@ -109,8 +109,8 @@ class Schema {
     @param {Function} callback
     @param {Object} context
   */
-  each () {
-    this.nodeRegistry.each.apply(this.nodeRegistry, arguments)
+  each (...args) {
+    return this.nodeRegistry.each(...args)
   }
 
   /**
@@ -136,5 +136,3 @@ class Schema {
     return NodeClass.schema
   }
 }
-
-export default Schema

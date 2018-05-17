@@ -12,8 +12,7 @@ import { setCursor } from './selectionHelpers'
   `text` for external HTML content
   @return {Object} with updated `selection`
 */
-
-function paste (tx, args) {
+export default function paste (tx, args) {
   let sel = tx.selection
   if (!sel || sel.isNull() || sel.isCustomSelection()) {
     throw new Error('Can not paste, without selection or a custom selection.')
@@ -192,10 +191,9 @@ function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id, visited) {
   // now we iterate all properties of the node schema,
   // to see if there are owned references, which need to be created recursively,
   // and if there are text properties, where annotations could be attached to
-  for (let key in nodeSchema) {
-    if (key === 'id' || key === 'type' || !nodeSchema.hasOwnProperty(key)) continue
-    const prop = nodeSchema[key]
+  for (let prop of nodeSchema) {
     const name = prop.name
+    if (name === 'id' || name === 'type') continue
     // Look for references to owned children and create recursively
     if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
       // NOTE: we need to recurse directly here, so that we can
@@ -250,5 +248,3 @@ function _transferArrayOfReferences (sourceDoc, targetDoc, arr, visited) {
     }
   }
 }
-
-export default paste

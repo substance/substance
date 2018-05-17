@@ -160,17 +160,17 @@ export function deleteNode (doc, node) {
 */
 export function copyNode (node) {
   let nodes = []
-  // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
-  let nodeSchema = node.getSchema()
+  // using schema reflection to determine whether to do a 'deep' copy or just shallow
   let doc = node.getDocument()
-  forEach(nodeSchema, (prop) => {
+  let nodeSchema = node.getSchema()
+  for (let prop of nodeSchema) {
     // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
     // or it is of type 'file'
     if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
       let val = node[prop.name]
       nodes.push(_copyChildren(val))
     }
-  })
+  }
   nodes.push(node.toJSON())
   let annotationIndex = node.getDocument().getIndex('annotations')
   let annotations = annotationIndex.get([node.id])

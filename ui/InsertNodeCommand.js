@@ -1,7 +1,6 @@
-import forEach from '../util/forEach'
 import Command from './Command'
 
-class InsertNodeCommand extends Command {
+export default class InsertNodeCommand extends Command {
   constructor (config) {
     super(config)
 
@@ -56,11 +55,9 @@ class InsertNodeCommand extends Command {
     const doc = context.editorSession.getDocument()
     const nodeSchema = doc.getSchema().getNodeSchema(type)
     let nodeData = {type}
-    forEach(nodeSchema, (key) => {
-      if (params.hasOwnProperty(key)) {
-        nodeData[key] = params[key]
-      }
-    })
+    for (let property of nodeSchema) {
+      nodeData[property.name] = params[property.name]
+    }
     return nodeData
   }
 
@@ -74,5 +71,3 @@ class InsertNodeCommand extends Command {
     }
   }
 }
-
-export default InsertNodeCommand
