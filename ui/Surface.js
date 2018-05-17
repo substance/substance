@@ -6,6 +6,7 @@ import { getDOMRangeFromEvent } from '../util/windowUtils'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
 import Clipboard from './Clipboard'
+import DOMSelection from './DOMSelection'
 import UnsupportedNode from './UnsupportedNodeComponent'
 
 const BROWSER_DELAY = platform.isFF ? 1 : 0
@@ -42,8 +43,7 @@ export default class Surface extends Component {
 
     this.clipboard = new Clipboard(this.editorSession)
 
-    this.domSelection = this.context.domSelection
-    if (!this.domSelection) throw new Error('DOMSelection instance must be provided via context.')
+    this.domSelection = this.context.domSelection || new DOMSelection(this)
 
     this._state = {
       // true if the document session's selection is addressing this surface
