@@ -17,116 +17,101 @@ import isArray from '../util/isArray'
   We do not want to store a the id of a parent node into the children, as this would be redundant, and would increase the amount of necessary operations.
   Instead we want to establish a link dynamically on the Node instance when the id is set in the parent (during construction or when updated).
 
-  The most in-obstrusive implementation is to add an 'operation:applied' hook, watching for such changes
-  and setting the reference. First we will apply this only for specific node types.
-  Later this will be derived from the schema.
-  With Texture we want to investigate a further option: replacing the node model with a DOM.
+  The most unobtrusive implementation is to add an 'operation:applied' hook, watching for such changes
+  and setting the reference.
 */
-
 export default class ParentNodeHook {
   constructor (doc) {
     this.doc = doc
-    this.table = {}
+    // parents by id of child nodes
+    this.parents = {}
     doc.data.on('operation:applied', this._onOperationApplied, this)
   }
 
   _onOperationApplied (op) {
     const doc = this.doc
-    const table = this.table
     let node = doc.get(op.path[0])
+    let nodeSchema, hasOwnedProperties
+    if (node) {
+      nodeSchema = node.getSchema()
+      hasOwnedProperties = nodeSchema.hasOwnedProperties()
+    }
     // TODO: instead of hard coding this here we should compile a matcher
     // based on the document schema
     switch (op.type) {
       case 'create': {
-        switch (node.type) {
-          case 'list':
-            _setParent(node, node.items)
-            break
-          case 'list-item': {
-            _setRegisteredParent(node)
-            break
-          }
-          case 'table':
-            _setParent(node, node.cells)
-            break
-          case 'table-cell': {
-            _setRegisteredParent(node)
-            break
-          }
-          default:
-            //
+        if (hasOwnedProperties) {
+          nodeSchema.getOwnedProperties().forEach(p => {
+            let refs = node[p.name]
+            if (refs) {
+              this._setParent(node, refs)
+            }
+            this._setRegisteredParent(node)
+          })
         }
         break
       }
       case 'update': {
-        // ATTENTION: we only set parents but don't remove when they are deleted
-        // assuming that if the parent gets deleted, the children get deleted too
-        let update = op.diff
-        switch (node.type) {
-          case 'list':
-            if (op.path[1] === 'items') {
-              if (update.isInsert()) {
-                _setParent(node, update.getValue())
-              }
+        if (hasOwnedProperties) {
+          let propName = op.path[1]
+          if (nodeSchema.isOwned(propName)) {
+            let update = op.diff
+            if (update.isDelete()) {
+              this._setParent(null, update.getValue())
+            } else {
+              this._setParent(node, update.getValue())
             }
-            break
-          case 'table':
-            if (op.path[1] === 'cells') {
-              if (update.isInsert()) {
-                _setParent(node, update.getValue())
-              }
-            }
-            break
-          default:
-            //
+          }
         }
         break
       }
       case 'set': {
-        switch (node.type) {
-          case 'list':
-            if (op.path[1] === 'items') {
-              _setParent(node, op.getValue())
-            }
-            break
-          case 'table':
-            if (op.path[1] === 'cells') {
-              _setParent(node, op.getValue())
-            }
-            break
-          default:
-            //
+        if (hasOwnedProperties) {
+          let propName = op.path[1]
+          if (nodeSchema.isOwned(propName)) {
+            let oldValue = op.getOldValue()
+            let newValue = op.getValue()
+            // Note: _setParent takes either an array or a single id
+            this._setParent(null, oldValue)
+            this._setParent(node, newValue)
+          }
         }
         break
       }
       default:
         //
     }
+  }
 
-    function _setParent (parent, ids) {
-      if (ids) {
-        if (isArray(ids)) {
-          ids.forEach(_set)
-        } else {
-          _set(ids)
-        }
-      }
-      function _set (id) {
-        // Note: it can happen, e.g. during deserialization, that the child node
-        // is created later than the parent node
-        // so we store the parent for later
-        table[id] = parent
-        let child = doc.get(id)
-        if (child) {
-          child.parent = parent
-        }
+  _setParent (parent, ids) {
+    if (ids) {
+      if (isArray(ids)) {
+        ids.forEach(id => this.__setParent(parent, id))
+      } else {
+        this.__setParent(parent, ids)
       }
     }
-    function _setRegisteredParent (child) {
-      let parent = table[child.id]
-      if (parent) {
-        child.parent = parent
-      }
+  }
+
+  __setParent (parent, id) {
+    // Note: it can happen, e.g. during deserialization, that the child node
+    // is created later than the parent node
+    // so we store the parent for later
+    // TODO: is this really still true? we have improved the new behavior in document.createFromDocument()
+    // so that it considers the ownership
+    this.parents[id] = parent
+    let child = this.doc.get(id)
+    if (!child) {
+      console.error('FIXME: parent is created before child, or child id is invalid')
+    } else {
+      child.setParent(parent)
+    }
+  }
+
+  _setRegisteredParent (child) {
+    let parent = this.parents[child.id]
+    if (parent) {
+      child.setParent(parent)
     }
   }
 }

@@ -110,6 +110,10 @@ class XMLDocumentNode extends DocumentNode {
     return this.parentNode
   }
 
+  setParent (parentNode) {
+    this.parentNode = parentNode
+  }
+
   get tagName () {
     return this.type
   }

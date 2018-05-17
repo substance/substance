@@ -3,7 +3,7 @@ import isArray from '../util/isArray'
 /*
   Maintains links to the parent node, but only for children of ElementNodes.
 */
-class ParentNodeHook {
+export default class XMLParentNodeHook {
   constructor (doc) {
     this.doc = doc
     // parents by id of child nodes
@@ -73,10 +73,8 @@ class ParentNodeHook {
       }
     }
   }
-}
 
-ParentNodeHook.register = function (doc) {
-  return new ParentNodeHook(doc)
+  static register (doc) {
+    return new XMLParentNodeHook(doc)
+  }
 }
-
-export default ParentNodeHook
