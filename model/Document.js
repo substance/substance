@@ -479,24 +479,51 @@ class Document extends EventEmitter {
     // clear all content, otherwise there would be an inconsistent mixture
     this.clear()
 
-    let nodes = doc.getNodes()
-    let annotations = []
-    let contentNodes = []
-    let containers = []
-    forEach(nodes, (node) => {
-      if (node.isAnnotation()) {
-        annotations.push(node)
-      } else if (node.isContainer()) {
-        containers.push(node)
-      } else {
-        contentNodes.push(node)
-      }
+    // Note: trying to bring the nodes into a correct order
+    // so that they can be created safely without causing troubles
+    // For example, a list-item should be created before its parent list.
+    // But a paragraph should be created before their annotations
+    // TODO: we should rethink the exception with annotations here
+    // in XML the annotation would be a child of the paragraph
+    // and thus should be created before hand. However our annotation indexes need the annotation target to exist.
+    let nodes = Object.values(doc.getNodes())
+    let levels = {}
+    let visited = new Set()
+    nodes.forEach(n => {
+      if (!visited.has(n)) this._computeDependencyLevel(n, levels, visited)
     })
-    contentNodes.concat(annotations).concat(containers).forEach(n => {
-      this.create(n)
+    // descending order: i.e. nodes with a deeper level get created first
+    nodes.sort((a, b) => {
+      return levels[b.id] - levels[a.id]
     })
-
+    nodes.forEach(n => this.create(n))
     return this
+  }
+
+  _computeDependencyLevel (node, levels, visited) {
+    if (!node) throw new Error('node was nil')
+    if (visited.has(node)) throw new Error('Cyclic node dependency')
+    visited.add(node)
+    // HACK: as of the comment above, annotations are currently treated as overlay
+    // not as children. So we assign level -1 to all annotations, meaning
+    // that they are 'on-top-of' the content, and being created at the very last
+    let level = 0
+    if (node.isAnnotation() || node.isInline()) {
+      level = -1
+    } else {
+      let parent = node.getParent()
+      if (parent) {
+        let parentLevel
+        if (levels.hasOwnProperty(parent.id)) {
+          parentLevel = levels[parent.id]
+        } else {
+          parentLevel = this._computeDependencyLevel(parent, levels, visited)
+        }
+        level = parentLevel + 1
+      }
+    }
+    levels[node.id] = level
+    return level
   }
 
   /**

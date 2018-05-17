@@ -69,7 +69,7 @@ test('Get change from document', (t) => {
   let change = getChangeFromDocument(doc)
   t.equal(change.ops.length, 6, 'There should be 6 operations')
   t.deepEqual(change.ops.map(op => op.type), new Array(6).fill('create'), 'all should be create ops')
-  t.deepEqual(change.ops.map(op => op.path[0]), ['p1', 'p2', 'p3', 'p4', 's1', 'body'], '.. in correct order')
+  t.deepEqual(change.ops.map(op => op.path[0]), ['p1', 'p2', 'p3', 'p4', 'body', 's1'], '.. in correct order')
   t.end()
 })
 
