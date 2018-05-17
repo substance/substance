@@ -133,22 +133,20 @@ export function deleteNode (doc, node) {
       doc.delete(annos[i].id)
     }
   }
-  // delete recursively
-  // ATM we do a cascaded delete if the property has type 'id' or ['array', 'id'] and property 'owned' set,
-  // or if it 'file'
+  // Recursive deletion of owned nodes
   let nodeSchema = node.getSchema()
-  forEach(nodeSchema, (prop) => {
-    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-      if (prop.isArray()) {
-        let ids = node[prop.name]
-        ids.forEach((id) => {
-          deleteNode(doc, doc.get(id))
-        })
-      } else {
-        deleteNode(doc, doc.get(node[prop.name]))
-      }
+  nodeSchema.getOwnedProperties().forEach(prop => {
+    let value = node[prop.name]
+    if (prop.isArray()) {
+      let ids = value
+      ids.forEach((id) => {
+        deleteNode(doc, doc.get(id))
+      })
+    } else {
+      deleteNode(doc, doc.get(value))
     }
   })
+
   doc.delete(node.id)
 }
 
