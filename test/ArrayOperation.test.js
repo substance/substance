@@ -40,16 +40,16 @@ test('Delete element', (t) => {
 
 test('Create operation with invalid data', (t) => {
   t.throws(function () {
-    new ArrayOperation()
+    new ArrayOperation() // eslint-disable-line no-new
   }, 'Should throw if no data given.')
   t.throws(function () {
-    new ArrayOperation({ type: 'foo' })
+    new ArrayOperation({ type: 'foo' }) // eslint-disable-line no-new
   }, 'Should throw for invalid type.')
   t.throws(function () {
-    new ArrayOperation({ type: ArrayOperation.INSERT, value: 1})
+    new ArrayOperation({ type: ArrayOperation.INSERT, value: 1 }) // eslint-disable-line no-new
   }, 'Should throw for missing position.')
   t.throws(function () {
-    new ArrayOperation({ type: ArrayOperation.INSERT, pos: -1, value: 1})
+    new ArrayOperation({ type: ArrayOperation.INSERT, pos: -1, value: 1 }) // eslint-disable-line no-new
   }, 'Should throw for position < 0.')
   t.end()
 })
@@ -123,11 +123,11 @@ test('Transformation: a=Insert, b=Insert, a < b and b < a', (t) => {
 test('Transformation: a=Insert, b=Insert, a == b', (t) => {
   let input = [1, 4]
   let expected = [1, 2, 3, 4]
-  let expected_2 = [1, 3, 2, 4]
+  let expected2 = [1, 3, 2, 4]
   let a = ArrayOperation.Insert(1, 2)
   let b = ArrayOperation.Insert(1, 3)
   checkArrayOperationTransform(t, a, b, input, expected)
-  checkArrayOperationTransform(t, b, a, input, expected_2)
+  checkArrayOperationTransform(t, b, a, input, expected2)
   t.end()
 })
 
