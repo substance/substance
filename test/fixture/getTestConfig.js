@@ -45,7 +45,7 @@ export default function getTestConfig () {
   config.import(FilePackage)
   config.import(ImagePackage)
 
-  config.addComponent('container', TestContainerComponent)
+  config.addComponent('@container', TestContainerComponent)
 
   config.addNode(TestNode)
 

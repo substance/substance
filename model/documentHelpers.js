@@ -65,7 +65,7 @@ export function getContainerAnnotationsForSelection (doc, sel, containerId, opti
 */
 export function isContainerAnnotation (doc, type) {
   let schema = doc.getSchema()
-  return schema.isInstanceOf(type, 'container-annotation')
+  return schema.isInstanceOf(type, '@container-annotation')
 }
 
 /**

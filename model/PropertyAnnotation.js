@@ -44,7 +44,7 @@ PropertyAnnotation.isPropertyAnnotation = true
 PropertyAnnotation.autoExpandRight = true
 
 PropertyAnnotation.schema = {
-  type: 'annotation',
+  type: '@annotation',
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
   _content: { type: 'string', optional: true }

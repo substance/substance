@@ -5,7 +5,7 @@ export default function createEditorSession (...seeds) {
   let config = getTestConfig()
   let doc = new Document(config.getSchema())
   let body = doc.create({
-    type: 'container',
+    type: '@container',
     id: 'body'
   })
   seeds.forEach((seed) => {

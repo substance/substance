@@ -4,7 +4,7 @@ import Container from './Container'
 import PropertyAnnotation from './PropertyAnnotation'
 import ContainerAnnotation from './ContainerAnnotation'
 
-class DocumentSchema extends Schema {
+export default class DocumentSchema extends Schema {
   constructor (schemaSpec) {
     super(schemaSpec.name, schemaSpec.version)
     /* istanbul ignore next */
@@ -32,5 +32,3 @@ class DocumentSchema extends Schema {
     return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation]
   }
 }
-
-export default DocumentSchema

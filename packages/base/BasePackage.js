@@ -73,7 +73,7 @@ export default {
       en: 'Container',
       de: 'Container'
     })
-    config.addLabel('container', {
+    config.addLabel('@container', {
       en: 'Container',
       de: 'Container'
     })

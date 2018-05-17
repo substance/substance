@@ -64,7 +64,7 @@ function _convertPlainTextToDocument (tx, args) {
   let pasteDoc = tx.getDocument().newInstance()
   let defaultTextType = pasteDoc.getSchema().getDefaultTextType()
   let container = pasteDoc.create({
-    type: 'container',
+    type: '@container',
     id: SNIPPET_ID,
     nodes: []
   })

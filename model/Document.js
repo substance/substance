@@ -466,7 +466,7 @@ class Document extends EventEmitter {
   createSnippet () {
     var snippet = this.newInstance()
     var snippetContainer = snippet.create({
-      type: 'container',
+      type: '@container',
       id: SNIPPET_ID
     })
     snippet.getContainer = function () {

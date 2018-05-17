@@ -153,7 +153,7 @@ export default class DOMImporter {
       }
     }
     return this._createNode({
-      type: 'container',
+      type: '@container',
       id: containerId,
       nodes: nodeIds
     })
