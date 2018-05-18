@@ -285,7 +285,7 @@ b.task('publish', ['clean', 'lib', 'minify'])
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'lib:browser:dev', 'test:browser'])
 
-b.task('test', ['test:node', 'cover'])
+b.task('test', ['schema', 'test:node', 'cover'])
   .describe('runs the test suite')
 
 b.setServerPort(4001)
