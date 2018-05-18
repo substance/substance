@@ -1,6 +1,6 @@
 import BlockNode from '../../model/BlockNode'
 
-class Table extends BlockNode {
+export default class Table extends BlockNode {
   getRowCount () {
     return this.cells.length
   }
@@ -25,5 +25,3 @@ Table.schema = {
   type: 'table',
   cells: { type: ['array', 'array', 'id'], default: [], owned: true }
 }
-
-export default Table
