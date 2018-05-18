@@ -915,10 +915,12 @@ function _addSurfaceId (sel, editorSession) {
     let surface = editorSession.getFocusedSurface()
     if (surface) {
       sel.surfaceId = surface.id
-    } else {
-      // TODO: instead of warning we could try to 'find' a suitable surface. However, this would also be a bit 'magical'
-      console.warn('No focused surface. Selection will not be rendered.')
     }
+    // else {
+    // Note: disabling this warning, because not having a rendered surface is
+    // a valid use-case in headless scenarios
+    // console.warn('No focused surface. Selection will not be rendered.')
+    // }
   }
 }
 

@@ -1,6 +1,7 @@
 import ListNode from './ListNode'
 import ListItemNode from './ListItemNode'
 import ListComponent from './ListComponent'
+import ListItemComponent from './ListItemComponent'
 import ListHTMLConverter from './ListHTMLConverter'
 import ListItemHTMLConverter from './ListItemHTMLConverter'
 import ToggleListCommand from './ToggleListCommand'
@@ -12,6 +13,7 @@ export default {
     config.addNode(ListNode)
     config.addNode(ListItemNode)
     config.addComponent('list', ListComponent)
+    config.addComponent('list-item', ListItemComponent)
     config.addConverter('html', ListHTMLConverter)
     config.addConverter('html', ListItemHTMLConverter)
     config.addCommand('toggle-unordered-list', ToggleListCommand, {

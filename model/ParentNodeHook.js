@@ -95,15 +95,14 @@ export default class ParentNodeHook {
 
   __setParent (parent, id) {
     // Note: it can happen, e.g. during deserialization, that the child node
-    // is created later than the parent node
-    // so we store the parent for later
-    // TODO: is this really still true? we have improved the new behavior in document.createFromDocument()
-    // so that it considers the ownership
+    // is created later than the parent so we store the parent for later
+    // While on Document.createFromDocument() we consider the order via dependeny analysis
+    // this can still happen when a document is loaded from some other sources,
+    // which does not take any measures to create nodes in a correct order.
+    // So, we must be prepared.
     this.parents[id] = parent
     let child = this.doc.get(id)
-    if (!child) {
-      console.error('FIXME: parent is created before child, or child id is invalid')
-    } else {
+    if (child) {
       child.setParent(parent)
     }
   }
