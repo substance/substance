@@ -35,7 +35,7 @@ import AnnotationMixin from './AnnotationMixin'
   })
   ```
 */
-class PropertyAnnotation extends AnnotationMixin(DocumentNode) {}
+export default class PropertyAnnotation extends AnnotationMixin(DocumentNode) {}
 
 PropertyAnnotation.prototype._isAnnotation = true
 PropertyAnnotation.prototype._isPropertyAnnotation = true
@@ -49,5 +49,3 @@ PropertyAnnotation.schema = {
   // i.e. not attached to a property
   _content: { type: 'string', optional: true }
 }
-
-export default PropertyAnnotation

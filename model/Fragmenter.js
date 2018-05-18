@@ -34,7 +34,7 @@ const ANCHOR = -2
 // TODO: If a violation for nodes of the same level occurs an Error should be thrown.
 // Currently, in such cases the first element that is opened earlier is preserved.
 
-class Fragmenter {
+export default class Fragmenter {
   constructor (options) {
     Object.assign(this, options)
   }
@@ -145,6 +145,7 @@ Fragmenter.SHOULD_NOT_SPLIT = 0
 Fragmenter.NORMAL = 10
 Fragmenter.ANY = 100
 Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE
+Fragmenter.ANCHOR = ANCHOR
 
 // This is a sweep algorithm wich uses a set of ENTER/EXIT entries
 // to manage a stack of active elements.
@@ -315,5 +316,3 @@ function _compareClosers (a, b) {
   if (a.opener.idx < b.opener.idx) return 1
   return 0
 }
-
-export default Fragmenter

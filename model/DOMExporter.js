@@ -147,26 +147,28 @@ class DOMExporter {
   }
 
   _annotatedText (text, annotations) {
-    var self = this
-
-    var annotator = new Fragmenter()
-    annotator.onText = function (context, text) {
+    const self = this
+    let annotator = new Fragmenter()
+    annotator.onText = (context, text) => {
       context.children.push(encodeXMLEntities(text))
     }
-    annotator.onEnter = function (fragment) {
+    annotator.onEnter = (fragment) => {
       var anno = fragment.node
       return {
         annotation: anno,
         children: []
       }
     }
-    annotator.onExit = function (fragment, context, parentContext) {
-      var anno = context.annotation
-      var converter = self.getNodeConverter(anno)
+    annotator.onExit = (fragment, context, parentContext) => {
+      const anno = context.annotation
+      // HAK: skip artifacts (this not be called in first place)
+      if (context.children.length === 0 && !anno.start.equals(anno.end)) return
+
+      let converter = self.getNodeConverter(anno)
       if (!converter) {
         converter = self.getDefaultPropertyAnnotationConverter()
       }
-      var el
+      let el
       if (converter.tagName) {
         el = this.$$(converter.tagName)
       } else {
@@ -178,7 +180,7 @@ class DOMExporter {
         el = converter.export(anno, el, self) || el
       }
       parentContext.children.push(el)
-    }.bind(this)
+    }
     var wrapper = { children: [] }
     annotator.start(wrapper, text, annotations)
     return wrapper.children
