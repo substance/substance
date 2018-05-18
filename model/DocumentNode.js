@@ -60,6 +60,11 @@ class DocumentNode extends DataNode {
     return this.parent
   }
 
+  setParent (parent) {
+    if (isString(parent)) parent = this.document.get(parent)
+    this.parent = parent
+  }
+
   /**
     Get the root node.
 

@@ -8,7 +8,7 @@ import ContainerMixin from './ContainerMixin'
   other things happen on a node level, e.g., breaking or mergin nodes,
   or spanning annotations so called ContainerAnnotations.
 */
-class Container extends ContainerMixin(DocumentNode) {
+export default class Container extends ContainerMixin(DocumentNode) {
   constructor (...args) {
     super(...args)
 
@@ -34,8 +34,6 @@ class Container extends ContainerMixin(DocumentNode) {
 Container.prototype._isContainer = true
 
 Container.schema = {
-  type: 'container',
-  nodes: { type: ['array', 'id'], default: [] }
+  type: '@container',
+  nodes: { type: ['array', 'id'], default: [], owned: true }
 }
-
-export default Container

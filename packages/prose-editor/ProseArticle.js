@@ -6,7 +6,7 @@ class ProseArticle extends Document {
     super._initialize()
 
     this.create({
-      type: 'container',
+      type: '@container',
       id: 'body',
       nodes: []
     })

@@ -9,7 +9,7 @@ export default function nestedContainers (tx) {
   body.show(p1)
 
   var c1 = tx.create({
-    type: 'container',
+    type: '@container',
     id: 'c1',
     nodes: []
   })
@@ -21,7 +21,7 @@ export default function nestedContainers (tx) {
   c1.show(c1p1)
 
   var c2 = tx.create({
-    type: 'container',
+    type: '@container',
     id: 'c2',
     nodes: []
   })

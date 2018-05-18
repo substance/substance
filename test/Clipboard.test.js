@@ -7,15 +7,6 @@ import {
   platform, find
 } from 'substance'
 
-const ParagraphHTMLConverter = ParagraphPackage.ParagraphHTMLConverter
-const HeadingHTMLConverter = HeadingPackage.HeadingHTMLConverter
-const StrongHTMLConverter = StrongPackage.StrongHTMLConverter
-const EmphasisHTMLConverter = EmphasisPackage.EmphasisHTMLConverter
-const LinkHTMLConverter = LinkPackage.LinkHTMLConverter
-const CodeblockHTMLConverter = CodeblockPackage.CodeblockHTMLConverter
-const SuperscriptHTMLConverter = SuperscriptPackage.SuperscriptHTMLConverter
-const SubscriptHTMLConverter = SubscriptPackage.SubscriptHTMLConverter
-
 import simple from './fixture/simple'
 import setupEditor from './fixture/setupEditor'
 import BrowserLinuxPLainTextFixture from './fixture/html/browser-linux-plain-text'
@@ -52,6 +43,15 @@ import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
 import MSW11OSXExtendedFixture from './fixture/html/word-11-osx-extended'
+
+const ParagraphHTMLConverter = ParagraphPackage.ParagraphHTMLConverter
+const HeadingHTMLConverter = HeadingPackage.HeadingHTMLConverter
+const StrongHTMLConverter = StrongPackage.StrongHTMLConverter
+const EmphasisHTMLConverter = EmphasisPackage.EmphasisHTMLConverter
+const LinkHTMLConverter = LinkPackage.LinkHTMLConverter
+const CodeblockHTMLConverter = CodeblockPackage.CodeblockHTMLConverter
+const SuperscriptHTMLConverter = SuperscriptPackage.SuperscriptHTMLConverter
+const SubscriptHTMLConverter = SubscriptPackage.SubscriptHTMLConverter
 
 ClipboardTests()
 

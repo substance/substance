@@ -41,7 +41,7 @@ class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
 }
 
 ContainerAnnotation.schema = {
-  type: 'container-annotation',
+  type: '@container-annotation',
   containerId: 'string',
   start: 'coordinate',
   end: 'coordinate'

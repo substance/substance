@@ -65,7 +65,7 @@ export function getContainerAnnotationsForSelection (doc, sel, containerId, opti
 */
 export function isContainerAnnotation (doc, type) {
   let schema = doc.getSchema()
-  return schema.isInstanceOf(type, 'container-annotation')
+  return schema.isInstanceOf(type, '@container-annotation')
 }
 
 /**
@@ -133,22 +133,20 @@ export function deleteNode (doc, node) {
       doc.delete(annos[i].id)
     }
   }
-  // delete recursively
-  // ATM we do a cascaded delete if the property has type 'id' or ['array', 'id'] and property 'owned' set,
-  // or if it 'file'
+  // Recursive deletion of owned nodes
   let nodeSchema = node.getSchema()
-  forEach(nodeSchema, (prop) => {
-    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-      if (prop.isArray()) {
-        let ids = node[prop.name]
-        ids.forEach((id) => {
-          deleteNode(doc, doc.get(id))
-        })
-      } else {
-        deleteNode(doc, doc.get(node[prop.name]))
-      }
+  nodeSchema.getOwnedProperties().forEach(prop => {
+    let value = node[prop.name]
+    if (prop.isArray()) {
+      let ids = value
+      ids.forEach((id) => {
+        deleteNode(doc, doc.get(id))
+      })
+    } else {
+      deleteNode(doc, doc.get(value))
     }
   })
+
   doc.delete(node.id)
 }
 
@@ -160,17 +158,17 @@ export function deleteNode (doc, node) {
 */
 export function copyNode (node) {
   let nodes = []
-  // EXPERIMENTAL: using schema reflection to determine whether to do a 'deep' copy or just shallow
-  let nodeSchema = node.getSchema()
+  // using schema reflection to determine whether to do a 'deep' copy or just shallow
   let doc = node.getDocument()
-  forEach(nodeSchema, (prop) => {
+  let nodeSchema = node.getSchema()
+  for (let prop of nodeSchema) {
     // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
     // or it is of type 'file'
     if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
       let val = node[prop.name]
       nodes.push(_copyChildren(val))
     }
-  })
+  }
   nodes.push(node.toJSON())
   let annotationIndex = node.getDocument().getIndex('annotations')
   let annotations = annotationIndex.get([node.id])

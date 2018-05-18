@@ -1,6 +1,6 @@
 import { AbstractEditor, ContainerEditor } from 'substance'
 
-class TestEditor extends AbstractEditor {
+export default class TestEditor extends AbstractEditor {
   constructor (...args) {
     super(...args)
     this.handleActions({
@@ -18,5 +18,3 @@ class TestEditor extends AbstractEditor {
     return el
   }
 }
-
-export default TestEditor

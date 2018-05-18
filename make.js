@@ -233,10 +233,6 @@ b.task('lib:browser', ['css', 'schema'], () => {
   buildLib('browser', 'production')
 })
 
-b.task('lib:browser:legacy', ['css', 'schema'], () => {
-  buildLib('browser:legacy', 'production')
-})
-
 b.task('lib:browser:dev', ['css', 'schema'], () => {
   buildLib('browser')
 })
@@ -247,8 +243,10 @@ b.task('lib:dev', ['css', 'schema'], () => {
 
 b.task('lib', ['css', 'schema'], () => {
   buildLib('all', 'production')
+  // FIXME: we can't use buble any more because I like to use 'for-of'
+  // We could switch to babel if we really need es5 support
   // Note: legacy build can not be mixed with the other builds
-  buildLib('browser:legacy', 'production')
+  // buildLib('browser:legacy', 'production')
 })
 
 b.task('test:browser', ['lib:browser:dev'], buildTestsBrowser)

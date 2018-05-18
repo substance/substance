@@ -128,48 +128,49 @@ function RenderingEngineTests (debug) {
   })
 
   // NOTE: Dunno if this is a good test. Obviously it depends too much on the performance of the device
-  test('(Performance) Rendering a large number of components with ref', (t) => {
-    const N = 100
-    const M = 52
-    const data = []
-    for (let i = 0; i < N; i++) {
-      let row = []
-      for (let j = 0; j < M; j++) {
-        row.push(`${i}-${j}`)
-      }
-      data.push(row)
-    }
-    class Matrix extends Component {
-      render ($$) {
-        let el = $$('table').css({
-          overflow: 'auto',
-          height: '100px'
-        })
-        const data = this.props.data
-        for (let i = 0; i < data.length; i++) {
-          let row = data[i]
-          let rowEl = $$('tr')
-          for (let j = 0; j < row.length; j++) {
-            rowEl.append(
-              $$('td')
-                .ref(row[j])
-                .text(row[j]))
-          }
-          el.append(rowEl)
-        }
-        return el
-      }
-    }
-    let t0 = Date.now()
-    let comp = Matrix.mount({data}, getMountPoint(t))
-    let t1 = Date.now() - t0
-    t0 = Date.now()
-    comp.setProps({data})
-    let t2 = Date.now() - t0
-    t.ok(t1 < 1000, 'First rendering should be finished in reasonable time')
-    t.ok(t2 < 1000, 'Second rendering should be finished in reasonable time')
-    t.end()
-  })
+  // TODO: we should do some performance metrics somewhere else, not as a test
+  // test('(Performance) Rendering a large number of components with ref', (t) => {
+  //   const N = 100
+  //   const M = 52
+  //   const data = []
+  //   for (let i = 0; i < N; i++) {
+  //     let row = []
+  //     for (let j = 0; j < M; j++) {
+  //       row.push(`${i}-${j}`)
+  //     }
+  //     data.push(row)
+  //   }
+  //   class Matrix extends Component {
+  //     render ($$) {
+  //       let el = $$('table').css({
+  //         overflow: 'auto',
+  //         height: '100px'
+  //       })
+  //       const data = this.props.data
+  //       for (let i = 0; i < data.length; i++) {
+  //         let row = data[i]
+  //         let rowEl = $$('tr')
+  //         for (let j = 0; j < row.length; j++) {
+  //           rowEl.append(
+  //             $$('td')
+  //               .ref(row[j])
+  //               .text(row[j]))
+  //         }
+  //         el.append(rowEl)
+  //       }
+  //       return el
+  //     }
+  //   }
+  //   let t0 = Date.now()
+  //   let comp = Matrix.mount({data}, getMountPoint(t))
+  //   let t1 = Date.now() - t0
+  //   t0 = Date.now()
+  //   comp.setProps({data})
+  //   let t2 = Date.now() - t0
+  //   t.ok(t1 < 1000, 'First rendering should be finished in reasonable time')
+  //   t.ok(t2 < 1000, 'Second rendering should be finished in reasonable time')
+  //   t.end()
+  // })
 }
 
 function _capture (comp) {

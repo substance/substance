@@ -3,11 +3,15 @@ import last from '../util/last'
 import Coordinate from './Coordinate'
 
 /*
-  Internal helper class used by model/data/Node.
+  Internal helper class for schema reflection.
 */
-export default class Property {
-  constructor (definition) {
+export default class NodeProperty {
+  constructor (name, definition) {
+    this.name = name
     this.definition = definition
+
+    Object.freeze(this)
+    Object.freeze(definition)
   }
 
   isArray () {
@@ -72,7 +76,7 @@ export default class Property {
     return this.definition.type
   }
 
-  get name () {
-    return this.definition.name
+  get targetTypes () {
+    return this.definition.targetTypes
   }
 }

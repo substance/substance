@@ -11,11 +11,8 @@ export default class ListComponent extends NodeComponent {
       if (isString(item)) {
         return $$(item)
       } else if (item.type === 'list-item') {
-        let path = item.getPath()
         return $$(ListItemComponent, {
-          path,
-          node: item,
-          tagName: 'li'
+          node: item
         }).ref(item.id)
       }
     })

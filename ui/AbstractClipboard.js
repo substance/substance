@@ -1,4 +1,3 @@
-import platform from '../util/platform'
 import substanceGlobals from '../util/substanceGlobals'
 import ClipboardImporter from '../model/ClipboardImporter'
 import ClipboardExporter from '../model/ClipboardExporter'
@@ -35,10 +34,7 @@ export default class AbstractClipboard {
       event.preventDefault()
       // store as plain text and html
       event.clipboardData.setData('text/plain', clipboardData.text)
-      // WORKAROUND: under IE and Edge it is not permitted to set 'text/html'
-      if (!platform.isIE && !platform.isEdge) {
-        event.clipboardData.setData('text/html', clipboardData.html)
-      }
+      event.clipboardData.setData('text/html', clipboardData.html)
     }
   }
 
@@ -82,27 +78,12 @@ export default class AbstractClipboard {
       html = clipboardData.getData('text/html')
     }
 
-    // HACK: to allow at least in app copy and paste under Edge (which blocks HTML)
-    // we guess by comparing the old and new plain text
-    if (platform.isEdge &&
-        substanceGlobals.clipboardData &&
-        substanceGlobals.clipboardData.text === plainText) {
-      html = substanceGlobals.clipboardData.html
-    } else {
-      substanceGlobals.clipboardData = {
-        text: plainText,
-        html: html
-      }
+    substanceGlobals.clipboardData = {
+      text: plainText,
+      html: html
     }
 
     // console.log('onPaste(): html = ', html);
-
-    // WORKAROUND: FF does not provide HTML coming in from other applications
-    // so fall back to pasting plain text
-    if (platform.isFF && !html) {
-      this._pastePlainText(plainText)
-      return
-    }
 
     // if we have content given as HTML we let the importer assess the quality first
     // and fallback to plain text import if it's bad

@@ -13,7 +13,7 @@
   "jsnext:main": "dist/substance.es.js",
   "scripts": {
     "prepublish": "node make publish",
-    "lint": "standard collab/**/*.js dom/**/*.js model/**/*.js packages/**/*.js test/**/*.js ui/**/*.js util/**/*.js xml/**/*.js index.es.js",
+    "lint": "standard collab/**/*.js dom/**/*.js model/**/*.js packages/**/*.js ui/**/*.js util/**/*.js xml/**/*.js index.es.js",
     "dev": "node make test:browser:pure -w -s",
     "pretest": "npm run lint",
     "test": "node make test",
@@ -43,7 +43,7 @@
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
     "substance-bundler": "^0.24.1",
-    "substance-test": "^0.9.4"
+    "substance-test": "^0.11.0"
   },
   "files": [
     "collab",

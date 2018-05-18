@@ -321,7 +321,8 @@ function DOMElementTests (impl) {
 
   test('getStyle()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div style="color:blue"></div>', 'html')
-    t.equal(el.getStyle('color'), 'blue', 'element should have style')
+    let expected = 'blue'
+    t.equal(el.getStyle('color'), expected, 'element should have style')
     t.equal(el.getAttribute('style'), 'color:blue', 'style can be retrieved via "style" attribute')
     t.end()
   })
@@ -329,10 +330,17 @@ function DOMElementTests (impl) {
   test('setStyle()', (t) => {
     let doc = DefaultDOMElement.createDocument('html')
     let el = doc.createElement('div')
+
     el.setStyle('color', 'blue')
-    t.equal(el.getStyle('color'), 'blue', 'element should have style set')
+    let actual = el.getStyle('color')
+    let expected = 'blue'
+    t.equal(actual, expected, 'element should have style set')
+
     el.setAttribute('style', 'color:green')
-    t.equal(el.getStyle('color'), 'green', 'style can be set via attribute "style" too')
+    actual = el.getStyle('color')
+    expected = 'green'
+    t.equal(actual, expected, 'style can be set via attribute "style" too')
+
     t.end()
   })
 
@@ -358,14 +366,23 @@ function DOMElementTests (impl) {
 
   test('css()', (t) => {
     let el = DefaultDOMElement.parseSnippet('<div style="color:blue"></div>', 'html')
-    t.equal(el.css('color'), 'blue', 'can access style via jquery style getter')
+
+    let actual = el.css('color')
+    let expected = 'blue'
+    t.equal(actual, expected, 'can access style via jquery style getter')
+
     el.css('color', 'green')
-    t.equal(el.getStyle('color'), 'green', 'can change style via jquery style setter')
+    actual = el.getStyle('color')
+    expected = 'green'
+    t.equal(actual, expected, 'can change style via jquery style setter')
+
     el.css({
       color: 'red',
-      background: 'orange'
+      'background-color': 'orange'
     })
-    t.deepEqual([el.getStyle('color'), el.getStyle('background')], ['red', 'orange'], 'can change multiple styles at once via jquery style setter')
+    actual = [el.getStyle('color'), el.getStyle('background-color')]
+    expected = ['red', 'orange']
+    t.deepEqual(actual, expected, 'can change multiple styles at once via jquery style setter')
     t.end()
   })
 
@@ -391,7 +408,13 @@ function DOMElementTests (impl) {
 
   test('innerHTML on XML', (t) => {
     let el = DefaultDOMElement.parseSnippet('<foo>abc<bar bla="foo" blupp="foo">TEST</bar>def</foo>', 'xml')
-    t.equal(el.innerHTML, 'abc<bar bla="foo" blupp="foo">TEST</bar>def', 'el.innerHTML should give the XML of the element content')
+    let innerHTML = el.innerHTML
+    // harr. Edge is having a random order of attributes
+    // so we see if we find some snippets
+    let innerHTMLIsOk = ['abc<bar', 'bla="foo"', 'blupp="foo"', '>TEST</bar>def'].reduce((acc, s) => {
+      return acc && innerHTML.indexOf(s) > -1
+    }, true)
+    t.ok(innerHTMLIsOk, 'el.innerHTML should give the XML of the element content')
     el.innerHTML = 'TEST'
     t.equal(el.innerHTML, 'TEST', 'setting innerHTML should replace the content')
     t.end()
@@ -413,7 +436,11 @@ function DOMElementTests (impl) {
 
   test('outerHTML of XML with camelCase tagnames', function (t) {
     let el = DefaultDOMElement.parseSnippet('<dummy><myNode></myNode></dummy>', 'xml')
-    t.equal(el.outerHTML, '<dummy><myNode/></dummy>', 'XML tags should be serialized preserving case.')
+    let expected = '<dummy><myNode/></dummy>'
+    let actual = el.outerHTML
+    // WORKAROUND: Edge inserts a whitespae before '/>'
+    if (platform.inBrowser && platform.isEdge) actual = actual.replace(/\s\/>/g, '/>')
+    t.equal(actual, expected, 'XML tags should be serialized preserving case.')
     t.end()
   })
 
@@ -640,7 +667,13 @@ function DOMElementTests (impl) {
     let doc = DefaultDOMElement.createDocument('xml')
     doc.setDoctype('foo', 'Foo 1.0', 'http://schema.org/foo.dtd')
     doc.append(doc.createElement('foo'))
-    t.equal(doc.serialize(), '<!DOCTYPE foo PUBLIC "Foo 1.0" "http://schema.org/foo.dtd"><foo/>', 'doctype should have been serialized')
+    let actual = doc.serialize()
+    let expected = '<!DOCTYPE foo PUBLIC "Foo 1.0" "http://schema.org/foo.dtd"><foo/>'
+    // WORKAROUND: Edge inserts a whitespae before '/>'
+    if (platform.inBrowser && platform.isEdge) actual = actual.replace(/\s\/>/g, '/>')
+    // WORKARONG: FF is adding a \n after DOCTYPE element
+    if (platform.inBrowser && platform.isFF) actual = actual.replace(/>\s+</g, '><')
+    t.equal(actual, expected, 'doctype should have been serialized')
     t.end()
   })
 
@@ -653,7 +686,12 @@ function DOMElementTests (impl) {
       { name: 'foo', publicId: 'Foo 1.0', systemId: 'http://schema.org/foo.dtd' },
       'doctype should have been parsed correctly'
     )
-    t.equal(doc.serialize(), xml, 'doctype should have been serialized correctly')
+    let actual = doc.serialize()
+    // WORKAROUND: Edge inserts a whitespae before '/>'
+    if (platform.inBrowser && platform.isEdge) actual = actual.replace(/\s\/>/g, '/>')
+    // WORKARONG: FF is adding a \n after DOCTYPE element
+    if (platform.inBrowser && platform.isFF) actual = actual.replace(/>\s+</g, '><')
+    t.equal(actual, xml, 'doctype should have been serialized correctly')
     t.end()
   })
 }

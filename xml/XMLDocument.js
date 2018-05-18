@@ -5,8 +5,7 @@ import AnnotationIndex from '../model/AnnotationIndex'
 import DocumentNodeFactory from '../model/DocumentNodeFactory'
 import uuid from '../util/uuid'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
-
-import ParentNodeHook from './ParentNodeHook'
+import XMLParentNodeHook from './XMLParentNodeHook'
 import XMLEditingInterface from './XMLEditingInterface'
 
 export default
@@ -18,7 +17,7 @@ class XMLDocument extends Document {
     this.addIndex('type', new PropertyIndex('type'))
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
-    ParentNodeHook.register(this)
+    XMLParentNodeHook.register(this)
   }
 
   toXML () {
