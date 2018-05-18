@@ -232,7 +232,7 @@ function _compileDefintion (definition) {
       if (defs.length > 1) {
         defs.forEach(t => {
           if (_valueTypes.has(t)) {
-            throw new Error('Multi-types must all be referential types.')
+            throw new Error('Multi-types must consist of node types.')
           }
         })
         definition.type = [ 'array', 'id' ]
