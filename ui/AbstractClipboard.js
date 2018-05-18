@@ -1,4 +1,3 @@
-import platform from '../util/platform'
 import substanceGlobals from '../util/substanceGlobals'
 import ClipboardImporter from '../model/ClipboardImporter'
 import ClipboardExporter from '../model/ClipboardExporter'
