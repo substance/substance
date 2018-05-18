@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import { documentHelpers, EditingInterface } from 'substance'
+import { documentHelpers, EditingInterface, toUnixLineEndings } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 
@@ -105,6 +105,40 @@ test('Pasting two paragraphs', function (t) {
   t.equal(body.nodes[1], test2.id, 'Second part should go into a single paragraph.')
   t.equal(tx.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.')
   t.equal(body.nodes[3], 'p2', 'After that should follow p2.')
+  t.end()
+})
+
+test('Pasting two structured content into TextProperty (#1111)', (t) => {
+  let { tx } = _fixture(simple)
+  let detached = tx.create({
+    id: 'detached',
+    type: 'paragraph',
+    content: '012345'
+  })
+  let snippet = tx.createSnippet()
+  let container = snippet.getContainer()
+  let test1 = snippet.create({
+    type: 'paragraph',
+    id: 'test1',
+    content: 'AA'
+  })
+  container.show(test1.id)
+  let test2 = snippet.create({
+    type: 'paragraph',
+    id: 'test2',
+    content: 'BB'
+  })
+  container.show(test2.id)
+  tx.setSelection({
+    type: 'property',
+    path: detached.getPath(),
+    startOffset: 3,
+    // 'detached' is not part of a container
+    containerId: null
+  })
+  tx.paste(snippet)
+  let actual = toUnixLineEndings(detached.content)
+  t.equal(actual, '012AA\nBB345', 'Plain text should have been inserted.')
   t.end()
 })
 
