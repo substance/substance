@@ -1327,7 +1327,7 @@ test('DEL33: Deleting using BACKSPACE at the start of a text property editor', (
   t.end()
 })
 
-test('DEL44: Deleting using DEL at the end of a text property editor', (t) => {
+test('DEL34: Deleting using DEL at the end of a text property editor', (t) => {
   let { editorSession, doc } = setupEditor(t)
   let p = doc.create({
     id: 'p',
@@ -1346,6 +1346,25 @@ test('DEL44: Deleting using DEL at the end of a text property editor', (t) => {
     })
   }, 'Should not throw an exception')
   t.equal(p.getText(), 'foo', '.. and the text should be untouched')
+  t.end()
+})
+
+test('DEL35: Deleting a NodeSelection', (t) => {
+  let { editorSession, doc } = setupEditor(t, _t1)
+  let body = doc.get('body')
+  let table = doc.get('t1')
+  editorSession.setSelection({
+    type: 'node',
+    nodeId: table.id,
+    containerId: body.id
+  })
+  let change = editorSession.transaction((tx) => {
+    tx.deleteSelection()
+  })
+  let deleteOps = change.ops.filter(op => op.isDelete())
+  let deletedIds = deleteOps.map(op => op.path[0])
+  let expected = ['t1', 't1_a1', 't1_b1', 't1_a2', 't1_b2']
+  t.deepEqual(deletedIds, expected, 'The nodes should have been deleted hierarchically and in correct order.')
   t.end()
 })
 
