@@ -35,9 +35,9 @@ export default class Node extends EventEmitter {
       // check integrity of provided data, such as type correctness,
       // and mandatory properties
       const propIsGiven = (data[name] !== undefined)
-      const hasDefault = property.hasDefault()
       const isOptional = property.isOptional()
-      if ((!isOptional && !hasDefault) && !propIsGiven) {
+      const hasDefault = property.hasDefault()
+      if (!isOptional && !propIsGiven) {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
@@ -208,11 +208,44 @@ function _compileSchema (schema) {
   return compiledSchema
 }
 
+const _valueTypes = new Set(['string', 'number', 'boolean', 'object', 'array'])
+
 function _compileDefintion (definition) {
   let result = definition
-  if (isArray(definition.type) && definition.type[0] !== 'array') {
+  if (isArray(definition.type)) {
+    // there are different allowed formats:
+    // 1. canonical: ['array', 'id'], ['array', 'some-node']
+    // 2. implcit: ['object']
+    // 3. multi-type: ['p', 'list']
+    let defs = definition.type
+    let lastIdx = defs.length - 1
+    let first = defs[0]
+    let last = defs[lastIdx]
+    let isCanonical = first === 'array'
+    let hasTargetType = last !== 'id' && !_valueTypes.has(last)
     definition.targetTypes = definition.type
-    definition.type = [ 'array', 'id' ]
+    if (isCanonical) {
+      definition.type = defs.slice()
+      definition.type[lastIdx] = 'id'
+      if (hasTargetType) definition.targetTypes = [last]
+    } else {
+      if (defs.length > 1) {
+        defs.forEach(t => {
+          if (_valueTypes.has(t)) {
+            throw new Error('Multi-types must consist of node types.')
+          }
+        })
+        definition.type = [ 'array', 'id' ]
+        definition.targetTypes = defs
+      } else {
+        if (_valueTypes.has(first)) {
+          definition.type = [ 'array', first ]
+        } else {
+          definition.type = [ 'array', 'id' ]
+          definition.targetTypes = defs
+        }
+      }
+    }
   } else if (definition.type === 'text') {
     result = {
       type: 'string',

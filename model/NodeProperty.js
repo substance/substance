@@ -35,7 +35,7 @@ export default class NodeProperty {
   }
 
   isOptional () {
-    return Boolean(this.definition.optional)
+    return this.definition.optional || this.hasDefault()
   }
 
   isNotNull () {
