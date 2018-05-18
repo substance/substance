@@ -12,7 +12,7 @@
   "main": "dist/substance.cjs.js",
   "jsnext:main": "dist/substance.es.js",
   "scripts": {
-    "prepack": "node make publish",
+    "prepack": "npm install && node make publish",
     "lint": "standard collab/**/*.js dom/**/*.js model/**/*.js packages/**/*.js ui/**/*.js util/**/*.js xml/**/*.js index.es.js",
     "dev": "node make test:browser:pure -w -s",
     "pretest": "npm run lint",
