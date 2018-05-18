@@ -185,8 +185,11 @@ class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   _finishFragment (fragment, context, parentContext) {
-    context.attr('data-length', fragment.length)
-    parentContext.append(context)
+    let anno = fragment.node
+    if (context.children.length !== 0 || anno.start.equals(anno.end)) {
+      context.attr('data-length', fragment.length)
+      parentContext.append(context)
+    }
   }
 
   _getDOMCoordinate (el, charPos) {

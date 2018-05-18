@@ -25,8 +25,7 @@ import TextPropertyComponent from './TextPropertyComponent'
   })
   ```
 */
-
-class TextPropertyEditor extends Surface {
+export default class TextPropertyEditor extends Surface {
   constructor (parent, props) {
     // making props.name optional
     props.name = props.name || props.path.join('.')
@@ -102,5 +101,3 @@ class TextPropertyEditor extends Surface {
 }
 
 TextPropertyEditor.prototype._isTextPropertyEditor = true
-
-export default TextPropertyEditor

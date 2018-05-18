@@ -4,7 +4,7 @@ import Registry from '../util/Registry'
 import encodeXMLEntities from '../util/encodeXMLEntities'
 import Fragmenter from './Fragmenter'
 
-class DOMExporter {
+export default class DOMExporter {
   constructor (config, context) {
     this.context = context || {}
     if (!config.converters) {
@@ -199,5 +199,3 @@ class DOMExporter {
     return el
   }
 }
-
-export default DOMExporter

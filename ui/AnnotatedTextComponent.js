@@ -13,7 +13,7 @@ import InlineNodeComponent from './InlineNodeComponent'
   @prop {String[]} path The property to be rendered.
 */
 
-class AnnotatedTextComponent extends Component {
+export default class AnnotatedTextComponent extends Component {
   render ($$) {
     let el = this._renderContent($$)
       .addClass('sc-annotated-text')
@@ -103,8 +103,9 @@ class AnnotatedTextComponent extends Component {
   }
 
   _finishFragment (fragment, context, parentContext) {
-    parentContext.append(context)
+    let anno = fragment.node
+    if (context.children.length !== 0 || anno.start.equals(anno.end)) {
+      parentContext.append(context)
+    }
   }
 }
-
-export default AnnotatedTextComponent
