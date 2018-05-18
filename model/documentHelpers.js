@@ -1,5 +1,6 @@
 import filter from '../util/filter'
 import flatten from '../util/flatten'
+import flattenOften from '../util/flattenOften'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
@@ -133,21 +134,28 @@ export function deleteNode (doc, node) {
       doc.delete(annos[i].id)
     }
   }
-  // Recursive deletion of owned nodes
   let nodeSchema = node.getSchema()
-  nodeSchema.getOwnedProperties().forEach(prop => {
+  // Note: we have to delete from top to down
+  // i.e. first delete a parent then its children.
+  // This way when undone, children will be created first.
+  doc.delete(node.id)
+  // Recursive deletion of owned nodes
+  let ownedProps = nodeSchema.getOwnedProperties()
+  ownedProps.forEach(prop => {
     let value = node[prop.name]
     if (prop.isArray()) {
       let ids = value
-      ids.forEach((id) => {
-        deleteNode(doc, doc.get(id))
-      })
+      if (ids.length > 0) {
+        // property can be a matrix
+        if (isArray(ids[0])) ids = flattenOften(ids, 2)
+        ids.forEach((id) => {
+          deleteNode(doc, doc.get(id))
+        })
+      }
     } else {
       deleteNode(doc, doc.get(value))
     }
   })
-
-  doc.delete(node.id)
 }
 
 /*
