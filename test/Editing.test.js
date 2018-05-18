@@ -2170,7 +2170,7 @@ test('CP10: Copy and Pasting a List partially', (t) => {
   t.end()
 })
 
-test('AN1: Annotating without unknown annotation type', (t) => {
+test('AN1: Annotating with unknown annotation type', (t) => {
   let { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
@@ -2199,6 +2199,75 @@ test('AN2: Tying to annotate using a non-annotation type', (t) => {
       tx.annotate({type: 'paragraph'})
     })
   }, 'Should throw an exception')
+  t.end()
+})
+
+test('AN3: Annotate a paragraph with <strong>', (t) => {
+  let { editorSession, doc } = setupEditor(t, _p1)
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 0,
+    endOffset: 0,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.annotate({ type: 'strong' })
+  })
+  let annos = doc.getAnnotations(p1.getPath())
+  t.equal(annos.length, 1, 'there should be one bold annotation')
+  t.end()
+})
+
+test('AN4: Superpose <link>s with a <strong> annotation (#1166)', (t) => {
+  let { editorSession, doc } = setupEditor(t)
+  editorSession.transaction(tx => {
+    let p1 = tx.create({
+      type: 'paragraph',
+      id: 'p1',
+      content: 'lorem ipsum dolor sit amet'
+    })
+    tx.get('body').show(p1)
+  })
+  let p1 = doc.get('p1')
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 6,
+    endOffset: 11,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.annotate({ id: 'l1', type: 'link', url: 'http://foo.io' })
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 18,
+    endOffset: 21,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.annotate({ id: 'l2', type: 'link', url: 'http://bar.io' })
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: p1.getPath(),
+    startOffset: 6,
+    endOffset: 21,
+    containerId: 'body'
+  })
+  editorSession.transaction((tx) => {
+    tx.annotate({ id: 's1', type: 'strong' })
+  })
+
+  let annos = doc.getAnnotations(p1.getPath())
+  t.equal(annos.length, 3, 'there should be 3 annotations')
+  let htmlExporter = editorSession.getConfigurator().createExporter('html', editorSession.getContext())
+  let el = htmlExporter.convertNode(p1)
+  let expected = '<p data-id="p1">lorem <a data-id="l1" href="http://foo.io"><strong data-id="s1">ipsum</strong></a><strong data-id="s1"> dolor </strong><a data-id="l2" href="http://bar.io"><strong data-id="s1">sit</strong></a> amet</p>'
+  t.equal(el.outerHTML, expected, 'Node should be converted to HTML correctly')
   t.end()
 })
 

@@ -9,10 +9,10 @@ export default {
   },
 
   export: function (link, el) {
-    el.attr({
-      href: link.url,
-      title: link.title
-    })
+    let url = link.url
+    if (url) el.setAttribute('href', url)
+    let title = link.title
+    if (title) el.setAttribute('title', title)
   }
 
 }

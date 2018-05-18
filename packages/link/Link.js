@@ -1,7 +1,7 @@
 import PropertyAnnotation from '../../model/PropertyAnnotation'
 import Fragmenter from '../../model/Fragmenter'
 
-class Link extends PropertyAnnotation {}
+export default class Link extends PropertyAnnotation {}
 
 Link.schema = {
   type: 'link',
@@ -13,5 +13,3 @@ Link.schema = {
 Link.fragmentation = Fragmenter.SHOULD_NOT_SPLIT
 
 Link.autoExpandRight = false
-
-export default Link
