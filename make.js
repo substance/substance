@@ -268,12 +268,19 @@ b.task('cover', () => {
   })
 })
 
+b.task('minify', () => {
+  install(b, 'uglify-es', UGLIFY_VERSION)
+  b.minify(DIST + 'substance.cjs.js', DIST + 'substance.cjs.min.js')
+  b.minify(DIST + 'substance.es.js', DIST + 'substance.es.min.js')
+  b.minify(DIST + 'substance.js', DIST + 'substance.min.js')
+})
+
 b.task('vendor', buildVendor)
   .describe('pre-bundles vendor libraries')
 
 b.task('default', ['clean', 'lib'])
 
-b.task('publish', ['clean', 'lib'])
+b.task('publish', ['clean', 'lib', 'minify'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'lib:browser:dev', 'test:browser'])
