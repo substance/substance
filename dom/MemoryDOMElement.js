@@ -547,6 +547,14 @@ class MemoryDOMElement extends DOMElement {
     this._propagateEvent(new MemoryDOMElementEvent(name, this, data))
   }
 
+  getBoundingClientRect () {
+    return { top: 0, left: 0, height: 0, width: 0 }
+  }
+
+  getClientRects () {
+    return [{ top: 0, left: 0, height: 0, width: 0 }]
+  }
+
   _propagateEvent (event) {
     let listeners = this.eventListeners
     if (listeners) {
