@@ -1,7 +1,6 @@
 import isString from '../util/isString'
 import keys from '../util/keys'
 import * as selectionHelpers from '../model/selectionHelpers'
-import EditingBehavior from '../model/EditingBehavior'
 import Surface from './Surface'
 import RenderingEngine from './RenderingEngine'
 
@@ -42,8 +41,6 @@ class ContainerEditor extends Surface {
     if (!this.container) {
       throw new Error('Container with id ' + this.containerId + ' does not exist.')
     }
-
-    this.editingBehavior = this.context.editingBehavior || new EditingBehavior()
 
     this._deriveInternalState(this.props)
   }
