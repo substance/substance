@@ -208,7 +208,7 @@ class Component extends EventEmitter {
     @return {Object} the child context
   */
   getChildContext () {
-    return this.childContext || {}
+    return {}
   }
 
   /**
