@@ -40,9 +40,9 @@ export default {
       en: 'Heading 3',
       de: 'Überschrift 3'
     })
-    config.addIcon('heading1', { 'fontawesome': 'fa-header' })
-    config.addIcon('heading2', { 'fontawesome': 'fa-header' })
-    config.addIcon('heading3', { 'fontawesome': 'fa-header' })
+    config.addIcon('heading1', { 'fontawesome': 'fa-heading' })
+    config.addIcon('heading2', { 'fontawesome': 'fa-heading' })
+    config.addIcon('heading3', { 'fontawesome': 'fa-heading' })
   },
   Heading,
   HeadingComponent,

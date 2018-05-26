@@ -22,7 +22,7 @@ export default {
     })
     config.addTool('edit-link', EditLinkTool)
     config.addIcon('link', { 'fontawesome': 'fa-link' })
-    config.addIcon('open-link', { 'fontawesome': 'fa-external-link' })
+    config.addIcon('open-link', { 'fontawesome': 'fa-external-link-alt' })
     config.addLabel('link', {
       en: 'Link',
       de: 'Link'

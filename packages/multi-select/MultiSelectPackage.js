@@ -4,8 +4,8 @@ export default {
   name: 'multi-select',
   configure: function (config) {
     config.addComponent('multi-select', MultiSelect)
-    config.addIcon('selected-option', { 'fontawesome': 'fa-check-square-o' })
-    config.addIcon('unselected-option', { 'fontawesome': 'fa-square-o' })
+    config.addIcon('selected-option', { 'fontawesome': 'fa-check-square' })
+    config.addIcon('unselected-option', { 'fontawesome': 'fa-square' })
     config.addLabel('expand-options', {
       en: 'Show more',
       de: 'Zeig mehr'

@@ -54,7 +54,7 @@ export default {
       en: 'Decrease indentation',
       de: 'Einrückung verringern'
     })
-    config.addIcon('dedent-list', { 'fontawesome': 'fa-dedent' })
+    config.addIcon('dedent-list', { 'fontawesome': 'fa-outdent' })
   },
   ListNode,
   ListItemNode,
