@@ -1,4 +1,6 @@
 import * as async from './async'
+import * as tableHelpers from './tableHelpers'
+
 export { default as ArrayIterator } from './ArrayIterator'
 export { default as ArrayTree } from './ArrayTree'
 export { default as array2table } from './array2table'
@@ -55,6 +57,7 @@ export { default as sendRequest } from './sendRequest'
 export { default as startsWith } from './startsWith'
 export { default as SubstanceError } from './SubstanceError'
 export { default as substanceGlobals } from './substanceGlobals'
+export { tableHelpers }
 export { default as times } from './times'
 export { default as toUnixLineEndings } from './toUnixLineEndings'
 export { default as TreeIndex } from './TreeIndex'
