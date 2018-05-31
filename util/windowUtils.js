@@ -111,6 +111,12 @@ export function setDOMSelection (startNode, startOffset, endNode, endOffset) {
   wsel.addRange(wrange)
 }
 
+/**
+  Get the value of a querystring parameter
+  @param  {String} param The field to get the value of
+  @param  {String} url   The URL to get the value from (optional)
+  @return {String}       The param value
+ */
 export function getQueryStringParam (param, url) {
   if (typeof window === 'undefined') return null
   let href = url || window.location.href
