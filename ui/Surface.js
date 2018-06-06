@@ -731,7 +731,8 @@ export default class Surface extends Component {
   _getNodeProps (node) {
     return {
       node: node,
-      placeholder: this.props.placeholder
+      placeholder: this.props.placeholder,
+      disabled: this.props.disabled
     }
   }
 

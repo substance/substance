@@ -115,14 +115,17 @@ class ContainerEditor extends Surface {
 
   _renderNode ($$, node, nodeIndex) {
     if (!node) throw new Error('Illegal argument')
-    let componentRegistry = this.getComponentRegistry()
-    let ComponentClass = componentRegistry.get(node.type)
+    let ComponentClass = this._getNodeComponentClass(node)
     let props = this._getNodeProps(node)
+    return $$(ComponentClass, props).ref(node.id)
+  }
+
+  _getNodeComponentClass (node) {
+    let ComponentClass = this.getComponent(node.type)
     if (node.isText() || ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
-      return $$(ComponentClass, props).ref(node.id)
+      return ComponentClass
     } else {
-      const IsolatedNodeComponent = this.getComponent('isolated-node')
-      return $$(IsolatedNodeComponent, props).ref(node.id)
+      return this.getComponent('isolated-node')
     }
   }
 
