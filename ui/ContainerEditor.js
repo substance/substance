@@ -3,7 +3,6 @@ import keys from '../util/keys'
 import * as selectionHelpers from '../model/selectionHelpers'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from './Surface'
-import IsolatedNodeComponent from './IsolatedNodeComponent'
 import RenderingEngine from './RenderingEngine'
 
 /**
@@ -125,6 +124,7 @@ class ContainerEditor extends Surface {
       if (ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
         return $$(ComponentClass, props).ref(node.id)
       } else {
+        const IsolatedNodeComponent = this.getComponent('isolated-node')
         return $$(IsolatedNodeComponent, props).ref(node.id)
       }
     }
