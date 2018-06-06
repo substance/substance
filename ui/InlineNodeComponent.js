@@ -89,7 +89,8 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
-  _getContentClass (node) {
+  _getContentClass () {
+    const node = this.props.node
     let ComponentClass
     // first try to get the component registered for this node
     ComponentClass = this.getComponent(node.type, true)
@@ -98,6 +99,9 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     if (!ComponentClass) {
       ComponentClass = this.getComponent('unsupported-inline-node', true)
     }
+    // TODO: this should not be in substance
+    // instead an application should register a custom implementation
+    // overriding _getContentClass()
     if (!ComponentClass) {
       console.error(`No component registered for inline node '${node.type}'.`)
       ComponentClass = StubInlineNodeComponent
