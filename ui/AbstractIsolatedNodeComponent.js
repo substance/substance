@@ -52,12 +52,7 @@ class AbstractIsolatedNodeComponent extends Component {
       console.error('Could not resolve a component for type: ' + node.type)
       return $$(this.__elementTag)
     } else {
-      let props = Object.assign({
-        disabled: this.props.disabled,
-        node: node,
-        isolatedNodeState: this.state.mode,
-        focused: (this.state.mode === 'focused')
-      }, options)
+      let props = Object.assign(this._getContentProps(), options)
       return $$(ComponentClass, props)
     }
   }
@@ -145,6 +140,15 @@ class AbstractIsolatedNodeComponent extends Component {
       ComponentClass = Component
     }
     return ComponentClass
+  }
+
+  _getContentProps () {
+    return {
+      disabled: this.props.disabled,
+      node: this.props.node,
+      isolatedNodeState: this.state.mode,
+      focused: (this.state.mode === 'focused')
+    }
   }
 
   _getSurface (selState) {
