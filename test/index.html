@@ -6,4 +6,11 @@
     <script type="text/javascript" src="../node_modules/substance-test/dist/testsuite.js"></script>
     <script type="text/javascript" src="../tmp/tests.js"></script>
   </head>
+  <script type="text/javascript">
+    window.addEventListener('load', () => {
+      if (substance.platform.devtools) {
+        substance.substanceGlobals.DEBUG_RENDERING = true
+      }
+    })
+  </script>
 </html>
