@@ -1,5 +1,6 @@
 import {
   ImagePackage, Component, Configurator,
+  BasePackage,
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
   ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage,
   SubscriptPackage, SuperscriptPackage
@@ -32,6 +33,7 @@ export default function getTestConfig () {
     defaultTextType: 'paragraph',
     version: 1.0
   })
+  config.import(BasePackage)
   config.import(ParagraphPackage)
   config.import(HeadingPackage)
   config.import(StrongPackage)
@@ -42,7 +44,6 @@ export default function getTestConfig () {
   config.import(ListPackage)
   config.import(TablePackage)
   config.import(CodeblockPackage)
-  config.import(FilePackage)
   config.import(ImagePackage)
 
   config.addComponent('@container', TestContainerComponent)
