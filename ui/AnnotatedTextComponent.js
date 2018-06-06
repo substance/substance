@@ -1,7 +1,6 @@
 import Fragmenter from '../model/Fragmenter'
 import Component from './Component'
 import AnnotationComponent from './AnnotationComponent'
-import InlineNodeComponent from './InlineNodeComponent'
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -95,7 +94,7 @@ class AnnotatedTextComponent extends Component {
           !ComponentClass.prototype._isInlineNodeComponent &&
           // opt-out for custom implementations
           !ComponentClass.isCustom) {
-        ComponentClass = InlineNodeComponent
+        ComponentClass = this.getComponent('inline-node')
       }
       let el = $$(ComponentClass, { doc: doc, node: node })
       return el
