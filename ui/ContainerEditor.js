@@ -114,7 +114,7 @@ class ContainerEditor extends Surface {
   }
 
   _renderNode ($$, node, nodeIndex) {
-    let props = { node }
+    let props = this._getNodeProps()
     if (!node) throw new Error('Illegal argument')
     if (node.isText()) {
       return this.renderNode($$, node, nodeIndex)
@@ -128,6 +128,10 @@ class ContainerEditor extends Surface {
         return $$(IsolatedNodeComponent, props).ref(node.id)
       }
     }
+  }
+
+  _getNodeProps (node) {
+    return { node }
   }
 
   _extractNodeProps (node) {
