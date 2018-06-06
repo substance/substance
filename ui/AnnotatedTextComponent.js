@@ -74,9 +74,9 @@ class AnnotatedTextComponent extends Component {
   }
 
   _renderFragment ($$, fragment) {
-    let doc = this.getDocument()
     let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
+    let props = this._getFragmentProps(node)
     // TODO: fix support for container annotations
     if (node.type === 'container-annotation-fragment') {
       // return $$(AnnotationComponent, { doc: doc, node: node })
@@ -96,9 +96,13 @@ class AnnotatedTextComponent extends Component {
           !ComponentClass.isCustom) {
         ComponentClass = this.getComponent('inline-node')
       }
-      let el = $$(ComponentClass, { doc: doc, node: node })
+      let el = $$(ComponentClass, props)
       return el
     }
+  }
+
+  _getFragmentProps (node) {
+    return { node }
   }
 
   _finishFragment (fragment, context, parentContext) {
