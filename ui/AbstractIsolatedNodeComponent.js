@@ -10,7 +10,7 @@ class AbstractIsolatedNodeComponent extends Component {
     this._state = { selectionFragment: null }
 
     this.handleAction('escape', this.escape)
-    this.ContentClass = this._getContentClass(this.props.node)
+    this.ContentClass = this._getContentClass()
 
     // NOTE: FF does not allow to navigate contenteditable isles
     let useBlocker = platform.isFF || !this.ContentClass.noBlocker
@@ -52,12 +52,7 @@ class AbstractIsolatedNodeComponent extends Component {
       console.error('Could not resolve a component for type: ' + node.type)
       return $$(this.__elementTag)
     } else {
-      let props = Object.assign({
-        disabled: this.props.disabled,
-        node: node,
-        isolatedNodeState: this.state.mode,
-        focused: (this.state.mode === 'focused')
-      }, options)
+      let props = Object.assign(this._getContentProps(), options)
       return $$(ComponentClass, props)
     }
   }
@@ -136,15 +131,24 @@ class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  _getContentClass (node) {
+  _getContentClass () {
+    const node = this.props.node
     let ComponentClass
     // first try to get the component registered for this node
     ComponentClass = this.getComponent(node.type, true)
     // otherwise just use an empty Component
-    if (!ComponentClass) {
-      ComponentClass = Component
-    }
+    if (!ComponentClass) ComponentClass = Component
+
     return ComponentClass
+  }
+
+  _getContentProps () {
+    return {
+      disabled: this.props.disabled,
+      node: this.props.node,
+      isolatedNodeState: this.state.mode,
+      focused: (this.state.mode === 'focused')
+    }
   }
 
   _getSurface (selState) {

@@ -132,16 +132,6 @@ export default class Surface extends Component {
     return el
   }
 
-  renderNode ($$, node) {
-    let componentRegistry = this.getComponentRegistry()
-    let ComponentClass = componentRegistry.get(node.type)
-    if (!ComponentClass) {
-      console.error('Could not resolve a component for type: ' + node.type)
-      ComponentClass = UnsupportedNode
-    }
-    return $$(ComponentClass, this._extractNodeProps(node)).ref(node.id)
-  }
-
   getComponentRegistry () {
     return this.context.componentRegistry || this.props.componentRegistry
   }
@@ -723,8 +713,6 @@ export default class Surface extends Component {
     }))
   }
 
-  // TODO: we could integrate container node rendering into this helper
-  // TODO: this helper should be available also in non surface context
   _renderNode ($$, nodeId) {
     let doc = this.getDocument()
     let node = doc.get(nodeId)
@@ -740,12 +728,11 @@ export default class Surface extends Component {
     })
   }
 
-  _extractNodeProps (node) {
-    let doc = this.getDocument()
+  _getNodeProps (node) {
     return {
+      node: node,
       placeholder: this.props.placeholder,
-      doc: doc,
-      node: node
+      disabled: this.props.disabled
     }
   }
 

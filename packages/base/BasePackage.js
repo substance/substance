@@ -17,6 +17,9 @@ import UndoCommand from './UndoCommand'
 import RedoCommand from './RedoCommand'
 import SelectAllCommand from './SelectAllCommand'
 import ToolPanelPackage from '../tool-panel/ToolPanelPackage'
+import IsolatedNodeComponent from '../../ui/IsolatedNodeComponent'
+import InlineNodeComponent from '../../ui/InlineNodeComponent'
+import AnnotationComponent from '../../ui/AnnotationComponent'
 
 export default {
   name: 'base',
@@ -85,6 +88,10 @@ export default {
       en: 'Insert Container',
       de: 'Container einfügen'
     })
+
+    config.addComponent('isolated-node', IsolatedNodeComponent)
+    config.addComponent('inline-node', InlineNodeComponent)
+    config.addComponent('annotation', AnnotationComponent)
 
     config.addKeyboardShortcut('CommandOrControl+Z', { command: 'undo' })
     config.addKeyboardShortcut('CommandOrControl+Shift+Z', { command: 'redo' })

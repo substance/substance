@@ -3,7 +3,6 @@ import keys from '../util/keys'
 import * as selectionHelpers from '../model/selectionHelpers'
 import EditingBehavior from '../model/EditingBehavior'
 import Surface from './Surface'
-import IsolatedNodeComponent from './IsolatedNodeComponent'
 import RenderingEngine from './RenderingEngine'
 
 /**
@@ -115,26 +114,18 @@ class ContainerEditor extends Surface {
   }
 
   _renderNode ($$, node, nodeIndex) {
-    let props = { node }
     if (!node) throw new Error('Illegal argument')
-    if (node.isText()) {
-      return this.renderNode($$, node, nodeIndex)
-    } else {
-      let componentRegistry = this.context.componentRegistry
-      let ComponentClass = componentRegistry.get(node.type)
-      if (ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
-        return $$(ComponentClass, props).ref(node.id)
-      } else {
-        return $$(IsolatedNodeComponent, props).ref(node.id)
-      }
-    }
+    let ComponentClass = this._getNodeComponentClass(node)
+    let props = this._getNodeProps(node)
+    return $$(ComponentClass, props).ref(node.id)
   }
 
-  _extractNodeProps (node) {
-    let doc = this.getDocument()
-    return {
-      doc: doc,
-      node: node
+  _getNodeComponentClass (node) {
+    let ComponentClass = this.getComponent(node.type)
+    if (node.isText() || ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
+      return ComponentClass
+    } else {
+      return this.getComponent('isolated-node')
     }
   }
 

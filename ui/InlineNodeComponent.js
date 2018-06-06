@@ -2,6 +2,9 @@ import isEqual from '../util/isEqual'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 import Component from './Component'
 
+// TODO: rename it to IsolatedInlineNodeComponent
+// The thing is that InlineNodeComponent as a general implementation is
+// actually an IsolatedNodeComponent, but the current naming does not reveal that.
 class InlineNodeComponent extends AbstractIsolatedNodeComponent {
   render ($$) {
     const node = this.props.node
@@ -86,7 +89,8 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     })
   }
 
-  _getContentClass (node) {
+  _getContentClass () {
+    const node = this.props.node
     let ComponentClass
     // first try to get the component registered for this node
     ComponentClass = this.getComponent(node.type, true)
@@ -95,6 +99,9 @@ class InlineNodeComponent extends AbstractIsolatedNodeComponent {
     if (!ComponentClass) {
       ComponentClass = this.getComponent('unsupported-inline-node', true)
     }
+    // TODO: this should not be in substance
+    // instead an application should register a custom implementation
+    // overriding _getContentClass()
     if (!ComponentClass) {
       console.error(`No component registered for inline node '${node.type}'.`)
       ComponentClass = StubInlineNodeComponent
