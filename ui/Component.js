@@ -299,7 +299,6 @@ class Component extends EventEmitter {
     TODO: this paramater should really be called 'strict' even if this
     is a breaking change
 
-
     @return {Class}                The ComponentClass
   */
   getComponent (componentName, maybe) {
