@@ -1,6 +1,5 @@
 import Fragmenter from '../model/Fragmenter'
 import Component from './Component'
-import AnnotationComponent from './AnnotationComponent'
 
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
@@ -74,31 +73,45 @@ class AnnotatedTextComponent extends Component {
   }
 
   _renderFragment ($$, fragment) {
-    let componentRegistry = this.getComponentRegistry()
     let node = fragment.node
-    let props = this._getFragmentProps(node)
+
     // TODO: fix support for container annotations
-    if (node.type === 'container-annotation-fragment') {
-      // return $$(AnnotationComponent, { doc: doc, node: node })
-      //   .addClass("se-annotation-fragment")
-      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
-    } else if (node.type === 'container-annotation-anchor') {
-      // return $$(AnnotationComponent, { doc: doc, node: node })
-      //   .addClass("se-anchor")
-      //   .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
-      //   .addClass(node.isStart?"start-anchor":"end-anchor")
-    } else {
-      let ComponentClass = componentRegistry.get(node.type) || AnnotationComponent
-      if (node.constructor.isInline &&
-          // also no extra wrapping if the node is already an inline node
-          !ComponentClass.prototype._isInlineNodeComponent &&
-          // opt-out for custom implementations
-          !ComponentClass.isCustom) {
-        ComponentClass = this.getComponent('inline-node')
-      }
-      let el = $$(ComponentClass, props)
-      return el
+    // if (node.type === 'container-annotation-fragment') {
+    //   return $$(AnnotationComponent, { doc: doc, node: node })
+    //     .addClass("se-annotation-fragment")
+    //     .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"));
+    // } else if (node.type === 'container-annotation-anchor') {
+    //   return $$(AnnotationComponent, { doc: doc, node: node })
+    //     .addClass("se-anchor")
+    //     .addClass(node.anno.getTypeNames().join(' ').replace(/_/g, "-"))
+    //     .addClass(node.isStart?"start-anchor":"end-anchor")
+    // } else {
+    //   ...
+    // }
+
+    let ComponentClass = this._getFragmentComponentClass(node)
+    let props = this._getFragmentProps(node)
+    let el = $$(ComponentClass, props)
+    return el
+  }
+
+  _getFragmentComponentClass (node, noDefault) {
+    let ComponentClass = this.getComponent(node.type, 'not-strict')
+    if (node.constructor.isInline &&
+        // also no extra wrapping if the node is already an inline node
+        !ComponentClass.prototype._isInlineNodeComponent &&
+        // opt-out for custom implementations
+        !ComponentClass.isCustom) {
+      ComponentClass = this.getComponent('inline-node')
     }
+    if (!ComponentClass && !noDefault) {
+      ComponentClass = this._getUnsupportedInlineNodeComponentClass()
+    }
+    return ComponentClass
+  }
+
+  _getUnsupportedInlineNodeComponentClass () {
+    return this.getComponent('annotation')
   }
 
   _getFragmentProps (node) {
