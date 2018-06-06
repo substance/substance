@@ -296,6 +296,10 @@ class Component extends EventEmitter {
 
     @param  {String} componentName The component's registration name
     @param  {Boolean} maybe if `true` then does not throw when no Component is found
+    TODO: this paramater should really be called 'strict' even if this
+    is a breaking change
+
+
     @return {Class}                The ComponentClass
   */
   getComponent (componentName, maybe) {
