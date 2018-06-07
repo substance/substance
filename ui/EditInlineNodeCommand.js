@@ -1,6 +1,6 @@
 import Command from './Command'
 
-class EditInlineNodeCommand extends Command {
+export default class EditInlineNodeCommand extends Command {
   constructor (...args) {
     super(...args)
     if (!this.config.nodeType) {
@@ -8,7 +8,7 @@ class EditInlineNodeCommand extends Command {
     }
   }
 
-  getCommandState (params) {
+  getCommandState (params, context) { // eslint-disable-line no-unused
     let sel = params.selection
     let newState = {
       disabled: true,
@@ -29,13 +29,9 @@ class EditInlineNodeCommand extends Command {
     return newState
   }
 
-  execute(params) { // eslint-disable-line
-
-  }
+  execute (params, context) { } // eslint-disable-line no-unused
 
   _getAnnotationsForSelection (params) {
     return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
 }
-
-export default EditInlineNodeCommand

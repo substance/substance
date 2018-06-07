@@ -2,10 +2,8 @@ import Command from './Command'
 
 /**
   Used for edit tools or property annotations (e.g. EditLinkTool)
-
-  @class
 */
-class EditAnnotationCommand extends Command {
+export default class EditAnnotationCommand extends Command {
   constructor (...args) {
     super(...args)
 
@@ -19,7 +17,7 @@ class EditAnnotationCommand extends Command {
 
     @return {Object} object with `disabled` and `node` properties
   */
-  getCommandState (params) {
+  getCommandState (params, context) { // eslint-disable-line no-unused
     let sel = this._getSelection(params)
     let annos = this._getAnnotationsForSelection(params)
     let newState = {
@@ -33,11 +31,9 @@ class EditAnnotationCommand extends Command {
     return newState
   }
 
-  execute(params) { } // eslint-disable-line
+  execute (params, context) { } // eslint-disable-line no-unused
 
   _getAnnotationsForSelection (params) {
     return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
 }
-
-export default EditAnnotationCommand
