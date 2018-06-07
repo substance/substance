@@ -29,17 +29,17 @@ import Command from './Command'
   ```
 */
 
-class InsertInlineNodeCommand extends Command {
+export default class InsertInlineNodeCommand extends Command {
   /**
     Determine command state for inline node insertion. Command is enabled
     if selection is a property selection.
   */
-  getCommandState (params) {
+  getCommandState (params, context) {
     let sel = params.selection
     let newState = {
-      disabled: this.isDisabled(params),
+      disabled: this.isDisabled(params, context),
       active: false,
-      showInContext: this.showInContext(sel, params)
+      showInContext: this.showInContext(sel, params, context)
     }
     return newState
   }
@@ -48,11 +48,11 @@ class InsertInlineNodeCommand extends Command {
     When cursor is not collapsed tool may be displayed in context (e.g. in an
     overlay)
   */
-  showInContext (sel) {
+  showInContext (sel, context) { // eslint-disable-line no-unused
     return !sel.isCollapsed()
   }
 
-  isDisabled (params) {
+  isDisabled (params, context) { // eslint-disable-line no-unused
     let sel = params.selection
     let selectionState = params.editorSession.getSelectionState()
     if (!sel.isPropertySelection()) {
@@ -78,19 +78,17 @@ class InsertInlineNodeCommand extends Command {
   /**
     Insert new inline node at the current selection
   */
-  execute (params) {
-    let state = this.getCommandState(params)
+  execute (params, context) {
+    let state = this.getCommandState(params, context)
     if (state.disabled) return
-    let editorSession = this._getEditorSession(params)
+    let editorSession = this._getEditorSession(params, context)
     editorSession.transaction((tx) => {
-      let nodeData = this.createNodeData(tx, params)
+      let nodeData = this.createNodeData(tx, params, context)
       tx.insertInlineNode(nodeData)
     })
   }
 
-  createNodeData(tx) { // eslint-disable-line
+  createNodeData (tx, params, context) { // eslint-disable-line no-unused
     throw new Error('This method is abstract')
   }
 }
-
-export default InsertInlineNodeCommand

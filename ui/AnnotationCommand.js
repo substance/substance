@@ -78,7 +78,7 @@ class AnnotationCommand extends Command {
     When cursor is not collapsed tool may be displayed in context (e.g. in an
     overlay)
   */
-  showInContext (sel/*, params */) {
+  showInContext (sel) {
     return !sel.isCollapsed()
   }
 
@@ -168,12 +168,12 @@ class AnnotationCommand extends Command {
     @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
   */
-  getCommandState(params) { // eslint-disable-line
+  getCommandState (params, context) { // eslint-disable-line no-unused
     let sel = this._getSelection(params)
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
-    if (this.isDisabled(sel, params)) {
+    if (this.isDisabled(sel, params, context)) {
       return {
         disabled: true
       }
@@ -199,7 +199,7 @@ class AnnotationCommand extends Command {
     } else {
       newState.disabled = true
     }
-    newState.showInContext = this.showInContext(sel, params)
+    newState.showInContext = this.showInContext(sel, params, context)
     return newState
   }
 
@@ -209,7 +209,7 @@ class AnnotationCommand extends Command {
     @returns {Object} info object with execution details.
   */
   // Execute command and trigger transformations
-  execute (params) {
+  execute (params, context) { // eslint-disable-line no-unused
     // Disabled the next line as I believe it is
     // always passed via params already
     // params.selection = this._getSelection(params)

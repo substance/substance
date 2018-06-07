@@ -16,7 +16,7 @@ export default class InsertNodeCommand extends Command {
     return this.config.nodeType
   }
 
-  getCommandState (params) {
+  getCommandState (params, context) { // eslint-disable-line no-unused
     let sel = params.selection
     let newState = {
       disabled: true,
@@ -25,11 +25,11 @@ export default class InsertNodeCommand extends Command {
     if (sel && !sel.isNull() && !sel.isCustomSelection() && sel.containerId) {
       newState.disabled = false
     }
-    newState.showInContext = this.showInContext(sel, params)
+    newState.showInContext = this.showInContext(sel, params, context)
     return newState
   }
 
-  showInContext (sel, params) {
+  showInContext (sel, params, context) { // eslint-disable-line no-unused
     let selectionState = params.selectionState
     return sel.isCollapsed() && selectionState.isFirst() && selectionState.isLast()
   }
