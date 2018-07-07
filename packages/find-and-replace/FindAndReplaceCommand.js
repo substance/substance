@@ -1,15 +1,17 @@
 import Command from '../../ui/Command'
 
-class FindAndReplaceCommand extends Command {
+export default class FindAndReplaceCommand extends Command {
   getCommandState ({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
-    let findAndReplaceState = findAndReplaceManager.getCommandState()
-    return findAndReplaceState
+    if (findAndReplaceManager) {
+      let findAndReplaceState = findAndReplaceManager.getCommandState()
+      return findAndReplaceState
+    } else {
+      return { disabled: true }
+    }
   }
 
   execute () {
     // Do nothing
   }
 }
-
-export default FindAndReplaceCommand

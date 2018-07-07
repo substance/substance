@@ -1,16 +1,8 @@
-import Command from '../../ui/Command'
+import ToggleFindAndReplaceCommand from './ToggleFindAndReplaceCommand'
 
-class FindNextCommand extends Command {
-  getCommandState () {
-    return {
-      disabled: false
-    }
-  }
-
+export default class FindNextCommand extends ToggleFindAndReplaceCommand {
   execute ({editorSession}) {
     let findAndReplaceManager = editorSession.getManager('find-and-replace')
     findAndReplaceManager.findNext()
   }
 }
-
-export default FindNextCommand
