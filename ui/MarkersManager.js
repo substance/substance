@@ -28,7 +28,7 @@ class MarkersManager {
 
     // keep markers up-to-date, and record which text properties
     // are affected by a change
-    editorSession.onUpdate(this._onChange, this)
+    editorSession.onUpdate('document', this._onChange, this)
 
     // trigger rerendering of 'dirty' text properties
     editorSession.onRender(this._updateProperties, this)
@@ -91,12 +91,10 @@ class MarkersManager {
     return annos.concat(markers)
   }
 
-  _onChange (editorSession) {
-    if (editorSession.hasDocumentChanged()) {
-      const change = editorSession.getChange()
-      this._markers._onDocumentChange(change)
-      this._recordDirtyTextProperties(change)
-    }
+  _onChange (change) {
+    // console.log('MarkersManager.onChange()', change)
+    this._markers._onDocumentChange(change)
+    this._recordDirtyTextProperties(change)
   }
 
   _recordDirtyTextProperties (change) {
