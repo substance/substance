@@ -2,7 +2,7 @@ import Component from './Component'
 
 export default class ToolPanel extends Component {
   didMount () {
-    this.context.editorSession.onRender(this._onCommandStatesChanged, this)
+    this.context.editorSession.onRender('commandStates', this._onCommandStatesChanged, this)
   }
 
   dispose () {
@@ -70,9 +70,7 @@ export default class ToolPanel extends Component {
     return this.props.theme || 'dark'
   }
 
-  _onCommandStatesChanged (editorSession) {
-    if (editorSession.hasChanged('commandStates')) {
-      this.rerender()
-    }
+  _onCommandStatesChanged () {
+    this.rerender()
   }
 }

@@ -133,7 +133,8 @@ export default class CommandManager {
     editorSession.setCommandStates(commandStates)
   }
 
-  _onSessionUpdate (editorSession) {
+  _onSessionUpdate () {
+    const editorSession = this.editorSession
     // TODO: the first condition does not make sense
     // as 'change' is not a valid resource
     if (
