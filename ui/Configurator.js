@@ -5,7 +5,6 @@ import map from '../util/map'
 import platform from '../util/platform'
 import Registry from '../util/Registry'
 import DocumentSchema from '../model/DocumentSchema'
-import EditingBehavior from '../model/EditingBehavior'
 
 import ComponentRegistry from './ComponentRegistry'
 import FontAwesomeIconProvider from './FontAwesomeIconProvider'
@@ -370,14 +369,8 @@ class Configurator {
     this.config.seed = seed
   }
 
-  /**
-    Adds an editing behavior to this configuration. {@link EditingBehavior}
-    for more.
-
-    @param {EditingBehavior} editingBehavior.
-   */
   addEditingBehavior (editingBehavior) {
-    this.config.editingBehaviors.push(editingBehavior)
+    console.error('Support for custom EditingBehaviors has been removed. Instead you can override Document.getEditingInterface()')
   }
 
   addMacro (macro) {
@@ -489,10 +482,6 @@ class Configurator {
     return new ExporterClass(config, context)
   }
 
-  getCommandGroups () {
-    return this.config.commandGroups
-  }
-
   getComponentRegistry () {
     var componentRegistry = new ComponentRegistry()
     forEach(this.config.components, function (ComponentClass, name) {
@@ -507,12 +496,8 @@ class Configurator {
     })
   }
 
-  getSurfaceCommandNames () {
-    var commands = this.getCommands()
-    var commandNames = commands.map(function (C) {
-      return C.name
-    })
-    return commandNames
+  getCommandGroups () {
+    return this.config.commandGroups
   }
 
   /*
@@ -545,11 +530,7 @@ class Configurator {
   }
 
   getEditingBehavior () {
-    var editingBehavior = new EditingBehavior()
-    this.config.editingBehaviors.forEach(function (behavior) {
-      behavior.register(editingBehavior)
-    })
-    return editingBehavior
+    console.error('Support for custom EditingBehaviors has been removed. Instead you can override Document.getEditingInterface()')
   }
 
   getMacros () {

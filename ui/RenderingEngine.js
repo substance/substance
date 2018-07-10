@@ -206,15 +206,21 @@ function _capture (state, vel, forceCapture) {
       var content = comp.render(context.$$)
       if (!content) {
         throw new Error('Component.render() returned nil.')
-      }
-      if (!content._isVirtualHTMLElement) {
-        throw new Error('Component.render() must return a plain element.')
+      } else if (content._isVirtualComponent) {
+        // EXPERIMENTAL: trying to allow for forwarding components
+        // debugger
+        content.parent = vel
+        _capture(state, content)
+      } else if (!content._isVirtualHTMLElement) {
+        throw new Error('render() must return a plain element or a Component')
       }
 
       if (comp.__htmlConfig__) {
         content._mergeHTMLConfig(comp.__htmlConfig__)
       }
-      content._comp = comp
+      if (!content._isVirtualComponent) {
+        content._comp = comp
+      }
       vel._content = content
       if (!state.isNew(vel) && comp.isMounted()) {
         state.setUpdated(vel)
@@ -297,6 +303,13 @@ function _render (state, vel) {
     })
     comp.refs = refs
     comp.__foreignRefs__ = foreignRefs
+
+    // EXPERIMENTAL: trying to allow for forwarding components
+    // not sure at all
+    if (vel._content._isVirtualComponent) {
+      comp.el = vel._content._comp.el
+      comp.triggerDidMount(true)
+    }
     return
   }
 

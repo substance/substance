@@ -86,7 +86,6 @@ class EditorSession extends EventEmitter {
     let dropHandlers = configurator.getDropHandlers()
     let macros = configurator.getMacros()
     let converterRegistry = configurator.getConverterRegistry()
-    let editingBehavior = configurator.getEditingBehavior()
 
     this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
 
@@ -125,7 +124,6 @@ class EditorSession extends EventEmitter {
 
     // TODO: see how we want to expose these
     this.converterRegistry = converterRegistry
-    this.editingBehavior = editingBehavior
   }
 
   dispose () {

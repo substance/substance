@@ -38,7 +38,7 @@ function ComponentTests (debug, memory) {
 
     class InvalidRender extends TestComponent {
       render ($$) {
-        return $$(Simple)
+        return 'foo'
       }
     }
     t.throws(() => {
@@ -154,7 +154,7 @@ function ComponentTests (debug, memory) {
   })
 
   test('Rerender on setProps()', function (t) {
-    let comp = Simple.render({ foo: 'bar '})
+    let comp = Simple.render({ foo: 'bar ' })
     comp.shouldRerender.reset()
     comp.render.reset()
     comp.setProps({ foo: 'baz' })
@@ -164,7 +164,7 @@ function ComponentTests (debug, memory) {
   })
 
   test('Rerendering triggers didUpdate()', function (t) {
-    let comp = Simple.render({ foo: 'bar '})
+    let comp = Simple.render({ foo: 'bar ' })
     spy(comp, 'didUpdate')
     comp.rerender()
     t.ok(comp.didUpdate.callCount === 1, 'didUpdate() should have been called once.')
@@ -172,7 +172,7 @@ function ComponentTests (debug, memory) {
   })
 
   test('Setting props triggers willReceiveProps()', function (t) {
-    let comp = Simple.render({ foo: 'bar '})
+    let comp = Simple.render({ foo: 'bar ' })
     spy(comp, 'willReceiveProps')
     comp.setProps({ foo: 'baz' })
     t.ok(comp.willReceiveProps.callCount === 1, 'willReceiveProps() should have been called once.')
@@ -401,7 +401,7 @@ function ComponentTests (debug, memory) {
     }
     let comp = TestComponent.render()
     t.equal(comp.el.getAttribute('contenteditable'), 'true', 'element should be contenteditable')
-    comp.setState({ mode: 1})
+    comp.setState({ mode: 1 })
     t.isNil(comp.el.getAttribute('contenteditable'), 'the attribute should have been removed')
     t.end()
   })
@@ -928,7 +928,7 @@ function ComponentTests (debug, memory) {
           $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
         )
       )
-    }, { grandChildRef: 'foo'})
+    }, { grandChildRef: 'foo' })
 
     t.notNil(comp.refs.foo, "Ref 'foo' should be set.")
     let foo = comp.refs.foo
@@ -1052,7 +1052,7 @@ function ComponentTests (debug, memory) {
           $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
         )
       )
-    }, { grandChildRef: 'foo'})
+    }, { grandChildRef: 'foo' })
 
     let child = comp.getChildAt(0)
     comp.rerender()
@@ -1367,6 +1367,31 @@ function ComponentTests (debug, memory) {
     comp.setProps({ ids: ['bar'] })
     t.isNil(registry['foo'], 'Surface "foo" should have been disposed.')
     t.ok(registry['bar'], '.. and surface "bar" should still be there.')
+    t.end()
+  })
+
+  test('Forwarding Components', (t) => {
+    class MyComponent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('my-component').append('Foo')
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(MyComponent)
+      }
+    }
+    class Parent extends Component {
+      render ($$) {
+        return $$(Forwarding).ref('forwarding')
+      }
+    }
+    let parent = Parent.mount({}, getMountPoint(t))
+    let forwarding = parent.refs.forwarding
+    t.equal(forwarding.didMount.callCount, 1, 'The forwarding component should be mounted')
+    t.ok(forwarding.el.hasClass('my-component'), '.. should render the forwarded components element')
+    t.equal(forwarding.el.textContent, 'Foo', '.. and it should have correct content')
+    t.ok(forwarding.isMounted(), '.. om')
     t.end()
   })
 }
