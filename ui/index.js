@@ -61,12 +61,15 @@ export { default as UnsupportedNodeComponent } from './UnsupportedNodeComponent'
 export { default as VirtualElement } from './VirtualElement'
 export { default as WorkflowPane } from './WorkflowPane'
 
-// these are in packages, but actually are so core'ish that we export them
-// here
+// these are in packages, but should be here as they are core functionaliy
 export { default as Button } from '../packages/button/Button'
 export { default as Layout } from '../packages/layout/Layout'
 export { default as ScrollPane } from '../packages/scroll-pane/ScrollPane'
 export { default as SplitPane } from '../packages/split-pane/SplitPane'
 export { default as Toolbar } from '../packages/toolbar/Toolbar'
+export { default as UndoCommand } from '../packages/base/UndoCommand'
+export { default as RedoCommand } from '../packages/base/RedoCommand'
+export { default as SelectAllCommand } from '../packages/base/SelectAllCommand'
+
 // TODO: Remove Tool export (legacy)
 export { default as Tool } from './ToggleTool'
