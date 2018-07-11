@@ -1383,7 +1383,9 @@ function ComponentTests (debug, memory) {
     }
     class Parent extends Component {
       render ($$) {
-        return $$(Forwarding).ref('forwarding')
+        return $$('div').append(
+          $$(Forwarding).ref('forwarding')
+        )
       }
     }
     let parent = Parent.mount({}, getMountPoint(t))
@@ -1392,6 +1394,97 @@ function ComponentTests (debug, memory) {
     t.ok(forwarding.el.hasClass('my-component'), '.. should render the forwarded components element')
     t.equal(forwarding.el.textContent, 'Foo', '.. and it should have correct content')
     t.ok(forwarding.isMounted(), '.. om')
+    t.end()
+  })
+
+  test('Using refs in forwarding components', (t) => {
+    class MyComponent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('my-component').append('Foo')
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(MyComponent).ref('foo')
+      }
+    }
+    let comp = Forwarding.mount({}, getMountPoint(t))
+    let foo = comp.refs.foo
+    t.notNil(foo, 'The forwarding component should be have a ref to the child component')
+    comp.rerender()
+    t.isEqual(comp.refs.foo, foo, 'The forwarded component should be persisted during rerender')
+    t.end()
+  })
+
+  test('Handling actions from forwarded components', (t) => {
+    let _foo = null
+
+    class MyComponent extends TestComponent {
+      didMount () {
+        this.send('foo')
+      }
+      render ($$) {
+        return $$('div')
+      }
+    }
+    class Forwarding extends TestComponent {
+      constructor (...args) {
+        super(...args)
+
+        this.handleActions({
+          foo () {
+            _foo = true
+          }
+        })
+      }
+
+      render ($$) {
+        return $$(MyComponent).ref('foo')
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append($$(Forwarding))
+      }
+    }
+    Parent.mount({}, getMountPoint(t))
+    t.ok(_foo, 'The action should have been handled')
+    t.end()
+  })
+
+  test('Handling actions from forwarded components', (t) => {
+    let _foo = null
+
+    class MyComponent extends TestComponent {
+      didMount () {
+        this.send('foo')
+      }
+      render ($$) {
+        return $$('div')
+      }
+    }
+    class Forwarding extends TestComponent {
+      constructor (...args) {
+        super(...args)
+
+        this.handleActions({
+          foo () {
+            _foo = true
+          }
+        })
+      }
+
+      render ($$) {
+        return $$(MyComponent).ref('foo')
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append($$(Forwarding))
+      }
+    }
+    Parent.mount({}, getMountPoint(t))
+    t.ok(_foo, 'The action should have been handled')
     t.end()
   })
 }
