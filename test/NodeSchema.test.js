@@ -47,3 +47,17 @@ test('property with invalid multi-type', (t) => {
   }, 'Multi-types must consist of node types.')
   t.end()
 })
+
+test('property of node type should be considered a reference', (t) => {
+  class MyNode extends Node {}
+  MyNode.schema = {
+    type: 'my-node',
+    foo: { type: 'foo' }
+  }
+  let property = MyNode.schema.getProperty('foo')
+  // props with default values are optional
+  t.ok(property.isReference(), 'property should be a reference type')
+  t.deepEqual(property.type, 'id', 'property should have id type')
+  t.deepEqual(property.targetTypes, ['foo'], 'property should have correct target type')
+  t.end()
+})

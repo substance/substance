@@ -9,6 +9,8 @@ import EventEmitter from '../util/EventEmitter'
 import NodeProperty from './NodeProperty'
 import NodeSchema from './NodeSchema'
 
+const VALUE_TYPES = new Set(['string', 'number', 'boolean', 'object', 'array', 'coordinate'])
+
 /*
   Base node implementation.
 
@@ -208,22 +210,25 @@ function _compileSchema (schema) {
   return compiledSchema
 }
 
-const _valueTypes = new Set(['string', 'number', 'boolean', 'object', 'array'])
+function _isValueType (t) {
+  return VALUE_TYPES.has(t)
+}
 
 function _compileDefintion (definition) {
   let result = definition
-  if (isArray(definition.type)) {
+  let type = definition.type
+  if (isArray(type)) {
     // there are different allowed formats:
     // 1. canonical: ['array', 'id'], ['array', 'some-node']
     // 2. implcit: ['object']
     // 3. multi-type: ['p', 'list']
-    let defs = definition.type
+    let defs = type
     let lastIdx = defs.length - 1
     let first = defs[0]
     let last = defs[lastIdx]
     let isCanonical = first === 'array'
-    let hasTargetType = last !== 'id' && !_valueTypes.has(last)
-    definition.targetTypes = definition.type
+    let hasTargetType = last !== 'id' && !_isValueType(last)
+    definition.targetTypes = type
     if (isCanonical) {
       definition.type = defs.slice()
       definition.type[lastIdx] = 'id'
@@ -231,14 +236,14 @@ function _compileDefintion (definition) {
     } else {
       if (defs.length > 1) {
         defs.forEach(t => {
-          if (_valueTypes.has(t)) {
+          if (_isValueType(t)) {
             throw new Error('Multi-types must consist of node types.')
           }
         })
         definition.type = [ 'array', 'id' ]
         definition.targetTypes = defs
       } else {
-        if (_valueTypes.has(first)) {
+        if (_isValueType(first)) {
           definition.type = [ 'array', first ]
         } else {
           definition.type = [ 'array', 'id' ]
@@ -246,13 +251,17 @@ function _compileDefintion (definition) {
         }
       }
     }
-  } else if (definition.type === 'text') {
+  } else if (type === 'text') {
     result = {
       type: 'string',
       default: '',
       _isText: true
     }
+  } else if (type !== 'id' && !_isValueType(type)) {
+    definition.type = 'id'
+    definition.targetTypes = [type]
   }
+
   return result
 }
 
