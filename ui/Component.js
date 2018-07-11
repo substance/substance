@@ -431,7 +431,9 @@ class Component extends EventEmitter {
   triggerDidMount () {
     // TODO: discuss and leave the decision here as a statement
     // while rendering is done bottom up, IMO  it makes
-    // sense to propagate didMount() from top to down.
+    // sense to propagate didMount() from top to down
+    // NOTE: On the other hand, we had some occasions, where we
+    // intuitively expected that this was done bottom-up, too
 
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.

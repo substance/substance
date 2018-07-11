@@ -207,10 +207,12 @@ function _capture (state, vel, forceCapture) {
       if (!content) {
         throw new Error('Component.render() returned nil.')
       } else if (content._isVirtualComponent) {
-        // EXPERIMENTAL: trying to allow for forwarding components
-        // debugger
+        // EXPERIMENTAL: allowing for forwarding components
+        // content needs to have a parent for creating components
+        content._isForwarded = true
         content.parent = vel
-        _capture(state, content)
+        // capture virtual DOM recursively
+        // _capture(state, content)
       } else if (!content._isVirtualHTMLElement) {
         throw new Error('render() must return a plain element or a Component')
       }
@@ -226,10 +228,12 @@ function _capture (state, vel, forceCapture) {
         state.setUpdated(vel)
       }
       // Mapping: map virtual elements to existing components based on refs
+      // TODO: this does not yet work for forwarded components
       _prepareVirtualComponent(state, comp, content)
       // Descending
-      // TODO: only do this in DEBUG mode
-      if (substanceGlobals.DEBUG_RENDERING) {
+      // HACK: we haven't managed to get the implementation right
+      // for 'forwarded components'; so we use the other approach for that
+      if (substanceGlobals.DEBUG_RENDERING && !vel._content._isForwarded) {
         // in this case we use the render() function as iterating function, where
         // $$ is a function which creates components and renders them recursively.
         // first we can create all element components that can be reached
@@ -304,11 +308,13 @@ function _render (state, vel) {
     comp.refs = refs
     comp.__foreignRefs__ = foreignRefs
 
-    // EXPERIMENTAL: trying to allow for forwarding components
-    // not sure at all
+    // EXPERIMENTAL: allowing for forwarding components
+    // take the element of the forwarded component
+    // and use it as element for this component
     if (vel._content._isVirtualComponent) {
       comp.el = vel._content._comp.el
-      comp.triggerDidMount(true)
+      vel._content._comp.triggerDidMount()
+      comp.triggerDidMount()
     }
     return
   }
