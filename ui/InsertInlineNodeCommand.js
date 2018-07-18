@@ -61,7 +61,7 @@ export default class InsertInlineNodeCommand extends Command {
     }
     // We don't allow inserting an inline node on top of an existing inline
     // node.
-    if (selectionState.isInlineNodeSelection()) {
+    if (selectionState.isInlineNodeSelection) {
       return true
     }
     return false

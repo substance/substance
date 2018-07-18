@@ -31,6 +31,6 @@ export default class EditInlineNodeCommand extends Command {
   execute (params, context) { } // eslint-disable-line no-unused
 
   _getAnnotationsForSelection (params) {
-    return params.selectionState.getAnnotationsForType(this.config.nodeType)
+    return params.selectionState.annosByType[this.config.nodeType] || []
   }
 }

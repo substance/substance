@@ -68,7 +68,7 @@ export default class AnnotationCommand extends Command {
     // TODO: Container selections should be valid if the annotation type
     // is a container annotation. Currently we only allow property selections.
     if (isBlurred || !sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection() ||
-        sel.isNodeSelection() || sel.isContainerSelection() || selectionState.isInlineNodeSelection()) {
+        sel.isNodeSelection() || sel.isContainerSelection() || selectionState.isInlineNodeSelection) {
       return true
     }
     return false
@@ -318,10 +318,9 @@ export default class AnnotationCommand extends Command {
     @returns {Object} transformed annotations.
    */
   _applyTransform (params, transformFn) {
-    let sel = this._getSelection(params)
+    const editorSession = params.editorSession
+    const sel = params.selection
     if (sel.isNull()) return
-
-    let editorSession = params.editorSession
     let result // to store transform result
     editorSession.setSelection(sel)
     editorSession.transaction(function (tx) {

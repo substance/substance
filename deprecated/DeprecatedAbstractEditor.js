@@ -101,6 +101,7 @@ export default class DeprecatedAbstractEditor extends Component {
     return {
       editor: this,
       editorSession: this.editorSession,
+      configurator: this.editorSession.getConfigurator(),
       doc: this.doc, // NOTE: deprecated, use document
       document: this.doc,
       componentRegistry: this.componentRegistry,

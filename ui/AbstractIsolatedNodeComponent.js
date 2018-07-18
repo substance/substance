@@ -164,16 +164,16 @@ export default class AbstractIsolatedNodeComponent extends Component {
     // HACK: deriving additional information from the selection and
     // storing it into selState
     // TODO: this should be part of the regular selection state reducer
-    let surface = selState.get('surface')
-    if (surface === undefined) {
-      let sel = selState.getSelection()
+    let surface = selState.surface
+    if (!surface) {
+      const sel = selState.getSelection()
       if (sel && sel.surfaceId) {
         const surfaceManager = this.getSurfaceManager()
         surface = surfaceManager.getSurface(sel.surfaceId)
       } else {
         surface = null
       }
-      selState.set('surface', surface)
+      selState.surface = surface
     }
     return surface
   }
@@ -184,7 +184,7 @@ export default class AbstractIsolatedNodeComponent extends Component {
     // HACK: deriving additional information from the selection and
     // storing it into selState
     // TODO: this should be part of the regular selection state reducer
-    let isolatedNodes = selState.get('isolatedNodes')
+    let isolatedNodes = selState.isolatedNodes
     if (!isolatedNodes) {
       let sel = selState.getSelection()
       isolatedNodes = []
@@ -195,7 +195,7 @@ export default class AbstractIsolatedNodeComponent extends Component {
           isolatedNodes = surface.getComponentPath().filter(comp => comp._isAbstractIsolatedNodeComponent)
         }
       }
-      selState.set('isolatedNodes', isolatedNodes)
+      selState.isolatedNodes = isolatedNodes
     }
     return isolatedNodes
   }

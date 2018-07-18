@@ -1,4 +1,3 @@
-import TreeIndex from '../util/TreeIndex'
 import Selection from './Selection'
 import { getPropertyAnnotationsForSelection, getContainerAnnotationsForSelection, getMarkersForSelection } from './documentHelpers'
 import { isFirst, isLast } from './selectionHelpers'
@@ -9,6 +8,10 @@ export default class SelectionState {
     this.selection = Selection.nullSelection
 
     this._reset()
+  }
+
+  getSelection () {
+    return this.selection
   }
 
   setSelection (sel) {
@@ -26,7 +29,7 @@ export default class SelectionState {
   }
 
   _deriveState (sel) {
-    this._resetState()
+    this._reset()
 
     this._deriveContainerSelectionState(sel)
     this._deriveAnnoState(sel)
@@ -68,20 +71,22 @@ export default class SelectionState {
     const doc = this.document
 
     // create a mapping by type for the currently selected annotations
-    let annosByType = new TreeIndex.Arrays()
+    let annosByType = {}
+    function _add(anno) {
+      if (!annosByType[anno.type]) {
+        annosByType[anno.type] = []
+      }
+      annosByType[anno.type].push(anno)
+    }
     const propAnnos = getPropertyAnnotationsForSelection(doc, sel)
-    propAnnos.forEach(function (anno) {
-      annosByType.add(anno.type, anno)
-    })
+    propAnnos.forEach(_add)
     if (propAnnos.length === 1 && propAnnos[0].isInline()) {
       this.isInlineNodeSelection = propAnnos[0].getSelection().equals(sel)
     }
     const containerId = sel.containerId
     if (containerId) {
       const containerAnnos = getContainerAnnotationsForSelection(doc, sel, containerId)
-      containerAnnos.forEach(function (anno) {
-        annosByType.add(anno.type, anno)
-      })
+      containerAnnos.forEach(_add)
     }
     this.annosByType = annosByType
   }
@@ -107,5 +112,9 @@ export default class SelectionState {
     this.isFirst = false
     // if the next node is one char away
     this.isLast = false
+    // TODO: try to reduce them here
+    // these are 'reduced' by AbstractIsolatedNodeComponent
+    this.surface = null
+    this.isolatedNodes = null
   }
 }

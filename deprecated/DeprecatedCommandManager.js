@@ -153,13 +153,13 @@ export default class DeprecatedCommandManager {
   _getCommandParams () {
     let editorSession = this.context.editorSession
     let selectionState = editorSession.getSelectionState()
-    let sel = selectionState.getSelection()
-    let surface = this.context.surfaceManager.getFocusedSurface()
+    let selection = editorSession.getSelection()
+    let surface = editorSession.getFocusedSurface()
     return {
-      editorSession: editorSession,
-      selectionState: selectionState,
-      surface: surface,
-      selection: sel
+      editorSession,
+      selectionState,
+      selection,
+      surface
     }
   }
 }

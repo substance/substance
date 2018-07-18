@@ -1,25 +1,20 @@
 import { module } from 'substance-test'
-import { SelectionState, AnnotationCommand } from 'substance'
+import { AnnotationCommand } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import containerAnnoSample from './fixture/containerAnnoSample'
 
 const test = module('AnnotationCommand')
 
 test("can 'create' property annotation", (t) => {
-  let { doc, editorSession } = fixture(t)
-  let selectionState = new SelectionState(doc)
+  let { editorSession } = fixture(t)
   let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection({
+  editorSession.setSelection({
     type: 'property',
     path: ['p4', 'content'],
     startOffset: 1,
     endOffset: 6
   })
-  selectionState.setSelection(sel)
-  let cmdState = cmd.getCommandState({
-    selectionState: selectionState,
-    editorSession: editorSession
-  })
+  let cmdState = cmd.getCommandState(_getCommandParams(editorSession))
   t.equal(cmdState.mode, 'create', 'Mode should be correct.')
   t.end()
 })
@@ -33,13 +28,9 @@ test("execute 'create' property annotation", (t) => {
     startOffset: 1,
     endOffset: 6
   })
-  let res = cmd.execute({
-    commandState: {
-      mode: 'create'
-    },
-    editorSession: editorSession,
-    selectionState: editorSession.getSelectionState()
-  })
+  let params = _getCommandParams(editorSession)
+  params.commandState = { mode: 'create' }
+  let res = cmd.execute(params)
   let newAnno = res.anno
   t.notNil(newAnno, 'A new anno should have been created')
   newAnno = doc.get(newAnno.id)
@@ -51,45 +42,7 @@ test("execute 'create' property annotation", (t) => {
 })
 
 test("can 'delete' property annotation", (t) => {
-  let { doc, editorSession } = fixture(t)
-  let selectionState = new SelectionState(doc)
-  let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 5,
-    endOffset: 7
-  })
-  selectionState.setSelection(sel)
-  let cmdState = cmd.getCommandState({
-    selectionState: selectionState,
-    editorSession: editorSession
-  })
-  t.equal(cmdState.mode, 'delete', 'Mode should be correct.')
-  t.end()
-})
-
-test("execute 'delete' property annotation", (t) => {
-  let { doc, editorSession } = fixture(t)
-  let selectionState = new SelectionState(doc)
-  let cmd = new ToggleStrongCommand()
-  let sel = doc.createSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 5,
-    endOffset: 7
-  })
-  selectionState.setSelection(sel)
-  let cmdState = cmd.getCommandState({
-    selectionState: selectionState,
-    editorSession: editorSession
-  })
-  t.equal(cmdState.mode, 'delete', 'Mode should be correct.')
-  t.end()
-})
-
-test("can 'expand' property annotation", (t) => {
-  let { editorSession, doc } = fixture(t)
+  let { editorSession } = fixture(t)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
     type: 'property',
@@ -97,14 +50,24 @@ test("can 'expand' property annotation", (t) => {
     startOffset: 5,
     endOffset: 7
   })
-  cmd.execute({
-    commandState: {
-      mode: 'delete'
-    },
-    editorSession: editorSession,
-    selectionState: editorSession.getSelectionState()
+  let cmdState = cmd.getCommandState(_getCommandParams(editorSession))
+  t.equal(cmdState.mode, 'delete', 'Mode should be correct.')
+  t.end()
+})
+
+test("execute 'delete' property annotation", (t) => {
+  let { doc, editorSession } = fixture(t)
+  let cmd = new ToggleStrongCommand()
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 5,
+    endOffset: 7
   })
-  t.isNil(doc.get('a3'), 'a3 should be gone.')
+  let params = _getCommandParams(editorSession)
+  params.commandState = { mode: 'delete' }
+  cmd.execute(params)
+  t.isNil(doc.get('a3'), 'annotation should have been deleted')
   t.end()
 })
 
@@ -123,4 +86,12 @@ function fixture (t) {
       end: { offset: 8 }
     })
   })
+}
+
+function _getCommandParams (editorSession) {
+  return {
+    editorSession,
+    selection: editorSession.getSelection(),
+    selectionState: editorSession.getSelectionState()
+  }
 }

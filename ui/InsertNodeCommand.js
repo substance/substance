@@ -32,7 +32,7 @@ export default class InsertNodeCommand extends Command {
   showInContext (sel, params, context) { // eslint-disable-line no-unused
     const editorSession = params.editorSession
     let selectionState = editorSession.getSelectionState()
-    return sel.isCollapsed() && selectionState.isFirst() && selectionState.isLast()
+    return sel.isCollapsed() && selectionState.isFirst && selectionState.isLast
   }
 
   isInsertCommand () {

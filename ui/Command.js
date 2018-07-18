@@ -65,7 +65,7 @@ export default class Command {
     ```
     getCommandState(params) {
       const sel = this._getSelection(params)
-      const annos = params.selectionState.getAnnotationsForType(this.config.nodeType)
+      const annos = params.selectionState.annosByType[this.config.nodeType] || []
       const newState = {
         disabled: true,
       }

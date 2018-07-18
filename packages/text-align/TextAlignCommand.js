@@ -7,7 +7,7 @@ export default class TextAlignCommand extends Command {
     let doc = params.editorSession.getDocument()
     let commandState = { disabled: true }
 
-    if (sel.isPropertySelection() && !selectionState.isInlineNodeSelection()) {
+    if (sel.isPropertySelection() && !selectionState.isInlineNodeSelection) {
       let path = sel.getPath()
       let node = doc.get(path[0])
       if (node && node.isText() && node.isBlock()) {
