@@ -1,6 +1,6 @@
-import Registry from '../util/Registry'
+import Registry from '../deprecated/DeprecatedRegistry'
 
-class ComponentRegistry extends Registry {
+export default class ComponentRegistry extends Registry {
   constructor (entries) {
     super(entries, function (ComponentClass) {
       if (!ComponentClass.prototype._isComponent) {
@@ -9,5 +9,3 @@ class ComponentRegistry extends Registry {
     })
   }
 }
-
-export default ComponentRegistry

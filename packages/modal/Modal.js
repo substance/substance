@@ -17,7 +17,7 @@ import Component from '../../ui/Component'
   });
   ```
 */
-class Modal extends Component {
+export default class Modal extends Component {
   render ($$) {
     let el = $$('div').addClass('sc-modal')
 
@@ -44,5 +44,3 @@ class Modal extends Component {
     }
   }
 }
-
-export default Modal

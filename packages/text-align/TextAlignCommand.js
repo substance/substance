@@ -1,6 +1,6 @@
 import Command from '../../ui/Command'
 
-class TextAlignCommand extends Command {
+export default class TextAlignCommand extends Command {
   getCommandState (params) {
     let sel = this._getSelection(params)
     let selectionState = params.editorSession.getSelectionState()
@@ -32,5 +32,3 @@ class TextAlignCommand extends Command {
     })
   }
 }
-
-export default TextAlignCommand

@@ -23,9 +23,9 @@ import Command from './Command'
   ```
 */
 
-class AnnotationCommand extends Command {
-  constructor (...args) {
-    super(...args)
+export default class AnnotationCommand extends Command {
+  constructor (config) {
+    super(config)
 
     if (!this.config.nodeType) {
       throw new Error("'nodeType' is required")
@@ -169,7 +169,7 @@ class AnnotationCommand extends Command {
     @returns {Object} info object with command details.
   */
   getCommandState (params, context) { // eslint-disable-line no-unused
-    let sel = this._getSelection(params)
+    const sel = params.selection
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
     // selection is a container selection
@@ -200,6 +200,7 @@ class AnnotationCommand extends Command {
       newState.disabled = true
     }
     newState.showInContext = this.showInContext(sel, params, context)
+
     return newState
   }
 
@@ -210,37 +211,34 @@ class AnnotationCommand extends Command {
   */
   // Execute command and trigger transformations
   execute (params, context) { // eslint-disable-line no-unused
-    // Disabled the next line as I believe it is
-    // always passed via params already
-    // params.selection = this._getSelection(params)
     let commandState = params.commandState
 
     if (commandState.disabled) return false
     switch (commandState.mode) {
       case 'create':
-        return this.executeCreate(params)
+        return this.executeCreate(params, context)
       case 'fuse':
-        return this.executeFuse(params)
+        return this.executeFuse(params, context)
       case 'truncate':
-        return this.executeTruncate(params)
+        return this.executeTruncate(params, context)
       case 'expand':
-        return this.executeExpand(params)
+        return this.executeExpand(params, context)
       case 'delete':
-        return this.executeDelete(params)
+        return this.executeDelete(params, context)
       default:
         console.warn('Command.execute(): unknown mode', commandState.mode)
         return false
     }
   }
 
-  executeCreate (params) {
-    let annos = this._getAnnotationsForSelection(params)
+  executeCreate (params, context) {
+    const editorSession = params.editorSession
+    const annos = this._getAnnotationsForSelection(params, context)
     this._checkPrecondition(params, annos, this.canCreate)
-    let editorSession = this._getEditorSession(params)
     let annoData = this.getAnnotationData()
     annoData.type = this.getAnnotationType()
     let anno
-    editorSession.transaction((tx) => {
+    editorSession.transaction(tx => {
       anno = tx.annotate(annoData)
     })
     return {
@@ -252,7 +250,7 @@ class AnnotationCommand extends Command {
   executeFuse (params) {
     let annos = this._getAnnotationsForSelection(params)
     this._checkPrecondition(params, annos, this.canFuse)
-    this._applyTransform(params, function (tx) {
+    this._applyTransform(params, tx => {
       annotationHelpers.fuseAnnotation(tx, annos)
     })
     return {
@@ -265,7 +263,7 @@ class AnnotationCommand extends Command {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canTruncate)
-    this._applyTransform(params, function (tx) {
+    this._applyTransform(params, tx => {
       annotationHelpers.truncateAnnotation(tx, anno, params.selection)
     })
     return {
@@ -278,7 +276,7 @@ class AnnotationCommand extends Command {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canExpand)
-    this._applyTransform(params, function (tx) {
+    this._applyTransform(params, tx => {
       annotationHelpers.expandAnnotation(tx, anno, params.selection)
     })
     return {
@@ -291,7 +289,7 @@ class AnnotationCommand extends Command {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
     this._checkPrecondition(params, annos, this.canDelete)
-    this._applyTransform(params, function (tx) {
+    this._applyTransform(params, tx => {
       return tx.delete(anno.id)
     })
     return {
@@ -300,19 +298,18 @@ class AnnotationCommand extends Command {
     }
   }
 
-  isAnnotationCommand () {
-    return true
-  }
+  isAnnotationCommand () { return true }
 
   _checkPrecondition (params, annos, checker) {
-    let sel = this._getSelection(params)
+    let sel = params.selection
     if (!checker.call(this, annos, sel)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString())
     }
   }
 
   _getAnnotationsForSelection (params) {
-    return params.selectionState.getAnnotationsForType(this.getAnnotationType())
+    const selectionState = params.selectionState
+    return selectionState.annosByType[this.getAnnotationType()] || []
   }
 
   /**
@@ -324,7 +321,7 @@ class AnnotationCommand extends Command {
     let sel = this._getSelection(params)
     if (sel.isNull()) return
 
-    let editorSession = this._getEditorSession(params)
+    let editorSession = params.editorSession
     let result // to store transform result
     editorSession.setSelection(sel)
     editorSession.transaction(function (tx) {
@@ -334,5 +331,3 @@ class AnnotationCommand extends Command {
     return result
   }
 }
-
-export default AnnotationCommand

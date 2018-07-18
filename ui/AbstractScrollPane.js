@@ -4,7 +4,7 @@ import platform from '../util/platform'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from '../ui/Component'
 
-class AbstractScrollPane extends Component {
+export default class AbstractScrollPane extends Component {
   /*
     Expose scrollPane as a child context
   */
@@ -148,5 +148,3 @@ class AbstractScrollPane extends Component {
     return getRelativeMouseBounds(e, this.getContentElement().getNativeElement())
   }
 }
-
-export default AbstractScrollPane

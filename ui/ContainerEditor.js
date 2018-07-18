@@ -24,8 +24,9 @@ import RenderingEngine from './RenderingEngine'
   ```
 */
 
-class ContainerEditor extends Surface {
+export default class ContainerEditor extends Surface {
   constructor (parent, props, el) {
+    // TODO consolidate this - how is it used actually?
     // default props derived from the given props
     props.containerId = props.containerId || props.node.id
     props.name = props.name || props.containerId || props.node.id
@@ -333,8 +334,6 @@ class ContainerEditor extends Surface {
     }
     this._attachPlaceholder()
   }
+
+  get _isContainerEditor () { return true }
 }
-
-ContainerEditor.prototype._isContainerEditor = true
-
-export default ContainerEditor

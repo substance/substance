@@ -1,21 +1,7 @@
 import NodeComponent from './NodeComponent'
 import TextProperty from './TextPropertyComponent'
 
-class TextBlockComponent extends NodeComponent {
-  didMount (...args) {
-    super.didMount(...args)
-
-    let node = this.props.node
-    this.context.editorSession.onRender('document', this.rerender, this, {
-      path: [node.id, 'textAlign']
-    })
-  }
-
-  dispose (...args) {
-    super.dispose(...args)
-    this.context.editorSession.off(this)
-  }
-
+export default class TextBlockComponent extends NodeComponent {
   render ($$) {
     let el = super.render($$)
     el.addClass('sc-text-block')
@@ -38,5 +24,3 @@ class TextBlockComponent extends NodeComponent {
     return el
   }
 }
-
-export default TextBlockComponent

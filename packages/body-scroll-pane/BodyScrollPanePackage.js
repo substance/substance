@@ -1,4 +1,4 @@
-import BodyScrollPane from './BodyScrollPane'
+import BodyScrollPane from '../../ui/BodyScrollPane'
 
 export default {
   name: 'body-scroll-pane',

@@ -21,10 +21,9 @@ import platform from '../util/platform'
 
 const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup', 'copy' ]
 
-class GlobalEventHandler {
-  constructor (editorSession, surfaceManager) {
+export default class GlobalEventHandler {
+  constructor (editorSession) {
     this.editorSession = editorSession
-    this.surfaceManager = surfaceManager
     this.listeners = []
     this.initialize()
   }
@@ -65,8 +64,8 @@ class GlobalEventHandler {
   }
 
   _getActiveListener (eventName) {
-    let editorSession = this.editorSession
-    let sel = editorSession.getSelection()
+    const editorSession = this.editorSession
+    const sel = editorSession.getSelection()
     if (sel) {
       let surfaceId = sel.surfaceId
       for (let i = 0; i < this.listeners.length; i++) {
@@ -79,14 +78,17 @@ class GlobalEventHandler {
   }
 
   _dispatch (eventName, e) {
-    let listener = this._getActiveListener(eventName)
+    const listener = this._getActiveListener(eventName)
     if (listener) {
       listener.handler(e)
     }
   }
+
+  on (...args) {
+    return DOMElement.prototype.on.apply(this, args)
+  }
+
+  off (...args) {
+    return DOMElement.prototype.off.apply(this, args)
+  }
 }
-
-GlobalEventHandler.prototype.on = DOMElement.prototype.on
-GlobalEventHandler.prototype.off = DOMElement.prototype.off
-
-export default GlobalEventHandler

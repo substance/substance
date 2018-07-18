@@ -1,6 +1,6 @@
 import Component from './Component'
 
-class UnsupportedNodeComponent extends Component {
+export default class UnsupportedNodeComponent extends Component {
   render ($$) {
     return $$('pre')
       .addClass('content-node unsupported')
@@ -13,5 +13,3 @@ class UnsupportedNodeComponent extends Component {
       )
   }
 }
-
-export default UnsupportedNodeComponent

@@ -22,11 +22,11 @@ const SLASH = '/'.charCodeAt(0)
       The the default unblocking gesture requires the content to implement a grabFocus() method, which should set the selection
       into one of the surfaces, or set a CustomSelection.
 */
-class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
+export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
   render ($$) {
-    let node = this.props.node
-    let ContentClass = this.ContentClass
-    let disabled = this.props.disabled
+    const node = this.props.node
+    const ContentClass = this.ContentClass
+    const disabled = this.props.disabled
 
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
     let el = $$('div')
@@ -47,7 +47,7 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     el.on('keydown', this.onKeydown)
 
     // console.log('##### rendering IsolatedNode', this.id)
-    let shouldRenderBlocker = (
+    const shouldRenderBlocker = (
       this.blockingMode === 'closed' &&
       !this.state.unblocked
     )
@@ -91,9 +91,9 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
 
   selectNode () {
     // console.log('IsolatedNodeComponent: selecting node.');
-    let editorSession = this.context.editorSession
-    let surface = this.context.surface
-    let nodeId = this.props.node.id
+    const editorSession = this.getEditorSession()
+    const surface = this.getParentSurface()
+    const nodeId = this.props.node.id
     editorSession.setSelection({
       type: 'node',
       nodeId: nodeId,
@@ -134,12 +134,15 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     }
   }
 
+  // TODO: this is almost the same as in IsolatedInlineNodeComponent
+  // We should consolidate this
   _deriveStateFromSelectionState (selState) {
-    let surface = this._getSurface(selState)
+    const surface = this._getSurfaceForSelection(selState)
+    const parentSurface = this.getParentSurface()
     let newState = { mode: null, unblocked: null }
     if (!surface) return newState
     // detect cases where this node is selected or co-selected by inspecting the selection
-    if (surface === this.context.surface) {
+    if (surface === parentSurface) {
       let sel = selState.getSelection()
       let nodeId = this.props.node.id
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
@@ -174,47 +177,45 @@ class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
     }
     return newState
   }
-}
 
-IsolatedNodeComponent.prototype._isIsolatedNodeComponent = true
+  get _isIsolatedNodeComponent () { return true }
 
-IsolatedNodeComponent.prototype._isDisabled = IsolatedNodeComponent.prototype.isDisabled
+  static getDOMCoordinate (comp, coor) {
+    let { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
+    if (coor.offset === 0) return start
+    else return end
+  }
 
-IsolatedNodeComponent.getDOMCoordinate = function (comp, coor) {
-  let { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
-  if (coor.offset === 0) return start
-  else return end
-}
-
-IsolatedNodeComponent.getDOMCoordinates = function (comp) {
-  const left = comp.refs.left
-  const right = comp.refs.right
-  return {
-    start: {
-      container: left.getNativeElement(),
-      offset: 0
-    },
-    end: {
-      container: right.getNativeElement(),
-      offset: right.getChildCount()
+  static getDOMCoordinates (comp) {
+    const left = comp.refs.left
+    const right = comp.refs.right
+    return {
+      start: {
+        container: left.getNativeElement(),
+        offset: 0
+      },
+      end: {
+        container: right.getNativeElement(),
+        offset: right.getChildCount()
+      }
     }
   }
-}
 
-IsolatedNodeComponent.getCoordinate = function (nodeEl, options) {
-  let comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
-  let offset = null
-  if (options.direction === 'left' || nodeEl === comp.refs.left.el) {
-    offset = 0
-  } else if (options.direction === 'right' || nodeEl === comp.refs.right.el) {
-    offset = 1
+  static getCoordinate (nodeEl, options) {
+    let comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
+    let offset = null
+    if (options.direction === 'left' || nodeEl === comp.refs.left.el) {
+      offset = 0
+    } else if (options.direction === 'right' || nodeEl === comp.refs.right.el) {
+      offset = 1
+    }
+    let coor
+    if (offset !== null) {
+      coor = new Coordinate([comp.props.node.id], offset)
+      coor._comp = comp
+    }
+    return coor
   }
-  let coor
-  if (offset !== null) {
-    coor = new Coordinate([comp.props.node.id], offset)
-    coor._comp = comp
-  }
-  return coor
 }
 
 class Blocker extends Component {
@@ -244,5 +245,3 @@ class Blocker extends Component {
     return this.context.isolatedNodeComponent
   }
 }
-
-export default IsolatedNodeComponent

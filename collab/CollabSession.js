@@ -1,7 +1,7 @@
 import cloneDeep from '../util/cloneDeep'
 import Err from '../util/SubstanceError'
 import DocumentChange from '../model/DocumentChange'
-import EditorSession from '../ui/EditorSession'
+import { EditorSession } from '../deprecated'
 
 /*
   Session that is connected to a Substance Hub allowing

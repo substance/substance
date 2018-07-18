@@ -1,6 +1,6 @@
-import ToggleTool from '../../ui/ToggleTool'
+import { ToggleTool } from '../../deprecated'
 
-class InsertImageTool extends ToggleTool {
+export default class InsertImageTool extends ToggleTool {
   getClassNames () {
     return 'sc-insert-image-tool'
   }
@@ -23,5 +23,3 @@ class InsertImageTool extends ToggleTool {
     })
   }
 }
-
-export default InsertImageTool

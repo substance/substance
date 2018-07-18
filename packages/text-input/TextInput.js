@@ -1,18 +1,15 @@
 import TextNode from '../../model/TextNode'
 import Document from '../../model/Document'
-import EditorSession from '../../ui/EditorSession'
-import Configurator from '../../ui/Configurator'
-import AbstractEditor from '../../ui/AbstractEditor'
 import TextPropertyEditor from '../../ui/TextPropertyEditor'
 import BasePackage from '../base/BasePackage'
+import { EditorSession, Configurator, AbstractEditor } from '../../deprecated'
 
 const { UndoCommand, RedoCommand, SelectAllCommand } = BasePackage
 
 // TODO: maybe AbstractEditor is too heavy?
 // still we need to do almost the same, so that nothing
 // from the parent is leaking through to the children
-export default
-class TextInput extends AbstractEditor {
+export default class TextInput extends AbstractEditor {
   constructor (parent, props = {}) {
     super(parent, _createEditorSession(props))
 

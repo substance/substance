@@ -1,8 +1,4 @@
+@import './_inline-node.css';
+@import './_isolated-node.css';
 @import './_text-block.css';
-@import './_tool-drop-down.css';
-@import './_toggle-tool.css';
-@import './_tool-group.css';
-@import './_menu.css';
-@import './_menu-item.css';
 @import './_tooltip.css';
-@import './_toolbar.css';

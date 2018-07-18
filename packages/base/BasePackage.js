@@ -1,9 +1,6 @@
 import ButtonPackage from '../button/ButtonPackage'
 import ContextMenuPackage from '../context-menu/ContextMenuPackage'
-import GridPackage from '../grid/GridPackage'
-import GutterPackage from '../gutter/GutterPackage'
 import InputPackage from '../input/InputPackage'
-import LayoutPackage from '../layout/LayoutPackage'
 import ModalPackage from '../modal/ModalPackage'
 import OverlayPackage from '../overlay/OverlayPackage'
 import DropzonesPackage from '../dropzones/DropzonesPackage'
@@ -18,7 +15,7 @@ import RedoCommand from './RedoCommand'
 import SelectAllCommand from './SelectAllCommand'
 import ToolPanelPackage from '../tool-panel/ToolPanelPackage'
 import IsolatedNodeComponent from '../../ui/IsolatedNodeComponent'
-import InlineNodeComponent from '../../ui/InlineNodeComponent'
+import IsolatedInlineNodeComponent from '../../ui/IsolatedInlineNodeComponent'
 import AnnotationComponent from '../../ui/AnnotationComponent'
 
 export default {
@@ -30,15 +27,12 @@ export default {
     config.import(SplitPanePackage)
     config.import(TabbedPanePackage)
     config.import(ScrollbarPackage)
-    config.import(GridPackage)
     config.import(ModalPackage)
     config.import(InputPackage)
     config.import(ButtonPackage)
-    config.import(LayoutPackage)
     config.import(ContextMenuPackage)
     config.import(OverlayPackage)
     config.import(DropzonesPackage)
-    config.import(GutterPackage)
     config.import(ToolPanelPackage)
 
     // Commands
@@ -90,7 +84,7 @@ export default {
     })
 
     config.addComponent('isolated-node', IsolatedNodeComponent)
-    config.addComponent('inline-node', InlineNodeComponent)
+    config.addComponent('inline-node', IsolatedInlineNodeComponent)
     config.addComponent('annotation', AnnotationComponent)
 
     config.addKeyboardShortcut('CommandOrControl+Z', { command: 'undo' })

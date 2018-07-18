@@ -1,4 +1,4 @@
-import Dropzones from './Dropzones'
+import { Dropzones } from '../../deprecated'
 
 export default {
   name: 'dropzones',

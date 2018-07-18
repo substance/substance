@@ -23,27 +23,19 @@ export default class Surface extends Component {
   }
 
   _initialize () {
-    // EditorSession instance must be provided either as a prop
-    // or via dependency-injection
-    this.editorSession = this.props.editorSession || this.context.editorSession
-    if (!this.editorSession) {
-      throw new Error('No EditorSession provided')
-    }
+    const editorSession = this.getEditorSession()
+    if (!editorSession) throw new Error('editorSession is mandatory')
     this.name = this.props.name
-    if (!this.name) {
-      throw new Error('Surface must have a name.')
-    }
+    if (!this.name) throw new Error('Surface must have a name.')
     if (this.name.indexOf('/') > -1) {
       // because we are using '/' to deal with nested surfaces (isolated nodes)
       throw new Error("Surface.name must not contain '/'")
     }
-    // this path is an identifier unique for this surface
-    // considering nesting in IsolatedNodes
+    // this path is an identifier unique for this surface considering nesting in IsolatedNodes
     this._surfaceId = Surface.createSurfaceId(this)
 
-    this.clipboard = new Clipboard(this.editorSession)
-
-    this.domSelection = this.context.domSelection || new DOMSelection(this)
+    this.clipboard = this.context.clipboard || this._initializeClipboard()
+    this.domSelection = this.context.domSelection || this._initializeDOMSelection()
 
     this._state = {
       // true if the document session's selection is addressing this surface
@@ -51,39 +43,49 @@ export default class Surface extends Component {
     }
   }
 
+  _initializeClipboard () {
+    return new Clipboard(this.getConfigurator(), this.getEditorSession())
+  }
+
+  _initializeDOMSelection () {
+    return new DOMSelection(this)
+  }
+
   getChildContext () {
     return {
       surface: this,
       parentSurfaceId: this.getId(),
       doc: this.getDocument(),
-      // HACK: clearing isolatedNodeComponent so that we can easily know
-      // if this surface is within an isolated node
+      // Note: clearing isolatedNodeComponent so that it is easier to detect
+      // if this surface is within an isolated node or not
       isolatedNodeComponent: null
     }
   }
 
   didMount () {
     const editorSession = this.getEditorSession()
+    editorSession.onRender('selection', this._onSelectionChanged, this)
     const surfaceManager = this.getSurfaceManager()
     if (surfaceManager) {
       surfaceManager.registerSurface(this)
     }
-    editorSession.onRender('selection', this._onSelectionChanged, this)
-
-    const globalEventHandler = editorSession.globalEventHandler
-    globalEventHandler.addEventListener('keydown', this._muteNativeHandlers, this)
+    const globalEventHandler = this.getGlobalEventHandler()
+    if (globalEventHandler) {
+      globalEventHandler.addEventListener('keydown', this._muteNativeHandlers, this)
+    }
   }
 
   dispose () {
     const editorSession = this.getEditorSession()
-    const surfaceManager = this.getSurfaceManager()
     editorSession.off(this)
+    const surfaceManager = this.getSurfaceManager()
     if (surfaceManager) {
       surfaceManager.unregisterSurface(this)
     }
-
-    const globalEventHandler = editorSession.globalEventHandler
-    globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
+    const globalEventHandler = this.getGlobalEventHandler()
+    if (globalEventHandler) {
+      globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
+    }
   }
 
   didUpdate () {
@@ -132,10 +134,6 @@ export default class Surface extends Component {
     return el
   }
 
-  getComponentRegistry () {
-    return this.context.componentRegistry || this.props.componentRegistry
-  }
-
   getName () {
     return this.name
   }
@@ -172,12 +170,28 @@ export default class Surface extends Component {
     return this.getEditorSession().getDocument()
   }
 
+  getComponentRegistry () {
+    return this.context.componentRegistry
+  }
+
+  getConfigurator () {
+    return this.context.configurator
+  }
+
   getEditorSession () {
-    return this.editorSession
+    return this.context.editorSession
   }
 
   getSurfaceManager () {
     return this.context.surfaceManager
+  }
+
+  getGlobalEventHandler () {
+    return this.context.globalEventHandler
+  }
+
+  getKeyboardManager () {
+    return this.context.keyboardManager
   }
 
   isEnabled () {
@@ -201,14 +215,18 @@ export default class Surface extends Component {
   }
 
   focus () {
-    if (this.getEditorSession().getFocusedSurface() !== this) {
+    const editorSession = this.getEditorSession()
+    const sel = editorSession.getSelection()
+    if (sel.surfaceId !== this.getId()) {
       this.selectFirst()
     }
   }
 
   blur () {
-    if (this.getEditorSession().getFocusedSurface() === this) {
-      this.getEditorSession().setSelection(null)
+    const editorSession = this.getEditorSession()
+    const sel = editorSession.getSelection()
+    if (sel.surfaceId === this.getId()) {
+      editorSession.setSelection(null)
     }
   }
 
@@ -224,8 +242,7 @@ export default class Surface extends Component {
       let sel = this.getEditorSession().getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
-        // TODO: remove this. We are now doing this properly.
-        // leaving this here a while for legacy
+        // TODO: remove this HACK
         const scrollPane = this.context.scrollPane
         if (scrollPane && scrollPane.onSelectionPositioned) {
           console.error('DEPRECATED: you should manage the scrollPane yourself')
@@ -252,7 +269,8 @@ export default class Surface extends Component {
     if (event.key === 'Dead') return
 
     // keyboard shortcuts
-    let custom = this.getEditorSession().keyboardManager.onKeydown(event)
+    const keyboardManager = this.getKeyboardManager()
+    let custom = keyboardManager.onKeydown(event)
     if (!custom) {
       // core handlers for cursor movements and editor interactions
       switch (event.keyCode) {
@@ -293,9 +311,10 @@ export default class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-    const editorSession = this.getEditorSession()
     let text = event.data
-    if (!editorSession.keyboardManager.onTextInput(text)) {
+    const keyboardManager = this.getKeyboardManager()
+    if (!keyboardManager || !keyboardManager.onTextInput(text)) {
+      const editorSession = this.getEditorSession()
       editorSession.transaction((tx) => {
         tx.insertText(text)
       }, { action: 'type' })
@@ -313,12 +332,13 @@ export default class Surface extends Component {
     // after a second a context menu appears and a composition-start event is fired
     // In that case, the first inserted character must be removed again
     if (event.data) {
+      const editorSession = this.getEditorSession()
       let l = event.data.length
-      let sel = this.getEditorSession().getSelection()
+      let sel = editorSession.getSelection()
       if (sel.isPropertySelection() && sel.isCollapsed()) {
         // console.log("Overwriting composed character")
         let offset = sel.start.offset
-        this.getEditorSession().setSelection(sel.createWithNewRange(offset - l, offset))
+        editorSession.setSelection(sel.createWithNewRange(offset - l, offset))
       }
     }
   }
@@ -334,8 +354,10 @@ export default class Surface extends Component {
       if (!event.data) return
       this._delayed(() => {
         let text = event.data
-        if (!this.getEditorSession().keyboardManager.onTextInput(text)) {
-          this.getEditorSession().transaction((tx) => {
+        const keyboardManager = this.getKeyboardManager()
+        if (!keyboardManager || !keyboardManager.onTextInput(text)) {
+          const editorSession = this.getEditorSession()
+          editorSession.transaction((tx) => {
             tx.insertText(text)
           }, { action: 'type' })
         }
@@ -363,7 +385,8 @@ export default class Surface extends Component {
     }
     event.preventDefault()
     event.stopPropagation()
-    if (!this.getEditorSession().keyboardManager.onTextInput(character)) {
+    const keyboardManager = this.getKeyboardManager()
+    if (!keyboardManager || !keyboardManager.onTextInput(character)) {
       if (character.length > 0) {
         this.getEditorSession().transaction((tx) => {
           tx.insertText(character)
@@ -514,25 +537,29 @@ export default class Surface extends Component {
   }
 
   _updateContentEditableState () {
-    // NOTE: managing contenteditable is difficult in
-    // order to achieve a correct behavior for IsolatedNodes
-    // For 'closed' isolated nodes it is important that the parents'
-    // contenteditables are all false. Otherwise, the cursor
-    // can leave the isolated area.
-    let enableContenteditable = false
-    if (this.isEditable() && !this.props.disabled) {
-      enableContenteditable = true
-      if (this.state.mode === 'co-focused') {
-        let selState = this.context.editorSession.getSelectionState()
-        let sel = selState.getSelection()
-        let surface = this.getSurfaceManager().getSurface(sel.surfaceId)
+    // NOTE: this gets called whenever props or state is updated.
+    // Particularly, when this surface is co-focused, i.e.
+    // it has a child surface which is focused, and the child surface
+    // is inside a ('closed') IsolatedNodeComponent,
+    // then it is important to turn-off contenteditable, as
+    // otherwise the cursor can leave the isolated area..
+    function isInsideOpenIsolatedNode (editorSession, surfaceManager) {
+      if (surfaceManager) {
+        let sel = editorSession.getSelection()
+        let surface = surfaceManager.getSurface(sel.surfaceId)
         if (surface) {
           let isolatedNodeComponent = surface.context.isolatedNodeComponent
           if (isolatedNodeComponent) {
-            enableContenteditable = isolatedNodeComponent.isOpen()
+            return isolatedNodeComponent.isOpen()
           }
         }
       }
+    }
+
+    // in most cases contenteditable is true if this Surface is not disabled
+    let enableContenteditable = this.isEditable() && !this.props.disabled
+    if (enableContenteditable && this.state.mode === 'co-focused') {
+      enableContenteditable = isInsideOpenIsolatedNode(this.getEditorSession(), this.getSurfaceManager())
     }
     if (enableContenteditable) {
       this.el.setAttribute('contenteditable', true)
@@ -625,8 +652,10 @@ export default class Surface extends Component {
     event.stopPropagation()
     event.preventDefault()
     const text = ' '
-    if (!this.getEditorSession().keyboardManager.onTextInput(text)) {
-      this.getEditorSession().transaction((tx) => {
+    const keyboardManager = this.getKeyboardManager()
+    if (!keyboardManager || !keyboardManager.onTextInput(text)) {
+      const editorSession = this.getEditorSession()
+      editorSession.transaction((tx) => {
         tx.insertText(text)
       }, { action: 'type' })
     }
@@ -716,21 +745,17 @@ export default class Surface extends Component {
   _renderNode ($$, nodeId) {
     let doc = this.getDocument()
     let node = doc.get(nodeId)
-    let componentRegistry = this.context.componentRegistry || this.props.componentRegistry
-    let ComponentClass = componentRegistry.get(node.type)
+    let ComponentClass = this.getComponent(node.type, true)
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
       ComponentClass = UnsupportedNode
     }
-    return $$(ComponentClass, {
-      doc: doc,
-      node: node
-    })
+    return $$(ComponentClass, this._getNodeProps(node))
   }
 
   _getNodeProps (node) {
     return {
-      node: node,
+      node,
       placeholder: this.props.placeholder,
       disabled: this.props.disabled
     }
@@ -743,7 +768,7 @@ export default class Surface extends Component {
     return (comp && (comp === this || comp.context.surface === this))
   }
 
-  // Experimental: used by DragManager
+  // Used by DragManager
   getSelectionFromEvent (event) {
     let domRange = getDOMRangeFromEvent(event)
     let sel = this.domSelection.getSelectionForDOMRange(domRange)
@@ -766,7 +791,9 @@ export default class Surface extends Component {
   }
 
   _delayed (fn) {
-    window.setTimeout(fn, BROWSER_DELAY)
+    if (platform.inBrowser) {
+      window.setTimeout(fn, BROWSER_DELAY)
+    }
   }
 
   // prevent the native behavior of contenteditable key shorcuts

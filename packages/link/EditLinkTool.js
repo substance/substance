@@ -1,4 +1,4 @@
-import ToggleTool from '../../ui/ToggleTool'
+import { ToggleTool } from '../../deprecated'
 
 /**
   Tool for editing an existing link.
@@ -9,7 +9,7 @@ import ToggleTool from '../../ui/ToggleTool'
   @component
 */
 
-class EditLinkTool extends ToggleTool {
+export default class EditLinkTool extends ToggleTool {
   getUrlPath () {
     let propPath = this.constructor.urlPropertyPath
     return [this.getNodeId()].concat(propPath)
@@ -77,5 +77,3 @@ class EditLinkTool extends ToggleTool {
 }
 
 EditLinkTool.urlPropertyPath = ['url']
-
-export default EditLinkTool

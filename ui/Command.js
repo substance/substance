@@ -1,3 +1,5 @@
+import HandlerParams from './HandlerParams'
+
 /**
   Commands are used to perform UI triggered actions on the document. For instance the
   {@link ui/AnnotationCommand} takes care of creating, expanding, truncating and
@@ -25,7 +27,7 @@
   }
   ```
 */
-class Command {
+export default class Command {
   /**
     Construcutor is only used internally.
 
@@ -75,7 +77,7 @@ class Command {
     }
     ```
 
-    @param {Object} params      Provides editorSession, selectionState, surface, selection
+    @param {Object} params      Provides editorSession, selction, selectionState, surface
     @param {Object} context     Provides app-specific context.
   */
   getCommandState(params, context) { // eslint-disable-line
@@ -115,23 +117,9 @@ class Command {
     return false
   }
 
-  _getEditorSession (params, context) {
-    let editorSession = params.editorSession || context.editorSession
-    if (!editorSession) {
-      throw new Error("'editorSession' is required.")
-    }
-    return editorSession
+  getParams (context) {
+    return new HandlerParams(context)
   }
 
-  _getSelection (params) {
-    let sel = params.selection || params.selectionState.getSelection()
-    if (!sel) {
-      throw new Error("'selection' is required.")
-    }
-    return sel
-  }
+  get _isCommand () { return true }
 }
-
-Command.prototype._isCommand = true
-
-export default Command

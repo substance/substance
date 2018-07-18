@@ -1,4 +1,4 @@
-import Scrollbar from './Scrollbar'
+import { Scrollbar } from '../../deprecated'
 
 export default {
   name: 'scrollbar',

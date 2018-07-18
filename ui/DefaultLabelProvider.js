@@ -1,7 +1,7 @@
 /*
- Default label provider implementation
+  Default label provider implementation
 */
-class DefaultLabelProvider {
+export default class DefaultLabelProvider {
   constructor (labels, lang) {
     this.lang = lang || 'en'
     this.labels = labels
@@ -44,5 +44,3 @@ class DefaultLabelProvider {
     return vars
   }
 }
-
-export default DefaultLabelProvider

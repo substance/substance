@@ -10,7 +10,7 @@ import Command from './Command'
   })
   ```
 */
-class SwitchTextTypeCommand extends Command {
+export default class SwitchTextTypeCommand extends Command {
   constructor (config) {
     super(config)
     if (!config.spec) {
@@ -26,14 +26,13 @@ class SwitchTextTypeCommand extends Command {
   }
 
   getCommandState (params) {
-    let doc = params.editorSession.getDocument()
-    let sel = params.selection
-    let isBlurred = params.editorSession.isBlurred()
-
+    const editorSession = params.editorSession
+    const doc = editorSession.getDocument()
+    const sel = params.selection
+    const isBlurred = editorSession.isBlurred()
     let commandState = {
       disabled: false
     }
-
     if (sel.isPropertySelection() && !isBlurred) {
       let path = sel.getPath()
       let node = doc.get(path[0])
@@ -49,7 +48,6 @@ class SwitchTextTypeCommand extends Command {
       // TODO: Allow Container Selections too, to switch multiple paragraphs
       commandState.disabled = true
     }
-
     return commandState
   }
 
@@ -57,12 +55,7 @@ class SwitchTextTypeCommand extends Command {
     Perform a switchTextType transformation based on the current selection
   */
   execute (params) {
-    let surface = params.surface
-    let editorSession = params.editorSession
-    if (!surface) {
-      console.warn('No focused surface. Stopping command execution.')
-      return
-    }
+    const editorSession = params.editorSession
     editorSession.transaction((tx) => {
       return tx.switchTextType(this.config.spec)
     })
@@ -72,5 +65,3 @@ class SwitchTextTypeCommand extends Command {
     return true
   }
 }
-
-export default SwitchTextTypeCommand

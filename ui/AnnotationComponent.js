@@ -20,7 +20,7 @@ import Component from './Component'
   ```
 */
 
-class AnnotationComponent extends Component {
+export default class AnnotationComponent extends Component {
   // TODO: we should avoid to have a didMount hook on an abstract base class
   didMount () {
     let node = this.props.node
@@ -60,5 +60,3 @@ class AnnotationComponent extends Component {
     return 'span'
   }
 }
-
-export default AnnotationComponent

@@ -16,7 +16,7 @@ import without from '../util/without'
   ```
 */
 
-class Highlights extends EventEmitter {
+export default class Highlights extends EventEmitter {
   constructor (doc) {
     super()
 
@@ -95,5 +95,3 @@ class Highlights extends EventEmitter {
     this.emit('highlights:updated', highlights)
   }
 }
-
-export default Highlights
