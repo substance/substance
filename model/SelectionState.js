@@ -72,7 +72,7 @@ export default class SelectionState {
 
     // create a mapping by type for the currently selected annotations
     let annosByType = {}
-    function _add(anno) {
+    function _add (anno) {
       if (!annosByType[anno.type]) {
         annosByType[anno.type] = []
       }
