@@ -9,7 +9,7 @@ import forEach from '../util/forEach'
   be done by the user who created the resource explicitly
 */
 
-class DeprecatedResourceManager {
+export default class DeprecatedResourceManager {
   constructor (editorSession, context) {
     this.editorSession = editorSession
     this.context = context
@@ -59,5 +59,3 @@ class DeprecatedResourceManager {
     })
   }
 }
-
-export default ResourceManager

@@ -86,7 +86,7 @@ export default class DeprecatedEditorSession extends EventEmitter {
     let macros = configurator.getMacros()
     let converterRegistry = configurator.getConverterRegistry()
 
-    this.fileManager = options.fileManager || new FileManager(this, configurator.getFileAdapters(), this._context)
+    this.fileManager = options.fileManager || new FileManager(configurator.getFileAdapters(), this._context)
 
     // Handling of saving
     this._hasUnsavedChanges = false

@@ -1,15 +1,6 @@
 import Component from '../ui/Component'
 
-/*
-
-  ```
-  $$(MenuItem, {
-    name: 'strong',
-    commandState: { active, disabled }
-  })
-  ```
-*/
-class DeprecatedMenuItem extends Component {
+export default class DeprecatedMenuItem extends Component {
   render ($$) {
     let commandState = this.props.commandState
     let el = $$('button')
@@ -85,5 +76,3 @@ class DeprecatedMenuItem extends Component {
     this.context.commandManager.executeCommand(this.props.name, props)
   }
 }
-
-export default MenuItem
