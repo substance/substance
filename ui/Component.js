@@ -133,12 +133,12 @@ export default class Component extends EventEmitter {
     // the latter is a rather EXPERIMENTAL feature only used TODO where?
     let context = options.context
     if (isFunction(this.defineContext)) {
-      context = this.defineContext()
+      context = this.defineContext(props, parent)
     } else {
       context = this._getContext()
     }
     this.context = context || {}
-    Object.freeze(this.context)
+    // Object.freeze(this.context)
 
     // used for rerendering and can be used by components for incremental rendering
     // Note: usually it is inherited from the parent. In case of root components
@@ -165,11 +165,11 @@ export default class Component extends EventEmitter {
 
     // setting props without triggering willReceiveProps
     this.props = props
-    Object.freeze(this.props)
+    // Object.freeze(this.props)
 
     // initializing state
     this.state = this.getInitialState() || {}
-    Object.freeze(this.state)
+    // Object.freeze(this.state)
   }
 
   getId () {
