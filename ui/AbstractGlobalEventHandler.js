@@ -21,9 +21,8 @@ import platform from '../util/platform'
 
 const events = [ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup', 'copy' ]
 
-export default class GlobalEventHandler {
-  constructor (editorSession) {
-    this.editorSession = editorSession
+export default class AbstractGlobalEventHandler {
+  constructor () {
     this.listeners = []
     this.initialize()
   }
@@ -64,8 +63,7 @@ export default class GlobalEventHandler {
   }
 
   _getActiveListener (eventName) {
-    const editorSession = this.editorSession
-    const sel = editorSession.getSelection()
+    const sel = this.getSelection()
     if (sel) {
       let surfaceId = sel.surfaceId
       for (let i = 0; i < this.listeners.length; i++) {
