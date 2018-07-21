@@ -6,8 +6,18 @@ import Component from '../ui/Component'
 // is too much tangled with ScrollPanes
 export default class DeprecatedDropzones extends Component {
   didMount () {
-    this.context.dragManager.on('drag:started', this.onDragStarted, this)
-    this.context.dragManager.on('drag:finished', this.onDragFinished, this)
+    const dragManager = this._getDragManager()
+    if (dragManager) {
+      dragManager.on('drag:started', this.onDragStarted, this)
+      dragManager.on('drag:finished', this.onDragFinished, this)
+    }
+  }
+
+  dispose () {
+    const dragManager = this._getDragManager()
+    if (dragManager) {
+      dragManager.off(this)
+    }
   }
 
   render ($$) {
@@ -125,6 +135,10 @@ export default class DeprecatedDropzones extends Component {
       dropzoneComponent
     })
     dragManager._onDragEnd(e)
+  }
+
+  _getDragManager () {
+    return this.context.dragManager
   }
 
   /*
