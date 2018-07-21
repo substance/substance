@@ -365,14 +365,21 @@ export default class DeprecatedEditorSession extends EventEmitter {
   */
   transaction (transformation, info) {
     const t = this._transaction
+    const tx = t.tx
     info = info || {}
     t._sync()
-    let change = t._recordChange(transformation, this.getSelection(), info)
+    // HACK: setting the state of 'tx' here
+    let selBefore = this.getSelection()
+    tx.selection = selBefore
+    let change = t._recordChange(transformation, info)
+    let selAfter = tx.selection
     if (change) {
+      change.before = { selection: selBefore }
+      change.after = { selection: selAfter }
       this._commit(change, info)
     } else {
       // if no changes, at least update the selection
-      this._setSelection(this._transaction.getSelection())
+      this._setSelection(tx.selection)
       this.startFlow()
     }
     return change

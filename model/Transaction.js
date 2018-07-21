@@ -2,38 +2,24 @@ import isFunction from '../util/isFunction'
 import DocumentChange from './DocumentChange'
 
 /*
-  A transaction for editing a document in an EditorSession.
-
-  Wherever you see `tx`, it is mostly an instance of this class.
-
-  The transaction is used to manipulate the document in a 'turtle-graphics' style.
-  For that it maintains an internal state consisting of an array of operations, a selection, and
-  the current surface.
-
-  Usually, at the beginning of a transaction, one Surface is focused. This is used to initialize
-  the transaction state. Depending on the type of Surface or the type of the current selection,
-  some manipulations are allowed or others are not: it is not possible to create a ContainerAnnotation without
-  a ContainerSelection, or pasting a list of nodes into a TextPropertyEditor will strip the structure and just
-  the text content.
-
+  This maintains a copy of a master document used as a stage
+  for recording operations.
 */
-export default
-class Transaction {
+export default class Transaction {
   /*
     @param {Document} doc
   */
   constructor (master) {
-    // using a different name internally
     this.master = master
+    // create a copy of the master document
     this.stage = master.newInstance().createFromDocument(master)
     // HACK: some code is relying on this
+    // TODO: what code?
     this.stage._isTransactionDocument = true
-
+    // used as 'tx' in transactions
     this.tx = this.stage.createEditingInterface()
     // internal state
     this._isTransacting = false
-    this._surface = null
-
     // HACK: need to wipe the ops from master as otherwise the next
     // sync would fail
     master._ops.length = 0
@@ -53,20 +39,11 @@ class Transaction {
     this.stage._ops = ops
   }
 
-  getSelection () {
-    return this.tx.getSelection()
-  }
-
-  setSelection (sel) {
-    this.tx.setSelection(sel)
-  }
-
   _reset () {
     this._before = {}
     this._after = {}
     this.stage._ops.length = 0
     this._info = {}
-    this.setSelection(null)
   }
 
   /**
@@ -86,7 +63,7 @@ class Transaction {
     })
     ```
   */
-  _recordChange (transformation, selection, info) {
+  _recordChange (transformation, info) {
     if (this._isTransacting) throw new Error('Nested transactions are not supported.')
     if (!isFunction(transformation)) throw new Error('Document.transaction() requires a transformation function.')
     let hasFinished = false
@@ -95,17 +72,11 @@ class Transaction {
     let change
     try {
       const tx = this.tx
-      tx.setSelection(selection)
-      let selBefore = tx.getSelection()
-      transformation(tx, {
-        selection: selBefore
-      })
+      transformation(tx)
       let ops = this.ops
       if (ops.length > 0) {
-        change = new DocumentChange(ops, tx._before, tx._after)
+        change = new DocumentChange(ops, {}, {})
         change.info = info
-        change.before = { selection: selBefore }
-        change.after = { selection: tx.getSelection() }
         // EXPERIMENTAL: in case of XMLDocuments we want to validate the stage document before committing
         // the change to the real document
         if (this.master._isXMLDocument) {
