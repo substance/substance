@@ -123,3 +123,5 @@ export default class Command {
 
   get _isCommand () { return true }
 }
+
+Command.DISABLED = Object.freeze({ diabled: true, active: false })
