@@ -35,26 +35,14 @@ export default class DeprecatedKeyboardManager extends AbstractKeyboardManager {
     })
   }
 
-  _getKeydownBindings (key) {
-    return this.keydownBindings[key]
-  }
-
-  _getTextInputBindings (text) {
-    return this.textInputBindings[text]
-  }
-
-  _getParams () {
-    const context = this.context
-    const editorSession = context.editorSession
-    const surfaceManager = context.surfaceManager
-    const selection = editorSession.getSelection()
-    const selectionState = editorSession.getSelectionState()
-    let surface = surfaceManager.getFocusedSurface()
-    return {
-      editorSession,
-      selection,
-      selectionState,
-      surface
+  _getBindings (type, key) {
+    switch (type) {
+      case 'keydown':
+        return this.keydownBindings[key]
+      case 'textinput':
+        return this.textInputBindings[key]
+      default:
+        throw new Error('Unsupported keyboard event type')
     }
   }
 

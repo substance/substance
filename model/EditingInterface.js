@@ -13,11 +13,10 @@ import { augmentSelection } from './selectionHelpers'
   Low-level manipulations are dispatched to the edited document instance.
   Higher-level manipulations involve complex manipulations keeping the selection in a correct state.
  */
-class EditingInterface {
+export default class EditingInterface {
   constructor (doc, options = {}) {
     this._document = doc
     this._selection = null
-    // TODO: allow for custom editing implementation
     this._impl = options.editing || new Editing()
     this._direction = null
   }
@@ -227,5 +226,3 @@ class EditingInterface {
     return this._document.createSnippet()
   }
 }
-
-export default EditingInterface
