@@ -5,10 +5,10 @@ import isString from '../util/isString'
 import EventEmitter from '../util/EventEmitter'
 import uuid from '../util/uuid'
 import Selection from '../model/Selection'
-import SelectionState from '../model/SelectionState'
 import ChangeHistory from '../model/ChangeHistory'
 import Transaction from '../model/Transaction'
 import * as operationHelpers from '../model/operationHelpers'
+import SelectionState from './DeprecatedSelectionState'
 
 export default class DeprecatedEditorSession extends EventEmitter {
   constructor (doc, options) {

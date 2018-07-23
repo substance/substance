@@ -1,8 +1,10 @@
-import Selection from './Selection'
-import { getPropertyAnnotationsForSelection, getContainerAnnotationsForSelection, getMarkersForSelection } from './documentHelpers'
-import { isFirst, isLast } from './selectionHelpers'
+import Selection from '../model/Selection'
+import {
+  getPropertyAnnotationsForSelection, getContainerAnnotationsForSelection, getMarkersForSelection
+} from '../model/documentHelpers'
+import { isFirst, isLast } from '../model/selectionHelpers'
 
-export default class SelectionState {
+export default class DeprecatedSelectionState {
   constructor (doc) {
     this.document = doc
     this.selection = Selection.nullSelection
