@@ -111,13 +111,12 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
 
   // TODO: this is almost the same as in IsolatedNodeComponent
   // We should consolidate this
-  _deriveStateFromSelectionState (selState) {
-    const surface = this._getSurfaceForSelection(selState)
+  _deriveStateFromSelectionState (sel, selState) {
+    const surface = this._getSurfaceForSelection(sel, selState)
     const parentSurface = this.getParentSurface()
     if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (surface === parentSurface) {
-      const sel = selState.getSelection()
       const node = this.props.node
       if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.start.path, node.start.path)) {
         const nodeSel = node.getSelection()
@@ -134,7 +133,7 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     if (isolatedNodeComponent === this) {
       return { mode: 'focused' }
     }
-    let isolatedNodes = this._getIsolatedNodes(selState)
+    let isolatedNodes = this._getIsolatedNodes(sel, selState)
     if (isolatedNodes.indexOf(this) > -1) {
       return { mode: 'co-focused' }
     }

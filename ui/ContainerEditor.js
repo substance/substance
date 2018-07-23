@@ -138,17 +138,17 @@ export default class ContainerEditor extends Surface {
 
   _selectNextIsolatedNode (direction) {
     let selState = this.getEditorSession().getSelectionState()
-    let node = (direction === 'left') ? selState.getPreviousNode() : selState.getNextNode()
+    let node = (direction === 'left') ? selState.previousNode : selState.nextNode
     let isIsolatedNode = !node.isText() && !node.isList()
     if (!node || !isIsolatedNode) return false
     if (
-      (direction === 'left' && selState.isFirst()) ||
-      (direction === 'right' && selState.isLast())
+      (direction === 'left' && selState.isFirst) ||
+      (direction === 'right' && selState.isLast)
     ) {
       this.getEditorSession().setSelection({
         type: 'node',
         nodeId: node.id,
-        containerId: selState.getContainer().id,
+        containerId: selState.container.id,
         surfaceId: this.id
       })
       return true

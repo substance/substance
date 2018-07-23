@@ -18,8 +18,9 @@ export default class AbstractIsolatedNodeComponent extends Component {
   }
 
   getInitialState () {
+    let sel = this.getEditorSession().getSelection()
     let selState = this.getEditorSession().getSelectionState()
-    return this._deriveStateFromSelectionState(selState)
+    return this._deriveStateFromSelectionState(sel, selState)
   }
 
   getChildContext () {
@@ -119,8 +120,9 @@ export default class AbstractIsolatedNodeComponent extends Component {
 
   _onSelectionChanged () {
     const editorSession = this.getEditorSession()
+    const sel = editorSession.getSelection()
     const selState = editorSession.getSelectionState()
-    const newState = this._deriveStateFromSelectionState(selState)
+    const newState = this._deriveStateFromSelectionState(sel, selState)
     if (!newState && this.state.mode) {
       this.extendState({ mode: null })
     } else if (newState && newState.mode !== this.state.mode) {
@@ -160,13 +162,12 @@ export default class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  _getSurfaceForSelection (selState) {
+  _getSurfaceForSelection (sel, selState) {
     // HACK: deriving additional information from the selection and
     // storing it into selState
     // TODO: this should be part of the regular selection state reducer
     let surface = selState.surface
     if (!surface) {
-      const sel = selState.getSelection()
       if (sel && sel.surfaceId) {
         const surfaceManager = this.getSurfaceManager()
         surface = surfaceManager.getSurface(sel.surfaceId)
@@ -180,13 +181,12 @@ export default class AbstractIsolatedNodeComponent extends Component {
 
   // compute the list of surfaces and isolated nodes
   // for the given selection
-  _getIsolatedNodes (selState) {
+  _getIsolatedNodes (sel, selState) {
     // HACK: deriving additional information from the selection and
     // storing it into selState
     // TODO: this should be part of the regular selection state reducer
     let isolatedNodes = selState.isolatedNodes
     if (!isolatedNodes) {
-      let sel = selState.getSelection()
       isolatedNodes = []
       if (sel && sel.surfaceId) {
         let surfaceManager = this.getSurfaceManager()
