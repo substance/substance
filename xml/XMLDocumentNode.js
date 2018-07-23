@@ -169,6 +169,8 @@ class XMLDocumentNode extends DocumentNode {
   getInnerXML () {
     return getInnerXML(this)
   }
+
+  get _isXMLNode () { return true }
 }
 
 XMLDocumentNode.prototype.attr = DOMElement.prototype.attr

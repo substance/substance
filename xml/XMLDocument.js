@@ -103,9 +103,11 @@ class XMLDocument extends Document {
     let errors = []
     Object.keys(changed).forEach((id) => {
       let node = this.get(id)
-      let res = xmlSchema.validateElement(node)
-      if (!res.ok) {
-        errors = errors.concat(res.errors)
+      if (node && node._isXMLNode) {
+        let res = xmlSchema.validateElement(node)
+        if (!res.ok) {
+          errors = errors.concat(res.errors)
+        }
       }
     })
     return {
