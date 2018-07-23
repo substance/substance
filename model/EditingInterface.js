@@ -80,7 +80,7 @@ export default class EditingInterface {
       sel = Selection.nullSelection
     } else if (isPlainObject(sel)) {
       sel = this.createSelection(sel)
-    } else {
+    } else if (!sel.isNull()) {
       sel = augmentSelection(sel, this._selection)
     }
     this._selection = sel
