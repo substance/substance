@@ -1,6 +1,6 @@
-import { default as Tool } from '../../ui/ToggleTool'
+import { ToggleTool } from '../../deprecated'
 
-class CorrectionTool extends Tool {
+export default class CorrectionTool extends ToggleTool {
   render ($$) {
     let node = this.props.node
     let Button = this.getComponent('button')
@@ -45,5 +45,3 @@ class CorrectionTool extends Tool {
     })
   }
 }
-
-export default CorrectionTool

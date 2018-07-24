@@ -1,7 +1,7 @@
-import ToggleTool from '../../ui/ToggleTool'
 import debounce from '../../util/debounce'
+import { ToggleTool } from '../../deprecated'
 
-class FindAndReplaceTool extends ToggleTool {
+export default class FindAndReplaceTool extends ToggleTool {
   didMount () {
     this.context.editorSession.onPosition(this._onPosition, this)
   }
@@ -245,5 +245,3 @@ class FindAndReplaceTool extends ToggleTool {
     findAndReplaceManager.setReplaceString(replaceString)
   }
 }
-
-export default FindAndReplaceTool

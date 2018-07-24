@@ -4,7 +4,6 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Coordinate from '../model/Coordinate'
 import Component from './Component'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
-import CursorComponent from './CursorComponent'
 import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 /**
@@ -107,9 +106,7 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     let node = fragment.node
     let id = node.id
     let el
-    if (node.type === 'cursor') {
-      el = $$(CursorComponent, { collaborator: node.collaborator })
-    } else if (node.type === 'selection-fragment') {
+    if (node.type === 'selection-fragment') {
       el = $$(SelectionFragmentComponent, { collaborator: node.collaborator })
     } else {
       el = super._renderFragment.apply(this, arguments)

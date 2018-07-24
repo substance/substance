@@ -407,8 +407,8 @@ class ClipboardEvent {
 }
 
 function _fixture (t, seed) {
-  let { editorSession, doc } = setupEditor(t, seed)
-  let clipboard = new Clipboard(editorSession, clipboardConfig)
+  let { configurator, editorSession, doc } = setupEditor(t, seed)
+  let clipboard = new Clipboard(configurator, editorSession)
   return { editorSession, doc, clipboard }
 }
 

@@ -2,7 +2,7 @@ import {
   ImagePackage, Component, Configurator,
   BasePackage,
   ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
-  ListPackage, LinkPackage, TablePackage, CodeblockPackage, FilePackage,
+  ListPackage, LinkPackage, TablePackage, CodeblockPackage,
   SubscriptPackage, SuperscriptPackage
   // InlineWrapperPackage,
 } from 'substance'

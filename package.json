@@ -13,7 +13,7 @@
   "jsnext:main": "dist/substance.es.js",
   "scripts": {
     "prepack": "npm install && node make publish",
-    "lint": "standard collab/**/*.js dom/**/*.js model/**/*.js packages/**/*.js ui/**/*.js util/**/*.js xml/**/*.js index.es.js",
+    "lint": "standard collab/**/*.js deprecated/**/*.js dom/**/*.js model/**/*.js packages/**/*.js ui/**/*.js util/**/*.js xml/**/*.js index.es.js",
     "dev": "node make test:browser:pure -w -s",
     "pretest": "npm run lint",
     "test": "node make test",
@@ -42,7 +42,7 @@
     "karma-tape-reporter": "1.0.3",
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
-    "substance-bundler": "0.25.1",
+    "substance-bundler": "0.25.4",
     "substance-test": "^0.11.0"
   },
   "files": [

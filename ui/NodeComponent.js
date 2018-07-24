@@ -26,8 +26,9 @@ export default class NodeComponent extends Component {
   }
 
   rerender (...args) {
-    // skip if this node has been disposed already
+    // HACK: skip if this node has been disposed already
     if (this.props.node.isDisposed()) return
+
     super.rerender(...args)
   }
 }

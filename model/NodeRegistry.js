@@ -1,4 +1,4 @@
-import Registry from '../util/Registry'
+import Registry from '../deprecated/DeprecatedRegistry'
 
 /*
   Registry for Nodes.
@@ -6,7 +6,7 @@ import Registry from '../util/Registry'
   @class NodeRegistry
   @extends util/Registry
  */
-class NodeRegistry extends Registry {
+export default class NodeRegistry extends Registry {
   /**
     Register a Node class.
 
@@ -28,5 +28,3 @@ class NodeRegistry extends Registry {
     this.add(type, nodeClazz)
   }
 }
-
-export default NodeRegistry

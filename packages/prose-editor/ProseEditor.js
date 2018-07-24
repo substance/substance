@@ -1,7 +1,5 @@
-import AbstractEditor from '../../ui/AbstractEditor'
+import { AbstractEditor, Toolbar, WorkflowPane } from '../../deprecated'
 import ContainerEditor from '../../ui/ContainerEditor'
-import WorkflowPane from '../../ui/WorkflowPane'
-import Toolbar from '../toolbar/Toolbar'
 
 /**
   Configurable ProseEditor component

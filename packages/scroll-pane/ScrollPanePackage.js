@@ -1,4 +1,4 @@
-import ScrollPane from './ScrollPane'
+import ScrollPane from '../../deprecated/DeprecatedScrollPane'
 
 export default {
   name: 'scroll-pane',

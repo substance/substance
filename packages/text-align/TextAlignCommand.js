@@ -1,13 +1,13 @@
 import Command from '../../ui/Command'
 
-class TextAlignCommand extends Command {
+export default class TextAlignCommand extends Command {
   getCommandState (params) {
     let sel = this._getSelection(params)
     let selectionState = params.editorSession.getSelectionState()
     let doc = params.editorSession.getDocument()
     let commandState = { disabled: true }
 
-    if (sel.isPropertySelection() && !selectionState.isInlineNodeSelection()) {
+    if (sel.isPropertySelection() && !selectionState.isInlineNodeSelection) {
       let path = sel.getPath()
       let node = doc.get(path[0])
       if (node && node.isText() && node.isBlock()) {
@@ -32,5 +32,3 @@ class TextAlignCommand extends Command {
     })
   }
 }
-
-export default TextAlignCommand

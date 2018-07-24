@@ -53,15 +53,15 @@ export default class InsertInlineNodeCommand extends Command {
   }
 
   isDisabled (params, context) { // eslint-disable-line no-unused
-    let sel = params.selection
-    let selectionState = params.editorSession.getSelectionState()
+    const editorSession = this.getEditorSession(params, context)
+    let sel = editorSession.getSelection()
+    let selectionState = editorSession.getSelectionState()
     if (!sel.isPropertySelection()) {
       return true
     }
-
     // We don't allow inserting an inline node on top of an existing inline
     // node.
-    if (selectionState.isInlineNodeSelection()) {
+    if (selectionState.isInlineNodeSelection) {
       return true
     }
     return false
@@ -79,9 +79,9 @@ export default class InsertInlineNodeCommand extends Command {
     Insert new inline node at the current selection
   */
   execute (params, context) {
-    let state = this.getCommandState(params, context)
+    let state = params.commandState
+    let editorSession = params.editorSession
     if (state.disabled) return
-    let editorSession = this._getEditorSession(params, context)
     editorSession.transaction((tx) => {
       let nodeData = this.createNodeData(tx, params, context)
       tx.insertInlineNode(nodeData)

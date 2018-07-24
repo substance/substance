@@ -19,7 +19,10 @@ const DEBUG = false
 
   @param {Editor} Editor component
  */
-class DOMSelection {
+export default class DOMSelection {
+  /**
+   *
+   */
   constructor (editor) {
     this.editor = editor
     if (platform.inBrowser) {
@@ -401,5 +404,3 @@ function _createRange ({start, end, isReverse}) {
   }
   return new Range(start, end, isReverse, surface.getContainerId(), surface.id)
 }
-
-export default DOMSelection

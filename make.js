@@ -93,7 +93,6 @@ function buildLib (target, production) {
     config.istanbul = {
       include: [
         'collab/*.js',
-        'dar/*.js',
         'dom/*.js',
         'model/**/*.js',
         'packages/**/*.js',
@@ -225,23 +224,19 @@ b.task('clean', () => {
 
 b.task('css', css)
 
-b.task('schema', () => {
-  rng(b, './dar/Manifest.rng', { dir: 'tmp' })
-})
-
-b.task('lib:browser', ['css', 'schema'], () => {
+b.task('lib:browser', ['css'], () => {
   buildLib('browser', 'production')
 })
 
-b.task('lib:browser:dev', ['css', 'schema'], () => {
+b.task('lib:browser:dev', ['css'], () => {
   buildLib('browser')
 })
 
-b.task('lib:dev', ['css', 'schema'], () => {
+b.task('lib:dev', ['css'], () => {
   buildLib('all')
 })
 
-b.task('lib', ['css', 'schema'], () => {
+b.task('lib', ['css'], () => {
   buildLib('all', 'production')
   // FIXME: we can't use buble any more because I like to use 'for-of'
   // We could switch to babel if we really need es5 support
@@ -285,7 +280,7 @@ b.task('publish', ['clean', 'lib', 'minify'])
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'lib:browser:dev', 'test:browser'])
 
-b.task('test', ['schema', 'test:node', 'cover'])
+b.task('test', ['test:node', 'cover'])
   .describe('runs the test suite')
 
 b.setServerPort(4001)

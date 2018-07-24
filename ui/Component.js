@@ -107,8 +107,7 @@ const COMPONENT_FACTORY = {
   HelloMessage.mount({name: 'John'}, document.body)
   ```
 */
-export default
-class Component extends EventEmitter {
+export default class Component extends EventEmitter {
   /**
     Construcutor is only used internally.
 
@@ -132,14 +131,19 @@ class Component extends EventEmitter {
 
     // context from parent (dependency injection) or if given via options
     // the latter is a rather EXPERIMENTAL feature only used TODO where?
-    let context = options.context ? options.context : this._getContext() || {}
-    this.context = context
-    Object.freeze(this.context)
+    let context
+    if (isFunction(this.defineContext)) {
+      context = this.defineContext(props, parent)
+    } else {
+      context = options.context || this._getContext()
+    }
+    this.context = context || {}
+    // Object.freeze(this.context)
 
     // used for rerendering and can be used by components for incremental rendering
     // Note: usually it is inherited from the parent. In case of root components
     // it can be provided via context or options
-    this.renderingEngine = (parent && parent.renderingEngine) || context.renderingEngine || options.renderingEngine || new RenderingEngine({
+    this.renderingEngine = (parent && parent.renderingEngine) || options.renderingEngine || new RenderingEngine({
       componentFactory: COMPONENT_FACTORY
     })
 
@@ -161,11 +165,11 @@ class Component extends EventEmitter {
 
     // setting props without triggering willReceiveProps
     this.props = props
-    Object.freeze(this.props)
+    // Object.freeze(this.props)
 
     // initializing state
     this.state = this.getInitialState() || {}
-    Object.freeze(this.state)
+    // Object.freeze(this.state)
   }
 
   getId () {
@@ -312,11 +316,7 @@ class Component extends EventEmitter {
   }
 
   getComponentRegistry () {
-    return this.props.componentRegistry || this.context.componentRegistry
-  }
-
-  getFlow () {
-    return this.context.flow
+    return this.context.componentRegistry
   }
 
   /**

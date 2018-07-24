@@ -1,4 +1,4 @@
-import ContextMenu from './ContextMenu'
+import { ContextMenu } from '../../deprecated'
 
 export default {
   name: 'context-menu',

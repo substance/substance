@@ -1,9 +1,6 @@
-import ToolDropdown from '../../ui/ToolDropdown'
-import ToolGroup from '../../ui/ToolGroup'
-import ToolPrompt from '../../ui/ToolPrompt'
-import ToolPanel from '../../ui/ToolPanel'
-import MenuGroup from '../../ui/MenuGroup'
-import ToolSeparator from './ToolSeparator'
+import {
+  ToolDropdown, ToolGroup, ToolPrompt, ToolPanel, MenuGroup, ToolSeparator
+} from '../../deprecated'
 
 export default {
   name: 'tool-panel',

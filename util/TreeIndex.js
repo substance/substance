@@ -16,7 +16,7 @@ class TreeNode {}
  * var index = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
 
-class TreeIndex {
+export default class TreeIndex {
   /**
    * Get value at path.
    *
@@ -187,5 +187,3 @@ class TreeIndexArrays extends TreeIndex {
 }
 
 TreeIndex.Arrays = TreeIndexArrays
-
-export default TreeIndex

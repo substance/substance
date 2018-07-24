@@ -1452,7 +1452,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Handling actions from forwarded components', (t) => {
+  test('Handling actions from forwarded components (2)', (t) => {
     let _foo = null
 
     class MyComponent extends TestComponent {

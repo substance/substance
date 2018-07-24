@@ -1,8 +1,7 @@
 import DocumentNode from '../../model/DocumentNode'
 import ListMixin from '../../model/ListMixin'
 
-export default
-class ListNode extends ListMixin(DocumentNode) {
+export default class ListNode extends ListMixin(DocumentNode) {
   // specific implementation
 
   createListItem (text) {

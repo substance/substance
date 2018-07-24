@@ -1,4 +1,4 @@
-import CommandManager from '../ui/CommandManager'
+import { CommandManager } from '../deprecated'
 
 const DISABLED = Object.freeze({
   disabled: true

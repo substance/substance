@@ -19,7 +19,7 @@ export default class ListComponent extends NodeComponent {
     el.addClass('sc-list').attr('data-id', node.id)
     return el
   }
-}
 
-// we need this ATM to prevent this being wrapped into an isolated node (see ContainerEditor._renderNode())
-ListComponent.prototype._isCustomNodeComponent = true
+  // we need this ATM to prevent this being wrapped into an isolated node (see ContainerEditor._renderNode())
+  get _isCustomNodeComponent () { return true }
+}

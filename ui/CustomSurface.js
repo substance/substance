@@ -19,12 +19,12 @@ export default class CustomSurface extends Component {
   }
 
   didMount () {
-    const surfaceManager = this.context.editorSession.surfaceManager
+    const surfaceManager = this._getSurfaceManager()
     surfaceManager.registerSurface(this)
   }
 
   dispose () {
-    const surfaceManager = this.context.editorSession.surfaceManager
+    const surfaceManager = this._getSurfaceManager()
     surfaceManager.unregisterSurface(this)
   }
 
@@ -80,5 +80,9 @@ export default class CustomSurface extends Component {
 
   _getCustomResourceId () {
     throw new Error('This method needs to be implemented by a CustomSurface')
+  }
+
+  _getSurfaceManager () {
+    return this.context.surfaceManager
   }
 }

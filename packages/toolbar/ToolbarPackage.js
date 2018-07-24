@@ -1,4 +1,4 @@
-import Toolbar from './Toolbar'
+import { Toolbar } from '../../deprecated/index'
 
 export default {
   name: 'toolbar',

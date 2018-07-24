@@ -1,4 +1,4 @@
-import Registry from './Registry'
+import { Registry } from '../deprecated'
 
 /*
   Simple factory implementation.
@@ -6,7 +6,7 @@ import Registry from './Registry'
   @class Factory
   @extends Registry
 */
-class Factory extends Registry {
+export default class Factory extends Registry {
   /**
     Create an instance of the clazz with a given name.
 
@@ -25,5 +25,3 @@ class Factory extends Registry {
     return obj
   }
 }
-
-export default Factory

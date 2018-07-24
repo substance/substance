@@ -1,24 +1,11 @@
-import Command from './Command'
+import EditInlineNodeCommand from './EditInlineNodeCommand'
 
 /**
-  Used for edit tools or property annotations (e.g. EditLinkTool)
+  Used for editing property annotations (e.g., such as links)
 */
-export default class EditAnnotationCommand extends Command {
-  constructor (...args) {
-    super(...args)
-
-    if (!this.config.nodeType) {
-      throw new Error("'nodeType' is required")
-    }
-  }
-
-  /**
-    Get command state
-
-    @return {Object} object with `disabled` and `node` properties
-  */
+export default class EditAnnotationCommand extends EditInlineNodeCommand {
   getCommandState (params, context) { // eslint-disable-line no-unused
-    let sel = this._getSelection(params)
+    let sel = params.selection
     let annos = this._getAnnotationsForSelection(params)
     let newState = {
       disabled: true
@@ -29,11 +16,5 @@ export default class EditAnnotationCommand extends Command {
       newState.nodeId = annos[0].id
     }
     return newState
-  }
-
-  execute (params, context) { } // eslint-disable-line no-unused
-
-  _getAnnotationsForSelection (params) {
-    return params.selectionState.getAnnotationsForType(this.config.nodeType)
   }
 }

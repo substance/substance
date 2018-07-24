@@ -2,9 +2,9 @@ import Command from '../../ui/Command'
 
 export default class ToggleListCommand extends Command {
   getCommandState (params) {
-    let editorSession = this._getEditorSession(params)
+    let editorSession = params.editorSession
     let doc = editorSession.getDocument()
-    let sel = this._getSelection(params)
+    let sel = editorSession.getSelection()
     if (sel && sel.isPropertySelection()) {
       let path = sel.path
       let node = doc.get(path[0])

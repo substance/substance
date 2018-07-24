@@ -1,4 +1,4 @@
-class DragAndDropHandler {
+export default class DragAndDropHandler {
   match(dragState, context) { // eslint-disable-line
     return false
   }
@@ -11,5 +11,3 @@ class DragAndDropHandler {
     return true
   }
 }
-
-export default DragAndDropHandler

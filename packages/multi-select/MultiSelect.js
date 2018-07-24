@@ -26,7 +26,7 @@ import { orderBy } from '../../util'
   });
   ```
 */
-class MultiSelect extends Component {
+export default class MultiSelect extends Component {
   didMount () {
     this._recomputeOrder()
   }
@@ -126,5 +126,3 @@ class MultiSelect extends Component {
     this.extendState({collapsed: !collapsed})
   }
 }
-
-export default MultiSelect

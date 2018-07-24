@@ -14,8 +14,8 @@ import AbstractClipboard from './AbstractClipboard'
   @internal
 */
 export default class Clipboard extends AbstractClipboard {
-  constructor (editorSession) {
-    super(editorSession.getConfigurator())
+  constructor (configurator, editorSession) {
+    super(configurator)
 
     this.editorSession = editorSession
   }
@@ -45,7 +45,7 @@ export default class Clipboard extends AbstractClipboard {
 
   _cut () {
     let editorSession = this.getEditorSession()
-    editorSession.transaction((tx) => {
+    editorSession.transaction(tx => {
       tx.deleteSelection()
     })
   }
@@ -57,7 +57,7 @@ export default class Clipboard extends AbstractClipboard {
   */
   _pastePlainText (plainText) {
     let editorSession = this.getEditorSession()
-    editorSession.transaction(function (tx) {
+    editorSession.transaction(tx => {
       tx.paste(plainText)
     }, { action: 'paste' })
   }
@@ -73,7 +73,7 @@ export default class Clipboard extends AbstractClipboard {
     let content = htmlImporter.importDocument(html) || text
     if (content) {
       let editorSession = this.getEditorSession()
-      editorSession.transaction((tx) => {
+      editorSession.transaction(tx => {
         tx.paste(content)
       }, { action: 'paste' })
     }

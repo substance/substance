@@ -14,23 +14,11 @@
 @import './emphasis/_emphasis.css';
 /* find-and-replace */
 @import './find-and-replace/_find-and-replace.css';
-/* grid */
-@import './grid/_grid.css';
-/* gutter */
-@import './gutter/_gutter.css';
 /* heading */
 @import './heading/_heading.css';
 /* image */
 @import './image/_image.css';
 @import './image/_insert-image-tool.css';
-/* inline-node */
-@import './inline-node/_inline-node.css';
-/* inline-wrapper */
-@import './inline-wrapper/_inline-wrapper.css';
-/* isolated-node */
-@import './isolated-node/_isolated-node.css';
-/* layout */
-@import './layout/_layout.css';
 /* link */
 @import './link/_link.css';
 @import './link/_edit-link-tool.css';
