@@ -131,11 +131,11 @@ export default class Component extends EventEmitter {
 
     // context from parent (dependency injection) or if given via options
     // the latter is a rather EXPERIMENTAL feature only used TODO where?
-    let context = options.context
+    let context
     if (isFunction(this.defineContext)) {
       context = this.defineContext(props, parent)
     } else {
-      context = this._getContext()
+      context = options.context || this._getContext()
     }
     this.context = context || {}
     // Object.freeze(this.context)
