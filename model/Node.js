@@ -197,11 +197,11 @@ function _compileSchema (schema) {
   let compiledSchema = {}
   forEach(schema, function (definition, name) {
     // skip 'type'
-    if (name === 'type') {
-      return
-    }
+    if (name === 'type') return
     if (isString(definition) || isArray(definition)) {
       definition = { type: definition }
+    } else {
+      definition = cloneDeep(definition)
     }
     definition = _compileDefintion(definition)
     definition.name = name
@@ -227,12 +227,13 @@ function _compileDefintion (definition) {
     let first = defs[0]
     let last = defs[lastIdx]
     let isCanonical = first === 'array'
-    let hasTargetType = last !== 'id' && !_isValueType(last)
-    definition.targetTypes = type
     if (isCanonical) {
       definition.type = defs.slice()
-      definition.type[lastIdx] = 'id'
-      if (hasTargetType) definition.targetTypes = [last]
+      // 'semi'-canonical
+      if (last !== 'id' && !_isValueType(last)) {
+        definition.targetTypes = [last]
+        definition.type[lastIdx] = 'id'
+      }
     } else {
       if (defs.length > 1) {
         defs.forEach(t => {
@@ -257,6 +258,7 @@ function _compileDefintion (definition) {
       default: '',
       _isText: true
     }
+  // single reference type
   } else if (type !== 'id' && !_isValueType(type)) {
     definition.type = 'id'
     definition.targetTypes = [type]
