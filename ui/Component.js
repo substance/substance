@@ -161,7 +161,7 @@ export default class Component extends EventEmitter {
     this.__foreignRefs__ = {}
 
     // action handlers added via `handleAction()` are stored here
-    this._actionHandlers = {}
+    this._actionHandlers = this.getActionHandlers()
 
     // setting props without triggering willReceiveProps
     this.props = props
@@ -178,6 +178,10 @@ export default class Component extends EventEmitter {
 
   setId () {
     throw new Error("'id' is readonly")
+  }
+
+  getActionHandlers () {
+    return {}
   }
 
   /**

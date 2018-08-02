@@ -23,7 +23,7 @@ test('properties of type ["object"] (#1169)', (t) => {
   t.end()
 })
 
-test('property with multiple reference types', (t) => {
+test('reference property with multiple target types', (t) => {
   class MyNode extends Node {}
   MyNode.schema = {
     type: 'my-node',
@@ -32,6 +32,21 @@ test('property with multiple reference types', (t) => {
   let property = MyNode.schema.getProperty('content')
   // props with default values are optional
   t.ok(property.isArray(), 'property should be an array type')
+  t.deepEqual(property.type, ['array', 'id'], 'property should have correct type')
+  t.deepEqual(property.targetTypes, ['foo', 'bar'], 'property should have targetTypes set')
+  t.end()
+})
+
+test('reference property with multiple target types (canonical notation)', (t) => {
+  class MyNode extends Node {}
+  MyNode.schema = {
+    type: 'my-node',
+    content: { type: ['array', 'id'], targetTypes: ['foo', 'bar'], default: [] }
+  }
+  let property = MyNode.schema.getProperty('content')
+  // props with default values are optional
+  t.ok(property.isArray(), 'property should be an array type')
+  t.ok(property.isReference(), 'property should be a reference type')
   t.deepEqual(property.type, ['array', 'id'], 'property should have correct type')
   t.deepEqual(property.targetTypes, ['foo', 'bar'], 'property should have targetTypes set')
   t.end()
