@@ -29,9 +29,10 @@ export default class Container extends ContainerMixin(DocumentNode) {
   getContent () {
     return this.nodes
   }
-}
 
-Container.prototype._isContainer = true
+  // TODO: find out if we really need this anymore
+  get _isContainer () { return true }
+}
 
 Container.schema = {
   type: '@container',

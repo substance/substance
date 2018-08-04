@@ -2,7 +2,7 @@ import isNumber from '../util/isNumber'
 
 const SHIFT = 'shift'
 
-class CoordinateOperation {
+export default class CoordinateOperation {
   constructor (data) {
     if (!data || data.type === undefined) {
       throw new Error('Illegal argument: insufficient data.')
@@ -72,10 +72,29 @@ class CoordinateOperation {
   toString () {
     return ['(', (this.type), ',', this.val, "')"].join('')
   }
-}
 
-CoordinateOperation.prototype._isOperation = true
-CoordinateOperation.prototype._isCoordinateOperation = true
+  // TODO: do we need this anymore?
+  get _isOperation () { return true }
+
+  get _isCoordinateOperation () { return true }
+
+  static transform (a, b, options) {
+    return transform(a, b, options)
+  }
+
+  static fromJSON (data) {
+    return new CoordinateOperation(data)
+  }
+
+  static Shift (val) {
+    return new CoordinateOperation({
+      type: SHIFT,
+      val: val
+    })
+  }
+
+  static get SHIFT () { return SHIFT }
+}
 
 function transformShiftShift (a, b) {
   a.val += b.val
@@ -96,20 +115,3 @@ function transform (a, b, options) {
   }
   return [a, b]
 }
-
-CoordinateOperation.transform = function (...args) {
-  return transform(...args)
-}
-
-CoordinateOperation.fromJSON = function (json) {
-  return new CoordinateOperation(json)
-}
-
-CoordinateOperation.Shift = function (val) {
-  return new CoordinateOperation({
-    type: SHIFT,
-    val: val
-  })
-}
-
-export default CoordinateOperation

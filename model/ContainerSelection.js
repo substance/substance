@@ -22,7 +22,7 @@ import PropertySelection from './PropertySelection'
   })
   ```
 */
-class ContainerSelection extends Selection {
+export default class ContainerSelection extends Selection {
   constructor (containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
     super()
 
@@ -342,13 +342,13 @@ class ContainerSelection extends Selection {
   get path () {
     throw new Error('ContainerSelection has no path property. Use startPath and endPath instead')
   }
-}
 
-ContainerSelection.prototype._isContainerSelection = true
+  get _isContainerSelection () { return true }
 
-ContainerSelection.fromJSON = function (properties) {
-  let sel = new ContainerSelection(properties)
-  return sel
+  static fromJSON (properties) {
+    let sel = new ContainerSelection(properties)
+    return sel
+  }
 }
 
 function _createNewSelection (containerSel, start, end) {
@@ -376,5 +376,3 @@ function _createNewSelection (containerSel, start, end) {
   }
   return newSel
 }
-
-export default ContainerSelection

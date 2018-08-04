@@ -1,7 +1,5 @@
 import TextNode from './TextNode'
 
-class TextBlock extends TextNode {}
-
-TextBlock.isBlock = true
-
-export default TextBlock
+export default class TextBlock extends TextNode {
+  static get isBlock () { return true }
+}

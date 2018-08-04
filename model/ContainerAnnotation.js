@@ -27,7 +27,7 @@ import AnnotationMixin from './AnnotationMixin'
   ```
  */
 
-class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
+export default class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
   setHighlighted (highlighted, scope) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted
@@ -38,6 +38,12 @@ class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
       })
     }
   }
+
+  // TODO: find out which of these we are really using
+  // and if we could get rid og them
+  get _isAnnotation () { return true }
+
+  get _isContainerAnnotation () { return true }
 }
 
 ContainerAnnotation.schema = {
@@ -46,8 +52,3 @@ ContainerAnnotation.schema = {
   start: 'coordinate',
   end: 'coordinate'
 }
-
-ContainerAnnotation.prototype._isAnnotation = true
-ContainerAnnotation.prototype._isContainerAnnotation = true
-
-export default ContainerAnnotation

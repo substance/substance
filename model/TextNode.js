@@ -1,8 +1,10 @@
 import DocumentNode from './DocumentNode'
 import TextNodeMixin from './TextNodeMixin'
-/** A base class for all text-ish nodes, such as Paragraphs, Headings, Prerendered, etc.
+
+/**
+  A base class for all text-ish nodes, such as Paragraphs, Headings, Prerendered, etc.
 */
-class TextNode extends TextNodeMixin(DocumentNode) {
+export default class TextNode extends TextNodeMixin(DocumentNode) {
   getPath () {
     return [this.id, 'content']
   }
@@ -10,9 +12,9 @@ class TextNode extends TextNodeMixin(DocumentNode) {
   getText () {
     return this.content
   }
-}
 
-TextNode.isText = true
+  static get isText () { return true }
+}
 
 TextNode.schema = {
   type: 'text',
@@ -20,5 +22,3 @@ TextNode.schema = {
   direction: { type: 'string', optional: true },
   textAlign: { type: 'string', default: 'left' }
 }
-
-export default TextNode

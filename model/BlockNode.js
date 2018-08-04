@@ -1,7 +1,5 @@
 import DocumentNode from './DocumentNode'
 
-class BlockNode extends DocumentNode {}
-
-BlockNode.isBlock = true
-
-export default BlockNode
+export default class BlockNode extends DocumentNode {
+  static get isBlock () { return true }
+}

@@ -971,74 +971,94 @@ export default class Component extends EventEmitter {
     }
     return context
   }
-}
 
-Component.prototype._isComponent = true
+  get _isComponent () { return true }
 
-Component.prototype.attr = DOMElement.prototype.attr
+  // Delegators
 
-Component.prototype.htmlProp = DOMElement.prototype.htmlProp
-
-Component.prototype.val = DOMElement.prototype.val
-
-Component.prototype.css = DOMElement.prototype.css
-
-Component.prototype.text = DOMElement.prototype.text
-
-Component.prototype.append = DOMElement.prototype.append
-
-Component.unwrap = _unwrapComp
-
-Component.render = function (props) {
-  props = props || {}
-  var ComponentClass = this
-  var comp = new ComponentClass(null, props)
-  comp._render()
-  return comp
-}
-
-Component.mount = function (props, el) {
-  if (arguments.length === 1) {
-    el = props
-    props = {}
+  attr () {
+    return DOMElement.prototype.attr.apply(this, arguments)
   }
-  if (!el) throw new Error("'el' is required.")
-  if (isString(el)) {
-    var selector = el
-    if (platform.inBrowser) {
-      el = window.document.querySelector(selector)
-    } else {
-      throw new Error('This selector is not supported on server side.')
+
+  htmlProp () {
+    return DOMElement.prototype.htmlProp.apply(this, arguments)
+  }
+
+  val () {
+    return DOMElement.prototype.val.apply(this, arguments)
+  }
+
+  css () {
+    return DOMElement.prototype.css.apply(this, arguments)
+  }
+
+  text () {
+    return DOMElement.prototype.text.apply(this, arguments)
+  }
+
+  append () {
+    return DOMElement.prototype.append.apply(this, arguments)
+  }
+
+  static unwrap () {
+    return _unwrapComp.apply(this, arguments)
+  }
+
+  static render (props) {
+    props = props || {}
+    var ComponentClass = this
+    var comp = new ComponentClass(null, props)
+    comp._render()
+    return comp
+  }
+
+  static mount (props, el) {
+    if (arguments.length === 1) {
+      el = props
+      props = {}
     }
+    if (!el) throw new Error("'el' is required.")
+    if (isString(el)) {
+      var selector = el
+      if (platform.inBrowser) {
+        el = window.document.querySelector(selector)
+      } else {
+        throw new Error('This selector is not supported on server side.')
+      }
+    }
+    el = DefaultDOMElement.wrap(el)
+    const ComponentClass = this
+    let comp = new ComponentClass(null, props)
+    comp.mount(el)
+    return comp
   }
-  el = DefaultDOMElement.wrap(el)
-  const ComponentClass = this
-  let comp = new ComponentClass(null, props)
-  comp.mount(el)
-  return comp
-}
 
-Component.getComponentForDOMElement = function (el) {
-  return _unwrapComp(el)
-}
+  static getComponentForDOMElement (el) {
+    return _unwrapComp(el)
+  }
 
-Component.unwrapDOMElement = function (el) {
-  console.warn('DEPRECATED: Use Component.getComponentForDOMElement')
-  return Component.getComponentForDOMElement(el)
-}
+  static unwrapDOMElement (el) {
+    console.warn('DEPRECATED: Use Component.getComponentForDOMElement')
+    return Component.getComponentForDOMElement(el)
+  }
 
-Component.getComponentFromNativeElement = function (nativeEl) {
-  // while it sounds strange to wrap a native element
-  // first, it makes sense after all, as DefaultDOMElement.wrap()
-  // provides the DOMElement instance of a previously wrapped native element.
-  return _unwrapComp(DefaultDOMElement.wrap(nativeEl))
-}
+  static getComponentFromNativeElement (nativeEl) {
+    // while it sounds strange to wrap a native element
+    // first, it makes sense after all, as DefaultDOMElement.wrap()
+    // provides the DOMElement instance of a previously wrapped native element.
+    return _unwrapComp(DefaultDOMElement.wrap(nativeEl))
+  }
 
-Component.createRenderingEngine = function (elementFactory) {
-  return new RenderingEngine({
-    componentFactory: COMPONENT_FACTORY,
-    elementFactory
-  })
+  static createRenderingEngine (elementFactory) {
+    return new RenderingEngine({
+      componentFactory: COMPONENT_FACTORY,
+      elementFactory
+    })
+  }
+
+  // TODO: try to get rid of this. If realy used extract into extra files
+  static get Element () { return ElementComponent }
+  static get TextNode () { return TextNodeComponent }
 }
 
 // NOTE: this is used for incremental updates only
@@ -1074,10 +1094,10 @@ function _unwrapCompStrict (el) {
   return comp
 }
 
-class ElementComponent extends Component {}
-
-ElementComponent.prototype._isElementComponent = true
-ElementComponent.prototype._SKIP_COMPONENT_INIT = true
+class ElementComponent extends Component {
+  get _isElementComponent () { return true }
+  get _SKIP_COMPONENT_INIT () { return true }
+}
 
 class TextNodeComponent extends Component {
   setTextContent (text) {
@@ -1096,10 +1116,7 @@ class TextNodeComponent extends Component {
   getChildren () {
     return []
   }
+
+  get _isTextNodeComponent () { return true }
+  get _SKIP_COMPONENT_INIT () { return true }
 }
-
-TextNodeComponent.prototype._isTextNodeComponent = true
-TextNodeComponent.prototype._SKIP_COMPONENT_INIT = true
-
-Component.Element = ElementComponent
-Component.TextNode = TextNodeComponent

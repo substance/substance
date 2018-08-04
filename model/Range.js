@@ -1,6 +1,6 @@
 import isPlainObject from '../util/isPlainObject'
 
-class Range {
+export default class Range {
   constructor (start, end, reverse, containerId, surfaceId) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
@@ -52,8 +52,7 @@ class Range {
     }
     return str.join('')
   }
+
+  // TODO: do we need this anymore?
+  get _isRange () { return true }
 }
-
-Range.prototype._isRange = true
-
-export default Range
