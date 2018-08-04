@@ -1,9 +1,9 @@
 import forEach from '../util/forEach'
 
 export default class NodeSchema {
-  constructor (properties) {
+  constructor (properties, superTypes) {
     this.properties = properties
-
+    this._superTypes = superTypes
     // Analysing ownership:
     // This is for hierarchal aspects in the model
     // I.e. a node can have a reference or a list of references to other nodes.
@@ -33,6 +33,14 @@ export default class NodeSchema {
 
   isOwned (name) {
     return this._ownedPropNames.has(name)
+  }
+
+  getSuperType () {
+    return this._superTypes[0]
+  }
+
+  getSuperTypes () {
+    return this._superTypes.slice()
   }
 
   [Symbol.iterator] () {

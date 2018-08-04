@@ -20,12 +20,12 @@ export default class Node extends EventEmitter {
   /**
     @param {Object} properties
   */
-  constructor () {
+  constructor (...args) {
     super()
 
     // NOTE: this indirection allows us to implement a overridable initializer
     // For instance, DocumentNode sets the document instance and the props
-    this._initialize.apply(this, arguments)
+    this._initialize(...args)
   }
 
   _initialize (data) {
@@ -80,11 +80,10 @@ export default class Node extends EventEmitter {
     @returns {String[]} An array of type names.
    */
   getTypeNames () {
-    var typeNames = []
-    var NodeClass = this.constructor
-    while (NodeClass.type !== '@node') {
-      typeNames.push(NodeClass.type)
-      NodeClass = Object.getPrototypeOf(NodeClass)
+    let NodeClass = this.constructor
+    let typeNames = this.schema.getSuperTypes()
+    if (NodeClass.hasOwnProperty('type')) {
+      typeNames.unshift(NodeClass.type)
     }
     return typeNames
   }
@@ -123,13 +122,46 @@ export default class Node extends EventEmitter {
   get type () {
     return this.constructor.type
   }
+
+  /**
+    Internal implementation of Node.prototype.isInstanceOf.
+    @returns {Boolean}
+   */
+  static isInstanceOf (NodeClass, typeName) {
+    let schema = NodeClass.schema
+    if (!schema) return false
+    if (NodeClass.type === typeName) return true
+    for (let superType of schema._superTypes) {
+      if (superType === typeName) return true
+    }
+    return false
+  }
+
+  // TODO: do we really need this?
+  get _isNode () { return true }
+
+  // TODO: do we really need this?
+  static define (schema) {
+    _define(schema)
+  }
+
+  static defineSchema (schema) {
+    _define(schema)
+  }
 }
 
-Node.prototype._isNode = true
-
-// NOTE: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
+// Attention: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
 Object.defineProperty(Node, 'schema', {
-  get () { return this._schema },
+  get () {
+    let NodeClass = this
+    // If the schema has not been set explicitly, derive it from the parent schema
+    if (!NodeClass.hasOwnProperty('_schema')) {
+      let ParentNodeClass = _getParentClass(NodeClass)
+      let parentSchema = ParentNodeClass.schema
+      NodeClass._schema = new NodeSchema(parentSchema.properties, _getSuperTypes(NodeClass))
+    }
+    return NodeClass._schema
+  },
   set (schema) {
     let NodeClass = this
     // TODO: discuss if we want this. Is a bit more convenient
@@ -144,53 +176,37 @@ Object.defineProperty(Node, 'schema', {
   }
 })
 
-Node.define = Node.defineSchema = function define (schema) {
-  this.schema = schema
-}
-
 Node.schema = {
   type: '@node',
   id: 'string'
 }
 
-/**
-  Internal implementation of Node.prototype.isInstanceOf.
-
-  @static
-  @private
-  @returns {Boolean}
- */
-Node.isInstanceOf = function (NodeClass, typeName) {
-  var type = NodeClass.type
-  while (type !== '@node') {
-    if (type === typeName) return true
-    var _super = Object.getPrototypeOf(NodeClass.prototype).constructor
-    if (_super && _super.type) {
-      NodeClass = _super
-      type = NodeClass.type
-    } else {
-      break
-    }
-  }
-  return false
-}
-
 // ### Internal implementation
+
+// TODO: IMO we don't need this anymore
+// The common way to define the schema is
+// NodeClass.schema = {
+//   ...
+// }
+function _define (schema) {
+  console.error("DEPRECATED: use 'Node.schema = {...}' instead")
+  let NodeClass = this
+  NodeClass.schema = schema
+}
 
 function compileSchema (NodeClass, schema) {
   let compiledSchema = _compileSchema(schema)
   let schemas = [compiledSchema]
-  let clazz = NodeClass
-  while (clazz) {
-    var parentProto = Object.getPrototypeOf(clazz.prototype)
-    if (!parentProto) break
-    clazz = parentProto.constructor
-    if (clazz && clazz._schema) {
-      schemas.unshift(clazz._schema.properties)
+  let Clazz = _getParentClass(NodeClass)
+  while (Clazz) {
+    if (Clazz && Clazz._schema) {
+      schemas.unshift(Clazz._schema.properties)
     }
+    Clazz = _getParentClass(Clazz)
   }
   schemas.unshift({})
-  return new NodeSchema(Object.assign.apply(null, schemas))
+  let superTypes = _getSuperTypes(NodeClass)
+  return new NodeSchema(Object.assign.apply(null, schemas), superTypes)
 }
 
 function _compileSchema (schema) {
@@ -294,4 +310,23 @@ function _checked (prop, value) {
     throw new Error('Illegal value type for property ' + name + ': expected ' + type + ', was ' + (typeof value))
   }
   return value
+}
+
+function _getSuperTypes (NodeClass) {
+  var typeNames = []
+  let SuperClass = _getParentClass(NodeClass)
+  while (SuperClass && SuperClass.type !== '@node') {
+    if (SuperClass.hasOwnProperty('type')) {
+      typeNames.push(SuperClass.type)
+    }
+    SuperClass = _getParentClass(SuperClass)
+  }
+  return typeNames
+}
+
+function _getParentClass (Clazz) {
+  var parentProto = Object.getPrototypeOf(Clazz.prototype)
+  if (parentProto) {
+    return parentProto.constructor
+  }
 }
