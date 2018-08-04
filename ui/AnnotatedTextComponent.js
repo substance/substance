@@ -4,14 +4,9 @@ import Component from './Component'
 /**
   Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
 
-  @class
-  @component
-  @extends ui/Component
-
   @prop {String[]} path The property to be rendered.
 */
-
-class AnnotatedTextComponent extends Component {
+export default class AnnotatedTextComponent extends Component {
   render ($$) {
     let el = this._renderContent($$)
       .addClass('sc-annotated-text')
@@ -122,5 +117,3 @@ class AnnotatedTextComponent extends Component {
     parentContext.append(context)
   }
 }
-
-export default AnnotatedTextComponent

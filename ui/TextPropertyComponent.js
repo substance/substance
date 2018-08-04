@@ -1,6 +1,4 @@
-import diff from '../util/diff'
 import isNumber from '../util/isNumber'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Coordinate from '../model/Coordinate'
 import Component from './Component'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
@@ -9,10 +7,6 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
 /**
   Renders a text property. Used internally by different components to render
   editable text.
-
-  @class
-  @component
-  @extends ui/AnnotatedTextComponent
 
   @prop {String[]} path path to a text property
   @prop {String} [tagName] specifies which tag should be used - defaults to `div`
@@ -26,14 +20,13 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
   ```
 */
 
-class TextPropertyComponent extends AnnotatedTextComponent {
+export default class TextPropertyComponent extends AnnotatedTextComponent {
   getInitialState () {
     const markersManager = this.context.markersManager
     let path = this.getPath()
     let markers
     if (markersManager) {
-      // register and get initial set of markers
-      markersManager.register(this)
+      // get initial set of markers
       markers = markersManager.getMarkers(path, {
         surfaceId: this.getSurfaceId(),
         containerId: this.getContainerId()
@@ -42,25 +35,20 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       const doc = this.getDocument()
       markers = doc.getAnnotations(path)
     }
-    return {
-      markers: markers
-    }
+    return { markers }
   }
 
   didMount () {
-    // TODO: this is problematic as it interferes with OSX's special character menu
-    // if (this.context.surface && this.context.surface.hasNativeSpellcheck()) {
-    //   this.domObserver = new window.MutationObserver(this._onDomMutations.bind(this));
-    //   this.domObserver.observe(this.el.getNativeElement(), { subtree: true, characterData: true, characterDataOldValue: true });
-    // }
+    const markersManager = this.context.markersManager
+    if (markersManager) {
+      markersManager.register(this)
+    }
   }
 
   dispose () {
-    if (this.context.markersManager) {
-      this.context.markersManager.deregister(this)
-    }
-    if (this.domObserver) {
-      this.domObserver.disconnect()
+    const markersManager = this.context.markersManager
+    if (markersManager) {
+      markersManager.deregister(this)
     }
   }
 
@@ -116,41 +104,6 @@ class TextPropertyComponent extends AnnotatedTextComponent {
     }
     el.attr('data-offset', fragment.pos)
     return el
-  }
-
-  _onDomMutations (mutations) {
-    // console.log('Observed DOM mutation on', this.props.path, mutations)
-    // HACK: only detecting mutations that are coming from the native spell-correction
-    if (mutations.length === 2 && mutations[0].target === mutations[1].target) {
-      let textEl = DefaultDOMElement.unwrap(mutations[0].target)
-      if (textEl) {
-        this._applyTextMutation(textEl, mutations[0].oldValue)
-        return
-      }
-    }
-    // in all other cases, revert the change by rerendering
-    this.rerender()
-  }
-
-  _applyTextMutation (textEl, oldText) {
-    // find the offset
-    let offset = _getCharPos(textEl, 0)
-    let newText = textEl.textContent
-    let changes = diff(oldText, newText, offset)
-
-    let editorSession = this.context.editorSession
-    let path = this.getPath()
-    editorSession.transaction(function (tx) {
-      changes.forEach(function (change) {
-        // NOTE: atomic text replace is not supported currently
-        if (change.type === 'replace') {
-          tx.update(path, { type: 'delete', start: change.start, end: change.end })
-          tx.update(path, { type: 'insert', start: change.start, text: change.text })
-        } else {
-          tx.update(path, change)
-        }
-      })
-    })
   }
 
   getSurface () {
@@ -237,41 +190,41 @@ class TextPropertyComponent extends AnnotatedTextComponent {
       }
     }
   }
-}
 
-TextPropertyComponent.prototype._isTextPropertyComponent = true
+  get _isTextPropertyComponent () { return true }
 
-// Helpers for DOM selection mapping
+  // Helpers for DOM selection mapping
 
-/*
-  Used to map from DOM to model.
-  Given a root element and a DOM element - which is typically somewhere inside a surface
-  it tries to find the next TextProperty by walking up the DOM.
-  If found it computes the character position, counting chars and using the hints, data-length and data-offset,
-  rendered by the TextPropertyComponent
-*/
-TextPropertyComponent.getCoordinate = function (root, el, offset) {
-  let context = _getPropertyContext(root, el, offset)
-  if (!context) {
-    return null
-  }
-  // EXPERIMENTAL: trying to detect
-  // TODO: add tests and remove this comment when mature
-  let charPos
-  if (el.parentNode && el.parentNode.is('.se-placeholder')) {
-    charPos = 0
-  } else {
-    // in some cases we need to normalize the DOM coordinate
-    // before we can use it for retrieving charPos
-    // E.g. observed with #273
-    charPos = _getCharPos(context.node, context.offset)
-  }
-  if (isNumber(charPos)) {
-    let coor = new Coordinate(context.path, charPos)
-    coor._comp = context.comp
-    return coor
-  } else {
-    return null
+  /*
+    Used to map from DOM to model.
+    Given a root element and a DOM element - which is typically somewhere inside a surface
+    it tries to find the next TextProperty by walking up the DOM.
+    If found it computes the character position, counting chars and using the hints, data-length and data-offset,
+    rendered by the TextPropertyComponent
+  */
+  static getCoordinate (root, el, offset) {
+    let context = _getPropertyContext(root, el, offset)
+    if (!context) {
+      return null
+    }
+    // EXPERIMENTAL: trying to detect
+    // TODO: add tests and remove this comment when mature
+    let charPos
+    if (el.parentNode && el.parentNode.is('.se-placeholder')) {
+      charPos = 0
+    } else {
+      // in some cases we need to normalize the DOM coordinate
+      // before we can use it for retrieving charPos
+      // E.g. observed with #273
+      charPos = _getCharPos(context.node, context.offset)
+    }
+    if (isNumber(charPos)) {
+      let coor = new Coordinate(context.path, charPos)
+      coor._comp = context.comp
+      return coor
+    } else {
+      return null
+    }
   }
 }
 
@@ -394,5 +347,3 @@ function _countCharacters (el, maxIdx) {
   }
   return charPos
 }
-
-export default TextPropertyComponent
