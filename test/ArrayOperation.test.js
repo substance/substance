@@ -1,6 +1,7 @@
 import { module } from 'substance-test'
 import { ArrayOperation } from 'substance'
 
+const NOP = ArrayOperation.NOP
 const test = module('ArrayOperation')
 
 function checkArrayOperationTransform (t, a, b, input, expected) {
@@ -55,7 +56,7 @@ test('Create operation with invalid data', (t) => {
 })
 
 test('Operation can be NOP', (t) => {
-  let op = new ArrayOperation({type: ArrayOperation.NOP})
+  let op = ArrayOperation.Nop()
   t.ok(op.isNOP(), 'Operation should be NOP')
   t.end()
 })
@@ -93,9 +94,9 @@ test('JSON de-/serialisation', (t) => {
   t.ok(op.isDelete())
   t.equal(op.getOffset(), 1)
   t.equal(op.getValue(), 2)
-  op = new ArrayOperation({type: ArrayOperation.NOP})
+  op = ArrayOperation.Nop()
   out = op.toJSON()
-  t.deepEqual(out, {type: ArrayOperation.NOP})
+  t.deepEqual(out, {type: NOP})
   t.end()
 })
 
@@ -206,8 +207,8 @@ test('Transformation: a=Insert, b=Delete (3), a == b', (t) => {
 })
 
 test('Transformation: a=NOP || b=NOP', (t) => {
-  let a = new ArrayOperation.Insert(1, 4)
-  let b = new ArrayOperation({type: ArrayOperation.NOP})
+  let a = ArrayOperation.Insert(1, 4)
+  let b = ArrayOperation.Nop()
   let tr = ArrayOperation.transform(a, b)
   t.deepEqual(tr[0].toJSON(), a.toJSON())
   t.deepEqual(tr[1].toJSON(), b.toJSON())
@@ -228,7 +229,7 @@ test('Inverting operations', (t) => {
   t.ok(inverse.isInsert(), 'Inverse of a delete op should be an insert op.')
   t.equal(inverse.getOffset(), op.getOffset(), 'Offset of inverted op should be the same.')
   t.equal(inverse.getValue(), op.getValue(), 'Value of inverted op should be the same.')
-  op = new ArrayOperation({type: ArrayOperation.NOP})
+  op = ArrayOperation.Nop()
   inverse = op.invert()
   t.ok(inverse.isNOP(), 'Inverse of a nop is a nop.')
   t.end()
@@ -284,7 +285,7 @@ test('Conflicts: inserting and deleting at the same position', (t) => {
 
 test('Conflicts: when NOP involved', (t) => {
   let a = ArrayOperation.Insert(2, 2)
-  let b = new ArrayOperation({type: ArrayOperation.NOP})
+  let b = ArrayOperation.Nop()
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'NOPs should never conflict.')
   t.end()
 })

@@ -78,20 +78,23 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
   isElementNode () {
     return true
   }
+
+  text () {
+    return DOMElement.prototype.text.apply(this, arguments)
+  }
+
+  get _isXMLTextElement () { return true }
+
+  get _elementType () { return 'text' }
+
+  static get isText () { return true }
+
+  static get isBlock () { return true }
 }
 
-XMLTextElement.prototype._isXMLTextElement = true
-
-XMLTextElement.prototype.text = DOMElement.prototype.text
-
-XMLTextElement.prototype._elementType = 'text'
-
-XMLTextElement.isText = true
-XMLTextElement.isBlock = true
-
-XMLTextElement.type = 'text'
-
 XMLTextElement.schema = {
+  // TODO: use '@text'
+  type: 'text',
   content: 'text'
 }
 

@@ -19,7 +19,7 @@ import DOMElement from '../dom/DOMElement'
   to a {@link Component} to actually create a real DOM element,
   which is done by {@link RenderingEngine}
 */
-class VirtualElement extends DOMElement {
+export default class VirtualElement extends DOMElement {
   constructor (owner) {
     super()
 
@@ -99,9 +99,9 @@ class VirtualElement extends DOMElement {
   isInDocument () {
     return false
   }
-}
 
-VirtualElement.prototype._isVirtualElement = true
+  get _isVirtualElement () { return true }
+}
 
 /*
   A virtual HTML element.
@@ -492,9 +492,9 @@ class VirtualHTMLElement extends VirtualElement {
       this.eventListeners = this.eventListeners.concat(other.eventListeners)
     }
   }
-}
 
-VirtualHTMLElement.prototype._isVirtualHTMLElement = true
+  get _isVirtualHTMLElement () { return true }
+}
 
 /*
   A virtual element which gets rendered by a custom component.
@@ -516,10 +516,6 @@ class VirtualComponent extends VirtualHTMLElement {
     }
     this.children = props.children
   }
-
-  get _isVirtualHTMLElement () { return false }
-
-  get _isVirtualComponent () { return true }
 
   getComponent () {
     return this._comp
@@ -556,6 +552,10 @@ class VirtualComponent extends VirtualHTMLElement {
       eventListeners: clone(this.eventListeners)
     }
   }
+
+  get _isVirtualHTMLElement () { return false }
+
+  get _isVirtualComponent () { return true }
 }
 
 class Outlet {
@@ -690,5 +690,3 @@ VirtualElement.createElement = function () {
   }
   return content
 }
-
-export default VirtualElement

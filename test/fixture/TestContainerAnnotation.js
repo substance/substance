@@ -1,7 +1,5 @@
 import { ContainerAnnotation } from 'substance'
 
-class TestContainerAnnotation extends ContainerAnnotation {}
+export default class TestContainerAnnotation extends ContainerAnnotation {}
 
 TestContainerAnnotation.type = 'test-container-anno'
-
-export default TestContainerAnnotation

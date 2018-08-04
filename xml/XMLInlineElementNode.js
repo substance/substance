@@ -1,8 +1,7 @@
 import XMLAnnotationNode from './XMLAnnotationNode'
 import * as xmlNodeHelpers from './xmlNodeHelpers'
 
-export default
-class XMLInlineElementNode extends XMLAnnotationNode {
+export default class XMLInlineElementNode extends XMLAnnotationNode {
   /*
     Note: InlineElements can be used in structured context,
     If path is specified, parent is implicitly given.
@@ -54,17 +53,16 @@ class XMLInlineElementNode extends XMLAnnotationNode {
       return child.toXML().outerHTML
     }).join('')
   }
+
+  get _elementType () { return 'inline-element' }
+
+  // TODO: figure out which of these flags are really necessary
+  get _isInlineNode () { return true }
+  static get isInline () { return true }
 }
 
-XMLInlineElementNode.prototype._elementType = 'inline-element'
-
-// TODO: figure out which of these flags are really necessary
-// and try to stream-line
-XMLInlineElementNode.prototype._isInlineNode = true
-XMLInlineElementNode.isInline = true
-
-XMLInlineElementNode.type = 'inline-element'
-
 XMLInlineElementNode.schema = {
+  // TODO: use '@inline-element'
+  type: 'inline-element',
   _childNodes: { type: ['array', 'id'], default: [], owned: true }
 }

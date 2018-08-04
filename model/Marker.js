@@ -9,7 +9,7 @@ import PropertyAnnotation from './PropertyAnnotation'
 
   Note: we extend PropertyAnnotation to inherit the same API.
 */
-class Marker extends PropertyAnnotation {
+export default class Marker extends PropertyAnnotation {
   _initialize (doc, props) {
     this.document = doc
     this.type = props.type
@@ -44,10 +44,9 @@ class Marker extends PropertyAnnotation {
   set type (type) {
     this._type = type
   }
+
+  // TODO find out how to get rid of these
+  // HACK: while having the same interface, Markers should still be treated differently, e.g. not go into the AnnotationIndex
+  get _isPropertyAnnotation () { return false }
+  get _isMarker () { return true }
 }
-
-// while having the same interface, Markers should still be treated differently, e.g. not go into the AnnotationIndex
-Marker.prototype._isPropertyAnnotation = false
-Marker.prototype._isMarker = true
-
-export default Marker

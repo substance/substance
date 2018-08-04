@@ -32,17 +32,16 @@ class XMLElementNode extends XMLDocumentNode {
     return true
   }
 
-  // TODO: implement as much of DOMElement as possible
+  append () {
+    return DOMElement.prototype.append.apply(this, arguments)
+  }
+
+  get _elementType () { return 'element' }
+
+  static get isBlock () { return true }
 }
-
-XMLElementNode.prototype.append = DOMElement.prototype.append
-
-XMLElementNode.prototype._elementType = 'element'
-
-XMLElementNode.type = 'element'
 
 XMLElementNode.schema = {
+  type: 'element',
   _childNodes: { type: ['array', 'id'], default: [], owned: true }
 }
-
-XMLElementNode.isBlock = true

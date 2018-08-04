@@ -17,12 +17,13 @@ export default class XMLContainerNode extends ContainerMixin(XMLElementNode) {
   appendChild (child) {
     super.show(child.id)
   }
+
+  get _elementType () { return 'container' }
+
+  static get isBlock () { return true }
 }
 
-XMLContainerNode.prototype._elementType = 'container'
-
-XMLContainerNode.type = 'container'
-
-XMLContainerNode.schema = {}
-
-XMLContainerNode.isBlock = true
+XMLContainerNode.schema = {
+  // TODO: use '@container' so that we do not clutter the namespace
+  type: 'container'
+}

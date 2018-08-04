@@ -14,7 +14,7 @@ const DELETE = 'delete'
 const UPDATE = 'update'
 const SET = 'set'
 
-class ObjectOperation {
+export default class ObjectOperation {
   constructor (data) {
     /* istanbul ignore next */
     if (!data) {
@@ -243,10 +243,87 @@ class ObjectOperation {
         throw new Error('Invalid type')
     }
   }
-}
 
-ObjectOperation.prototype._isOperation = true
-ObjectOperation.prototype._isObjectOperation = true
+  static transform (a, b, options) {
+    return transform(a, b, options)
+  }
+
+  static hasConflict (a, b) {
+    return hasConflict(a, b)
+  }
+
+  // Factories
+
+  static Create (idOrPath, val) {
+    var path
+    if (isString(idOrPath)) {
+      path = [idOrPath]
+    } else {
+      path = idOrPath
+    }
+    return new ObjectOperation({type: CREATE, path: path, val: val})
+  }
+
+  static Delete (idOrPath, val) {
+    var path
+    if (isString(idOrPath)) {
+      path = [idOrPath]
+    } else {
+      path = idOrPath
+    }
+    return new ObjectOperation({type: DELETE, path: path, val: val})
+  }
+
+  static Update (path, op) {
+    return new ObjectOperation({
+      type: UPDATE,
+      path: path,
+      diff: op
+    })
+  }
+
+  static Set (path, oldVal, newVal) {
+    return new ObjectOperation({
+      type: SET,
+      path: path,
+      val: cloneDeep(newVal),
+      original: cloneDeep(oldVal)
+    })
+  }
+
+  static fromJSON (data) {
+    data = cloneDeep(data)
+    if (data.type === 'update') {
+      switch (data.propertyType) {
+        case 'string':
+          data.diff = TextOperation.fromJSON(data.diff)
+          break
+        case 'array':
+          data.diff = ArrayOperation.fromJSON(data.diff)
+          break
+        case 'coordinate':
+          data.diff = CoordinateOperation.fromJSON(data.diff)
+          break
+        default:
+          throw new Error('Unsupported update diff:' + JSON.stringify(data.diff))
+      }
+    }
+    let op = new ObjectOperation(data)
+    return op
+  }
+
+  // Symbols
+  // TODO: we should probably just export these symbols
+  static get NOP () { return NOP }
+  static get CREATE () { return CREATE }
+  static get DELETE () { return DELETE }
+  static get UPDATE () { return UPDATE }
+  static get SET () { return SET }
+
+  // TODO: do we need this anymore?
+  get _isOperation () { return true }
+  get _isObjectOperation () { return true }
+}
 
 /* Low level implementation */
 
@@ -408,74 +485,3 @@ function transform (a, b, options) {
   }
   return [a, b]
 }
-
-ObjectOperation.transform = transform
-ObjectOperation.hasConflict = hasConflict
-
-/* Factories */
-
-ObjectOperation.Create = function (idOrPath, val) {
-  var path
-  if (isString(idOrPath)) {
-    path = [idOrPath]
-  } else {
-    path = idOrPath
-  }
-  return new ObjectOperation({type: CREATE, path: path, val: val})
-}
-
-ObjectOperation.Delete = function (idOrPath, val) {
-  var path
-  if (isString(idOrPath)) {
-    path = [idOrPath]
-  } else {
-    path = idOrPath
-  }
-  return new ObjectOperation({type: DELETE, path: path, val: val})
-}
-
-ObjectOperation.Update = function (path, op) {
-  return new ObjectOperation({
-    type: UPDATE,
-    path: path,
-    diff: op
-  })
-}
-
-ObjectOperation.Set = function (path, oldVal, newVal) {
-  return new ObjectOperation({
-    type: SET,
-    path: path,
-    val: cloneDeep(newVal),
-    original: cloneDeep(oldVal)
-  })
-}
-
-ObjectOperation.fromJSON = function (data) {
-  data = cloneDeep(data)
-  if (data.type === 'update') {
-    switch (data.propertyType) {
-      case 'string':
-        data.diff = TextOperation.fromJSON(data.diff)
-        break
-      case 'array':
-        data.diff = ArrayOperation.fromJSON(data.diff)
-        break
-      case 'coordinate':
-        data.diff = CoordinateOperation.fromJSON(data.diff)
-        break
-      default:
-        throw new Error('Unsupported update diff:' + JSON.stringify(data.diff))
-    }
-  }
-  var op = new ObjectOperation(data)
-  return op
-}
-
-ObjectOperation.NOP = NOP
-ObjectOperation.CREATE = CREATE
-ObjectOperation.DELETE = DELETE
-ObjectOperation.UPDATE = UPDATE
-ObjectOperation.SET = SET
-
-export default ObjectOperation

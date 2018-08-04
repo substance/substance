@@ -7,7 +7,7 @@ const NOP = 'NOP'
 const DELETE = 'delete'
 const INSERT = 'insert'
 
-class ArrayOperation {
+export default class ArrayOperation {
   constructor (data) {
     if (!data || !data.type) {
       throw new Error('Illegal argument: insufficient data.')
@@ -104,10 +104,45 @@ class ArrayOperation {
   toString () {
     return ['(', (this.isInsert() ? INSERT : DELETE), ',', this.getOffset(), ",'", this.getValue(), "')"].join('')
   }
-}
 
-ArrayOperation.prototype._isOperation = true
-ArrayOperation.prototype._isArrayOperation = true
+  // TODO: find out if we really need this anymore
+
+  get _isOperation () { return true }
+
+  get _isArrayOperation () { return true }
+
+  static transform (a, b, options) {
+    return transform(a, b, options)
+  }
+
+  static hasConflict (a, b) {
+    return hasConflict(a, b)
+  }
+
+  // Factories
+  static Insert (pos, val) {
+    return new ArrayOperation({type: INSERT, pos: pos, val: val})
+  }
+
+  static Delete (pos, val) {
+    return new ArrayOperation({ type: DELETE, pos: pos, val: val })
+  }
+
+  static Nop () {
+    return new ArrayOperation({type: NOP})
+  }
+
+  static fromJSON (data) {
+    return new ArrayOperation(data)
+  }
+
+  // Symbols
+  static get NOP () { return NOP }
+
+  static get DELETE () { return DELETE }
+
+  static get INSERT () { return INSERT }
+}
 
 function hasConflict (a, b) {
   if (a.type === NOP || b.type === NOP) return false
@@ -181,29 +216,3 @@ var transform = function (a, b, options) {
   }
   return [a, b]
 }
-
-ArrayOperation.transform = transform
-ArrayOperation.hasConflict = hasConflict
-
-/* Factories */
-
-ArrayOperation.Insert = function (pos, val) {
-  return new ArrayOperation({type: INSERT, pos: pos, val: val})
-}
-
-ArrayOperation.Delete = function (pos, val) {
-  return new ArrayOperation({ type: DELETE, pos: pos, val: val })
-}
-
-ArrayOperation.fromJSON = function (data) {
-  return new ArrayOperation(data)
-}
-
-ArrayOperation.NOP = NOP
-ArrayOperation.DELETE = DELETE
-ArrayOperation.INSERT = INSERT
-
-// Export
-// ========
-
-export default ArrayOperation

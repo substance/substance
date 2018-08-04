@@ -1,6 +1,6 @@
 import Container from './Container'
 
-class ContainerAdapter extends Container {
+export default class ContainerAdapter extends Container {
   constructor (doc, path) {
     super(doc, { id: String(path) })
     this.document = doc
@@ -18,9 +18,9 @@ class ContainerAdapter extends Container {
   get nodes () {
     return this.document.get(this.path)
   }
+
+  // TODO: find out if we need this anymore
+  get _isDocumentNode () { return false }
+
+  get _isContainer () { return false }
 }
-
-ContainerAdapter.prototype._isDocumentNode = false
-ContainerAdapter.prototype._isContainer = false
-
-export default ContainerAdapter

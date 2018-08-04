@@ -2,7 +2,7 @@ import cloneDeep from '../util/cloneDeep'
 import isEqual from '../util/isEqual'
 import Selection from './Selection'
 
-class CustomSelection extends Selection {
+export default class CustomSelection extends Selection {
   constructor (customType, data, surfaceId) {
     super()
 
@@ -60,12 +60,10 @@ class CustomSelection extends Selection {
   _clone () {
     return new CustomSelection(this)
   }
+
+  get _isCustomSelection () { return true }
+
+  static fromJSON (data) {
+    return new CustomSelection(data)
+  }
 }
-
-CustomSelection.prototype._isCustomSelection = true
-
-CustomSelection.fromJSON = function (json) {
-  return new CustomSelection(json)
-}
-
-export default CustomSelection

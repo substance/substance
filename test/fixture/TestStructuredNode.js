@@ -1,6 +1,8 @@
 import { DocumentNode } from 'substance'
 
-class StructuredNode extends DocumentNode {}
+export default class StructuredNode extends DocumentNode {
+  static get isBlock () { return true }
+}
 
 StructuredNode.schema = {
   type: 'structured-node',
@@ -8,7 +10,3 @@ StructuredNode.schema = {
   body: 'text',
   caption: 'text'
 }
-
-StructuredNode.isBlock = true
-
-export default StructuredNode

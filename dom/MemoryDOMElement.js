@@ -10,12 +10,10 @@ import DomUtils from '../vendor/domutils'
 import DOMElement from './DOMElement'
 import parseMarkup from './parseMarkup'
 
-const MemoryDOMElementFactory = (type, data) => {
-  return new MemoryDOMElement(type, data)
-}
+// Singleton for browser window stub
+let _browserWindowStub
 
-export default
-class MemoryDOMElement extends DOMElement {
+export default class MemoryDOMElement extends DOMElement {
   constructor (type, args = {}) {
     super()
 
@@ -638,99 +636,103 @@ class MemoryDOMElement extends DOMElement {
   _isXML () {
     return this.getFormat() === 'xml'
   }
-}
 
-MemoryDOMElement.prototype._isMemoryDOMElement = true
+  // TODO: do we really need this?
+  get _isMemoryDOMElement () { return true }
 
-MemoryDOMElement.createDocument = function (format) {
-  if (format === 'xml') {
-    return new MemoryDOMElement('document', { format: format })
-  } else {
-    return MemoryDOMElement.parseMarkup(DOMElement.EMPTY_HTML, 'html')
-  }
-}
-
-MemoryDOMElement.parseMarkup = function (str, format, options = {}) {
-  if (!str) {
-    return MemoryDOMElement.createDocument(format)
-  }
-  let parserOpts = Object.assign({
-    format,
-    decodeEntities: true,
-    elementFactory: MemoryDOMElementFactory
-  }, options)
-  // opt-out from HTML structure sanitization
-  if (options.raw) {
-    return parseMarkup(str, parserOpts)
-  }
-  if (options.snippet) {
-    str = `<__snippet__>${str}</__snippet__>`
-  }
-  let doc
-  if (format === 'html') {
-    doc = parseMarkup(str, parserOpts)
-    _sanitizeHTMLStructure(doc)
-  } else if (format === 'xml') {
-    doc = parseMarkup(str, parserOpts)
-  }
-  if (options.snippet) {
-    let childNodes = doc.find('__snippet__').childNodes
-    if (childNodes.length === 1) {
-      return childNodes[0]
+  static createDocument (format) {
+    if (format === 'xml') {
+      return new MemoryDOMElement('document', { format: format })
     } else {
-      return childNodes
-    }
-  } else {
-    return doc
-  }
-}
-
-MemoryDOMElement.wrap =
-MemoryDOMElement.wrapNativeElement = function (el) {
-  if (inBrowser) {
-    // HACK: at many places we have an `isBrowser` check
-    // to skip code that uses window or window.document
-    // To be able to test such code together with the memory DOM implementation
-    // we stub out window and document
-    if (el === window || el === window.document) {
-      return new DOMElementStub()
-    // HACK: additionally, if a window.document.Node or a BrowserDOMElement is given
-    // as it happens when trying to mount onto t.sandbox with DefaultDOMElement using MemoryDOMElement as default
-    // we just return a new root element
-    } else if (el instanceof window.Node || el._isBrowserDOMElement) {
-      // return MemoryDOMElement.createDocument('html').createElement('div')
+      return MemoryDOMElement.parseMarkup(DOMElement.EMPTY_HTML, 'html')
     }
   }
+
+  static parseMarkup (str, format, options = {}) {
+    if (!str) {
+      return MemoryDOMElement.createDocument(format)
+    }
+    let parserOpts = Object.assign({
+      format,
+      decodeEntities: true,
+      elementFactory: MemoryDOMElementFactory
+    }, options)
+    // opt-out from HTML structure sanitization
+    if (options.raw) {
+      return parseMarkup(str, parserOpts)
+    }
+    if (options.snippet) {
+      str = `<__snippet__>${str}</__snippet__>`
+    }
+    let doc
+    if (format === 'html') {
+      doc = parseMarkup(str, parserOpts)
+      _sanitizeHTMLStructure(doc)
+    } else if (format === 'xml') {
+      doc = parseMarkup(str, parserOpts)
+    }
+    if (options.snippet) {
+      let childNodes = doc.find('__snippet__').childNodes
+      if (childNodes.length === 1) {
+        return childNodes[0]
+      } else {
+        return childNodes
+      }
+    } else {
+      return doc
+    }
+  }
+
+  static wrapNativeElement (el) {
+    if (inBrowser) {
+      // HACK: at many places we have an `isBrowser` check
+      // to skip code that uses window or window.document
+      // To be able to test such code together with the memory DOM implementation
+      // we stub out window and document
+      if (el === window || el === window.document) {
+        return new DOMElementStub()
+      // HACK: additionally, if a window.document.Node or a BrowserDOMElement is given
+      // as it happens when trying to mount onto t.sandbox with DefaultDOMElement using MemoryDOMElement as default
+      // we just return a new root element
+      } else if (el instanceof window.Node || el._isBrowserDOMElement) {
+        // return MemoryDOMElement.createDocument('html').createElement('div')
+      }
+    }
+    /* istanbul ignore next */
+    if (!el._isMemoryDOMElement) {
+      throw new Error('Illegal argument: expected MemoryDOMElement instance')
+    }
+    return el
+  }
+
+  static wrap (el) { return MemoryDOMElement.wrapNativeElement(el) }
+
+  static unwrap (el) {
+    /* istanbul ignore next */
+    if (!el._isMemoryDOMElement) {
+      throw new Error('Illegal argument: expected MemoryDOMElement instance')
+    }
+    return el
+  }
+
+  // TODO: this is used only in browser to determine if
+  // a selection  is reverse.
   /* istanbul ignore next */
-  if (!el._isMemoryDOMElement) {
-    throw new Error('Illegal argument: expected MemoryDOMElement instance')
+  static isReverse () {
+    return false
   }
-  return el
+
+  static getBrowserWindow () {
+    // HACK: this is a bit awkward
+    if (!_browserWindowStub) {
+      _browserWindowStub = MemoryDOMElement.createDocument('html')
+    }
+    return _browserWindowStub
+  }
 }
 
-MemoryDOMElement.unwrap = function (el) {
-  /* istanbul ignore next */
-  if (!el._isMemoryDOMElement) {
-    throw new Error('Illegal argument: expected MemoryDOMElement instance')
-  }
-  return el
-}
-
-// TODO: this is used only in browser to determine if
-// a selection  is reverse.
-/* istanbul ignore next */
-MemoryDOMElement.isReverse = function () {
-  return false
-}
-
-// Stub
-let _browserWindowStub
-MemoryDOMElement.getBrowserWindow = function () {
-  // HACK: this is a bit awkward
-  if (!_browserWindowStub) {
-    _browserWindowStub = MemoryDOMElement.createDocument('html')
-  }
-  return _browserWindowStub
+function MemoryDOMElementFactory (type, data) {
+  return new MemoryDOMElement(type, data)
 }
 
 class MemoryDOMDoctype extends MemoryDOMElement {

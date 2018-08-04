@@ -1,7 +1,7 @@
 /**
   A document selection. Refers to a Substance document model, not to the DOM.
 */
-class Selection {
+export default class Selection {
   constructor () {
     // Internal stuff
     var _internal = {}
@@ -130,10 +130,12 @@ class Selection {
     Object.assign(data, update)
     return SelectionClass.fromJSON(data)
   }
-}
 
-// for duck-typed instanceof
-Selection.prototype._isSelection = true
+  // for duck-typed instanceof
+  get _isSelection () { return true }
+
+  static get nullSelection () { return NULL_SELECTION }
+}
 
 /*
   Class to represent null selections.
@@ -163,7 +165,4 @@ class NullSelection extends Selection {
 
   @type {model/Selection}
 */
-
-Selection.nullSelection = Object.freeze(new NullSelection())
-
-export default Selection
+const NULL_SELECTION = Object.freeze(new NullSelection())

@@ -43,7 +43,7 @@ const converter = new JSONConverter()
   ```
 */
 
-class Document extends EventEmitter {
+export default class Document extends EventEmitter {
   /**
     @param {DocumentSchema} schema The document schema.
   */
@@ -652,8 +652,6 @@ class Document extends EventEmitter {
     }
     return new Coordinate(path, offset)
   }
+
+  get _isDocument () { return true }
 }
-
-Document.prototype._isDocument = true
-
-export default Document

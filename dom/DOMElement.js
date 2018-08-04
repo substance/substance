@@ -13,8 +13,7 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 
   @abstract
 */
-export default
-class DOMElement {
+export default class DOMElement {
   /*
     The element's id.
     @property {String} DOMElement#id
@@ -1067,11 +1066,16 @@ class DOMElement {
   set value (value) {
     return this.setValue(value)
   }
+
+  get _isDOMElement () { return true }
+
+  // TODO: probably we should just export these symbols
+  static get pxStyles () { return PX_STYLES }
+
+  static get EMPTY_HTML () { return EMPTY_HTML }
 }
 
-DOMElement.prototype._isDOMElement = true
-
-DOMElement.pxStyles = {
+const PX_STYLES = {
   top: true,
   bottom: true,
   left: true,
@@ -1080,4 +1084,4 @@ DOMElement.pxStyles = {
   width: true
 }
 
-DOMElement.EMPTY_HTML = '<html><head></head><body></body></html>'
+const EMPTY_HTML = '<html><head></head><body></body></html>'

@@ -35,13 +35,16 @@ import AnnotationMixin from './AnnotationMixin'
   })
   ```
 */
-class PropertyAnnotation extends AnnotationMixin(DocumentNode) {}
+export default class PropertyAnnotation extends AnnotationMixin(DocumentNode) {
+  // TODO: find out where we use these and try to get rid if we don't need them
+  get _isAnnotation () { return true }
 
-PropertyAnnotation.prototype._isAnnotation = true
-PropertyAnnotation.prototype._isPropertyAnnotation = true
+  get _isPropertyAnnotation () { return true }
 
-PropertyAnnotation.isPropertyAnnotation = true
-PropertyAnnotation.autoExpandRight = true
+  static get isPropertyAnnotation () { return true }
+
+  static get autoExpandRight () { return true }
+}
 
 PropertyAnnotation.schema = {
   type: '@annotation',
@@ -49,5 +52,3 @@ PropertyAnnotation.schema = {
   // i.e. not attached to a property
   _content: { type: 'string', optional: true }
 }
-
-export default PropertyAnnotation

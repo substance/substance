@@ -179,42 +179,45 @@ class DocumentNode extends DataNode {
   isInline () {
     return Boolean(this.constructor.isInline)
   }
+
+  // TODO: find out which of these properties are used anymore
+  // and try to get rid of them.
+
+  get _isDocumentNode () { return true }
+
+  /**
+    Declares a node to be treated as block-type node.
+
+    BlockNodes are considers the direct descendant of `Container` nodes.
+    @type {Boolean} default: false
+  */
+  static get isBlock () { return false }
+
+  /**
+    Declares a node to be treated as text-ish node.
+
+    @type {Boolean} default: false
+  */
+  static get isText () { return false }
+
+  /**
+    Declares a node to be treated as {@link model/PropertyAnnotation}.
+
+    @type {Boolean} default: false
+  */
+  static get isPropertyAnnotation () { return false }
+
+  /**
+    Declares a node to be treated as {@link model/ContainerAnnotation}.
+
+    @type {Boolean} default: false
+  */
+  static get isContainerAnnotation () { return false }
+
+  /**
+    Declares a node to be treated as {@link model/InlineNode}.
+
+    @type {Boolean} default: false
+  */
+  static get isInline () { return false }
 }
-
-DocumentNode.prototype._isDocumentNode = true
-
-/**
-  Declares a node to be treated as block-type node.
-
-  BlockNodes are considers the direct descendant of `Container` nodes.
-  @type {Boolean} default: false
-*/
-DocumentNode.isBlock = false
-
-/**
-  Declares a node to be treated as text-ish node.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isText = false
-
-/**
-  Declares a node to be treated as {@link model/PropertyAnnotation}.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isPropertyAnnotation = false
-
-/**
-  Declares a node to be treated as {@link model/ContainerAnnotation}.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isContainerAnnotation = false
-
-/**
-  Declares a node to be treated as {@link model/InlineNode}.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isInline = false

@@ -5,7 +5,7 @@ import isNumber from '../util/isNumber'
 /**
   @internal
 */
-class Coordinate {
+export default class Coordinate {
   /**
    @param {Array} path the address of a property, such as ['text_1', 'content']
    @param {int} offset the position in the property
@@ -72,8 +72,7 @@ class Coordinate {
   hasSamePath (other) {
     return isArrayEqual(this.path, other.path)
   }
+
+  // TODO: do we need this anymore?
+  get _isCoordinate () { return true }
 }
-
-Coordinate.prototype._isCoordinate = true
-
-export default Coordinate

@@ -5,7 +5,7 @@ import Conflict from './Conflict'
 const INSERT = 'insert'
 const DELETE = 'delete'
 
-class TextOperation {
+export default class TextOperation {
   constructor (data) {
     if (!data || data.type === undefined || data.pos === undefined || data.str === undefined) {
       throw new Error('Illegal argument: insufficient data.')
@@ -99,10 +99,38 @@ class TextOperation {
   toString () {
     return ['(', (this.isInsert() ? INSERT : DELETE), ',', this.pos, ",'", this.str, "')"].join('')
   }
-}
 
-TextOperation.prototype._isOperation = true
-TextOperation.prototype._isTextOperation = true
+  // TODO: do we need this anymore?
+  get _isOperation () { return true }
+  get _isTextOperation () { return true }
+
+  static transform (a, b, options) {
+    return transform(a, b, options)
+  }
+
+  static hasConflict (a, b) {
+    return _hasConflict(a, b)
+  }
+
+  // Factories
+
+  static Insert (pos, str) {
+    return new TextOperation({ type: INSERT, pos: pos, str: str })
+  }
+
+  static Delete (pos, str) {
+    return new TextOperation({ type: DELETE, pos: pos, str: str })
+  }
+
+  static fromJSON (data) {
+    return new TextOperation(data)
+  }
+
+  // Symbols
+  // TODO: probably just export the symbols
+  static get INSERT () { return INSERT }
+  static get DELETE () { return DELETE }
+}
 
 function _hasConflict (a, b) {
   // Insert vs Insert:
@@ -209,26 +237,3 @@ function transform (a, b, options) {
   }
   return [a, b]
 }
-
-TextOperation.transform = function () {
-  return transform.apply(null, arguments)
-}
-
-/* Factories */
-
-TextOperation.Insert = function (pos, str) {
-  return new TextOperation({ type: INSERT, pos: pos, str: str })
-}
-
-TextOperation.Delete = function (pos, str) {
-  return new TextOperation({ type: DELETE, pos: pos, str: str })
-}
-
-TextOperation.INSERT = INSERT
-TextOperation.DELETE = DELETE
-
-TextOperation.fromJSON = function (data) {
-  return new TextOperation(data)
-}
-
-export default TextOperation

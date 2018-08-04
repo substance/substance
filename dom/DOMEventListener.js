@@ -5,8 +5,7 @@ import findIndex from '../util/findIndex'
 /*
   Internal implementation used to store event bindings.
 */
-export default
-class DOMEventListener {
+export default class DOMEventListener {
   constructor (eventName, handler, options) {
     /* istanbul ignore next */
     if (!isString(eventName) || !isFunction(handler)) {
@@ -33,23 +32,24 @@ class DOMEventListener {
     // set when this gets attached to a DOM element
     this._el = null
   }
-}
 
-DOMEventListener.prototype._isDOMEventListener = true
+  // TODO: do we really need this?
+  get _isDOMEventListener () { return true }
 
-DOMEventListener.findIndex = function (eventListeners, eventName, handler) {
-  var idx = -1
-  if (arguments[1]._isDOMEventListener) {
-    idx = eventListeners.indexOf(arguments[1])
-  } else {
-    idx = findIndex(eventListeners,
-      _matches.bind(null, {
-        eventName: eventName,
-        originalHandler: handler
-      })
-    )
+  static findIndex (eventListeners, eventName, handler) {
+    var idx = -1
+    if (arguments[1]._isDOMEventListener) {
+      idx = eventListeners.indexOf(arguments[1])
+    } else {
+      idx = findIndex(eventListeners,
+        _matches.bind(null, {
+          eventName: eventName,
+          originalHandler: handler
+        })
+      )
+    }
+    return idx
   }
-  return idx
 }
 
 function _matches (l1, l2) {

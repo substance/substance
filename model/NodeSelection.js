@@ -2,7 +2,7 @@ import isString from '../util/isString'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 
-class NodeSelection extends Selection {
+export default class NodeSelection extends Selection {
   constructor (containerId, nodeId, mode, reverse, surfaceId) {
     super()
 
@@ -121,20 +121,18 @@ class NodeSelection extends Selection {
   _clone () {
     return new NodeSelection(this)
   }
+
+  static fromJSON (data) {
+    return new NodeSelection(data)
+  }
+
+  // TODO: is this used?
+  static _createFromCoordinate (coor) {
+    var containerId = coor.containerId
+    var nodeId = coor.getNodeId()
+    var mode = coor.offset === 0 ? 'before' : 'after'
+    return new NodeSelection(containerId, nodeId, mode, false)
+  }
+
+  get _isNodeSelection () { return true }
 }
-
-NodeSelection.prototype._isNodeSelection = true
-
-NodeSelection.fromJSON = function (json) {
-  return new NodeSelection(json)
-}
-
-// TODO: is this used?
-NodeSelection._createFromCoordinate = function (coor) {
-  var containerId = coor.containerId
-  var nodeId = coor.getNodeId()
-  var mode = coor.offset === 0 ? 'before' : 'after'
-  return new NodeSelection(containerId, nodeId, mode, false)
-}
-
-export default NodeSelection

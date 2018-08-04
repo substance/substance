@@ -76,3 +76,21 @@ test('property of node type should be considered a reference', (t) => {
   t.deepEqual(property.targetTypes, ['foo'], 'property should have correct target type')
   t.end()
 })
+
+test('Node inheritance', (t) => {
+  class ParentNode extends Node {}
+  ParentNode.schema = {
+    type: 'parent',
+    foo: 'string'
+  }
+  class ChildNode extends ParentNode {}
+  ChildNode.schema = {
+    type: 'child',
+    bar: 'number'
+  }
+  let schema = ChildNode.schema
+  t.ok(Node.isInstanceOf(ChildNode, 'parent'), "'child' should be considered an instance of 'parent'")
+  t.equal(schema.getProperty('foo').type, 'string', "'child' should have a string property 'foo'")
+  t.equal(schema.getProperty('bar').type, 'number', "'child' should have a number property 'bar'")
+  t.end()
+})
