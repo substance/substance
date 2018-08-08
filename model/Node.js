@@ -231,7 +231,7 @@ function _isValueType (t) {
 }
 
 function _compileDefintion (definition) {
-  let result = definition
+  let result = Object.assign({}, definition)
   let type = definition.type
   if (isArray(type)) {
     // there are different allowed formats:
@@ -244,11 +244,11 @@ function _compileDefintion (definition) {
     let last = defs[lastIdx]
     let isCanonical = first === 'array'
     if (isCanonical) {
-      definition.type = defs.slice()
+      result.type = defs.slice()
       // 'semi'-canonical
       if (last !== 'id' && !_isValueType(last)) {
-        definition.targetTypes = [last]
-        definition.type[lastIdx] = 'id'
+        result.targetTypes = [last]
+        result.type[lastIdx] = 'id'
       }
     } else {
       if (defs.length > 1) {
@@ -257,14 +257,14 @@ function _compileDefintion (definition) {
             throw new Error('Multi-types must consist of node types.')
           }
         })
-        definition.type = [ 'array', 'id' ]
-        definition.targetTypes = defs
+        result.type = [ 'array', 'id' ]
+        result.targetTypes = defs
       } else {
         if (_isValueType(first)) {
-          definition.type = [ 'array', first ]
+          result.type = [ 'array', first ]
         } else {
-          definition.type = [ 'array', 'id' ]
-          definition.targetTypes = defs
+          result.type = [ 'array', 'id' ]
+          result.targetTypes = defs
         }
       }
     }
@@ -276,8 +276,8 @@ function _compileDefintion (definition) {
     }
   // single reference type
   } else if (type !== 'id' && !_isValueType(type)) {
-    definition.type = 'id'
-    definition.targetTypes = [type]
+    result.type = 'id'
+    result.targetTypes = [type]
   }
 
   return result
