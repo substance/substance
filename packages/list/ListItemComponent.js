@@ -8,7 +8,10 @@ export default class ListItemComponent extends Component {
 
     let el = $$('li').addClass('sc-list-item')
     el.append(
-      $$(TextPropertyComponent, { path }).ref('text')
+      $$(TextPropertyComponent, {
+        path,
+        doc: node.getDocument()
+      }).ref('text')
     )
     // for nested lists
     if (this.props.children) {

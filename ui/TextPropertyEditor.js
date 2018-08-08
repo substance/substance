@@ -50,6 +50,7 @@ export default class TextPropertyEditor extends Surface {
 
     el.append(
       $$(TextPropertyComponent, {
+        doc: this.getDocument(),
         placeholder: this.props.placeholder,
         tagName: this.props.tagName || 'div',
         path: this.props.path,
