@@ -9,19 +9,35 @@ class Adapter extends DomUtils.DomUtils {
   }
 
   getChildren (elem) {
-    return elem.getChildren() || []
+    if (elem.getChildren) {
+      return elem.getChildren()
+    } else {
+      return []
+    }
   }
 
   getAttributeValue (elem, name) {
-    return elem.getAttribute(name)
+    if (elem.getAttribute) {
+      return elem.getAttribute(name)
+    }
   }
 
   getAttributes (elem) {
-    return ['id', elem.id].concat(map(elem.attributes, (val, key) => { return [key, val] }))
+    if (elem.hasOwnProperty('attributes')) {
+      return ['id', elem.id].concat(map(elem.attributes, (val, key) => { return [key, val] }))
+    } else {
+      return ['id', elem.id]
+    }
   }
 
   hasAttrib (elem, name) {
-    return name === 'id' || elem.attributes.hasOwnProperty(name)
+    if (name === 'id') {
+      return true
+    } else if (elem.hasOwnProperty('attributes')) {
+      return elem.attributes.hasOwnProperty(name)
+    } else {
+      return false
+    }
   }
 
   getName (elem) {
@@ -41,4 +57,6 @@ class Adapter extends DomUtils.DomUtils {
   }
 }
 
-export default new Adapter()
+const cssSelectAdapter = new Adapter()
+
+export default cssSelectAdapter
