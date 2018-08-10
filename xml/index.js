@@ -1,45 +1,23 @@
-import XMLAnchorNode from './XMLAnchorNode'
-import XMLAnnotationNode from './XMLAnnotationNode'
-import XMLContainerNode from './XMLContainerNode'
-import XMLDocument from './XMLDocument'
-import XMLDocumentImporter from './XMLDocumentImporter'
-import XMLEditingInterface from './XMLEditingInterface'
-import XMLElementNode from './XMLElementNode'
-import XMLElementNodeConverter from './XMLElementNodeConverter'
-import XMLExternalNode from './XMLExternalNode'
-import XMLExternalNodeConverter from './XMLExternalNodeConverter'
-import XMLSchema from './XMLSchema'
-import XMLTextElement from './XMLTextElement'
-import XMLTextElementConverter from './XMLTextElementConverter'
-import checkSchema from './checkSchema'
-import compileRNG from './compileRNG'
-import registerSchema from './registerSchema'
-import SchemaDrivenCommandManager from './SchemaDrivenCommandManager'
-import loadRNG from './_loadRNG'
-import validateXMLSchema from './validateXML'
-import ValidatingChildNodeIterator from './ValidatingChildNodeIterator'
-import prettyPrintXML from './prettyPrintXML'
-
-export {
-  XMLAnchorNode,
-  XMLAnnotationNode,
-  XMLContainerNode,
-  XMLDocument,
-  XMLDocumentImporter,
-  XMLEditingInterface,
-  XMLElementNode,
-  XMLElementNodeConverter,
-  XMLExternalNode,
-  XMLExternalNodeConverter,
-  XMLSchema,
-  XMLTextElement,
-  XMLTextElementConverter,
-  checkSchema,
-  compileRNG,
-  registerSchema,
-  SchemaDrivenCommandManager,
-  loadRNG,
-  validateXMLSchema,
-  ValidatingChildNodeIterator,
-  prettyPrintXML
-}
+export { default as XMLAnchorNode } from './XMLAnchorNode'
+export { default as XMLAnnotationNode } from './XMLAnnotationNode'
+export { default as XMLContainerNode } from './XMLContainerNode'
+export { default as XMLDocument } from './XMLDocument'
+export { default as XMLDocumentImporter } from './XMLDocumentImporter'
+export { default as XMLEditingInterface } from './XMLEditingInterface'
+export { default as XMLElementNode } from './XMLElementNode'
+export { default as XMLElementNodeConverter } from './XMLElementNodeConverter'
+export { default as XMLExternalNode } from './XMLExternalNode'
+export { default as XMLExternalNodeConverter } from './XMLExternalNodeConverter'
+export { default as XMLInlineElementNode } from './XMLInlineElementNode'
+export { default as XMLNodeConverter } from './XMLNodeConverter'
+export { default as XMLSchema } from './XMLSchema'
+export { default as XMLTextElement } from './XMLTextElement'
+export { default as XMLTextElementConverter } from './XMLTextElementConverter'
+export { default as checkSchema } from './checkSchema'
+export { default as compileRNG } from './compileRNG'
+export { default as registerSchema } from './registerSchema'
+export { default as SchemaDrivenCommandManager } from './SchemaDrivenCommandManager'
+export { default as loadRNG } from './_loadRNG'
+export { default as validateXMLSchema } from './validateXML'
+export { default as ValidatingChildNodeIterator } from './ValidatingChildNodeIterator'
+export { default as prettyPrintXML } from './prettyPrintXML'
