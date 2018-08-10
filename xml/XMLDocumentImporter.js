@@ -3,17 +3,26 @@ import DOMImporter from '../model/DOMImporter'
 import isString from '../util/isString'
 import ValidatingChildNodeIterator from './ValidatingChildNodeIterator'
 
+function _mapParams (config) {
+  const schema = config.schema
+  // Note: having an extra argument for xmlSchema allows to
+  // use an XML Schema only partially
+  const xmlSchema = config.xmlSchema || schema.xmlSchema
+  const converters = config.converters
+  const idAttribute = config.idAttribute || xmlSchema.getIdAttribute()
+  return {
+    schema,
+    xmlSchema,
+    converters,
+    idAttribute
+  }
+}
+
 export default class XMLDocumentImporter extends DOMImporter {
   constructor (config, context) {
-    // TODO: this should be stream-lined
-    super({
-      // legacy: the old Substance.Data schema
-      schema: config.schema,
-      // HACK: usually we use configurator.createImporter()
-      converters: config.converters,
-      idAttribute: config.schema.xmlSchema.getIdAttribute()
-    }, context)
-    this.xmlSchema = config.schema.xmlSchema
+    super(_mapParams(config, context), context)
+
+    this.xmlSchema = config.xmlSchema || config.schema.xmlSchema
   }
 
   importDocument (dom) {
@@ -94,7 +103,11 @@ export default class XMLDocumentImporter extends DOMImporter {
     // TODO: this looks very hacky. Why do we need el plus it?
     let schema = this.xmlSchema.getElementSchema(el.tagName)
     let it = el.getChildNodeIterator()
-    return new ValidatingChildNodeIterator(el, it, schema.expr)
+    if (schema) {
+      return new ValidatingChildNodeIterator(el, it, schema.expr)
+    } else {
+      return it
+    }
   }
 
   _convertPropertyAnnotation () {
