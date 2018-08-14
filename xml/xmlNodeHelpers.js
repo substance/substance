@@ -20,6 +20,17 @@ export function removeChild (xmlNode, child) {
   return xmlNode
 }
 
+export function replaceChild (xmlNode, oldChild, newChild) {
+  const childPos = getChildPos(xmlNode, oldChild)
+  if (childPos >= 0) {
+    removeAt(xmlNode, childPos)
+    insertAt(xmlNode, childPos, newChild)
+  } else {
+    throw new Error(`Node ${oldChild.id} is not a child of ${xmlNode.id}`)
+  }
+  return xmlNode
+}
+
 export function insertBefore (xmlNode, newChild, ref) {
   if (!ref) {
     appendChild(xmlNode, newChild)

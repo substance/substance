@@ -36,6 +36,10 @@ class XMLElementNode extends XMLDocumentNode {
     return DOMElement.prototype.append.apply(this, arguments)
   }
 
+  replaceChild (oldChild, newChild) {
+    return xmlNodeHelpers.replaceChild(this, oldChild, newChild)
+  }
+
   get _elementType () { return 'element' }
 
   static get isBlock () { return true }

@@ -8,7 +8,7 @@ class XMLTextElementConverter extends XMLNodeConverter {
 
   export (node, el, converter) {
     el.tagName = this.tagNameNS
-    el.setAttributes(node.attributes)
+    el.attr(node.attributes)
     el.append(converter.annotatedText([node.id, 'content']))
   }
 }
