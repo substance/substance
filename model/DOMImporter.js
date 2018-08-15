@@ -438,6 +438,9 @@ export default class DOMImporter {
         var startOffset = context.offset
         const annoType = annoConverter.type
         const AnnoClass = this.schema.getNodeClass(annoType)
+        if (!AnnoClass) {
+          throw new Error(`No Node class registered for type ${annoType}.`)
+        }
         let annoData = this._createNodeData(el, annoType)
         // push a new context so we can deal with reentrant calls
         let stackFrame = {
