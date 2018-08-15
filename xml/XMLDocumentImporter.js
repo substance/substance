@@ -80,7 +80,7 @@ export default class XMLDocumentImporter extends DOMImporter {
       }
 
       // TODO: need to rethink this
-      if (NodeClass.prototype._isAnnotation) {
+      if (NodeClass.isAnnotation() || NodeClass.isInlineNode()) {
         this._propertyAnnotationConverters.push(converter)
       } else {
         this._blockConverters.push(converter)
