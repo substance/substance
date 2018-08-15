@@ -70,13 +70,9 @@ function _analyzeElementSchema (elementSchema, elementSchemas) {
       if (_hasText) childSchema.usedInlineBy[name] = true
     })
   })
-  // TODO: do we really need this?
-  if (hasElements) {
-    elementSchema.isStructured = true
-  }
-  if (hasText) {
-    elementSchema.isText = true
-  }
+  // TODO: document what these fields are used for.
+  if (hasElements) elementSchema.isStructured = true
+  if (hasText) elementSchema.isText = true
   if (elementSchema.type === 'implicit') {
     if (hasText) {
       elementSchema.type = 'text'

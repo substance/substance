@@ -141,7 +141,7 @@ function _renderTextNode (dom, node) {
     let fragmenter = new Fragmenter({
       onText: (context, text) => {
         const node = context.node
-        if (node.isText() || (node.isAnnotation() && !node._isInlineNode)) {
+        if (node.isText() || node.isAnnotation()) {
           context.el.append(text)
         }
       },

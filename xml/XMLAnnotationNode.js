@@ -1,8 +1,7 @@
 import AnnotationMixin from '../model/AnnotationMixin'
 import XMLDocumentNode from './XMLDocumentNode'
 
-export default
-class XMLAnnotationNode extends AnnotationMixin(XMLDocumentNode) {
+export default class XMLAnnotationNode extends AnnotationMixin(XMLDocumentNode) {
   /*
     The parent of an Annotation is implicitly given by its path.
   */
@@ -12,17 +11,12 @@ class XMLAnnotationNode extends AnnotationMixin(XMLDocumentNode) {
     return doc.get(path[0])
   }
 
-  isPropertyAnnotation () {
-    return true
-  }
+  static isPropertyAnnotation () { return true }
+
+  get _elementType () { return 'annotation' }
 }
 
-XMLAnnotationNode.prototype._elementType = 'annotation'
-
-// HACK: this is necessary so that DOMImporter registers convertes as annotation converters
-XMLAnnotationNode.prototype._isPropertyAnnotation = true
-
-XMLAnnotationNode.type = '@annotation'
-
 // schema inherited from mixin
-XMLAnnotationNode.schema = {}
+XMLAnnotationNode.schema = {
+  type: '@annotation'
+}

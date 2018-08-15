@@ -81,7 +81,9 @@ export default class DOMImporter {
       }
       this._allConverters.push(converter)
       // Defaults to _blockConverters
-      if (NodeClass.prototype._isPropertyAnnotation) {
+      // TODO: rename '_propertyAnnotationConverters' to 'inlineElementConverters'
+      // TODO: what about anchors and ContainerAnnotations?
+      if (NodeClass.isPropertyAnnotation() || NodeClass.isInlineNode()) {
         this._propertyAnnotationConverters.push(converter)
       } else {
         this._blockConverters.push(converter)
@@ -183,9 +185,9 @@ export default class DOMImporter {
       // usually, annotations are imported via `importer.annotatedText(..)`
       // The peculiarity here is that in such a case, it is not
       // not clear, which property the annotation should be attached to.
-      if (NodeClass.isInline) {
+      if (NodeClass.isInlineNode()) {
         nodeData = this._convertInlineNode(el, nodeData, converter)
-      } else if (NodeClass.prototype._isPropertyAnnotation) {
+      } else if (NodeClass.isPropertyAnnotation()) {
         nodeData = this._convertPropertyAnnotation(el, nodeData)
       } else {
         nodeData = converter.import(el, nodeData, this) || nodeData
@@ -455,7 +457,7 @@ export default class DOMImporter {
         // let the content be converted by custom implementations
         // as they do not own the content
         // TODO: we should make sure to throw when the user tries to
-        if (AnnoClass.isInline) {
+        if (AnnoClass.isInlineNode()) {
           this._customText(INVISIBLE_CHARACTER)
           // TODO: check if this is correct; after reading an inline,
           // we need to reset the lastChar, so that the next whitespace

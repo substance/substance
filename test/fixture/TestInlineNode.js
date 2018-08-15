@@ -1,11 +1,8 @@
 import { InlineNode } from 'substance'
 
-class TestInlineNode extends InlineNode {}
-
-TestInlineNode.type = 'test-inline-node'
+export default class TestInlineNode extends InlineNode {}
 
 TestInlineNode.schema = {
+  type: 'test-inline-node',
   content: 'text'
 }
-
-export default TestInlineNode

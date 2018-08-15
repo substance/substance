@@ -5,10 +5,6 @@ const ERR_ABSTRACT = 'This method is abstract!'
 
 export default function (DocumentNode) {
   class AbstractList extends DocumentNode {
-    isList () {
-      return true
-    }
-
     createListItem (text) {
       throw new Error(ERR_ABSTRACT)
     }
@@ -102,6 +98,10 @@ export default function (DocumentNode) {
       if (oldListTypeString !== listTypeString) {
         this.setListTypeString(listTypeString)
       }
+    }
+
+    static isList () {
+      return true
     }
   }
 

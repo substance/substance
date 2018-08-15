@@ -13,7 +13,7 @@ export default class TextNode extends TextNodeMixin(DocumentNode) {
     return this.content
   }
 
-  static get isText () { return true }
+  static isText () { return true }
 }
 
 TextNode.schema = {

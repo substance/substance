@@ -508,7 +508,7 @@ export default class Document extends EventEmitter {
     // not as children. So we assign level -1 to all annotations, meaning
     // that they are 'on-top-of' the content, and being created at the very last
     let level = 0
-    if (node.isAnnotation() || node.isInline()) {
+    if (node.isAnnotation() || node.isInlineNode()) {
       level = -1
     } else {
       let parent = node.getParent()

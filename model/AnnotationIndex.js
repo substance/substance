@@ -6,7 +6,7 @@ import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
 /*
-  Index for Annotations.
+  Index for Annotations and InlineNodes.
 
   @example
   Lets us look up existing annotations by path and type
@@ -20,7 +20,7 @@ import DocumentIndex from './DocumentIndex'
 
     aIndex.get(["text_1", "content"], 23, 45)
 */
-class AnnotationIndex extends DocumentIndex {
+export default class AnnotationIndex extends DocumentIndex {
   constructor () {
     super()
 
@@ -29,7 +29,7 @@ class AnnotationIndex extends DocumentIndex {
   }
 
   select (node) {
-    return node.isPropertyAnnotation()
+    return node.isPropertyAnnotation() || node.isInlineNode()
   }
 
   clear () {
@@ -95,5 +95,3 @@ AnnotationIndex.filterByRange = function (start, end) {
     return overlap
   }
 }
-
-export default AnnotationIndex

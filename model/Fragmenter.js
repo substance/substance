@@ -185,10 +185,10 @@ Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE
 //
 
 function _extractEntries (annotations) {
-  var openers = []
-  var closers = []
+  let openers = []
+  let closers = []
   forEach(annotations, function (a) {
-    var isAnchor = (a.isAnchor ? a.isAnchor() : false)
+    let isAnchor = a.isAnchor()
     // special treatment for zero-width annos such as ContainerAnnotation.Anchors
     if (isAnchor) {
       openers.push({
@@ -212,7 +212,7 @@ function _extractEntries (annotations) {
 
       // use a weak default level when not given
       var l = Fragmenter.NORMAL
-      var isInline = (a.isInline ? a.isInline() : false)
+      var isInline = a.isInlineNode()
       if (isInline) {
         l = Number.MAX_VALUE
       } else if (a.constructor.hasOwnProperty('fragmentation')) {

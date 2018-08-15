@@ -39,11 +39,9 @@ export default class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
     }
   }
 
-  // TODO: find out which of these we are really using
-  // and if we could get rid og them
-  get _isAnnotation () { return true }
+  static isAnnotation () { return true }
 
-  get _isContainerAnnotation () { return true }
+  static isContainerAnnotation () { return true }
 }
 
 ContainerAnnotation.schema = {

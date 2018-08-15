@@ -41,7 +41,7 @@ export default class PropertyAnnotation extends AnnotationMixin(DocumentNode) {
 
   get _isPropertyAnnotation () { return true }
 
-  static get isPropertyAnnotation () { return true }
+  static isPropertyAnnotation () { return true }
 
   static get autoExpandRight () { return true }
 }

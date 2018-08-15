@@ -1,7 +1,7 @@
 import { DocumentNode } from 'substance'
 
 export default class StructuredNode extends DocumentNode {
-  static get isBlock () { return true }
+  static isBlock () { return true }
 }
 
 StructuredNode.schema = {

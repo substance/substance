@@ -1,7 +1,8 @@
-import XMLAnnotationNode from './XMLAnnotationNode'
+import AnnotationMixin from '../model/AnnotationMixin'
+import XMLDocumentNode from './XMLDocumentNode'
 import * as xmlNodeHelpers from './xmlNodeHelpers'
 
-export default class XMLInlineElementNode extends XMLAnnotationNode {
+export default class XMLInlineElementNode extends AnnotationMixin(XMLDocumentNode) {
   /*
     Note: InlineElements can be used in structured context,
     If path is specified, parent is implicitly given.
@@ -54,11 +55,13 @@ export default class XMLInlineElementNode extends XMLAnnotationNode {
     }).join('')
   }
 
+  static isInlineNode () { return true }
+
   get _elementType () { return 'inline-element' }
 
-  // TODO: figure out which of these flags are really necessary
+  // this is used at some other places (DragManager, DOMExporter, Editing, AnnotatedTextComponent, xmlNodeHelpers)
+  // TODO: get rid of this by using `node.isInlineNode()` or `NodeClass.isInlineNode()`
   get _isInlineNode () { return true }
-  static get isInline () { return true }
 }
 
 XMLInlineElementNode.schema = {
