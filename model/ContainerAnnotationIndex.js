@@ -4,7 +4,7 @@ import map from '../util/map'
 import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
-class ContainerAnnotationIndex extends DocumentIndex {
+export default class ContainerAnnotationIndex extends DocumentIndex {
   constructor () {
     super()
     this.byId = new TreeIndex()
@@ -38,5 +38,3 @@ class ContainerAnnotationIndex extends DocumentIndex {
     // TODO should we support moving a container anno from one container to another?
   }
 }
-
-export default ContainerAnnotationIndex

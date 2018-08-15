@@ -3,7 +3,7 @@ import XMLDocumentNode from './XMLDocumentNode'
 export default class XMLExternalNode extends XMLDocumentNode {
   get _elementType () { return 'external' }
 
-  static get isBlock () { return true }
+  static isBlock () { return true }
 }
 
 XMLExternalNode.schema = {

@@ -132,7 +132,7 @@ class Anno extends PropertyAnnotation {
   constructor (tagName, id, startOffset, endOffset, opts) {
     super(null, {
       id: id,
-      start: { path: [id, 'content'], offset: startOffset},
+      start: { path: [id, 'content'], offset: startOffset },
       end: { path: [id, 'content'], offset: endOffset }
     })
 

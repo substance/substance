@@ -207,6 +207,10 @@ export default function (DocumentNode) {
     getChildCount () {
       return this.getContent().length
     }
+
+    static isContainer () {
+      return true
+    }
   }
   return AbstractContainer
 }

@@ -82,7 +82,7 @@ export default class DeprecatedSelectionState {
     }
     const propAnnos = getPropertyAnnotationsForSelection(doc, sel)
     propAnnos.forEach(_add)
-    if (propAnnos.length === 1 && propAnnos[0].isInline()) {
+    if (propAnnos.length === 1 && propAnnos[0].isInlineNode()) {
       this.isInlineNodeSelection = propAnnos[0].getSelection().equals(sel)
     }
     const containerId = sel.containerId

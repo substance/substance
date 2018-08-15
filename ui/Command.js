@@ -42,6 +42,7 @@ export default class Command {
     }
   }
 
+  // TODO: is this really used?
   get isAsync () {
     return false
   }

@@ -42,7 +42,7 @@ class XMLElementNode extends XMLDocumentNode {
 
   get _elementType () { return 'element' }
 
-  static get isBlock () { return true }
+  static isBlock () { return true }
 }
 
 XMLElementNode.schema = {

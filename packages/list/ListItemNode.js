@@ -1,10 +1,6 @@
 import TextNode from '../../model/TextNode'
 
 export default class ListItem extends TextNode {
-  isListItem () {
-    return true
-  }
-
   getLevel () {
     return this.level
   }
@@ -14,10 +10,13 @@ export default class ListItem extends TextNode {
       this.getDocument().set([this.id, 'level'], newLevel)
     }
   }
+
+  static isListItem () {
+    return true
+  }
 }
 
-ListItem.type = 'list-item'
-
 ListItem.schema = {
+  type: 'list-item',
   level: { type: 'number', default: 1 }
 }

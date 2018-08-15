@@ -30,11 +30,11 @@ export default class Editing {
     // TODO: we need to generalize how node category can be derived statically
     /* istanbul ignore else  */
     if (sel.isPropertySelection()) {
-      if (!AnnotationClass.prototype._isAnnotation) {
+      if (!AnnotationClass.isAnnotation()) {
         throw new Error('Annotation can not be created for a selection.')
       }
     } else if (sel.isContainerSelection()) {
-      if (AnnotationClass.prototype._isPropertyAnnotation) {
+      if (AnnotationClass.isPropertyAnnotation()) {
         console.warn('NOT SUPPORTED YET: creating property annotations for a non collapsed container selection.')
       }
     }
@@ -751,7 +751,7 @@ export default class Editing {
       // they are deleted
       } else if (
         (annoStart >= startOffset && annoEnd < endOffset) ||
-        (anno._isInlineNode && annoStart >= startOffset && annoEnd <= endOffset)
+        (anno.isInlineNode() && annoStart >= startOffset && annoEnd <= endOffset)
       ) {
         tx.delete(anno.id)
       // IV anno.start between and anno.end after
@@ -770,7 +770,7 @@ export default class Editing {
         // skip
       // VII anno.start before and anno.end after
       } else if (annoStart < startOffset && annoEnd >= endOffset) {
-        if (anno._isInlineNode) {
+        if (anno.isInlineNode()) {
           // skip
         } else {
           tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset + L })
@@ -798,7 +798,7 @@ export default class Editing {
     } else if (node.isList()) {
       this._breakListNode(tx, node, coor, container)
     } else {
-      throw new Error('Not supported')
+      console.error('FIXME: _breakNode() not supported for type', node.type)
     }
   }
 

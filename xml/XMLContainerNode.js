@@ -20,7 +20,7 @@ export default class XMLContainerNode extends ContainerMixin(XMLElementNode) {
 
   get _elementType () { return 'container' }
 
-  static get isBlock () { return true }
+  static isBlock () { return true }
 }
 
 XMLContainerNode.schema = {

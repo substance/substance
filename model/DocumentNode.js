@@ -131,59 +131,86 @@ class DocumentNode extends DataNode {
   // Node categories
   // --------------------
 
-  // TODO: we should use the same approach everywhere, either as prototype property or as class property
+  /**
+   * An anchor is an inline-node with zero-width.
+   */
+  isAnchor () {
+    return this.constructor.isAnchor()
+  }
 
   /**
-    @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
-  */
+   * An annotation has a `start` and an `end` coordinate that is used to anchor it within the document.
+   */
+  isAnnotation () {
+    return this.constructor.isAnnotation()
+  }
+
+  /**
+   * @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
+   */
   isBlock () {
-    return Boolean(this.constructor.isBlock)
+    // TODO: This category did not help too much.
+    // Find out if we can get rid of this. Essentially everything which is not an annotation or an inline node is a block
+    return this.constructor.isBlock()
+  }
+
+  /**
+   * A DocumentNode with a sequence of child nodes.
+   */
+  isContainer () {
+    return this.constructor.isContainer()
+  }
+
+  /**
+   * A ContainerAnnotation may span over multiple nodes, i.e. `start` and `end` may be located on different text nodes within a Container.
+   */
+  isContainerAnnotation () {
+    return this.constructor.isContainerAnnotation()
+  }
+
+  /**
+   * @returns {Boolean} true if node is an inline node (e.g. Inline Formula)
+   *
+   * > Attention: InlineNodes are substantially different to Annotations, as they **own** their content.
+   *  In contrast, annotations do not own the content, they are just 'overlays' to text owned by other nodes.
+   */
+  isInlineNode () {
+    return this.constructor.isInlineNode()
+  }
+
+  /**
+   * A DocumentNode used for modelling a List, consisting of a list of ListItems and a definition of ordering types.
+   */
+  isList () {
+    return this.constructor.isList()
+  }
+
+  /**
+   * A ListItem is may only be a direct child of a ListNode and should be a TextNode.
+   */
+  isListItem () {
+    return this.constructor.isListItem()
+  }
+
+  /**
+   * A PropertyAnnotation is an Annotation that is anchored to a single text property.
+   */
+  isPropertyAnnotation () {
+    return this.constructor.isPropertyAnnotation()
   }
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
   isText () {
-    return Boolean(this.constructor.isText)
+    return this.constructor.isText()
   }
 
-  isList () {
-    return Boolean(this.constructor.isList)
-  }
+  // actual implementations are static
 
-  isListItem () {
-    return Boolean(this.constructor.isListItem)
-  }
+  static isAnchor () { return false }
 
-  isContainer () {
-    return Boolean(this._isContainer)
-  }
-
-  // annotation categories
-
-  isAnnotation () {
-    return Boolean(this._isAnnotation)
-  }
-
-  isPropertyAnnotation () {
-    return Boolean(this._isPropertyAnnotation)
-  }
-
-  isContainerAnnotation () {
-    return Boolean(this._isContainerAnnotation)
-  }
-
-  /**
-    @returns {Boolean} true if node is an inline node (e.g. Citation)
-  */
-  isInline () {
-    return Boolean(this.constructor.isInline)
-  }
-
-  // TODO: find out which of these properties are used anymore
-  // and try to get rid of them.
-
-  get _isDocumentNode () { return true }
+  static isAnnotation () { return false }
 
   /**
     Declares a node to be treated as block-type node.
@@ -191,33 +218,42 @@ class DocumentNode extends DataNode {
     BlockNodes are considers the direct descendant of `Container` nodes.
     @type {Boolean} default: false
   */
-  static get isBlock () { return false }
+  static isBlock () { return false }
 
-  /**
-    Declares a node to be treated as text-ish node.
-
-    @type {Boolean} default: false
-  */
-  static get isText () { return false }
-
-  /**
-    Declares a node to be treated as {@link model/PropertyAnnotation}.
-
-    @type {Boolean} default: false
-  */
-  static get isPropertyAnnotation () { return false }
+  static isContainer () { return false }
 
   /**
     Declares a node to be treated as {@link model/ContainerAnnotation}.
 
     @type {Boolean} default: false
   */
-  static get isContainerAnnotation () { return false }
+  static isContainerAnnotation () { return false }
 
   /**
-    Declares a node to be treated as {@link model/InlineNode}.
+   * Declares a node to be treated as {@link model/InlineNode}.
+   *
+   * @type {Boolean} default: false
+   */
+  static isInlineNode () { return false }
+
+  static isList () { return false }
+
+  static isListItem () { return false }
+
+  /**
+   * Declares a node to be treated as {@link model/PropertyAnnotation}.
+   *
+   * @type {Boolean} default: false
+   */
+  static isPropertyAnnotation () { return false }
+
+  /**
+    Declares a node to be treated as text-ish node.
 
     @type {Boolean} default: false
   */
-  static get isInline () { return false }
+  static isText () { return false }
+
+  // used for 'instanceof' comparison
+  get _isDocumentNode () { return true }
 }

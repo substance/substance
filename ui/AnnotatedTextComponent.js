@@ -92,7 +92,7 @@ export default class AnnotatedTextComponent extends Component {
 
   _getFragmentComponentClass (node, noDefault) {
     let ComponentClass = this.getComponent(node.type, 'not-strict')
-    if (node.constructor.isInline &&
+    if (node.isInlineNode() &&
         // also no extra wrapping if the node is already an inline node
         !ComponentClass.prototype._isInlineNodeComponent &&
         // opt-out for custom implementations

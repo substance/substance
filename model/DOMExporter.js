@@ -151,7 +151,9 @@ class DOMExporter {
 
     var annotator = new Fragmenter()
     annotator.onText = function (context, text) {
-      context.children.push(encodeXMLEntities(text))
+      if (text) {
+        context.children.push(encodeXMLEntities(text))
+      }
     }
     annotator.onEnter = function (fragment) {
       var anno = fragment.node
@@ -173,9 +175,29 @@ class DOMExporter {
         el = this.$$('span')
       }
       el.attr(this.config.idAttribute, anno.id)
-      el.append(context.children)
-      if (converter.export) {
-        el = converter.export(anno, el, self) || el
+      // inline nodes are special, because they are like an island in the text:
+      // In a Substance TextNode, an InlineNode is anchored on an invisible character.
+      // In the XML presentation, however, this character must not be inserted, instead the element
+      // converted and then inserted at the very same location.
+      if (anno.isInlineNode()) {
+        if (converter.export) {
+          el = converter.export(anno, el, self) || el
+        } else {
+          el = this.convertNode(anno) || el
+        }
+      } else if (anno.isAnnotation()) {
+        // allowing to provide a custom exporter
+        // ATTENTION: a converter for the children of an annotation must not be
+        if (converter.export) {
+          el = converter.export(anno, el, self) || el
+          if (el.children.length) {
+            throw new Error('A converter for an annotation type must not convert children. The content of an annotation is owned by their TextNode.')
+          }
+        }
+        el.append(context.children)
+      } else {
+        // TODO: this should not be possible from the beginning. Seeing this error here, is pretty late.
+        throw new Error('Illegal element type: only inline nodes and annotations are allowed within a TextNode')
       }
       parentContext.children.push(el)
     }.bind(this)

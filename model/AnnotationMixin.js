@@ -99,19 +99,6 @@ export default function (DocumentNode) {
     }
 
     /**
-      If this annotation is an Anchor.
-
-      Anchors are annotations with a zero width.
-      For instance, ContainerAnnotation have a start and an end anchor,
-      or rendered cursors are modeled as anchors.
-
-      @returns {Boolean}
-    */
-    isAnchor () {
-      return false
-    }
-
-    /**
       Provides a selection which has the same range as this annotation.
 
       @return {model/ContainerSelection}
@@ -123,7 +110,7 @@ export default function (DocumentNode) {
         console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
         return Selection.nullSelection()
       }
-      if (this._isContainerAnnotation) {
+      if (this.isContainerAnnotation()) {
         return doc.createSelection({
           type: 'container',
           containerId: this.containerId,
@@ -172,9 +159,9 @@ export default function (DocumentNode) {
         throw new Error('Invalid selection.')
       }
     }
-  }
 
-  AbstractAnnotation.prototype._isAnnotation = true
+    static isAnnotation () { return true }
+  }
 
   AbstractAnnotation.schema = {
     start: { type: 'coordinate', default: { path: [], offset: 0 } },

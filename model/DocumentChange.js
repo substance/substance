@@ -85,7 +85,7 @@ class DocumentChange {
         }
         default:
           /* istanbul ignore next */
-          throw new Error('Illegal state')
+          // NOP
       }
     }
 

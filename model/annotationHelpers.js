@@ -32,7 +32,7 @@ function insertedText (doc, coordinate, length) {
     }
     // inline nodes do not expand automatically
     if ((pos < end) ||
-         (pos === end && !anno.isInline())) {
+         (pos === end && !anno.isInlineNode())) {
       newEnd += length
     }
     // TODO: Use coordintate ops!

@@ -87,9 +87,9 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
 
   get _elementType () { return 'text' }
 
-  static get isText () { return true }
+  static isText () { return true }
 
-  static get isBlock () { return true }
+  static isBlock () { return true }
 }
 
 XMLTextElement.schema = {
