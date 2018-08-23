@@ -27,7 +27,6 @@ export default function getSelectionRect (parentRect) {
   use the DOM selection, e.g. for positioning an overlay.
 */
 function _fixCorruptDOMSelection (wsel, wrange) {
-  console.error('FIXME: DOM selection is corrupt. This can happen if you try to retrieve the selection rectangle too early, i.e., without having rendered the DOM selection before.')
   let anchorNode = wsel.anchorNode
   if (!anchorNode) return
   let rect = anchorNode.getBoundingClientRect()
