@@ -948,6 +948,7 @@ export default class Component extends EventEmitter {
     if (this.el) {
       this.el.click()
     }
+    return this
   }
 
   getComponentPath () {
