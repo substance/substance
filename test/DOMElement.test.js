@@ -694,6 +694,38 @@ function DOMElementTests (impl) {
     t.equal(actual, xml, 'doctype should have been serialized correctly')
     t.end()
   })
+
+  // This use-case caused a problem in the MemoryDOM implementation:
+  // the problem was that in case of a failed match of the first part of the selection
+  // the search went up the whole DOM until it got to the the document element
+  // which then caused an exception because the DOMUtil for getting an attribute threw an exception
+  // There are two solutions, either do not register the document element as parent, or make the util function for retrieving attributes
+  // more robust. We decided to do the latter because it is generally a good idea with all the different DOM node types.
+  // TODO: getParent of the top-level node should be consistent with the Browser implementation.
+  // I have tried to implement this, however it resulted in regressions.
+  test('Find element using a nested selector including id', t => {
+    const html = `
+<html>
+  <head><title>Foo</title></head>
+  <body>
+    <div class="app">
+      <div id="foo">
+        <div class="baz">FOO</div>
+      </div>
+      <div id="bar">
+        <div class="baz">BAR</div>
+      </div>
+    </div>
+  </body>
+</html>`
+    const doc = DefaultDOMElement.parseHTML(html)
+    const app = doc.find('.app')
+    const el = app.find('#foo .baz')
+    t.notNil(el, 'element should be found')
+    const els = app.findAll('#foo .baz')
+    t.equal(els.length, 1, 'there should be exactly one element found')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {

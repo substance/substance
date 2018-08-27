@@ -163,47 +163,55 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   hasAttribute (name) {
-    return this.attributes.has(name)
+    if (this.attributes) {
+      return this.attributes.has(name)
+    }
   }
 
   getAttribute (name) {
-    return this.attributes.get(name)
+    if (this.attributes) {
+      return this.attributes.get(name)
+    }
   }
 
   setAttribute (name, value) {
-    value = String(value)
-    // Note: keeping the Set version of classes and styles in sync
-    switch (name) {
-      case 'class':
-        this.classes = new Set()
-        parseClasses(this.classes, value)
-        break
-      case 'style':
-        this.styles = new Map()
-        parseStyles(this.styles, value)
-        break
-      default:
-        //
-    }
-    this.attributes.set(name, value)
-    if (this._isHTML()) {
-      deriveHTMLPropertyFromAttribute(this, name, value)
+    if (this.attributes) {
+      value = String(value)
+      // Note: keeping the Set version of classes and styles in sync
+      switch (name) {
+        case 'class':
+          this.classes = new Set()
+          parseClasses(this.classes, value)
+          break
+        case 'style':
+          this.styles = new Map()
+          parseStyles(this.styles, value)
+          break
+        default:
+          //
+      }
+      this.attributes.set(name, value)
+      if (this._isHTML()) {
+        deriveHTMLPropertyFromAttribute(this, name, value)
+      }
     }
     return this
   }
 
   removeAttribute (name) {
-    switch (name) {
-      case 'class':
-        this.classes = new Set()
-        break
-      case 'style':
-        this.styles = new Map()
-        break
-      default:
-        //
+    if (this.attributes) {
+      switch (name) {
+        case 'class':
+          this.classes = new Set()
+          break
+        case 'style':
+          this.styles = new Map()
+          break
+        default:
+          //
+      }
+      this.attributes.delete(name)
     }
-    this.attributes.delete(name)
     return this
   }
 
@@ -234,8 +242,10 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   addClass (name) {
-    this.classes.add(name)
-    this.attributes.set('class', stringifyClasses(this.classes))
+    if (this.classes) {
+      this.classes.add(name)
+      this.attributes.set('class', stringifyClasses(this.classes))
+    }
     return this
   }
 
@@ -407,6 +417,15 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   getParent () {
+    // TODO: to be consistent with the Browser implementation
+    // root elements should return null as parent element.
+    // However, this breaks other code ATM.
+    // let parent = this.parent
+    // if (parent && parent.type !== 'document') {
+    //   return this.parent
+    // } else {
+    //   return null
+    // }
     return this.parent
   }
 
