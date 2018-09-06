@@ -2,11 +2,12 @@ import { module } from 'substance-test'
 import { AnnotationCommand } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import containerAnnoSample from './fixture/containerAnnoSample'
+import simple from './fixture/simple'
 
 const test = module('AnnotationCommand')
 
 test("can 'create' property annotation", (t) => {
-  let { editorSession } = fixture(t)
+  let { editorSession } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
     type: 'property',
@@ -20,7 +21,7 @@ test("can 'create' property annotation", (t) => {
 })
 
 test("execute 'create' property annotation", (t) => {
-  let { editorSession, doc } = fixture(t)
+  let { editorSession, doc } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
     type: 'property',
@@ -42,7 +43,7 @@ test("execute 'create' property annotation", (t) => {
 })
 
 test("can 'delete' property annotation", (t) => {
-  let { editorSession } = fixture(t)
+  let { editorSession } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
     type: 'property',
@@ -56,7 +57,7 @@ test("can 'delete' property annotation", (t) => {
 })
 
 test("execute 'delete' property annotation", (t) => {
-  let { doc, editorSession } = fixture(t)
+  let { doc, editorSession } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
     type: 'property',
@@ -71,20 +72,79 @@ test("execute 'delete' property annotation", (t) => {
   t.end()
 })
 
+test('creating two consecutive annotations', (t) => {
+  let { editorSession, doc } = setupEditor(t, simple)
+  let cmd = new ToggleStrongCommand()
+  editorSession.transaction(tx => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 0,
+      endOffset: 3
+    })
+    tx.annotate({type: 'strong'})
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 3,
+    endOffset: 6
+  })
+  let params = _getCommandParams(editorSession)
+  let cmdState = cmd.getCommandState(params)
+  t.equal(cmdState.mode, 'create', 'Should allow to create.')
+  params.commandState = cmdState
+  cmd.execute(params)
+  let p1 = doc.get('p1')
+  let annos = p1.getAnnotations()
+  t.equal(annos.length, 2, 'there should be two annotations')
+  t.end()
+})
+
+test('expanding an annotation', (t) => {
+  let { editorSession, doc } = setupEditor(t, simple)
+  let cmd = new ToggleStrongCommand()
+  editorSession.transaction(tx => {
+    tx.setSelection({
+      type: 'property',
+      path: ['p1', 'content'],
+      startOffset: 0,
+      endOffset: 3
+    })
+    tx.annotate({type: 'strong'})
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 2,
+    endOffset: 6
+  })
+  let params = _getCommandParams(editorSession)
+  let cmdState = cmd.getCommandState(params)
+  t.equal(cmdState.mode, 'expand', 'command should be expand.')
+  params.commandState = cmdState
+  cmd.execute(params)
+  let p1 = doc.get('p1')
+  let annos = p1.getAnnotations()
+  t.equal(annos.length, 1, 'there should be one annotation')
+  let anno = annos[0]
+  t.deepEqual([anno.startOffset, anno.endOffset], [0, 6], 'annotation should have been expanded')
+  t.end()
+})
+
 class ToggleStrongCommand extends AnnotationCommand {
   constructor () {
     super({ name: 'strong', nodeType: 'strong' })
   }
 }
 
-function fixture (t) {
-  return setupEditor(t, containerAnnoSample, (tx) => {
-    tx.create({
-      id: 'a3',
-      type: 'strong',
-      start: { path: ['p1', 'content'], offset: 4 },
-      end: { offset: 8 }
-    })
+function _default (tx) {
+  containerAnnoSample(tx)
+  tx.create({
+    id: 'a3',
+    type: 'strong',
+    start: { path: ['p1', 'content'], offset: 4 },
+    end: { offset: 8 }
   })
 }
 
