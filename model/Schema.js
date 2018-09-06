@@ -72,8 +72,8 @@ export default class Schema {
     @param {String} name
     @returns {Class}
   */
-  getNodeClass (name) {
-    return this.nodeRegistry.get(name)
+  getNodeClass (name, strict) {
+    return this.nodeRegistry.get(name, strict)
   }
 
   /**
