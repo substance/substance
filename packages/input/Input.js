@@ -10,6 +10,7 @@ export default class Input extends Component {
       type: this.props.type,
       placeholder: this.props.placeholder
     }).addClass('sc-input')
+      .val(val)
       .on('keydown', this._onKeydown)
 
     if (this.props.path) {
