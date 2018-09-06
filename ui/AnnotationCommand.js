@@ -93,7 +93,15 @@ export default class AnnotationCommand extends Command {
    */
   // When there's no existing annotation overlapping, we create a new one.
   canCreate (annos, sel) {
-    return (annos.length === 0 && !sel.isCollapsed())
+    // to create an annotation we need an expanded selection
+    if (sel.isCollapsed()) return false
+    // fine if there is no other anno of this type yet
+    if (annos.length === 0) return true
+    // otherwise these annos are only allowed to 'touch' the current selection, not overlap.
+    for (let anno of annos) {
+      if (sel.overlaps(anno.getSelection(), 'strict')) return false
+    }
+    return true
   }
 
   /**
@@ -140,7 +148,7 @@ export default class AnnotationCommand extends Command {
     // When there's some overlap with only a single annotation we do an expand
     if (annos.length !== 1) return false
     let annoSel = annos[0].getSelection()
-    return sel.overlaps(annoSel) && !sel.isInsideOf(annoSel)
+    return sel.overlaps(annoSel, 'strict') && !sel.isInsideOf(annoSel)
   }
 
   /**
