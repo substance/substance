@@ -272,7 +272,8 @@ function _compileDefintion (definition) {
     result = {
       type: 'string',
       default: '',
-      _isText: true
+      _isText: true,
+      targetTypes: definition.targetTypes
     }
   // single reference type
   } else if (type !== 'id' && !_isValueType(type)) {
