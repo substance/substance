@@ -284,22 +284,25 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   getInnerHTML () {
-    return DomUtils.getInnerHTML(this, { decodeEntities: true })
+    let isXML = this._isXML()
+    return DomUtils.getInnerHTML(this, { xmlMode: isXML, decodeEntities: !isXML })
   }
 
   // TODO: parse html using settings from el,
   // clear old childNodes and append new childNodes
   setInnerHTML (html) {
     if (this.childNodes) {
+      let isXML = this._isXML()
       let _doc = parseMarkup(html, {
         ownerDocument: this.getOwnerDocument(),
-        decodeEntities: true,
+        format: isXML ? 'xml' : 'html',
+        decodeEntities: !isXML,
         elementFactory: MemoryDOMElementFactory
       })
       this.empty()
       // ATTENTION: important to copy the childNodes array first
       // as appendChild removes from parent
-      _doc.childNodes.slice(0).forEach((child) => {
+      _doc.childNodes.slice(0).forEach(child => {
         this.appendChild(child)
       })
     }
@@ -307,7 +310,8 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   getOuterHTML () {
-    return DomUtils.getOuterHTML(this, { xmlMode: this._isXML(), decodeEntities: true })
+    let isXML = this._isXML()
+    return DomUtils.getOuterHTML(this, { xmlMode: isXML, decodeEntities: !isXML })
   }
 
   getTextContent () {
@@ -671,9 +675,11 @@ export default class MemoryDOMElement extends DOMElement {
     if (!str) {
       return MemoryDOMElement.createDocument(format)
     }
+    // decodeEntities by default only in HTML mode
+    let decodeEntities = format === 'html'
     let parserOpts = Object.assign({
       format,
-      decodeEntities: true,
+      decodeEntities,
       elementFactory: MemoryDOMElementFactory
     }, options)
     // opt-out from HTML structure sanitization
