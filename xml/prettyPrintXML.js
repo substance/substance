@@ -48,6 +48,8 @@ function _prettyPrint (result, el, level) {
         result.push(indent + tagStr.join(' ') + ' />')
       }
     }
+  } else if (level === 0 && el.isTextNode()) {
+    // skip text outside of the root element
   } else {
     result.push(indent + el.outerHTML)
   }
