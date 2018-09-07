@@ -14,6 +14,10 @@ export default function prettyPrintXML (xml) {
     dom = xml
   }
   const result = []
+  if (dom._isBrowserDOMElement && dom.isDocumentNode()) {
+    // TODO: this should not be hard-coded but come from the DOM
+    result.push('<?xml version="1.0" encoding="UTF-8"?>')
+  }
   dom.childNodes.forEach((el) => {
     _prettyPrint(result, el, 0)
   })
