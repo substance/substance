@@ -129,6 +129,8 @@ class DomHandler {
   }
 
   onprocessinginstruction (name, data) {
+    // remove leading and trailing '?'
+    data = data.slice(1, -1)
     let element = this.document.createProcessingInstruction(name, data)
     this._addDomElement(element)
   }
