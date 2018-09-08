@@ -5,7 +5,7 @@ import ClipboardExporter from '../model/ClipboardExporter'
 export default class AbstractClipboard {
   constructor (configurator) {
     let schema = configurator.getSchema()
-    let converterRegistry = configurator.converterRegistry
+    let converterRegistry = configurator.getConverterRegistry()
     let htmlConverters = []
     if (converterRegistry && converterRegistry.contains('html')) {
       htmlConverters = converterRegistry.get('html').values() || []
