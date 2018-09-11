@@ -152,7 +152,12 @@ class DOMExporter {
     var annotator = new Fragmenter()
     annotator.onText = function (context, text) {
       if (text) {
-        context.children.push(encodeXMLEntities(text))
+        // ATTENTION: only encode if this is desired, e.g. '"' would be encoded as '&quot;' but as Clipboard HTML this is not understood by
+        // other applications such as Word.
+        if (self.config.ENCODE_ENTITIES_IN_TEXT) {
+          text = encodeXMLEntities(text)
+        }
+        context.children.push(text)
       }
     }
     annotator.onEnter = function (fragment) {
