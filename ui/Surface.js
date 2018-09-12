@@ -403,7 +403,7 @@ export default class Surface extends Component {
   onMouseDown (event) {
     if (!this._shouldConsumeEvent(event)) {
       // console.log('skipping mousedown', this.id)
-      return
+      return false
     }
 
     // EXPERIMENTAL: trying to 'reserve' a mousedown event
