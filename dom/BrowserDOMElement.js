@@ -698,7 +698,9 @@ BrowserDOMElement.parseMarkup = function (str, format, options = {}) {
     if (doc) {
       let parserError = doc.querySelector('parsererror')
       if (parserError) {
-        throw new Error('ParserError: ' + parserError)
+        // extracting a more readable message from parserError
+        // which is a native DOM element
+        throw new Error('ParserError: ' + BrowserDOMElement.wrap(parserError).outerHTML)
       }
     }
     return doc
