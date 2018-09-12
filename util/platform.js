@@ -58,6 +58,7 @@ function detect () {
     const msie = ua.indexOf('MSIE ')
     const trident = ua.indexOf('Trident/')
     const edge = ua.indexOf('Edge/')
+    const chrome = window.chrome
 
     if (msie > 0) {
       // IE 10 or older => return version number
@@ -87,6 +88,9 @@ function detect () {
 
     // TODO: explicit detection of Webkit&/Blink
     platform.isWebkit = !platform.isFF && !platform.isIE
+
+    // Detect Chromium
+    platform.isChromium = !!chrome
   } else {
     platform.inBrowser = false
   }
