@@ -29,6 +29,8 @@ const platform = {
 
   isWebkit: false,
 
+  isChromium: false,
+
   /*
     Major version
 
