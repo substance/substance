@@ -579,10 +579,11 @@ export default class MemoryDOMElement extends DOMElement {
   _propagateEvent (event) {
     let listeners = this.eventListeners
     if (listeners) {
-      let listener = listeners.find((l) => {
-        return l.eventName === event.type
+      listeners.forEach(l => {
+        if (l.eventName === event.type) {
+          l.handler(event)
+        }
       })
-      if (listener) listener.handler(event)
       if (event.stopped) return
       let p = this.parentNode
       if (p) p._propagateEvent(event)
