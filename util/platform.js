@@ -27,6 +27,8 @@ const platform = {
 
   isFF: false,
 
+  isOpera: false,
+
   isWebkit: false,
 
   isChromium: false,
@@ -57,9 +59,11 @@ function detect () {
 
     // Detect Internet Explorer / Edge
     const ua = window.navigator.userAgent
+    const vn = window.navigator.vendor
     const msie = ua.indexOf('MSIE ')
     const trident = ua.indexOf('Trident/')
     const edge = ua.indexOf('Edge/')
+    const opera = window.opr
     const chrome = window.chrome
 
     if (msie > 0) {
@@ -91,8 +95,11 @@ function detect () {
     // TODO: explicit detection of Webkit&/Blink
     platform.isWebkit = !platform.isFF && !platform.isIE
 
+    // Detect Opera
+    platform.isOpera = typeof opera !== 'undefined'
+
     // Detect Chromium
-    platform.isChromium = !!chrome
+    platform.isChromium = !!chrome && vn === 'Google Inc.' && !platform.isOpera && !platform.isEdge
   } else {
     platform.inBrowser = false
   }
