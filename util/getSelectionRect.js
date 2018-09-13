@@ -13,7 +13,8 @@ export default function getSelectionRect (parentRect) {
     let selectionRect = wrange.getBoundingClientRect()
 
     if (selectionRect.top === 0 && selectionRect.bottom === 0) {
-      selectionRect = _fixCorruptDOMSelection(wsel, wrange)
+      let fixed = _fixCorruptDOMSelection(wsel, wrange)
+      if (fixed) selectionRect = fixed
     }
     return getRelativeRect(contentRect, selectionRect)
   }
@@ -28,7 +29,7 @@ export default function getSelectionRect (parentRect) {
 */
 function _fixCorruptDOMSelection (wsel, wrange) {
   let anchorNode = wsel.anchorNode
-  if (!anchorNode) return
+  if (!anchorNode || !anchorNode.getBoundingClientRect) return
   let rect = anchorNode.getBoundingClientRect()
   return {
     left: rect.left,
