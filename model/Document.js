@@ -124,6 +124,23 @@ export default class Document extends EventEmitter {
   getAnnotations (path) {
     return this.getIndex('annotations').get(path)
   }
+  /**
+   * Retrieve the NodeProperty for a given path
+   *
+   * @param {string[]} path
+   */
+  getProperty (path) {
+    if (path.length !== 2) {
+      throw new Error('path must have length=2')
+    }
+    let [nodeId, propName] = path
+    let node = this.get(nodeId)
+    if (node) {
+      return node.getSchema().getProperty(propName)
+    } else {
+      throw new Error('Invalid path.')
+    }
+  }
 
   /**
     Creates a context like a transaction for importing nodes.

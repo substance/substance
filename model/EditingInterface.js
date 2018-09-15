@@ -33,6 +33,10 @@ export default class EditingInterface {
     return this._document.get(...args)
   }
 
+  getProperty (...args) {
+    return this._document.getProperty(...args)
+  }
+
   contains (id) {
     return this._document.contains(id)
   }
