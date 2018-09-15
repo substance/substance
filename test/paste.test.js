@@ -138,7 +138,7 @@ test('Pasting two structured content into TextProperty (#1111)', (t) => {
   })
   tx.paste(snippet)
   let actual = toUnixLineEndings(detached.content)
-  t.equal(actual, '012AA\nBB345', 'Plain text should have been inserted.')
+  t.equal(actual, '012AA BB345', 'Plain text should have been inserted.')
   t.end()
 })
 

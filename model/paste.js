@@ -1,5 +1,5 @@
+import map from '../util/map'
 import last from '../util/last'
-import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import { deleteNode, SNIPPET_ID, TEXT_SNIPPET_ID } from './documentHelpers'
 import { setCursor } from './selectionHelpers'
@@ -14,53 +14,61 @@ import _transferWithDisambiguatedIds from './_transferWithDisambiguatedIds'
 */
 export default function paste (tx, args) {
   let sel = tx.selection
-  if (!sel || sel.isNull() || sel.isCustomSelection()) {
-    throw new Error('Can not paste, without selection or a custom selection.')
+  if (!sel || sel.isNull()) {
+    throw new Error('Can not paste without selection.')
+  }
+  if (sel.isCustomSelection()) {
+    throw new Error('Paste not implemented for custom selection.')
   }
   args = args || {}
   args.text = args.text || ''
   let pasteDoc = args.doc
-  // TODO: is there a better way to detect that this paste is happening within a
-  // container?
+  // TODO: is there a better way to detect that this paste is happening within a container?
   let inContainer = Boolean(sel.containerId)
-
-  // when we are in a container, we interpret line-breaks
-  // and create a document with multiple paragraphs
-  // in a PropertyEditor we paste the text as is
-  if (!pasteDoc && !inContainer) {
-    tx.insertText(args.text)
-    return
-  }
-  if (!pasteDoc) {
-    pasteDoc = _convertPlainTextToDocument(tx, args)
-  }
-  if (pasteDoc && !inContainer) {
-    // TODO: implement rich document import with merge into one paragraph
-    let nodes = []
-    let container = pasteDoc.get('snippet')
-    let content = container.getContent()
-    content.forEach(nodeId => {
-      let text = pasteDoc.get(nodeId).getText()
-      nodes.push(text)
-    })
-    tx.insertText(nodes.join('\r\n'))
-    return
-  }
+  // first delete the current selection
   if (!sel.isCollapsed()) {
     tx.deleteSelection()
   }
+  // snippet is plain-text only
+  if (!pasteDoc) {
+    // in a PropertyEditor paste the text
+    if (!inContainer) {
+      tx.insertText(args.text)
+      return
+    // in a ContainerEditor interpret line-breaks
+    // and create a document with multiple paragraphs
+    } else {
+      pasteDoc = _convertPlainTextToDocument(tx, args)
+    }
+  }
+  // pasting into a TextProperty
   let snippet = pasteDoc.get(SNIPPET_ID)
-  if (snippet.getLength() > 0) {
-    let first = snippet.getChildAt(0)
+  let L = snippet.getLength()
+  if (L === 0) return
+  let first = snippet.getChildAt(0)
+  // paste into a TextProperty
+  if (!inContainer) {
+    // if there is only one node it better be a text node
+    // otherwise we can't do
+    if (L === 1) {
+      if (first.isText()) {
+        _pasteAnnotatedText(tx, pasteDoc)
+      }
+    } else {
+      pasteDoc = _convertIntoAnnotatedText(tx, pasteDoc)
+      _pasteAnnotatedText(tx, pasteDoc)
+    }
+  } else {
     if (first.isText()) {
       _pasteAnnotatedText(tx, pasteDoc)
       // now we remove the first node from the snippet,
       // so that we can call _pasteDocument for the remaining
       // content
       snippet.hideAt(0)
+      L--
     }
-    // if still nodes left > 0
-    if (snippet.getLength() > 0) {
+    // if still nodes left paste the remaining document
+    if (L > 0) {
       _pasteDocument(tx, pasteDoc)
     }
   }
@@ -100,6 +108,50 @@ function _convertPlainTextToDocument (tx, args) {
   return pasteDoc
 }
 
+function _convertIntoAnnotatedText (tx, copy) {
+  let sel = tx.selection
+  let path = sel.start.path
+  let snippet = tx.createSnippet()
+  let defaultTextType = snippet.getSchema().getDefaultTextType()
+
+  // walk through all nodes
+  let container = copy.get('snippet')
+  let nodeIds = container.getContent()
+  // collect all transformed annotations
+  let fragments = []
+  let offset = 0
+  let annos = []
+  for (let nodeId of nodeIds) {
+    let node = copy.get(nodeId)
+    if (node.isText()) {
+      let text = node.getText()
+      if (fragments.length > 0) {
+        fragments.push(' ')
+        offset += 1
+      }
+      // tranform annos
+      let _annos = map(node.getAnnotations(), anno => {
+        let data = anno.toJSON()
+        data.start.path = path.slice(0)
+        data.start.offset += offset
+        data.end.offset += offset
+        return data
+      })
+      fragments.push(text)
+      annos = annos.concat(_annos)
+      offset += text.length
+    }
+  }
+  snippet.create({
+    id: TEXT_SNIPPET_ID,
+    type: defaultTextType,
+    content: fragments.join('')
+  })
+  annos.forEach(anno => snippet.create(anno))
+  snippet.getContainer().show(TEXT_SNIPPET_ID)
+  return snippet
+}
+
 function _pasteAnnotatedText (tx, copy) {
   let sel = tx.selection
   const nodes = copy.get(SNIPPET_ID).nodes
@@ -112,16 +164,25 @@ function _pasteAnnotatedText (tx, copy) {
   let path = sel.start.path
   let offset = sel.start.offset
   tx.insertText(text)
-  // copy annotations
-  forEach(annotations, function (anno) {
-    let data = anno.toJSON()
-    data.start.path = path.slice(0)
-    data.start.offset += offset
-    data.end.offset += offset
-    // create a new uuid if a node with the same id exists already
-    if (tx.get(data.id)) data.id = uuid(data.type)
-    tx.create(data)
-  })
+  let targetProp = tx.getProperty(path)
+  if (targetProp.isText()) {
+    // copy annotations (only for TEXT properties)
+    let annos = map(annotations)
+    // NOTE: filtering annotations which are not explicitly white-listed via property.targetTypes
+    let allowedTypes = targetProp.targetTypes
+    if (allowedTypes) {
+      annos = annos.filter(anno => allowedTypes.indexOf(anno.type) >= 0)
+    }
+    for (let anno of annos) {
+      let data = anno.toJSON()
+      data.start.path = path.slice(0)
+      data.start.offset += offset
+      data.end.offset += offset
+      // create a new uuid if a node with the same id exists already
+      if (tx.get(data.id)) data.id = uuid(data.type)
+      tx.create(data)
+    }
+  }
 }
 
 function _pasteDocument (tx, pasteDoc) {
@@ -160,11 +221,19 @@ function _pasteDocument (tx, pasteDoc) {
   let nodeIds = pasteDoc.get(SNIPPET_ID).nodes
   let insertedNodes = []
   let visited = {}
-  for (let i = 0; i < nodeIds.length; i++) {
-    let node = pasteDoc.get(nodeIds[i])
-    // Note: this will on the one hand make sure
-    // node ids are changed to avoid collisions in
-    // the target doc
+  let nodes = nodeIds.map(id => pasteDoc.get(id))
+
+  // now filter nodes w.r.t. allowed types for the given container
+  let contentProperty = tx.getProperty(container.getContentPath())
+  let targetTypes = contentProperty.targetTypes
+  // TODO: instead of dropping all invalid ones we could try to convert text nodes to the default text node
+  if (targetTypes && targetTypes.length > 0) {
+    nodes = nodes.filter(node => targetTypes.indexOf(node.type) >= 0)
+  }
+
+  for (let node of nodes) {
+    // Note: this will on the one hand make sure node ids are changed
+    // to avoid collisions in the target doc
     // Plus, it uses reflection to create owned nodes recursively,
     // and to transfer attached annotations.
     let newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
