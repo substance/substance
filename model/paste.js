@@ -122,7 +122,7 @@ function _convertIntoAnnotatedText (tx, copy) {
   let offset = 0
   let annos = []
   for (let nodeId of nodeIds) {
-    let node = tx.get(nodeId)
+    let node = copy.get(nodeId)
     if (node.isText()) {
       let text = node.getText()
       if (fragments.length > 0) {
