@@ -423,7 +423,7 @@ export default class DomUtils {
   }
 
   renderDirective (elem) {
-    return '<?' + this.getData(elem) + '?>'
+    return '<?' + this.getName(elem) + ' ' + this.getData(elem) + '?>'
   }
 
   renderDoctype (elem) {
