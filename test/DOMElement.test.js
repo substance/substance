@@ -663,6 +663,15 @@ function DOMElementTests (impl) {
     t.end()
   })
 
+  test('creating and serializing an XML document with xml instruction', t => {
+    let doc = DefaultDOMElement.createDocument('xml', { version: '1.0', encoding: 'UTF-8' })
+    doc.append(doc.createElement('dummy'))
+    let actual = doc.serialize()
+    let expected = '<?xml version="1.0" encoding="UTF-8"?><dummy/>'
+    t.equal(actual, expected, 'serialized xml should contain xml instruction')
+    t.end()
+  })
+
   test('doctype should be serialized (XML)', t => {
     let doc = DefaultDOMElement.createDocument('xml')
     doc.setDoctype('foo', 'Foo 1.0', 'http://schema.org/foo.dtd')
