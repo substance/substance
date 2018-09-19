@@ -250,9 +250,9 @@ function paragraphWithInlineNodes (doc, body) {
   }))
   // -> 01X234X56789X
   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 2})
-  tx.insertInlineNode({ type: 'test-inline-node', id: 'in1', content: '[1]'})
+  tx.insertInlineNode({ type: 'test-inline-node', id: 'in1', content: '[1]' })
   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 6})
-  tx.insertInlineNode({ type: 'test-inline-node', id: 'in2', content: '[2]'})
+  tx.insertInlineNode({ type: 'test-inline-node', id: 'in2', content: '[2]' })
   tx.setSelection({type: 'property', path: ['p', 'content'], startOffset: 12})
-  tx.insertInlineNode({ type: 'test-inline-node', id: 'in3', content: '[3]'})
+  tx.insertInlineNode({ type: 'test-inline-node', id: 'in3', content: '[3]' })
 }

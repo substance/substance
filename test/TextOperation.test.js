@@ -29,10 +29,10 @@ test('Insert at last position', (t) => {
 
 test('Invalid arguments', (t) => {
   t.throws(function () {
-    new TextOperation({})
+    new TextOperation({}) // eslint-disable-line no-new
   }, 'Should throw for incomplete data.')
   t.throws(function () {
-    new TextOperation({type: 'foo', pos: 0, str: ''})
+    new TextOperation({type: 'foo', pos: 0, str: ''}) // eslint-disable-line no-new
   }, 'Should throw for invalid type.')
   t.throws(function () {
     TextOperation.Insert(-1, '')
@@ -156,9 +156,9 @@ test('Transformation: a=Insert, b=Insert, same position', (t) => {
   let b = TextOperation.Insert(6, 'blupp ')
   let expected = 'Lorem bla blupp ipsum'
   // applying b first gives a different result
-  let expected_2 = 'Lorem blupp bla ipsum'
+  let expected2 = 'Lorem blupp bla ipsum'
   checkTextTransform(t, a, b, input, expected)
-  checkTextTransform(t, b, a, input, expected_2)
+  checkTextTransform(t, b, a, input, expected2)
   t.end()
 })
 

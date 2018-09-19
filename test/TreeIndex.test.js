@@ -40,7 +40,7 @@ test('Getting values recursively', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a', 'b'], 'foo')
   adapter.set(['a', 'c', 'd'], 'bar')
-  t.deepEqual(adapter.getAll('a'), { b: 'foo', d: 'bar'}, 'Values should be collected together into an object')
+  t.deepEqual(adapter.getAll('a'), { b: 'foo', d: 'bar' }, 'Values should be collected together into an object')
   t.end()
 })
 

@@ -33,6 +33,6 @@ test('isEqual on arrays', (t) => {
 
 test('isEqual on objects', (t) => {
   t.ok(isEqual({ foo: 'foo', bar: { bla: 'bla', blupp: {} }, baz: [1, 2, 3] }, { foo: 'foo', bar: { bla: 'bla', blupp: {} }, baz: [1, 2, 3] }), 'should do a deep object comparison')
-  t.notOk(isEqual({ foo: 'foo', bar: { bla: 'bla', blupp: {} }, baz: [1, 2, 3] }, { foo: 'foo', bar: { bla: 'bla', blupp: { a: 'a'} }, baz: [1, 2, 3] }), 'should detect inequality on deeper level')
+  t.notOk(isEqual({ foo: 'foo', bar: { bla: 'bla', blupp: {} }, baz: [1, 2, 3] }, { foo: 'foo', bar: { bla: 'bla', blupp: { a: 'a' } }, baz: [1, 2, 3] }), 'should detect inequality on deeper level')
   t.end()
 })

@@ -2,7 +2,6 @@
 import { module } from 'substance-test'
 import { substanceGlobals, RenderingEngine, Component } from 'substance'
 import TestComponent from './fixture/TestComponent'
-import getMountPoint from './fixture/getMountPoint'
 
 const Simple = TestComponent.Simple
 const internal = RenderingEngine._internal

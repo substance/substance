@@ -72,7 +72,7 @@ function _simple () {
 function _items () {
   let config = new Configurator()
   config.addLabel('n_items_found', {
-    en: '${n} items found'
+    en: '${n} items found' // eslint-disable-line no-template-curly-in-string
   })
   return config
 }

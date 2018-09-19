@@ -1,9 +1,6 @@
 import { module } from 'substance-test'
 import {
-  DefaultDOMElement, Registry, Clipboard,
-  ParagraphPackage, HeadingPackage, StrongPackage,
-  EmphasisPackage, LinkPackage, CodeblockPackage,
-  SuperscriptPackage, SubscriptPackage,
+  DefaultDOMElement, Clipboard,
   platform, find
 } from 'substance'
 
@@ -43,15 +40,6 @@ import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
 import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
 import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
 import MSW11OSXExtendedFixture from './fixture/html/word-11-osx-extended'
-
-const ParagraphHTMLConverter = ParagraphPackage.ParagraphHTMLConverter
-const HeadingHTMLConverter = HeadingPackage.HeadingHTMLConverter
-const StrongHTMLConverter = StrongPackage.StrongHTMLConverter
-const EmphasisHTMLConverter = EmphasisPackage.EmphasisHTMLConverter
-const LinkHTMLConverter = LinkPackage.LinkHTMLConverter
-const CodeblockHTMLConverter = CodeblockPackage.CodeblockHTMLConverter
-const SuperscriptHTMLConverter = SuperscriptPackage.SuperscriptHTMLConverter
-const SubscriptHTMLConverter = SubscriptPackage.SubscriptHTMLConverter
 
 ClipboardTests()
 
@@ -361,23 +349,6 @@ function ClipboardTests (memory) {
   test('Microsoft Word 11 (OSX) - Extended', function (t) {
     _extendedTest(t, MSW11OSXExtendedFixture)
   })
-}
-
-let converterRegistry = new Registry({
-  'html': new Registry({
-    'paragraph': ParagraphHTMLConverter,
-    'heading': HeadingHTMLConverter,
-    'strong': StrongHTMLConverter,
-    'emphasis': EmphasisHTMLConverter,
-    'link': LinkHTMLConverter,
-    'codeblock': CodeblockHTMLConverter,
-    'superscript': SuperscriptHTMLConverter,
-    'subscript': SubscriptHTMLConverter
-  })
-})
-
-let clipboardConfig = {
-  converterRegistry: converterRegistry
 }
 
 class ClipboardEventData {

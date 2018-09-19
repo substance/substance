@@ -14,7 +14,7 @@ function checkObjectOperationTransform (test, a, b, input, expected) {
 test('Creating values.', (t) => {
   let path = ['a']
   let val = { bla: 'blupp' }
-  let expected = {a: { bla: 'blupp' } }
+  let expected = { a: { bla: 'blupp' } }
   let op = ObjectOperation.Create(path, val)
   let obj = {}
   op.apply(obj)
@@ -25,7 +25,7 @@ test('Creating values.', (t) => {
 test('Creating nested values.', (t) => {
   let path = ['a', 'b']
   let val = { bla: 'blupp' }
-  let expected = {a: { b: { bla: 'blupp' } } }
+  let expected = { a: { b: { bla: 'blupp' } } }
   let op = ObjectOperation.Create(path, val)
   let obj = {'a': {}}
   op.apply(obj)
@@ -49,7 +49,7 @@ test('Deleting nested values.', (t) => {
   let val = 'bla'
   let op = ObjectOperation.Delete(path, val)
   let expected = { a: {} }
-  let obj = { a: { b: 'bla'} }
+  let obj = { a: { b: 'bla' } }
   op.apply(obj)
   t.deepEqual(obj, expected, 'Should delete nested value.')
   t.end()
@@ -116,33 +116,33 @@ test('Apply operation on PathObject.', (t) => {
 
 test('Creating operation with invalid data.', (t) => {
   t.throws(function () {
-    new ObjectOperation()
+    new ObjectOperation() // eslint-disable-line no-new
   }, 'Should throw when data is undefined.')
   t.throws(function () {
-    new ObjectOperation({})
+    new ObjectOperation({}) // eslint-disable-line no-new
   }, 'Should throw when type is missing.')
   t.throws(function () {
-    new ObjectOperation({ type: 'foo', path: ['test'] })
+    new ObjectOperation({ type: 'foo', path: ['test'] }) // eslint-disable-line no-new
   }, 'Should throw when type is invalid.')
   t.throws(function () {
-    new ObjectOperation({
+    new ObjectOperation({ // eslint-disable-line no-new
       type: ObjectOperation.CREATE
     })
   }, 'Should throw when path is missing.')
   t.throws(function () {
-    new ObjectOperation({
+    new ObjectOperation({ // eslint-disable-line no-new
       type: ObjectOperation.CREATE,
       path: ['test']
     })
   }, 'Should throw when created value is missing.')
   t.throws(function () {
-    new ObjectOperation({
+    new ObjectOperation({ // eslint-disable-line no-new
       type: ObjectOperation.UPDATE,
       path: ['test']
     })
   }, 'Should throw when update diff is missing.')
   t.throws(function () {
-    new ObjectOperation({
+    new ObjectOperation({ // eslint-disable-line no-new
       type: ObjectOperation.UPDATE,
       path: ['test'],
       diff: 'foo'

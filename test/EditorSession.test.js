@@ -6,7 +6,7 @@ const test = module('EditorSession')
 
 test('Keeping TransactionDocument up-to-date.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
-  doc.create({ type: 'paragraph', id: 'foo', content: 'foo'})
+  doc.create({ type: 'paragraph', id: 'foo', content: 'foo' })
   editorSession.transaction((tx) => {
     const p = tx.get('foo')
     t.notNil(p, 'Stage should contain new paragraph node.')

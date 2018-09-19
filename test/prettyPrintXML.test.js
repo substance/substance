@@ -1,5 +1,5 @@
 import { module } from 'substance-test'
-import { platform, prettyPrintXML, DefaultDOMElement } from 'substance'
+import { platform, prettyPrintXML } from 'substance'
 
 if (platform.inBrowser) {
   prettyPrintTests('BrowserDOMElement')
