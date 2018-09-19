@@ -560,8 +560,8 @@ class BrowserDOMElement extends DOMElement {
     return this.el.childNodes.length
   }
 
-  focus () {
-    this.el.focus()
+  focus (opts) {
+    this.el.focus(opts)
     return this
   }
 
