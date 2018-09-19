@@ -597,7 +597,7 @@ export default class Surface extends Component {
       this._state.skipNextFocusEvent = true
       // ATTENTION: unfortunately, focusing the contenteditable does lead to auto-scrolling
       // in some browsers
-      this.el.focus()
+      this.el.focus({ preventScroll: true })
       this._state.skipNextFocusEvent = false
     }
   }
