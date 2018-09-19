@@ -14,11 +14,19 @@ export default function prettyPrintXML (xml) {
     dom = xml
   }
   const result = []
-  if (dom._isBrowserDOMElement && dom.isDocumentNode()) {
-    // TODO: this should not be hard-coded but come from the DOM
-    result.push('<?xml version="1.0" encoding="UTF-8"?>')
+  // Note: the browser treats XML instructions in a surprising way:
+  // parsing `<?xml version="1.0" encoding="UTF-8"?><dummy/>` results in only one element
+  // i.e. the instruction is swallowed and stored in a way that it is created during serialization.
+  // Interestingly, this is not the case for the DOCTYPE declaration.
+  // ATTENTION: we have assimilated the MemoryDOM implementation, so that we get the same result.
+  let childNodes = dom.getChildNodes()
+  if (dom.isDocumentNode()) {
+    let xml = dom.empty().serialize()
+    if (/<\?\s*xml/.exec(xml)) {
+      result.push(xml)
+    }
   }
-  dom.childNodes.forEach((el) => {
+  childNodes.forEach(el => {
     _prettyPrint(result, el, 0)
   })
   return result.join('\n')

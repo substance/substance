@@ -129,10 +129,17 @@ class DomHandler {
   }
 
   onprocessinginstruction (name, data) {
-    // remove leading and trailing '?'
-    data = data.slice(1, -1)
-    let element = this.document.createProcessingInstruction(name, data)
-    this._addDomElement(element)
+    // ATTENTION: this looks a bit hacky, but is essentially caused by the XML parser implementation
+    // remove leading '?${name}' and trailing '?'
+    data = data.slice(name.length, -1).trim()
+    // remove leading ?
+    name = name.slice(1)
+    let el = this.document.createProcessingInstruction(name, data)
+    if (name === 'xml') {
+      this.document._xmlInstruction = el
+    } else {
+      this._addDomElement(el)
+    }
   }
 
   ondeclaration (data) {

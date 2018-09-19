@@ -339,8 +339,8 @@ class BrowserDOMElement extends DOMElement {
     return BrowserDOMElement.wrap(clone)
   }
 
-  createDocument (format) {
-    return BrowserDOMElement.createDocument(format)
+  createDocument (format, opts) {
+    return BrowserDOMElement.createDocument(format, opts)
   }
 
   createElement (tagName) {
@@ -648,11 +648,24 @@ class BrowserDOMElement extends DOMElement {
 BrowserDOMElement.prototype._isBrowserDOMElement = true
 
 // TODO: flesh out how options should look like (e.g. XML namespaceURI etc.)
-BrowserDOMElement.createDocument = function (format) {
+BrowserDOMElement.createDocument = function (format, opts = {}) {
   let doc
   if (format === 'xml') {
+    let xmlInstruction = []
+    if (opts.version) {
+      xmlInstruction.push(`version="${opts.version}"`)
+    }
+    if (opts.encoding) {
+      xmlInstruction.push(`encoding="${opts.encoding}"`)
+    }
+    let xmlStr
+    if (xmlInstruction.length > 0) {
+      xmlStr = `<?xml ${xmlInstruction.join(' ')}?><dummy/>`
+    } else {
+      xmlStr = `<dummy/>`
+    }
     // HACK: didn't find a way to create an empty XML doc without a root element
-    doc = window.document.implementation.createDocument(null, 'dummy')
+    doc = (new window.DOMParser()).parseFromString(xmlStr, 'application/xml')
     // remove the
     doc.removeChild(doc.firstChild)
   } else {

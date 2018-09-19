@@ -363,6 +363,9 @@ export default class DomUtils {
       switch (elem.type) {
         case 'root':
         case 'document': {
+          if (elem._xmlInstruction) {
+            output.push(this.render(elem._xmlInstruction, opts))
+          }
           output.push(this.render(this.getChildren(elem), opts))
           break
         }
@@ -423,7 +426,7 @@ export default class DomUtils {
   }
 
   renderDirective (elem) {
-    return '<?' + this.getData(elem) + '?>'
+    return '<?' + this.getName(elem) + ' ' + this.getData(elem) + '?>'
   }
 
   renderDoctype (elem) {
