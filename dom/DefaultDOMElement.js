@@ -7,8 +7,8 @@ import MemoryDOMElement from './MemoryDOMElement'
 */
 let DefaultDOMElement = {}
 
-DefaultDOMElement.createDocument = function (format) {
-  return _getDefaultImpl().createDocument(format)
+DefaultDOMElement.createDocument = function (format, opts) {
+  return _getDefaultImpl().createDocument(format, opts)
 }
 
 /* istanbul ignore next */
