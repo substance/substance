@@ -134,8 +134,12 @@ class DomHandler {
     data = data.slice(name.length, -1).trim()
     // remove leading ?
     name = name.slice(1)
-    let element = this.document.createProcessingInstruction(name, data)
-    this._addDomElement(element)
+    let el = this.document.createProcessingInstruction(name, data)
+    if (name === 'xml') {
+      this.document._xmlInstruction = el
+    } else {
+      this._addDomElement(el)
+    }
   }
 
   ondeclaration (data) {

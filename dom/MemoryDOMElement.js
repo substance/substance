@@ -664,9 +664,20 @@ export default class MemoryDOMElement extends DOMElement {
   // TODO: do we really need this?
   get _isMemoryDOMElement () { return true }
 
-  static createDocument (format) {
+  static createDocument (format, opts = {}) {
     if (format === 'xml') {
-      return new MemoryDOMElement('document', { format: format })
+      let doc = new MemoryDOMElement('document', { format: format })
+      let xmlInstruction = []
+      if (opts.version) {
+        xmlInstruction.push(`version="${opts.version}"`)
+      }
+      if (opts.encoding) {
+        xmlInstruction.push(`encoding="${opts.encoding}"`)
+      }
+      if (xmlInstruction.length > 0) {
+        doc._xmlInstruction = doc.createProcessingInstruction('xml', xmlInstruction.join(' '))
+      }
+      return doc
     } else {
       return MemoryDOMElement.parseMarkup(DOMElement.EMPTY_HTML, 'html')
     }
