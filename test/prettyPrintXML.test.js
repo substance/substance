@@ -25,17 +25,6 @@ function prettyPrintTests (impl) {
     t.end()
   })
 
-  test('dont render duplicate XML declaration', t => {
-    let xmlStr = `<article />`
-    let dom = DefaultDOMElement.parseXML(xmlStr)
-    let xmlInstruction = dom.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"')
-    dom.insertAt(0, xmlInstruction)
-    let expected = `<?xml version="1.0" encoding="UTF-8"?>\n<article />`
-    let actual = prettyPrintXML(dom)
-    t.equal(actual, expected, 'prettyPrinted XML should be correct')
-    t.end()
-  })
-
   test('preserve DOCTYPE declaration', t => {
     let xmlStr = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving DTD v1.0 20120330//EN" "JATS-journalarchiving.dtd"><article />`
     let expected = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving DTD v1.0 20120330//EN" "JATS-journalarchiving.dtd">\n<article />`
