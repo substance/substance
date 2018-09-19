@@ -28,7 +28,11 @@ function _defaultConfig (config) {
     idAttribute: 'id'
   }, config)
   if (!config.elementFactory) {
-    config.elementFactory = DefaultDOMElement.createDocument('xml')
+    let xmlParams = {
+      version: config.xmlVersion || '1.0',
+      encoding: config.xmlEncoding || 'UTF-8'
+    }
+    config.elementFactory = DefaultDOMElement.createDocument('xml', xmlParams)
   }
   return config
 }
