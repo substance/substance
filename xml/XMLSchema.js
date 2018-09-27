@@ -151,7 +151,7 @@ function _validateElement (elementSchema, el) {
     }
   }
   // Elements
-  if (elementSchema.type === 'external') {
+  if (elementSchema.type === 'external' || elementSchema.type === 'not-implemented') {
     // skip
   } else {
     // HACK: special treatment for our text elements which are not real DOM elements
@@ -179,7 +179,7 @@ function _checkAttributes(elementSchema, el) { // eslint-disable-line
 function _checkChildren (elementSchema, el) {
   // Don't validate external nodes
   // TODO: maybe we should do this too?
-  if (elementSchema.type === 'external') {
+  if (elementSchema.type === 'external' || elementSchema.type === 'not-implemented') {
     return true
   }
   const expr = elementSchema.expr

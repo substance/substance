@@ -66,7 +66,8 @@ export default function registerSchema (config, xmlSchema, DocumentClass, option
         ConverterClass = XMLElementNodeConverter
         break
       }
-      case 'external': {
+      case 'external':
+      case 'not-implemented': {
         NodeClass = XMLExternalNode
         ConverterClass = XMLExternalNodeConverter
         break
