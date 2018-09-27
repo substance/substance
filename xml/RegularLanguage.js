@@ -472,7 +472,7 @@ export class Interleave {
   }
 
   toString () {
-    return '(' + this.blocks.map(b => b.toString()).join('~') + ')'
+    return '(' + this.blocks.map(b => b.toString()).join(', ') + ')[unordered]'
   }
 
   toJSON () {
