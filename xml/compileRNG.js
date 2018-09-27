@@ -14,8 +14,7 @@ const TEXT = DFA.TEXT
   We use regular RNG, with slight restrictions plus custom extensions,
   and compile it into our internal format.
 */
-export default
-function compileRNG (fs, searchDirs, entry) {
+export default function compileRNG (fs, searchDirs, entry) {
   let rng
   // used for testing
   if (arguments.length === 1 && isString(arguments[0])) {
@@ -45,7 +44,7 @@ function compileRNG (fs, searchDirs, entry) {
 function _registerDefinitions (grammar) {
   let defs = {}
   // NOTE: definitions are only considered on the top level
-  grammar.children.forEach((child) => {
+  grammar.children.forEach(child => {
     const tagName = nameWithoutNS(child.tagName)
     if (tagName === 'define') {
       _processDefine(child, defs)
@@ -65,34 +64,61 @@ function _processDefine (el, defs) {
     }
   } else {
     if (defs[name]) {
-      console.info(`Overwriting definition ${name}`)
+      // console.info(`Overwriting definition ${name}`)
     }
     defs[name] = el
   }
 }
 
 /* Transformation of RNG into internal representation */
+function _transformRNG (grammar) {
+  const $$ = grammar.createElement.bind(grammar)
+  // remove everything elements from the grammar that have been tagged as 's:removed'
+  grammar.findAll('removed').forEach(el => {
+    let name = el.attr('name')
+    grammar.findAll(`element[name="${name}"]`).forEach(el => {
+      // console.log('removing <element>', name)
+      el.remove()
+    })
+    grammar.findAll(`ref[name="${name}"]`).forEach(el => {
+      // console.log('removing <ref>', name)
+      el.remove()
+    })
+  })
 
-function _transformRNG (grammar) { // eslint-disable-line no-unused-vars
-  // expanding all element definitions
   const elements = {}
   const defs = grammar.defs
   const elementDefinitions = grammar.findAll('define > element')
   const doc = DefaultDOMElement.createDocument('xml')
   const newGrammar = doc.createElement('grammar')
-  elementDefinitions.forEach((el) => {
+
+  // record all not implemented ones
+  // we will allow to use them, but skip their content definition
+  const notImplemented = grammar.findAll('not-implemented').reduce((s, el) => {
+    let name = el.attr('name')
+    if (name) s.add(name)
+    return s
+  }, new Set())
+
+  // expand definitions
+  elementDefinitions.forEach(el => {
     const name = el.attr('name')
     if (!name) throw new Error("'name' is mandatory.")
-    const transformed = _transformElementDefinition(doc, name, el, defs)
+    let transformed
+    if (notImplemented.has(name)) {
+      transformed = $$('element').attr('name', name).attr('type', 'not-implemented')
+    } else {
+      transformed = _transformElementDefinition(doc, name, el, defs)
+    }
     elements[name] = transformed
     newGrammar.appendChild(transformed)
   })
 
-  // transfer element types
+  // infer element types
   const elementTypes = grammar.findAll('elementType')
-  elementTypes.forEach((typeEl) => {
+  elementTypes.forEach(typeEl => {
     const name = typeEl.attr('name')
-    const type = typeEl.attr('s:type') || typeEl.attr('type')
+    let type = typeEl.attr('s:type') || typeEl.attr('type')
     if (!name || !type) throw new Error('Attributes name and type are mandatory.')
     const element = elements[name]
     if (!element) throw new Error(`Unknown element ${name}.`)
@@ -134,9 +160,7 @@ function _transformElementDefinition (doc, name, orig, defs) {
     - choice > choice
     - choice with one element
   */
-
-  let hasPruned = true
-  while (hasPruned) {
+  while (true) {
     // Unwrap nested choices
     let nestedChoice = children.find('choice > choice')
     if (nestedChoice) {
@@ -150,17 +174,35 @@ function _transformElementDefinition (doc, name, orig, defs) {
       parentChoice.removeChild(nestedChoice)
       continue
     }
-    // Simplify singular choices
-    let choices = children.findAll('choice')
-    for (let i = 0; i < choices.length; i++) {
-      let choice = choices[i]
-      let children = choice.children
-      if (children.length === 1) {
-        choice.parentNode.replaceChild(choice, children[0])
-      }
-      continue
+    break
+  }
+
+  // Simplify singular choices
+  let choices = children.findAll('choice')
+  for (let i = 0; i < choices.length; i++) {
+    let choice = choices[i]
+    let children = choice.children
+    if (children.length === 1) {
+      choice.parentNode.replaceChild(choice, children[0])
     }
-    hasPruned = false
+  }
+
+  let optionalTextEls = children.findAll('optional > text, zeroOrMore > text')
+  for (let i = 0; i < optionalTextEls.length; i++) {
+    let textEl = optionalTextEls[i]
+    let optionalEl = textEl.parentNode
+    if (optionalEl.getChildCount() === 1) {
+      optionalEl.parentNode.replaceChild(optionalEl, textEl)
+    }
+  }
+
+  // remove empty groups
+  let groupEls = children.findAll('optional, zeroOrMore, oneOrMore')
+  for (let i = 0; i < groupEls.length; i++) {
+    let groupEl = groupEls[i]
+    if (groupEl.getChildCount() === 0) {
+      groupEl.remove()
+    }
   }
 
   return el
@@ -234,7 +276,7 @@ function _extractStart (grammar) {
 function _compile (grammar) {
   const schemas = {}
   const elements = grammar.children.filter(el => el.tagName === 'element')
-  elements.forEach((element) => {
+  elements.forEach(element => {
     const name = element.attr('name')
     const attributes = _collectAttributes(element.find('attributes'))
     const children = element.find('children')
@@ -260,6 +302,7 @@ function _compile (grammar) {
 }
 
 function _processChildren (el, grammar) {
+  if (!el) return new Sequence([])
   let blocks = _processBlocks(el.children, grammar)
   if (blocks.length === 1) {
     return blocks[0]
@@ -362,6 +405,7 @@ function _processReference (ref, grammar) {
 }
 
 function _collectAttributes (el, grammar, attributes = {}) {
+  if (!el) return {}
   // ATTENTION: RNG supports more than we do here
   // We just collect all attributes, infering no rules
   let children = el.children

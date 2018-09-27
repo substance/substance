@@ -6,7 +6,7 @@ import { DFAExpr, InterleaveExpr } from './RegularLanguage'
 const { TEXT } = DFA
 
 export default function analyze (elementSchemas) {
-  forEach(elementSchemas, (elementSchema) => {
+  forEach(elementSchemas, elementSchema => {
     Object.assign(elementSchema, {
       children: {},
       parents: {},
@@ -15,7 +15,7 @@ export default function analyze (elementSchemas) {
       usedStructuredBy: {}
     })
   })
-  forEach(elementSchemas, (elementSchema) => {
+  forEach(elementSchemas, elementSchema => {
     _analyzeElementSchema(elementSchema, elementSchemas)
   })
 }

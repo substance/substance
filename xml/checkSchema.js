@@ -114,7 +114,8 @@ export default function checkSchema (xmlSchema) {
         issues = issues.concat(_checkAnchor(elementSchema))
         break
       }
-      case 'external': {
+      case 'external':
+      case 'not-implemented': {
         break
       }
       default:
