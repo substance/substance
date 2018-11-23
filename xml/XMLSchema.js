@@ -182,6 +182,7 @@ function _checkChildren (elementSchema, el) {
   if (elementSchema.type === 'external' || elementSchema.type === 'not-implemented') {
     return true
   }
+  const isText = elementSchema.type === 'text'
   const expr = elementSchema.expr
   const state = expr.getInitialState()
   const iterator = el.getChildNodeIterator()
@@ -191,12 +192,15 @@ function _checkChildren (elementSchema, el) {
     let token
     if (childEl.isTextNode()) {
       // Note: skipping empty text being child node of elements
-      if (elementSchema.type !== 'text' && _isTextNodeEmpty(childEl)) {
+      if (!isText && _isTextNodeEmpty(childEl)) {
         continue
       }
       token = TEXT
     } else if (childEl.isElementNode()) {
       token = childEl.tagName
+    } else if (childEl.getNodeType() === 'cdata') {
+      // CDATA elements are treated as a TEXT fragment
+      token = TEXT
     } else {
       continue
     }
@@ -210,7 +214,10 @@ function _checkChildren (elementSchema, el) {
       err.el = el
     })
   }
-  if (valid && !expr.isFinished(state)) {
+  const isFinished = expr.isFinished(state)
+  // HACK: adding an exception here for text elements, as they are allowed to be empty
+  // TODO: from an architectural point of view, this should be solved in the DFA in the first place
+  if (valid && !isFinished && !isText) {
     state.errors.push({
       msg: `<${el.tagName}> is incomplete.\nSchema: ${expr.toString()}`,
       el

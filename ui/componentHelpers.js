@@ -1,7 +1,7 @@
 import Component from './Component'
 
 /*
-  Looks for the first parent Component instance for a give´n native element.
+  Looks for the first parent Component instance for a given native element.
 */
 export function findParentComponent (el) {
   while (el) {
