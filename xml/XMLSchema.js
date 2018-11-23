@@ -192,10 +192,11 @@ function _checkChildren (elementSchema, el) {
     let token
     if (childEl.isTextNode()) {
       // Note: skipping empty text being child node of elements
-      if (!isText && _isTextNodeEmpty(childEl)) {
+      if (_isTextNodeEmpty(childEl)) {
         continue
+      } else {
+        token = TEXT
       }
-      token = TEXT
     } else if (childEl.isElementNode()) {
       token = childEl.tagName
     } else if (childEl.getNodeType() === 'cdata') {
