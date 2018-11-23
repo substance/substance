@@ -118,6 +118,34 @@ test('Interleaving', (t) => {
   t.end()
 })
 
+const TEXT = `
+<grammar>
+  <define name="foo">
+    <element name="foo">
+      <text/>
+    </element>
+  </define>
+  <start>
+    <ref name="foo"/>
+  </start>
+</grammar>
+`
+test('Text elements should be allowed to be empty', t => {
+  let xmlSchema = _compileRNG(TEXT, 'foo')
+  let doc = DefaultDOMElement.parseXML(`<foo></foo>`)
+  let result = validateXMLSchema(xmlSchema, doc)
+  t.ok(result.ok, 'empty text element is valid')
+  t.end()
+})
+
+test('Text elements should allow for CDATA', t => {
+  let xmlSchema = _compileRNG(TEXT, 'foo')
+  let doc = DefaultDOMElement.parseXML(`<foo><![CDATA[x^2 > y]]></foo>`)
+  let result = validateXMLSchema(xmlSchema, doc)
+  t.ok(result.ok, 'text element with CDATA is valid')
+  t.end()
+})
+
 function _compileRNG (rng, startElement) {
   let xmlSchema = compileRNG(rng)
   xmlSchema.getStartElement = function () { return startElement }
