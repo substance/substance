@@ -1,6 +1,6 @@
 import { Document } from 'substance'
 
-class TestArticle extends Document {
+export default class TestArticle extends Document {
   constructor (schema) {
     super(schema)
     this.create({
@@ -10,5 +10,3 @@ class TestArticle extends Document {
     })
   }
 }
-
-export default TestArticle
