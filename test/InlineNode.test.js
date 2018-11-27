@@ -8,7 +8,7 @@ const test = module('InlineNode')
 // NOTE: surface ids are a bit ids of Surfaces and IsolatedNodes are not very intuitive
 // body/in1 means parent surface of in1 is body -- while in1 is actually on p1.content, which is not a surface on its own
 
-test('InlineNodes should be not selected when selection is null', function (t) {
+test('InlineNodes should be not selected when selection is null', t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection(null)
@@ -18,7 +18,7 @@ test('InlineNodes should be not selected when selection is null', function (t) {
   t.end()
 })
 
-test('InlineNodes should be not selected when selection is somewhere else', function (t) {
+test('InlineNodes should be not selected when selection is somewhere else', t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -33,7 +33,7 @@ test('InlineNodes should be not selected when selection is somewhere else', func
   t.end()
 })
 
-test("InlineNode should be 'selected' with when the inline node is selected", function (t) {
+test("InlineNode should be 'selected' with when the inline node is selected", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -54,7 +54,7 @@ test("InlineNode should be 'selected' with when the inline node is selected", fu
   t.end()
 })
 
-test("InlineNode should be 'co-selected' when selection is spanning an inline node", function (t) {
+test("InlineNode should be 'co-selected' when selection is spanning an inline node", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -75,7 +75,7 @@ test("InlineNode should be 'co-selected' when selection is spanning an inline no
   t.end()
 })
 
-test("InlineNode should be 'focused' when having the selection", function (t) {
+test("InlineNode should be 'focused' when having the selection", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -96,7 +96,7 @@ test("InlineNode should be 'focused' when having the selection", function (t) {
   t.end()
 })
 
-test("InlineNode should be 'co-focused' when a nested inline node has the selection", function (t) {
+test("InlineNode should be 'co-focused' when a nested inline node has the selection", t => {
   let { editorSession, editor } = setupEditor(t, nestedInlineNode)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -109,10 +109,30 @@ test("InlineNode should be 'co-focused' when a nested inline node has the select
     'body/in1': 'co-focused',
     'body/in1/in1.content/in2': 'focused'
   }
-  nodes.forEach(function (node) {
-    var id = node.getId()
+  nodes.forEach(node => {
+    let id = node.getId()
     t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
   })
+  t.end()
+})
+
+test('Click on InlineNode inside IsolatedNode should select InlineNode', t => {
+  let { editor, editorSession } = setupEditor(t, inlineNodeInsideIsolatedNode)
+  let comp = editor.find('*[data-id="in"]')
+  comp.click()
+  let sel = editorSession.getSelection()
+  t.deepEqual({
+    path: sel.path,
+    startOffset: sel.startOffset,
+    endOffset: sel.endOffset,
+    surfaceId: sel.surfaceId
+  }, {
+    path: ['sn', 'body'],
+    startOffset: 3,
+    endOffset: 4,
+    surfaceId: 'body/sn/sn.body'
+  }, 'inline node should be selected')
+  t.ok(comp.el.hasClass('sm-selected'), 'inline node component should render selected')
   t.end()
 })
 
@@ -167,5 +187,27 @@ function nestedInlineNode (doc) {
     type: 'test-inline-node',
     id: 'in2',
     content: 'YYY'
+  })
+}
+
+function inlineNodeInsideIsolatedNode (doc) {
+  let tx = new EditingInterface(doc)
+  let body = tx.get('body')
+  body.show(tx.create({
+    type: 'structured-node',
+    id: 'sn',
+    title: 'Foo',
+    body: 'abcdefgh'
+  }))
+  tx.setSelection({
+    type: 'property',
+    path: ['sn', 'body'],
+    startOffset: 3,
+    surfaceId: 'body/sn/sn.body'
+  })
+  tx.insertInlineNode({
+    type: 'test-inline-node',
+    id: 'in',
+    content: 'XXX'
   })
 }

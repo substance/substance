@@ -68,10 +68,11 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
   }
 
   onClick (event) {
-    if (!this._shouldConsumeEvent(event)) {
-      return
+    if (this._shouldConsumeEvent(event)) {
+      event.stopPropagation()
+      event.preventDefault()
+      this.selectNode()
     }
-    this.selectNode()
   }
 
   selectNode () {
