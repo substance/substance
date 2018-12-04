@@ -11,8 +11,8 @@ export default function (DocumentNode) {
       super(doc, _normalizedProps(props))
 
       // making sure that coordinates are Coordinate instances
-      this.start = new Coordinate(this.start)
-      this.end = new Coordinate(this.end)
+      this._properties.start = new Coordinate(this.start)
+      this._properties.end = new Coordinate(this.end)
     }
 
     /* istanbul ignore start */
