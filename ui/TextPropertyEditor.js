@@ -1,5 +1,4 @@
 import Surface from './Surface'
-import TextPropertyComponent from './TextPropertyComponent'
 
 /**
   Editor for a text property (annotated string). Needs to be
@@ -38,6 +37,8 @@ export default class TextPropertyEditor extends Surface {
   }
 
   render ($$) {
+    const TextPropertyComponent = this.getComponent('text-property')
+
     let el = super.render.apply(this, arguments)
     el.addClass('sc-text-property-editor')
 
