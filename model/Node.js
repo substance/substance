@@ -23,6 +23,8 @@ export default class Node extends EventEmitter {
   constructor (...args) {
     super()
 
+    this._properties = {}
+
     // NOTE: this indirection allows us to implement a overridable initializer
     // For instance, DocumentNode sets the document instance and the props
     this._initialize(...args)
@@ -43,9 +45,9 @@ export default class Node extends EventEmitter {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
-        this[name] = _checked(property, data[name])
+        this._properties[name] = _checked(property, data[name])
       } else if (hasDefault) {
-        this[name] = cloneDeep(_checked(property, property.getDefault()))
+        this._properties[name] = cloneDeep(_checked(property, property.getDefault()))
       } else {
         // property is optional
       }
@@ -123,6 +125,10 @@ export default class Node extends EventEmitter {
     return this.constructor.type
   }
 
+  _set (propName, value) {
+    this._properties[propName] = value
+  }
+
   /**
     Internal implementation of Node.prototype.isInstanceOf.
     @returns {Boolean}
@@ -138,9 +144,6 @@ export default class Node extends EventEmitter {
   }
 
   // TODO: do we really need this?
-  get _isNode () { return true }
-
-  // TODO: do we really need this?
   static define (schema) {
     _define(schema)
   }
@@ -148,6 +151,8 @@ export default class Node extends EventEmitter {
   static defineSchema (schema) {
     _define(schema)
   }
+
+  get _isNode () { return true }
 }
 
 // Attention: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
@@ -206,7 +211,24 @@ function compileSchema (NodeClass, schema) {
   }
   schemas.unshift({})
   let superTypes = _getSuperTypes(NodeClass)
-  return new NodeSchema(Object.assign.apply(null, schemas), superTypes)
+  let _schema = new NodeSchema(Object.assign.apply(null, schemas), superTypes)
+
+  // define property getter and setters
+  for (let prop of _schema) {
+    let name = prop.name
+    Object.defineProperty(NodeClass.prototype, name, {
+      get () {
+        return this._properties[name]
+      },
+      set (val) {
+        this.set(name, val)
+      },
+      enumerable: true,
+      configurable: true
+    })
+  }
+
+  return _schema
 }
 
 function _compileSchema (schema) {
