@@ -17,7 +17,6 @@ import ToolPanelPackage from '../tool-panel/ToolPanelPackage'
 import IsolatedNodeComponent from '../../ui/IsolatedNodeComponent'
 import IsolatedInlineNodeComponent from '../../ui/IsolatedInlineNodeComponent'
 import AnnotationComponent from '../../ui/AnnotationComponent'
-import TextPropertyComponent from '../../ui/TextPropertyComponent'
 
 export default {
   name: 'base',
@@ -84,7 +83,6 @@ export default {
       de: 'Container einfügen'
     })
 
-    config.addComponent('text-property', TextPropertyComponent)
     config.addComponent('isolated-node', IsolatedNodeComponent)
     config.addComponent('inline-node', IsolatedInlineNodeComponent)
     config.addComponent('annotation', AnnotationComponent)
