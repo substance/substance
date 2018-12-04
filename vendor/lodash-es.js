@@ -2503,6 +2503,72 @@ function baseSet(object, path, value, customizer) {
   return object;
 }
 
+function basePickBy(object, paths, predicate) {
+  var index = -1,
+      length = paths.length,
+      result = {};
+
+  while (++index < length) {
+    var path = paths[index],
+        value = baseGet(object, path);
+
+    if (predicate(value, path)) {
+      baseSet(result, castPath(path, object), value);
+    }
+  }
+  return result;
+}
+
+function basePick(object, paths) {
+  return basePickBy(object, paths, function(value, path) {
+    return hasIn(object, path);
+  });
+}
+
+var spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
+
+
+function isFlattenable(value) {
+  return isArray(value) || isArguments(value) ||
+    !!(spreadableSymbol && value && value[spreadableSymbol]);
+}
+
+function baseFlatten(array, depth, predicate, isStrict, result) {
+  var index = -1,
+      length = array.length;
+
+  predicate || (predicate = isFlattenable);
+  result || (result = []);
+
+  while (++index < length) {
+    var value = array[index];
+    if (depth > 0 && predicate(value)) {
+      if (depth > 1) {
+        
+        baseFlatten(value, depth - 1, predicate, isStrict, result);
+      } else {
+        arrayPush(result, value);
+      }
+    } else if (!isStrict) {
+      result[result.length] = value;
+    }
+  }
+  return result;
+}
+
+function flatten(array) {
+  var length = array == null ? 0 : array.length;
+  return length ? baseFlatten(array, 1) : [];
+}
+
+function flatRest(func) {
+  return setToString(overRest(func, undefined, flatten), func + '');
+}
+
+var pick = flatRest(function(object, paths) {
+  return object == null ? {} : basePick(object, paths);
+});
+
 function setWith(object, path, value, customizer) {
   customizer = typeof customizer == 'function' ? customizer : undefined;
   return object == null ? object : baseSet(object, path, value, customizer);
@@ -2824,6 +2890,4 @@ function orderBy(collection, iteratees, orders, guard) {
   return baseOrderBy(collection, iteratees, orders);
 }
 
-export { camelCase, capitalize, debounce, get, find, isMatch, merge, mergeWith, setWith, uniq, unset, without, orderBy };
-
-//# sourceMappingURL=./lodash-es.js.map
+export { camelCase, capitalize, debounce, get, find, isMatch, merge, mergeWith, pick, setWith, uniq, unset, without, orderBy };

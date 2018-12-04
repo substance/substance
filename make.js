@@ -4,7 +4,6 @@ const path = require('path')
 const install = require('substance-bundler/extensions/install')
 const fork = require('substance-bundler/extensions/fork')
 const karma = require('substance-bundler/extensions/karma')
-const rng = require('substance-bundler/extensions/rng')
 
 const UGLIFY_VERSION = '^3.3.9'
 
@@ -161,6 +160,14 @@ function buildVendor () {
     cleanup: CLEANUP,
     minify: MINIFY
   })
+  vendorRollup('lodash-es', {
+    commonjs: true,
+    cleanup: CLEANUP,
+    minify: MINIFY
+  })
+  // ATTENTION!
+  // TODO: this is somehow exiting the build.
+  // as we have not been running this for ages, this slipped out of our control
   vendorRollup('htmlparser2', {
     commonjs: {
       include: ['node_modules/**', 'vendor/htmlparser2/**']
@@ -186,11 +193,6 @@ function buildVendor () {
     cleanup: CLEANUP,
     minify: MINIFY
   })
-  vendorRollup('lodash-es', {
-    commonjs: true,
-    cleanup: CLEANUP,
-    minify: MINIFY
-  })
 }
 
 function vendorRollup (name, opts = {}) {
@@ -200,9 +202,11 @@ function vendorRollup (name, opts = {}) {
   const minify = opts.minify
   delete opts.minify
   b.js(src, Object.assign({
-    dest: dest,
-    format: 'es',
-    sourceMap: false,
+    output: [{
+      file: dest,
+      format: 'es',
+      sourcemap: false
+    }],
     cleanup: true
   }, opts))
   if (minify !== false) {
