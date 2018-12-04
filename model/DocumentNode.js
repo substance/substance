@@ -55,6 +55,18 @@ class DocumentNode extends DataNode {
   }
 
   /**
+   * Convenience method to assign multiple values.
+   *
+   * @param {object} props
+   */
+  assign (props) {
+    if (!props) return
+    Object.keys(props).forEach(propName => {
+      this.set(propName, props[propName])
+    })
+  }
+
+  /**
     Whether this node has a parent.
 
     `parent` is a built-in property for implementing nested nodes.
