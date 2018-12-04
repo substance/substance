@@ -9,7 +9,7 @@ import EventEmitter from '../util/EventEmitter'
 
   It forms the underlying implementation for {@link Document}.
  */
-class Data extends EventEmitter {
+export default class Data extends EventEmitter {
   /**
     @param {Schema} schema
     @param {Object} [options]
@@ -415,9 +415,13 @@ function _setValue (root, path, newValue) {
     ctx = ctx[path[i]]
     if (!ctx) throw new Error('Can not set value.')
   }
-  let oldValue = ctx[path[L - 1]]
-  ctx[path[L - 1]] = newValue
+  let propName = path[L - 1]
+  let oldValue = ctx[propName]
+  if (ctx._isNode) {
+    ctx._set(propName, newValue)
+  } else {
+    // NOTE: this is used when manipulating object values e.g. node.obj.foo
+    ctx[propName] = newValue
+  }
   return oldValue
 }
-
-export default Data

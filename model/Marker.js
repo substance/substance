@@ -22,7 +22,7 @@ export default class Marker extends PropertyAnnotation {
     if (!props.end) {
       throw new Error("'end' is mandatory")
     }
-    Object.assign(this, props)
+    Object.assign(this._properties, props)
   }
 
   // TODO: we should use the Coordinate comparison API here
