@@ -3,18 +3,20 @@ import isEqual from '../util/isEqual'
 import Selection from './Selection'
 
 export default class CustomSelection extends Selection {
-  constructor (customType, data, surfaceId) {
+  constructor (customType, data, nodeId, surfaceId) {
     super()
 
     if (arguments.length === 1) {
       let _data = arguments[0]
       customType = _data.customType
       data = _data.data
+      nodeId = _data.nodeId
       surfaceId = _data.surfaceId
     }
 
     this.customType = customType
     this.data = data || {}
+    this.nodeId = nodeId
     this.surfaceId = surfaceId
   }
 
@@ -28,6 +30,14 @@ export default class CustomSelection extends Selection {
 
   getCustomType () {
     return this.customType
+  }
+
+  /**
+   * Provide the id of the node which is responsible for this selection.
+   * E.g. a table selection is interpreted by a specific table.
+   */
+  getNodeId () {
+    return this.nodeId
   }
 
   toJSON () {
