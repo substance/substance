@@ -70,4 +70,3 @@ function _setup () {
 function _reset (index) {
   methods.forEach(m => index[m].reset())
 }
-
