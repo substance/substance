@@ -1,15 +1,13 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { annotationHelpers, EditingInterface } from 'substance'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
-
-const test = module('annotationHelpers')
 
 let truncateAnnotation = annotationHelpers.truncateAnnotation
 let expandAnnotation = annotationHelpers.expandAnnotation
 let fuseAnnotation = annotationHelpers.fuseAnnotation
 
-test('Truncate property annotation with a given property selection', function (t) {
+test('annotationHelpers: truncate property annotation with a given property selection', function (t) {
   let doc = fixture(A1)
   // Put cursor inside an the existing annotation
   let sel = doc.createSelection({
@@ -25,7 +23,7 @@ test('Truncate property annotation with a given property selection', function (t
   t.end()
 })
 
-test('Truncate container annotation with a given property selection', function (t) {
+test('annotationHelpers: truncate container annotation with a given property selection', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'property',
@@ -39,7 +37,7 @@ test('Truncate container annotation with a given property selection', function (
   t.end()
 })
 
-test('Truncate container annotation with a given container selection', function (t) {
+test('annotationHelpers: truncate container annotation with a given container selection', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
@@ -56,7 +54,7 @@ test('Truncate container annotation with a given container selection', function 
   t.end()
 })
 
-test('Expand-right of property annotation for a given property selection', function (t) {
+test('annotationHelpers: expand-right of property annotation for a given property selection', function (t) {
   let doc = fixture(A1)
   let sel = doc.createSelection({
     type: 'property',
@@ -71,7 +69,7 @@ test('Expand-right of property annotation for a given property selection', funct
   t.end()
 })
 
-test('Expand container annotation for a given property selection (right expansion)', function (t) {
+test('annotationHelpers: expand container annotation for a given property selection (right expansion)', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'property',
@@ -85,7 +83,7 @@ test('Expand container annotation for a given property selection (right expansio
   t.end()
 })
 
-test('Expand container annotation for a given container selection (expand right)', function (t) {
+test('annotationHelpers: expand container annotation for a given container selection (expand right)', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
@@ -102,7 +100,7 @@ test('Expand container annotation for a given container selection (expand right)
   t.end()
 })
 
-test('Fuse two property annotations for a given property selection', function (t) {
+test('annotationHelpers: fuse two property annotations for a given property selection', function (t) {
   let tx = new EditingInterface(fixture(A1, A2))
   // Put selection so that it touches both strong annotations
   tx.setSelection({
@@ -120,7 +118,7 @@ test('Fuse two property annotations for a given property selection', function (t
   t.end()
 })
 
-test('Fuse two conatiner annotations for a given property selection', function (t) {
+test('annotationHelpers: fuse two conatiner annotations for a given property selection', function (t) {
   let tx = new EditingInterface(fixture(CA1, CA2))
   tx.setSelection({
     type: 'property',

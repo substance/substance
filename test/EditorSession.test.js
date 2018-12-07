@@ -1,10 +1,8 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import setupEditor from './fixture/setupEditor'
 import simple from './fixture/simple'
 
-const test = module('EditorSession')
-
-test('Keeping TransactionDocument up-to-date.', function (t) {
+test('EditorSession: Keeping TransactionDocument up-to-date.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo' })
   editorSession.transaction((tx) => {
@@ -15,7 +13,7 @@ test('Keeping TransactionDocument up-to-date.', function (t) {
   t.end()
 })
 
-test('Undoing and redoing a change.', function (t) {
+test('EditorSession: Undoing and redoing a change.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
   editorSession.transaction(function (tx) {
     tx.update(['p1', 'content'], { type: 'insert', start: 3, text: 'XXX' })
@@ -31,7 +29,7 @@ test('Undoing and redoing a change.', function (t) {
   t.end()
 })
 
-test('Selections after undo/redo.', function (t) {
+test('EditorSession: Selections after undo/redo.', function (t) {
   let { editorSession, doc } = setupEditor(t, simple)
   var path = ['p1', 'content']
   editorSession.setSelection({

@@ -1,9 +1,7 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { compileRNG, DefaultDOMElement, validateXMLSchema } from 'substance'
 
-const test = module('XMLSchema')
-
-test('Sequence', (t) => {
+test('XMLSchema: Sequence', (t) => {
   const RNG = `
     <grammar>
       <define name="a">
@@ -55,7 +53,7 @@ test('Sequence', (t) => {
   t.end()
 })
 
-test('Interleaving', (t) => {
+test('XMLSchema: Interleaving', (t) => {
   const RNG = `
     <grammar>
       <define name="a">
@@ -130,7 +128,7 @@ const TEXT = `
   </start>
 </grammar>
 `
-test('Text elements should be allowed to be empty', t => {
+test('XMLSchema: Text elements should be allowed to be empty', t => {
   let xmlSchema = _compileRNG(TEXT, 'foo')
   let doc = DefaultDOMElement.parseXML(`<foo></foo>`)
   let result = validateXMLSchema(xmlSchema, doc)
@@ -138,7 +136,7 @@ test('Text elements should be allowed to be empty', t => {
   t.end()
 })
 
-test('Text elements should allow for CDATA', t => {
+test('XMLSchema: Text elements should allow for CDATA', t => {
   let xmlSchema = _compileRNG(TEXT, 'foo')
   let doc = DefaultDOMElement.parseXML(`<foo><![CDATA[x^2 > y]]></foo>`)
   let result = validateXMLSchema(xmlSchema, doc)

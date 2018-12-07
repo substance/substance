@@ -1,7 +1,7 @@
 import CollabSession from '../../collab/CollabSession'
 import DocumentChange from '../../model/DocumentChange'
 
-class TestCollabSession extends CollabSession {
+export default class TestCollabSession extends CollabSession {
   constructor (...args) {
     super(...args)
     this._incomingMessages = []
@@ -55,5 +55,3 @@ class TestCollabSession extends CollabSession {
     return DocumentChange.fromJSON(serializedChange)
   }
 }
-
-export default TestCollabSession

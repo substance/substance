@@ -1,4 +1,4 @@
-import { module, spy } from 'substance-test'
+import { test as substanceTest, spy } from 'substance-test'
 import { DefaultDOMElement, platform, BrowserDOMElement, MemoryDOMElement } from 'substance'
 
 if (platform.inBrowser) {
@@ -8,11 +8,13 @@ if (platform.inBrowser) {
 DOMElementTests('MemoryDOMElement')
 
 function DOMElementTests (impl) {
-  const test = module('DOMElement (' + impl + ')', {
-    before: () => {
+  const LABEL = `DOMElement (${impl})`
+
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
+    before () {
       if (impl === 'MemoryDOMElement') platform.inBrowser = false
     },
-    after: () => {
+    after () {
       platform._reset()
     }
   })
@@ -738,7 +740,7 @@ function DOMElementTests (impl) {
 }
 
 if (platform.inBrowser) {
-  const test = module('DOMElement (comparison)')
+  const test = (title, fn) => substanceTest(`DOMElement (comparison): ${title}`, fn)
 
   /*
     We found that DomUtils does too much.

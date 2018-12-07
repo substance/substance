@@ -1,11 +1,9 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { Document, ChangeRecorder, DocumentChange } from 'substance'
 import getTestConfig from './fixture/getTestConfig'
 import simple from './fixture/simple'
 
-const test = module('DocumentChange')
-
-test('hasUpdated()', (t) => {
+test('DocumentChange: hasUpdated()', t => {
   let tx = setup(simple)
   let path = ['p1', 'content']
   // updating a property
@@ -36,7 +34,7 @@ test('hasUpdated()', (t) => {
   t.end()
 })
 
-test('serialize() and deserialize()', function (t) {
+test('DocumentChange: serialize() and deserialize()', t => {
   let tx = setup(simple)
   let path = ['p1', 'content']
   // updating a property

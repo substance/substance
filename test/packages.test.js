@@ -1,4 +1,4 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import {
   BasePackage,
   BlockquotePackage,
@@ -36,9 +36,7 @@ import {
   Configurator
 } from 'substance'
 
-const test = module('packages')
-
-test('import all packages', (t) => {
+test('packages: import all packages', (t) => {
   [
     BasePackage,
     BlockquotePackage,

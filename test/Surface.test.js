@@ -1,12 +1,16 @@
 /* eslint-disable no-invalid-this */
-import { module } from 'substance-test'
-import { BrowserDOMElement } from 'substance'
+import { test } from 'substance-test'
+import { platform, BrowserDOMElement } from 'substance'
 import setupEditor from './fixture/setupEditor'
 
-const test = module('Surface')
+function uiTest (title, fn) {
+  if (platform.inBrowser) {
+    test(title, fn)
+  }
+}
 
 // This test was added to cover issue #82
-test.UI('Set the selection after creating annotation.', function (t) {
+uiTest('Surface: Set the selection after creating annotation.', function (t) {
   window.getSelection().removeAllRanges()
   let { editorSession, surface } = setupEditor(t, _p1)
   let sel = editorSession.setSelection({
@@ -27,7 +31,7 @@ test.UI('Set the selection after creating annotation.', function (t) {
   t.end()
 })
 
-test.UI('Render a reverse selection.', function (t) {
+uiTest('Surface: Render a reverse selection.', function (t) {
   window.getSelection().removeAllRanges()
   let { editorSession } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({

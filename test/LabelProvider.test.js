@@ -1,12 +1,10 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import {
   Configurator, EditorSession, Document, DocumentSchema, AbstractEditor, forEach
 } from 'substance'
 import getMountPoint from './fixture/getMountPoint'
 
-const test = module('LabelProvider')
-
-test('get label', (t) => {
+test('LabelProvider: get label', t => {
   let configurator = _simple()
   let editorSession = _createEditorSession(configurator)
   let editor = Editor1.mount({ editorSession }, getMountPoint(t))
@@ -16,7 +14,7 @@ test('get label', (t) => {
   t.end()
 })
 
-test('get translated label', (t) => {
+test('LabelProvider: get translated label', t => {
   let configurator = _simple()
   let editorSession = _createEditorSession(configurator)
   editorSession.setLanguage('de')
@@ -27,7 +25,7 @@ test('get translated label', (t) => {
   t.end()
 })
 
-test('expand label with vars', (t) => {
+test('LabelProvider: expand label with vars', t => {
   let configurator = _items()
   let editorSession = _createEditorSession(configurator)
   let editor = Editor2.mount({ editorSession }, getMountPoint(t))
@@ -37,7 +35,7 @@ test('expand label with vars', (t) => {
   t.end()
 })
 
-test('custom label provider', (t) => {
+test('LabelProvider: custom label provider', t => {
   let configurator = _custom()
   let editorSession = _createEditorSession(configurator)
   let editor = Editor2.mount({ editorSession }, getMountPoint(t))
@@ -47,7 +45,7 @@ test('custom label provider', (t) => {
   t.end()
 })
 
-test('switch language', (t) => {
+test('LabelProvider: switch language', t => {
   let configurator = _simple()
   let editorSession = _createEditorSession(configurator)
   let editor = Editor1.mount({ editorSession }, getMountPoint(t))

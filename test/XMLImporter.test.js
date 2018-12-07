@@ -1,13 +1,11 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { DefaultDOMElement } from 'substance'
 import checkValues from './fixture/checkValues'
 import getTestConfig from './fixture/getTestConfig'
 
-const test = module('XMLImporter')
-
 const CONTENT = '0123456789'
 
-test('Importing paragraph', function (t) {
+test('XMLImporter: Importing paragraph', t => {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">' + CONTENT + '</p>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -20,7 +18,7 @@ test('Importing paragraph', function (t) {
   t.end()
 })
 
-test('Importing paragraph with strong', function (t) {
+test('XMLImporter: Importing paragraph with strong', t => {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<p id="p1">0123<strong id="s1">456</strong>789</p>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -32,7 +30,7 @@ test('Importing paragraph with strong', function (t) {
   t.end()
 })
 
-test('Importing h1', function (t) {
+test('XMLImporter: Importing h1', t => {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h1 id="h1">' + CONTENT + '</h1>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -46,7 +44,7 @@ test('Importing h1', function (t) {
   t.end()
 })
 
-test('Importing h2', function (t) {
+test('XMLImporter: Importing h2', t => {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<h2 id="h2">' + CONTENT + '</h2>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -60,7 +58,7 @@ test('Importing h2', function (t) {
   t.end()
 })
 
-test('Importing meta', function (t) {
+test('XMLImporter: Importing meta', t => {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<meta><title>' + CONTENT + '</title></meta>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')
@@ -74,7 +72,7 @@ test('Importing meta', function (t) {
 })
 
 // FIXME: broken since introduction of file nodes
-test('Importing image', function (t) {
+test('XMLImporter: Importing image', t => {
   let importer = _setupImporter({ 'stand-alone': true })
   let xml = '<img id="img1" src="someimage.png"></img>'
   let el = DefaultDOMElement.parseSnippet(xml, 'xml')

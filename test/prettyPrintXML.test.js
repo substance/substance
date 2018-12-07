@@ -1,4 +1,4 @@
-import { module } from 'substance-test'
+import { test as substanceTest } from 'substance-test'
 import { platform, prettyPrintXML } from 'substance'
 
 if (platform.inBrowser) {
@@ -8,11 +8,12 @@ if (platform.inBrowser) {
 prettyPrintTests('MemoryDOMElement')
 
 function prettyPrintTests (impl) {
-  const test = module('prettyPrintXML (' + impl + ')', {
-    before: () => {
+  const LABEL = 'prettyPrintXML (' + impl + ')'
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
+    before () {
       if (impl === 'MemoryDOMElement') platform.inBrowser = false
     },
-    after: () => {
+    after () {
       platform._reset()
     }
   })

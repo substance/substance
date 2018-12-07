@@ -1,4 +1,5 @@
 import { async } from 'substance'
+import { test } from 'substance-test'
 
 let EXAMPLE_CHANGE = {
   ops: [{some: 'operation'}],
@@ -16,12 +17,12 @@ function _addChange (store, change) {
   }
 }
 
-function testChangeStore (createEmptyChangeStore, test) {
+function testChangeStore (createEmptyChangeStore) {
   /*
     Add change
   */
 
-  test('Add a first change', (t) => {
+  test('ChangeStore: Add a first change', (t) => {
     let changeStore = createEmptyChangeStore()
     changeStore.addChange('test-doc', EXAMPLE_CHANGE, (err, version) => {
       t.notOk(err, 'Should not error')
@@ -30,7 +31,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     })
   })
 
-  test('Add a second change', (t) => {
+  test('ChangeStore: Add a second change', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE)
@@ -47,7 +48,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     Get changes
   */
 
-  test('Get all changes', (t) => {
+  test('ChangeStore: Get all changes', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
@@ -62,7 +63,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     })
   })
 
-  test('Get changes since version 1 (2 changes stored)', (t) => {
+  test('ChangeStore: Get changes since version 1 (2 changes stored)', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
@@ -77,7 +78,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     })
   })
 
-  test('Get changes since version 1 up to version 2 (3 changes stored)', (t) => {
+  test('ChangeStore: Get changes since version 1 up to version 2 (3 changes stored)', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
@@ -93,7 +94,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     })
   })
 
-  test('Should return no changes if sinceVersion = actual version', (t) => {
+  test('ChangeStore: Should return no changes if sinceVersion = actual version', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE)
@@ -111,7 +112,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     Get version
   */
 
-  test('Return version of test-doc', function (t) {
+  test('ChangeStore: Return version of test-doc', function (t) {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE)
@@ -124,7 +125,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     })
   })
 
-  test('Return version=0 if no changes are found', (t) => {
+  test('ChangeStore: Return version=0 if no changes are found', (t) => {
     let changeStore = createEmptyChangeStore()
     changeStore.getVersion('not-existing-doc', (err, version) => {
       t.notOk(err, 'Should not error')
@@ -137,7 +138,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     Delete changes
   */
 
-  test('Delete all changes', (t) => {
+  test('ChangeStore: Delete all changes', (t) => {
     let changeStore = createEmptyChangeStore()
     async.series([
       _addChange(changeStore, EXAMPLE_CHANGE),
@@ -156,7 +157,7 @@ function testChangeStore (createEmptyChangeStore, test) {
     })
   })
 
-  test('Delete changes of not existing doc', (t) => {
+  test('ChangeStore: Delete changes of not existing doc', (t) => {
     let changeStore = createEmptyChangeStore()
     changeStore.deleteChanges('not-existing-doc', (err, changeCount) => {
       t.notOk(err, 'Should not error')

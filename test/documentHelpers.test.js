@@ -1,13 +1,11 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { documentHelpers, getChangeFromDocument } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import containerAnnoSample from './fixture/containerAnnoSample'
 import { _l1, _l11, _l12, _l13, LI1_TEXT, LI2_TEXT, LI3_TEXT } from './fixture/samples'
 
-const test = module('documentHelpers')
-
-test('Get annotations for selection', (t) => {
+test('documentHelpers: Get annotations for selection', (t) => {
   let doc = fixture(simple)
   const path = ['p1', 'content']
   doc.create({ type: 'strong', path, startOffset: 0, endOffset: 1 })
@@ -30,14 +28,14 @@ test('Get annotations for selection', (t) => {
   t.end()
 })
 
-test('Get text for null selection.', (t) => {
+test('documentHelpers: Get text for null selection.', (t) => {
   let doc = fixture(simple)
   t.equal(documentHelpers.getTextForSelection(doc, null), '', 'Should be empty for null selection.')
   t.equal(documentHelpers.getTextForSelection(doc, doc.createSelection(null)), '', 'Should be empty for null selection.')
   t.end()
 })
 
-test('Get text for property selection', (t) => {
+test('documentHelpers: Get text for property selection', (t) => {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'property',
@@ -49,7 +47,7 @@ test('Get text for property selection', (t) => {
   t.end()
 })
 
-test('Get text for container selection', (t) => {
+test('documentHelpers: Get text for container selection', (t) => {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'container',
@@ -63,7 +61,7 @@ test('Get text for container selection', (t) => {
   t.end()
 })
 
-test('Get change from document', (t) => {
+test('documentHelpers: Get change from document', (t) => {
   let doc = fixture(simple)
   doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 0, endOffset: 1 })
   let change = getChangeFromDocument(doc)
@@ -73,7 +71,7 @@ test('Get change from document', (t) => {
   t.end()
 })
 
-test('deleteNode()', (t) => {
+test('documentHelpers: deleteNode()', (t) => {
   let doc = fixture(simple)
   ;[_l1, _l11].forEach(f => f(doc, doc.get('body')))
   doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 0, endOffset: 1 })
@@ -86,7 +84,7 @@ test('deleteNode()', (t) => {
   t.end()
 })
 
-test('deleteTextRange()', (t) => {
+test('documentHelpers: deleteTextRange()', (t) => {
   const path = ['p1', 'content']
   // anno is after
   let doc = fixture(simple)
@@ -121,7 +119,7 @@ test('deleteTextRange()', (t) => {
   t.end()
 })
 
-test('deleteListRange()', (t) => {
+test('documentHelpers: deleteListRange()', (t) => {
   // first and last not entirely selected, and no item in between
   let doc = fixture(simple)
   ;[_l1, _l11, _l12, _l13].forEach(f => f(doc, doc.get('body')))
@@ -161,14 +159,14 @@ test('deleteListRange()', (t) => {
   t.end()
 })
 
-test('isContainerAnnotation()', (t) => {
+test('documentHelpers: isContainerAnnotation()', (t) => {
   let doc = fixture(simple)
   t.ok(documentHelpers.isContainerAnnotation(doc, 'test-container-anno'))
   t.notOk(documentHelpers.isContainerAnnotation(doc, 'strong'))
   t.end()
 })
 
-test('Get container annotations for property selection', (t) => {
+test('documentHelpers: Get container annotations for property selection', (t) => {
   let doc = fixture(containerAnnoSample)
   let sel = doc.createSelection({
     type: 'property',

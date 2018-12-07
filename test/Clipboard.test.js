@@ -1,4 +1,4 @@
-import { module } from 'substance-test'
+import { test as substanceTest } from 'substance-test'
 import {
   DefaultDOMElement, Clipboard,
   platform, find
@@ -48,16 +48,17 @@ if (platform.inBrowser) {
 }
 
 function ClipboardTests (memory) {
-  const test = module('Clipboard' + (memory ? ' [memory]' : ''), {
-    before: function () {
+  const LABEL = `Clipboard${memory ? ' [memory]' : ''}`
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
+    before () {
       if (memory) platform.inBrowser = false
     },
-    after: function () {
+    after () {
       platform._reset()
     }
   })
 
-  test('Copying HTML, and plain text', function (t) {
+  test('Copying HTML, and plain text', t => {
     let { editorSession, clipboard } = _fixture(t, simple)
     editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
     let event = new ClipboardEvent()
@@ -71,7 +72,7 @@ function ClipboardTests (memory) {
     t.end()
   })
 
-  test('Copying a property selection', function (t) {
+  test('Copying a property selection', t => {
     let { editorSession, clipboard } = _fixture(t, simple)
     editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
     let TEXT = '01234'
@@ -87,7 +88,7 @@ function ClipboardTests (memory) {
     t.end()
   })
 
-  test('Copying a container selection', function (t) {
+  test('Copying a container selection', t => {
     let { editorSession, clipboard } = _fixture(t, simple)
     editorSession.setSelection({
       type: 'container',
@@ -124,7 +125,7 @@ function ClipboardTests (memory) {
     t.end()
   })
 
-  test("Pasting text into ContainerEditor using 'text/plain'.", function (t) {
+  test("Pasting text into ContainerEditor using 'text/plain'.", t => {
     let { editorSession, clipboard, doc } = _fixture(t, simple)
     editorSession.setSelection({
       type: 'property',
@@ -139,7 +140,7 @@ function ClipboardTests (memory) {
     t.end()
   })
 
-  test('Pasting without any data given.', function (t) {
+  test('Pasting without any data given.', t => {
     let { editorSession, clipboard, doc } = _fixture(t, simple)
     editorSession.setSelection({
       type: 'property',
@@ -153,7 +154,7 @@ function ClipboardTests (memory) {
     t.end()
   })
 
-  test("Pasting text into ContainerEditor using 'text/html'.", function (t) {
+  test("Pasting text into ContainerEditor using 'text/html'.", t => {
     let { editorSession, clipboard, doc } = _fixture(t, simple)
     editorSession.setSelection({
       type: 'property',
@@ -172,7 +173,7 @@ function ClipboardTests (memory) {
 
   // this test revealed #700: the problem was that in source code there where
   // `"` and `'` characters which did not survive the way through HTML correctly
-  test('Copy and Pasting source code.', function (t) {
+  test('Copy and Pasting source code.', t => {
     let { editorSession, clipboard, doc } = _fixture(t, simple)
     let body = doc.get('body')
     let cb = doc.create({
@@ -204,43 +205,43 @@ function ClipboardTests (memory) {
     t.end()
   })
 
-  test('Browser - Chrome (OSX/Linux) - Plain Text', function (t) {
+  test('Browser - Chrome (OSX/Linux) - Plain Text', t => {
     _plainTextTest(t, BrowserLinuxPLainTextFixture)
   })
 
-  test('Browser - Chrome (OSX/Linux) - Annotated Text', function (t) {
+  test('Browser - Chrome (OSX/Linux) - Annotated Text', t => {
     _annotatedTextTest(t, BrowserLinuxAnnotatedTextFixture)
   })
 
-  test('Browser - Chrome (OSX/Linux) - Two Paragraphs', function (t) {
+  test('Browser - Chrome (OSX/Linux) - Two Paragraphs', t => {
     _twoParagraphsTest(t, BrowserLinuxTwoParagraphsFixture)
   })
 
-  test('Browser - Chrome (Windows) - Plain Text', function (t) {
+  test('Browser - Chrome (Windows) - Plain Text', t => {
     _plainTextTest(t, BrowserWindowsPlainTextFixture, 'forceWindows')
   })
 
-  test('Browser - Chrome (Windows) - Annotated Text', function (t) {
+  test('Browser - Chrome (Windows) - Annotated Text', t => {
     _annotatedTextTest(t, BrowserWindowsAnnotatedTextFixture, 'forceWindows')
   })
 
-  test('Browser - Chrome (Windows) - Two Paragraphs', function (t) {
+  test('Browser - Chrome (Windows) - Two Paragraphs', t => {
     _twoParagraphsTest(t, BrowserWindowsTwoParagraphsFixture, 'forceWindows')
   })
 
-  test('Browser - Firefox (Linux) - Plain Text', function (t) {
+  test('Browser - Firefox (Linux) - Plain Text', t => {
     _plainTextTest(t, BrowserLinuxFirefoxPlainTextFixture)
   })
 
-  test('Browser - Firefox (Linux) - Annotated Text', function (t) {
+  test('Browser - Firefox (Linux) - Annotated Text', t => {
     _annotatedTextTest(t, BrowserLinuxFirefoxAnnotatedTextFixture)
   })
 
-  test('Browser - Firefox (Linux) - Two Paragraphs', function (t) {
+  test('Browser - Firefox (Linux) - Two Paragraphs', t => {
     _twoParagraphsTest(t, BrowserLinuxFirefoxTwoParagraphsFixture)
   })
 
-  test('Browser - Firefox (Linux) - Whole Page', function (t) {
+  test('Browser - Firefox (Linux) - Whole Page', t => {
     let html = BrowserLinuxFirefoxWholePageFixture
     _fixtureTest(t, html, function (doc, clipboard) {
       let event = new ClipboardEvent()
@@ -254,99 +255,99 @@ function ClipboardTests (memory) {
     })
   })
 
-  test('Browser - Firefox (OSX) - Plain Text', function (t) {
+  test('Browser - Firefox (OSX) - Plain Text', t => {
     _plainTextTest(t, BrowserOSXFirefoxPlainTextFixture)
   })
 
-  test('Browser - Firefox (OSX) - Annotated Text', function (t) {
+  test('Browser - Firefox (OSX) - Annotated Text', t => {
     _annotatedTextTest(t, BrowserOSXFirefoxAnnotatedTextFixture)
   })
 
-  test('Browser - Firefox (OSX) - Two Paragraphs', function (t) {
+  test('Browser - Firefox (OSX) - Two Paragraphs', t => {
     _twoParagraphsTest(t, BrowserOSXFirefoxTwoParagraphsFixture)
   })
 
-  test('Browser - Firefox (Windows) - Plain Text', function (t) {
+  test('Browser - Firefox (Windows) - Plain Text', t => {
     _plainTextTest(t, BrowserWindowsFirefoxPlainTextFixture, 'forceWindows')
   })
 
-  test('Browser - Firefox (Windows) - Annotated Text', function (t) {
+  test('Browser - Firefox (Windows) - Annotated Text', t => {
     _annotatedTextTest(t, BrowserWindowsFirefoxAnnotatedTextFixture, 'forceWindows')
   })
 
-  test('Browser - Firefox (Windows) - Two Paragraphs', function (t) {
+  test('Browser - Firefox (Windows) - Two Paragraphs', t => {
     _twoParagraphsTest(t, BrowserWindowsFirefoxTwoParagraphsFixture, 'forceWindows')
   })
 
-  test('Browser - Edge (Windows) - Plain Text', function (t) {
+  test('Browser - Edge (Windows) - Plain Text', t => {
     _plainTextTest(t, BrowserWindowsEdgePlainTextFixture, 'forceWindows')
   })
 
-  test('Browser - Edge (Windows) - Annotated Text', function (t) {
+  test('Browser - Edge (Windows) - Annotated Text', t => {
     _annotatedTextTest(t, BrowserWindowsEdgeAnnotatedTextFixture, 'forceWindows')
   })
 
-  test('Browser - Edge (Windows) - Two Paragraphs', function (t) {
+  test('Browser - Edge (Windows) - Two Paragraphs', t => {
     _twoParagraphsTest(t, BrowserWindowsEdgeTwoParagraphsFixture, 'forceWindows')
   })
 
-  test('GoogleDocs - Chrome (OSX/Linux) - Plain Text', function (t) {
+  test('GoogleDocs - Chrome (OSX/Linux) - Plain Text', t => {
     _plainTextTest(t, GDocsOSXLinuxChromePlainTextFixture)
   })
 
-  test('GoogleDocs - Chrome (OSX/Linux) - Annotated Text', function (t) {
+  test('GoogleDocs - Chrome (OSX/Linux) - Annotated Text', t => {
     _annotatedTextTest(t, GDocsOSXLinuxChromeAnnotatedTextFixture)
   })
 
-  test('GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs', function (t) {
+  test('GoogleDocs - Chrome (OSX/Linux) - Two Paragraphs', t => {
     _twoParagraphsTest(t, GDocsOSXLinuxChromeTwoParagraphsFixture)
   })
 
-  test('GoogleDocs - Chrome (OSX/Linux) - Extended', function (t) {
+  test('GoogleDocs - Chrome (OSX/Linux) - Extended', t => {
     _extendedTest(t, GDocsOSXLinuxChromeExtendedFixture)
   })
 
-  test('GoogleDocs - Firefox (Linux) - Plain Text', function (t) {
+  test('GoogleDocs - Firefox (Linux) - Plain Text', t => {
     _plainTextTest(t, GDocsLinuxFirefoxPlainTextFixture)
   })
 
-  test('GoogleDocs - Firefox (Linux) - Annotated Text', function (t) {
+  test('GoogleDocs - Firefox (Linux) - Annotated Text', t => {
     _annotatedTextTest(t, GDocsLinuxFirefoxAnnotatedTextFixture)
   })
 
-  test('GoogleDocs - Firefox (OSX) - Plain Text', function (t) {
+  test('GoogleDocs - Firefox (OSX) - Plain Text', t => {
     _plainTextTest(t, GDocsOSXFirefoxPlainTextFixture)
   })
 
-  test('LibreOffice (OSX/Linux) - Plain Text', function (t) {
+  test('LibreOffice (OSX/Linux) - Plain Text', t => {
     _plainTextTest(t, LibreOfficeOSXPlainTextFixture)
   })
 
-  test('LibreOffice (OSX/Linux) - Annotated Text', function (t) {
+  test('LibreOffice (OSX/Linux) - Annotated Text', t => {
     _annotatedTextTest(t, LibreOfficeOSXAnnotatedTextFixture)
   })
 
-  test('LibreOffice (OSX/Linux) - Two Paragraphs', function (t) {
+  test('LibreOffice (OSX/Linux) - Two Paragraphs', t => {
     _twoParagraphsTest(t, LibreOfficeOSXTwoParagraphsFixture)
   })
 
-  test('LibreOffice (OSX/Linux) - Extended', function (t) {
+  test('LibreOffice (OSX/Linux) - Extended', t => {
     _extendedTest(t, LibreOfficeOSXExtendedFixture)
   })
 
-  test('Microsoft Word 11 (OSX) - Plain Text', function (t) {
+  test('Microsoft Word 11 (OSX) - Plain Text', t => {
     _plainTextTest(t, MSW11OSXPlainTextFixture)
   })
 
-  test('Microsoft Word 11 (OSX) - Annotated Text', function (t) {
+  test('Microsoft Word 11 (OSX) - Annotated Text', t => {
     _annotatedTextTest(t, MSW11OSXAnnotatedTextFixture)
   })
 
-  test('Microsoft Word 11 (OSX) - Two Paragraphs', function (t) {
+  test('Microsoft Word 11 (OSX) - Two Paragraphs', t => {
     _twoParagraphsTest(t, MSW11OSXTwoParagraphsFixture)
   })
 
-  test('Microsoft Word 11 (OSX) - Extended', function (t) {
+  test('Microsoft Word 11 (OSX) - Extended', t => {
     _extendedTest(t, MSW11OSXExtendedFixture)
   })
 }

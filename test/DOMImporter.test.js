@@ -1,8 +1,6 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { DOMImporter, DefaultDOMElement } from 'substance'
 import getTestConfig from './fixture/getTestConfig'
-
-const test = module('DOMImporter')
 
 const pConverter = {
   type: 'paragraph',
@@ -12,7 +10,7 @@ const pConverter = {
   }
 }
 
-test('creating a DOMImporter', (t) => {
+test('DOMImporter: creating a DOMImporter', (t) => {
   const schema = getTestConfig().getSchema()
   // fail without converters
   t.throws(() => {
@@ -45,7 +43,7 @@ test('creating a DOMImporter', (t) => {
   t.end()
 })
 
-test('default matchElement()', (t) => {
+test('DOMImporter: default matchElement()', (t) => {
   const testConverter = {
     type: 'paragraph', tagName: 'p'
   }
@@ -54,7 +52,7 @@ test('default matchElement()', (t) => {
   t.end()
 })
 
-test('using a Converter class', (t) => {
+test('DOMImporter: using a Converter class', (t) => {
   class MyConverter {
     get type () { return 'paragraph' }
     get tagName () { return 'p' }
@@ -64,7 +62,7 @@ test('using a Converter class', (t) => {
   t.end()
 })
 
-test('convertElement() -- block element', (t) => {
+test('DOMImporter: convertElement() -- block element', (t) => {
   const importer = createImporter()
   const el = DefaultDOMElement.parseSnippet('<p>TEST</p>', 'html')
   const node = importer.convertElement(el)
@@ -73,7 +71,7 @@ test('convertElement() -- block element', (t) => {
 })
 
 // Note: it is not common to convert inline nodes outside of their context -- that's why they are called inline
-test('convertElement() -- inline node', (t) => {
+test('DOMImporter: convertElement() -- inline node', (t) => {
   const testConverter = {
     type: 'test-inline-node',
     matchElement (el) { return el.is('[data-type=test-inline-node]') },
@@ -89,7 +87,7 @@ test('convertElement() -- inline node', (t) => {
 })
 
 // Note: it is not common to convert annotations outside of their context
-test('convertElement() -- annotation element', (t) => {
+test('DOMImporter: convertElement() -- annotation element', (t) => {
   const importer = createImporter()
   const el = DefaultDOMElement.parseSnippet('<b>TEST</b>', 'html')
   const node = importer.convertElement(el)
@@ -97,7 +95,7 @@ test('convertElement() -- annotation element', (t) => {
   t.end()
 })
 
-test('convertElement() should throw if no converter found', (t) => {
+test('DOMImporter: convertElement() should throw if no converter found', (t) => {
   const importer = createImporter([pConverter])
   const el = DefaultDOMElement.parseSnippet('<h1>TEST</h1>', 'html')
   t.throws(() => {
@@ -106,7 +104,7 @@ test('convertElement() should throw if no converter found', (t) => {
   t.end()
 })
 
-test('converting paragraph with inline node', (t) => {
+test('DOMImporter: converting paragraph with inline node', (t) => {
   const testConverter = {
     type: 'test-inline-node',
     matchElement (el) { return el.is('[data-type=test-inline-node]') }
@@ -118,7 +116,7 @@ test('converting paragraph with inline node', (t) => {
   t.end()
 })
 
-test('converting an annotated paragraph', (t) => {
+test('DOMImporter: converting an annotated paragraph', (t) => {
   const importer = createImporter()
   const el = DefaultDOMElement.parseSnippet('<p>abc <b>TEST</b> def</p>', 'html')
   const node = importer.convertElement(el)
@@ -128,7 +126,7 @@ test('converting an annotated paragraph', (t) => {
   t.end()
 })
 
-test('plainText()', (t) => {
+test('DOMImporter: plainText()', (t) => {
   const testConverter = Object.assign({}, pConverter, {
     import (el, node, converter) {
       node.content = converter.plainText(el)
@@ -141,7 +139,7 @@ test('plainText()', (t) => {
   t.end()
 })
 
-test('convertContainer() -- trailing text', (t) => {
+test('DOMImporter: convertContainer() -- trailing text', (t) => {
   const importer = createImporter()
   const els = DefaultDOMElement.parseSnippet('<p>A paragraph</p> and some trailing text', 'html')
   let container = importer.convertContainer(els, 'body')
@@ -150,7 +148,7 @@ test('convertContainer() -- trailing text', (t) => {
   t.end()
 })
 
-test('resolving id collisions', (t) => {
+test('DOMImporter: resolving id collisions', (t) => {
   // converter with 'tagName' gets a default matcher
   const importer = createImporter()
   const els = DefaultDOMElement.parseSnippet('<p id="foo">A paragraph</p><p id="foo">and another one with the same id</p>', 'html')

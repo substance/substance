@@ -1,4 +1,4 @@
-import { module } from 'substance-test'
+import { test as substanceTest } from 'substance-test'
 import { DefaultDOMElement, MemoryDOMElement, platform } from 'substance'
 import createTestArticle from './fixture/createTestArticle'
 import simple from './fixture/simple'
@@ -13,8 +13,9 @@ if (platform.inBrowser) {
 }
 
 function XMLExporterTests (memory) {
-  const test = module('XMLExporter' + (memory ? ' [memory]' : ''), {
-    before: function (t) {
+  const LABEL = 'XMLExporter' + (memory ? ' [memory]' : '')
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
+    before (t) {
       t.elementFactory = memory ? MemoryDOMElement.createDocument('xml') : DefaultDOMElement.createDocument('xml')
     }
   })

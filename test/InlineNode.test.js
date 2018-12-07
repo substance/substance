@@ -1,14 +1,12 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { EditingInterface } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import twoParagraphs from './fixture/twoParagraphs'
 
-const test = module('InlineNode')
-
 // NOTE: surface ids are a bit ids of Surfaces and IsolatedNodes are not very intuitive
 // body/in1 means parent surface of in1 is body -- while in1 is actually on p1.content, which is not a surface on its own
 
-test('InlineNodes should be not selected when selection is null', t => {
+test('InlineNode: InlineNodes should be not selected when selection is null', t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection(null)
@@ -18,7 +16,7 @@ test('InlineNodes should be not selected when selection is null', t => {
   t.end()
 })
 
-test('InlineNodes should be not selected when selection is somewhere else', t => {
+test('InlineNode: InlineNodes should be not selected when selection is somewhere else', t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -33,7 +31,7 @@ test('InlineNodes should be not selected when selection is somewhere else', t =>
   t.end()
 })
 
-test("InlineNode should be 'selected' with when the inline node is selected", t => {
+test("InlineNode: InlineNode should be 'selected' with when the inline node is selected", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -54,7 +52,7 @@ test("InlineNode should be 'selected' with when the inline node is selected", t 
   t.end()
 })
 
-test("InlineNode should be 'co-selected' when selection is spanning an inline node", t => {
+test("InlineNode: InlineNode should be 'co-selected' when selection is spanning an inline node", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -75,7 +73,7 @@ test("InlineNode should be 'co-selected' when selection is spanning an inline no
   t.end()
 })
 
-test("InlineNode should be 'focused' when having the selection", t => {
+test("InlineNode: InlineNode should be 'focused' when having the selection", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -96,7 +94,7 @@ test("InlineNode should be 'focused' when having the selection", t => {
   t.end()
 })
 
-test("InlineNode should be 'co-focused' when a nested inline node has the selection", t => {
+test("InlineNode: InlineNode should be 'co-focused' when a nested inline node has the selection", t => {
   let { editorSession, editor } = setupEditor(t, nestedInlineNode)
   let nodes = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
@@ -116,7 +114,7 @@ test("InlineNode should be 'co-focused' when a nested inline node has the select
   t.end()
 })
 
-test('Click on InlineNode inside IsolatedNode should select InlineNode', t => {
+test('InlineNode: Click on InlineNode inside IsolatedNode should select InlineNode', t => {
   let { editor, editorSession } = setupEditor(t, inlineNodeInsideIsolatedNode)
   let comp = editor.find('*[data-id="in"]')
   comp.click()

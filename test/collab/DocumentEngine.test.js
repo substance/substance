@@ -1,16 +1,14 @@
 /* eslint-disable consistent-return */
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { DocumentEngine } from 'substance'
 import makeStoresFixture from './makeStoresFixture'
-
-const test = module('collab/DocumentEngine')
 
 /*
   TODO: Test documentEngine.deleteDocument, which removes clears all changes
         and snapshots
 */
 
-test('Should allow creation of a new document', function (t) {
+test('DocumentEngine: Should allow creation of a new document', function (t) {
   let documentEngine = _fixture(0) // 0 changes, no snapshots
   let initialChange = _getChange(1)
 
@@ -26,7 +24,7 @@ test('Should allow creation of a new document', function (t) {
   })
 })
 
-test('Should allow adding a new change', function (t) {
+test('DocumentEngine: Should allow adding a new change', function (t) {
   let documentEngine = _fixture(2) // 0 changes, no snapshots
   let newChange = _getChange(3)
 
@@ -42,7 +40,7 @@ test('Should allow adding a new change', function (t) {
   })
 })
 
-test('Should be able to retrieve changes', function (t) {
+test('DocumentEngine: Should be able to retrieve changes', function (t) {
   let documentEngine = _fixture(2) // 0 changes, no snapshots
   documentEngine.getChanges('test-doc', (err, changes) => {
     if (err) t.fail()

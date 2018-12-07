@@ -1,7 +1,5 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { TextOperation } from 'substance'
-
-const test = module('TextOperation')
 
 function checkTextTransform (test, a, b, input, expected) {
   let ops = TextOperation.transform(a, b)
@@ -11,7 +9,7 @@ function checkTextTransform (test, a, b, input, expected) {
   test.deepEqual(output, expected, `(a' o b)('${input}') == '${expected}' with b=${b.toString()}, a'=${ops[0].toString()}`)
 }
 
-test('Insert string', (t) => {
+test('TextOperation: Insert string', (t) => {
   let input = 'Lorem ipsum'
   let expected = 'Lorem bla ipsum'
   let a = TextOperation.Insert(6, 'bla ')
@@ -19,7 +17,7 @@ test('Insert string', (t) => {
   t.end()
 })
 
-test('Insert at last position', (t) => {
+test('TextOperation: Insert at last position', (t) => {
   let input = 'Lorem ipsum'
   let expected = 'Lorem ipsum.'
   let a = TextOperation.Insert(11, '.')
@@ -27,7 +25,7 @@ test('Insert at last position', (t) => {
   t.end()
 })
 
-test('Invalid arguments', (t) => {
+test('TextOperation: Invalid arguments', (t) => {
   t.throws(function () {
     new TextOperation({}) // eslint-disable-line no-new
   }, 'Should throw for incomplete data.')
@@ -43,7 +41,7 @@ test('Invalid arguments', (t) => {
   t.end()
 })
 
-test('TextOperation has length', (t) => {
+test('TextOperation: TextOperation has length', (t) => {
   let op = TextOperation.Delete(1, 'bla')
   t.equal(op.getLength(), 3, 'Length of ' + op.toString() + ' should be 3.')
   op = TextOperation.Insert(1, 'blupp')
@@ -51,7 +49,7 @@ test('TextOperation has length', (t) => {
   t.end()
 })
 
-test('JSON serialisation', (t) => {
+test('TextOperation: JSON serialisation', (t) => {
   let op = TextOperation.Delete(1, 'bla')
   let expected = {
     type: TextOperation.DELETE,
@@ -62,7 +60,7 @@ test('JSON serialisation', (t) => {
   t.end()
 })
 
-test('JSON deserialisation', (t) => {
+test('TextOperation: JSON deserialisation', (t) => {
   let data = {
     type: TextOperation.INSERT,
     pos: 1,
@@ -75,7 +73,7 @@ test('JSON deserialisation', (t) => {
   t.end()
 })
 
-test('Empty TextOperations are NOPs', (t) => {
+test('TextOperation: Empty TextOperations are NOPs', (t) => {
   let op = TextOperation.Insert(0, '')
   t.ok(op.isNOP(), 'Empty operations should be NOPs.')
   t.end()
@@ -93,7 +91,7 @@ test("Can't apply on a too short string", (t) => {
   t.end()
 })
 
-test('Can be applied on custom String implementation', (t) => {
+test('TextOperation: Can be applied on custom String implementation', (t) => {
   let CustomString = function (str) {
     this.arr = str.split('')
     this.splice = function (pos, remove, insert) {
@@ -122,7 +120,7 @@ test('Can be applied on custom String implementation', (t) => {
   t.end()
 })
 
-test('Inversion of Insert = Delete', (t) => {
+test('TextOperation: Inversion of Insert = Delete', (t) => {
   let op = TextOperation.Insert(6, 'bla')
   let inverse = op.invert()
   t.ok(inverse.isDelete(), 'Inverted operation should be a delete op.')
@@ -131,7 +129,7 @@ test('Inversion of Insert = Delete', (t) => {
   t.end()
 })
 
-test('Inversion of Delete = Insert', (t) => {
+test('TextOperation: Inversion of Delete = Insert', (t) => {
   let op = TextOperation.Delete(6, 'bla')
   let inverse = op.invert()
   t.ok(inverse.isInsert(), 'Inverted operation should be a insert op.')
@@ -140,7 +138,7 @@ test('Inversion of Delete = Insert', (t) => {
   t.end()
 })
 
-test('Transformation: a=Insert, b=Insert, a before b', (t) => {
+test('TextOperation: Transformation: a=Insert, b=Insert, a before b', (t) => {
   let input = 'Lorem ipsum'
   let expected = 'Lorem bla ipsum blupp'
   let a = TextOperation.Insert(6, 'bla ')
@@ -150,7 +148,7 @@ test('Transformation: a=Insert, b=Insert, a before b', (t) => {
   t.end()
 })
 
-test('Transformation: a=Insert, b=Insert, same position', (t) => {
+test('TextOperation: Transformation: a=Insert, b=Insert, same position', (t) => {
   let input = 'Lorem ipsum'
   let a = TextOperation.Insert(6, 'bla ')
   let b = TextOperation.Insert(6, 'blupp ')
@@ -162,7 +160,7 @@ test('Transformation: a=Insert, b=Insert, same position', (t) => {
   t.end()
 })
 
-test('Transformation: a=Delete, b=Delete, a before b', (t) => {
+test('TextOperation: Transformation: a=Delete, b=Delete, a before b', (t) => {
   let input = 'Lorem ipsum dolor sit amet'
   let expected = 'Lorem dolor amet'
   let a = TextOperation.Delete(6, 'ipsum ')
@@ -172,7 +170,7 @@ test('Transformation: a=Delete, b=Delete, a before b', (t) => {
   t.end()
 })
 
-test('Transformation: a=Delete, b=Delete, overlapping', (t) => {
+test('TextOperation: Transformation: a=Delete, b=Delete, overlapping', (t) => {
   let input = 'Lorem ipsum dolor sit amet'
   let expected = 'Lorem amet'
   let a = TextOperation.Delete(6, 'ipsum dolor sit ')
@@ -182,7 +180,7 @@ test('Transformation: a=Delete, b=Delete, overlapping', (t) => {
   t.end()
 })
 
-test('Transformation: a=Delete, b=Delete, same position', (t) => {
+test('TextOperation: Transformation: a=Delete, b=Delete, same position', (t) => {
   let input = 'Lorem ipsum dolor sit amet'
   let expected = 'Lorem amet'
   let a = TextOperation.Delete(6, 'ipsum dolor ')
@@ -192,7 +190,7 @@ test('Transformation: a=Delete, b=Delete, same position', (t) => {
   t.end()
 })
 
-test('Transformation: a=Insert, b=Delete', (t) => {
+test('TextOperation: Transformation: a=Insert, b=Delete', (t) => {
   let input = 'Lorem dolor sit amet'
   let expected = 'Lorem ipsum dolor amet'
   let a = TextOperation.Insert(6, 'ipsum ')
@@ -202,7 +200,7 @@ test('Transformation: a=Insert, b=Delete', (t) => {
   t.end()
 })
 
-test('Transformation: a=Insert, b=Delete, a after b', (t) => {
+test('TextOperation: Transformation: a=Insert, b=Delete, a after b', (t) => {
   let input = 'Lorem ipsum dolor amet'
   let expected = 'Lorem dolor sit amet'
   let a = TextOperation.Insert(18, 'sit ')
@@ -212,7 +210,7 @@ test('Transformation: a=Insert, b=Delete, a after b', (t) => {
   t.end()
 })
 
-test('Transformation: a=Insert, b=Delete, overlap', (t) => {
+test('TextOperation: Transformation: a=Insert, b=Delete, overlap', (t) => {
   let input = 'Lorem dolor sit amet'
   let expected = 'Lorem amet'
   let a = TextOperation.Insert(12, 'ipsum ')
@@ -222,7 +220,7 @@ test('Transformation: a=Insert, b=Delete, overlap', (t) => {
   t.end()
 })
 
-test('Transformations can be done inplace (optimzation for internal use)', (t) => {
+test('TextOperation: Transformations can be done inplace (optimzation for internal use)', (t) => {
   let a = TextOperation.Insert(6, 'bla ')
   let b = TextOperation.Insert(6, 'blupp ')
   let ops = TextOperation.transform(a, b, {inplace: true})
@@ -234,28 +232,28 @@ test('Transformations can be done inplace (optimzation for internal use)', (t) =
 // in such cases. However in certain situations it makes sense to detect such cases, e.g. to notify
 // the user to review the result.
 
-test('Conflict: Insert at the same position', (t) => {
+test('TextOperation: Conflict: Insert at the same position', (t) => {
   let a = TextOperation.Insert(6, 'bla')
   let b = TextOperation.Insert(6, 'blupp')
   t.ok(a.hasConflict(b), 'Two inserts are considered a conflict if they are at the same position.')
   t.end()
 })
 
-test('Conflict: Delete with overlapping range', (t) => {
+test('TextOperation: Conflict: Delete with overlapping range', (t) => {
   let a = TextOperation.Delete(4, 'bla')
   let b = TextOperation.Delete(6, 'blupp')
   t.ok(a.hasConflict(b) && b.hasConflict(a), 'Two deletes are considered a conflict if they overlap.')
   t.end()
 })
 
-test('Conflict: Delete and Insert with overlapping range', (t) => {
+test('TextOperation: Conflict: Delete and Insert with overlapping range', (t) => {
   let a = TextOperation.Insert(4, 'bla')
   let b = TextOperation.Delete(2, 'blupp')
   t.ok(a.hasConflict(b) && b.hasConflict(a), 'Inserts and Deletes are considered a conflict if they overlap.')
   t.end()
 })
 
-test("With option 'no-conflict' conflicting operations can not be transformed.", (t) => {
+test("TextOperation: With option 'no-conflict' conflicting operations can not be transformed.", (t) => {
   let a = TextOperation.Insert(4, 'bla')
   let b = TextOperation.Delete(2, 'blupp')
   t.throws(function () {

@@ -6,7 +6,7 @@ var __id__ = 0
   Simple TestWebSocket implementation for local testing
 */
 
-class TestWebSocket extends EventEmitter {
+export default class TestWebSocket extends EventEmitter {
   constructor (config) {
     super()
 
@@ -83,5 +83,3 @@ class TestWebSocket extends EventEmitter {
     this.messageQueue.pushMessage(msg)
   }
 }
-
-export default TestWebSocket

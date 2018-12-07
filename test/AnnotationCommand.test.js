@@ -1,12 +1,10 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { AnnotationCommand } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import containerAnnoSample from './fixture/containerAnnoSample'
 import simple from './fixture/simple'
 
-const test = module('AnnotationCommand')
-
-test("can 'create' property annotation", (t) => {
+test("AnnotationCommand: can 'create' property annotation", (t) => {
   let { editorSession } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
@@ -20,7 +18,7 @@ test("can 'create' property annotation", (t) => {
   t.end()
 })
 
-test("execute 'create' property annotation", (t) => {
+test("AnnotationCommand: execute 'create' property annotation", (t) => {
   let { editorSession, doc } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
@@ -42,7 +40,7 @@ test("execute 'create' property annotation", (t) => {
   t.end()
 })
 
-test("can 'delete' property annotation", (t) => {
+test("AnnotationCommand: can 'delete' property annotation", (t) => {
   let { editorSession } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
@@ -56,7 +54,7 @@ test("can 'delete' property annotation", (t) => {
   t.end()
 })
 
-test("execute 'delete' property annotation", (t) => {
+test("AnnotationCommand: execute 'delete' property annotation", (t) => {
   let { doc, editorSession } = setupEditor(t, _default)
   let cmd = new ToggleStrongCommand()
   editorSession.setSelection({
@@ -72,7 +70,7 @@ test("execute 'delete' property annotation", (t) => {
   t.end()
 })
 
-test('creating two consecutive annotations', (t) => {
+test('AnnotationCommand: creating two consecutive annotations', (t) => {
   let { editorSession, doc } = setupEditor(t, simple)
   let cmd = new ToggleStrongCommand()
   editorSession.transaction(tx => {
@@ -101,7 +99,7 @@ test('creating two consecutive annotations', (t) => {
   t.end()
 })
 
-test('expanding an annotation', (t) => {
+test('AnnotationCommand: expanding an annotation', (t) => {
   let { editorSession, doc } = setupEditor(t, simple)
   let cmd = new ToggleStrongCommand()
   editorSession.transaction(tx => {

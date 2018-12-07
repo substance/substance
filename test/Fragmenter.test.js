@@ -1,25 +1,23 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { Fragmenter, PropertyAnnotation } from 'substance'
-
-const test = module('Fragmenter')
 
 var TEXT = 'ABCDEFGHI'
 
-test('No annos.', function (t) {
+test('Fragmenter: No annos.', function (t) {
   var annos = []
   var html = _render(TEXT, annos)
   t.equal(html, TEXT)
   t.end()
 })
 
-test('With one anno.', function (t) {
+test('Fragmenter: With one anno.', function (t) {
   var annos = [new Anno('b', 'b1', 3, 6)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>DEF</b>GHI')
   t.end()
 })
 
-test('With one anchor.', function (t) {
+test('Fragmenter: With one anchor.', function (t) {
   var annos = [new Anno('a', 'a1', 3, 3, {
     isAnchor: true
   })]
@@ -28,35 +26,35 @@ test('With one anchor.', function (t) {
   t.end()
 })
 
-test('With one inline.', function (t) {
+test('Fragmenter: With one inline.', function (t) {
   var annos = [new Anno('i', 'i1', 3, 4)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<i>D</i>EFGHI')
   t.end()
 })
 
-test('One nested anno.', function (t) {
+test('Fragmenter: One nested anno.', function (t) {
   var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 5)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>D<i>E</i>F</b>GHI')
   t.end()
 })
 
-test('Overlapping annos.', function (t) {
+test('Fragmenter: Overlapping annos.', function (t) {
   var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 8)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>D<i>EF</i></b><i>GH</i>I')
   t.end()
 })
 
-test('Equal annos.', function (t) {
+test('Fragmenter: Equal annos.', function (t) {
   var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 3, 6)]
   var html = _render(TEXT, annos)
   t.equal(html, 'ABC<b><i>DEF</i></b>GHI')
   t.end()
 })
 
-test('Overlapping with fragmentation hint.', function (t) {
+test('Fragmenter: Overlapping with fragmentation hint.', function (t) {
   var annos = [
     new Anno('b', 'b1', 3, 6),
     new Anno('a', 'link1', 4, 8, {
@@ -68,7 +66,7 @@ test('Overlapping with fragmentation hint.', function (t) {
   t.end()
 })
 
-test('Anchors should rendered as early as possible.', function (t) {
+test('Fragmenter: Anchors should rendered as early as possible.', function (t) {
   var annos = [
     new Anno('b', 'b1', 3, 6),
     new Anno('a', 'a1', 3, 3, {
@@ -80,7 +78,7 @@ test('Anchors should rendered as early as possible.', function (t) {
   t.end()
 })
 
-test('Two subsequent inline nodes.', function (t) {
+test('Fragmenter: Two subsequent inline nodes.', function (t) {
   var annos = [
     new Anno('a', 'inline1', 3, 4, {
       isInline: true
@@ -94,7 +92,7 @@ test('Two subsequent inline nodes.', function (t) {
   t.end()
 })
 
-test('Collapsed annotation.', function (t) {
+test('Fragmenter: Collapsed annotation.', function (t) {
   var annos = [
     new Anno('a', 'a1', 0, 0, {
     })
@@ -104,7 +102,7 @@ test('Collapsed annotation.', function (t) {
   t.end()
 })
 
-test('Two collapsed annotations.', function (t) {
+test('Fragmenter: Two collapsed annotations.', function (t) {
   var annos = [
     new Anno('a', 'a1', 0, 0, {
     }),
@@ -116,7 +114,7 @@ test('Two collapsed annotations.', function (t) {
   t.end()
 })
 
-test('Anchors should not fragment other annotations.', function (t) {
+test('Fragmenter: Anchors should not fragment other annotations.', function (t) {
   var annos = [
     new Anno('a', 'a1', 3, 6),
     new Anno('b', 'b1', 4, 4, {

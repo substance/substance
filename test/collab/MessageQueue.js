@@ -4,7 +4,7 @@ import { EventEmitter } from 'substance'
   Websocket server implementation for client-side development of protocols
 */
 
-class MessageQueue extends EventEmitter {
+export default class MessageQueue extends EventEmitter {
   constructor () {
     super()
 
@@ -144,5 +144,3 @@ class MessageQueue extends EventEmitter {
     this.emit('message:sent', message)
   }
 }
-
-export default MessageQueue

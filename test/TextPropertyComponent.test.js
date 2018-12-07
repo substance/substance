@@ -1,12 +1,10 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { TextPropertyComponent } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import getMountPoint from './fixture/getMountPoint'
 
-const test = module('TextPropertyComponent')
-
-test('Get coordinate of empty property', function (t) {
+test('TextPropertyComponent: Get coordinate of empty property', function (t) {
   var doc = fixture(simple)
   doc.create({
     type: 'paragraph',
