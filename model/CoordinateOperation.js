@@ -22,6 +22,7 @@ export default class CoordinateOperation {
 
   apply (coor) {
     coor.offset = coor.offset + this.val
+    return coor
   }
 
   isShift () {

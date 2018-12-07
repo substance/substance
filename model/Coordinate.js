@@ -57,6 +57,10 @@ export default class Coordinate {
     }
   }
 
+  clone () {
+    return new Coordinate(this.toJSON())
+  }
+
   toString () {
     return '(' + this.path.join('.') + ', ' + this.offset + ')'
   }
