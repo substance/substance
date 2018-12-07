@@ -18,3 +18,5 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 script:
   - npm run test-and-cover
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

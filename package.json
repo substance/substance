@@ -17,7 +17,7 @@
     "dev": "node make test:browser:pure -w -s",
     "pretest": "npm run lint",
     "test": "node make test",
-    "test-and-cover": "npm run test && node make cover && codecov",
+    "test-and-cover": "npm run test && node make cover",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },
