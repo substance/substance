@@ -18,13 +18,15 @@ if (platform.inBrowser) {
 
 function ComponentTests (debug, memory) {
   const LABEL = 'Component' + (debug ? ' [debug]' : '') + (memory ? ' [memory]' : '')
-  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
-    before (t) {
-      substanceGlobals.DEBUG_RENDERING = Boolean(debug)
-      if (memory) platform.inBrowser = false
-      t._document = DefaultDOMElement.createDocument('html')
-    },
-    after () {
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+    if (memory) platform.inBrowser = false
+    t._document = DefaultDOMElement.createDocument('html')
+    try {
+      fn(t)
+    } finally {
+      // after
       platform._reset()
     }
   })

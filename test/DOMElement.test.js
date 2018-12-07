@@ -10,11 +10,13 @@ DOMElementTests('MemoryDOMElement')
 function DOMElementTests (impl) {
   const LABEL = `DOMElement (${impl})`
 
-  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
-    before () {
-      if (impl === 'MemoryDOMElement') platform.inBrowser = false
-    },
-    after () {
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    if (impl === 'MemoryDOMElement') platform.inBrowser = false
+    try {
+      fn(t)
+    } finally {
+      // after
       platform._reset()
     }
   })

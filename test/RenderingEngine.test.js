@@ -14,9 +14,15 @@ RenderingEngineTests('debug')
 
 function RenderingEngineTests (debug) {
   const LABEL = 'RenderingEngine' + (debug ? ' [debug-mode]' : '')
-  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
-      before () {
-      substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    let oldVal = substanceGlobals.DEBUG_RENDERING
+    substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+    try {
+      fn(t)
+    } finally {
+      // after
+      substanceGlobals.DEBUG_RENDERING = oldVal
     }
   })
 

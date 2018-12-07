@@ -14,10 +14,10 @@ if (platform.inBrowser) {
 
 function htmlExporterTests (memory) {
   const LABEL = 'HTMLExporter' + (memory ? ' [memory]' : '')
-  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
-    before (t) {
-      t.elementFactory = memory ? MemoryDOMElement.createDocument('html') : DefaultDOMElement.createDocument('html')
-    }
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    t.elementFactory = memory ? MemoryDOMElement.createDocument('html') : DefaultDOMElement.createDocument('html')
+    fn(t)
   })
 
   test('Exporting paragraph', function (t) {

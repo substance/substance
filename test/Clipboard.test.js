@@ -49,11 +49,13 @@ if (platform.inBrowser) {
 
 function ClipboardTests (memory) {
   const LABEL = `Clipboard${memory ? ' [memory]' : ''}`
-  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, fn, {
-    before () {
-      if (memory) platform.inBrowser = false
-    },
-    after () {
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    if (memory) platform.inBrowser = false
+    try {
+      fn(t)
+    } finally {
+      // after
       platform._reset()
     }
   })
