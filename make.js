@@ -111,7 +111,7 @@ function buildLib (target, production) {
 }
 
 function buildTestsBrowser () {
-  b.js('test/**/*.test.js', {
+  b.js('test/index.js', {
     output: [{
       file: 'tmp/tests.js',
       format: 'umd',
@@ -126,7 +126,7 @@ function buildTestsBrowser () {
 }
 
 function buildTestsNode () {
-  b.js('test/**/*.test.js', {
+  b.js('test/index.js', {
     output: [{
       file: 'tmp/tests.cjs.js',
       format: 'cjs'
