@@ -1,9 +1,7 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { Node } from 'substance'
 
-const test = module('NodeSchema')
-
-test('properties of type ["object"] (#1169)', (t) => {
+test('NodeSchema: properties of type ["object"] (#1169)', t => {
   class MyNode extends Node {}
   MyNode.schema = {
     type: 'my-node',
@@ -23,7 +21,7 @@ test('properties of type ["object"] (#1169)', (t) => {
   t.end()
 })
 
-test('reference property with multiple target types', (t) => {
+test('NodeSchema: reference property with multiple target types', t => {
   class MyNode extends Node {}
   MyNode.schema = {
     type: 'my-node',
@@ -37,7 +35,7 @@ test('reference property with multiple target types', (t) => {
   t.end()
 })
 
-test('reference property with multiple target types (canonical notation)', (t) => {
+test('NodeSchema: reference property with multiple target types (canonical notation)', t => {
   class MyNode extends Node {}
   MyNode.schema = {
     type: 'my-node',
@@ -52,7 +50,7 @@ test('reference property with multiple target types (canonical notation)', (t) =
   t.end()
 })
 
-test('property with invalid multi-type', (t) => {
+test('NodeSchema: property with invalid multi-type', t => {
   class MyNode extends Node {}
   t.throws(() => {
     MyNode.define({
@@ -63,7 +61,7 @@ test('property with invalid multi-type', (t) => {
   t.end()
 })
 
-test('property of node type should be considered a reference', (t) => {
+test('NodeSchema: property of node type should be considered a reference', t => {
   class MyNode extends Node {}
   MyNode.schema = {
     type: 'my-node',
@@ -77,7 +75,7 @@ test('property of node type should be considered a reference', (t) => {
   t.end()
 })
 
-test('Node inheritance', (t) => {
+test('NodeSchema: Node inheritance', t => {
   class ParentNode extends Node {}
   ParentNode.schema = {
     type: 'parent',

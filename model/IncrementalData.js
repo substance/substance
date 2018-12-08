@@ -94,28 +94,8 @@ class IncrementalData extends Data {
     } else if (op.type === ObjectOperation.DELETE) {
       super.delete(op.val.id)
     } else if (op.type === ObjectOperation.UPDATE) {
-      var oldVal = this.get(op.path)
-      var diff = op.diff
-      if (op.propertyType === 'array') {
-        if (!(diff._isArrayOperation)) {
-          diff = ArrayOperation.fromJSON(diff)
-        }
-        // array ops work inplace
-        diff.apply(oldVal)
-      } else if (op.propertyType === 'string') {
-        if (!(diff._isTextOperation)) {
-          diff = TextOperation.fromJSON(diff)
-        }
-        var newVal = diff.apply(oldVal)
-        super.set(op.path, newVal)
-      } else if (op.propertyType === 'coordinate') {
-        if (!(diff._isCoordinateOperation)) {
-          diff = CoordinateOperation.fromJSON(diff)
-        }
-        diff.apply(oldVal)
-      } else {
-        throw new Error('Unsupported type for operational update.')
-      }
+      let diff = op.diff
+      super.update(op.path, diff)
     } else if (op.type === ObjectOperation.SET) {
       super.set(op.path, op.val)
     } else {

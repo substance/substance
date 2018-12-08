@@ -17,7 +17,7 @@
     "dev": "node make test:browser:pure -w -s",
     "pretest": "npm run lint",
     "test": "node make test",
-    "test-and-cover": "npm run test && node make cover && codecov",
+    "test-and-cover": "npm run test && node make cover",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },
@@ -32,18 +32,16 @@
     "nth-check": "1.0.1"
   },
   "devDependencies": {
-    "codecov": "^3.0.1",
-    "karma": "0.13.22",
-    "karma-chrome-launcher": "1.0.1",
-    "karma-coverage": "^1.1.1",
-    "karma-firefox-launcher": "1.0.0",
-    "karma-source-map-support": "1.1.0",
-    "karma-tap": "1.0.4",
+    "karma": "1.x",
+    "karma-chrome-launcher": "2.2.0",
+    "karma-coverage": "1.1.2",
+    "karma-firefox-launcher": "1.1.0",
+    "karma-tap": "4.1.4",
     "karma-tape-reporter": "1.0.3",
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
-    "substance-bundler": "0.25.4",
-    "substance-test": "^0.11.0"
+    "substance-bundler": "0.25.6",
+    "substance-test": "0.12.5"
   },
   "files": [
     "collab",

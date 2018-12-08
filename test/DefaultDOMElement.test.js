@@ -1,4 +1,4 @@
-import { module } from 'substance-test'
+import { test as substanceTest } from 'substance-test'
 import { DefaultDOMElement, MemoryDOMElement, platform } from 'substance'
 
 if (platform.inBrowser) {
@@ -8,11 +8,14 @@ if (platform.inBrowser) {
 DOMElementTests('MemoryDOMElement')
 
 function DOMElementTests (impl) {
-  const test = module('DefaultDOMElement (' + impl + ')', {
-    before: () => {
-      if (impl === 'MemoryDOMElement') platform.inBrowser = false
-    },
-    after: () => {
+  const LABEL = `DefaultDOMElment (${impl})`
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    if (impl === 'MemoryDOMElement') platform.inBrowser = false
+    try {
+      fn(t)
+    } finally {
+      // after
       platform._reset()
     }
   })

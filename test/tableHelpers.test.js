@@ -1,15 +1,13 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { tableHelpers } from 'substance'
 
-const test = module('tableHelpers')
-
-test('getColumnLabel()', t => {
+test('tableHelpers: getColumnLabel()', t => {
   t.equal(tableHelpers.getColumnLabel(0), 'A')
   t.equal(tableHelpers.getColumnLabel(26), 'AA')
   t.end()
 })
 
-test('getColumnIndex()', t => {
+test('tableHelpers: getColumnIndex()', t => {
   t.equal(tableHelpers.getColumnIndex('A'), 0)
   t.equal(tableHelpers.getColumnIndex('AA'), 26)
   t.equal(tableHelpers.getColumnIndex('AB'), 27)
@@ -19,19 +17,19 @@ test('getColumnIndex()', t => {
   t.end()
 })
 
-test('getRowCol()', t => {
+test('tableHelpers: getRowCol()', t => {
   t.deepEqual(tableHelpers.getRowCol('A1'), [0, 0])
   t.deepEqual(tableHelpers.getRowCol('AA2'), [1, 26])
   t.end()
 })
 
-test('getCellLabel()', t => {
+test('tableHelpers: getCellLabel()', t => {
   t.equal(tableHelpers.getCellLabel(0, 0), 'A1')
   t.equal(tableHelpers.getCellLabel(1, 26), 'AA2')
   t.end()
 })
 
-test('getIndexesFromRange()', t => {
+test('tableHelpers: getIndexesFromRange()', t => {
   t.deepEqual(tableHelpers.getIndexesFromRange('A1', 'B10'), {
     startRow: 0,
     startCol: 0,
@@ -48,7 +46,7 @@ test('getIndexesFromRange()', t => {
   t.end()
 })
 
-test('getRangeFromMatrix()', t => {
+test('tableHelpers: getRangeFromMatrix()', t => {
   let cells = [
     [1, 2, 3],
     [4, 5, 6],

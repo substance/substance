@@ -5,7 +5,7 @@ import TestServerWebSocket from './TestServerWebSocket'
   Local in-process Websocket server implementation for client-side development
   of protocols.
 */
-class TestWebSocketServer extends EventEmitter {
+export default class TestWebSocketServer extends EventEmitter {
   constructor (config) {
     super()
 
@@ -54,5 +54,3 @@ class TestWebSocketServer extends EventEmitter {
     delete this.clients[clientId]
   }
 }
-
-export default TestWebSocketServer

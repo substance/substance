@@ -4,7 +4,7 @@ import TestWebSocket from './TestWebSocket'
 /*
   Browser WebSocket abstraction. Handles reconnects etc.
 */
-class TestWebSocketConnection extends ClientConnection {
+export default class TestWebSocketConnection extends ClientConnection {
   _createWebSocket () {
     // this.config has messageQueue, clientId, serverId
     var ws = new TestWebSocket(this.config)
@@ -53,5 +53,3 @@ class TestWebSocketConnection extends ClientConnection {
     return msg
   }
 }
-
-export default TestWebSocketConnection

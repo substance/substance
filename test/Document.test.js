@@ -1,19 +1,17 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { pick } from 'substance'
 
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 
-const test = module('Document')
-
-test('Create null selection.', function (t) {
+test('Document: Create null selection.', function (t) {
   let doc = fixture(simple)
   let sel = doc.createSelection(null)
   t.ok(sel.isNull(), 'Selection should be null.')
   t.end()
 })
 
-test('Create collapsed property selection.', function (t) {
+test('Document: Create collapsed property selection.', function (t) {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'property',
@@ -27,7 +25,7 @@ test('Create collapsed property selection.', function (t) {
   t.end()
 })
 
-test('Create expanded property selection.', function (t) {
+test('Document: Create expanded property selection.', function (t) {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'property',
@@ -43,7 +41,7 @@ test('Create expanded property selection.', function (t) {
   t.end()
 })
 
-test('Node.toJSON() should not export undefined optional properties', function (t) {
+test('Document: Node.toJSON() should not export undefined optional properties', function (t) {
   let doc = fixture(simple)
   let p = doc.create({
     type: 'paragraph',
@@ -54,7 +52,7 @@ test('Node.toJSON() should not export undefined optional properties', function (
   t.end()
 })
 
-test('Setting a node property with DocumentNode.set()', t => {
+test('Document: Setting a node property with DocumentNode.set()', t => {
   let doc = fixture(simple)
   let p1 = doc.get('p1')
   p1.set('content', 'XXX')
@@ -62,7 +60,7 @@ test('Setting a node property with DocumentNode.set()', t => {
   t.end()
 })
 
-test('Assigning multiple properties with DocumentNode.assign()', t => {
+test('Document: Assigning multiple properties with DocumentNode.assign()', t => {
   let doc = fixture()
   let node = doc.create({
     type: 'structured-node',

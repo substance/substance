@@ -1,9 +1,7 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { TreeIndex } from 'substance'
 
-const test = module('TreeIndex')
-
-test('Setting and getting values from a TreeIndex', function (t) {
+test('TreeIndex: Setting and getting values from a TreeIndex', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a'], 1)
   adapter.set(['c', 'b'], 2)
@@ -12,7 +10,7 @@ test('Setting and getting values from a TreeIndex', function (t) {
   t.end()
 })
 
-test('Getting with invalid arguments', function (t) {
+test('TreeIndex: Getting with invalid arguments', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a'], 1)
   adapter.set(['c', 'b'], 2)
@@ -36,7 +34,7 @@ test('Getting with invalid arguments', function (t) {
 //   t.deepEqual(adapter.get('a'), mine.a, 'Get on first level should return plain content.')
 // })
 
-test('Getting values recursively', function (t) {
+test('TreeIndex: Getting values recursively', function (t) {
   var adapter = new TreeIndex()
   adapter.set(['a', 'b'], 'foo')
   adapter.set(['a', 'c', 'd'], 'bar')
@@ -44,7 +42,7 @@ test('Getting values recursively', function (t) {
   t.end()
 })
 
-test('Arrays: basic usage', function (t) {
+test('TreeIndex: Arrays: basic usage', function (t) {
   var adapter = new TreeIndex.Arrays()
   t.throws(function () {
     adapter.set('a', [])

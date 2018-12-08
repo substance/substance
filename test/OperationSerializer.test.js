@@ -1,10 +1,8 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { OperationSerializer, ObjectOperation, TextOperation,
   ArrayOperation } from 'substance'
 
-const test = module('OperationSerializer')
-
-test('Serializing create', function (t) {
+test('OperationSerializer: Serializing create', t => {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' }
   var op = ObjectOperation.Create(['p1'], p)
   var io = new OperationSerializer()
@@ -13,7 +11,7 @@ test('Serializing create', function (t) {
   t.end()
 })
 
-test('Deserializing create', function (t) {
+test('OperationSerializer: Deserializing create', t => {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' }
   var io = new OperationSerializer()
   var data = ['c', 'p1', p]
@@ -23,7 +21,7 @@ test('Deserializing create', function (t) {
   t.end()
 })
 
-test('Serializing delete', function (t) {
+test('OperationSerializer: Serializing delete', t => {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' }
   var op = ObjectOperation.Delete(['p1'], p)
   var io = new OperationSerializer()
@@ -32,7 +30,7 @@ test('Serializing delete', function (t) {
   t.end()
 })
 
-test('Deserializing delete', function (t) {
+test('OperationSerializer: Deserializing delete', t => {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' }
   var io = new OperationSerializer()
   var data = ['d', 'p1', p]
@@ -42,7 +40,7 @@ test('Deserializing delete', function (t) {
   t.end()
 })
 
-test('Serializing set', function (t) {
+test('OperationSerializer: Serializing set', t => {
   var op = ObjectOperation.Set(['p1', 'content'], 'foo', 'bar')
   var io = new OperationSerializer()
   var data = io.serialize(op)
@@ -50,7 +48,7 @@ test('Serializing set', function (t) {
   t.end()
 })
 
-test('Serializing set with null', function (t) {
+test('OperationSerializer: Serializing set with null', t => {
   var op = ObjectOperation.Set(['p1', 'content'], null, null)
   var io = new OperationSerializer()
   var data = io.serialize(op)
@@ -58,7 +56,7 @@ test('Serializing set with null', function (t) {
   t.end()
 })
 
-test('Serializing set with undefined', function (t) {
+test('OperationSerializer: Serializing set with undefined', t => {
   // ATTENTION: undefined is not a valid JSON value, so it gets replaced
   // by null
   var op = ObjectOperation.Set(['p1', 'content'], undefined, undefined)
@@ -68,7 +66,7 @@ test('Serializing set with undefined', function (t) {
   t.end()
 })
 
-test('Deserializing set', function (t) {
+test('OperationSerializer: Deserializing set', t => {
   var io = new OperationSerializer()
   var data = ['s', 'p1.content', 'bar', 'foo']
   var op = io.deserialize(data)
@@ -79,7 +77,7 @@ test('Deserializing set', function (t) {
   t.end()
 })
 
-test('Serializing text insert', function (t) {
+test('OperationSerializer: Serializing text insert', t => {
   var op = ObjectOperation.Update(['p1', 'content'], TextOperation.Insert(3, 'foo'))
   var io = new OperationSerializer()
   var data = io.serialize(op)
@@ -87,7 +85,7 @@ test('Serializing text insert', function (t) {
   t.end()
 })
 
-test('Deserializing text insert', function (t) {
+test('OperationSerializer: Deserializing text insert', t => {
   var io = new OperationSerializer()
   var data = ['u', 'p1.content', 't+', 3, 'foo']
   var op = io.deserialize(data)
@@ -101,7 +99,7 @@ test('Deserializing text insert', function (t) {
   t.end()
 })
 
-test('Serializing text delete', function (t) {
+test('OperationSerializer: Serializing text delete', t => {
   var op = ObjectOperation.Update(['p1', 'content'], TextOperation.Delete(3, 'foo'))
   var io = new OperationSerializer()
   var data = io.serialize(op)
@@ -109,7 +107,7 @@ test('Serializing text delete', function (t) {
   t.end()
 })
 
-test('Deserializing text delete', function (t) {
+test('OperationSerializer: Deserializing text delete', t => {
   var io = new OperationSerializer()
   var data = ['u', 'p1.content', 't-', 3, 'foo']
   var op = io.deserialize(data)
@@ -123,7 +121,7 @@ test('Deserializing text delete', function (t) {
   t.end()
 })
 
-test('Serializing an array insert', function (t) {
+test('OperationSerializer: Serializing an array insert', t => {
   var op = ObjectOperation.Update(['test', 'numbers'], ArrayOperation.Insert(3, 1234))
   var io = new OperationSerializer()
   var data = io.serialize(op)
@@ -131,7 +129,7 @@ test('Serializing an array insert', function (t) {
   t.end()
 })
 
-test('Deserializing an array insert', function (t) {
+test('OperationSerializer: Deserializing an array insert', t => {
   var io = new OperationSerializer()
   var data = ['u', 'test.numbers', 'a+', 3, 1234]
   var op = io.deserialize(data)
@@ -145,7 +143,7 @@ test('Deserializing an array insert', function (t) {
   t.end()
 })
 
-test('Serializing an array delete', function (t) {
+test('OperationSerializer: Serializing an array delete', t => {
   var op = ObjectOperation.Update(['test', 'numbers'], ArrayOperation.Delete(3, 1234))
   var io = new OperationSerializer()
   var data = io.serialize(op)
@@ -153,7 +151,7 @@ test('Serializing an array delete', function (t) {
   t.end()
 })
 
-test('Deserializing an array delete', function (t) {
+test('OperationSerializer: Deserializing an array delete', t => {
   var io = new OperationSerializer()
   var data = ['u', 'test.numbers', 'a-', 3, 1234]
   var op = io.deserialize(data)

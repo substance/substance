@@ -1,12 +1,13 @@
+import { test } from 'substance-test'
 import { series } from '../../util/async'
 
 let EXAMPLE_SNAPSHOT = {test: 'test'}
 
-function testSnapshotStore (createEmptySnapshotStore, test) {
+function testSnapshotStore (createEmptySnapshotStore) {
   /*
     Save snapshot
   */
-  test('Save a snapshot', (t) => {
+  test('SnapshotStore: Save a snapshot', t => {
     let snapshotStore = createEmptySnapshotStore()
     snapshotStore.saveSnapshot('test-doc', 1, EXAMPLE_SNAPSHOT, (err, snapshot) => {
       t.notOk(err, 'should not error')
@@ -18,7 +19,7 @@ function testSnapshotStore (createEmptySnapshotStore, test) {
   /*
     Get snapshot
   */
-  test('Retrieve snapshot for test-doc', (t) => {
+  test('SnapshotStore: Retrieve snapshot for test-doc', t => {
     let snapshotStore = createEmptySnapshotStore()
 
     function _create (cb) {
@@ -41,7 +42,7 @@ function testSnapshotStore (createEmptySnapshotStore, test) {
   /*
     Get versions
   */
-  test('Get all available versions for a document', (t) => {
+  test('SnapshotStore: Get all available versions for a document', t => {
     let snapshotStore = createEmptySnapshotStore()
 
     function _createV1 (cb) {
@@ -68,7 +69,7 @@ function testSnapshotStore (createEmptySnapshotStore, test) {
   /*
     Delete snapshot
   */
-  test('Delete snapshot', (t) => {
+  test('SnapshotStore: Delete snapshot', t => {
     let snapshotStore = createEmptySnapshotStore()
 
     function _create (cb) {

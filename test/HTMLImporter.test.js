@@ -1,4 +1,4 @@
-import { module } from 'substance-test'
+import { test as substanceTest } from 'substance-test'
 import { DefaultDOMElement, platform } from 'substance'
 import checkValues from './fixture/checkValues'
 import getTestConfig from './fixture/getTestConfig'
@@ -12,11 +12,14 @@ if (platform.inBrowser) {
 }
 
 function HTMLImporterTests (memory) {
-  const test = module('HTMLImporter' + (memory ? ' [memory]' : ''), {
-    before: () => {
-      if (memory) platform.inBrowser = false
-    },
-    after: () => {
+  const LABEL = 'HTMLImporter' + (memory ? ' [memory]' : '')
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    if (memory) platform.inBrowser = false
+    try {
+      fn(t)
+    } finally {
+      // after
       platform._reset()
     }
   })

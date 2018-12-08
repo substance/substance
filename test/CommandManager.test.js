@@ -1,10 +1,8 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import simple from './fixture/simple'
 import setupEditor from './fixture/setupEditor'
 
-const test = module('CommandManager')
-
-test('Command state changing with selection', (t) => {
+test('CommandManager: Command state changing with selection', (t) => {
   let { editorSession } = setupEditor(t, simple)
   editorSession.setSelection({
     type: 'property',

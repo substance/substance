@@ -190,16 +190,23 @@ export default class Data extends EventEmitter {
     @returns {any} The value before applying the update.
   */
   update (path, diff) {
-    var realPath = this.getRealPath(path)
-    if (!realPath) {
-      console.error('Could not resolve path', path)
-      return
-    }
-    let node = this.get(realPath[0])
-    let oldValue = this._get(realPath)
+    let node = this.get(path[0])
+    let oldValue = this._get(path)
     let newValue
-    if (diff.isOperation) {
-      newValue = diff.apply(oldValue)
+    if (diff._isOperation) {
+      // ATTENTION: array operations are done inplace
+      if (diff._isArrayOperation) {
+        let tmp = oldValue
+        oldValue = Array.from(oldValue)
+        newValue = diff.apply(tmp)
+      // ATTENTION: coordinate operations are done inplace
+      } else if (diff._isCoordinateOperation) {
+        let tmp = oldValue
+        oldValue = oldValue.clone()
+        newValue = diff.apply(tmp)
+      } else {
+        newValue = diff.apply(oldValue)
+      }
     } else {
       diff = this._normalizeDiff(oldValue, diff)
       if (isString(oldValue)) {
@@ -245,12 +252,12 @@ export default class Data extends EventEmitter {
         throw new Error('Diff is not supported:', JSON.stringify(diff))
       }
     }
-    this._set(realPath, newValue)
+    this._set(path, newValue)
 
     var change = {
       type: 'update',
       node: node,
-      path: realPath,
+      path: path,
       newValue: newValue,
       oldValue: oldValue
     }
@@ -380,7 +387,22 @@ export default class Data extends EventEmitter {
         if (!index[change.type]) {
           console.error('Contract: every NodeIndex must implement ' + change.type)
         }
-        index[change.type](change.node, change.path, change.newValue, change.oldValue)
+        switch (change.type) {
+          case 'create':
+            index.create(change.node)
+            break
+          case 'delete':
+            index.delete(change.node)
+            break
+          case 'set':
+            index.set(change.node, change.path, change.newValue, change.oldValue)
+            break
+          case 'update':
+            index.update(change.node, change.path, change.newValue, change.oldValue)
+            break
+          default:
+            throw new Error('Illegal state.')
+        }
       }
     })
   }

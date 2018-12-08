@@ -1,6 +1,6 @@
 import CollabServer from '../../collab/CollabServer'
 
-class TestCollabServer extends CollabServer {
+export default class TestCollabServer extends CollabServer {
   constructor (config) {
     super(config)
 
@@ -15,5 +15,3 @@ class TestCollabServer extends CollabServer {
     return msg
   }
 }
-
-export default TestCollabServer

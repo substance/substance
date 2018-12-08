@@ -1,5 +1,5 @@
 /* eslint-disable no-invalid-this, indent */
-import { module } from 'substance-test'
+import { test as substanceTest } from 'substance-test'
 import { substanceGlobals, RenderingEngine, Component } from 'substance'
 import TestComponent from './fixture/TestComponent'
 
@@ -13,9 +13,16 @@ RenderingEngineTests()
 RenderingEngineTests('debug')
 
 function RenderingEngineTests (debug) {
-  const test = module('RenderingEngine' + (debug ? ' [debug-mode]' : ''), {
-    before: function () {
-      substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+  const LABEL = 'RenderingEngine' + (debug ? ' [debug-mode]' : '')
+  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
+    // before
+    let oldVal = substanceGlobals.DEBUG_RENDERING
+    substanceGlobals.DEBUG_RENDERING = Boolean(debug)
+    try {
+      fn(t)
+    } finally {
+      // after
+      substanceGlobals.DEBUG_RENDERING = oldVal
     }
   })
 

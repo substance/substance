@@ -1,11 +1,9 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { documentHelpers, EditingInterface, toUnixLineEndings } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 
-const test = module('paste')
-
-test('Pasting plain text', function (t) {
+test('paste: Pasting plain text', t => {
   let { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
@@ -18,7 +16,7 @@ test('Pasting plain text', function (t) {
   t.end()
 })
 
-test('Pasting a single paragraph', function (t) {
+test('paste: Pasting a single paragraph', t => {
   let { tx } = _fixture(simple)
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -40,7 +38,7 @@ test('Pasting a single paragraph', function (t) {
   t.end()
 })
 
-test('Pasting annotated text', function (t) {
+test('paste: Pasting annotated text', t => {
   let { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
@@ -76,7 +74,7 @@ test('Pasting annotated text', function (t) {
   t.end()
 })
 
-test('Pasting two paragraphs', function (t) {
+test('paste: Pasting two paragraphs', t => {
   let { tx } = _fixture(simple)
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -108,7 +106,7 @@ test('Pasting two paragraphs', function (t) {
   t.end()
 })
 
-test('Pasting two structured content into TextProperty (#1111)', (t) => {
+test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
   let { tx } = _fixture(simple)
   let detached = tx.create({
     id: 'detached',

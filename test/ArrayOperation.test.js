@@ -1,8 +1,7 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { ArrayOperation } from 'substance'
 
 const NOP = ArrayOperation.NOP
-const test = module('ArrayOperation')
 
 function checkArrayOperationTransform (t, a, b, input, expected) {
   let ops = ArrayOperation.transform(a, b)
@@ -12,7 +11,7 @@ function checkArrayOperationTransform (t, a, b, input, expected) {
   t.deepEqual(output, expected, `(a' o b)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with b=${b.toString()}, a'=${ops[0].toString()}`)
 }
 
-test('Insert element', (t) => {
+test('ArrayOperation: Insert element', (t) => {
   let arr = [1, 2, 4]
   let expected = [1, 2, 3, 4]
   let op = ArrayOperation.Insert(2, 3)
@@ -21,7 +20,7 @@ test('Insert element', (t) => {
   t.end()
 })
 
-test('Insert element after last position', (t) => {
+test('ArrayOperation: Insert element after last position', (t) => {
   let arr = [1, 2, 3]
   let expected = [1, 2, 3, 4]
   let op = ArrayOperation.Insert(arr.length, 4)
@@ -30,7 +29,7 @@ test('Insert element after last position', (t) => {
   t.end()
 })
 
-test('Delete element', (t) => {
+test('ArrayOperation: Delete element', (t) => {
   let arr = [1, 2, 3]
   let expected = [1, 3]
   let op = ArrayOperation.Delete(1, 2)
@@ -39,7 +38,7 @@ test('Delete element', (t) => {
   t.end()
 })
 
-test('Create operation with invalid data', (t) => {
+test('ArrayOperation: Create operation with invalid data', (t) => {
   t.throws(function () {
     new ArrayOperation() // eslint-disable-line no-new
   }, 'Should throw if no data given.')
@@ -55,13 +54,13 @@ test('Create operation with invalid data', (t) => {
   t.end()
 })
 
-test('Operation can be NOP', (t) => {
+test('ArrayOperation: Operation can be NOP', (t) => {
   let op = ArrayOperation.Nop()
   t.ok(op.isNOP(), 'Operation should be NOP')
   t.end()
 })
 
-test('Apply operation on too short array.', (t) => {
+test('ArrayOperation: Apply operation on too short array.', (t) => {
   let arr = [1, 2, 3]
   let op = ArrayOperation.Insert(4, 5)
   t.throws(function () {
@@ -75,7 +74,7 @@ test('Apply operation on too short array.', (t) => {
 })
 
 // Note: it is better to fail in such cases, as this is an indicator for other greater problems.
-test('Apply delete operation on wrong array.', (t) => {
+test('ArrayOperation: Apply delete operation on wrong array.', (t) => {
   let arr = [1, 2, 3]
   let op = ArrayOperation.Delete(2, 4)
   t.throws(function () {
@@ -84,7 +83,7 @@ test('Apply delete operation on wrong array.', (t) => {
   t.end()
 })
 
-test('JSON de-/serialisation', (t) => {
+test('ArrayOperation: JSON de-/serialisation', (t) => {
   let op = ArrayOperation.Delete(1, 2)
   let out = op.toJSON()
   t.equal(out.type, ArrayOperation.DELETE)
@@ -107,7 +106,7 @@ test('JSON de-/serialisation', (t) => {
 //  2. `b < a`:   dito
 //  3. `a == b`:  result depends on preference (first applied)
 
-test('Transformation: a=Insert, b=Insert, a < b and b < a', (t) => {
+test('ArrayOperation: Transformation: a=Insert, b=Insert, a < b and b < a', (t) => {
   let input = [1, 3, 5]
   let expected = [1, 2, 3, 4, 5]
   let a = ArrayOperation.Insert(1, 2)
@@ -121,7 +120,7 @@ test('Transformation: a=Insert, b=Insert, a < b and b < a', (t) => {
 //     A = [1,4], a = [+, 1, 2], b = [+, 1, 3]
 //     A  - a ->  [1, 2, 4]   - b' ->   [1,2,3,4]     => b'= [+, 2, 3], transform(a, b) = [a, b']
 //     A  - b ->  [1, 3, 4]   - a' ->   [1,3,2,4]     => a'= [+, 2, 2], transform(b, a) = [a', b]
-test('Transformation: a=Insert, b=Insert, a == b', (t) => {
+test('ArrayOperation: Transformation: a=Insert, b=Insert, a == b', (t) => {
   let input = [1, 4]
   let expected = [1, 2, 3, 4]
   let expected2 = [1, 3, 2, 4]
@@ -140,7 +139,7 @@ test('Transformation: a=Insert, b=Insert, a == b', (t) => {
 //  3. `a == b`:  second operation should not have an effect
 //                user should be noticed about conflict
 
-test('Transformation: a=Delete, b=Delete (1,2), a < b and b < a', (t) => {
+test('ArrayOperation: Transformation: a=Delete, b=Delete (1,2), a < b and b < a', (t) => {
   let input = [1, 2, 3, 4, 5]
   let expected = [1, 3, 5]
   let a = ArrayOperation.Delete(1, 2)
@@ -150,7 +149,7 @@ test('Transformation: a=Delete, b=Delete (1,2), a < b and b < a', (t) => {
   t.end()
 })
 
-test('Transformation: a=Delete, b=Delete (3), a == b', (t) => {
+test('ArrayOperation: Transformation: a=Delete, b=Delete (3), a == b', (t) => {
   let input = [1, 2, 3]
   let expected = [1, 3]
   let a = ArrayOperation.Delete(1, 2)
@@ -170,7 +169,7 @@ test('Transformation: a=Delete, b=Delete (3), a == b', (t) => {
 // A = [1,3,4,5], a = [+, 1, 2], b = [-, 2, 4]
 // A  - a ->  [1,2,3,4,5] - b' ->   [1,2,3,5]     => b'= [-, 3, 4]
 // A  - b ->  [1,3,5]     - a' ->   [1,2,3,5]     => a'= [+, 1, 2] = a
-test('Transformation: a=Insert, b=Delete (1), a < b', (t) => {
+test('ArrayOperation: Transformation: a=Insert, b=Delete (1), a < b', (t) => {
   let input = [1, 3, 4, 5]
   let expected = [1, 2, 3, 5]
   let a = ArrayOperation.Insert(1, 2)
@@ -183,7 +182,7 @@ test('Transformation: a=Insert, b=Delete (1), a < b', (t) => {
 // A = [1,2,3,5], a = [+,3,4], b = [-,1,2]
 // A  - a ->  [1,2,3,4,5] - b' ->   [1,3,4,5]     => b'= [-,1,2] = b
 // A  - b ->  [1,3,5]     - a' ->   [1,3,4,5]     => a'= [+,2,4]
-test('Transformation: a=Insert, b=Delete (2), b < a', (t) => {
+test('ArrayOperation: Transformation: a=Insert, b=Delete (2), b < a', (t) => {
   let input = [1, 2, 3, 5]
   let expected = [1, 3, 4, 5]
   let a = ArrayOperation.Insert(3, 4)
@@ -196,7 +195,7 @@ test('Transformation: a=Insert, b=Delete (2), b < a', (t) => {
 // A = [1,2,3], a = [+,1,4], b = [-,1,2]
 // A  - a ->  [1,4,2,3] - b' ->   [1,4,3]     => b'= [-,2,2]
 // A  - b ->  [1,3]     - a' ->   [1,4,3]     => a'= [+,1,4] = a
-test('Transformation: a=Insert, b=Delete (3), a == b', (t) => {
+test('ArrayOperation: Transformation: a=Insert, b=Delete (3), a == b', (t) => {
   let input = [1, 2, 3]
   let expected = [1, 4, 3]
   let a = ArrayOperation.Insert(1, 4)
@@ -206,7 +205,7 @@ test('Transformation: a=Insert, b=Delete (3), a == b', (t) => {
   t.end()
 })
 
-test('Transformation: a=NOP || b=NOP', (t) => {
+test('ArrayOperation: Transformation: a=NOP || b=NOP', (t) => {
   let a = ArrayOperation.Insert(1, 4)
   let b = ArrayOperation.Nop()
   let tr = ArrayOperation.transform(a, b)
@@ -218,7 +217,7 @@ test('Transformation: a=NOP || b=NOP', (t) => {
   t.end()
 })
 
-test('Inverting operations', (t) => {
+test('ArrayOperation: Inverting operations', (t) => {
   let op = ArrayOperation.Insert(1, 4)
   let inverse = op.invert()
   t.ok(inverse.isDelete(), 'Inverse of an insert op should be a delete op.')
@@ -235,7 +234,7 @@ test('Inverting operations', (t) => {
   t.end()
 })
 
-test('Transformations can be done inplace (optimzation for internal use)', (t) => {
+test('ArrayOperation: Transformations can be done inplace (optimzation for internal use)', (t) => {
   let a = ArrayOperation.Insert(2, 3)
   let b = ArrayOperation.Insert(2, 3)
   let tr = ArrayOperation.transform(a, b, {inplace: true})
@@ -243,7 +242,7 @@ test('Transformations can be done inplace (optimzation for internal use)', (t) =
   t.end()
 })
 
-test("With option 'no-conflict' conflicting operations can not be transformed.", (t) => {
+test("ArrayOperation: With option 'no-conflict' conflicting operations can not be transformed.", (t) => {
   let a = ArrayOperation.Insert(2, 2)
   let b = ArrayOperation.Insert(2, 2)
   t.throws(function () {
@@ -252,7 +251,7 @@ test("With option 'no-conflict' conflicting operations can not be transformed.",
   t.end()
 })
 
-test('Conflicts: inserting at the same position', (t) => {
+test('ArrayOperation: Conflicts: inserting at the same position', (t) => {
   // this is considered a conflict as a decision is needed to determine which element comes first.
   let a = ArrayOperation.Insert(2, 'a')
   let b = ArrayOperation.Insert(2, 'b')
@@ -260,14 +259,14 @@ test('Conflicts: inserting at the same position', (t) => {
   t.end()
 })
 
-test('Conflicts: inserting at different positions', (t) => {
+test('ArrayOperation: Conflicts: inserting at different positions', (t) => {
   let a = ArrayOperation.Insert(2, 'a')
   let b = ArrayOperation.Insert(4, 'b')
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'Inserts at different positions should be fine.')
   t.end()
 })
 
-test('Conflicts: deleting at the same position', (t) => {
+test('ArrayOperation: Conflicts: deleting at the same position', (t) => {
   // this is *not* considered a conflict as it is clear how the result should look like.
   let a = ArrayOperation.Delete(2, 'a')
   let b = ArrayOperation.Delete(2, 'a')
@@ -275,7 +274,7 @@ test('Conflicts: deleting at the same position', (t) => {
   t.end()
 })
 
-test('Conflicts: inserting and deleting at the same position', (t) => {
+test('ArrayOperation: Conflicts: inserting and deleting at the same position', (t) => {
   // this is *not* considered a conflict as it is clear how the result should look like.
   let a = ArrayOperation.Insert(2, 'a')
   let b = ArrayOperation.Delete(2, 'b')
@@ -283,7 +282,7 @@ test('Conflicts: inserting and deleting at the same position', (t) => {
   t.end()
 })
 
-test('Conflicts: when NOP involved', (t) => {
+test('ArrayOperation: Conflicts: when NOP involved', (t) => {
   let a = ArrayOperation.Insert(2, 2)
   let b = ArrayOperation.Nop()
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'NOPs should never conflict.')

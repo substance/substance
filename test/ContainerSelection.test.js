@@ -1,12 +1,10 @@
-import { module } from 'substance-test'
+import { test } from 'substance-test'
 import { ContainerSelection } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 import containerAnnoSample from './fixture/containerAnnoSample'
 
-const test = module('ContainerSelection')
-
-test('Creating a ContainerSelection', function (t) {
+test('ContainerSelection: Creating a ContainerSelection', function (t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p2', 'content'], 2)
   t.ok(sel.isContainerSelection(), 'Should be a container selection.')
   t.ok(!sel.isNull(), 'Should not be null.')
@@ -18,20 +16,20 @@ test('Creating a ContainerSelection', function (t) {
   t.end()
 })
 
-test('Collapsed ContainerSelection', function (t) {
+test('ContainerSelection: Collapsed ContainerSelection', function (t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 1)
   t.ok(sel.isContainerSelection(), 'Should be a container selection.')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed.')
   t.end()
 })
 
-test('Reverse ContainerSelection', function (t) {
+test('ContainerSelection: Reverse ContainerSelection', function (t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p1', 'content'], 3, true)
   t.ok(sel.isReverse(), 'Selection should be reverse.')
   t.end()
 })
 
-test('isInsideOf: strictly inside other', function (t) {
+test('ContainerSelection: isInsideOf: strictly inside other', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -54,7 +52,7 @@ test('isInsideOf: strictly inside other', function (t) {
   t.end()
 })
 
-test('isInsideOf: not-strictly inside other', function (t) {
+test('ContainerSelection: isInsideOf: not-strictly inside other', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -77,7 +75,7 @@ test('isInsideOf: not-strictly inside other', function (t) {
   t.end()
 })
 
-test('isInsideOf: inside a PropertySelection', function (t) {
+test('ContainerSelection: isInsideOf: inside a PropertySelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -97,7 +95,7 @@ test('isInsideOf: inside a PropertySelection', function (t) {
   t.end()
 })
 
-test('isInsideOf: not inside', function (t) {
+test('ContainerSelection: isInsideOf: not inside', function (t) {
   var doc = fixture(containerAnnoSample)
   var other = doc.createSelection({
     type: 'container',
@@ -143,7 +141,7 @@ test('isInsideOf: not inside', function (t) {
   t.end()
 })
 
-test('overlaps with other ContainerSelection', function (t) {
+test('ContainerSelection: overlaps with other ContainerSelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -206,7 +204,7 @@ test('overlaps with other ContainerSelection', function (t) {
   t.end()
 })
 
-test('Collapsing to the left', function (t) {
+test('ContainerSelection: Collapsing to the left', function (t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p3', 'content'], 3)
   sel = sel.collapse('left')
   t.ok(sel.isCollapsed(), 'should be collapsed')
@@ -215,7 +213,7 @@ test('Collapsing to the left', function (t) {
   t.end()
 })
 
-test('Collapsing to the right', function (t) {
+test('ContainerSelection: Collapsing to the right', function (t) {
   var sel = new ContainerSelection('body', ['p1', 'content'], 1, ['p3', 'content'], 3)
   sel = sel.collapse('right')
   t.ok(sel.isCollapsed(), 'should be collapsed')
@@ -224,7 +222,7 @@ test('Collapsing to the right', function (t) {
   t.end()
 })
 
-test('Expanding: other is inside', function (t) {
+test('ContainerSelection: Expanding: other is inside', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -245,7 +243,7 @@ test('Expanding: other is inside', function (t) {
   t.end()
 })
 
-test('Expand: is inside other', function (t) {
+test('ContainerSelection: Expand: is inside other', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -268,7 +266,7 @@ test('Expand: is inside other', function (t) {
   t.end()
 })
 
-test('Expand right', function (t) {
+test('ContainerSelection: Expand right', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -292,7 +290,7 @@ test('Expand right', function (t) {
   t.end()
 })
 
-test('Expand left', function (t) {
+test('ContainerSelection: Expand left', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -316,7 +314,7 @@ test('Expand left', function (t) {
   t.end()
 })
 
-test('Expand left with PropertySelection', function (t) {
+test('ContainerSelection: Expand left with PropertySelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -338,7 +336,7 @@ test('Expand left with PropertySelection', function (t) {
   t.end()
 })
 
-test('Expand right with PropertySelection', function (t) {
+test('ContainerSelection: Expand right with PropertySelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -360,7 +358,7 @@ test('Expand right with PropertySelection', function (t) {
   t.end()
 })
 
-test('Truncate with other ContainerSelection', function (t) {
+test('ContainerSelection: Truncate with other ContainerSelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
@@ -435,7 +433,7 @@ test('Truncate with other ContainerSelection', function (t) {
   t.end()
 })
 
-test('containsNode: inner node', function (t) {
+test('ContainerSelection: containsNode: inner node', function (t) {
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
@@ -449,7 +447,7 @@ test('containsNode: inner node', function (t) {
   t.end()
 })
 
-test('containsNode: outer nodes', function (t) {
+test('ContainerSelection: containsNode: outer nodes', function (t) {
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
@@ -464,7 +462,7 @@ test('containsNode: outer nodes', function (t) {
   t.end()
 })
 
-test('containsNode: start/end is nodeFragment', function (t) {
+test('ContainerSelection: containsNode: start/end is nodeFragment', function (t) {
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
@@ -487,7 +485,7 @@ test('containsNode: start/end is nodeFragment', function (t) {
   t.end()
 })
 
-test('containsNode: with partial node fragment', function (t) {
+test('ContainerSelection: containsNode: with partial node fragment', function (t) {
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
