@@ -1,8 +1,7 @@
-import { test } from 'substance-test'
+import { test, getMountPoint } from 'substance-test'
 import {
   Configurator, EditorSession, Document, DocumentSchema, AbstractEditor, forEach
 } from 'substance'
-import getMountPoint from './fixture/getMountPoint'
 
 test('LabelProvider: get label', t => {
   let configurator = _simple()

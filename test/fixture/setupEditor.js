@@ -1,6 +1,6 @@
+import { getMountPoint } from 'substance-test'
 import TestEditor from './TestEditor'
 import createTestEditorSession from './createTestEditorSession'
-import getMountPoint from './getMountPoint'
 
 export default function setupEditor (t, ...f) {
   const editorSession = createTestEditorSession(...f)
