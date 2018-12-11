@@ -1,4 +1,4 @@
-import { getMountPoint } from 'substance-test'
+import { getMountPoint } from '../shared/testHelpers'
 import TestEditor from './TestEditor'
 import createTestEditorSession from './createTestEditorSession'
 

@@ -1,6 +1,7 @@
 /* eslint-disable no-invalid-this, indent */
 import { test as substanceTest } from 'substance-test'
 import { substanceGlobals, RenderingEngine, Component } from 'substance'
+// import { getMountPoint } from './shared/testHelpers'
 import TestComponent from './fixture/TestComponent'
 
 const Simple = TestComponent.Simple
