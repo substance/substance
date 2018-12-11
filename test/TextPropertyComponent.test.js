@@ -1,5 +1,6 @@
-import { test, getMountPoint } from 'substance-test'
+import { test } from 'substance-test'
 import { TextPropertyComponent } from 'substance'
+import { getMountPoint } from './shared/testHelpers'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
 

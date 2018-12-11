@@ -1,5 +1,6 @@
-import { test as substanceTest, spy, getMountPoint } from 'substance-test'
+import { test as substanceTest, spy } from 'substance-test'
 import { DefaultDOMElement, substanceGlobals, isEqual, Component, platform } from 'substance'
+import { getMountPoint } from './shared/testHelpers'
 import TestComponent from './fixture/TestComponent'
 
 const Simple = TestComponent.Simple
