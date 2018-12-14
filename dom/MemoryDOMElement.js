@@ -560,7 +560,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   click () {
-    this.emit('click', { target: this })
+    this.emit('click', { target: this, currentTarget: this })
     return this
   }
 
