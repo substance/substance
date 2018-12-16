@@ -313,7 +313,7 @@ export default class Document extends EventEmitter {
 
     Deleting from an array:
     ```
-    doc.update(['body', 'nodes'], { delete: 2 })
+    doc.update(['body', 'nodes'], { delete: { offset: 2 } })
     ```
     would turn `[1,2,3,4]` into `[1,2,4]`.
   */
