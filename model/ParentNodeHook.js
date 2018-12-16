@@ -48,15 +48,16 @@ export default class ParentNodeHook {
     switch (op.type) {
       case 'create': {
         if (hasOwnedProperties) {
-          nodeSchema.getOwnedProperties().forEach(p => {
+          for (let p of nodeSchema.getOwnedProperties()) {
+            let isChildren = p.isArray()
             let refs = node[p.name]
             if (refs) {
-              this._setParent(node, refs, p.name)
+              this._setParent(node, refs, p.name, isChildren)
             }
-            this._setRegisteredParent(node)
-            if (p.isArray()) this._markContainerAsDirty(node.id, p.name)
-          })
+            if (isChildren) this._markContainerAsDirty(node.id, p.name)
+          }
         }
+        this._setRegisteredParent(node)
         break
       }
       case 'update': {
@@ -64,12 +65,13 @@ export default class ParentNodeHook {
           let propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
             let update = op.diff
+            let isChildren = update._isArrayOperation
             if (update.isDelete()) {
-              this._setParent(null, update.getValue(), propName)
+              this._setParent(null, update.getValue(), propName, isChildren)
             } else {
-              this._setParent(node, update.getValue(), propName)
+              this._setParent(node, update.getValue(), propName, isChildren)
             }
-            if (update._isArrayOperation) this._markContainerAsDirty(...op.path)
+            if (isChildren) this._markContainerAsDirty(...op.path)
           }
         }
         break
@@ -79,12 +81,13 @@ export default class ParentNodeHook {
           let propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
             let prop = nodeSchema.getProperty(propName)
+            let isChildren = prop.isArray()
             let oldValue = op.getOldValue()
             let newValue = op.getValue()
             // Note: _setParent takes either an array or a single id
-            this._setParent(null, oldValue, propName)
-            this._setParent(node, newValue, propName)
-            if (prop.isArray()) this._markContainerAsDirty(...op.path)
+            this._setParent(null, oldValue, propName, isChildren)
+            this._setParent(node, newValue, propName, isChildren)
+            if (isChildren) this._markContainerAsDirty(...op.path)
           }
         }
         break
@@ -94,17 +97,17 @@ export default class ParentNodeHook {
     }
   }
 
-  _setParent (parent, ids, property) {
+  _setParent (parent, ids, property, isChildren) {
     if (ids) {
       if (isArray(ids)) {
-        ids.forEach(id => this.__setParent(parent, id, property))
+        ids.forEach(id => this.__setParent(parent, id, property, isChildren))
       } else {
-        this.__setParent(parent, ids)
+        this.__setParent(parent, ids, property, isChildren)
       }
     }
   }
 
-  __setParent (parent, id, property) {
+  __setParent (parent, id, property, isChildren) {
     let child = this.doc.get(id)
     if (child) {
       this._setParentAndXpath(parent, child, property)
@@ -115,15 +118,16 @@ export default class ParentNodeHook {
       // this can still happen when a document is loaded from some other sources,
       // which does not take any measures to create nodes in a correct order.
       // So, we must be prepared.
-      this.parents[id] = { parent, property }
+      this.parents[id] = { parent, property, isChildren }
     }
   }
 
   _setRegisteredParent (child) {
     let entry = this.parents[child.id]
     if (entry) {
-      let { parent, property } = entry
+      let { parent, property, isChildren } = entry
       this._setParentAndXpath(parent, child, property)
+      if (isChildren) this._markContainerAsDirty(parent.id, property)
       delete this.parents[child.id]
     }
   }
@@ -137,6 +141,9 @@ export default class ParentNodeHook {
     } else {
       xpath.prev = null
       xpath.property = null
+      // ATTENTION: need to remove this here, because
+      // it will otherwise not be updated
+      xpath.pos = null
     }
   }
 

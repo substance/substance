@@ -1,5 +1,6 @@
 import DataNode from './Node'
 import isString from '../util/isString'
+import XPathNode from './XPathNode'
 
 /**
   Base node type for document nodes.
@@ -38,7 +39,7 @@ export default class DocumentNode extends DataNode {
      * followed by zero or more nodes with property and position.
      * For example, the xpath for the second paragraph in a document's body could look like this [{id: 'article'}, { property: 'body', pos: 2 }]
      */
-    this._xpath = { id: this.id, prev: null, property: null, pos: null }
+    this._xpath = new XPathNode(this.id)
   }
 
   /**
