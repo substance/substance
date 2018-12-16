@@ -23,9 +23,16 @@ import isArray from '../util/isArray'
 export default class ParentNodeHook {
   constructor (doc) {
     this.doc = doc
-    // parents by id of child nodes
+
+    // remembering parents for children, when nodes are loaded in wrong order
+    // key: node.id, value: { parent, property }
     this.parents = {}
+    // whenever an update on a container property is detected
+    // we recompute the xpath positions of the children
+    this.changedContainers = new Map()
+
     doc.data.on('operation:applied', this._onOperationApplied, this)
+    doc.on('document:changed', this._afterDocumentChange, this)
   }
 
   _onOperationApplied (op) {
@@ -44,9 +51,10 @@ export default class ParentNodeHook {
           nodeSchema.getOwnedProperties().forEach(p => {
             let refs = node[p.name]
             if (refs) {
-              this._setParent(node, refs)
+              this._setParent(node, refs, p.name)
             }
             this._setRegisteredParent(node)
+            if (p.isArray()) this._markContainerAsDirty(node.id, p.name)
           })
         }
         break
@@ -57,10 +65,11 @@ export default class ParentNodeHook {
           if (nodeSchema.isOwned(propName)) {
             let update = op.diff
             if (update.isDelete()) {
-              this._setParent(null, update.getValue())
+              this._setParent(null, update.getValue(), propName)
             } else {
-              this._setParent(node, update.getValue())
+              this._setParent(node, update.getValue(), propName)
             }
+            if (update._isArrayOperation) this._markContainerAsDirty(...op.path)
           }
         }
         break
@@ -69,11 +78,13 @@ export default class ParentNodeHook {
         if (hasOwnedProperties) {
           let propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
+            let prop = nodeSchema.getProperty(propName)
             let oldValue = op.getOldValue()
             let newValue = op.getValue()
             // Note: _setParent takes either an array or a single id
-            this._setParent(null, oldValue)
-            this._setParent(node, newValue)
+            this._setParent(null, oldValue, propName)
+            this._setParent(node, newValue, propName)
+            if (prop.isArray()) this._markContainerAsDirty(...op.path)
           }
         }
         break
@@ -83,35 +94,76 @@ export default class ParentNodeHook {
     }
   }
 
-  _setParent (parent, ids) {
+  _setParent (parent, ids, property) {
     if (ids) {
       if (isArray(ids)) {
-        ids.forEach(id => this.__setParent(parent, id))
+        ids.forEach(id => this.__setParent(parent, id, property))
       } else {
         this.__setParent(parent, ids)
       }
     }
   }
 
-  __setParent (parent, id) {
-    // Note: it can happen, e.g. during deserialization, that the child node
-    // is created later than the parent so we store the parent for later
-    // While on Document.createFromDocument() we consider the order via dependeny analysis
-    // this can still happen when a document is loaded from some other sources,
-    // which does not take any measures to create nodes in a correct order.
-    // So, we must be prepared.
-    this.parents[id] = parent
+  __setParent (parent, id, property) {
     let child = this.doc.get(id)
     if (child) {
-      child.setParent(parent)
+      this._setParentAndXpath(parent, child, property)
+    } else {
+      // Note: it can happen, e.g. during deserialization, that the child node
+      // is created later than the parent so we store the parent for later
+      // While on Document.createFromDocument() we consider the order via dependeny analysis
+      // this can still happen when a document is loaded from some other sources,
+      // which does not take any measures to create nodes in a correct order.
+      // So, we must be prepared.
+      this.parents[id] = { parent, property }
     }
   }
 
   _setRegisteredParent (child) {
-    let parent = this.parents[child.id]
-    if (parent) {
-      child.setParent(parent)
+    let entry = this.parents[child.id]
+    if (entry) {
+      let { parent, property } = entry
+      this._setParentAndXpath(parent, child, property)
+      delete this.parents[child.id]
     }
+  }
+
+  _setParentAndXpath (parent, child, property) {
+    child.setParent(parent)
+    let xpath = child._xpath
+    if (parent) {
+      xpath.prev = parent._xpath
+      xpath.property = property
+    } else {
+      xpath.prev = null
+      xpath.property = null
+    }
+  }
+
+  _markContainerAsDirty (id, property) {
+    let path = [id, property]
+    this.changedContainers.set(String(path), path)
+  }
+
+  _afterDocumentChange () {
+    this._updateContainerPositions()
+  }
+
+  _updateContainerPositions () {
+    let doc = this.doc
+    for (let path of this.changedContainers.values()) {
+      let ids = doc.get(path)
+      if (ids) {
+        for (let pos = 0; pos < ids.length; pos++) {
+          let id = ids[pos]
+          let child = doc.get(id)
+          if (child) {
+            child._xpath.pos = pos
+          }
+        }
+      }
+    }
+    this.changedContainers.clear()
   }
 }
 

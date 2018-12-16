@@ -25,11 +25,20 @@ import isString from '../util/isString'
   - `bool` boolean values
   - `id` a node id referencing another node in the document
 */
-export default
-class DocumentNode extends DataNode {
+export default class DocumentNode extends DataNode {
   _initialize (doc, props) {
     this.document = doc
+
     super._initialize(props)
+
+    /**
+     * Experimental:
+     * Provides an XPathNode that leads back to the root.
+     * An XPath of a DocumentNode is a sequence of XPathNodes, where the first one contains a node id as entry point
+     * followed by zero or more nodes with property and position.
+     * For example, the xpath for the second paragraph in a document's body could look like this [{id: 'article'}, { property: 'body', pos: 2 }]
+     */
+    this._xpath = { id: this.id, prev: null, property: null, pos: null }
   }
 
   /**
@@ -151,6 +160,10 @@ class DocumentNode extends DataNode {
   */
   getChildCount () {
     return 0
+  }
+
+  getXpath () {
+    return this._xpath
   }
 
   // Node categories
