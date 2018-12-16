@@ -6,7 +6,7 @@ import ContainerAnnotation from './ContainerAnnotation'
 
 export default class DocumentSchema extends Schema {
   constructor (schemaSpec) {
-    super(schemaSpec.name, schemaSpec.version)
+    super(schemaSpec)
     /* istanbul ignore next */
     if (!schemaSpec.DocumentClass) {
       throw new Error('DocumentClass is mandatory')
