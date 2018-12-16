@@ -66,6 +66,7 @@ export { default as PropertyIndex } from './PropertyIndex'
 export { default as PropertySelection } from './PropertySelection'
 export { default as Range } from './Range'
 export { default as Schema } from './Schema'
+export * from './schemaHelpers'
 export { default as Selection } from './Selection'
 export { selectionHelpers }
 export { default as TextBlock } from './TextBlock'
