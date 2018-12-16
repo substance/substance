@@ -85,7 +85,7 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
       path: node.start.path,
       startOffset: node.start.offset,
       endOffset: node.end.offset,
-      containerId: surface.getContainerId(),
+      containerPath: surface.getContainerPath(),
       surfaceId: surface.id
     })
   }

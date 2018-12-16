@@ -1,46 +1,41 @@
-import isString from '../util/isString'
+import isArray from '../util/isArray'
+import isArrayEqual from '../util/isArrayEqual'
 import keys from '../util/keys'
 import * as selectionHelpers from '../model/selectionHelpers'
 import Surface from './Surface'
 import RenderingEngine from './RenderingEngine'
+import { getContainerPosition } from '../model/documentHelpers'
 
 /**
-  Represents an editor for content rendered in a flow, such as a manuscript.
-
-  @prop {String} name unique editor name
-  @prop {String} containerId container id
-
-  @example
-
-  Create a full-fledged `ContainerEditor` for the `body` container of a document.
-  Allow Strong and Emphasis annotations and to switch text types between paragraph
-  and heading at level 1.
-
-  ```js
-  $$(ContainerEditor, {
-    name: 'bodyEditor',
-    containerId: 'body'
-  })
-  ```
-*/
-
+ * Represents an editor for content rendered in a flow, such as a manuscript.
+ *
+ * @prop {String} name unique editor name
+ * @prop {String} containerPath container id
+ *
+ * @example
+ *
+ * Create a full-fledged `ContainerEditor` for the `body` container of a document.
+ * Allow Strong and Emphasis annotations and to switch text types between paragraph
+ * and heading at level 1.
+ *
+ * ```js
+ * $$(ContainerEditor, {
+ *   name: 'bodyEditor',
+ *   containerPath: ['body', 'nodes']
+ * })
+ * ```
+ */
 export default class ContainerEditor extends Surface {
   constructor (parent, props, el) {
     // TODO consolidate this - how is it used actually?
-    // default props derived from the given props
-    props.containerId = props.containerId || props.node.id
-    props.name = props.name || props.containerId || props.node.id
+    props.containerPath = props.containerPath || props.node.getContentPath()
+    props.name = props.name || props.containerPath.join('.') || props.node.id
 
     super(parent, props, el)
 
-    this.containerId = this.props.containerId
-    if (!isString(this.containerId)) {
-      throw new Error("Property 'containerId' is mandatory.")
-    }
-    let doc = this.getDocument()
-    this.container = doc.get(this.containerId)
-    if (!this.container) {
-      throw new Error('Container with id ' + this.containerId + ' does not exist.')
+    this.containerPath = this.props.containerPath
+    if (!isArray(this.containerPath)) {
+      throw new Error("Property 'containerPath' is mandatory.")
     }
 
     this._deriveInternalState(this.props)
@@ -63,7 +58,7 @@ export default class ContainerEditor extends Surface {
     super.didMount.apply(this, arguments)
     let editorSession = this.getEditorSession()
     editorSession.onUpdate('document', this._onContainerChanged, this, {
-      path: this.container.getContentPath()
+      path: this.getContainerPath()
     })
     this._attachPlaceholder()
   }
@@ -78,20 +73,19 @@ export default class ContainerEditor extends Surface {
     let el = super.render($$)
 
     let doc = this.getDocument()
-    let containerId = this.getContainerId()
-    let containerNode = doc.get(containerId)
-    if (!containerNode) {
-      console.warn('No container node found for ', containerId)
-    }
-    el.addClass('sc-container-editor container-node ' + containerId)
-      .attr('data-id', containerId)
+    let containerPath = this.getContainerPath()
+    el.addClass('sc-container-editor container-node')
+      .attr('data-id', containerPath.join('.'))
 
     // native spellcheck
     el.attr('spellcheck', this.props.spellcheck === 'native')
 
-    containerNode.getNodes().forEach(function (node, index) {
-      el.append(this._renderNode($$, node, index))
-    }.bind(this))
+    let ids = doc.get(containerPath)
+    el.append(
+      ids.map((id, index) => {
+        return this._renderNode($$, doc.get(id), index)
+      })
+    )
 
     // No editing if disabled by user or container is empty
     if (!this.props.disabled && !this.isEmpty()) {
@@ -103,11 +97,13 @@ export default class ContainerEditor extends Surface {
   }
 
   selectFirst () {
-    const container = this.getContainer()
-    if (container.getLength() > 0) {
+    let doc = this.getDocument()
+    let containerPath = this.getContainerPath()
+    let nodeIds = doc.get()
+    if (nodeIds.length > 0) {
       const editorSession = this.getEditorSession()
-      const first = container.getChildAt(0)
-      selectionHelpers.setCursor(editorSession, first, container.id, 'before')
+      const first = doc.get(nodeIds[0])
+      selectionHelpers.setCursor(editorSession, first, containerPath, 'before')
     }
   }
 
@@ -148,7 +144,7 @@ export default class ContainerEditor extends Surface {
       this.getEditorSession().setSelection({
         type: 'node',
         nodeId: node.id,
-        containerId: selState.container.id,
+        containerPath: this.getContainerPath(),
         surfaceId: this.id
       })
       return true
@@ -165,17 +161,16 @@ export default class ContainerEditor extends Surface {
     const direction = left ? 'left' : 'right'
 
     if (sel && !sel.isNull()) {
-      const container = doc.get(sel.containerId, 'strict')
-
+      let containerPath = sel.containerPath
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
-        let nodePos = container.getPosition(doc.get(sel.getNodeId()))
-        if ((left && nodePos === 0) || (right && nodePos === container.length - 1)) {
+        let nodeIds = doc.get(containerPath)
+        let nodePos = getContainerPosition(doc, sel.getNodeId())
+        if ((left && nodePos === 0) || (right && nodePos === nodeIds.length - 1)) {
           event.preventDefault()
           return
         }
       }
-
       if (sel.isNodeSelection() && !event.shiftKey) {
         this.domSelection.collapse(direction)
       }
@@ -195,11 +190,12 @@ export default class ContainerEditor extends Surface {
     const direction = up ? 'left' : 'right'
 
     if (sel && !sel.isNull()) {
-      const container = doc.get(sel.containerId, 'strict')
+      let containerPath = sel.containerPath
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
-        let nodePos = container.getPosition(doc.get(sel.getNodeId()))
-        if ((up && nodePos === 0) || (down && nodePos === container.length - 1)) {
+        let nodeIds = doc.get(containerPath)
+        let nodePos = getContainerPosition(doc, sel.getNodeId())
+        if ((up && nodePos === 0) || (down && nodePos === nodeIds.length - 1)) {
           event.preventDefault()
           return
         }
@@ -212,12 +208,12 @@ export default class ContainerEditor extends Surface {
         if (!event.shiftKey) {
           event.preventDefault()
           if (up) {
-            let prev = container.getChildAt(nodePos - 1)
-            selectionHelpers.setCursor(editorSession, prev, sel.containerId, 'after')
+            let prev = doc.get(nodeIds[nodePos - 1])
+            selectionHelpers.setCursor(editorSession, prev, containerPath, 'after')
             return
           } else {
-            let next = container.getChildAt(nodePos + 1)
-            selectionHelpers.setCursor(editorSession, next, sel.containerId, 'before')
+            let next = doc.get(nodeIds[nodePos + 1])
+            selectionHelpers.setCursor(editorSession, next, containerPath, 'before')
             return
           }
         }
@@ -263,19 +259,15 @@ export default class ContainerEditor extends Surface {
   }
 
   /**
-    Returns the containerId the editor is bound to
+    Returns the containerPath the editor is bound to
   */
-  getContainerId () {
-    return this.containerId
-  }
-
-  getContainer () {
-    return this.getDocument().get(this.getContainerId())
+  getContainerPath () {
+    return this.containerPath
   }
 
   isEmpty () {
-    let containerNode = this.getContainer()
-    return (containerNode && containerNode.length === 0)
+    let ids = this.getDocument().get(this.containerPath)
+    return (!ids || ids.length === 0)
   }
 
   /*
@@ -308,11 +300,10 @@ export default class ContainerEditor extends Surface {
     // first update the container
     let renderContext = RenderingEngine.createContext(this)
     let $$ = renderContext.$$
-    let container = this.getContainer()
-    let path = container.getContentPath()
+    let containerPath = this.getContainerPath()
     for (let i = 0; i < change.ops.length; i++) {
       let op = change.ops[i]
-      if (op.type === 'update' && op.path[0] === path[0]) {
+      if (op.type === 'update' && isArrayEqual(op.path, containerPath)) {
         let diff = op.diff
         if (diff.type === 'insert') {
           let nodeId = diff.getValue()

@@ -19,7 +19,7 @@ export default function createEditorSession (...seeds) {
         type: 'property',
         path: first.getPath(),
         startOffset: 0,
-        containerId: 'body',
+        containerPath: ['body', 'nodes'],
         surfaceId: 'body'
       })
     } else if (first.isList()) {
@@ -27,7 +27,7 @@ export default function createEditorSession (...seeds) {
         type: 'property',
         path: first.getItemAt(0).getPath(),
         startOffset: 0,
-        containerId: 'body',
+        containerPath: ['body', 'nodes'],
         surfaceId: 'body'
       })
     } else {
@@ -35,7 +35,7 @@ export default function createEditorSession (...seeds) {
         type: 'node',
         nodeId: first.id,
         mode: 'before',
-        containerId: 'body',
+        containerPath: ['body', 'nodes'],
         surfaceId: 'body'
       })
     }

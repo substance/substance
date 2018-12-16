@@ -352,8 +352,10 @@ export default class DOMSelection {
       if (comp && comp._isContainerEditor) {
         let childIdx = (offset === 0) ? 0 : offset - 1
         let isBefore = (offset === 0)
-        let container = comp.getContainer()
-        let childNode = container.getNodeAt(childIdx)
+        let doc = comp.getDocument()
+        let containerPath = comp.getContainerPath()
+        let nodeIds = doc.get(containerPath)
+        let childNode = doc.get(nodeIds[childIdx])
         let childComp = comp.getChildAt(childIdx)
         coor = new Coordinate([childNode.id], isBefore ? 0 : 1)
         coor._comp = childComp
@@ -402,5 +404,5 @@ function _createRange ({start, end, isReverse}) {
     console.error('Coordinates are within two different surfaces. Can not create a selection.')
     return null
   }
-  return new Range(start, end, isReverse, surface.getContainerId(), surface.id)
+  return new Range(start, end, isReverse, surface.getContainerPath(), surface.id)
 }

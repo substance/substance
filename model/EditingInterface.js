@@ -45,10 +45,6 @@ export default class EditingInterface {
     return this._document.create(nodeData)
   }
 
-  createDefaultTextNode (content) {
-    return this._document.createDefaultTextNode(content, this._direction)
-  }
-
   delete (nodeId) {
     return this._document.delete(nodeId)
   }
@@ -70,11 +66,11 @@ export default class EditingInterface {
   createSelection (selData) {
     // TODO: we need to rethink this
     // I'd like to make it convenient for the 99% use cases
-    // which means reusing containerId and surfaceId
+    // which means reusing containerPath and surfaceId
     // However, it does not work well for cases
     // where the surface changes
     // Even better would be just to have surfaceId, and derive
-    // containerId dynamically
+    // containerPath dynamically
     selData = augmentSelection(selData, this._selection)
     return this._document.createSelection(selData)
   }

@@ -4,28 +4,28 @@ import Selection from './Selection'
 import Coordinate from './Coordinate'
 
 /**
-  A selection which is bound to a property. Implements {@link model/Selection}.
-
-  @example
-
-  ```js
-  var propSel = doc.createSelection({
-    type: 'property',
-    path: ['p1', 'content'],
-    startOffset: 3,
-    endOffset: 6
-  })
-*/
-class PropertySelection extends Selection {
+ * A selection which is bound to a property. Implements {@link model/Selection}.
+ *
+ * @example
+ *
+ * ```js
+ * var propSel = doc.createSelection({
+ *   type: 'property',
+ *   path: ['p1', 'content'],
+ *   startOffset: 3,
+ *   endOffset: 6
+ * })
+ */
+export default class PropertySelection extends Selection {
   /**
-    @param {array} path
-    @param {int} startOffset
-    @param {int} endOffset
-    @param {bool} reverse
-    @param {string} [containerId]
-    @param {string} [surfaceId]
-  */
-  constructor (path, startOffset, endOffset, reverse, containerId, surfaceId) {
+   * @param {array} path
+   * @param {int} startOffset
+   * @param {int} endOffset
+   * @param {bool} reverse
+   * @param {string} [containerPath]
+   * @param {string} [surfaceId]
+   */
+  constructor (path, startOffset, endOffset, reverse, containerPath, surfaceId) {
     super()
 
     if (arguments.length === 1) {
@@ -34,7 +34,7 @@ class PropertySelection extends Selection {
       startOffset = data.startOffset
       endOffset = data.endOffset
       reverse = data.reverse
-      containerId = data.containerId
+      containerPath = data.containerPath
       surfaceId = data.surfaceId
     }
 
@@ -51,7 +51,7 @@ class PropertySelection extends Selection {
     */
     this.reverse = Boolean(reverse)
 
-    this.containerId = containerId
+    this.containerPath = containerPath
 
     /**
       Identifier of the surface this selection should be active in.
@@ -86,7 +86,7 @@ class PropertySelection extends Selection {
       startOffset: this.start.offset,
       endOffset: this.end.offset,
       reverse: this.reverse,
-      containerId: this.containerId,
+      containerPath: this.containerPath,
       surfaceId: this.surfaceId
     }
   }
@@ -149,10 +149,10 @@ class PropertySelection extends Selection {
   // ----------------------
 
   /**
-    Get path of a selection, e.g. target property where selected data is stored.
-
-    @returns {String[]} path
-  */
+   * Get path of a selection, e.g. target property where selected data is stored.
+   *
+   * @returns {String[]} path
+   */
   getPath () {
     return this.start.path
   }
@@ -162,12 +162,12 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Checks if this selection is inside another one.
-
-    @param {Selection} other
-    @param {Boolean} [strict] true if should check that it is strictly inside the other
-    @returns {Boolean}
-  */
+   * Checks if this selection is inside another one.
+   *
+   * @param {Selection} other
+   * @param {Boolean} [strict] true if should check that it is strictly inside the other
+   * @returns {Boolean}
+   */
   isInsideOf (other, strict) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
@@ -185,24 +185,24 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Checks if this selection contains another one.
-
-    @param {Selection} other
-    @param {Boolean} [strict] true if should check that it is strictly contains the other
-    @returns {Boolean}
-  */
+   * Checks if this selection contains another one.
+   *
+   * @param {Selection} other
+   * @param {Boolean} [strict] true if should check that it is strictly contains the other
+   * @returns {Boolean}
+   */
   contains (other, strict) {
     if (other.isNull()) return false
     return other.isInsideOf(this, strict)
   }
 
   /**
-    Checks if this selection overlaps another one.
-
-    @param {Selection} other
-    @param {Boolean} [strict] true if should check that it is strictly overlaps the other
-    @returns {Boolean}
-  */
+   * Checks if this selection overlaps another one.
+   *
+   * @param {Selection} other
+   * @param {Boolean} [strict] true if should check that it is strictly overlaps the other
+   * @returns {Boolean}
+   */
   overlaps (other, strict) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
@@ -218,11 +218,11 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Checks if this selection has the right boundary in common with another one.
-
-    @param {Selection} other
-    @returns {Boolean}
-  */
+   * Checks if this selection has the right boundary in common with another one.
+   *
+   * @param {Selection} other
+   * @returns {Boolean}
+   */
   isRightAlignedWith (other) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
@@ -234,11 +234,11 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Checks if this selection has the left boundary in common with another one.
-
-    @param {Selection} other
-    @returns {Boolean}
-  */
+   * Checks if this selection has the left boundary in common with another one.
+   *
+   * @param {Selection} other
+   * @returns {Boolean}
+   */
   isLeftAlignedWith (other) {
     if (other.isNull()) return false
     if (other.isContainerSelection()) {
@@ -250,11 +250,11 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Expands selection to include another selection.
-
-    @param {Selection} other
-    @returns {Selection} a new selection
-  */
+   * Expands selection to include another selection.
+   *
+   * @param {Selection} other
+   * @returns {Selection} a new selection
+   */
   expand (other) {
     if (other.isNull()) return this
 
@@ -273,11 +273,11 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Creates a new selection by truncating this one by another selection.
-
-    @param {Selection} other
-    @returns {Selection} a new selection
-  */
+   * Creates a new selection by truncating this one by another selection.
+   *
+   * @param {Selection} other
+   * @returns {Selection} a new selection
+   */
   truncateWith (other) {
     if (other.isNull()) return this
     if (other.isInsideOf(this, 'strict')) {
@@ -287,7 +287,7 @@ class PropertySelection extends Selection {
     if (!this.overlaps(other)) {
       return this
     }
-    var otherStartOffset, otherEndOffset
+    let otherStartOffset, otherEndOffset
     if (other.isPropertySelection()) {
       otherStartOffset = other.start.offset
       otherEndOffset = other.end.offset
@@ -307,8 +307,8 @@ class PropertySelection extends Selection {
       return this
     }
 
-    var newStartOffset
-    var newEndOffset
+    let newStartOffset
+    let newEndOffset
     if (this.start.offset > otherStartOffset && this.end.offset > otherEndOffset) {
       newStartOffset = otherEndOffset
       newEndOffset = this.end.offset
@@ -339,14 +339,14 @@ class PropertySelection extends Selection {
   }
 
   /**
-    Creates a new selection with given range and same path.
-
-    @param {Number} startOffset
-    @param {Number} endOffset
-    @returns {Selection} a new selection
-  */
+   * Creates a new selection with given range and same path.
+   *
+   * @param {Number} startOffset
+   * @param {Number} endOffset
+   * @returns {Selection} a new selection
+   */
   createWithNewRange (startOffset, endOffset) {
-    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerId, this.surfaceId)
+    var sel = new PropertySelection(this.path, startOffset, endOffset, false, this.containerPath, this.surfaceId)
     var doc = this._internal.doc
     if (doc) {
       sel.attach(doc)
@@ -355,12 +355,10 @@ class PropertySelection extends Selection {
   }
 
   _clone () {
-    return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerId, this.surfaceId)
+    return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerPath, this.surfaceId)
   }
 }
 
 PropertySelection.fromJSON = function (json) {
   return new PropertySelection(json)
 }
-
-export default PropertySelection

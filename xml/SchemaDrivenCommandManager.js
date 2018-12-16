@@ -99,7 +99,7 @@ export default class SchemaDrivenCommandManager extends CommandManager {
 
       // SwitchTypeCommands can only be applied to
       // block-level text nodes
-      if (!parentNode || !sel.containerId || !isInsideText || !parentNode.isContainer()) {
+      if (!parentNode || !sel.containerPath || !isInsideText || !parentNode.isContainer()) {
         _disable(this.switchTypeCommands)
       } else {
         // TODO: disable all commands with types that are not allowed

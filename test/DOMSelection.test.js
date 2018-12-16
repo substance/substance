@@ -27,7 +27,7 @@ uiTest('DOMSelection: Mapping a cursor inside a TextProperty from DOM to model',
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   t.end()
@@ -44,7 +44,7 @@ uiTest('DOMSelection: Mapping a cursor in an empty paragraph from DOM to model',
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   t.end()
@@ -64,7 +64,7 @@ uiTest('DOMSelection: Mapping a ContainerSelection from DOM to model', function 
     startOffset: 1,
     endPath: ['p2', 'content'],
     endOffset: 2,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   t.end()
@@ -81,7 +81,7 @@ ffTest('DOMSelection: Issue #354: Wrong selection in FF when double clicking bet
     type: 'node',
     nodeId: 'p1',
     mode: 'full',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   t.end()
@@ -102,7 +102,7 @@ uiTest('DOMSelection: DOM selection that starts in a TextNode and ends in a para
     startOffset: 0,
     endPath: ['p2', 'content'],
     endOffset: 0,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   t.end()
@@ -122,7 +122,7 @@ uiTest('DOMSelection: Issue #376: Wrong selection mapping at end of paragraph', 
     startOffset: 2,
     endPath: ['p2', 'content'],
     endOffset: 0,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   t.end()
@@ -137,7 +137,7 @@ uiTest('DOMSelection: Rendering a ContainerSelection', function (t) {
     startOffset: 1,
     endPath: ['p2', 'content'],
     endOffset: 1,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   domSelection.setSelection(sel)
@@ -160,7 +160,7 @@ uiTest('DOMSelection: Rendering a cursor after inline node', function (t) {
     type: 'property',
     path: ['p', 'content'],
     startOffset: 3,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
@@ -180,7 +180,7 @@ uiTest('DOMSelection: Rendering a cursor after inline node at the end of a prope
     type: 'property',
     path: ['p', 'content'],
     startOffset: 13,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
@@ -199,7 +199,7 @@ uiTest('DOMSelection: Rendering a cursor after inline node at the end of a prope
 //     type: 'node',
 //     nodeId: 't1',
 //     mode: 'before',
-//     containerId: 'body',
+//     containerPath: ['body', 'nodes'],
 //     surfaceId: 'body'
 //   })
 //   domSelection.setSelection(sel)
@@ -219,7 +219,7 @@ uiTest('DOMSelection: Rendering a cursor after inline node at the end of a prope
 //     type: 'node',
 //     nodeId: 't1',
 //     mode: 'after',
-//     containerId: 'body',
+//     containerPath: ['body', 'nodes'],
 //     surfaceId: 'body'
 //   })
 //   domSelection.setSelection(sel)

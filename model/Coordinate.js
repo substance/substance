@@ -77,6 +77,11 @@ export default class Coordinate {
     return isArrayEqual(this.path, other.path)
   }
 
+  isEqual (other) {
+    if (!other) return false
+    return this.offset === other.offset && this.hasSamePath(other)
+  }
+
   // TODO: do we need this anymore?
   get _isCoordinate () { return true }
 }

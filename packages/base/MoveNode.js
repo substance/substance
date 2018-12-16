@@ -22,22 +22,21 @@ class MoveNode extends DragAndDropHandler {
     // just clear, but don't merge or don't insert a new node
     tx.deleteSelection({ clear: true })
 
-    let containerId = dragState.sourceSelection.containerId
+    let containerPath = dragState.sourceSelection.containerPath
     let surfaceId = dragState.sourceSelection.surfaceId
-    let container = tx.get(containerId)
-
-    let targetNodeId = container.getNodeIdAt(insertPos)
+    let ids = tx.get(containerPath)
+    let targetNodeId = ids[insertPos]
     let insertMode = 'before'
     if (!targetNodeId) {
-      targetNodeId = container.getNodeIdAt(insertPos - 1)
+      targetNodeId = ids[insertPos - 1]
       insertMode = 'after'
     }
     tx.setSelection({
       type: 'node',
       nodeId: targetNodeId,
       mode: insertMode,
-      containerId: containerId,
-      surfaceId: surfaceId
+      containerPath,
+      surfaceId
     })
     tx.paste(copy)
   }

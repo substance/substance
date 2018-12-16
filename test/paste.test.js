@@ -30,7 +30,7 @@ test('paste: Pasting a single paragraph', t => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
   let p1 = tx.get('p1')
@@ -44,7 +44,7 @@ test('paste: Pasting annotated text', t => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -94,7 +94,7 @@ test('paste: Pasting two paragraphs', t => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
   let body = tx.get('body')
@@ -132,7 +132,7 @@ test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
     path: detached.getPath(),
     startOffset: 3,
     // 'detached' is not part of a container
-    containerId: null
+    containerPath: null
   })
   tx.paste(snippet)
   let actual = toUnixLineEndings(detached.content)

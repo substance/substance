@@ -94,7 +94,7 @@ function ClipboardTests (memory) {
     let { editorSession, clipboard } = _fixture(t, simple)
     editorSession.setSelection({
       type: 'container',
-      containerId: 'body',
+      containerPath: ['body', 'nodes'],
       startPath: ['p1', 'content'],
       startOffset: 1,
       endPath: ['p3', 'content'],
@@ -133,7 +133,7 @@ function ClipboardTests (memory) {
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     let event = new ClipboardEvent()
     event.clipboardData.setData('text/plain', 'XXX')
@@ -148,7 +148,7 @@ function ClipboardTests (memory) {
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     let event = new ClipboardEvent()
     clipboard.onPaste(event)
@@ -162,7 +162,7 @@ function ClipboardTests (memory) {
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     let TEXT = 'XXX'
     let event = new ClipboardEvent()
@@ -194,7 +194,7 @@ function ClipboardTests (memory) {
       startOffset: 1,
       endPath: ['p2', 'content'],
       endOffset: 1,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     }))
     let event = new ClipboardEvent()
     clipboard.onCut(event)
@@ -394,7 +394,7 @@ function _fixtureTest (t, html, impl, forceWindows) {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   impl(doc, clipboard)
   platform.isWindows = _isWindows
@@ -421,7 +421,7 @@ function _emptyFixtureTest (t, html, impl, forceWindows) {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   impl(doc, clipboard)
 }

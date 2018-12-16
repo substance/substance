@@ -31,7 +31,7 @@ test("IsolatedNode: IsolatedNode should be 'selected' with node selection", t =>
   editorSession.setSelection({
     type: 'node',
     nodeId: 'c1',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   let expected = {
@@ -47,7 +47,7 @@ test("IsolatedNode: IsolatedNode should be 'co-selected' with spanning container
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],

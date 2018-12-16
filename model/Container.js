@@ -9,19 +9,6 @@ import ContainerMixin from './ContainerMixin'
   or spanning annotations so called ContainerAnnotations.
 */
 export default class Container extends ContainerMixin(DocumentNode) {
-  constructor (...args) {
-    super(...args)
-
-    // NOTE: we are caching positions as they are queried very often,
-    // whereas the number of changes to a container are quite rare.
-    // The cache gets invalidated whenever the container is changed.
-    this._enableCaching()
-  }
-
-  dispose () {
-    this.document.off(this)
-  }
-
   getContentPath () {
     return [this.id, 'nodes']
   }

@@ -1,34 +1,35 @@
+import isArrayEqual from '../util/isArrayEqual'
 import isNil from '../util/isNil'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
+import compareCoordinates from './_compareCoordinates'
+import isCoordinateBefore from './_isCoordinateBefore'
 
 /**
-  A selection spanning multiple nodes.
-
-  @class
-  @extends PropertySelection
-
-  @example
-
-  ```js
-  let containerSel = doc.createSelection({
-    type: 'container',
-    containerId: 'body',
-    startPath: ['p1', 'content'],
-    startOffset: 5,
-    endPath: ['p3', 'content'],
-    endOffset: 4,
-  })
-  ```
-*/
+ * A selection spanning multiple nodes.
+ *
+ *
+ * @example
+ *
+ * ```js
+ * let containerSel = doc.createSelection({
+ *   type: 'container',
+ *   containerPath: 'body',
+ *   startPath: ['p1', 'content'],
+ *   startOffset: 5,
+ *   endPath: ['p3', 'content'],
+ *   endOffset: 4,
+ * })
+ * ```
+ */
 export default class ContainerSelection extends Selection {
-  constructor (containerId, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
+  constructor (containerPath, startPath, startOffset, endPath, endOffset, reverse, surfaceId) {
     super()
 
     if (arguments.length === 1) {
       let data = arguments[0]
-      containerId = data.containerId
+      containerPath = data.containerPath
       startPath = data.startPath
       startOffset = data.startOffset
       endPath = data.endPath
@@ -40,8 +41,8 @@ export default class ContainerSelection extends Selection {
     /**
       @type {String}
     */
-    this.containerId = containerId
-    if (!this.containerId) throw new Error('Invalid arguments: `containerId` is mandatory')
+    this.containerPath = containerPath
+    if (!this.containerPath) throw new Error('Invalid arguments: `containerPath` is mandatory')
 
     this.start = new Coordinate(startPath, startOffset)
     this.end = new Coordinate(isNil(endPath) ? startPath : endPath, isNil(endOffset) ? startOffset : endOffset)
@@ -78,7 +79,7 @@ export default class ContainerSelection extends Selection {
   toJSON () {
     return {
       type: 'container',
-      containerId: this.containerId,
+      containerPath: this.containerPath,
       startPath: this.start.path,
       startOffset: this.start.offset,
       endPath: this.end.path,
@@ -111,7 +112,7 @@ export default class ContainerSelection extends Selection {
   equals (other) {
     return (
       Selection.prototype.equals.call(this, other) &&
-      this.containerId === other.containerId &&
+      isArrayEqual(this.containerPath, other.containerPath) &&
       (this.start.equals(other.start) && this.end.equals(other.end))
     )
   }
@@ -120,7 +121,7 @@ export default class ContainerSelection extends Selection {
     /* istanbul ignore next */
     return [
       'ContainerSelection(',
-      this.containerId, ', ',
+      this.containerPath, ', ',
       JSON.stringify(this.start.path), ', ', this.start.offset,
       ' -> ',
       JSON.stringify(this.end.path), ', ', this.end.offset,
@@ -130,79 +131,61 @@ export default class ContainerSelection extends Selection {
     ].join('')
   }
 
-  /**
-    @return {model/Container} The container node instance for this selection.
-  */
-  getContainer () {
-    if (!this._internal.container) {
-      this._internal.container = this.getDocument().get(this.containerId)
-    }
-    return this._internal.container
-  }
-
   isInsideOf (other, strict) {
     // Note: this gets called from PropertySelection.contains()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false
-    strict = Boolean(strict)
-    let r1 = this._range(this)
-    let r2 = this._range(other)
-    return (r2.start.isBefore(r1.start, strict) &&
-      r1.end.isBefore(r2.end, strict))
+    return (
+      this._isCoordinateBefore(other.start, this.start, strict) &&
+      this._isCoordinateBefore(this.end, other.end, strict)
+    )
   }
 
   contains (other, strict) {
     // Note: this gets called from PropertySelection.isInsideOf()
     // because this implementation can deal with mixed selection types.
     if (other.isNull()) return false
-    strict = Boolean(strict)
-    let r1 = this._range(this)
-    let r2 = this._range(other)
-    return (r1.start.isBefore(r2.start, strict) &&
-      r2.end.isBefore(r1.end, strict))
+    return (
+      this._isCoordinateBefore(this.start, other.start, strict) &&
+      this._isCoordinateBefore(other.end, this.end, strict)
+    )
   }
 
   containsNode (nodeId, strict) {
-    const container = this.getContainer()
-    if (!container.contains(nodeId)) return false
-    const coor = new Coordinate([nodeId], 0)
-    const address = container.getAddress(coor)
-    const r = this._range(this)
-    // console.log('ContainerSelection.containsNode()', address, 'is within', r.start, '->', r.end, '?')
-    let contained = r.start.isBefore(address, strict)
-    if (contained) {
-      address.offset = 1
-      contained = r.end.isAfter(address, strict)
-    }
-    return contained
+    let containerPath = this.containerPath
+    const nodeIds = this._getContainerContent()
+    if (nodeIds.indexOf(nodeId) === -1) return false
+    let doc = this.getDocument()
+    let nodeCoor = { path: [nodeId], offset: 0 }
+    let cmpStart = compareCoordinates(doc, containerPath, nodeCoor, this.start)
+    let cmpEnd = compareCoordinates(doc, containerPath, nodeCoor, this.end)
+    if (cmpStart < 0 || cmpEnd > 0) return false
+    if (strict && (cmpStart === 0 || cmpEnd === 0)) return false
+    return true
   }
 
   overlaps (other) {
-    let r1 = this._range(this)
-    let r2 = this._range(other)
     // it overlaps if they are not disjunct
-    return !(r1.end.isBefore(r2.start, false) ||
-      r2.end.isBefore(r1.start, false))
+    return (
+      !this._isCoordinateBefore(this.end, other.start, false) ||
+      this._isCoordinateBefore(other.end, this.start, false)
+    )
   }
 
   isLeftAlignedWith (other) {
-    let r1 = this._range(this)
-    let r2 = this._range(other)
-    return r1.start.isEqual(r2.start)
+    return this.start.isEqual(other.start)
   }
 
   isRightAlignedWith (other) {
-    let r1 = this._range(this)
-    let r2 = this._range(other)
-    return r1.end.isEqual(r2.end)
+    return this.end.isEqual(other.end)
   }
 
   /**
-    Collapse a selection to chosen direction.
-
-    @param {String} direction either left of right
-    @returns {PropertySelection}
-  */
+   * Collapse a selection to chosen direction.
+   *
+   * @param {String} direction either left of right
+   * @returns {PropertySelection}
+   */
   collapse (direction) {
     let coor
     if (direction === 'left') {
@@ -214,21 +197,19 @@ export default class ContainerSelection extends Selection {
   }
 
   expand (other) {
-    let r1 = this._range(this)
-    let r2 = this._range(other)
     let start
     let end
 
-    if (r1.start.isEqual(r2.start)) {
+    if (this.start.isEqual(other.start)) {
       start = new Coordinate(this.start.path, Math.min(this.start.offset, other.start.offset))
-    } else if (r1.start.isAfter(r2.start)) {
+    } else if (this._isCoordinateBefore(other.start, this.start, false)) {
       start = new Coordinate(other.start.path, other.start.offset)
     } else {
       start = this.start
     }
-    if (r1.end.isEqual(r2.end)) {
+    if (this.end.isEqual(other.end)) {
       end = new Coordinate(this.end.path, Math.max(this.end.offset, other.end.offset))
-    } else if (r1.end.isBefore(r2.end, false)) {
+    } else if (this._isCoordinateBefore(this.end, other.end, false)) {
       end = new Coordinate(other.end.path, other.end.offset)
     } else {
       end = this.end
@@ -245,25 +226,23 @@ export default class ContainerSelection extends Selection {
     if (!this.overlaps(other)) {
       return this
     }
-    let r1 = this._range(this)
-    let r2 = this._range(other)
     let start, end
-    if (r2.start.isBefore(r1.start, 'strict') && r2.end.isBefore(r1.end, 'strict')) {
+    if (this._isCoordinateBefore(other.start, this.start, 'strict') && this._isCoordinateBefore(other.end, this.end, 'strict')) {
       start = other.end
       end = this.end
-    } else if (r1.start.isBefore(r2.start, 'strict') && r1.end.isBefore(r2.end, 'strict')) {
+    } else if (this._isCoordinateBefore(this.start, other.start, 'strict') && this._isCoordinateBefore(this.end, other.end, 'strict')) {
       start = this.start
       end = other.start
-    } else if (r1.start.isEqual(r2.start)) {
-      if (r2.end.isBefore(r1.end, 'strict')) {
+    } else if (this.start.isEqual(other.start)) {
+      if (this._isCoordinateBefore(other.end, this.end, 'strict')) {
         start = other.end
         end = this.end
       } else {
         // the other selection is larger which eliminates this one
         return Selection.nullSelection
       }
-    } else if (r1.end.isEqual(r2.end)) {
-      if (r1.start.isBefore(r2.start, 'strict')) {
+    } else if (this.end.isEqual(other.end)) {
+      if (this._isCoordinateBefore(this.start, other.start, 'strict')) {
         start = this.start
         end = other.start
       } else {
@@ -279,64 +258,45 @@ export default class ContainerSelection extends Selection {
   }
 
   /**
-    Get the node ids covered by this selection.
-
-    @returns {String[]} an array of ids
-  */
+   * Get the node ids covered by this selection.
+   *
+   * @returns {String[]} an getNodeIds of ids
+   */
   getNodeIds () {
-    const container = this.getContainer()
-    const startPos = container.getPosition(this.start.path[0])
-    const endPos = container.getPosition(this.end.path[0])
-    return container.getContent().slice(startPos, endPos + 1)
+    // TODO is this still used?
+    // TODO: this is not very efficient
+    const nodeIds = this._getContainerContent()
+    const startPos = nodeIds.indexOf(this.start.path[0])
+    const endPos = nodeIds.indexOf(this.end.path[0])
+    return nodeIds.slice(startPos, endPos + 1)
   }
 
   /**
-    Splits a container selection into property selections.
-
-    @returns {PropertySelection[]}
-  */
+   * Splits a container selection into property selections.
+   *
+   * @returns {PropertySelection[]}
+   */
   splitIntoPropertySelections () {
-    let sels = []
     let fragments = this.getFragments()
-    fragments.forEach(function (fragment) {
-      if (fragment instanceof Selection.Fragment) {
-        sels.push(
-          new PropertySelection(fragment.path, fragment.startOffset,
-            fragment.endOffset, false, this.containerId, this.surfaceId)
-        )
-      }
-    }.bind(this))
-    return sels
+    return fragments.filter(f => f instanceof Selection.Fragment).map(f => {
+      return new PropertySelection(f.path, f.startOffset,
+        f.endOffset, false, this.containerPath, this.surfaceId)
+    })
+  }
+
+  /**
+   * @return {Array} an array of ids.
+   */
+  _getContainerContent () {
+    return this.getDocument().get(this.containerPath)
   }
 
   _clone () {
     return new ContainerSelection(this)
   }
 
-  _range (sel) {
-    // EXPERIMENTAL: caching the internal address based range
-    // as we use it very often.
-    // However, this is dangerous as this data can get invalid by a change
-    if (sel._internal.addressRange) {
-      return sel._internal.addressRange
-    }
-
-    let container = this.getContainer()
-    let startAddress = container.getAddress(sel.start)
-    let endAddress
-    if (sel.isCollapsed()) {
-      endAddress = startAddress
-    } else {
-      endAddress = container.getAddress(sel.end)
-    }
-    let addressRange = {
-      start: startAddress,
-      end: endAddress
-    }
-    if (sel._isContainerSelection) {
-      sel._internal.addressRange = addressRange
-    }
-    return addressRange
+  _isCoordinateBefore (coor1, coor2, strict) {
+    return isCoordinateBefore(this.getDocument(), this.containerPath, coor1, coor2, strict)
   }
 
   get path () {
@@ -359,12 +319,12 @@ function _createNewSelection (containerSel, start, end) {
       path: start.path,
       startOffset: start.offset,
       endOffset: start.offset,
-      containerId: containerSel.containerId,
+      containerPath: containerSel.containerPath,
       surfaceId: containerSel.surfaceId
     })
   } else {
     newSel = new ContainerSelection(
-      containerSel.containerId,
+      containerSel.containerPath,
       start.path, start.offset, end.path, end.offset,
       false, containerSel.surfaceId
     )

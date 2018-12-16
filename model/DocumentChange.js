@@ -7,6 +7,7 @@ import uuid from '../util/uuid'
 import OperationSerializer from './OperationSerializer'
 import ObjectOperation from './ObjectOperation'
 import { fromJSON as selectionFromJSON } from './selectionHelpers'
+import { getContainerPosition } from './documentHelpers'
 
 class DocumentChange {
   constructor (ops, before, after) {
@@ -107,12 +108,12 @@ class DocumentChange {
       _checkAnnotation(op)
     }
 
-    affectedContainerAnnos.forEach(function (anno) {
-      let container = doc.get(anno.containerId, 'strict')
-      let startPos = container.getPosition(anno.start.path[0])
-      let endPos = container.getPosition(anno.end.path[0])
+    affectedContainerAnnos.forEach(anno => {
+      let startPos = getContainerPosition(doc, anno.start.path[0])
+      let endPos = getContainerPosition(doc, anno.end.path[0])
+      let nodeIds = doc.get(anno.containerPath)
       for (let pos = startPos; pos <= endPos; pos++) {
-        let node = container.getChildAt(pos)
+        let node = doc.get(nodeIds[pos])
         let path
         if (node.isText()) {
           path = node.getPath()

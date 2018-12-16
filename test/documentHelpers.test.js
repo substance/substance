@@ -51,7 +51,7 @@ test('documentHelpers: Get text for container selection', (t) => {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p2', 'content'],

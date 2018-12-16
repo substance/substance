@@ -75,7 +75,7 @@ export function _il1 (doc) {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.insertInlineNode({
     type: 'test-inline-node',

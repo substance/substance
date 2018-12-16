@@ -39,7 +39,7 @@ export default class CorrectionTool extends ToggleTool {
         path: node.start.path,
         startOffset: node.start.offset,
         endOffset: node.end.offset,
-        containerId: sel.containerId
+        containerPath: sel.containerPath
       })
       tx.insertText(suggestion)
     })

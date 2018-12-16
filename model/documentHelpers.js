@@ -34,24 +34,24 @@ export function getPropertyAnnotationsForSelection (doc, sel, options) {
 
   @param {Document} doc
   @param {Selection} sel
-  @param {String} containerId
+  @param {String} containerPath
   @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
 */
-export function getContainerAnnotationsForSelection (doc, sel, containerId, options) {
+export function getContainerAnnotationsForSelection (doc, sel, containerPath, options) {
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
   // to properties which make it easy to lookup.
   /* istanbul ignore next */
-  if (!containerId) {
-    throw new Error("'containerId' is required.")
+  if (!containerPath) {
+    throw new Error("'containerPath' is required.")
   }
   options = options || {}
   let index = doc.getIndex('container-annotations')
   let annotations = []
   if (index) {
-    annotations = index.get(containerId, options.type)
+    annotations = index.get(containerPath, options.type)
     annotations = filter(annotations, function (anno) {
       return sel.overlaps(anno.getSelection())
     })
@@ -367,3 +367,40 @@ export function getNodes (doc, ids) {
 // and by ClipboardImporter/Exporter
 export const SNIPPET_ID = 'snippet'
 export const TEXT_SNIPPET_ID = 'text-snippet'
+
+export function insertAt (doc, containerPath, pos, id) {
+  doc.update(containerPath, { type: 'insert', pos, value: id })
+}
+
+export function append (doc, containerPath, id) {
+  insertAt(doc, containerPath, doc.get(containerPath).length, id)
+}
+
+export function removeAt (doc, containerPath, pos) {
+  doc.update(containerPath, { type: 'delete', pos })
+}
+
+export function getNodeAt (doc, containerPath, nodePos) {
+  let ids = doc.get(containerPath)
+  return doc.get(ids[nodePos])
+}
+
+export function getPreviousNode (doc, containerPath, nodePos) {
+  if (nodePos > 0) {
+    return getNodeAt(doc, containerPath, nodePos - 1)
+  }
+}
+
+export function getNextNode (doc, containerPath, nodePos) {
+  return getNodeAt(doc, containerPath, nodePos + 1)
+}
+
+export function getContainerPosition (doc, nodeId) {
+  return doc.get(nodeId).getXpath().pos
+}
+
+export { default as compareCoordinates } from './_compareCoordinates'
+
+export { default as isCoordinateBefore } from './_isCoordinateBefore'
+
+export { default as getContainerRoot } from './_getContainerRoot'

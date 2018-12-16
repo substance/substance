@@ -18,7 +18,7 @@ uiTest('Surface: Set the selection after creating annotation.', function (t) {
     path: ['p1', 'content'],
     startOffset: 0,
     endOffset: 5,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   editorSession.transaction(function (tx) {
@@ -41,7 +41,7 @@ uiTest('Surface: Render a reverse selection.', function (t) {
     endPath: ['p2', 'content'],
     endOffset: 2,
     reverse: true,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   var wsel = BrowserDOMElement.getWindowSelection()

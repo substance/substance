@@ -1,7 +1,7 @@
 import last from '../../util/last'
 import Command from '../../ui/Command'
 
-class SelectAll extends Command {
+export default class SelectAll extends Command {
   getCommandState (params) {
     let editorSession = params.editorSession
     let isBlurred = editorSession.isBlurred()
@@ -25,8 +25,8 @@ class SelectAll extends Command {
       let sel
       // TODO: what about CustomSurfaces?
       if (surface._isContainerEditor) {
-        let container = surface.getContainer()
-        let nodeIds = container.getContent()
+        let containerPath = surface.getContainerPath()
+        let nodeIds = doc.get(containerPath)
         if (nodeIds.length === 0) return false
         let firstNodeId = nodeIds[0]
         let lastNodeId = last(nodeIds)
@@ -36,7 +36,7 @@ class SelectAll extends Command {
           startOffset: 0,
           endPath: [lastNodeId],
           endOffset: 1,
-          containerId: container.id,
+          containerPath,
           surfaceId: surface.id
         })
       } else if (surface._isTextPropertyEditor) {
@@ -56,5 +56,3 @@ class SelectAll extends Command {
     return false
   }
 }
-
-export default SelectAll

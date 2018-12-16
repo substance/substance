@@ -1,7 +1,7 @@
 import map from '../util/map'
 import last from '../util/last'
 import uuid from '../util/uuid'
-import { deleteNode, SNIPPET_ID, TEXT_SNIPPET_ID } from './documentHelpers'
+import { deleteNode, SNIPPET_ID, TEXT_SNIPPET_ID, removeAt, getContainerPosition, insertAt } from './documentHelpers'
 import { setCursor } from './selectionHelpers'
 import _transferWithDisambiguatedIds from './_transferWithDisambiguatedIds'
 
@@ -24,7 +24,7 @@ export default function paste (tx, args) {
   args.text = args.text || ''
   let pasteDoc = args.doc
   // TODO: is there a better way to detect that this paste is happening within a container?
-  let inContainer = Boolean(sel.containerId)
+  let inContainer = Boolean(sel.containerPath)
   // first delete the current selection
   if (!sel.isCollapsed()) {
     tx.deleteSelection()
@@ -187,19 +187,18 @@ function _pasteAnnotatedText (tx, copy) {
 
 function _pasteDocument (tx, pasteDoc) {
   let sel = tx.selection
-  let containerId = sel.containerId
-  let container = tx.get(containerId)
+  let containerPath = sel.containerPath
   let insertPos
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
     let nodeId = sel.start.getNodeId()
-    let startPos = container.getPosition(nodeId, 'strict')
+    let startPos = getContainerPosition(tx, nodeId)
     let text = tx.get(startPath)
     // Break, unless we are at the last character of a node,
     // then we can simply insert after the node
     if (text.length === 0) {
       insertPos = startPos
-      container.hide(nodeId)
+      removeAt(tx, containerPath, insertPos)
       deleteNode(tx, tx.get(nodeId))
     } else if (text.length === sel.start.offset) {
       insertPos = startPos + 1
@@ -208,7 +207,7 @@ function _pasteDocument (tx, pasteDoc) {
       insertPos = startPos + 1
     }
   } else if (sel.isNodeSelection()) {
-    let nodePos = container.getPosition(sel.getNodeId(), 'strict')
+    let nodePos = getContainerPosition(tx, sel.getNodeId())
     if (sel.isBefore()) {
       insertPos = nodePos
     } else if (sel.isAfter()) {
@@ -224,13 +223,12 @@ function _pasteDocument (tx, pasteDoc) {
   let nodes = nodeIds.map(id => pasteDoc.get(id))
 
   // now filter nodes w.r.t. allowed types for the given container
-  let contentProperty = tx.getProperty(container.getContentPath())
-  let targetTypes = contentProperty.targetTypes
+  let containerProperty = tx.getProperty(containerPath)
+  let targetTypes = containerProperty.targetTypes
   // TODO: instead of dropping all invalid ones we could try to convert text nodes to the default text node
   if (targetTypes && targetTypes.length > 0) {
     nodes = nodes.filter(node => targetTypes.indexOf(node.type) >= 0)
   }
-
   for (let node of nodes) {
     // Note: this will on the one hand make sure node ids are changed
     // to avoid collisions in the target doc
@@ -239,12 +237,12 @@ function _pasteDocument (tx, pasteDoc) {
     let newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
     // get the node in the targetDocument
     node = tx.get(newId)
-    container.showAt(insertPos++, newId)
+    insertAt(tx, containerPath, insertPos++, newId)
     insertedNodes.push(node)
   }
 
   if (insertedNodes.length > 0) {
     let lastNode = last(insertedNodes)
-    setCursor(tx, lastNode, containerId, 'after')
+    setCursor(tx, lastNode, containerPath, 'after')
   }
 }

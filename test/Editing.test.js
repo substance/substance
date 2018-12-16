@@ -28,7 +28,7 @@ test('Editing: IT1: Inserting text with cursor in the middle of a TextProperty',
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -46,7 +46,7 @@ test('Editing: IT2: Inserting text with cursor within TextProperty inside annota
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -66,7 +66,7 @@ test('Editing: IT3: Inserting text with cursor within TextProperty at the start 
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -87,7 +87,7 @@ test('Editing: IT4: Inserting text with cursor within TextProperty at the end of
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -109,7 +109,7 @@ test('Editing: IT5: Inserting text with range within TextProperty', (t) => {
     path: ['p1', 'content'],
     startOffset: 2,
     endOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -130,7 +130,7 @@ test('Editing: IT6: Inserting text with range within TextProperty overlapping an
     path: ['p1', 'content'],
     startOffset: 3,
     endOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -153,7 +153,7 @@ test('Editing: IT7: Inserting text with range within TextProperty inside an anno
     path: ['p1', 'content'],
     startOffset: 3,
     endOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -177,7 +177,7 @@ test('Editing: IT8: Inserting text with range within TextProperty starting insid
     path: ['p1', 'content'],
     startOffset: 4,
     endOffset: 6,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -199,7 +199,7 @@ test('Editing: IT9: Inserting text after an InlineNode node', (t) => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
@@ -220,7 +220,7 @@ test('Editing: IT10: Typing over an InlineNode node', (t) => {
     path: ['p1', 'content'],
     startOffset: 3,
     endOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
@@ -237,7 +237,7 @@ test('Editing: IT11: Typing over a selected IsolatedNode', (t) => {
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
@@ -255,7 +255,7 @@ test('Editing: IT12: Typing before an IsolatedNode', (t) => {
     type: 'node',
     nodeId: 'in1',
     mode: 'before',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
@@ -273,7 +273,7 @@ test('Editing: IT13: Typing after an IsolatedNode', (t) => {
     type: 'node',
     nodeId: 'in1',
     mode: 'after',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
@@ -295,7 +295,7 @@ test('Editing: IT14: Typing over a ContainerSelection', (t) => {
     startOffset: 3,
     endPath: p2.getPath(),
     endOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('Y')
@@ -313,7 +313,7 @@ test('Editing: IT15: Inserting text into a ListItem', (t) => {
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
@@ -347,7 +347,7 @@ test('Editing: II1: Inserting InlineNode node into a TextProperty', (t) => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertInlineNode({
@@ -372,7 +372,7 @@ test('Editing: IB2: Inserting BlockNode using cursor at start of a TextNode', (t
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -397,7 +397,7 @@ test('Editing: IB3: Inserting an existing BlockNode', (t) => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.create({
@@ -419,7 +419,7 @@ test('Editing: IB4: Inserting a BlockNode when an IsolatedNode is selected', (t)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -440,7 +440,7 @@ test('Editing: IB5: Inserting a BlockNode before an IsolatedNode', (t) => {
     type: 'node',
     nodeId: 'in1',
     mode: 'before',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -459,7 +459,7 @@ test('Editing: IB6: Inserting a BlockNode after an IsolatedNode', (t) => {
     type: 'node',
     nodeId: 'in1',
     mode: 'after',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -480,7 +480,7 @@ test('Editing: IB7: Inserting a BlockNode with an expanded PropertySelection', (
     path: p1.getPath(),
     startOffset: 3,
     endOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -503,7 +503,7 @@ test('Editing: IB8: Inserting a BlockNode into an empty paragraph', (t) => {
     type: 'property',
     path: empty.getPath(),
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -524,7 +524,7 @@ test('Editing: IB9: Inserting a BlockNode after a text node', (t) => {
     type: 'property',
     path: p1.getPath(),
     startOffset: p1.getLength(),
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -546,7 +546,7 @@ test('Editing: IB10: Inserting a BlockNode with a collapsed ContainerSelection',
     startOffset: 3,
     endPath: p1.getPath(),
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -570,7 +570,7 @@ test('Editing: IB11: Inserting a BlockNode with a ContainerSelection', (t) => {
     startOffset: 3,
     endPath: p2.getPath(),
     endOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.insertBlockNode({
@@ -618,7 +618,7 @@ test('Editing: DEL2: Deleting using DELETE with cursor at the end of a TextNode 
     type: 'property',
     path: ['p2', 'content'],
     startOffset: P2_TEXT.length,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -656,7 +656,7 @@ test('Editing: DEL4: Deleting using DELETE with cursor inside an empty TextNode 
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -678,7 +678,7 @@ test('Editing: DEL5: Deleting using DELETE with cursor inside an empty TextNode 
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -697,7 +697,7 @@ test('Editing: DEL6: Deleting using DELETE with cursor inside an empty TextNode 
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -717,7 +717,7 @@ test('Editing: DEL7: Deleting using DELETE with cursor at the end of a non-empty
     type: 'property',
     path: ['p1', 'content'],
     startOffset: P1_TEXT.length,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -738,7 +738,7 @@ test('Editing: DEL8: Deleting using DELETE with cursor at the end of a non-empty
     type: 'property',
     path: ['p1', 'content'],
     startOffset: P1_TEXT.length,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -760,7 +760,7 @@ test('Editing: DEL9: Deleting using DELETE with cursor after an IsolatedNode and
     type: 'node',
     nodeId: 'block1',
     mode: 'after',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -781,7 +781,7 @@ test('Editing: DEL10: Deleting using DELETE with cursor after an IsolatedNode an
     type: 'node',
     nodeId: 'block1',
     mode: 'after',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -800,7 +800,7 @@ test('Editing: DEL11: Deleting using BACKSPACE with cursor in the middle of a Te
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -818,7 +818,7 @@ test('Editing: DEL12: Deleting using BACKSPACE with cursor inside an empty TextN
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -838,7 +838,7 @@ test('Editing: DEL13: Deleting using BACKSPACE with cursor inside an empty TextN
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -856,7 +856,7 @@ test('Editing: DEL14: Deleting using BACKSPACE with cursor at the start of a non
     type: 'property',
     path: ['p2', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -877,7 +877,7 @@ test('Editing: DEL15: Deleting using BACKSPACE with cursor at the start of a non
     type: 'property',
     path: ['p2', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -897,7 +897,7 @@ test('Editing: DEL16: Deleting using BACKSPACE with cursor after IsolatedNode', 
     type: 'node',
     mode: 'after',
     nodeId: 'block1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -919,7 +919,7 @@ test('Editing: DEL17: Deleting using BACKSPACE with cursor before IsolatedNode w
     type: 'node',
     mode: 'before',
     nodeId: 'block2',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -941,7 +941,7 @@ test('Editing: DEL18: Deleting using BACKSPACE with cursor before IsolatedNode a
     type: 'node',
     mode: 'before',
     nodeId: 'block2',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -960,7 +960,7 @@ test('Editing: DEL19: Deleting an entirely selected IsolatedNode', (t) => {
   editorSession.setSelection({
     type: 'node',
     nodeId: 'block1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -986,7 +986,7 @@ test('Editing: DEL20: Deleting a range starting before a TextNode and ending aft
     startOffset: 0,
     endPath: p2.getPath(),
     endOffset: p2.getLength(),
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1013,7 +1013,7 @@ test('Editing: DEL21: Deleting a range starting in the middle of a TextNode and 
     startOffset: 3,
     endPath: p2.getPath(),
     endOffset: p2.getLength(),
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1040,7 +1040,7 @@ test('Editing: DEL22: Deleting a range starting before a TextNode and ending in 
     startOffset: 0,
     endPath: p2.getPath(),
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1067,7 +1067,7 @@ test('Editing: DEL23: Deleting a range starting in the middle of a TextNode and 
     startOffset: 3,
     endPath: p2.getPath(),
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1094,7 +1094,7 @@ test('Editing: DEL24: Deleting a range starting in the middle of a TextNode and 
     startOffset: 3,
     endPath: ['l1-1', 'content'],
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1120,7 +1120,7 @@ test('Editing: DEL25: Deleting a range starting in the middle of a ListItem and 
     startOffset: 3,
     endPath: p1.getPath(),
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1146,7 +1146,7 @@ test('Editing: DEL26: Deleting a range within a ListItem', (t) => {
     startOffset: 3,
     endPath: ['l1-2', 'content'],
     endOffset: 6,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1170,7 +1170,7 @@ test('Editing: DEL27: Deleting a range across two ListItems within the same List
     startOffset: 3,
     endPath: ['l1-2', 'content'],
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1194,7 +1194,7 @@ test('Editing: DEL28: Deleting a ContainerSelection within a single TextNode', (
     startOffset: 3,
     endPath: p1.getPath(),
     endOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1229,7 +1229,7 @@ test('Editing: DEL30: Merging two ListItems using DELETE', (t) => {
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: LI1_TEXT.length,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -1251,7 +1251,7 @@ test('Editing: DEL31: Merging a List into previous List using DELETE', (t) => {
     type: 'property',
     path: ['l1-2', 'content'],
     startOffset: LI2_TEXT.length,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -1271,7 +1271,7 @@ test('Editing: DEL31-2: Merging a List into previous List using DELETE on an emp
     type: 'property',
     path: ['empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -1294,7 +1294,7 @@ test('Editing: DEL32: Merging an empty List into previous TextNode using DELETE'
     type: 'property',
     path: p1.getPath(),
     startOffset: p1.getLength(),
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
@@ -1349,12 +1349,11 @@ test('Editing: DEL34: Deleting using DEL at the end of a text property editor', 
 
 test('Editing: DEL35: Deleting a NodeSelection', (t) => {
   let { editorSession, doc } = setupEditor(t, _t1)
-  let body = doc.get('body')
   let table = doc.get('t1')
   editorSession.setSelection({
     type: 'node',
     nodeId: table.id,
-    containerId: body.id
+    containerPath: ['body', 'nodes']
   })
   let change = editorSession.transaction((tx) => {
     tx.deleteSelection()
@@ -1383,7 +1382,7 @@ test('Editing: BR2: Breaking a TextNode', (t) => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1404,7 +1403,7 @@ test('Editing: BR3: Breaking annotated text with cursor before the annotation', 
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1424,7 +1423,7 @@ test('Editing: BR4: Breaking annotated text with cursor inside the annotation', 
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1447,7 +1446,7 @@ test('Editing: BR5: Breaking a TextNode at the first position', (t) => {
     type: 'property',
     path: h1.getPath(),
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1474,7 +1473,7 @@ test('Editing: BR5: Breaking a TextNode at the last position', (t) => {
     type: 'property',
     path: h1.getPath(),
     startOffset: h1.getLength(),
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1502,7 +1501,7 @@ test('Editing: BR6: Breaking a ContainerSelection', (t) => {
     startOffset: 3,
     endPath: ['p2', 'content'],
     endOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1523,7 +1522,7 @@ test('Editing: BR7: Breaking a NodeSelection', (t) => {
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1546,7 +1545,7 @@ test('Editing: BR8: Breaking a NodeSelection (before)', (t) => {
     type: 'node',
     nodeId: 'in1',
     mode: 'before',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1557,7 +1556,7 @@ test('Editing: BR8: Breaking a NodeSelection (before)', (t) => {
     type: 'node',
     nodeId: 'in1',
     mode: 'before',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   t.end()
 })
@@ -1569,7 +1568,7 @@ test('Editing: BR9: Breaking with an expanded PropertySelection', (t) => {
     path: ['p1', 'content'],
     startOffset: 3,
     endOffset: 5,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1593,7 +1592,7 @@ test('Editing: BR10: Breaking a ListItem with cursor in the middle of text', (t)
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1616,7 +1615,7 @@ test('Editing: BR11: Breaking a ListItem with cursor at begin of text', (t) => {
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1639,7 +1638,7 @@ test('Editing: BR12: Splitting a List by breaking an empty ListItem', (t) => {
     type: 'property',
     path: ['l1-empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1668,7 +1667,7 @@ test('Editing: BR13: Breaking the last empty list item', (t) => {
     type: 'property',
     path: ['l1-empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1693,7 +1692,7 @@ test('Editing: BR14: Breaking a list with only one empty item', (t) => {
     type: 'property',
     path: ['l1-empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1717,7 +1716,7 @@ test('Editing: BR15: Breaking a list with a first empty item', (t) => {
     type: 'property',
     path: ['l1-empty', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.break()
@@ -1744,7 +1743,7 @@ test('Editing: L5-1: Toggling the first item of a List using BACKSPACE', (t) => 
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
@@ -1769,7 +1768,7 @@ test('Editing: L8-1: Toggling a paragraph into a List', (t) => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.toggleList({ ordered: false })
@@ -1790,7 +1789,7 @@ test('Editing: L8-2: Toggling first list-item into a paragraph', (t) => {
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.toggleList()
@@ -1812,7 +1811,7 @@ test('Editing: L8-3: Toggling last list-item into a paragraph', (t) => {
     type: 'property',
     path: ['l1-2', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.toggleList()
@@ -1834,7 +1833,7 @@ test('Editing: L8-4: Toggling a middle list-item into a paragraph splitting the 
     type: 'property',
     path: ['l1-3', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.toggleList()
@@ -1859,7 +1858,7 @@ test('Editing: L8-5: Toggling the only list-item of a list into a paragraph', (t
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.toggleList()
@@ -1904,7 +1903,7 @@ test('Editing: IND1: Indenting a ListItem', (t) => {
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.indent()
@@ -1920,7 +1919,7 @@ test('Editing: IND2: Dedenting a ListItem', (t) => {
     type: 'property',
     path: ['l1-1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.dedent()
@@ -1938,7 +1937,7 @@ test('Editing: CP1: Copying a property selection', (t) => {
     path: ['p1', 'content'],
     startOffset: 4,
     endOffset: 9,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let copy = editor.copySelection()
   let textNode = copy.get(documentHelpers.TEXT_SNIPPET_ID)
@@ -1955,7 +1954,7 @@ test('Editing: CP2: Copying a property selection with annotated text', (t) => {
     path: ['p2', 'content'],
     startOffset: 10,
     endOffset: 19,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let copy = editor.copySelection()
   t.equal(copy.get([documentHelpers.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.')
@@ -1972,7 +1971,7 @@ test('Editing: CP3: Copying a container selection', (t) => {
   let editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['h1', 'content'],
     startOffset: 4,
     endPath: ['p2', 'content'],
@@ -1997,7 +1996,7 @@ test('Editing: CP4: Copying a paragraph', (t) => {
   let editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2'],
     startOffset: 0,
     endPath: ['p2'],
@@ -2018,7 +2017,7 @@ test('Editing: CP5: Copying two ListItems', (t) => {
     startOffset: 3,
     endPath: ['l1-2', 'content'],
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let copy = editor.copySelection()
   let content = copy.getContainer()
@@ -2042,7 +2041,7 @@ test('Editing: CP6: Copying a paragraph and a ListItem', (t) => {
     startOffset: 3,
     endPath: ['l1-1', 'content'],
     endOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let copy = editor.copySelection()
   let content = copy.getContainer()
@@ -2061,7 +2060,7 @@ test('Editing: CP7 Copying a table', (t) => {
   editor.setSelection({
     type: 'node',
     nodeId: 't1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let copy = editor.copySelection()
   let t1 = copy.get('t1')
@@ -2084,7 +2083,7 @@ test('Editing: CP8 Copying a sparse table', (t) => {
   editor.setSelection({
     type: 'node',
     nodeId: 't1',
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let copy = editor.copySelection()
   let t1 = copy.get('t1')
@@ -2113,14 +2112,14 @@ test('Editing: CP9: Copy and Pasting a List', (t) => {
       startOffset: 0,
       endPath: ['l1-2', 'content'],
       endOffset: LI2_TEXT.length,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     let copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['empty', 'content'],
       startOffset: 0,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     tx.paste(copy)
   })
@@ -2145,14 +2144,14 @@ test('Editing: CP10: Copy and Pasting a List partially', (t) => {
       startOffset: 3,
       endPath: ['l1-2', 'content'],
       endOffset: 3,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     let copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['empty', 'content'],
       startOffset: 0,
-      containerId: 'body'
+      containerPath: ['body', 'nodes']
     })
     tx.paste(copy)
   })
@@ -2208,7 +2207,7 @@ test('Editing: ST1: Switching text type', (t) => {
     path: p1.getPath(),
     startOffset: 0,
     endOffset: 0,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
     tx.switchTextType({type: 'heading', level: 1})

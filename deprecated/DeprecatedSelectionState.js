@@ -1,6 +1,7 @@
 import Selection from '../model/Selection'
 import {
-  getPropertyAnnotationsForSelection, getContainerAnnotationsForSelection, getMarkersForSelection
+  getPropertyAnnotationsForSelection, getContainerAnnotationsForSelection, getMarkersForSelection,
+  getContainerRoot, getPreviousNode, getNextNode
 } from '../model/documentHelpers'
 import { isFirst, isLast } from '../model/selectionHelpers'
 
@@ -43,29 +44,26 @@ export default class DeprecatedSelectionState {
 
   _deriveContainerSelectionState (sel) {
     let doc = this.document
-    if (sel.containerId) {
-      let container = doc.get(sel.containerId)
-      this.container = container
+    let containerPath = sel.containerPath
+    if (containerPath) {
       let startId = sel.start.getNodeId()
       let endId = sel.end.getNodeId()
-      let startNode = doc.get(startId).getContainerRoot()
-      let startPos = container.getPosition(startNode)
+      let startNode = getContainerRoot(doc, containerPath, startId)
+      let startPos = startNode.getXpath().pos
       if (startPos > 0) {
-        this.previousNode = container.getNodeAt(startPos - 1)
+        this.previousNode = getPreviousNode(doc, containerPath, startPos)
       }
-      this.isFirst = isFirst(doc, sel.start)
+      this.isFirst = isFirst(doc, containerPath, sel.start)
       let endNode, endPos
       if (endId === startId) {
         endNode = startNode
         endPos = startPos
       } else {
-        endNode = doc.get(endId).getContainerRoot()
-        endPos = container.getPosition(endNode)
+        endNode = getContainerRoot(doc, containerPath, endId)
+        endPos = endNode.getXpath().pos
       }
-      if (endPos < container.getLength() - 1) {
-        this.nextNode = container.getNodeAt(endPos + 1)
-      }
-      this.isLast = isLast(doc, sel.end)
+      this.nextNode = getNextNode(doc, containerPath, endPos)
+      this.isLast = isLast(doc, containerPath, sel.end)
     }
   }
 
@@ -85,9 +83,9 @@ export default class DeprecatedSelectionState {
     if (propAnnos.length === 1 && propAnnos[0].isInlineNode()) {
       this.isInlineNodeSelection = propAnnos[0].getSelection().equals(sel)
     }
-    const containerId = sel.containerId
-    if (containerId) {
-      const containerAnnos = getContainerAnnotationsForSelection(doc, sel, containerId)
+    const containerPath = sel.containerPath
+    if (containerPath) {
+      const containerAnnos = getContainerAnnotationsForSelection(doc, sel, containerPath)
       containerAnnos.forEach(_add)
     }
     this.annosByType = annosByType
@@ -107,7 +105,6 @@ export default class DeprecatedSelectionState {
     // flags for inline nodes
     this.isInlineNodeSelection = false
     // container information (only for ContainerSelection)
-    this.container = null
     this.previousNode = null
     this.nextNode = null
     // if the previous node is one char away

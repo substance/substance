@@ -4,6 +4,7 @@ import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
+import getContainerRoot from './_getContainerRoot'
 
 export function fromJSON (json) {
   if (!json) return Selection.nullSelection
@@ -26,9 +27,9 @@ export function fromJSON (json) {
 /*
   Helper to check if a coordinate is the first position of a node.
 */
-export function isFirst (doc, coor) {
+export function isFirst (doc, containerPath, coor) {
   if (coor.isNodeCoordinate() && coor.offset === 0) return true
-  let node = doc.get(coor.path[0]).getContainerRoot()
+  let node = getContainerRoot(doc, containerPath, coor.path[0])
   if (node.isText() && coor.offset === 0) return true
   if (node.isList()) {
     let itemId = coor.path[0]
@@ -39,9 +40,9 @@ export function isFirst (doc, coor) {
 /*
   Helper to check if a coordinate is the last position of a node.
 */
-export function isLast (doc, coor) {
+export function isLast (doc, containerPath, coor) {
   if (coor.isNodeCoordinate() && coor.offset > 0) return true
-  let node = doc.get(coor.path[0]).getContainerRoot()
+  let node = getContainerRoot(doc, containerPath, coor.path[0])
   if (node.isText() && coor.offset >= node.getLength()) return true
   if (node.isList()) {
     let itemId = coor.path[0]
@@ -78,7 +79,7 @@ export function getRangeInfo (doc, node, start, end) {
   return {isFirst, isLast, isEntirelySelected}
 }
 
-export function setCursor (tx, node, containerId, mode) {
+export function setCursor (tx, node, containerPath, mode) {
   if (node.isText()) {
     let offset = 0
     if (mode === 'after') {
@@ -89,7 +90,7 @@ export function setCursor (tx, node, containerId, mode) {
       type: 'property',
       path: node.getPath(),
       startOffset: offset,
-      containerId: containerId
+      containerPath
     })
   } else if (node.isList()) {
     let item, offset
@@ -104,12 +105,12 @@ export function setCursor (tx, node, containerId, mode) {
       type: 'property',
       path: item.getPath(),
       startOffset: offset,
-      containerId: containerId
+      containerPath
     })
   } else {
     tx.setSelection({
       type: 'node',
-      containerId: containerId,
+      containerPath,
       nodeId: node.id
       // NOTE: ATM we mostly use 'full' NodeSelections
       // Still, they are supported internally
@@ -118,22 +119,22 @@ export function setCursor (tx, node, containerId, mode) {
   }
 }
 
-export function selectNode (tx, nodeId, containerId) {
-  tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerId }))
+export function selectNode (tx, nodeId, containerPath) {
+  tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerPath }))
 }
 
-export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, surfaceId }) {
+export function createNodeSelection ({ doc, nodeId, containerPath, mode, reverse, surfaceId }) {
   let node = doc.get(nodeId)
   if (!node) return Selection.nullSelection
-  node = node.getContainerRoot()
+  node = getContainerRoot(doc, containerPath, nodeId)
   if (node.isText()) {
     return new PropertySelection({
       path: node.getPath(),
       startOffset: mode === 'after' ? node.getLength() : 0,
       endOffset: mode === 'before' ? 0 : node.getLength(),
-      reverse: reverse,
-      containerId: containerId,
-      surfaceId: surfaceId
+      reverse,
+      containerPath,
+      surfaceId
     })
   } else if (node.isList() && node.getLength() > 0) {
     let first = node.getFirstItem()
@@ -153,12 +154,12 @@ export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, 
       startOffset: start.offset,
       endPath: end.path,
       endOffset: end.offset,
-      reverse: reverse,
-      containerId: containerId,
-      surfaceId: surfaceId
+      reverse,
+      containerPath,
+      surfaceId
     })
   } else {
-    return new NodeSelection({ nodeId, mode, reverse, containerId, surfaceId })
+    return new NodeSelection({ nodeId, mode, reverse, containerPath, surfaceId })
   }
 }
 
@@ -183,10 +184,12 @@ export function stepIntoIsolatedNode (editorSession, comp) {
       })
       return true
     } else if (surface._isContainerEditor) {
-      let container = surface.getContainer()
-      if (container.length > 0) {
-        let first = container.getChildAt(0)
-        setCursor(editorSession, first, container.id, 'after')
+      let doc = editorSession.getDocument()
+      let containerPath = surface.getContainerPath()
+      let nodeIds = doc.get()
+      if (nodeIds.length > 0) {
+        let first = doc.get(nodeIds[0])
+        setCursor(editorSession, first, containerPath, 'after')
       }
       return true
     }
@@ -197,7 +200,7 @@ export function stepIntoIsolatedNode (editorSession, comp) {
 export function augmentSelection (selData, oldSel) {
   // don't do magically if a surfaceId is present
   if (selData && oldSel && !selData.surfaceId && !oldSel.isNull()) {
-    selData.containerId = selData.containerId || oldSel.containerId
+    selData.containerPath = selData.containerPath || oldSel.containerPath
     selData.surfaceId = selData.surfaceId || oldSel.surfaceId
   }
   return selData

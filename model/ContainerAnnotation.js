@@ -14,7 +14,7 @@ import AnnotationMixin from './AnnotationMixin'
   {
     "id": "subject_reference_1",
     "type": "subject_reference",
-    "containerId": "content",
+    "containerPath": ["body", "content"],
     "start": {
       "path": ["text_2", "content"],
       "offset": 100,
@@ -46,7 +46,7 @@ export default class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
 
 ContainerAnnotation.schema = {
   type: '@container-annotation',
-  containerId: 'string',
+  containerPath: { type: ['array', 'id'] },
   start: 'coordinate',
   end: 'coordinate'
 }

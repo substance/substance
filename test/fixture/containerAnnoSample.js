@@ -31,7 +31,7 @@ export default function (tx) {
       path: ['p3', 'content'],
       offset: 4
     },
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.create({
     type: 'strong',

@@ -1,7 +1,7 @@
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
 import ContainerAddress from './ContainerAddress'
-import { getNodes } from './documentHelpers'
+import { getNodes, getContainerPosition } from './documentHelpers'
 
 export default function (DocumentNode) {
   class AbstractContainer extends DocumentNode {
@@ -9,16 +9,9 @@ export default function (DocumentNode) {
       return this.getPosition(nodeId) >= 0
     }
 
-    getPosition (node, strict) {
-      if (isString(node)) {
-        node = this.document.get(node)
-      }
-      if (!node) return -1
-      let pos = this._getPosition(node)
-      if (strict && pos < 0) {
-        throw new Error('Node is not within this container: ' + node.id)
-      }
-      return pos
+    getPosition (node) {
+      console.error('DEPRECATED: use documentHelpers.getPosition(node) instead')
+      return getContainerPosition(this.getDocument(), node.id)
     }
 
     getNodeAt (idx) {
@@ -90,26 +83,6 @@ export default function (DocumentNode) {
       }
     }
 
-    getAddress (coor) {
-      if (!coor._isCoordinate) {
-        // we have broken with an earlier version of this API
-        throw new Error('Illegal argument: Container.getAddress(coor) expects a Coordinate instance.')
-      }
-      var nodeId = coor.path[0]
-      var nodePos = this.getPosition(nodeId)
-      var offset
-      if (coor.isNodeCoordinate()) {
-        if (coor.offset > 0) {
-          offset = Number.MAX_VALUE
-        } else {
-          offset = 0
-        }
-      } else {
-        offset = coor.offset
-      }
-      return new ContainerAddress(nodePos, offset)
-    }
-
     getLength () {
       return this.getContent().length
     }
@@ -117,72 +90,6 @@ export default function (DocumentNode) {
     get length () {
       return this.getLength()
     }
-
-    _getPosition (node) {
-      if (this._isCaching) {
-        return this._getCachedPosition(node)
-      } else {
-        return this._lookupPosition(node)
-      }
-    }
-
-    _getCachedPosition (node) {
-      let cache = this._cachedPositions || this._fillCache()
-      let nodeId = node.id
-      let pos = -1
-      if (cache.hasOwnProperty(nodeId)) {
-        pos = cache[nodeId]
-      } else {
-        pos = this._lookupPosition(node)
-        cache[nodeId] = pos
-      }
-      return pos
-    }
-
-    _fillCache () {
-      let positions = {}
-      this.nodes.forEach((id, pos) => {
-        positions[id] = pos
-      })
-      this._cachedPositions = positions
-      return positions
-    }
-
-    _invalidateCache () {
-      this._cachedPositions = null
-    }
-
-    _lookupPosition (node) {
-      if (node.hasParent()) {
-        node = node.getContainerRoot()
-      }
-      return this.getContent().indexOf(node.id)
-    }
-
-    _enableCaching () {
-      // this hook is used to invalidate cached positions
-      if (this.document) {
-        this.document.data.on('operation:applied', this._onOperationApplied, this)
-        this._isCaching = true
-      }
-    }
-
-    _onOperationApplied (op) {
-      if (op.type === 'set' || op.type === 'update') {
-        if (op.path[0] === this.id) {
-          this._invalidateCache()
-        }
-      }
-    }
-
-    _onDocumentChange (change) {
-      if (change.hasUpdated(this.getContentPath())) {
-        this._invalidateCache()
-      }
-    }
-
-    // NOTE: this has been in ParentNodeMixin before
-    // TODO: try to get rid of this
 
     hasChildren () {
       return this.getContent().length > 0
