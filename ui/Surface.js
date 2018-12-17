@@ -210,7 +210,7 @@ export default class Surface extends Component {
     return this.props.spellcheck === 'native'
   }
 
-  getContainerId () {
+  getContainerPath () {
     return null
   }
 

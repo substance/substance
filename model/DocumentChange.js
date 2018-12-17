@@ -109,8 +109,8 @@ class DocumentChange {
     }
 
     affectedContainerAnnos.forEach(anno => {
-      let startPos = getContainerPosition(doc, anno.start.path[0])
-      let endPos = getContainerPosition(doc, anno.end.path[0])
+      let startPos = getContainerPosition(doc, anno.containerPath, anno.start.path[0])
+      let endPos = getContainerPosition(doc, anno.containerPath, anno.end.path[0])
       let nodeIds = doc.get(anno.containerPath)
       for (let pos = startPos; pos <= endPos; pos++) {
         let node = doc.get(nodeIds[pos])

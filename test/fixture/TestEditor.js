@@ -14,8 +14,9 @@ export default class TestEditor extends AbstractEditor {
     let el = $$('div')
     el.append(
       $$(ContainerEditor, {
-        containerPath: body.getContentPath()
-      }).ref('editor')
+        containerPath: body.getContentPath(),
+        name: 'body'
+      }).ref('surface')
     )
     return el
   }

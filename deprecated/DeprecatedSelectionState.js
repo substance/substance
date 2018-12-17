@@ -49,7 +49,7 @@ export default class DeprecatedSelectionState {
       let startId = sel.start.getNodeId()
       let endId = sel.end.getNodeId()
       let startNode = getContainerRoot(doc, containerPath, startId)
-      let startPos = startNode.getXpath().pos
+      let startPos = startNode.getPosition()
       if (startPos > 0) {
         this.previousNode = getPreviousNode(doc, containerPath, startPos)
       }
@@ -60,7 +60,7 @@ export default class DeprecatedSelectionState {
         endPos = startPos
       } else {
         endNode = getContainerRoot(doc, containerPath, endId)
-        endPos = endNode.getXpath().pos
+        endPos = endNode.getPosition()
       }
       this.nextNode = getNextNode(doc, containerPath, endPos)
       this.isLast = isLast(doc, containerPath, sel.end)

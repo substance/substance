@@ -50,8 +50,7 @@ export default class Editing {
     if (sel.isNodeSelection()) {
       let containerPath = sel.containerPath
       let nodeId = sel.getNodeId()
-      let node = tx.get(nodeId)
-      let nodePos = node.getXpath().pos
+      let nodePos = getContainerPosition(tx, containerPath, nodeId)
       let textNode = this.createTextNode(tx, containerPath)
       if (sel.isBefore()) {
         insertAt(tx, containerPath, nodePos, textNode.id)
@@ -79,8 +78,7 @@ export default class Editing {
       let start = sel.start
       let containerPath = sel.containerPath
       let startNodeId = start.path[0]
-      let startNode = tx.get(startNodeId)
-      let nodePos = startNode.getXpath().pos
+      let nodePos = getContainerPosition(tx, containerPath, startNodeId)
       this._deleteContainerSelection(tx, sel, { noMerge: true })
       setCursor(tx, getNextNode(tx, containerPath, nodePos), containerPath, 'before')
     }
@@ -140,7 +138,7 @@ export default class Editing {
         if (root.isList() && offset === 0 && direction === 'left') {
           return this.toggleList(tx)
         } else {
-          this._merge(tx, root, sel.start, direction, sel.containerPath)
+          this._merge(tx, root, sel.start, direction, containerPath)
         }
       } else {
         // if we are not in a merge scenario, we stop at the boundaries
@@ -175,8 +173,7 @@ export default class Editing {
   _deleteNodeSelection (tx, sel, direction) {
     let nodeId = sel.getNodeId()
     let containerPath = sel.containerPath
-    let node = tx.get(nodeId)
-    let nodePos = node.getXpath().pos
+    let nodePos = getContainerPosition(tx, containerPath, nodeId)
     if (sel.isFull() ||
         (sel.isBefore() && direction === 'right') ||
         (sel.isAfter() && direction === 'left')) {
@@ -255,10 +252,8 @@ export default class Editing {
     let end = sel.end
     let startId = start.getNodeId()
     let endId = end.getNodeId()
-    let startNode = tx.get(startId)
-    let endNode = tx.get(endId)
-    let startPos = startNode.getXpath().pos
-    let endPos = endNode.getXpath().pos
+    let startPos = getContainerPosition(tx, containerPath, startId)
+    let endPos = getContainerPosition(tx, containerPath, endId)
     // special case: selection within one node
     if (startPos === endPos) {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
@@ -338,7 +333,8 @@ export default class Editing {
       })
     } else if (!firstEntirelySelected && !lastEntirelySelected) {
       if (!options.noMerge) {
-        this._merge(tx, firstNode, sel.start, 'right', containerPath)
+        let firstNodeRoot = getContainerRoot(tx, containerPath, firstNode.id)
+        this._merge(tx, firstNodeRoot, sel.start, 'right', containerPath)
       }
       tx.setSelection(sel.collapse('left'))
     } else if (firstEntirelySelected) {
@@ -381,7 +377,7 @@ export default class Editing {
     /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
       let nodeId = sel.getNodeId()
-      let nodePos = getContainerPosition(tx, nodeId)
+      let nodePos = getContainerPosition(tx, containerPath, nodeId)
       // insert before
       if (sel.isBefore()) {
         insertAt(tx, containerPath, nodePos, blockNode.id)
@@ -415,7 +411,7 @@ export default class Editing {
       let node = tx.get(sel.path[0])
       /* istanbul ignore next */
       if (!node) throw new Error('Invalid selection.')
-      let nodePos = getContainerPosition(tx, node.id)
+      let nodePos = getContainerPosition(tx, containerPath, node.id)
       /* istanbul ignore else  */
       if (node.isText()) {
         let text = node.getText()
@@ -479,7 +475,7 @@ export default class Editing {
     if (sel.isNodeSelection()) {
       let containerPath = sel.containerPath
       let nodeId = sel.getNodeId()
-      let nodePos = getContainerPosition(tx, nodeId)
+      let nodePos = getContainerPosition(tx, containerPath, nodeId)
       let textNode = this.createTextNode(tx, containerPath, text)
       if (sel.isBefore()) {
         insertAt(tx, containerPath, nodePos, textNode.id)
@@ -570,7 +566,7 @@ export default class Editing {
     annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0)
 
     // hide and delete the old one, show the new node
-    let pos = getContainerPosition(tx, nodeId)
+    let pos = getContainerPosition(tx, containerPath, nodeId)
     removeAt(tx, containerPath, pos)
     deleteNode(tx, node)
     insertAt(tx, containerPath, pos, newNode.id)
@@ -597,7 +593,7 @@ export default class Editing {
       let nodeId = sel.start.path[0]
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = getContainerRoot(tx, containerPath, nodeId)
-      let nodePos = node.getXpath().pos
+      let nodePos = node.getPosition()
       /* istanbul ignore else  */
       if (node.isText()) {
         removeAt(tx, containerPath, nodePos)
@@ -814,7 +810,7 @@ export default class Editing {
   _breakTextNode (tx, node, coor, containerPath) {
     let path = coor.path
     let offset = coor.offset
-    let nodePos = node.getXpath().pos
+    let nodePos = node.getPosition()
     let text = node.getText()
 
     // when breaking at the first position, a new node of the same
@@ -880,7 +876,7 @@ export default class Editing {
       if (!text) {
         // if it is the first or last item, a default text node is inserted before or after, and the item is removed
         // if the list has only one element, it is removed
-        let nodePos = node.getXpath().pos
+        let nodePos = node.getPosition()
         let newTextNode = this.createTextNode(tx, containerPath)
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
@@ -976,8 +972,8 @@ export default class Editing {
       }
     }
     // in all other cases merge is done across node boundaries
-    let nodePos = getContainerPosition(tx, node.id)
     let nodeIds = tx.get(containerPath)
+    let nodePos = node.getPosition()
     if (direction === 'left' && nodePos > 0) {
       this._mergeNodes(tx, containerPath, nodePos - 1, direction)
     } else if (direction === 'right' && nodePos < nodeIds.length - 1) {
@@ -1051,7 +1047,6 @@ export default class Editing {
         let target = first.getLastItem()
         let targetPath = target.getPath()
         let targetLength = target.getLength()
-        let nodeIds = tx.get(containerPath)
         let third = (nodeIds.length > pos + 2) ? tx.get(nodeIds[pos + 2]) : null
         if (second.getLength() === 0) {
           removeAt(tx, containerPath, secondPos)
@@ -1104,7 +1099,7 @@ export default class Editing {
   }
 
   _mergeTwoLists (tx, containerPath, first, second) {
-    let secondPos = getContainerPosition(tx, second)
+    let secondPos = second.getPosition()
     removeAt(tx, containerPath, secondPos)
     let secondItems = second.getItems().slice()
     for (let i = 0; i < secondItems.length; i++) {

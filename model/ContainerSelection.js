@@ -151,17 +151,16 @@ export default class ContainerSelection extends Selection {
     )
   }
 
-  containsNode (nodeId, strict) {
+  containsNode (nodeId) {
     let containerPath = this.containerPath
-    const nodeIds = this._getContainerContent()
-    if (nodeIds.indexOf(nodeId) === -1) return false
     let doc = this.getDocument()
-    let nodeCoor = { path: [nodeId], offset: 0 }
+    let nodeCoor = new Coordinate([nodeId], 0)
     let cmpStart = compareCoordinates(doc, containerPath, nodeCoor, this.start)
     let cmpEnd = compareCoordinates(doc, containerPath, nodeCoor, this.end)
-    if (cmpStart < 0 || cmpEnd > 0) return false
-    if (strict && (cmpStart === 0 || cmpEnd === 0)) return false
-    return true
+    // HACK: trying to get this working
+    // the coor created is always ([nodeId], 0)
+    // The node is considered inside the selection if this coor >= start and coor < end
+    return cmpStart >= 0 && cmpEnd < 0
   }
 
   overlaps (other) {
@@ -258,20 +257,6 @@ export default class ContainerSelection extends Selection {
   }
 
   /**
-   * Get the node ids covered by this selection.
-   *
-   * @returns {String[]} an getNodeIds of ids
-   */
-  getNodeIds () {
-    // TODO is this still used?
-    // TODO: this is not very efficient
-    const nodeIds = this._getContainerContent()
-    const startPos = nodeIds.indexOf(this.start.path[0])
-    const endPos = nodeIds.indexOf(this.end.path[0])
-    return nodeIds.slice(startPos, endPos + 1)
-  }
-
-  /**
    * Splits a container selection into property selections.
    *
    * @returns {PropertySelection[]}
@@ -296,7 +281,8 @@ export default class ContainerSelection extends Selection {
   }
 
   _isCoordinateBefore (coor1, coor2, strict) {
-    return isCoordinateBefore(this.getDocument(), this.containerPath, coor1, coor2, strict)
+    let doc = this.getDocument()
+    return isCoordinateBefore(doc, this.containerPath, coor1, coor2, strict)
   }
 
   get path () {

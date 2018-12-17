@@ -80,15 +80,15 @@ class ClipboardImporter extends HTMLImporter {
       this._isGoogleDoc = true
     }
 
-    let body = htmlDoc.find('body')
-    body = this._sanitizeBody(body)
-    if (!body) {
+    let bodyEl = htmlDoc.find('body')
+    bodyEl = this._sanitizeBody(bodyEl)
+    if (!bodyEl) {
       console.warn('Invalid HTML.')
       return null
     }
-    this._wrapIntoParagraph(body)
+    this._wrapIntoParagraph(bodyEl)
     this.reset()
-    this.convertBody(body)
+    this.convertBody(bodyEl)
     const doc = this.state.doc
     return doc
   }
@@ -223,8 +223,8 @@ class ClipboardImporter extends HTMLImporter {
 
     @param {String} body body element of given HTML document
   */
-  convertBody (body) {
-    this.convertContainer(body.childNodes, SNIPPET_ID)
+  convertBody (bodyEl) {
+    this.convertContainer(bodyEl.childNodes, SNIPPET_ID)
   }
 
   /**

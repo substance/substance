@@ -1,17 +1,11 @@
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
-import ContainerAddress from './ContainerAddress'
 import { getNodes, getContainerPosition } from './documentHelpers'
 
 export default function (DocumentNode) {
   class AbstractContainer extends DocumentNode {
     contains (nodeId) {
       return this.getPosition(nodeId) >= 0
-    }
-
-    getPosition (node) {
-      console.error('DEPRECATED: use documentHelpers.getPosition(node) instead')
-      return getContainerPosition(this.getDocument(), node.id)
     }
 
     getNodeAt (idx) {
@@ -69,7 +63,7 @@ export default function (DocumentNode) {
     }
 
     hide (nodeId) {
-      const pos = this.getPosition(nodeId)
+      const pos = getContainerPosition(this.getDocument(), this.getContentPath(), nodeId)
       this.hideAt(pos)
     }
 

@@ -9,6 +9,7 @@ import {
 
 import TestNode from './TestNode'
 import TestBlockNode from './TestBlockNode'
+import TestBody from './TestBody'
 import TestContainerAnnotation from './TestContainerAnnotation'
 import TestStructuredNode from './TestStructuredNode'
 import TestStructuredNodeComponent from './TestStructuredNodeComponent'
@@ -27,6 +28,8 @@ import TestArticle from './TestArticle'
 
 export default function getTestConfig () {
   let config = new Configurator()
+  // TODO: I want to move away from making name and version required
+  // This is app specific and should be addressed somewhere else
   config.defineSchema({
     name: 'test-article',
     DocumentClass: TestArticle,
@@ -47,8 +50,10 @@ export default function getTestConfig () {
   config.import(ImagePackage)
 
   config.addComponent('@container', TestContainerComponent)
+  config.addComponent('body', TestContainerComponent)
 
   config.addNode(TestNode)
+  config.addNode(TestBody)
 
   config.addNode(TestBlockNode)
   config.addComponent(TestBlockNode.type, Component)

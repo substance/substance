@@ -165,7 +165,7 @@ export default class ContainerEditor extends Surface {
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
         let nodeIds = doc.get(containerPath)
-        let nodePos = getContainerPosition(doc, sel.getNodeId())
+        let nodePos = getContainerPosition(doc, containerPath, sel.getNodeId())
         if ((left && nodePos === 0) || (right && nodePos === nodeIds.length - 1)) {
           event.preventDefault()
           return
@@ -194,7 +194,7 @@ export default class ContainerEditor extends Surface {
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
         let nodeIds = doc.get(containerPath)
-        let nodePos = getContainerPosition(doc, sel.getNodeId())
+        let nodePos = getContainerPosition(doc, containerPath, sel.getNodeId())
         if ((up && nodePos === 0) || (down && nodePos === nodeIds.length - 1)) {
           event.preventDefault()
           return

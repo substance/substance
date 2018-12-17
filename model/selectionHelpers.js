@@ -5,6 +5,7 @@ import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
 import getContainerRoot from './_getContainerRoot'
+import getContainerPosition from './_getContainerPosition'
 
 export function fromJSON (json) {
   if (!json) return Selection.nullSelection
@@ -24,31 +25,43 @@ export function fromJSON (json) {
   }
 }
 
-/*
-  Helper to check if a coordinate is the first position of a node.
-*/
+/**
+ * Helper to check if a coordinate is the first position of a node.
+ * Attention: this works only for Text and List nodes
+ */
 export function isFirst (doc, containerPath, coor) {
-  if (coor.isNodeCoordinate() && coor.offset === 0) return true
+  if (coor.isNodeCoordinate()) {
+    return coor.offset === 0
+  }
   let node = getContainerRoot(doc, containerPath, coor.path[0])
-  if (node.isText() && coor.offset === 0) return true
+  if (node.isText()) {
+    return coor.offset === 0
+  }
   if (node.isList()) {
     let itemId = coor.path[0]
-    if (node.items[0] === itemId && coor.offset === 0) return true
+    return (node.items[0] === itemId && coor.offset === 0)
   }
+  return false
 }
 
-/*
-  Helper to check if a coordinate is the last position of a node.
-*/
+/**
+ * Helper to check if a coordinate is the last position of a node.
+ * Attention: this works only for Text and List nodes
+ */
 export function isLast (doc, containerPath, coor) {
-  if (coor.isNodeCoordinate() && coor.offset > 0) return true
+  if (coor.isNodeCoordinate()) {
+    return coor.offset > 0
+  }
   let node = getContainerRoot(doc, containerPath, coor.path[0])
-  if (node.isText() && coor.offset >= node.getLength()) return true
+  if (node.isText()) {
+    return coor.offset >= node.getLength()
+  }
   if (node.isList()) {
     let itemId = coor.path[0]
     let item = doc.get(itemId)
-    if (last(node.items) === itemId && coor.offset === item.getLength()) return true
+    return (last(node.items) === itemId && coor.offset === item.getLength())
   }
+  return false
 }
 
 export function isEntirelySelected (doc, node, start, end) {
@@ -204,4 +217,17 @@ export function augmentSelection (selData, oldSel) {
     selData.surfaceId = selData.surfaceId || oldSel.surfaceId
   }
   return selData
+}
+
+/**
+ * Get the node ids covered by this selection.
+ *
+ * @returns {String[]} an getNodeIds of ids
+ */
+export function getNodeIdsCoveredByContainerSelection (doc, sel) {
+  let containerPath = sel.containerPath
+  let startPos = getContainerPosition(doc, containerPath, sel.start.path[0])
+  let endPos = getContainerPosition(doc, containerPath, sel.end.path[0])
+  let nodeIds = doc.get(containerPath)
+  return nodeIds.slice(startPos, endPos + 1)
 }

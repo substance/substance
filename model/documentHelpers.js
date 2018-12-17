@@ -6,7 +6,9 @@ import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
 import DocumentIndex from './DocumentIndex'
 import annotationHelpers from './annotationHelpers'
-import { isEntirelySelected } from './selectionHelpers'
+import {
+  isEntirelySelected, getNodeIdsCoveredByContainerSelection
+} from './selectionHelpers'
 
 /**
   For a given selection get all property annotations
@@ -84,7 +86,7 @@ export function getTextForSelection (doc, sel) {
     return text.substring(sel.start.offset, sel.end.offset)
   } else if (sel.isContainerSelection()) {
     let result = []
-    let nodeIds = sel.getNodeIds()
+    let nodeIds = getNodeIdsCoveredByContainerSelection(doc, sel)
     let L = nodeIds.length
     for (let i = 0; i < L; i++) {
       let id = nodeIds[i]
@@ -270,6 +272,8 @@ export function deleteTextRange (doc, start, end) {
 }
 
 export function deleteListRange (doc, list, start, end) {
+  // HACK: resolving the right node
+  // TODO: we should not do this, instead fix the calling code
   if (doc !== list.getDocument()) {
     list = doc.get(list.id)
   }
@@ -377,7 +381,10 @@ export function append (doc, containerPath, id) {
 }
 
 export function removeAt (doc, containerPath, pos) {
-  doc.update(containerPath, { type: 'delete', pos })
+  let op = doc.update(containerPath, { type: 'delete', pos })
+  if (op && op.diff) {
+    return op.diff.val
+  }
 }
 
 export function getNodeAt (doc, containerPath, nodePos) {
@@ -395,12 +402,10 @@ export function getNextNode (doc, containerPath, nodePos) {
   return getNodeAt(doc, containerPath, nodePos + 1)
 }
 
-export function getContainerPosition (doc, nodeId) {
-  return doc.get(nodeId).getXpath().pos
-}
-
 export { default as compareCoordinates } from './_compareCoordinates'
 
 export { default as isCoordinateBefore } from './_isCoordinateBefore'
 
 export { default as getContainerRoot } from './_getContainerRoot'
+
+export { default as getContainerPosition } from './_getContainerPosition'

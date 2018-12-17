@@ -167,6 +167,13 @@ export default class DocumentNode extends DataNode {
     return this._xpath
   }
 
+  /**
+   * The position in the parent's children property.
+   */
+  getPosition () {
+    return this._xpath.pos
+  }
+
   // Node categories
   // --------------------
 

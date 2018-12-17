@@ -127,9 +127,10 @@ export default class EditingInterface {
   }
 
   copySelection () {
+    const doc = this.getDocument()
     const sel = this._selection
     if (sel && !sel.isNull() && !sel.isCollapsed()) {
-      return copySelection(this.getDocument(), this._selection)
+      return copySelection(doc, this._selection)
     }
   }
 

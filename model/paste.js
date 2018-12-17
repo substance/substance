@@ -192,7 +192,7 @@ function _pasteDocument (tx, pasteDoc) {
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
     let nodeId = sel.start.getNodeId()
-    let startPos = getContainerPosition(tx, nodeId)
+    let startPos = getContainerPosition(tx, containerPath, nodeId)
     let text = tx.get(startPath)
     // Break, unless we are at the last character of a node,
     // then we can simply insert after the node
@@ -207,7 +207,7 @@ function _pasteDocument (tx, pasteDoc) {
       insertPos = startPos + 1
     }
   } else if (sel.isNodeSelection()) {
-    let nodePos = getContainerPosition(tx, sel.getNodeId())
+    let nodePos = getContainerPosition(tx, containerPath, sel.getNodeId())
     if (sel.isBefore()) {
       insertPos = nodePos
     } else if (sel.isAfter()) {

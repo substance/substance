@@ -79,4 +79,8 @@ export default class NodeProperty {
   get targetTypes () {
     return this.definition.targetTypes
   }
+
+  get defaultTextType () {
+    return this.definition.defaultTextType
+  }
 }

@@ -168,6 +168,7 @@ test('documentHelpers: isContainerAnnotation()', (t) => {
 
 test('documentHelpers: Get container annotations for property selection', (t) => {
   let doc = fixture(containerAnnoSample)
+  let body = doc.get('body')
   let sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
@@ -176,10 +177,10 @@ test('documentHelpers: Get container annotations for property selection', (t) =>
   })
   let annos
   // without options
-  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body')
+  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, body.getContentPath())
   t.equal(annos.length, 1, 'There should be one container anno')
   // filtered by type
-  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body', {
+  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, body.getContentPath(), {
     type: 'test-container-anno'
   })
   t.equal(annos.length, 1, 'There should be one container anno')

@@ -1,3 +1,4 @@
+import ArrayIterator from '../util/ArrayIterator'
 import last from '../util/last'
 import createCountingIdGenerator from '../util/createCountingIdGenerator'
 
@@ -112,6 +113,52 @@ export default class DOMImporter {
 
   getDocument () {
     return this.state.doc
+  }
+
+  /**
+   * Converts all children of a given element and creates a Container node.
+   *
+   * @param {DOMElement[]} elements All elements that should be converted into the container.
+   * @param {String} containerId The id of the target container node.
+   * @returns {Container} the container node
+   */
+  convertContainer (elements, containerId) {
+    if (!this.state.doc) this.reset()
+    const state = this.state
+    const iterator = new ArrayIterator(elements)
+    const nodeIds = []
+    while (iterator.hasNext()) {
+      const el = iterator.next()
+      let node
+      const blockTypeConverter = this._getConverterForElement(el, 'block')
+      if (blockTypeConverter) {
+        state.pushContext(el.tagName, blockTypeConverter)
+        let nodeData = this._createNodeData(el, blockTypeConverter.type)
+        nodeData = blockTypeConverter.import(el, nodeData, this) || nodeData
+        node = this._createNode(nodeData)
+        let context = state.popContext()
+        context.annos.forEach((a) => {
+          this._createNode(a)
+        })
+      } else if (el.isCommentNode()) {
+        continue
+      } else {
+        // skip empty text nodes
+        if (el.isTextNode() && /^\s*$/.exec(el.textContent)) continue
+        // If we find text nodes on the block level we wrap
+        // it into a paragraph element (or what is configured as default block level element)
+        iterator.back()
+        node = this._wrapInlineElementsIntoBlockElement(iterator)
+      }
+      if (node) {
+        nodeIds.push(node.id)
+      }
+    }
+    return this._createNode({
+      type: '@container',
+      id: containerId,
+      nodes: nodeIds
+    })
   }
 
   /**
