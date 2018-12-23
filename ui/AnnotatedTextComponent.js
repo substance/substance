@@ -110,7 +110,12 @@ export default class AnnotatedTextComponent extends Component {
   }
 
   _getFragmentProps (node) {
-    return { node }
+    return {
+      // Note: we want to move to the more generic property name 'model' instead of 'node'
+      model: node,
+      // LEGACY
+      node
+    }
   }
 
   _finishFragment (fragment, context, parentContext) {

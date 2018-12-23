@@ -2,14 +2,15 @@ import Component from './Component'
 
 export default class UnsupportedNodeComponent extends Component {
   render ($$) {
+    let model = this.props.model
     return $$('pre')
       .addClass('content-node unsupported')
       .attr({
-        'data-id': this.props.node.id,
+        'data-id': model.id,
         contentEditable: false
       })
       .append(
-        JSON.stringify(this.props.node.properties, null, 2)
+        JSON.stringify(model.properties, null, 2)
       )
   }
 }

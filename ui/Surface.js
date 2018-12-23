@@ -96,6 +96,7 @@ export default class Surface extends Component {
     let tagName = this.props.tagName || 'div'
     let el = $$(tagName)
       .addClass('sc-surface')
+      .addClass(`sm-${this.name}`)
       .attr('tabindex', 2)
       .attr('data-surface-id', this.id)
 
@@ -755,6 +756,8 @@ export default class Surface extends Component {
 
   _getNodeProps (node) {
     return {
+      model: node,
+      // LEGACY: we want to use the more generic property name 'model'
       node,
       placeholder: this.props.placeholder,
       disabled: this.props.disabled

@@ -6,20 +6,20 @@ export default class TextBlockComponent extends NodeComponent {
     let el = super.render($$)
     el.addClass('sc-text-block')
 
-    let node = this.props.node
+    let model = this.props.model
     // NOTE: we are not using the native text direction support as it changes the contenteditable behavior in a weird way
     // instead rtl text is supported on model level
-    if (node.direction) {
-      // el.attr('data-direction', node.direction)
-      el.attr('dir', node.direction)
+    if (model.direction) {
+      // el.attr('data-direction', model.direction)
+      el.attr('dir', model.direction)
     }
-    if (node.textAlign) {
-      el.addClass('sm-align-' + node.textAlign)
+    if (model.textAlign) {
+      el.addClass('sm-align-' + model.textAlign)
     }
     el.append($$(TextProperty, {
       placeholder: this.props.placeholder,
-      path: node.getPath(),
-      direction: node.direction
+      path: model.getPath(),
+      direction: model.direction
     }))
     return el
   }

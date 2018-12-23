@@ -2,7 +2,7 @@ import Component from './Component'
 
 export default class NodeComponent extends Component {
   didMount () {
-    this.context.editorSession.onRender('document', this.rerender, this, { path: [this.props.node.id] })
+    this.context.editorSession.onRender('document', this.rerender, this, { path: [this.props.model.id] })
   }
 
   dispose () {
@@ -12,7 +12,7 @@ export default class NodeComponent extends Component {
   render ($$) {
     let tagName = this.getTagName()
     let el = $$(tagName)
-      .attr('data-id', this.props.node.id)
+      .attr('data-id', this.props.model.id)
       .addClass(this.getClassNames())
     return el
   }
@@ -27,7 +27,7 @@ export default class NodeComponent extends Component {
 
   rerender (...args) {
     // HACK: skip if this node has been disposed already
-    if (this.props.node.isDisposed()) return
+    if (this.props.model.isDisposed()) return
 
     super.rerender(...args)
   }

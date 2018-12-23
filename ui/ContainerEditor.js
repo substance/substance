@@ -27,10 +27,8 @@ import { getContainerPosition } from '../model/documentHelpers'
  */
 export default class ContainerEditor extends Surface {
   constructor (parent, props, el) {
-    // TODO consolidate this - how is it used actually?
-    props.containerPath = props.containerPath || props.node.getContentPath()
-    props.name = props.name || props.containerPath.join('.') || props.node.id
-
+    // Note: name is optional for ContainerEditors
+    props.name = props.name || props.containerPath.join('.')
     super(parent, props, el)
 
     this.containerPath = this.props.containerPath
@@ -303,23 +301,35 @@ export default class ContainerEditor extends Surface {
     let containerPath = this.getContainerPath()
     for (let i = 0; i < change.ops.length; i++) {
       let op = change.ops[i]
-      if (op.type === 'update' && isArrayEqual(op.path, containerPath)) {
-        let diff = op.diff
-        if (diff.type === 'insert') {
-          let nodeId = diff.getValue()
-          let node = doc.get(nodeId)
-          let nodeEl
-          if (node) {
-            nodeEl = this._renderNode($$, node)
-          } else {
-            // node does not exist anymore
-            // so we insert a stub element, so that the number of child
-            // elements is consistent
-            nodeEl = $$('div')
+      if (isArrayEqual(op.path, containerPath)) {
+        switch (op.type) {
+          case 'update': {
+            let diff = op.diff
+            if (diff.type === 'insert') {
+              let nodeId = diff.getValue()
+              let node = doc.get(nodeId)
+              let nodeEl
+              if (node) {
+                nodeEl = this._renderNode($$, node)
+              } else {
+                // node does not exist anymore
+                // so we insert a stub element, so that the number of child
+                // elements is consistent
+                nodeEl = $$('div')
+              }
+              this.insertAt(diff.getOffset(), nodeEl)
+            } else if (diff.type === 'delete') {
+              this.removeAt(diff.getOffset())
+            }
+            break
           }
-          this.insertAt(diff.getOffset(), nodeEl)
-        } else if (diff.type === 'delete') {
-          this.removeAt(diff.getOffset())
+          case 'set': {
+            this.empty()
+            this.rerender()
+            break
+          }
+          default:
+            //
         }
       }
     }

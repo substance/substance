@@ -71,8 +71,9 @@ export default class CustomSurface extends Component {
   _createSurfaceId () {
     let isolatedNodeComponent = this.context.isolatedNodeComponent
     if (isolatedNodeComponent) {
+      // TODO: use API instead of accessing the context directly
       let parentSurface = isolatedNodeComponent.context.surface
-      return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + this._name
+      return parentSurface.id + '/' + isolatedNodeComponent.props.model.id + '/' + this._name
     } else {
       return this._name
     }
