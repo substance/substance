@@ -4,6 +4,8 @@ export function TEXT (...targetTypes) {
   return { type: 'text', targetTypes }
 }
 
+export const PLAIN_TEXT = Object.freeze(TEXT())
+
 export const STRING_ARRAY = { type: ['array', 'string'], default: [] }
 
 export const BOOLEAN = { type: 'boolean', default: false }
