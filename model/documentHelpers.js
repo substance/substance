@@ -118,11 +118,16 @@ export function getMarkersForSelection (doc, sel) {
   return filtered
 }
 
+export function deleteNode (doc, node) {
+  console.error('DEPRECATED: use documentHelpers.deepDeleteNode() instead')
+  return deepDeleteNode(doc, node)
+}
+
 /*
   Deletes a node and its children and attached annotations
   and removes it from a given container
 */
-export function deleteNode (doc, node) {
+export function deepDeleteNode (doc, node) {
   /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
@@ -361,12 +366,6 @@ export function mergeListItems (doc, listId, itemPos) {
   deleteNode(doc, sourceItem)
 }
 
-export function getNodes (doc, ids) {
-  return ids.map((id) => {
-    return doc.get(id, 'strict')
-  })
-}
-
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
 export const SNIPPET_ID = 'snippet'
@@ -385,6 +384,18 @@ export function removeAt (doc, containerPath, pos) {
   if (op && op.diff) {
     return op.diff.val
   }
+}
+
+export function remove (doc, containerPath, id) {
+  let index = doc.get(containerPath).indexOf(id)
+  if (index >= 0) {
+    return removeAt(doc, containerPath, index)
+  }
+  return false
+}
+
+export function getNodes (doc, ids) {
+  return ids.map(id => doc.get(id, 'strict'))
 }
 
 export function getNodeAt (doc, containerPath, nodePos) {
