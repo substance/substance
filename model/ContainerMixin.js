@@ -30,6 +30,10 @@ export default function (DocumentNode) {
       return this.getContent().map(id => doc.get(id)).filter(Boolean)
     }
 
+    getPath () {
+      return this.getContentPath()
+    }
+
     show (nodeId, pos) {
       // allow to provide a node instance instead of nodeId
       const arg1 = arguments[0]
