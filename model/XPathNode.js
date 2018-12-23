@@ -1,15 +1,16 @@
 import isNumber from '../util/isNumber'
 
 export default class XPathNode {
-  constructor (id) {
+  constructor (id, type) {
     this.id = id
+    this.type = type
     this.prev = null
     this.property = null
     this.pos = null
   }
 
   toJSON () {
-    let data = { id: this.id }
+    let data = { id: this.id, type: this.type }
     if (this.property) data.property = this.property
     if (isNumber(this.pos)) data.pos = this.pos
     return data
