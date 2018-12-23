@@ -75,3 +75,16 @@ test('Document: Assigning multiple properties with DocumentNode.assign()', t => 
   t.deepEqual(pick(node, ['title', 'body', 'caption']), props, 'properties should have changed')
   t.end()
 })
+
+test('Document: node.find()', t => {
+  let doc = fixture(simple)
+  let body = doc.get('body')
+  let p2 = body.find('#p2')
+  t.notNil(p2, 'body.find(#p2) should find a node')
+  t.equal(p2.id, 'p2', '.. with correct id')
+  doc.create({ type: 'strong', start: { path: p2.getPath(), offset: 1 }, end: { offset: 3 } })
+  let strong = p2.find('strong')
+  t.notNil(strong, 'p2.find(strong) should find a node')
+  t.equal(strong.type, 'strong', '.. of correct type')
+  t.end()
+})
