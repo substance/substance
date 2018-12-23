@@ -420,3 +420,40 @@ export { default as isCoordinateBefore } from './_isCoordinateBefore'
 export { default as getContainerRoot } from './_getContainerRoot'
 
 export { default as getContainerPosition } from './_getContainerPosition'
+
+// TODO: we could optimize this by 'compiling' which properties are 'parent' props
+// i.e. TEXT, CHILD, and CHILDREN
+export function getChildren (node) {
+  const doc = node.getDocument()
+  const id = node.id
+  const schema = node.getSchema()
+  let result = []
+  for (let p of schema) {
+    const name = p.name
+    if (p.isText()) {
+      let annos = doc.getAnnotations([id, name])
+      forEach(annos, a => result.push(a))
+    } else if (p.isReference() && p.isOwned()) {
+      let val = node[name]
+      if (val) {
+        if (p.isArray()) {
+          result = result.concat(val.map(id => doc.get(id)))
+        } else {
+          result.push(doc.get(val))
+        }
+      }
+    }
+  }
+  return result
+}
+
+export function getParent (node) {
+  // TODO: maybe we should implement ParentNodeHook for annotations
+  if (node._isAnnotation) {
+    let anno = node
+    let nodeId = anno.start.path[0]
+    return anno.getDocument().get(nodeId)
+  } else {
+    return node.getParent()
+  }
+}

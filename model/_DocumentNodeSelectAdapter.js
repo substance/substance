@@ -1,5 +1,5 @@
-import forEach from '../util/forEach'
 import DomUtils from '../vendor/domutils'
+import { getChildren, getParent } from './documentHelpers'
 
 export default class DocumentNodeSelectAdapter extends DomUtils.DomUtils {
   // we only have nodes which correspond to DOM elements
@@ -8,27 +8,11 @@ export default class DocumentNodeSelectAdapter extends DomUtils.DomUtils {
   }
 
   getChildren (node) {
-    const doc = node.getDocument()
-    const id = node.id
-    const schema = node.getSchema()
-    let result = []
-    for (let p of schema) {
-      const name = p.name
-      if (p.isText()) {
-        let annos = doc.getAnnotations([id, name])
-        forEach(annos, a => result.push(a))
-      } else if (p.isReference() && p.isOwned()) {
-        let val = this[name]
-        if (val) {
-          if (p.isArray()) {
-            result = result.concat(val.map(id => doc.get(id)))
-          } else {
-            result.push(doc.get(val))
-          }
-        }
-      }
-    }
-    return result
+    return getChildren(node)
+  }
+
+  getParent (node) {
+    return getParent(node)
   }
 
   getAttributeValue (node, name) {

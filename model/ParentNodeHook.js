@@ -39,8 +39,6 @@ export default class ParentNodeHook {
       nodeSchema = node.getSchema()
       hasOwnedProperties = nodeSchema.hasOwnedProperties()
     }
-    // TODO: instead of hard coding this here we should compile a matcher
-    // based on the document schema
     switch (op.type) {
       case 'create': {
         if (hasOwnedProperties) {
