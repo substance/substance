@@ -37,7 +37,7 @@ test("IsolatedNode: IsolatedNode should be 'selected' with node selection", t =>
   let expected = {
     'body/c1': 'selected',
     // TODO: we need to find a more intuitive way to surfaceIds
-    'body/c1/c1.nodes/c2': undefined
+    'body/c1/c1/c2': undefined
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
@@ -59,7 +59,7 @@ test("IsolatedNode: IsolatedNode should be 'co-selected' with spanning container
     'body/c1': 'co-selected',
     // Note: 'co-selection' does not propagate down
     // it is a state related to the parent container
-    'body/c1/c1.nodes/c2': undefined
+    'body/c1/c1/c2': undefined
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
@@ -73,12 +73,12 @@ test("IsolatedNode: IsolatedNode should be 'focused' when having the selection",
     path: ['c1_p1', 'content'],
     startOffset: 0,
     // TODO: we need to find a more intuitive way to surfaceIds
-    surfaceId: 'body/c1/c1.nodes'
+    surfaceId: 'body/c1/c1'
   })
   let expected = {
     'body/c1': 'focused',
     // TODO: we need to find a more intuitive way to surfaceIds
-    'body/c1/c1.nodes/c2': undefined
+    'body/c1/c1/c2': undefined
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()
@@ -92,12 +92,12 @@ test("IsolatedNode: IsolatedNode should be 'co-focused' when child is having the
     path: ['c2_p1', 'content'],
     startOffset: 0,
     // TODO: we need to find a more intuitive way to surfaceIds
-    surfaceId: 'body/c1/c1.nodes/c2/c2.nodes'
+    surfaceId: 'body/c1/c1/c2/c2'
   })
   let expected = {
     'body/c1': 'co-focused',
     // TODO: we need to find a more intuitive way to surfaceIds
-    'body/c1/c1.nodes/c2': 'focused'
+    'body/c1/c1/c2': 'focused'
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
   t.end()

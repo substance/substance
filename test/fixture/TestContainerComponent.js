@@ -1,17 +1,17 @@
 import { Component, ContainerEditor } from 'substance'
 
-class TestContainerComponent extends Component {
+export default class TestContainerComponent extends Component {
   render ($$) {
-    var el = $$('div').addClass('sc-container')
+    let model = this.props.model
+    let el = $$('div').addClass('sc-container')
     el.append(
       $$(ContainerEditor, {
-        node: this.props.node
+        name: model.id,
+        containerPath: model.getPath()
       }).ref('editor')
     )
     return el
   }
+
+  static get fullWidth () { return true }
 }
-
-TestContainerComponent.fullWidth = true
-
-export default TestContainerComponent
