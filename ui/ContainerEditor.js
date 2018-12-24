@@ -72,8 +72,7 @@ export default class ContainerEditor extends Surface {
 
     let doc = this.getDocument()
     let containerPath = this.getContainerPath()
-    el.addClass('sc-container-editor container-node')
-      .attr('data-id', containerPath.join('.'))
+    el.attr('data-id', containerPath.join('.'))
 
     // native spellcheck
     el.attr('spellcheck', this.props.spellcheck === 'native')
@@ -92,6 +91,10 @@ export default class ContainerEditor extends Surface {
     }
 
     return el
+  }
+
+  _getClassNames () {
+    return 'sc-container-editor sc-surface'
   }
 
   selectFirst () {
