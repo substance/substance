@@ -191,7 +191,7 @@ function nestedInlineNode (doc) {
 function inlineNodeInsideIsolatedNode (doc) {
   let tx = new EditingInterface(doc)
   let body = tx.get('body')
-  body.show(tx.create({
+  body.append(tx.create({
     type: 'structured-node',
     id: 'sn',
     title: 'Foo',

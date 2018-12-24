@@ -394,7 +394,12 @@ export function remove (doc, containerPath, id) {
   return false
 }
 
-export function getNodes (doc, ids) {
+export function getNodes (doc, containerPath) {
+  let ids = doc.get(containerPath)
+  return _getNodes(doc, ids)
+}
+
+export function _getNodes (doc, ids) {
   return ids.map(id => doc.get(id, 'strict'))
 }
 

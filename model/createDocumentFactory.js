@@ -15,7 +15,7 @@ import ChangeRecorder from './ChangeRecorder'
       type: 'paragraph',
       content: '0123456789'
     });
-    body.show('p1');
+    body.append('p1');
   });
 
   myDocFactory.ArticleClass;

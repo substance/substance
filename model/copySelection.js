@@ -44,7 +44,7 @@ function _copyPropertySelection (doc, selection) {
     id: TEXT_SNIPPET_ID,
     content: text.substring(offset, endOffset)
   })
-  containerNode.show(TEXT_SNIPPET_ID)
+  containerNode.append(TEXT_SNIPPET_ID)
   let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
   forEach(annotations, function (anno) {
     let data = cloneDeep(anno.toJSON())

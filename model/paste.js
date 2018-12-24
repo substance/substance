@@ -45,7 +45,7 @@ export default function paste (tx, args) {
   let snippet = pasteDoc.get(SNIPPET_ID)
   let L = snippet.getLength()
   if (L === 0) return
-  let first = snippet.getChildAt(0)
+  let first = snippet.getNodeAt(0)
   // paste into a TextProperty
   if (!inContainer) {
     // if there is only one node it better be a text node
@@ -64,7 +64,7 @@ export default function paste (tx, args) {
       // now we remove the first node from the snippet,
       // so that we can call _pasteDocument for the remaining
       // content
-      snippet.hideAt(0)
+      snippet.removeAt(0)
       L--
     }
     // if still nodes left paste the remaining document
@@ -94,7 +94,7 @@ function _convertPlainTextToDocument (tx, args) {
       type: defaultTextType,
       content: lines[0]
     })
-    container.show(node.id)
+    container.append(node.id)
   } else {
     for (let i = 0; i < lines.length; i++) {
       node = pasteDoc.create({
@@ -102,7 +102,7 @@ function _convertPlainTextToDocument (tx, args) {
         type: defaultTextType,
         content: lines[i]
       })
-      container.show(node.id)
+      container.append(node.id)
     }
   }
   return pasteDoc
@@ -148,7 +148,7 @@ function _convertIntoAnnotatedText (tx, copy) {
     content: fragments.join('')
   })
   annos.forEach(anno => snippet.create(anno))
-  snippet.getContainer().show(TEXT_SNIPPET_ID)
+  snippet.getContainer().append(TEXT_SNIPPET_ID)
   return snippet
 }
 

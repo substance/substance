@@ -135,12 +135,12 @@ function _modeOk (t, isolated, expected) {
 
 function _twoStructuredNodes (doc) {
   let body = doc.get('body')
-  body.show(doc.create({
+  body.append(doc.create({
     type: 'structured-node',
     id: 'sn',
     title: 'Foo'
   }))
-  body.show(doc.create({
+  body.append(doc.create({
     type: 'structured-node',
     id: 'sn2',
     title: 'Bar'

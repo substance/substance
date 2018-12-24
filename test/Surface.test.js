@@ -57,7 +57,7 @@ function _p1 (doc, body) {
     id: 'p1',
     content: P1_TEXT
   })
-  body.show('p1')
+  body.append('p1')
 }
 
 const P2_TEXT = 'ghijk'
@@ -68,5 +68,5 @@ function _p2 (doc, body) {
     id: 'p2',
     content: P2_TEXT
   })
-  body.show('p2')
+  body.append('p2')
 }

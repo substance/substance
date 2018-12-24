@@ -44,9 +44,9 @@ export default function (tx) {
       offset: 2
     }
   })
-  body.show('p1')
-  body.show('p2')
-  body.show('p3')
-  body.show('p4')
+  body.append('p1')
+  body.append('p2')
+  body.append('p3')
+  body.append('p4')
   return tx
 }

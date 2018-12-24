@@ -187,7 +187,7 @@ function ClipboardTests (memory) {
         '}'
       ].join('\n')
     })
-    body.showAt(body.getPosition('p1') + 1, cb)
+    body.insertAt(body.getNodeIndex('p1') + 1, cb)
     editorSession.setSelection(doc.createSelection({
       type: 'container',
       startPath: ['p1', 'content'],
@@ -407,7 +407,7 @@ function _emptyParagraphSeed (tx) {
     id: 'p1',
     content: ''
   })
-  body.show('p1')
+  body.append('p1')
 }
 
 function _emptyFixtureTest (t, html, impl, forceWindows) {
@@ -459,11 +459,11 @@ function _twoParagraphsTest (t, html, forceWindows) {
     event.clipboardData.setData('text/html', html)
     clipboard.onPaste(event)
     let body = doc.get('body')
-    let p1 = body.getChildAt(0)
+    let p1 = body.getNodeAt(0)
     t.equal(p1.content, '0AAA', 'First paragraph should be truncated.')
-    let p2 = body.getChildAt(1)
+    let p2 = body.getNodeAt(1)
     t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
-    let p3 = body.getChildAt(2)
+    let p3 = body.getNodeAt(2)
     t.equal(p3.content, '123456789', 'Remainder of original p1 should go into forth paragraph.')
     t.end()
   }, forceWindows)
@@ -477,7 +477,7 @@ function _extendedTest (t, html, forceWindows) {
     clipboard.onPaste(event)
     let body = doc.get('body')
     // First node is a paragraph with strong, emphasis, superscript and subscript annos
-    let node1 = body.getChildAt(0)
+    let node1 = body.getNodeAt(0)
     t.equal(node1.type, 'paragraph', 'First node should be a paragraph.')
     t.equal(node1.content.length, 121, 'First paragraph should contain 121 symbols.')
     let annotationsNode1 = doc.getIndex('annotations').get([node1.id, 'content']).sort((a, b) => {
@@ -502,7 +502,7 @@ function _extendedTest (t, html, forceWindows) {
     t.equal(annoFourthNode1.end.offset, 56, 'Subscript annotation should end at 57th symbol.')
 
     // Second node is a first level heading without annos
-    let node2 = body.getChildAt(1)
+    let node2 = body.getNodeAt(1)
     t.equal(node2.type, 'heading', 'Second node should be a heading.')
     t.equal(node2.level, 1, 'Second node should be a first level heading.')
     t.equal(node2.content.length, 12, 'Heading should contain 12 symbols.')
@@ -510,7 +510,7 @@ function _extendedTest (t, html, forceWindows) {
     t.equal(annotationsNode2.length, 0, 'There should be no annotations inside a heading.')
 
     // Third node is a paragraph with overlapping annos
-    let node3 = body.getChildAt(2)
+    let node3 = body.getNodeAt(2)
     t.equal(node3.type, 'paragraph', 'Third node should be a paragraph.')
     t.equal(node3.content.length, 178, 'Second paragraph should contain 178 symbols.')
     // let annotationsNode3 = doc.getIndex('annotations').get([node3.id, 'content']).sort((a, b) => {

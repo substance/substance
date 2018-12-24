@@ -503,13 +503,13 @@ function DOMElementTests (impl) {
   })
 
   test('insertAt', function (t) {
-    let dummy = DefaultDOMElement.parseSnippet('<dummy><bla></bla></dummy>', 'xml')
-    let doc = dummy.getOwnerDocument()
+    let dummyEl = DefaultDOMElement.parseSnippet('<dummy><bla></bla></dummy>', 'xml')
+    let doc = dummyEl.getOwnerDocument()
     let newChild = doc.createElement('blupp')
-    dummy.insertAt(1, newChild)
-    t.equal(dummy.getChildCount(), 2, 'There should be 2 children now')
-    t.ok(dummy.getChildAt(0).is('bla'), '.. the first should be <bla>')
-    t.ok(dummy.getChildAt(1).is('blupp'), '.. the second should be <blupp>')
+    dummyEl.insertAt(1, newChild)
+    t.equal(dummyEl.getChildCount(), 2, 'There should be 2 children now')
+    t.ok(dummyEl.getChildAt(0).is('bla'), '.. the first should be <bla>')
+    t.ok(dummyEl.getChildAt(1).is('blupp'), '.. the second should be <blupp>')
     t.end()
   })
 

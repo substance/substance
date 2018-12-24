@@ -841,9 +841,9 @@ export default class Component extends EventEmitter {
   }
 
   getChildAt (pos) {
-    let node = this.el.getChildAt(pos)
-    if (node) {
-      return _unwrapCompStrict(node)
+    let child = this.el.getChildAt(pos)
+    if (child) {
+      return _unwrapCompStrict(child)
     }
   }
 

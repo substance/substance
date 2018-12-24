@@ -9,7 +9,7 @@ export function _h1 (doc, body) {
     content: H1_TEXT,
     level: 1
   })
-  body.show('h1')
+  body.append('h1')
 }
 
 export const H2_TEXT = 'h2:lmnopqrs'
@@ -21,7 +21,7 @@ export function _h2 (doc, body) {
     content: H2_TEXT,
     level: 2
   })
-  body.show('h2')
+  body.append('h2')
 }
 
 export const P1_TEXT = 'p1:abcdef'
@@ -32,7 +32,7 @@ export function _p1 (doc, body) {
     id: 'p1',
     content: P1_TEXT
   })
-  body.show('p1')
+  body.append('p1')
 }
 
 export const P2_TEXT = 'p2:ghijk'
@@ -43,7 +43,7 @@ export function _p2 (doc, body) {
     id: 'p2',
     content: P2_TEXT
   })
-  body.show('p2')
+  body.append('p2')
 }
 
 export function _empty (doc, body) {
@@ -52,7 +52,7 @@ export function _empty (doc, body) {
     id: 'empty',
     content: ''
   })
-  body.show('empty')
+  body.append('empty')
 }
 
 export function _s1 (doc) {
@@ -94,7 +94,7 @@ export function _l1 (doc, body) {
     type: 'list',
     id: 'l1'
   })
-  body.show('l1')
+  body.append('l1')
 }
 
 export function _l11 (doc) {
@@ -153,7 +153,7 @@ export function _l2 (doc, body) {
     type: 'list',
     id: 'l2'
   })
-  body.show('l2')
+  body.append('l2')
 }
 
 export function _l21 (doc) {
@@ -187,7 +187,7 @@ export function _l1Single (doc, body) {
     id: 'l1',
     items: ['l1-1']
   })
-  body.show('l1')
+  body.append('l1')
 }
 
 export function _block1 (doc, body) {
@@ -195,7 +195,7 @@ export function _block1 (doc, body) {
     type: 'test-block',
     id: 'block1'
   })
-  body.show('block1')
+  body.append('block1')
 }
 
 export function _block2 (doc, body) {
@@ -203,7 +203,7 @@ export function _block2 (doc, body) {
     type: 'test-block',
     id: 'block2'
   })
-  body.show('block2')
+  body.append('block2')
 }
 
 export const IN1_TITLE = 'TITLE'
@@ -217,7 +217,7 @@ export function _in1 (doc, body) {
     body: IN1_BODY,
     caption: IN1_CAPTION
   })
-  body.show('in1')
+  body.append('in1')
 }
 
 export const T_CONTENT = [['A1', 'B1'], ['A2', 'B2']]
@@ -227,7 +227,7 @@ export function _t1 (doc, body) {
   doc.create({type: 'table-cell', id: 't1_b1', content: T_CONTENT[0][1]})
   doc.create({type: 'table-cell', id: 't1_a2', content: T_CONTENT[1][0]})
   doc.create({type: 'table-cell', id: 't1_b2', content: T_CONTENT[1][1]})
-  body.show(doc.create({
+  body.append(doc.create({
     type: 'table', id: 't1', cells: [['t1_a1', 't1_b1'], ['t1_a2', 't1_b2']]
   }))
 }

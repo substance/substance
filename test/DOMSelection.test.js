@@ -234,17 +234,17 @@ uiTest('DOMSelection: Rendering a cursor after inline node at the end of a prope
 
 function surfaceWithParagraphs (doc, body) {
   let tx = new EditingInterface(doc)
-  body.show(tx.create({
+  body.append(tx.create({
     type: 'paragraph',
     id: 'p1',
     content: 'AA'
   }))
-  body.show(tx.create({
+  body.append(tx.create({
     type: 'paragraph',
     id: 'p2',
     content: 'BBB'
   }))
-  body.show(tx.create({
+  body.append(tx.create({
     type: 'paragraph',
     id: 'p3',
     content: 'CCCC'
@@ -253,7 +253,7 @@ function surfaceWithParagraphs (doc, body) {
 
 function paragraphWithInlineNodes (doc, body) {
   let tx = new EditingInterface(doc)
-  body.show(tx.create({
+  body.append(tx.create({
     type: 'paragraph',
     id: 'p',
     content: '0123456789'

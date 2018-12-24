@@ -25,7 +25,7 @@ test('paste: Pasting a single paragraph', t => {
     id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
-  container.show(p.id)
+  container.append(p.id)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -53,7 +53,7 @@ test('paste: Pasting annotated text', t => {
     id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
-  container.show(p.id)
+  container.append(p.id)
   snippet.create({
     type: 'strong',
     id: 's1',
@@ -83,13 +83,13 @@ test('paste: Pasting two paragraphs', t => {
     id: 'test1',
     content: 'AA'
   })
-  container.show(test1.id)
+  container.append(test1.id)
   let test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
   })
-  container.show(test2.id)
+  container.append(test2.id)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -120,13 +120,13 @@ test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
     id: 'test1',
     content: 'AA'
   })
-  container.show(test1.id)
+  container.append(test1.id)
   let test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
   })
-  container.show(test2.id)
+  container.append(test2.id)
   tx.setSelection({
     type: 'property',
     path: detached.getPath(),

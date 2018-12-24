@@ -154,8 +154,8 @@ test('DOMImporter: resolving id collisions', (t) => {
   const els = DefaultDOMElement.parseSnippet('<p id="foo">A paragraph</p><p id="foo">and another one with the same id</p>', 'html')
   let container = importer.convertContainer(els, 'body')
   t.equal(container.getLength(), 2, 'should have two nodes')
-  t.equal(container.getNodeIdAt(0), 'foo', 'first should have the original id')
-  t.notEqual(container.getNodeIdAt(1), 'foo', 'second should have a new one')
+  t.equal(container.getNodeAt(0).id, 'foo', 'first should have the original id')
+  t.notEqual(container.getNodeAt(1).id, 'foo', 'second should have a new one')
   t.end()
 })
 

@@ -1,27 +1,26 @@
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
-import { getNodes, getContainerPosition } from './documentHelpers'
+import { getContainerPosition } from './documentHelpers'
 
 export default function (DocumentNode) {
   class AbstractContainer extends DocumentNode {
+    getContentPath () {
+      throw new Error('This method is abstract')
+    }
+
+    getContent () {
+      let doc = this.getDocument()
+      return doc.get(this.getContentPath())
+    }
+
     contains (nodeId) {
-      return this.getPosition(nodeId) >= 0
+      return this.getChildIndex(nodeId) >= 0
     }
 
     getNodeAt (idx) {
-      const nodeId = this.getNodeIdAt(idx)
+      const nodeId = this._getNodeIdAt(idx)
       if (nodeId) {
         return this.getDocument().get(nodeId)
-      }
-    }
-
-    getNodeIdAt (idx) {
-      let content = this.getContent()
-      if (idx < 0 || idx >= content.length) {
-        // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
-        return undefined
-      } else {
-        return content[idx]
       }
     }
 
@@ -30,11 +29,15 @@ export default function (DocumentNode) {
       return this.getContent().map(id => doc.get(id)).filter(Boolean)
     }
 
+    getNodeIndex (id) {
+      return this.getContent().indexOf(id)
+    }
+
     getPath () {
       return this.getContentPath()
     }
 
-    show (nodeId, pos) {
+    append (nodeId) {
       // allow to provide a node instance instead of nodeId
       const arg1 = arguments[0]
       if (!isString(arg1)) {
@@ -42,17 +45,12 @@ export default function (DocumentNode) {
           nodeId = arg1.id
         }
       }
-      if (arguments.length > 1) {
-        console.error('DEPRECATED: use container.showAt(pos, nodeId) instead')
-      } else {
-        pos = this.getLength()
-      }
-      return this.showAt(pos, nodeId)
+      return this.insertAt(this.length, nodeId)
     }
 
-    showAt (pos, nodeId) {
+    insertAt (pos, nodeId) {
       const doc = this.getDocument()
-      const length = this.getLength()
+      const length = this.length
       if (!isNumber(pos) || pos < 0 || pos > length) {
         throw new Error('Index out of bounds')
       }
@@ -66,13 +64,13 @@ export default function (DocumentNode) {
       doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
     }
 
-    hide (nodeId) {
+    remove (nodeId) {
       const pos = getContainerPosition(this.getDocument(), this.getContentPath(), nodeId)
-      this.hideAt(pos)
+      this.removeAt(pos)
     }
 
-    hideAt (pos) {
-      const length = this.getLength()
+    removeAt (pos) {
+      const length = this.length
       if (pos >= 0 && pos < length) {
         const doc = this.getDocument()
         doc.update(this.getContentPath(), { type: 'delete', pos: pos })
@@ -81,36 +79,22 @@ export default function (DocumentNode) {
       }
     }
 
-    getLength () {
-      return this.getContent().length
-    }
-
     get length () {
       return this.getLength()
     }
 
-    hasChildren () {
-      return this.getContent().length > 0
-    }
-
-    getChildIndex (child) {
-      return this.getContent().indexOf(child.id)
-    }
-
-    getChildren () {
-      return getNodes(this.getDocument(), this.getContent())
-    }
-
-    getChildAt (idx) {
-      var childrenIds = this.getContent()
-      if (idx < 0 || idx >= childrenIds.length) {
-        throw new Error('Array index out of bounds: ' + idx + ', ' + childrenIds.length)
-      }
-      return this.getDocument().get(childrenIds[idx], 'strict')
-    }
-
-    getChildCount () {
+    getLength () {
       return this.getContent().length
+    }
+
+    _getNodeIdAt (idx) {
+      let content = this.getContent()
+      if (idx < 0 || idx >= content.length) {
+        // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
+        return undefined
+      } else {
+        return content[idx]
+      }
     }
 
     static isContainer () {

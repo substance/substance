@@ -16,23 +16,23 @@ export default function simple (doc) {
     id: 'p1',
     content: '0123456789'
   })
-  body.show('p1')
+  body.append('p1')
   doc.create({
     type: 'paragraph',
     id: 'p2',
     content: '0123456789'
   })
-  body.show('p2')
+  body.append('p2')
   doc.create({
     type: 'paragraph',
     id: 'p3',
     content: '0123456789'
   })
-  body.show('p3')
+  body.append('p3')
   doc.create({
     type: 'paragraph',
     id: 'p4',
     content: '0123456789'
   })
-  body.show('p4')
+  body.append('p4')
 }

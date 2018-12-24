@@ -187,8 +187,8 @@ class ClipboardImporter extends HTMLImporter {
     return body
   }
 
-  _wrapIntoParagraph (body) {
-    let childNodes = body.getChildNodes()
+  _wrapIntoParagraph (bodyEl) {
+    let childNodes = bodyEl.getChildNodes()
     let shouldWrap = false
     for (let i = 0; i < childNodes.length; i++) {
       const c = childNodes[i]
@@ -203,9 +203,9 @@ class ClipboardImporter extends HTMLImporter {
       }
     }
     if (shouldWrap) {
-      let p = body.createElement('p')
+      let p = bodyEl.createElement('p')
       p.append(childNodes)
-      body.append(p)
+      bodyEl.append(p)
     }
   }
 
