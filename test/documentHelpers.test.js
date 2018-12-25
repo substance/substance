@@ -71,7 +71,7 @@ test('documentHelpers: Get change from document', (t) => {
   t.end()
 })
 
-test('documentHelpers: deleteNode()', (t) => {
+test('documentHelpers: deepDeleteNode()', (t) => {
   let doc = fixture(simple)
   ;[_l1, _l11].forEach(f => f(doc, doc.get('body')))
   doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 0, endOffset: 1 })

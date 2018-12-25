@@ -1,7 +1,7 @@
 import map from '../util/map'
 import last from '../util/last'
 import uuid from '../util/uuid'
-import { deleteNode, SNIPPET_ID, TEXT_SNIPPET_ID, removeAt, getContainerPosition, insertAt } from './documentHelpers'
+import { deepDeleteNode, SNIPPET_ID, TEXT_SNIPPET_ID, removeAt, getContainerPosition, insertAt } from './documentHelpers'
 import { setCursor } from './selectionHelpers'
 import _transferWithDisambiguatedIds from './_transferWithDisambiguatedIds'
 
@@ -199,7 +199,7 @@ function _pasteDocument (tx, pasteDoc) {
     if (text.length === 0) {
       insertPos = startPos
       removeAt(tx, containerPath, insertPos)
-      deleteNode(tx, tx.get(nodeId))
+      deepDeleteNode(tx, tx.get(nodeId))
     } else if (text.length === sel.start.offset) {
       insertPos = startPos + 1
     } else {

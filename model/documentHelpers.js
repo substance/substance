@@ -156,11 +156,11 @@ export function deepDeleteNode (doc, node) {
         // property can be a matrix
         if (isArray(ids[0])) ids = flattenOften(ids, 2)
         ids.forEach((id) => {
-          deleteNode(doc, doc.get(id))
+          deepDeleteNode(doc, doc.get(id))
         })
       }
     } else {
-      deleteNode(doc, doc.get(value))
+      deepDeleteNode(doc, doc.get(value))
     }
   })
 }
@@ -320,7 +320,7 @@ export function deleteListRange (doc, list, start, end) {
   // delete or truncate last node
   if (lastEntirelySelected) {
     list.removeItemAt(endPos)
-    deleteNode(doc, endItem)
+    deepDeleteNode(doc, endItem)
   } else {
     deleteTextRange(doc, null, end)
   }
@@ -330,7 +330,7 @@ export function deleteListRange (doc, list, start, end) {
   for (let i = endPos - 1; i > startPos; i--) {
     let item = items[i]
     list.removeItemAt(i)
-    deleteNode(doc, item)
+    deepDeleteNode(doc, item)
   }
 
   // delete or truncate the first node
@@ -338,7 +338,7 @@ export function deleteListRange (doc, list, start, end) {
     // NOTE: this does not work well, because then
     // the item where the selection remains would have gone
     // list.removeItemAt(startPos)
-    // deleteNode(doc, startItem)
+    // deepDeleteNode(doc, startItem)
     deleteTextRange(doc, start, null)
   } else {
     deleteTextRange(doc, start, null)
@@ -363,7 +363,7 @@ export function mergeListItems (doc, listId, itemPos) {
   doc.update(targetPath, { type: 'insert', start: targetLength, text: sourceItem.getText() })
   // transfer annotations
   annotationHelpers.transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
-  deleteNode(doc, sourceItem)
+  deepDeleteNode(doc, sourceItem)
 }
 
 // used by transforms copy, paste

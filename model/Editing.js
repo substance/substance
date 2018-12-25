@@ -3,7 +3,7 @@ import isString from '../util/isString'
 import uuid from '../util/uuid'
 import annotationHelpers from './annotationHelpers'
 import {
-  deleteTextRange, deleteNode, deleteListRange, mergeListItems,
+  deleteTextRange, deepDeleteNode, deleteListRange, mergeListItems,
   insertAt, removeAt, getContainerRoot, getContainerPosition, getNextNode, getPreviousNode
 } from './documentHelpers'
 import { setCursor, isEntirelySelected, selectNode } from './selectionHelpers'
@@ -179,7 +179,7 @@ export default class Editing {
         (sel.isAfter() && direction === 'left')) {
       // replace the node with default text node
       removeAt(tx, containerPath, nodePos)
-      deleteNode(tx, tx.get(nodeId))
+      deepDeleteNode(tx, tx.get(nodeId))
       let newNode = this.createTextNode(tx, sel.containerPath)
       insertAt(tx, containerPath, nodePos, newNode.id)
       tx.setSelection({
@@ -283,7 +283,7 @@ export default class Editing {
     // delete or truncate last node
     if (lastEntirelySelected) {
       removeAt(tx, containerPath, endPos)
-      deleteNode(tx, lastNode)
+      deepDeleteNode(tx, lastNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = getContainerRoot(tx, containerPath, lastNodeId)
@@ -300,13 +300,13 @@ export default class Editing {
     // delete inner nodes
     for (let i = endPos - 1; i > startPos; i--) {
       let nodeId = removeAt(tx, containerPath, i)
-      deleteNode(tx, tx.get(nodeId))
+      deepDeleteNode(tx, tx.get(nodeId))
     }
 
     // delete or truncate the first node
     if (firstEntirelySelected) {
       removeAt(tx, containerPath, startPos)
-      deleteNode(tx, firstNode)
+      deepDeleteNode(tx, firstNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       let node = getContainerRoot(tx, containerPath, firstNodeId)
@@ -392,7 +392,7 @@ export default class Editing {
         })
       } else {
         removeAt(tx, containerPath, nodePos)
-        deleteNode(tx, tx.get(nodeId))
+        deepDeleteNode(tx, tx.get(nodeId))
         insertAt(tx, containerPath, nodePos, blockNode.id)
         tx.setSelection({
           type: 'node',
@@ -418,7 +418,7 @@ export default class Editing {
         // replace node
         if (text.length === 0) {
           removeAt(tx, containerPath, nodePos)
-          deleteNode(tx, node)
+          deepDeleteNode(tx, node)
           insertAt(tx, containerPath, nodePos, blockNode.id)
           setCursor(tx, blockNode, containerPath, 'after')
         // insert before
@@ -483,7 +483,7 @@ export default class Editing {
         insertAt(tx, containerPath, nodePos + 1, textNode.id)
       } else {
         removeAt(tx, containerPath, nodePos)
-        deleteNode(tx, tx.get(nodeId))
+        deepDeleteNode(tx, tx.get(nodeId))
         insertAt(tx, containerPath, nodePos, textNode.id)
       }
       setCursor(tx, textNode, containerPath, 'after')
@@ -568,7 +568,7 @@ export default class Editing {
     // hide and delete the old one, show the new node
     let pos = getContainerPosition(tx, containerPath, nodeId)
     removeAt(tx, containerPath, pos)
-    deleteNode(tx, node)
+    deepDeleteNode(tx, node)
     insertAt(tx, containerPath, pos, newNode.id)
 
     tx.setSelection({
@@ -601,7 +601,7 @@ export default class Editing {
         let newItem = newList.createListItem(node.getText())
         annotationHelpers.transferAnnotations(tx, node.getPath(), 0, newItem.getPath(), 0)
         newList.appendItem(newItem)
-        deleteNode(tx, node)
+        deepDeleteNode(tx, node)
         insertAt(tx, containerPath, nodePos, newList.id)
         tx.setSelection({
           type: 'property',
@@ -619,7 +619,7 @@ export default class Editing {
         node.removeItemAt(itemPos)
         if (node.isEmpty()) {
           removeAt(tx, containerPath, nodePos)
-          deleteNode(tx, node)
+          deepDeleteNode(tx, node)
           insertAt(tx, containerPath, nodePos, newTextNode.id)
         } else if (itemPos === 0) {
           insertAt(tx, containerPath, nodePos, newTextNode.id)
@@ -881,17 +881,17 @@ export default class Editing {
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
           removeAt(tx, containerPath, nodePos)
-          deleteNode(tx, node)
+          deepDeleteNode(tx, node)
           insertAt(tx, containerPath, nodePos, newTextNode.id)
         // if at the first list item, remove the item
         } else if (itemPos === 0) {
           node.removeItem(listItem)
-          deleteNode(tx, listItem)
+          deepDeleteNode(tx, listItem)
           insertAt(tx, containerPath, nodePos, newTextNode.id)
         // if at the last list item, remove the item and append the paragraph
         } else if (itemPos >= L - 1) {
           node.removeItem(listItem)
-          deleteNode(tx, listItem)
+          deepDeleteNode(tx, listItem)
           insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
         // otherwise create a new list
         } else {
@@ -991,7 +991,7 @@ export default class Editing {
       if (first.isEmpty()) {
         removeAt(tx, containerPath, pos)
         secondPos--
-        deleteNode(tx, first)
+        deepDeleteNode(tx, first)
         // TODO: need to clear where to handle
         // selections ... probably better not to do it here
         setCursor(tx, second, containerPath, 'before')
@@ -1008,7 +1008,7 @@ export default class Editing {
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        deleteNode(tx, source)
+        deepDeleteNode(tx, source)
         tx.setSelection({
           type: 'property',
           path: targetPath,
@@ -1027,11 +1027,11 @@ export default class Editing {
           // transfer annotations
           annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
           // delete item and prune empty list
-          deleteNode(tx, source)
+          deepDeleteNode(tx, source)
         }
         if (list.isEmpty()) {
           removeAt(tx, containerPath, secondPos)
-          deleteNode(tx, list)
+          deepDeleteNode(tx, list)
         }
         tx.setSelection({
           type: 'property',
@@ -1050,14 +1050,14 @@ export default class Editing {
         let third = (nodeIds.length > pos + 2) ? tx.get(nodeIds[pos + 2]) : null
         if (second.getLength() === 0) {
           removeAt(tx, containerPath, secondPos)
-          deleteNode(tx, second)
+          deepDeleteNode(tx, second)
         } else {
           let source = second
           let sourcePath = source.getPath()
           removeAt(tx, containerPath, secondPos)
           tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
           annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-          deleteNode(tx, source)
+          deepDeleteNode(tx, source)
         }
         // merge to lists if they were split by a paragraph
         if (third && third.type === first.type) {
@@ -1090,7 +1090,7 @@ export default class Editing {
     } else {
       if (second.isText() && second.isEmpty()) {
         removeAt(tx, containerPath, secondPos)
-        deleteNode(tx, second)
+        deepDeleteNode(tx, second)
         setCursor(tx, first, containerPath, 'after')
       } else {
         selectNode(tx, direction === 'left' ? first.id : second.id, containerPath)
@@ -1106,6 +1106,6 @@ export default class Editing {
       second.removeItemAt(0)
       first.appendItem(secondItems[i])
     }
-    deleteNode(tx, second)
+    deepDeleteNode(tx, second)
   }
 }
