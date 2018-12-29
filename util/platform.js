@@ -119,12 +119,15 @@ function detect () {
   }
 
   if (platform.inBrowser) {
-    let widthThreshold = window.outerWidth - window.innerWidth > 160
-    let heightThreshold = window.outerHeight - window.innerHeight > 160
-    let orientation = widthThreshold ? 'vertical' : 'horizontal'
-    if (!(heightThreshold && widthThreshold) &&
-      ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || widthThreshold || heightThreshold)) {
+    let _detector = /./
+    _detector.toString = function () {
       platform.devtools = true
+    }
+    // Note: _detector.toString() is only called by the DevTools console.log()
+    console.log('%c', _detector)
+    if (platform.devtools) {
+      let widthThreshold = window.outerWidth - window.innerWidth > 160
+      let orientation = widthThreshold ? 'vertical' : 'horizontal'
       platform.devtoolsOrientation = orientation
     }
   }
