@@ -3,6 +3,7 @@ import copySelection from './copySelection'
 import Editing from './Editing'
 import Selection from './Selection'
 import { augmentSelection } from './selectionHelpers'
+import { deepDeleteNode } from './documentHelpers'
 
 /*
   Abstract base class for document editor APIs such as Transaction.
@@ -47,6 +48,10 @@ export default class EditingInterface {
 
   delete (nodeId) {
     return this._document.delete(nodeId)
+  }
+
+  deepDeleteNode (nodeId) {
+    return deepDeleteNode(this._document.get(nodeId))
   }
 
   set (path, value) {
