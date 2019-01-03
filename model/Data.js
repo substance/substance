@@ -2,6 +2,8 @@ import isArray from '../util/isArray'
 import isString from '../util/isString'
 import forEach from '../util/forEach'
 import EventEmitter from '../util/EventEmitter'
+import isPlainObject from '../util/isPlainObject'
+import cloneDeep from '../util/cloneDeep'
 
 /*
   A data storage implemention that supports data defined via a {@link Schema},
@@ -431,6 +433,10 @@ export default class Data extends EventEmitter {
 }
 
 function _setValue (root, path, newValue) {
+  // HACK: cloning the value so that we get independent copies
+  if (isArray(newValue)) newValue = newValue.slice()
+  else if (isPlainObject(newValue)) newValue = cloneDeep(newValue)
+
   let ctx = root
   let L = path.length
   for (let i = 0; i < L - 1; i++) {
