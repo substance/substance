@@ -295,9 +295,9 @@ export default class Component extends EventEmitter {
     ```
     render($$) {
       let el = $$('div').addClass('sc-my-component')
-      let caption = this.props.model.getCaption() // some method that returns a node
+      let caption = this.props.node.getCaption() // some method that returns a node
       let CaptionClass = this.getComponent(caption.type)
-      el.append($$(CaptionClass, {model: caption}))
+      el.append($$(CaptionClass, {node: caption}))
       return el
     }
     ```
@@ -467,7 +467,7 @@ export default class Component extends EventEmitter {
     class Foo extends Component {
       didMount() {
         this.context.editorSession.onRender('document', this.rerender, this, {
-          path: [this.props.model.id, 'label']
+          path: [this.props.node.id, 'label']
         })
       }
 

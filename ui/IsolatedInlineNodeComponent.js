@@ -7,15 +7,15 @@ import Component from './Component'
 // actually an IsolatedNodeComponent, but the current naming does not reveal that.
 export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeComponent {
   render ($$) {
-    const model = this.props.model
+    const node = this.props.node
     const ContentClass = this.ContentClass
     const state = this.state
 
     let el = $$('span')
     el.addClass(this.getClassNames())
       .addClass('sc-inline-node')
-      .addClass('sm-' + this.props.model.type)
-      .attr('data-id', model.id)
+      .addClass('sm-' + this.props.node.type)
+      .attr('data-id', node.id)
       .attr('data-inline', '1')
 
     let disabled = this.isDisabled()
@@ -36,7 +36,7 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     el.on('keydown', this.onKeydown)
 
     el.append(
-      this.renderContent($$, model)
+      this.renderContent($$, node)
         .ref('content')
         .addClass('se-content')
     )
@@ -76,31 +76,25 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
   }
 
   selectNode () {
-    // TODO: instead of doing this directly here
-    // we should delegate this to an API method (e.g. in editorSession)
     // console.log('IsolatedNodeComponent: selecting node.');
     const editorSession = this.getEditorSession()
-    editorSession.setSelection(this._createNodeSelection())
-  }
-
-  _createNodeSelection () {
     const surface = this.getParentSurface()
-    const model = this.props.model
-    return {
+    const node = this.props.node
+    editorSession.setSelection({
       type: 'property',
-      path: model.start.path,
-      startOffset: model.start.offset,
-      endOffset: model.end.offset,
+      path: node.start.path,
+      startOffset: node.start.offset,
+      endOffset: node.end.offset,
       containerPath: surface.getContainerPath(),
       surfaceId: surface.id
-    }
+    })
   }
 
   _getContentClass () {
-    const model = this.props.model
+    const node = this.props.node
     let ComponentClass
     // first try to get the component registered for this node
-    ComponentClass = this.getComponent(model.type, true)
+    ComponentClass = this.getComponent(node.type, true)
     // then try to find a generic a component registered
     // for "inline-node"
     if (!ComponentClass) {
@@ -110,22 +104,23 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     // instead an application should register a custom implementation
     // overriding _getContentClass()
     if (!ComponentClass) {
-      console.error(`No component registered for inline node '${model.type}'.`)
+      console.error(`No component registered for inline node '${node.type}'.`)
       ComponentClass = StubInlineNodeComponent
     }
     return ComponentClass
   }
 
-  // TODO: this is almost the same as in IsolatedNodeComponent.
+  // TODO: this is almost the same as in IsolatedNodeComponent
+  // We should consolidate this
   _deriveStateFromSelectionState (sel, selState) {
     const surface = this._getSurfaceForSelection(sel, selState)
     const parentSurface = this.getParentSurface()
     if (!surface) return null
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (surface === parentSurface) {
-      const model = this.props.model
-      if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.start.path, model.start.path)) {
-        const nodeSel = this.getDocument().createSelection(this._createNodeSelection())
+      const node = this.props.node
+      if (sel.isPropertySelection() && !sel.isCollapsed() && isEqual(sel.start.path, node.start.path)) {
+        const nodeSel = node.getSelection()
         if (nodeSel.equals(sel)) {
           return { mode: 'selected' }
         }
@@ -151,7 +146,7 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
 
 class StubInlineNodeComponent extends Component {
   render ($$) {
-    const model = this.props.model
-    return $$('span').text('???').attr('data-id', model.id).attr('data-type', model.type)
+    const node = this.props.node
+    return $$('span').text('???').attr('data-id', node.id).attr('data-type', node.type)
   }
 }

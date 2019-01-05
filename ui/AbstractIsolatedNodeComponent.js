@@ -6,14 +6,15 @@ export default class AbstractIsolatedNodeComponent extends Component {
   constructor (...args) {
     super(...args)
 
-    this.name = this._getName()
+    this.name = this.props.node.id
     this._state = { selectionFragment: null }
+
+    this.handleAction('escape', this.escape)
     this.ContentClass = this._getContentClass()
+
     // NOTE: FF does not allow to navigate contenteditable isles
     let useBlocker = platform.isFF || !this.ContentClass.noBlocker
     this.blockingMode = useBlocker ? 'closed' : 'open'
-
-    this.handleAction('escape', this.escape)
   }
 
   getInitialState () {
@@ -109,10 +110,6 @@ export default class AbstractIsolatedNodeComponent extends Component {
     return this.context.surface
   }
 
-  getDocument () {
-    return this.context.editorSession.getDocument()
-  }
-
   getEditorSession () {
     return this.context.editorSession
   }
@@ -145,27 +142,21 @@ export default class AbstractIsolatedNodeComponent extends Component {
     }
   }
 
-  _getName () {
-    return this.props.model.id
-  }
-
   _getContentClass () {
-    const model = this.props.model
+    const node = this.props.node
     let ComponentClass
-    // first try to get the component registered for this model
-    ComponentClass = this.getComponent(model.type, true)
+    // first try to get the component registered for this node
+    ComponentClass = this.getComponent(node.type, true)
     // otherwise just use an empty Component
     if (!ComponentClass) ComponentClass = Component
+
     return ComponentClass
   }
 
   _getContentProps () {
-    const model = this.props.model
     return {
       disabled: this.props.disabled,
-      model,
-      // LEGACY: we want to use the more generic name 'model' instead of 'node'
-      node: model,
+      node: this.props.node,
       isolatedNodeState: this.state.mode,
       focused: (this.state.mode === 'focused')
     }

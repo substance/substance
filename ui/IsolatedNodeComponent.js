@@ -24,7 +24,7 @@ const SLASH = '/'.charCodeAt(0)
 */
 export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent {
   render ($$) {
-    const model = this.props.model
+    const node = this.props.node
     const ContentClass = this.ContentClass
     const disabled = this.props.disabled
 
@@ -32,8 +32,8 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
     let el = $$('div')
     el.addClass(this.getClassNames())
       .addClass('sc-isolated-node')
-      .addClass('sm-' + model.type)
-      .attr('data-id', model.id)
+      .addClass('sm-' + this.props.node.type)
+      .attr('data-id', node.id)
     if (disabled) {
       el.addClass('sm-disabled')
     }
@@ -59,7 +59,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
         .append(BRACKET)
     )
 
-    let content = this.renderContent($$, model, {
+    let content = this.renderContent($$, node, {
       disabled: this.props.disabled || shouldRenderBlocker
     }).ref('content')
     content.attr('contenteditable', false)
@@ -90,11 +90,10 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
   }
 
   selectNode () {
-    // TODO: it would be better to delegate this to API  instead of doing this here
     // console.log('IsolatedNodeComponent: selecting node.');
     const editorSession = this.getEditorSession()
     const surface = this.getParentSurface()
-    const nodeId = this.props.model.id
+    const nodeId = this.props.node.id
     editorSession.setSelection({
       type: 'node',
       nodeId: nodeId,
@@ -144,8 +143,8 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
     if (!surface) return newState
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (surface === parentSurface) {
-      let modelId = this.props.model.id
-      if (sel.isNodeSelection() && sel.getNodeId() === modelId) {
+      let nodeId = this.props.node.id
+      if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
           newState.mode = 'selected'
           newState.unblocked = true
@@ -157,7 +156,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
           newState.position = 'after'
         }
       }
-      if (sel.isContainerSelection() && sel.containsNode(modelId)) {
+      if (sel.isContainerSelection() && sel.containsNode(nodeId)) {
         newState.mode = 'co-selected'
       }
     } else {
@@ -210,7 +209,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
     }
     let coor
     if (offset !== null) {
-      coor = new Coordinate([comp.props.model.id], offset)
+      coor = new Coordinate([comp.props.node.id], offset)
       coor._comp = comp
     }
     return coor

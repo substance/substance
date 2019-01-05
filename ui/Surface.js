@@ -759,8 +759,6 @@ export default class Surface extends Component {
 
   _getNodeProps (node) {
     return {
-      model: node,
-      // LEGACY: we want to use the more generic property name 'model'
       node,
       placeholder: this.props.placeholder,
       disabled: this.props.disabled
