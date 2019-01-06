@@ -60,7 +60,6 @@ export default class ContainerEditor extends Surface {
     editorSession.onUpdate('document', this._onContainerChanged, this, {
       path: this.getContainerPath()
     })
-    this._attachPlaceholder()
   }
 
   dispose () {
@@ -273,26 +272,6 @@ export default class ContainerEditor extends Surface {
     return (!ids || ids.length === 0)
   }
 
-  /*
-    Adds a placeholder if needed
-  */
-  _attachPlaceholder () {
-    let firstNode = this.childNodes[0]
-    // Remove old placeholder if necessary
-    if (this.placeholderNode) {
-      this.placeholderNode.extendProps({
-        placeholder: undefined
-      })
-    }
-
-    if (this.childNodes.length === 1 && this.props.placeholder) {
-      firstNode.extendProps({
-        placeholder: this.props.placeholder
-      })
-      this.placeholderNode = firstNode
-    }
-  }
-
   isEditable () {
     return super.isEditable.call(this) && !this.isEmpty()
   }
@@ -306,27 +285,31 @@ export default class ContainerEditor extends Surface {
     let containerPath = this.getContainerPath()
     for (let i = 0; i < change.ops.length; i++) {
       let op = change.ops[i]
-      if (op.type === 'update' && isArrayEqual(op.path, containerPath)) {
-        let diff = op.diff
-        if (diff.type === 'insert') {
-          let nodeId = diff.getValue()
-          let node = doc.get(nodeId)
-          let nodeEl
-          if (node) {
-            nodeEl = this._renderNode($$, node)
-          } else {
-            // node does not exist anymore
-            // so we insert a stub element, so that the number of child
-            // elements is consistent
-            nodeEl = $$('div')
+      if (isArrayEqual(op.path, containerPath)) {
+        if (op.type === 'update') {
+          let diff = op.diff
+          if (diff.type === 'insert') {
+            let nodeId = diff.getValue()
+            let node = doc.get(nodeId)
+            let nodeEl
+            if (node) {
+              nodeEl = this._renderNode($$, node)
+            } else {
+              // node does not exist anymore
+              // so we insert a stub element, so that the number of child
+              // elements is consistent
+              nodeEl = $$('div')
+            }
+            this.insertAt(diff.getOffset(), nodeEl)
+          } else if (diff.type === 'delete') {
+            this.removeAt(diff.getOffset())
           }
-          this.insertAt(diff.getOffset(), nodeEl)
-        } else if (diff.type === 'delete') {
-          this.removeAt(diff.getOffset())
+        } else {
+          this.empty()
+          this.rerender()
         }
       }
     }
-    this._attachPlaceholder()
   }
 
   get _isContainerEditor () { return true }
