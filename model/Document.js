@@ -114,6 +114,27 @@ export default class Document extends EventEmitter {
     return this.data.get(path, strict)
   }
 
+  resolve (path, strict) {
+    let prop = this.getProperty(path)
+    if (!prop) {
+      if (strict) {
+        throw new Error('Invalid path')
+      } else {
+        return undefined
+      }
+    }
+    let val = this.get(path, strict)
+    if (prop.isReference()) {
+      if (prop.isArray()) {
+        return val.map(id => this.get(id))
+      } else {
+        return this.get(val)
+      }
+    } else {
+      return val
+    }
+  }
+
   /**
     @return {Object} A hash of {@link model/DocumentNode} instances.
   */

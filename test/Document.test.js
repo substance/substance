@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { pick } from 'substance'
+import { pick, Document, DocumentSchema, DocumentNode, CHILD, CHILDREN } from 'substance'
 
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
@@ -86,5 +86,55 @@ test('Document: node.find()', t => {
   let strong = p2.find('strong')
   t.notNil(strong, 'p2.find(strong) should find a node')
   t.equal(strong.type, 'strong', '.. of correct type')
+  t.end()
+})
+
+class Parent extends DocumentNode {}
+Parent.schema = {
+  type: 'parent',
+  child: CHILD('child')
+}
+class Child extends DocumentNode {}
+Child.schema = {
+  type: 'child',
+  foo: { type: 'string', default: '' }
+}
+class ParentWithChildren extends DocumentNode {}
+ParentWithChildren.schema = {
+  type: 'parent-with-children',
+  children: CHILDREN('child')
+}
+
+test('Document: resolve() a single id', t => {
+  let doc = new Document(new DocumentSchema({ nodes: [Parent, Child], DocumentClass: Document }))
+  let child = doc.create({ type: 'child', id: 'c1' })
+  doc.create({ type: 'parent', id: 'p1', child: 'c1' })
+  t.equal(doc.resolve(['p1', 'child']), child, 'resolve() should provide a referenced node')
+  t.end()
+})
+
+test('Document: resolve() multiple ids', t => {
+  let doc = new Document(new DocumentSchema({ nodes: [ParentWithChildren, Child], DocumentClass: Document }))
+  let c1 = doc.create({ type: 'child', id: 'c1' })
+  let c2 = doc.create({ type: 'child', id: 'c2' })
+  doc.create({ type: 'parent-with-children', id: 'p1', children: ['c1', 'c2'] })
+  t.deepEqual(doc.resolve(['p1', 'children']), [c1, c2], 'resolve() should provide referenced nodes')
+  t.end()
+})
+
+test('Document: resolve() provides values like get() for non-reference values', t => {
+  let doc = new Document(new DocumentSchema({ nodes: [Child], DocumentClass: Document }))
+  doc.create({ type: 'child', id: 'c1', foo: 'bar' })
+  t.equal(doc.resolve(['c1', 'foo']), 'bar', 'resolve() should provide a primitive values')
+  t.end()
+})
+
+test('Document: resolve() throws for non-existing properties in strict mode', t => {
+  let doc = new Document(new DocumentSchema({ nodes: [Child], DocumentClass: Document }))
+  doc.create({ type: 'child', id: 'c1', foo: 'bar' })
+  t.equal(doc.resolve(['c1', 'bla']), undefined, 'resolve() should return undefined in not-strict mode')
+  t.throws(() => {
+    doc.resolve(['c1', 'bla'], 'strict')
+  }, /Invalid path/, 'resolve() should throw for invalid paths in strict mode')
   t.end()
 })
