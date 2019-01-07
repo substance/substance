@@ -42,6 +42,14 @@ export default class EditingInterface {
     return this._document.contains(id)
   }
 
+  find (cssSelector) {
+    return this._document.find(cssSelector)
+  }
+
+  findAll (cssSelector) {
+    return this._document.findAll(cssSelector)
+  }
+
   create (nodeData) {
     return this._document.create(nodeData)
   }
