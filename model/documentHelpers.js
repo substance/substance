@@ -1,11 +1,12 @@
+import annotationHelpers from './annotationHelpers'
+import DocumentIndex from './DocumentIndex'
 import filter from '../util/filter'
 import flatten from '../util/flatten'
 import flattenOften from '../util/flattenOften'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
-import DocumentIndex from './DocumentIndex'
-import annotationHelpers from './annotationHelpers'
+import isString from '../util/isString'
 import {
   isEntirelySelected, getNodeIdsCoveredByContainerSelection
 } from './selectionHelpers'
@@ -132,6 +133,9 @@ export function deepDeleteNode (doc, node) {
   if (!node) {
     console.warn('Invalid arguments')
     return
+  }
+  if (isString(node)) {
+    node = doc.get(node)
   }
   // TODO: bring back support for container annotations
   if (node.isText()) {
@@ -461,4 +465,29 @@ export function getParent (node) {
   } else {
     return node.getParent()
   }
+}
+
+export function createNodeFromJson (doc, data) {
+  let type = data.type
+  let nodeSchema = doc.getSchema().getNodeSchema(type)
+  let nodeData = {
+    type,
+    id: data.id
+  }
+  for (let p of nodeSchema) {
+    const name = p.name
+    if (!data.hasOwnProperty(name)) continue
+    let val = data[name]
+    if (p.isReference()) {
+      if (p.isArray()) {
+        nodeData[name] = val.map(childData => createNodeFromJson(doc, childData).id)
+      } else {
+        let child = createNodeFromJson(doc, val)
+        nodeData[name] = child.id
+      }
+    } else {
+      nodeData[p.name] = val
+    }
+  }
+  return doc.create(nodeData)
 }
