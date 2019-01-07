@@ -121,8 +121,8 @@ test('InlineNode: Click on InlineNode inside IsolatedNode should select InlineNo
   let sel = editorSession.getSelection()
   t.deepEqual({
     path: sel.path,
-    startOffset: sel.startOffset,
-    endOffset: sel.endOffset,
+    startOffset: sel.start.offset,
+    endOffset: sel.end.offset,
     surfaceId: sel.surfaceId
   }, {
     path: ['sn', 'body'],
