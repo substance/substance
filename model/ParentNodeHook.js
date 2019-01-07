@@ -34,10 +34,13 @@ export default class ParentNodeHook {
   _onOperationApplied (op) {
     const doc = this.doc
     let node = doc.get(op.path[0])
-    let nodeSchema, hasOwnedProperties
+    let hasOwnedProperties = false
+    let isAnnotation = false
+    let nodeSchema
     if (node) {
       nodeSchema = node.getSchema()
       hasOwnedProperties = nodeSchema.hasOwnedProperties()
+      isAnnotation = node.isAnnotation()
     }
     switch (op.type) {
       case 'create': {
@@ -50,6 +53,9 @@ export default class ParentNodeHook {
             }
             if (isChildren) this._updateContainerPositions([node.id, p.name])
           }
+        }
+        if (isAnnotation) {
+          this._setAnnotationParent(node)
         }
         this._setRegisteredParent(node)
         break
@@ -83,6 +89,9 @@ export default class ParentNodeHook {
             this._setParent(node, newValue, propName, isChildren)
             if (isChildren) this._updateContainerPositions(op.path)
           }
+        }
+        if (isAnnotation && op.path[1] === 'start' && op.path[2] === 'path') {
+          this._setAnnotationParent(node)
         }
         break
       }
@@ -155,6 +164,13 @@ export default class ParentNodeHook {
         }
       }
     }
+  }
+
+  _setAnnotationParent (anno) {
+    let doc = anno.getDocument()
+    let path = anno.start.path
+    let annoParent = doc.get(path[0])
+    this._setParent(annoParent, anno.id, path[1])
   }
 }
 

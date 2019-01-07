@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { Document, DocumentSchema, DocumentNode, CHILD, OPTIONAL, CHILDREN } from 'substance'
+import { Document, DocumentSchema, DocumentNode, CHILD, OPTIONAL, CHILDREN, TextNode, PropertyAnnotation } from 'substance'
 
 /*
  Tests:
@@ -19,6 +19,10 @@ class Child extends DocumentNode {}
 Child.schema = {
   type: 'child'
 }
+class SomeText extends TextNode {}
+SomeText.schema = { type: 'some-text' }
+class SomeAnno extends PropertyAnnotation {}
+SomeAnno.schema = { type: 'some-anno' }
 
 test('ParentNode: nodes referenced via CHILD should have parent set after creation', t => {
   let doc = new Document(new DocumentSchema({ nodes: [Parent, Child], DocumentClass: Document }))
@@ -100,11 +104,11 @@ test('ParentNode: inserted CHILDREN should have parent', t => {
   let doc = new Document(new DocumentSchema({ nodes: [ParentWithChildren, Child], DocumentClass: Document }))
   let parent = doc.create({ type: 'parent', id: 'a' })
   let child1 = doc.create({ type: 'child', id: 'b' })
-  doc.update([parent.id, 'foo'], { insert: { offset: 0, value: child1.id } })
+  doc.update([parent.id, 'foo'], { type: 'insert', pos: 0, value: child1.id })
   t.ok(child1.getParent() === parent, 'child1 should have parent')
   t.deepEqual(child1.getXpath().toArray(), [{ id: 'a', type: 'parent' }, { id: 'b', type: 'child', property: 'foo', pos: 0 }], 'xpath of child1 should be correct')
   let child2 = doc.create({ type: 'child', id: 'c' })
-  doc.update([parent.id, 'foo'], { insert: { offset: 0, value: child2.id } })
+  doc.update([parent.id, 'foo'], { type: 'insert', pos: 0, value: child2.id })
   t.ok(child2.getParent() === parent, 'child2 should have parent')
   t.deepEqual(child1.getXpath().toArray(), [{ id: 'a', type: 'parent' }, { id: 'b', type: 'child', property: 'foo', pos: 1 }], 'xpath of child1 should be correct')
   t.deepEqual(child2.getXpath().toArray(), [{ id: 'a', type: 'parent' }, { id: 'c', type: 'child', property: 'foo', pos: 0 }], 'xpath of child2 should be correct')
@@ -116,7 +120,7 @@ test('ParentNode: removed CHILDREN should have no parent', t => {
   let child1 = doc.create({ type: 'child', id: 'b' })
   let child2 = doc.create({ type: 'child', id: 'c' })
   let parent = doc.create({ type: 'parent', id: 'a', foo: ['b', 'c'] })
-  doc.update([parent.id, 'foo'], { delete: { offset: 0 } })
+  doc.update([parent.id, 'foo'], { type: 'delete', pos: 0 })
   t.isNil(child1.getParent(), 'child1 should have no parent anymore')
   t.ok(child2.getParent() === parent, 'child2 should have parent')
   t.deepEqual(child1.getXpath().toArray(), [{ id: 'b', type: 'child' }], 'xpath of child1 should be correct')
@@ -137,7 +141,7 @@ test('ParentNode: clearing CHILDREN should remove parent', t => {
   t.end()
 })
 
-test('ParentNode: setting CHILDREN should update parent appriately', t => {
+test('ParentNode: setting CHILDREN should update parent appropriately', t => {
   let doc = new Document(new DocumentSchema({ nodes: [ParentWithChildren, Child], DocumentClass: Document }))
   let child1 = doc.create({ type: 'child', id: 'b' })
   let child2 = doc.create({ type: 'child', id: 'c' })
@@ -150,5 +154,24 @@ test('ParentNode: setting CHILDREN should update parent appriately', t => {
   t.deepEqual(child1.getXpath().toArray(), [{ id: 'b', type: 'child' }], 'xpath of child1 should be correct')
   t.deepEqual(child2.getXpath().toArray(), [{ id: 'a', type: 'parent' }, { id: 'c', type: 'child', property: 'foo', pos: 0 }], 'xpath of child2 should be correct')
   t.deepEqual(child3.getXpath().toArray(), [{ id: 'a', type: 'parent' }, { id: 'd', type: 'child', property: 'foo', pos: 1 }], 'xpath of child3 should be correct')
+  t.end()
+})
+
+test('ParentNode: creating an annotation should set parent', t => {
+  let doc = new Document(new DocumentSchema({ nodes: [SomeText, SomeAnno], DocumentClass: Document }))
+  let text = doc.create({ type: 'some-text', id: 'text', content: 'abcdefgh' })
+  let anno = doc.create({ type: 'some-anno', id: 'anno', start: { path: ['text', 'content'], offset: 1 }, end: { offset: 3 } })
+  t.equal(anno.getParent(), text, 'annotation should have text node as parent')
+  t.deepEqual(anno.getXpath().toArray(), [{ id: 'text', type: 'some-text' }, { id: 'anno', type: 'some-anno', property: 'content' }], 'xpath of anno should be correct')
+  t.end()
+})
+
+test('ParentNode: setting the path of an annotation should update the parent accordingly', t => {
+  let doc = new Document(new DocumentSchema({ nodes: [SomeText, SomeAnno], DocumentClass: Document }))
+  doc.create({ type: 'some-text', id: 'text1', content: 'abcdefgh' })
+  let text2 = doc.create({ type: 'some-text', id: 'text2', content: 'abcdefgh' })
+  let anno = doc.create({ type: 'some-anno', id: 'anno', start: { path: ['text', 'content'], offset: 1 }, end: { offset: 3 } })
+  doc.set([anno.id, 'start', 'path'], ['text2', 'content'])
+  t.equal(anno.getParent(), text2, 'annotation should have text2 as parent')
   t.end()
 })
