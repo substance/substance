@@ -56,6 +56,18 @@ export default class DocumentNode extends DataNode {
     return this.document
   }
 
+  resolve (propName) {
+    let val = this[propName]
+    if (val) {
+      let doc = this.getDocument()
+      if (isArray(val)) {
+        return val.map(id => doc.get(id))
+      } else {
+        return doc.get(val)
+      }
+    }
+  }
+
   /**
    * Set the value of a node's property
    *
@@ -268,18 +280,6 @@ export default class DocumentNode extends DataNode {
     @type {Boolean} default: false
   */
   static isText () { return false }
-
-  _resolve (propName) {
-    let val = this[propName]
-    if (val) {
-      let doc = this.getDocument()
-      if (isArray(val)) {
-        return val.map(id => doc.get(id))
-      } else {
-        return doc.get(val)
-      }
-    }
-  }
 
   // used for 'instanceof' comparison
   get _isDocumentNode () { return true }
