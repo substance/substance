@@ -32,6 +32,10 @@ export default class ContainerEditor extends Surface {
     props.name = props.name || props.containerPath.join('.') || props.node.id
 
     super(parent, props, el)
+  }
+
+  _initialize () {
+    super._initialize()
 
     this.containerPath = this.props.containerPath
     if (!isArray(this.containerPath)) {
