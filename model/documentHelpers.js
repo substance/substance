@@ -7,6 +7,7 @@ import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
 import isString from '../util/isString'
+import isFunction from '../util/isFunction'
 import {
   isEntirelySelected, getNodeIdsCoveredByContainerSelection
 } from './selectionHelpers'
@@ -468,6 +469,7 @@ export function getParent (node) {
 }
 
 export function createNodeFromJson (doc, data) {
+  if (!isFunction(doc.create)) throw new Error('First argument must be document or tx')
   let type = data.type
   let nodeSchema = doc.getSchema().getNodeSchema(type)
   let nodeData = {
