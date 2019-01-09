@@ -8,7 +8,7 @@ test('CommandManager: Command state changing with selection', (t) => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
 
   let commandStates = editorSession.getCommandStates()
@@ -23,7 +23,7 @@ test('CommandManager: Command state changing with selection', (t) => {
     path: ['p1', 'content'],
     startOffset: 3,
     endOffset: 4,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
 
   commandStates = editorSession.getCommandStates()

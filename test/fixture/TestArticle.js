@@ -4,7 +4,7 @@ export default class TestArticle extends Document {
   constructor (schema) {
     super(schema)
     this.create({
-      type: '@container',
+      type: 'body',
       id: 'body',
       nodes: []
     })

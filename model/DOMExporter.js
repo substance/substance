@@ -46,37 +46,36 @@ class DOMExporter {
   }
 
   /**
-    @param {Document}
-    @returns {DOMElement|DOMElement[]} The exported document as DOM or an array of elements
-             if exported as partial, which depends on the actual implementation
-             of `this.convertDocument()`.
-
-    @abstract
-    @example
-
-    convertDocument(doc) {
-      var elements = this.convertContainer(doc, this.state.containerId)
-      var out = elements.map(function(el) {
-        return el.outerHTML
-      })
-      return out.join('')
-    }
-  */
+   * @param {Document}
+   * @returns {DOMElement|DOMElement[]} The exported document as DOM or an array of elements
+   *          if exported as partial, which depends on the actual implementation
+   *          of `this.convertDocument()`.
+   *
+   * @abstract
+   * @example
+   *
+   * convertDocument(doc) {
+   *   let container = doc.get('body')
+   *   var elements = this.convertContainer(container)
+   *   var out = elements.map(el => {
+   *     return el.outerHTML
+   *   })
+   *   return out.join('')
+   * }
+   */
   convertDocument(doc) { // eslint-disable-line
     throw new Error('This method is abstract')
   }
 
-  convertContainer (container) {
-    if (!container) {
-      throw new Error('Illegal arguments: container is mandatory.')
+  convertContainer (doc, containerPath) {
+    if (!containerPath) {
+      throw new Error('Illegal arguments: containerPath is mandatory.')
     }
-    const doc = container.getDocument()
     this.state.doc = doc
-    let elements = []
-    container.getContent().forEach((id) => {
-      const node = doc.get(id)
-      const nodeEl = this.convertNode(node)
-      elements.push(nodeEl)
+    let ids = doc.get(containerPath)
+    let elements = ids.map(id => {
+      let node = doc.get(id)
+      return this.convertNode(node)
     })
     return elements
   }

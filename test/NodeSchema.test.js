@@ -53,7 +53,8 @@ test('NodeSchema: reference property with multiple target types (canonical notat
 test('NodeSchema: property with invalid multi-type', t => {
   class MyNode extends Node {}
   t.throws(() => {
-    MyNode.define({
+    // HACK: somehow we need this as otherwise the code is not executed (?!)
+    MyNode._defineSchema({
       type: 'my-node',
       content: { type: ['object', 'foo'], default: [] }
     })

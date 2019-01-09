@@ -18,8 +18,8 @@ export default class ContainerAnnotationIndex extends DocumentIndex {
     this.byId.clear()
   }
 
-  get (containerId, type) {
-    var annotations = map(this.byId.get(containerId))
+  get (containerPath, type) {
+    var annotations = map(this.byId.get(String(containerPath)))
     if (isString(type)) {
       annotations = filter(annotations, DocumentIndex.filterByType)
     }
@@ -27,11 +27,11 @@ export default class ContainerAnnotationIndex extends DocumentIndex {
   }
 
   create (anno) {
-    this.byId.set([anno.containerId, anno.id], anno)
+    this.byId.set([String(anno.containerPath), anno.id], anno)
   }
 
   delete (anno) {
-    this.byId.delete([anno.containerId, anno.id])
+    this.byId.delete([String(anno.containerPath), anno.id])
   }
 
   update(node, path, newValue, oldValue) { // eslint-disable-line

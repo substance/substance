@@ -454,7 +454,7 @@ There are two types of text selections:
     startOffset: 0,
     endPath: ['p3', 'content'],
     endOffset: 6,
-    containerId: 'body',
+    containerPath: 'body',
     surfaceId: 'body'
   })
   ```

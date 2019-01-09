@@ -1,6 +1,6 @@
+import ArrayIterator from '../util/ArrayIterator'
 import last from '../util/last'
 import createCountingIdGenerator from '../util/createCountingIdGenerator'
-import ArrayIterator from '../util/ArrayIterator'
 
 const WS_LEFT = /^\s+/g
 // TODO: this is probably incorrect, /^\s*/ would always be a match
@@ -15,11 +15,11 @@ const TABS_OR_NL = /[\t\n\r]+/g
 const INVISIBLE_CHARACTER = '\u200B'
 
 /**
-  A generic base implementation for XML/HTML importers.
-
-  @param {Object} config
-  @param {DocumentSchema} config.schema
-  @param {object[]} config.converters
+ * A generic base implementation for XML/HTML importers.
+ *
+ * @param {Object} config
+ * @param {DocumentSchema} config.schema
+ * @param {object[]} config.converters
  */
 export default class DOMImporter {
   constructor (config, context) {
@@ -98,11 +98,11 @@ export default class DOMImporter {
   }
 
   /**
-    Resets this importer.
-
-    Make sure to either create a new importer instance or call this method
-    when you want to generate nodes belonging to different documents.
-  */
+   * Resets this importer.
+   *
+   * Make sure to either create a new importer instance or call this method
+   * when you want to generate nodes belonging to different documents.
+   */
   reset () {
     if (this.state.doc) {
       this.state.doc.dispose()
@@ -116,11 +116,11 @@ export default class DOMImporter {
   }
 
   /**
-    Converts all children of a given element and creates a Container node.
-
-    @param {DOMElement[]} elements All elements that should be converted into the container.
-    @param {String} containerId The id of the target container node.
-    @returns {Container} the container node
+   * Converts all children of a given element and creates a Container node.
+   *
+   * @param {DOMElement[]} elements All elements that should be converted into the container.
+   * @param {String} containerId The id of the target container node.
+   * @returns {Container} the container node
    */
   convertContainer (elements, containerId) {
     if (!this.state.doc) this.reset()
@@ -162,10 +162,10 @@ export default class DOMImporter {
   }
 
   /**
-    Converts a single HTML element and creates a node in the current document.
-
-    @param {ui/DOMElement} el the HTML element
-    @returns {object} the created node as JSON
+   * Converts a single HTML element and creates a node in the current document.
+   *
+   * @param {ui/DOMElement} el the HTML element
+   * @returns {object} the created node as JSON
    */
   convertElement (el) {
     if (!this.state.doc) this.reset()
@@ -214,20 +214,20 @@ export default class DOMImporter {
   }
 
   /**
-    Convert annotated text. You should call this method only for elements
-    containing rich-text.
-
-    @param {DOMElement} el
-    @param {String[]} path The target property where the extracted text (plus annotations) should be stored.
-    @param {Object} options
-    @param {Boolean} options.preserveWhitespace when true will preserve whitespace. Default: false.
-    @returns {String} The converted text as plain-text
-
-    @example
-
-    ```
-    p.content = converter.annotatedText(pEl, [p.id, 'content'])
-    ```
+   * Convert annotated text. You should call this method only for elements
+   * containing rich-text.
+   *
+   * @param {DOMElement} el
+   * @param {String[]} path The target property where the extracted text (plus annotations) should be stored.
+   * @param {Object} options
+   * @param {Boolean} options.preserveWhitespace when true will preserve whitespace. Default: false.
+   * @returns {String} The converted text as plain-text
+   *
+   * @example
+   *
+   * ```
+   * p.content = converter.annotatedText(pEl, [p.id, 'content'])
+   * ```
    */
   annotatedText (el, path, options = {}) {
     if (!path) {
@@ -264,10 +264,10 @@ export default class DOMImporter {
   }
 
   /**
-    Converts the given element as plain-text.
-
-    @param {ui/DOMElement} el
-    @returns {String} The plain text
+   * Converts the given element as plain-text.
+   *
+   * @param {ui/DOMElement} el
+   * @returns {String} The plain text
    */
   plainText (el) {
     var state = this.state
@@ -280,15 +280,15 @@ export default class DOMImporter {
     return text
   }
 
-  /*
-    Tells the converter to insert custom text.
-
-    During conversion of annotatedText this is used to insert different
-    text than taken from the DOM. E.g., for inline nodes we insert an invisible
-    character instead of the inner content.
-
-    @private
-    @param {String}
+  /**
+   * Tells the converter to insert custom text.
+   *
+   * During conversion of annotatedText this is used to insert different
+   * text than taken from the DOM. E.g., for inline nodes we insert an invisible
+   * character instead of the inner content.
+   *
+   * @private
+   * @param {String}
    */
   _customText (text) {
     var state = this.state
@@ -301,10 +301,10 @@ export default class DOMImporter {
   }
 
   /**
-    Generates an id. The generated id is unique with respect to all ids generated so far.
-
-    @param {String} a prefix
-    @return {String} the generated id
+   * Generates an id. The generated id is unique with respect to all ids generated so far.
+   *
+   * @param {String} prefix
+   * @return {String} the generated id
    */
   nextId (prefix) {
     // TODO: we could create more beautiful ids?
@@ -392,9 +392,9 @@ export default class DOMImporter {
     return el.is(this.tagName)
   }
 
-  /*
-    Internal function for parsing annotated text
-  */
+  /**
+   * Internal function for parsing annotated text
+   */
   _annotatedText (iterator) {
     const state = this.state
     const context = last(state.stack)
@@ -524,12 +524,12 @@ export default class DOMImporter {
     return converter.matchElement(el, this)
   }
 
-  /*
-    Wraps the remaining (inline) elements of a node iterator into a default
-    block node.
-
-    @param {DOMImporter.ChildIterator} childIterator
-    @returns {object} node data
+  /**
+   * Wraps the remaining (inline) elements of a node iterator into a default
+   * block node.
+   *
+   * @param {DOMImporter.ChildIterator} childIterator
+   * @returns {object} node data
    */
   _wrapInlineElementsIntoBlockElement (childIterator) {
     if (!childIterator.hasNext()) return
@@ -601,11 +601,11 @@ export default class DOMImporter {
     return text
   }
 
-  /*
-    Removes any leading and trailing whitespaces from the content
-    within the given element.
-    Attention: this is not yet implemented fully. Atm, trimming is only done
-    on the first and last text node (if they exist).
+  /**
+   * Removes any leading and trailing whitespaces from the content
+   * within the given element.
+   * Attention: this is not yet implemented fully. Atm, trimming is only done
+   * on the first and last text node (if they exist).
    */
   _trimTextContent (el) {
     var nodes = el.getChildNodes()
@@ -644,7 +644,7 @@ class DOMImporterState {
     this.preserveWhitespace = false
     this.nodes = []
     this.annotations = []
-    this.containerId = null
+    this.containerPath = null
     this.container = []
     this.ids = {}
     // stack for reentrant calls into convertElement()
@@ -662,7 +662,7 @@ class DOMImporterState {
   }
 
   pushContext (tagName, converter) {
-    this.contexts.push({ tagName: tagName, converter: converter, annos: [] })
+    this.contexts.push({ tagName, converter, annos: [] })
   }
 
   popContext () {

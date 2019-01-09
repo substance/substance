@@ -51,7 +51,7 @@ test('documentHelpers: Get text for container selection', (t) => {
   let doc = fixture(simple)
   let sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p2', 'content'],
@@ -71,14 +71,14 @@ test('documentHelpers: Get change from document', (t) => {
   t.end()
 })
 
-test('documentHelpers: deleteNode()', (t) => {
+test('documentHelpers: deepDeleteNode()', (t) => {
   let doc = fixture(simple)
   ;[_l1, _l11].forEach(f => f(doc, doc.get('body')))
   doc.create({ type: 'strong', id: 's1', path: ['p1', 'content'], startOffset: 0, endOffset: 1 })
-  documentHelpers.deleteNode(doc, doc.get('p1'))
+  documentHelpers.deepDeleteNode(doc, doc.get('p1'))
   t.nil(doc.get('p1'), 'node should have been deleted')
   t.nil(doc.get('s1'), 'annotation should have been deleted too')
-  documentHelpers.deleteNode(doc, doc.get('l1'))
+  documentHelpers.deepDeleteNode(doc, doc.get('l1'))
   t.nil(doc.get('l1'), 'node should have been deleted')
   t.nil(doc.get('l1-1'), 'list item should have been deleted too')
   t.end()
@@ -168,6 +168,7 @@ test('documentHelpers: isContainerAnnotation()', (t) => {
 
 test('documentHelpers: Get container annotations for property selection', (t) => {
   let doc = fixture(containerAnnoSample)
+  let body = doc.get('body')
   let sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
@@ -176,10 +177,10 @@ test('documentHelpers: Get container annotations for property selection', (t) =>
   })
   let annos
   // without options
-  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body')
+  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, body.getContentPath())
   t.equal(annos.length, 1, 'There should be one container anno')
   // filtered by type
-  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, 'body', {
+  annos = documentHelpers.getContainerAnnotationsForSelection(doc, sel, body.getContentPath(), {
     type: 'test-container-anno'
   })
   t.equal(annos.length, 1, 'There should be one container anno')

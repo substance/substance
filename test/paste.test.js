@@ -25,12 +25,12 @@ test('paste: Pasting a single paragraph', t => {
     id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
-  container.show(p.id)
+  container.append(p.id)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
   let p1 = tx.get('p1')
@@ -44,7 +44,7 @@ test('paste: Pasting annotated text', t => {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -53,7 +53,7 @@ test('paste: Pasting annotated text', t => {
     id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
-  container.show(p.id)
+  container.append(p.id)
   snippet.create({
     type: 'strong',
     id: 's1',
@@ -83,18 +83,18 @@ test('paste: Pasting two paragraphs', t => {
     id: 'test1',
     content: 'AA'
   })
-  container.show(test1.id)
+  container.append(test1.id)
   let test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
   })
-  container.show(test2.id)
+  container.append(test2.id)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
   let body = tx.get('body')
@@ -120,19 +120,19 @@ test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
     id: 'test1',
     content: 'AA'
   })
-  container.show(test1.id)
+  container.append(test1.id)
   let test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
   })
-  container.show(test2.id)
+  container.append(test2.id)
   tx.setSelection({
     type: 'property',
     path: detached.getPath(),
     startOffset: 3,
     // 'detached' is not part of a container
-    containerId: null
+    containerPath: null
   })
   tx.paste(snippet)
   let actual = toUnixLineEndings(detached.content)

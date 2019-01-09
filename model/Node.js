@@ -143,16 +143,12 @@ export default class Node extends EventEmitter {
     return false
   }
 
-  // TODO: do we really need this?
-  static define (schema) {
-    _define(schema)
-  }
-
-  static defineSchema (schema) {
-    _define(schema)
-  }
-
   get _isNode () { return true }
+
+  // this is used only for testing
+  static _defineSchema (schema) {
+    Node.schema = schema
+  }
 }
 
 // Attention: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
@@ -187,17 +183,6 @@ Node.schema = {
 }
 
 // ### Internal implementation
-
-// TODO: IMO we don't need this anymore
-// The common way to define the schema is
-// NodeClass.schema = {
-//   ...
-// }
-function _define (schema) {
-  console.error("DEPRECATED: use 'Node.schema = {...}' instead")
-  let NodeClass = this
-  NodeClass.schema = schema
-}
 
 function compileSchema (NodeClass, schema) {
   let compiledSchema = _compileSchema(schema)

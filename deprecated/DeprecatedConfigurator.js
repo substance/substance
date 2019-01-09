@@ -359,7 +359,7 @@ export default class DeprecatedConfigurator {
         type: 'paragraph',
         content: 'This is your new paragraph!'
       })
-      body.show('p1')
+      body.append('p1')
     }
 
     config.addSeed(seedFn)

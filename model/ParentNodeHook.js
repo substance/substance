@@ -23,32 +23,41 @@ import isArray from '../util/isArray'
 export default class ParentNodeHook {
   constructor (doc) {
     this.doc = doc
-    // parents by id of child nodes
+
+    // remembering parents for children, when nodes are loaded in wrong order
+    // key: node.id, value: { parent, property }
     this.parents = {}
+
     doc.data.on('operation:applied', this._onOperationApplied, this)
   }
 
   _onOperationApplied (op) {
     const doc = this.doc
     let node = doc.get(op.path[0])
-    let nodeSchema, hasOwnedProperties
+    let hasOwnedProperties = false
+    let isAnnotation = false
+    let nodeSchema
     if (node) {
       nodeSchema = node.getSchema()
       hasOwnedProperties = nodeSchema.hasOwnedProperties()
+      isAnnotation = node.isAnnotation()
     }
-    // TODO: instead of hard coding this here we should compile a matcher
-    // based on the document schema
     switch (op.type) {
       case 'create': {
         if (hasOwnedProperties) {
-          nodeSchema.getOwnedProperties().forEach(p => {
+          for (let p of nodeSchema.getOwnedProperties()) {
+            let isChildren = p.isArray()
             let refs = node[p.name]
             if (refs) {
-              this._setParent(node, refs)
+              this._setParent(node, refs, p.name, isChildren)
             }
-            this._setRegisteredParent(node)
-          })
+            if (isChildren) this._updateContainerPositions([node.id, p.name])
+          }
         }
+        if (isAnnotation) {
+          this._setAnnotationParent(node)
+        }
+        this._setRegisteredParent(node)
         break
       }
       case 'update': {
@@ -56,11 +65,13 @@ export default class ParentNodeHook {
           let propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
             let update = op.diff
+            let isChildren = update._isArrayOperation
             if (update.isDelete()) {
-              this._setParent(null, update.getValue())
+              this._setParent(null, update.getValue(), propName, isChildren)
             } else {
-              this._setParent(node, update.getValue())
+              this._setParent(node, update.getValue(), propName, isChildren)
             }
+            if (isChildren) this._updateContainerPositions(op.path)
           }
         }
         break
@@ -69,12 +80,18 @@ export default class ParentNodeHook {
         if (hasOwnedProperties) {
           let propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
+            let prop = nodeSchema.getProperty(propName)
+            let isChildren = prop.isArray()
             let oldValue = op.getOldValue()
             let newValue = op.getValue()
             // Note: _setParent takes either an array or a single id
-            this._setParent(null, oldValue)
-            this._setParent(node, newValue)
+            this._setParent(null, oldValue, propName, isChildren)
+            this._setParent(node, newValue, propName, isChildren)
+            if (isChildren) this._updateContainerPositions(op.path)
           }
+        }
+        if (isAnnotation && op.path[1] === 'start' && op.path[2] === 'path') {
+          this._setAnnotationParent(node)
         }
         break
       }
@@ -83,35 +100,77 @@ export default class ParentNodeHook {
     }
   }
 
-  _setParent (parent, ids) {
+  _setParent (parent, ids, property, isChildren) {
     if (ids) {
       if (isArray(ids)) {
-        ids.forEach(id => this.__setParent(parent, id))
+        ids.forEach(id => this.__setParent(parent, id, property, isChildren))
       } else {
-        this.__setParent(parent, ids)
+        this.__setParent(parent, ids, property, isChildren)
       }
     }
   }
 
-  __setParent (parent, id) {
-    // Note: it can happen, e.g. during deserialization, that the child node
-    // is created later than the parent so we store the parent for later
-    // While on Document.createFromDocument() we consider the order via dependeny analysis
-    // this can still happen when a document is loaded from some other sources,
-    // which does not take any measures to create nodes in a correct order.
-    // So, we must be prepared.
-    this.parents[id] = parent
+  __setParent (parent, id, property, isChildren) {
     let child = this.doc.get(id)
     if (child) {
-      child.setParent(parent)
+      this._setParentAndXpath(parent, child, property)
+    } else {
+      // Note: it can happen, e.g. during deserialization, that the child node
+      // is created later than the parent so we store the parent for later
+      // While on Document.createFromDocument() we consider the order via dependeny analysis
+      // this can still happen when a document is loaded from some other sources,
+      // which does not take any measures to create nodes in a correct order.
+      // So, we must be prepared.
+      this.parents[id] = { parent, property, isChildren }
     }
   }
 
   _setRegisteredParent (child) {
-    let parent = this.parents[child.id]
-    if (parent) {
-      child.setParent(parent)
+    let entry = this.parents[child.id]
+    if (entry) {
+      let { parent, property, isChildren } = entry
+      this._setParentAndXpath(parent, child, property)
+      if (isChildren) {
+        child._xpath.pos = parent[property].indexOf(child.id)
+      }
+      delete this.parents[child.id]
     }
+  }
+
+  _setParentAndXpath (parent, child, property) {
+    child.setParent(parent)
+    let xpath = child._xpath
+    if (parent) {
+      xpath.prev = parent._xpath
+      xpath.property = property
+    } else {
+      xpath.prev = null
+      xpath.property = null
+      // ATTENTION: need to remove this here, because
+      // it will otherwise not be updated
+      xpath.pos = null
+    }
+  }
+
+  _updateContainerPositions (containerPath) {
+    let doc = this.doc
+    let ids = doc.get(containerPath)
+    if (ids) {
+      for (let pos = 0; pos < ids.length; pos++) {
+        let id = ids[pos]
+        let child = doc.get(id)
+        if (child) {
+          child._xpath.pos = pos
+        }
+      }
+    }
+  }
+
+  _setAnnotationParent (anno) {
+    let doc = anno.getDocument()
+    let path = anno.start.path
+    let annoParent = doc.get(path[0])
+    this._setParent(annoParent, anno.id, path[1])
   }
 }
 

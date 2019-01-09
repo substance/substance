@@ -97,7 +97,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
     editorSession.setSelection({
       type: 'node',
       nodeId: nodeId,
-      containerId: surface.getContainerId(),
+      containerPath: surface.getContainerPath(),
       surfaceId: surface.id
     })
   }

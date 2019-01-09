@@ -31,11 +31,12 @@ test("IsolatedNode: IsolatedNode should be 'selected' with node selection", t =>
   editorSession.setSelection({
     type: 'node',
     nodeId: 'c1',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   let expected = {
     'body/c1': 'selected',
+    // TODO: we need to find a more intuitive way to surfaceIds
     'body/c1/c1/c2': undefined
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
@@ -47,7 +48,7 @@ test("IsolatedNode: IsolatedNode should be 'co-selected' with spanning container
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -71,10 +72,12 @@ test("IsolatedNode: IsolatedNode should be 'focused' when having the selection",
     type: 'property',
     path: ['c1_p1', 'content'],
     startOffset: 0,
+    // TODO: we need to find a more intuitive way to surfaceIds
     surfaceId: 'body/c1/c1'
   })
   let expected = {
     'body/c1': 'focused',
+    // TODO: we need to find a more intuitive way to surfaceIds
     'body/c1/c1/c2': undefined
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
@@ -88,10 +91,12 @@ test("IsolatedNode: IsolatedNode should be 'co-focused' when child is having the
     type: 'property',
     path: ['c2_p1', 'content'],
     startOffset: 0,
+    // TODO: we need to find a more intuitive way to surfaceIds
     surfaceId: 'body/c1/c1/c2/c2'
   })
   let expected = {
     'body/c1': 'co-focused',
+    // TODO: we need to find a more intuitive way to surfaceIds
     'body/c1/c1/c2': 'focused'
   }
   isolatedNodes.forEach(n => _modeOk(t, n, expected))
@@ -130,12 +135,12 @@ function _modeOk (t, isolated, expected) {
 
 function _twoStructuredNodes (doc) {
   let body = doc.get('body')
-  body.show(doc.create({
+  body.append(doc.create({
     type: 'structured-node',
     id: 'sn',
     title: 'Foo'
   }))
-  body.show(doc.create({
+  body.append(doc.create({
     type: 'structured-node',
     id: 'sn2',
     title: 'Bar'

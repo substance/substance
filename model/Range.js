@@ -1,7 +1,8 @@
 import isPlainObject from '../util/isPlainObject'
+import isArrayEqual from '../util/isArrayEqual'
 
 export default class Range {
-  constructor (start, end, reverse, containerId, surfaceId) {
+  constructor (start, end, reverse, containerPath, surfaceId) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
@@ -9,13 +10,13 @@ export default class Range {
       this.start = data.start
       this.end = data.end
       this.reverse = Boolean(data.reverse)
-      this.containerId = data.containerId
+      this.containerPath = data.containerPath
       this.surfaceId = data.surfaceId
     } else {
       this.start = start
       this.end = end
       this.reverse = Boolean(reverse)
-      this.containerId = containerId
+      this.containerPath = containerPath
       this.surfaceId = surfaceId
     }
   }
@@ -28,7 +29,7 @@ export default class Range {
     if (this === other) return true
     else {
       return (
-        this.containerId === other.containerId &&
+        isArrayEqual(this.containerPath, other.containerPath) &&
         this.start.equals(other.start) &&
         this.end.equals(other.end)
       )
@@ -44,8 +45,8 @@ export default class Range {
     if (this.isReverse()) {
       str.push('[reverse]')
     }
-    if (this.containerId) {
-      str.push('[container=' + this.containerId + ']')
+    if (this.containerPath) {
+      str.push('[container=' + this.containerPath + ']')
     }
     if (this.surfaceId) {
       str.push('[surface=' + this.surfaceId + ']')

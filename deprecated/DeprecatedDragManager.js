@@ -238,7 +238,7 @@ export default class DeprecatedDragManager extends EventEmitter {
         path: inlineNode.start.path,
         startOffset: inlineNode.start.offset,
         endOffset: inlineNode.end.offset,
-        containerId: surface.getContainerId(),
+        containerPath: surface.getContainerPath(),
         surfaceId: surface.id
       }
       return
@@ -250,7 +250,7 @@ export default class DeprecatedDragManager extends EventEmitter {
     dragState.sourceSelection = {
       type: 'node',
       nodeId: isolatedNodeComponent.props.node.id,
-      containerId: surface.getContainerId(),
+      containerPath: surface.getContainerPath(),
       surfaceId: surface.id
     }
     // We store the scrollPanes in dragState so the Dropzones component
@@ -380,21 +380,21 @@ class MoveBlockNode extends DragAndDropHandler {
     let copy = tx.copySelection()
     // just clear, but don't merge or don't insert a new node
     tx.deleteSelection({ clear: true })
-    let containerId = dragState.targetSurface.getContainerId()
+    let containerPath = dragState.targetSurface.getContainerPath()
     let surfaceId = dragState.targetSurface.getName()
-    let container = tx.get(containerId)
-    let targetNodeId = container.getNodeIdAt(insertPos)
+    let nodeIds = tx.get(containerPath)
+    let targetNodeId = nodeIds[insertPos]
     let insertMode = 'before'
     if (!targetNodeId) {
-      targetNodeId = container.getNodeIdAt(insertPos - 1)
+      targetNodeId = nodeIds[insertPos - 1]
       insertMode = 'after'
     }
     tx.setSelection({
       type: 'node',
       nodeId: targetNodeId,
       mode: insertMode,
-      containerId: containerId,
-      surfaceId: surfaceId
+      containerPath,
+      surfaceId
     })
     tx.paste(copy)
   }
@@ -442,21 +442,21 @@ class InsertNodes extends DragAndDropHandler {
     let { insertPos } = dragState.dropParams
     let files = dragState.data.files
     let uris = dragState.data.uris
-    let containerId = dragState.targetSurface.getContainerId()
+    let containerPath = dragState.targetSurface.getContainerPath()
     let surfaceId = dragState.targetSurface.id
-    let container = tx.get(containerId)
-    let targetNode = container.getNodeIdAt(insertPos)
+    let nodeIds = tx.get(containerPath)
+    let targetNode = nodeIds[insertPos]
     let insertMode = 'before'
     if (!targetNode) {
-      targetNode = container.getNodeIdAt(insertPos - 1)
+      targetNode = nodeIds[insertPos - 1]
       insertMode = 'after'
     }
     tx.setSelection({
       type: 'node',
       nodeId: targetNode,
       mode: insertMode,
-      containerId: containerId,
-      surfaceId: surfaceId
+      containerPath,
+      surfaceId
     })
     if (files.length > 0) {
       files.forEach((file) => {

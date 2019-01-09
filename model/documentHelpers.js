@@ -1,12 +1,15 @@
+import annotationHelpers from './annotationHelpers'
+import DocumentIndex from './DocumentIndex'
 import filter from '../util/filter'
 import flatten from '../util/flatten'
 import flattenOften from '../util/flattenOften'
 import forEach from '../util/forEach'
 import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
-import DocumentIndex from './DocumentIndex'
-import annotationHelpers from './annotationHelpers'
-import { isEntirelySelected } from './selectionHelpers'
+import isString from '../util/isString'
+import {
+  isEntirelySelected, getNodeIdsCoveredByContainerSelection
+} from './selectionHelpers'
 
 /**
   For a given selection get all property annotations
@@ -34,24 +37,24 @@ export function getPropertyAnnotationsForSelection (doc, sel, options) {
 
   @param {Document} doc
   @param {Selection} sel
-  @param {String} containerId
+  @param {String} containerPath
   @param {String} options.type provides only annotations of that type
   @return {Array} An array of container annotations
 */
-export function getContainerAnnotationsForSelection (doc, sel, containerId, options) {
+export function getContainerAnnotationsForSelection (doc, sel, containerPath, options) {
   // ATTENTION: looking for container annotations is not as efficient as property
   // selections, as we do not have an index that has notion of the spatial extend
   // of an annotation. Opposed to that, common annotations are bound
   // to properties which make it easy to lookup.
   /* istanbul ignore next */
-  if (!containerId) {
-    throw new Error("'containerId' is required.")
+  if (!containerPath) {
+    throw new Error("'containerPath' is required.")
   }
   options = options || {}
   let index = doc.getIndex('container-annotations')
   let annotations = []
   if (index) {
-    annotations = index.get(containerId, options.type)
+    annotations = index.get(containerPath, options.type)
     annotations = filter(annotations, function (anno) {
       return sel.overlaps(anno.getSelection())
     })
@@ -84,7 +87,7 @@ export function getTextForSelection (doc, sel) {
     return text.substring(sel.start.offset, sel.end.offset)
   } else if (sel.isContainerSelection()) {
     let result = []
-    let nodeIds = sel.getNodeIds()
+    let nodeIds = getNodeIdsCoveredByContainerSelection(doc, sel)
     let L = nodeIds.length
     for (let i = 0; i < L; i++) {
       let id = nodeIds[i]
@@ -116,15 +119,23 @@ export function getMarkersForSelection (doc, sel) {
   return filtered
 }
 
+export function deleteNode (doc, node) {
+  console.error('DEPRECATED: use documentHelpers.deepDeleteNode() instead')
+  return deepDeleteNode(doc, node)
+}
+
 /*
   Deletes a node and its children and attached annotations
   and removes it from a given container
 */
-export function deleteNode (doc, node) {
+export function deepDeleteNode (doc, node) {
   /* istanbul ignore next */
   if (!node) {
     console.warn('Invalid arguments')
     return
+  }
+  if (isString(node)) {
+    node = doc.get(node)
   }
   // TODO: bring back support for container annotations
   if (node.isText()) {
@@ -149,11 +160,11 @@ export function deleteNode (doc, node) {
         // property can be a matrix
         if (isArray(ids[0])) ids = flattenOften(ids, 2)
         ids.forEach((id) => {
-          deleteNode(doc, doc.get(id))
+          deepDeleteNode(doc, doc.get(id))
         })
       }
     } else {
-      deleteNode(doc, doc.get(value))
+      deepDeleteNode(doc, doc.get(value))
     }
   })
 }
@@ -270,6 +281,8 @@ export function deleteTextRange (doc, start, end) {
 }
 
 export function deleteListRange (doc, list, start, end) {
+  // HACK: resolving the right node
+  // TODO: we should not do this, instead fix the calling code
   if (doc !== list.getDocument()) {
     list = doc.get(list.id)
   }
@@ -311,7 +324,7 @@ export function deleteListRange (doc, list, start, end) {
   // delete or truncate last node
   if (lastEntirelySelected) {
     list.removeItemAt(endPos)
-    deleteNode(doc, endItem)
+    deepDeleteNode(doc, endItem)
   } else {
     deleteTextRange(doc, null, end)
   }
@@ -321,7 +334,7 @@ export function deleteListRange (doc, list, start, end) {
   for (let i = endPos - 1; i > startPos; i--) {
     let item = items[i]
     list.removeItemAt(i)
-    deleteNode(doc, item)
+    deepDeleteNode(doc, item)
   }
 
   // delete or truncate the first node
@@ -329,7 +342,7 @@ export function deleteListRange (doc, list, start, end) {
     // NOTE: this does not work well, because then
     // the item where the selection remains would have gone
     // list.removeItemAt(startPos)
-    // deleteNode(doc, startItem)
+    // deepDeleteNode(doc, startItem)
     deleteTextRange(doc, start, null)
   } else {
     deleteTextRange(doc, start, null)
@@ -354,16 +367,127 @@ export function mergeListItems (doc, listId, itemPos) {
   doc.update(targetPath, { type: 'insert', start: targetLength, text: sourceItem.getText() })
   // transfer annotations
   annotationHelpers.transferAnnotations(doc, sourcePath, 0, targetPath, targetLength)
-  deleteNode(doc, sourceItem)
-}
-
-export function getNodes (doc, ids) {
-  return ids.map((id) => {
-    return doc.get(id, 'strict')
-  })
+  deepDeleteNode(doc, sourceItem)
 }
 
 // used by transforms copy, paste
 // and by ClipboardImporter/Exporter
 export const SNIPPET_ID = 'snippet'
 export const TEXT_SNIPPET_ID = 'text-snippet'
+
+export function insertAt (doc, containerPath, pos, id) {
+  doc.update(containerPath, { type: 'insert', pos, value: id })
+}
+
+export function append (doc, containerPath, id) {
+  insertAt(doc, containerPath, doc.get(containerPath).length, id)
+}
+
+export function removeAt (doc, containerPath, pos) {
+  let op = doc.update(containerPath, { type: 'delete', pos })
+  if (op && op.diff) {
+    return op.diff.val
+  }
+}
+
+export function remove (doc, containerPath, id) {
+  let index = doc.get(containerPath).indexOf(id)
+  if (index >= 0) {
+    return removeAt(doc, containerPath, index)
+  }
+  return false
+}
+
+export function getNodesForPath (doc, containerPath) {
+  let ids = doc.get(containerPath)
+  return getNodesForIds(doc, ids)
+}
+
+export function getNodesForIds (doc, ids) {
+  return ids.map(id => doc.get(id, 'strict'))
+}
+
+export function getNodeAt (doc, containerPath, nodePos) {
+  let ids = doc.get(containerPath)
+  return doc.get(ids[nodePos])
+}
+
+export function getPreviousNode (doc, containerPath, nodePos) {
+  if (nodePos > 0) {
+    return getNodeAt(doc, containerPath, nodePos - 1)
+  }
+}
+
+export function getNextNode (doc, containerPath, nodePos) {
+  return getNodeAt(doc, containerPath, nodePos + 1)
+}
+
+export { default as compareCoordinates } from './_compareCoordinates'
+
+export { default as isCoordinateBefore } from './_isCoordinateBefore'
+
+export { default as getContainerRoot } from './_getContainerRoot'
+
+export { default as getContainerPosition } from './_getContainerPosition'
+
+// TODO: we could optimize this by 'compiling' which properties are 'parent' props
+// i.e. TEXT, CHILD, and CHILDREN
+export function getChildren (node) {
+  const doc = node.getDocument()
+  const id = node.id
+  const schema = node.getSchema()
+  let result = []
+  for (let p of schema) {
+    const name = p.name
+    if (p.isText()) {
+      let annos = doc.getAnnotations([id, name])
+      forEach(annos, a => result.push(a))
+    } else if (p.isReference() && p.isOwned()) {
+      let val = node[name]
+      if (val) {
+        if (p.isArray()) {
+          result = result.concat(val.map(id => doc.get(id)))
+        } else {
+          result.push(doc.get(val))
+        }
+      }
+    }
+  }
+  return result
+}
+
+export function getParent (node) {
+  // TODO: maybe we should implement ParentNodeHook for annotations
+  if (node._isAnnotation) {
+    let anno = node
+    let nodeId = anno.start.path[0]
+    return anno.getDocument().get(nodeId)
+  } else {
+    return node.getParent()
+  }
+}
+
+export function createNodeFromJson (doc, data) {
+  let type = data.type
+  let nodeSchema = doc.getSchema().getNodeSchema(type)
+  let nodeData = {
+    type,
+    id: data.id
+  }
+  for (let p of nodeSchema) {
+    const name = p.name
+    if (!data.hasOwnProperty(name)) continue
+    let val = data[name]
+    if (p.isReference()) {
+      if (p.isArray()) {
+        nodeData[name] = val.map(childData => createNodeFromJson(doc, childData).id)
+      } else {
+        let child = createNodeFromJson(doc, val)
+        nodeData[name] = child.id
+      }
+    } else {
+      nodeData[p.name] = val
+    }
+  }
+  return doc.create(nodeData)
+}

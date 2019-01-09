@@ -3,6 +3,7 @@ import copySelection from './copySelection'
 import Editing from './Editing'
 import Selection from './Selection'
 import { augmentSelection } from './selectionHelpers'
+import { deepDeleteNode } from './documentHelpers'
 
 /*
   Abstract base class for document editor APIs such as Transaction.
@@ -41,16 +42,24 @@ export default class EditingInterface {
     return this._document.contains(id)
   }
 
+  find (cssSelector) {
+    return this._document.find(cssSelector)
+  }
+
+  findAll (cssSelector) {
+    return this._document.findAll(cssSelector)
+  }
+
   create (nodeData) {
     return this._document.create(nodeData)
   }
 
-  createDefaultTextNode (content) {
-    return this._document.createDefaultTextNode(content, this._direction)
-  }
-
   delete (nodeId) {
     return this._document.delete(nodeId)
+  }
+
+  deepDeleteNode (nodeId) {
+    return deepDeleteNode(this._document.get(nodeId))
   }
 
   set (path, value) {
@@ -70,11 +79,11 @@ export default class EditingInterface {
   createSelection (selData) {
     // TODO: we need to rethink this
     // I'd like to make it convenient for the 99% use cases
-    // which means reusing containerId and surfaceId
+    // which means reusing containerPath and surfaceId
     // However, it does not work well for cases
     // where the surface changes
     // Even better would be just to have surfaceId, and derive
-    // containerId dynamically
+    // containerPath dynamically
     selData = augmentSelection(selData, this._selection)
     return this._document.createSelection(selData)
   }
@@ -131,9 +140,10 @@ export default class EditingInterface {
   }
 
   copySelection () {
+    const doc = this.getDocument()
     const sel = this._selection
     if (sel && !sel.isNull() && !sel.isCollapsed()) {
-      return copySelection(this.getDocument(), this._selection)
+      return copySelection(doc, this._selection)
     }
   }
 

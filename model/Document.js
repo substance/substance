@@ -21,7 +21,7 @@ import Coordinate from './Coordinate'
 import { createNodeSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
-import { SNIPPET_ID } from './documentHelpers'
+import { SNIPPET_ID, getContainerRoot, compareCoordinates } from './documentHelpers'
 
 const converter = new JSONConverter()
 
@@ -112,6 +112,27 @@ export default class Document extends EventEmitter {
   */
   get (path, strict) {
     return this.data.get(path, strict)
+  }
+
+  resolve (path, strict) {
+    let prop = this.getProperty(path)
+    if (!prop) {
+      if (strict) {
+        throw new Error('Invalid path')
+      } else {
+        return undefined
+      }
+    }
+    let val = this.get(path, strict)
+    if (prop.isReference()) {
+      if (prop.isArray()) {
+        return val.map(id => this.get(id))
+      } else {
+        return this.get(val)
+      }
+    } else {
+      return val
+    }
   }
 
   /**
@@ -313,7 +334,7 @@ export default class Document extends EventEmitter {
 
     Deleting from an array:
     ```
-    doc.update(['body', 'nodes'], { delete: 2 })
+    doc.update(['body', 'nodes'], { delete: { offset: 2 } })
     ```
     would turn `[1,2,3,4]` into `[1,2,4]`.
   */
@@ -376,7 +397,7 @@ export default class Document extends EventEmitter {
       path: [ 'text1', 'content'],
       startOffset: 10,
       endOffset: 20,
-      containerId: 'body'
+      containerPath: 'body'
     })
     ```
 
@@ -385,7 +406,7 @@ export default class Document extends EventEmitter {
     ```js
     doc.createSelection({
       type: 'container',
-      containerId: 'body',
+      containerPath: 'body',
       startPath: [ 'p1', 'content'],
       startOffset: 10,
       endPath: [ 'p2', 'content'],
@@ -428,25 +449,18 @@ export default class Document extends EventEmitter {
           break
         }
         case 'container': {
-          let container = this.get(data.containerId, 'strict')
-          if (!container) throw new Error('Can not create ContainerSelection: container "' + data.containerId + '" does not exist.')
-          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset })
-          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset })
-          let startAddress = container.getAddress(start)
-          let endAddress = container.getAddress(end)
-          if (!startAddress) {
-            throw new Error('Invalid arguments for ContainerSelection: ', start.toString())
-          }
-          if (!endAddress) {
-            throw new Error('Invalid arguments for ContainerSelection: ', end.toString())
-          }
+          let containerPath = data.containerPath
+          let ids = this.get(containerPath)
+          if (!ids) throw new Error('Can not create ContainerSelection: container "' + containerPath + '" does not exist.')
+          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset, containerPath })
+          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset, containerPath })
           if (!data.hasOwnProperty('reverse')) {
-            if (endAddress.isBefore(startAddress, 'strict')) {
+            if (compareCoordinates(this, containerPath, start, end) > 0) {
               [start, end] = [end, start]
               data.reverse = true
             }
           }
-          sel = new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, data.reverse, data.surfaceId)
+          sel = new ContainerSelection(containerPath, start.path, start.offset, end.path, end.offset, data.reverse, data.surfaceId)
           break
         }
         case 'node': {
@@ -454,7 +468,7 @@ export default class Document extends EventEmitter {
             doc: this,
             nodeId: data.nodeId,
             mode: data.mode,
-            containerId: data.containerId,
+            containerPath: data.containerPath,
             reverse: data.reverse,
             surfaceId: data.surfaceId
           })
@@ -622,8 +636,8 @@ export default class Document extends EventEmitter {
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
         // ATTENTION: we only create full NodeSelections
-        // when mapping from the DOM to Model  return new NodeSelection(range.containerId, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
-        return new NodeSelection(range.containerId, range.start.getNodeId(), 'full', range.reverse, range.surfaceId)
+        // when mapping from the DOM to Model  return new NodeSelection(range.containerPath, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
+        return new NodeSelection(range.containerPath, range.start.getNodeId(), 'full', range.reverse, range.surfaceId)
       } else {
         return this.createSelection({
           type: 'property',
@@ -631,7 +645,7 @@ export default class Document extends EventEmitter {
           startOffset: range.start.offset,
           endOffset: range.end.offset,
           reverse: range.reverse,
-          containerId: range.containerId,
+          containerPath: range.containerPath,
           surfaceId: range.surfaceId
         })
       }
@@ -643,16 +657,18 @@ export default class Document extends EventEmitter {
         endPath: range.end.path,
         endOffset: range.end.offset,
         reverse: range.reverse,
-        containerId: range.containerId,
+        containerPath: range.containerPath,
         surfaceId: range.surfaceId
       })
     }
   }
 
-  _normalizeCoor ({ path, offset }) {
+  _normalizeCoor ({ path, offset, containerPath }) {
     // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
     if (path.length === 1) {
-      let node = this.get(path[0]).getContainerRoot()
+      // FIXME: originally getContainerRoot was called here
+      // however in this case
+      let node = getContainerRoot(this, containerPath, path[0])
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         return new Coordinate(node.getPath(), offset === 0 ? 0 : node.getLength())

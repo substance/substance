@@ -95,7 +95,7 @@ export default class Surface extends Component {
   render ($$) {
     let tagName = this.props.tagName || 'div'
     let el = $$(tagName)
-      .addClass('sc-surface')
+      .addClass(this._getClassNames())
       .attr('tabindex', 2)
       .attr('data-surface-id', this.id)
 
@@ -132,6 +132,10 @@ export default class Surface extends Component {
       el.on('copy', this._onCopy)
     }
     return el
+  }
+
+  _getClassNames () {
+    return `sc-surface sm-${this.name}`
   }
 
   getName () {
@@ -210,7 +214,7 @@ export default class Surface extends Component {
     return this.props.spellcheck === 'native'
   }
 
-  getContainerId () {
+  getContainerPath () {
     return null
   }
 

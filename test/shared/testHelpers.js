@@ -9,9 +9,9 @@ export function getMountPoint (t) {
       t.sandbox.append(el)
       return el
     } else {
-      let body = DOM.wrap(window.document.body)
-      let sandboxEl = body.createElement('div')
-      body.append(sandboxEl)
+      let bodyEl = DOM.wrap(window.document.body)
+      let sandboxEl = bodyEl.createElement('div')
+      bodyEl.append(sandboxEl)
       return sandboxEl
     }
   } else {

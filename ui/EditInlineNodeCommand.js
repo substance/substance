@@ -18,12 +18,13 @@ export default class EditInlineNodeCommand extends Command {
     // Among the annotations found we need to pick the first that exactly
     // matches the current selection
     if (annos.length > 0) {
-      annos.forEach(anno => {
+      for (let anno of annos) {
         if (anno.getSelection().equals(sel)) {
           newState.disabled = false
           newState.nodeId = anno.id
+          break
         }
-      })
+      }
     }
     return newState
   }

@@ -1,40 +1,26 @@
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
-import ContainerAddress from './ContainerAddress'
-import { getNodes } from './documentHelpers'
+import { getContainerPosition } from './documentHelpers'
 
 export default function (DocumentNode) {
   class AbstractContainer extends DocumentNode {
-    contains (nodeId) {
-      return this.getPosition(nodeId) >= 0
+    getContentPath () {
+      throw new Error('This method is abstract')
     }
 
-    getPosition (node, strict) {
-      if (isString(node)) {
-        node = this.document.get(node)
-      }
-      if (!node) return -1
-      let pos = this._getPosition(node)
-      if (strict && pos < 0) {
-        throw new Error('Node is not within this container: ' + node.id)
-      }
-      return pos
+    getContent () {
+      let doc = this.getDocument()
+      return doc.get(this.getContentPath())
+    }
+
+    contains (nodeId) {
+      return this.getChildIndex(nodeId) >= 0
     }
 
     getNodeAt (idx) {
-      const nodeId = this.getNodeIdAt(idx)
+      const nodeId = this._getNodeIdAt(idx)
       if (nodeId) {
         return this.getDocument().get(nodeId)
-      }
-    }
-
-    getNodeIdAt (idx) {
-      let content = this.getContent()
-      if (idx < 0 || idx >= content.length) {
-        // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
-        return undefined
-      } else {
-        return content[idx]
       }
     }
 
@@ -43,7 +29,15 @@ export default function (DocumentNode) {
       return this.getContent().map(id => doc.get(id)).filter(Boolean)
     }
 
-    show (nodeId, pos) {
+    getNodeIndex (id) {
+      return this.getContent().indexOf(id)
+    }
+
+    getPath () {
+      return this.getContentPath()
+    }
+
+    append (nodeId) {
       // allow to provide a node instance instead of nodeId
       const arg1 = arguments[0]
       if (!isString(arg1)) {
@@ -51,17 +45,12 @@ export default function (DocumentNode) {
           nodeId = arg1.id
         }
       }
-      if (arguments.length > 1) {
-        console.error('DEPRECATED: use container.showAt(pos, nodeId) instead')
-      } else {
-        pos = this.getLength()
-      }
-      return this.showAt(pos, nodeId)
+      return this.insertAt(this.length, nodeId)
     }
 
-    showAt (pos, nodeId) {
+    insertAt (pos, nodeId) {
       const doc = this.getDocument()
-      const length = this.getLength()
+      const length = this.length
       if (!isNumber(pos) || pos < 0 || pos > length) {
         throw new Error('Index out of bounds')
       }
@@ -75,13 +64,13 @@ export default function (DocumentNode) {
       doc.update(this.getContentPath(), { type: 'insert', pos: pos, value: nodeId })
     }
 
-    hide (nodeId) {
-      const pos = this.getPosition(nodeId)
-      this.hideAt(pos)
+    remove (nodeId) {
+      const pos = getContainerPosition(this.getDocument(), this.getContentPath(), nodeId)
+      this.removeAt(pos)
     }
 
-    hideAt (pos) {
-      const length = this.getLength()
+    removeAt (pos) {
+      const length = this.length
       if (pos >= 0 && pos < length) {
         const doc = this.getDocument()
         doc.update(this.getContentPath(), { type: 'delete', pos: pos })
@@ -90,122 +79,22 @@ export default function (DocumentNode) {
       }
     }
 
-    getAddress (coor) {
-      if (!coor._isCoordinate) {
-        // we have broken with an earlier version of this API
-        throw new Error('Illegal argument: Container.getAddress(coor) expects a Coordinate instance.')
-      }
-      var nodeId = coor.path[0]
-      var nodePos = this.getPosition(nodeId)
-      var offset
-      if (coor.isNodeCoordinate()) {
-        if (coor.offset > 0) {
-          offset = Number.MAX_VALUE
-        } else {
-          offset = 0
-        }
-      } else {
-        offset = coor.offset
-      }
-      return new ContainerAddress(nodePos, offset)
+    get length () {
+      return this.getLength()
     }
 
     getLength () {
       return this.getContent().length
     }
 
-    get length () {
-      return this.getLength()
-    }
-
-    _getPosition (node) {
-      if (this._isCaching) {
-        return this._getCachedPosition(node)
+    _getNodeIdAt (idx) {
+      let content = this.getContent()
+      if (idx < 0 || idx >= content.length) {
+        // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
+        return undefined
       } else {
-        return this._lookupPosition(node)
+        return content[idx]
       }
-    }
-
-    _getCachedPosition (node) {
-      let cache = this._cachedPositions || this._fillCache()
-      let nodeId = node.id
-      let pos = -1
-      if (cache.hasOwnProperty(nodeId)) {
-        pos = cache[nodeId]
-      } else {
-        pos = this._lookupPosition(node)
-        cache[nodeId] = pos
-      }
-      return pos
-    }
-
-    _fillCache () {
-      let positions = {}
-      this.nodes.forEach((id, pos) => {
-        positions[id] = pos
-      })
-      this._cachedPositions = positions
-      return positions
-    }
-
-    _invalidateCache () {
-      this._cachedPositions = null
-    }
-
-    _lookupPosition (node) {
-      if (node.hasParent()) {
-        node = node.getContainerRoot()
-      }
-      return this.getContent().indexOf(node.id)
-    }
-
-    _enableCaching () {
-      // this hook is used to invalidate cached positions
-      if (this.document) {
-        this.document.data.on('operation:applied', this._onOperationApplied, this)
-        this._isCaching = true
-      }
-    }
-
-    _onOperationApplied (op) {
-      if (op.type === 'set' || op.type === 'update') {
-        if (op.path[0] === this.id) {
-          this._invalidateCache()
-        }
-      }
-    }
-
-    _onDocumentChange (change) {
-      if (change.hasUpdated(this.getContentPath())) {
-        this._invalidateCache()
-      }
-    }
-
-    // NOTE: this has been in ParentNodeMixin before
-    // TODO: try to get rid of this
-
-    hasChildren () {
-      return this.getContent().length > 0
-    }
-
-    getChildIndex (child) {
-      return this.getContent().indexOf(child.id)
-    }
-
-    getChildren () {
-      return getNodes(this.getDocument(), this.getContent())
-    }
-
-    getChildAt (idx) {
-      var childrenIds = this.getContent()
-      if (idx < 0 || idx >= childrenIds.length) {
-        throw new Error('Array index out of bounds: ' + idx + ', ' + childrenIds.length)
-      }
-      return this.getDocument().get(childrenIds[idx], 'strict')
-    }
-
-    getChildCount () {
-      return this.getContent().length
     }
 
     static isContainer () {

@@ -1,29 +1,30 @@
+import isArray from '../util/isArray'
 import isString from '../util/isString'
 import Selection from './Selection'
 import Coordinate from './Coordinate'
 
 export default class NodeSelection extends Selection {
-  constructor (containerId, nodeId, mode, reverse, surfaceId) {
+  constructor (containerPath, nodeId, mode, reverse, surfaceId) {
     super()
 
     if (arguments.length === 1) {
       let data = arguments[0]
-      containerId = data.containerId
+      containerPath = data.containerPath
       nodeId = data.nodeId
       mode = data.mode
       reverse = data.reverse
       surfaceId = data.surfaceId
     }
 
-    if (!isString(containerId)) {
-      throw new Error("'containerId' is mandatory.")
+    if (!isArray(containerPath)) {
+      throw new Error("'containerPath' is mandatory.")
     }
     if (!isString(nodeId)) {
       throw new Error("'nodeId' is mandatory.")
     }
     mode = mode || 'full'
 
-    this.containerId = containerId
+    this.containerPath = containerPath
     this.nodeId = nodeId
     this.mode = mode
     this.reverse = Boolean(reverse)
@@ -75,7 +76,7 @@ export default class NodeSelection extends Selection {
       nodeId: this.nodeId,
       mode: this.mode,
       reverse: this.reverse,
-      containerId: this.containerId,
+      containerPath: this.containerPath,
       surfaceId: this.surfaceId
     }
   }
@@ -84,7 +85,7 @@ export default class NodeSelection extends Selection {
     /* istanbul ignore next */
     return [
       'NodeSelection(',
-      this.containerId, '.', this.nodeId, ', ',
+      this.containerPath, '.', this.nodeId, ', ',
       this.mode, ', ',
       (this.reverse ? ', reverse' : ''),
       (this.surfaceId ? (', ' + this.surfaceId) : ''),
@@ -97,13 +98,13 @@ export default class NodeSelection extends Selection {
       if (this.isBefore()) {
         return this
       } else {
-        return new NodeSelection(this.containerId, this.nodeId, 'before', this.reverse, this.surfaceId)
+        return new NodeSelection(this.containerPath, this.nodeId, 'before', this.reverse, this.surfaceId)
       }
     } else if (direction === 'right') {
       if (this.isAfter()) {
         return this
       } else {
-        return new NodeSelection(this.containerId, this.nodeId, 'after', this.reverse, this.surfaceId)
+        return new NodeSelection(this.containerPath, this.nodeId, 'after', this.reverse, this.surfaceId)
       }
     } else {
       throw new Error("'direction' must be either 'left' or 'right'")
@@ -124,14 +125,6 @@ export default class NodeSelection extends Selection {
 
   static fromJSON (data) {
     return new NodeSelection(data)
-  }
-
-  // TODO: is this used?
-  static _createFromCoordinate (coor) {
-    var containerId = coor.containerId
-    var nodeId = coor.getNodeId()
-    var mode = coor.offset === 0 ? 'before' : 'after'
-    return new NodeSelection(containerId, nodeId, mode, false)
   }
 
   get _isNodeSelection () { return true }

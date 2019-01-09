@@ -201,7 +201,7 @@ export default class AbstractIsolatedNodeComponent extends Component {
   }
 
   _shouldConsumeEvent (event) {
-    let comp = Component.unwrap(event.target)
+    let comp = Component.unwrap(event.currentTarget)
     let isolatedNodeComponent = this._getIsolatedNode(comp)
     return (isolatedNodeComponent === this)
   }

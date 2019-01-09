@@ -4,6 +4,8 @@ import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
+import getContainerRoot from './_getContainerRoot'
+import getContainerPosition from './_getContainerPosition'
 
 export function fromJSON (json) {
   if (!json) return Selection.nullSelection
@@ -23,31 +25,43 @@ export function fromJSON (json) {
   }
 }
 
-/*
-  Helper to check if a coordinate is the first position of a node.
-*/
-export function isFirst (doc, coor) {
-  if (coor.isNodeCoordinate() && coor.offset === 0) return true
-  let node = doc.get(coor.path[0]).getContainerRoot()
-  if (node.isText() && coor.offset === 0) return true
+/**
+ * Helper to check if a coordinate is the first position of a node.
+ * Attention: this works only for Text and List nodes
+ */
+export function isFirst (doc, containerPath, coor) {
+  if (coor.isNodeCoordinate()) {
+    return coor.offset === 0
+  }
+  let node = getContainerRoot(doc, containerPath, coor.path[0])
+  if (node.isText()) {
+    return coor.offset === 0
+  }
   if (node.isList()) {
     let itemId = coor.path[0]
-    if (node.items[0] === itemId && coor.offset === 0) return true
+    return (node.items[0] === itemId && coor.offset === 0)
   }
+  return false
 }
 
-/*
-  Helper to check if a coordinate is the last position of a node.
-*/
-export function isLast (doc, coor) {
-  if (coor.isNodeCoordinate() && coor.offset > 0) return true
-  let node = doc.get(coor.path[0]).getContainerRoot()
-  if (node.isText() && coor.offset >= node.getLength()) return true
+/**
+ * Helper to check if a coordinate is the last position of a node.
+ * Attention: this works only for Text and List nodes
+ */
+export function isLast (doc, containerPath, coor) {
+  if (coor.isNodeCoordinate()) {
+    return coor.offset > 0
+  }
+  let node = getContainerRoot(doc, containerPath, coor.path[0])
+  if (node.isText()) {
+    return coor.offset >= node.getLength()
+  }
   if (node.isList()) {
     let itemId = coor.path[0]
     let item = doc.get(itemId)
-    if (last(node.items) === itemId && coor.offset === item.getLength()) return true
+    return (last(node.items) === itemId && coor.offset === item.getLength())
   }
+  return false
 }
 
 export function isEntirelySelected (doc, node, start, end) {
@@ -78,7 +92,7 @@ export function getRangeInfo (doc, node, start, end) {
   return {isFirst, isLast, isEntirelySelected}
 }
 
-export function setCursor (tx, node, containerId, mode) {
+export function setCursor (tx, node, containerPath, mode) {
   if (node.isText()) {
     let offset = 0
     if (mode === 'after') {
@@ -89,7 +103,7 @@ export function setCursor (tx, node, containerId, mode) {
       type: 'property',
       path: node.getPath(),
       startOffset: offset,
-      containerId: containerId
+      containerPath
     })
   } else if (node.isList()) {
     let item, offset
@@ -104,12 +118,12 @@ export function setCursor (tx, node, containerId, mode) {
       type: 'property',
       path: item.getPath(),
       startOffset: offset,
-      containerId: containerId
+      containerPath
     })
   } else {
     tx.setSelection({
       type: 'node',
-      containerId: containerId,
+      containerPath,
       nodeId: node.id
       // NOTE: ATM we mostly use 'full' NodeSelections
       // Still, they are supported internally
@@ -118,22 +132,22 @@ export function setCursor (tx, node, containerId, mode) {
   }
 }
 
-export function selectNode (tx, nodeId, containerId) {
-  tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerId }))
+export function selectNode (tx, nodeId, containerPath) {
+  tx.setSelection(createNodeSelection({ doc: tx, nodeId, containerPath }))
 }
 
-export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, surfaceId }) {
+export function createNodeSelection ({ doc, nodeId, containerPath, mode, reverse, surfaceId }) {
   let node = doc.get(nodeId)
   if (!node) return Selection.nullSelection
-  node = node.getContainerRoot()
+  node = getContainerRoot(doc, containerPath, nodeId)
   if (node.isText()) {
     return new PropertySelection({
       path: node.getPath(),
       startOffset: mode === 'after' ? node.getLength() : 0,
       endOffset: mode === 'before' ? 0 : node.getLength(),
-      reverse: reverse,
-      containerId: containerId,
-      surfaceId: surfaceId
+      reverse,
+      containerPath,
+      surfaceId
     })
   } else if (node.isList() && node.getLength() > 0) {
     let first = node.getFirstItem()
@@ -153,12 +167,12 @@ export function createNodeSelection ({ doc, nodeId, containerId, mode, reverse, 
       startOffset: start.offset,
       endPath: end.path,
       endOffset: end.offset,
-      reverse: reverse,
-      containerId: containerId,
-      surfaceId: surfaceId
+      reverse,
+      containerPath,
+      surfaceId
     })
   } else {
-    return new NodeSelection({ nodeId, mode, reverse, containerId, surfaceId })
+    return new NodeSelection({ nodeId, mode, reverse, containerPath, surfaceId })
   }
 }
 
@@ -183,10 +197,12 @@ export function stepIntoIsolatedNode (editorSession, comp) {
       })
       return true
     } else if (surface._isContainerEditor) {
-      let container = surface.getContainer()
-      if (container.length > 0) {
-        let first = container.getChildAt(0)
-        setCursor(editorSession, first, container.id, 'after')
+      let doc = editorSession.getDocument()
+      let containerPath = surface.getContainerPath()
+      let nodeIds = doc.get()
+      if (nodeIds.length > 0) {
+        let first = doc.get(nodeIds[0])
+        setCursor(editorSession, first, containerPath, 'after')
       }
       return true
     }
@@ -197,8 +213,21 @@ export function stepIntoIsolatedNode (editorSession, comp) {
 export function augmentSelection (selData, oldSel) {
   // don't do magically if a surfaceId is present
   if (selData && oldSel && !selData.surfaceId && !oldSel.isNull()) {
-    selData.containerId = selData.containerId || oldSel.containerId
+    selData.containerPath = selData.containerPath || oldSel.containerPath
     selData.surfaceId = selData.surfaceId || oldSel.surfaceId
   }
   return selData
+}
+
+/**
+ * Get the node ids covered by this selection.
+ *
+ * @returns {String[]} an getNodeIds of ids
+ */
+export function getNodeIdsCoveredByContainerSelection (doc, sel) {
+  let containerPath = sel.containerPath
+  let startPos = getContainerPosition(doc, containerPath, sel.start.path[0])
+  let endPos = getContainerPosition(doc, containerPath, sel.end.path[0])
+  let nodeIds = doc.get(containerPath)
+  return nodeIds.slice(startPos, endPos + 1)
 }

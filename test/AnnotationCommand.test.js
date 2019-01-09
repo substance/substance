@@ -126,7 +126,7 @@ test('AnnotationCommand: expanding an annotation', (t) => {
   let annos = p1.getAnnotations()
   t.equal(annos.length, 1, 'there should be one annotation')
   let anno = annos[0]
-  t.deepEqual([anno.startOffset, anno.endOffset], [0, 6], 'annotation should have been expanded')
+  t.deepEqual([anno.start.offset, anno.end.offset], [0, 6], 'annotation should have been expanded')
   t.end()
 })
 

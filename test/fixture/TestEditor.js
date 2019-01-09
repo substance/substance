@@ -10,11 +10,14 @@ export default class TestEditor extends AbstractEditor {
 
   render ($$) {
     let doc = this.editorSession.getDocument()
+    let body = doc.get('body')
     let el = $$('div')
-    let body = $$(ContainerEditor, {
-      node: doc.get('body')
-    }).ref('surface')
-    el.append(body)
+    el.append(
+      $$(ContainerEditor, {
+        containerPath: body.getContentPath(),
+        name: 'body'
+      }).ref('surface')
+    )
     return el
   }
 }

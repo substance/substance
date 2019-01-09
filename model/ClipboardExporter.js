@@ -45,7 +45,7 @@ class ClipboardExporter extends HTMLExporter {
     if (!content) {
       throw new Error('Illegal clipboard document: could not find container "' + SNIPPET_ID + '"')
     }
-    return this.convertContainer(content)
+    return this.convertContainer(doc, content.getContentPath())
   }
 }
 

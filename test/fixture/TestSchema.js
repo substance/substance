@@ -2,9 +2,11 @@ import {
   DocumentSchema as Schema,
   ParagraphPackage, HeadingPackage, EmphasisPackage, StrongPackage,
   LinkPackage, ImagePackage, CodeblockPackage, ListPackage,
-  InlineWrapperPackage
+  InlineWrapperPackage,
+  Container
 } from 'substance'
 
+import Body from './TestBody'
 import MetaNode from './TestMetaNode'
 import TestNode from './TestNode'
 import TestContainerAnnotation from './TestContainerAnnotation'
@@ -21,26 +23,21 @@ const List = ListPackage.ListNode
 const ListItem = ListPackage.ListItemNode
 const InlineWrapper = InlineWrapperPackage.InlineWrapper
 
-var schema = new Schema('test-article', '1.0.0')
-
-schema.getDefaultTextType = function () {
-  return 'paragraph'
-}
-
-schema.addNodes([
-  MetaNode,
-  Paragraph,
-  Heading,
-  Emphasis,
-  Strong,
-  Link,
-  ImageNode,
-  Codeblock,
-  List, ListItem,
-  TestNode,
-  TestContainerAnnotation,
-  TestStructuredNode,
-  InlineWrapper
-])
-
-export default schema
+export default new Schema({
+  nodes: [
+    MetaNode,
+    Body,
+    Paragraph,
+    Heading,
+    Emphasis,
+    Strong,
+    Link,
+    ImageNode,
+    Codeblock,
+    List, ListItem,
+    TestNode,
+    TestContainerAnnotation,
+    TestStructuredNode,
+    InlineWrapper
+  ]
+})

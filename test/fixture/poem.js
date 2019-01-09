@@ -7,7 +7,7 @@ export default function (tx) {
     level: 1,
     content: 'A Dream Within a Dream'
   })
-  body.show('h1')
+  body.append('h1')
 
   tx.create({
     id: 'h2',
@@ -15,7 +15,7 @@ export default function (tx) {
     level: 2,
     content: 'by Edgar Allan Poe'
   })
-  body.show('h2')
+  body.append('h2')
 
   tx.create({
     id: 'p1',
@@ -34,7 +34,7 @@ export default function (tx) {
       'Is but a dream within a dream.'
     ].join('\n')
   })
-  body.show('p1')
+  body.append('p1')
 
   tx.create({
     id: 'p2',
@@ -55,5 +55,5 @@ export default function (tx) {
       'But a dream within a dream?'
     ].join('\n')
   })
-  body.show('p2')
+  body.append('p2')
 }

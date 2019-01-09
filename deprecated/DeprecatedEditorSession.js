@@ -291,7 +291,7 @@ export default class DeprecatedEditorSession extends EventEmitter {
     }
 
     _addSurfaceId(sel, this)
-    _addContainerId(sel, this)
+    _addContainerPath(sel, this)
 
     if (this._setSelection(sel) && !skipFlow) {
       this.startFlow()
@@ -304,7 +304,7 @@ export default class DeprecatedEditorSession extends EventEmitter {
     this.setSelection({
       type: 'node',
       nodeId: nodeId,
-      containerId: surface.getContainerId(),
+      containerPath: surface.getContainerPath(),
       surfaceId: surface.id
     })
   }
@@ -904,7 +904,7 @@ function _patchTxSetSelection (tx, editorSession) {
   tx.setSelection = function (sel) {
     sel = Transaction.prototype.setSelection.call(tx, sel)
     _addSurfaceId(sel, editorSession)
-    _addContainerId(sel, editorSession)
+    _addContainerPath(sel, editorSession)
     return sel
   }
 }
@@ -928,13 +928,13 @@ function _addSurfaceId (sel, editorSession) {
   }
 }
 
-function _addContainerId (sel, editorSession) {
-  if (sel && !sel.isNull() && sel.surfaceId && !sel.containerId) {
+function _addContainerPath (sel, editorSession) {
+  if (sel && !sel.isNull() && sel.surfaceId && !sel.containerPath) {
     let surface = editorSession.getSurface(sel.surfaceId)
     if (surface) {
-      let containerId = surface.getContainerId()
-      if (containerId) {
-        sel.containerId = containerId
+      let containerPath = surface.getContainerPath()
+      if (containerPath) {
+        sel.containerPath = containerPath
       }
     }
   }

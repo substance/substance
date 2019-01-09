@@ -1,5 +1,11 @@
-import DataNode from './Node'
+import isArray from '../util/isArray'
 import isString from '../util/isString'
+import cssSelect from '../vendor/css-select'
+import DataNode from './Node'
+import XPathNode from './XPathNode'
+import DocumentNodeSelectAdapter from './_DocumentNodeSelectAdapter'
+
+const cssSelectAdapter = new DocumentNodeSelectAdapter()
 
 /**
   Base node type for document nodes.
@@ -25,11 +31,20 @@ import isString from '../util/isString'
   - `bool` boolean values
   - `id` a node id referencing another node in the document
 */
-export default
-class DocumentNode extends DataNode {
+export default class DocumentNode extends DataNode {
   _initialize (doc, props) {
     this.document = doc
+
     super._initialize(props)
+
+    /**
+     * Experimental:
+     * Provides an XPathNode that leads back to the root.
+     * An XPath of a DocumentNode is a sequence of XPathNodes, where the first one contains a node id as entry point
+     * followed by zero or more nodes with property and position.
+     * For example, the xpath for the second paragraph in a document's body could look like this [{id: 'article'}, { property: 'body', pos: 2 }]
+     */
+    this._xpath = new XPathNode(this.id, this.type)
   }
 
   /**
@@ -39,6 +54,18 @@ class DocumentNode extends DataNode {
   */
   getDocument () {
     return this.document
+  }
+
+  resolve (propName) {
+    let val = this[propName]
+    if (val) {
+      let doc = this.getDocument()
+      if (isArray(val)) {
+        return val.map(id => doc.get(id))
+      } else {
+        return doc.get(val)
+      }
+    }
   }
 
   /**
@@ -106,51 +133,26 @@ class DocumentNode extends DataNode {
     return node
   }
 
-  getContainerRoot () {
-    let node = this
-    while (node.parent) {
-      // stop if node is immediate child of a container
-      if (node.parent.isContainer()) return node
-      // oherwise traverse up
-      node = node.parent
-    }
-    return node
+  find (cssSelector) {
+    return cssSelect.selectOne(cssSelector, this, { xmlMode: true, adapter: cssSelectAdapter })
+  }
+
+  findAll (cssSelector) {
+    return cssSelect.selectAll(cssSelector, this, { xmlMode: true, adapter: cssSelectAdapter })
   }
 
   /**
-    Checks whether this node has children.
-
-    @returns {Boolean} default: false
-  */
-  hasChildren () {
-    return false
+   * The xpath of this node.
+   */
+  getXpath () {
+    return this._xpath
   }
 
   /**
-    Get the index of a given child.
-
-    @returns {Number} default: -1
-  */
-  getChildIndex(child) { // eslint-disable-line
-    return -1
-  }
-
-  /**
-    Get a child node at a given position.
-
-    @returns {DocumentNode} default: null
-  */
-  getChildAt(idx) { // eslint-disable-line
-    return null
-  }
-
-  /**
-    Get the number of children nodes.
-
-    @returns {Number} default: 0
-  */
-  getChildCount () {
-    return 0
+   * The position in the parent's children property.
+   */
+  getPosition () {
+    return this._xpath.pos
   }
 
   // Node categories

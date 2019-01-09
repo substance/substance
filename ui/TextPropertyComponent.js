@@ -29,7 +29,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
       // get initial set of markers
       markers = markersManager.getMarkers(path, {
         surfaceId: this.getSurfaceId(),
-        containerId: this.getContainerId()
+        containerPath: this.getContainerPath()
       })
     } else {
       const doc = this.getDocument()
@@ -115,9 +115,9 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     return surface ? surface.id : null
   }
 
-  getContainerId () {
+  getContainerPath () {
     let surface = this.getSurface()
-    return surface ? surface.getContainerId() : null
+    return surface ? surface.getContainerPath() : null
   }
 
   isEditable () {

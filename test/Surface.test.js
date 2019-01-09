@@ -18,7 +18,7 @@ uiTest('Surface: Set the selection after creating annotation.', function (t) {
     path: ['p1', 'content'],
     startOffset: 0,
     endOffset: 5,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   editorSession.transaction(function (tx) {
@@ -41,7 +41,7 @@ uiTest('Surface: Render a reverse selection.', function (t) {
     endPath: ['p2', 'content'],
     endOffset: 2,
     reverse: true,
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
   var wsel = BrowserDOMElement.getWindowSelection()
@@ -57,7 +57,7 @@ function _p1 (doc, body) {
     id: 'p1',
     content: P1_TEXT
   })
-  body.show('p1')
+  body.append('p1')
 }
 
 const P2_TEXT = 'ghijk'
@@ -68,5 +68,5 @@ function _p2 (doc, body) {
     id: 'p2',
     content: P2_TEXT
   })
-  body.show('p2')
+  body.append('p2')
 }

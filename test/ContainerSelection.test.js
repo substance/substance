@@ -33,7 +33,7 @@ test('ContainerSelection: isInsideOf: strictly inside other', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -41,7 +41,7 @@ test('ContainerSelection: isInsideOf: strictly inside other', function (t) {
   })
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -56,7 +56,7 @@ test('ContainerSelection: isInsideOf: not-strictly inside other', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -64,7 +64,7 @@ test('ContainerSelection: isInsideOf: not-strictly inside other', function (t) {
   })
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -79,7 +79,7 @@ test('ContainerSelection: isInsideOf: inside a PropertySelection', function (t) 
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p1', 'content'],
@@ -99,7 +99,7 @@ test('ContainerSelection: isInsideOf: not inside', function (t) {
   var doc = fixture(containerAnnoSample)
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -108,7 +108,7 @@ test('ContainerSelection: isInsideOf: not inside', function (t) {
   // wrapping
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -118,7 +118,7 @@ test('ContainerSelection: isInsideOf: not inside', function (t) {
   // left-boundary not inside
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -128,7 +128,7 @@ test('ContainerSelection: isInsideOf: not inside', function (t) {
   // right-boundary not inside
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -145,7 +145,7 @@ test('ContainerSelection: overlaps with other ContainerSelection', function (t) 
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -154,7 +154,7 @@ test('ContainerSelection: overlaps with other ContainerSelection', function (t) 
   // equal
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 4,
     endPath: ['p3', 'content'],
@@ -164,7 +164,7 @@ test('ContainerSelection: overlaps with other ContainerSelection', function (t) 
   // inside
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -174,7 +174,7 @@ test('ContainerSelection: overlaps with other ContainerSelection', function (t) 
   // contained
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 2,
     endPath: ['p3', 'content'],
@@ -184,7 +184,7 @@ test('ContainerSelection: overlaps with other ContainerSelection', function (t) 
   // left
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 2,
     endPath: ['p2', 'content'],
@@ -194,7 +194,7 @@ test('ContainerSelection: overlaps with other ContainerSelection', function (t) 
   // right
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 2,
     endPath: ['p3', 'content'],
@@ -226,7 +226,7 @@ test('ContainerSelection: Expanding: other is inside', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -247,7 +247,7 @@ test('ContainerSelection: Expand: is inside other', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -255,7 +255,7 @@ test('ContainerSelection: Expand: is inside other', function (t) {
   })
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 3,
     endPath: ['p3', 'content'],
@@ -270,7 +270,7 @@ test('ContainerSelection: Expand right', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -278,7 +278,7 @@ test('ContainerSelection: Expand right', function (t) {
   })
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -294,7 +294,7 @@ test('ContainerSelection: Expand left', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -302,7 +302,7 @@ test('ContainerSelection: Expand left', function (t) {
   })
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -318,7 +318,7 @@ test('ContainerSelection: Expand left with PropertySelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -340,7 +340,7 @@ test('ContainerSelection: Expand right with PropertySelection', function (t) {
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -362,7 +362,7 @@ test('ContainerSelection: Truncate with other ContainerSelection', function (t) 
   var doc = fixture(containerAnnoSample)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p3', 'content'],
@@ -371,7 +371,7 @@ test('ContainerSelection: Truncate with other ContainerSelection', function (t) 
   // left side overlapping
   var other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p2', 'content'],
@@ -383,7 +383,7 @@ test('ContainerSelection: Truncate with other ContainerSelection', function (t) 
   // right side overlapping
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -398,7 +398,7 @@ test('ContainerSelection: Truncate with other ContainerSelection', function (t) 
   // wrapping
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -409,7 +409,7 @@ test('ContainerSelection: Truncate with other ContainerSelection', function (t) 
   // left side aligned
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 5,
     endPath: ['p2', 'content'],
@@ -421,7 +421,7 @@ test('ContainerSelection: Truncate with other ContainerSelection', function (t) 
   // right side aligned
   other = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -437,7 +437,7 @@ test('ContainerSelection: containsNode: inner node', function (t) {
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -451,7 +451,7 @@ test('ContainerSelection: containsNode: outer nodes', function (t) {
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -466,7 +466,7 @@ test('ContainerSelection: containsNode: start/end is nodeFragment', function (t)
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p1'],
@@ -475,7 +475,7 @@ test('ContainerSelection: containsNode: start/end is nodeFragment', function (t)
   t.ok(sel.containsNode('p1'), 'Should contain node.')
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p2'],
@@ -489,7 +489,7 @@ test('ContainerSelection: containsNode: with partial node fragment', function (t
   var doc = fixture(simple)
   var sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1'],
     startOffset: 1,
     endPath: ['p2'],
@@ -498,7 +498,7 @@ test('ContainerSelection: containsNode: with partial node fragment', function (t
   t.notOk(sel.containsNode('p1'), 'Should not contain node.')
   sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p1'],
     startOffset: 0,
     endPath: ['p2'],

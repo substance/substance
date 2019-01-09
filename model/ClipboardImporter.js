@@ -80,15 +80,15 @@ class ClipboardImporter extends HTMLImporter {
       this._isGoogleDoc = true
     }
 
-    let body = htmlDoc.find('body')
-    body = this._sanitizeBody(body)
-    if (!body) {
+    let bodyEl = htmlDoc.find('body')
+    bodyEl = this._sanitizeBody(bodyEl)
+    if (!bodyEl) {
       console.warn('Invalid HTML.')
       return null
     }
-    this._wrapIntoParagraph(body)
+    this._wrapIntoParagraph(bodyEl)
     this.reset()
-    this.convertBody(body)
+    this.convertBody(bodyEl)
     const doc = this.state.doc
     return doc
   }
@@ -187,8 +187,8 @@ class ClipboardImporter extends HTMLImporter {
     return body
   }
 
-  _wrapIntoParagraph (body) {
-    let childNodes = body.getChildNodes()
+  _wrapIntoParagraph (bodyEl) {
+    let childNodes = bodyEl.getChildNodes()
     let shouldWrap = false
     for (let i = 0; i < childNodes.length; i++) {
       const c = childNodes[i]
@@ -203,9 +203,9 @@ class ClipboardImporter extends HTMLImporter {
       }
     }
     if (shouldWrap) {
-      let p = body.createElement('p')
+      let p = bodyEl.createElement('p')
       p.append(childNodes)
-      body.append(p)
+      bodyEl.append(p)
     }
   }
 
@@ -223,8 +223,8 @@ class ClipboardImporter extends HTMLImporter {
 
     @param {String} body body element of given HTML document
   */
-  convertBody (body) {
-    this.convertContainer(body.childNodes, SNIPPET_ID)
+  convertBody (bodyEl) {
+    this.convertContainer(bodyEl.childNodes, SNIPPET_ID)
   }
 
   /**

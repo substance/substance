@@ -113,7 +113,7 @@ export default function (DocumentNode) {
       if (this.isContainerAnnotation()) {
         return doc.createSelection({
           type: 'container',
-          containerId: this.containerId,
+          containerPath: this.containerPath,
           startPath: this.start.path,
           startOffset: this.start.offset,
           endPath: this.end.path,

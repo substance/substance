@@ -5,7 +5,7 @@ class TestXMLExporter extends XMLExporter {
     var articleEl = this.createElement('article')
     var body = doc.get('body')
     articleEl.append(
-      this.convertContainer(body)
+      this.convertContainer(doc, body.getContentPath())
     )
     return articleEl
   }

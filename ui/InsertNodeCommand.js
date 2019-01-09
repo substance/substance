@@ -22,7 +22,7 @@ export default class InsertNodeCommand extends Command {
       disabled: true,
       active: false
     }
-    if (sel && !sel.isNull() && !sel.isCustomSelection() && sel.containerId) {
+    if (sel && !sel.isNull() && !sel.isCustomSelection() && sel.containerPath) {
       newState.disabled = false
     }
     newState.showInContext = this.showInContext(sel, params, context)

@@ -41,7 +41,7 @@ test('annotationHelpers: truncate container annotation with a given container se
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -87,7 +87,7 @@ test('annotationHelpers: expand container annotation for a given container selec
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
@@ -185,7 +185,7 @@ function CA1 (doc) {
       path: ['p3', 'content'],
       offset: 4
     },
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
 }
 
@@ -193,7 +193,7 @@ function CA2 (doc) {
   doc.create({
     type: 'test-container-anno',
     id: 'ca2',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     start: {
       path: ['p3', 'content'],
       offset: 7

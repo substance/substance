@@ -12,35 +12,35 @@ export default class Schema {
     @param {String} name
     @param {String} version
   */
-  constructor (name, version) {
-    if (!name) {
-      throw new Error("'name' is mandatory")
-    }
-    if (!version) {
-      throw new Error("'version' is mandatory")
+  constructor (options) {
+    // new version of the API
+    // the old one will be deprecated
+    // because we think name and version should be optional
+    if (arguments.length > 1) {
+      console.warn('DEPRECATED: use "new Schema(options)" instead')
+      options = { name: arguments[0], version: arguments[1] }
     }
 
     /**
       @type {String}
     */
-    this.name = name
+    this.name = options.name
     /**
       @type {String}
     */
-    this.version = version
+    this.version = options.version
     /**
       @type {NodeRegistry}
       @private
     */
     this.nodeRegistry = new NodeRegistry()
-    /**
-      @type {Array} all Node classes which have `Node.tocType = true`
-      @private
-    */
-    this.tocTypes = []
 
     // add built-in node classes
     this.addNodes(this.getBuiltIns())
+
+    if (options.nodes) {
+      this.addNodes(options.nodes)
+    }
   }
 
   /**
@@ -50,20 +50,17 @@ export default class Schema {
   */
   addNodes (nodes) {
     if (!nodes) return
-    forEach(nodes, function (NodeClass) {
+    forEach(nodes, NodeClass => {
       if (!NodeClass.prototype._isNode) {
         console.error('Illegal node class: ', NodeClass)
       } else {
         this.addNode(NodeClass)
       }
-    }.bind(this))
+    })
   }
 
   addNode (NodeClass) {
     this.nodeRegistry.register(NodeClass)
-    if (NodeClass.tocType) {
-      this.tocTypes.push(NodeClass.type)
-    }
   }
 
   /**
@@ -111,13 +108,6 @@ export default class Schema {
   */
   each (...args) {
     return this.nodeRegistry.each(...args)
-  }
-
-  /**
-    @returns {Node[]} list of types that should appear in a TOC
-  */
-  getTocTypes () {
-    return this.tocTypes
   }
 
   /**

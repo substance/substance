@@ -43,7 +43,7 @@ test('DocumentIndex: index should be updated correctly when updating a node prop
   let { doc, index } = _setup()
   _reset(index)
   let body = doc.get('body')
-  body.hide('p4')
+  body.remove('p4')
   t.equal(index.update.callCount, 1, 'index.update() should have been called')
   t.deepEqual(index.update.args, [doc.get('body'), ['body', 'nodes'], ['p1', 'p2', 'p3'], ['p1', 'p2', 'p3', 'p4']], '.. with correct arguments')
   t.end()
