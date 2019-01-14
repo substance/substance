@@ -30,6 +30,10 @@ export default class NodeProperty {
     return Boolean(this.definition._isText)
   }
 
+  isContainer () {
+    return Boolean(this.definition._isContainer)
+  }
+
   isOwned () {
     return Boolean(this.definition.owned)
   }
