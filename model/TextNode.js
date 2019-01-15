@@ -17,7 +17,7 @@ export default class TextNode extends TextNodeMixin(DocumentNode) {
 }
 
 TextNode.schema = {
-  type: 'text',
+  type: 'text-node',
   content: 'text',
   direction: { type: 'string', optional: true },
   textAlign: { type: 'string', default: 'left' }
