@@ -92,14 +92,19 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
   selectNode () {
     // console.log('IsolatedNodeComponent: selecting node.');
     const editorSession = this.getEditorSession()
-    const surface = this.getParentSurface()
     const nodeId = this.props.node.id
-    editorSession.setSelection({
+    let selData = {
       type: 'node',
-      nodeId: nodeId,
-      containerPath: surface.getContainerPath(),
-      surfaceId: surface.id
-    })
+      nodeId: nodeId
+    }
+    const surface = this.getParentSurface()
+    if (surface) {
+      Object.assign(selData, {
+        containerPath: surface.getContainerPath(),
+        surfaceId: surface.id
+      })
+    }
+    editorSession.setSelection(selData)
   }
 
   // EXPERIMENTAL: trying to catch clicks not handled by the
