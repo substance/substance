@@ -545,7 +545,7 @@ export default class Editing {
     let nodeId = path[0]
     let node = tx.get(nodeId)
     /* istanbul ignore next */
-    if (!(node.isInstanceOf('text'))) {
+    if (!(node.isText())) {
       throw new Error('Trying to use switchTextType on a non text node.')
     }
     const newId = uuid(data.type)
