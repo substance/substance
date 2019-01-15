@@ -78,16 +78,21 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
   selectNode () {
     // console.log('IsolatedNodeComponent: selecting node.');
     const editorSession = this.getEditorSession()
-    const surface = this.getParentSurface()
     const node = this.props.node
-    editorSession.setSelection({
+    let selData = {
       type: 'property',
       path: node.start.path,
       startOffset: node.start.offset,
-      endOffset: node.end.offset,
-      containerPath: surface.getContainerPath(),
-      surfaceId: surface.id
-    })
+      endOffset: node.end.offset
+    }
+    const surface = this.getParentSurface()
+    if (surface) {
+      Object.assign(selData, {
+        containerPath: surface.getContainerPath(),
+        surfaceId: surface.id
+      })
+    }
+    editorSession.setSelection(selData)
   }
 
   _getContentClass () {
