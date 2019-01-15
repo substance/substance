@@ -108,7 +108,7 @@ test("IsolatedNode: Issue #696: IsolatedNode should detect 'co-focused' robustly
   // by using startsWith on the surface path. This was leading to wrong
   // co-focused states when e.g. two isolated nodes `body/entity` and `body/entity-1`
   // exist. I.e. one surfaceId was a prefix of another one.
-  let { editorSession, editor } = setupEditor(t, _twoStructuredNodes)
+  let { editorSession, editor } = setupEditor(t, TWO_STRUCTURED_NODES)
   let isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'property',
@@ -124,6 +124,24 @@ test("IsolatedNode: Issue #696: IsolatedNode should detect 'co-focused' robustly
   t.end()
 })
 
+test('IsolatedNode: Click on an IsolatedNode should select the node', t => {
+  let { editor, editorSession } = setupEditor(t, TWO_STRUCTURED_NODES)
+  let isolatedNode = editor.find('.sc-isolated-node[data-id="sn"]')
+  // make sure there is no selection in the beginning
+  editorSession.setSelection(null)
+  // click on the isolatedNode
+  _clickOnIsolatedNode(isolatedNode)
+  let sel = editorSession.getSelection()
+  t.deepEqual({
+    type: sel.type,
+    nodeId: sel.nodeId
+  }, {
+    type: 'node',
+    nodeId: 'sn'
+  }, 'node should be selected')
+  t.end()
+})
+
 function _notSelected (t, isolated) {
   t.ok(isolated.isNotSelected(), "isolated node '" + isolated.getId() + "' should not be selected.")
 }
@@ -133,7 +151,13 @@ function _modeOk (t, isolated, expected) {
   t.looseEqual(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
 }
 
-function _twoStructuredNodes (doc) {
+function _clickOnIsolatedNode (comp) {
+  // TODO: it might be better to have the click handler on the IsolatedNodeComponent instead of the blocker
+  // e.g. also works when used without blocker
+  comp.refs.blocker.el.click()
+}
+
+function TWO_STRUCTURED_NODES (doc) {
   let body = doc.get('body')
   body.append(doc.create({
     type: 'structured-node',
