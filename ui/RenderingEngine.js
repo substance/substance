@@ -632,6 +632,14 @@ function _updateElement (comp, vel) {
   }
 }
 
+function _hashGet (hash, key) {
+  if (hash instanceof Map) {
+    return hash.get(key)
+  } else {
+    return hash[key]
+  }
+}
+
 function _updateHash (args) {
   const newHash = args.newHash
   const oldHash = args.oldHash || {}
@@ -640,8 +648,8 @@ function _updateHash (args) {
   let updatedKeys = {}
   for (let key in newHash) {
     if (newHash.hasOwnProperty(key)) {
-      var oldVal = oldHash[key]
-      var newVal = newHash[key]
+      var oldVal = _hashGet(oldHash, key)
+      var newVal = _hashGet(newHash, key)
       updatedKeys[key] = true
       if (oldVal !== newVal) {
         update(key, newVal)

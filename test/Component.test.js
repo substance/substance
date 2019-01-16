@@ -1119,6 +1119,27 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('Updating classes and attributes.', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        let el = $$('div')
+        if (this.props.foo) el.setAttribute('data-foo', 'true')
+        if (this.props.foo) el.addClass('sm-foo')
+        return el
+      }
+    }
+    let comp = MyComponent.render()
+    t.notOk(comp.el.hasClass('sm-foo'), 'component should not have class set.')
+    t.notOk(comp.el.getAttribute('data-foo'), 'component should not have attribute set.')
+    comp.setProps({ foo: true })
+    t.ok(comp.el.hasClass('sm-foo'), 'component should have class set.')
+    t.ok(comp.el.getAttribute('data-foo'), 'component should have attribute set.')
+    comp.setProps({})
+    t.notOk(comp.el.hasClass('sm-foo'), 'component should not have class set.')
+    t.notOk(comp.el.getAttribute('data-foo'), 'component should not have attribute set.')
+    t.end()
+  })
+
   /* ##################### Integration tests / Issues ########################## */
 
   test('Preserve components when ref matches and rerender when props changed', t => {
