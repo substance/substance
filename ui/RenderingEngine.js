@@ -281,12 +281,19 @@ function _render (state, vel) {
   if (state.isSkipped(vel)) return
   // console.log('... rendering', vel._ref)
 
-  // before changes can be applied, a VirtualElement must have been captured
-  // FIXME: with DEBUG_RENDERING we are having troubles with this assumption.
-  // It happens when the rerendered component is having children injected from its parent.
-  // Then the parent is no rerendered this, these injected components are not recaptured, and this assertion does not hold.
-  // However, it seems not to be critical, as these components don't need to be rerendered
-  // Still we should find a consistent way
+  // HACK: workaround for a problem found in DEBUG_RENDERING mode
+  // situation: a grand-parent injects via props a child component into a parent component
+  // which does render the children only in certain states (e.g. showChild=true|false)
+  // changing the state from hide to show on the parent component, caused errors here
+  // TODO: decide if this really a HACK
+  // Generally it would be more consistent to do this during the capturing phase of vel._preliminaryParent
+  // i.e. the one that has the injected component.
+  // However, it could be difficult, because a child could be ingested in many ways, e.g. via props.children, but also via a custom property
+  if (!vel._comp) {
+    if (vel._ref && vel._preliminaryParent !== vel._owner) {
+      _capture(state, vel, true)
+    }
+  }
 
   let comp = vel._comp
   console.assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
