@@ -1511,4 +1511,39 @@ function ComponentTests (debug, memory) {
     t.ok(_foo, 'The action should have been handled')
     t.end()
   })
+
+  // Note: this test revealed a problem with debug rendering where the RenderingEngine
+  // threw an error because the injected components were not captured
+  // but only if the middle component decided not to render the injected components
+  test('Rerendering a component with injected children', t => {
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-grand-parent').append(
+          $$(Parent).append(
+            $$(Child).ref('grandChild')
+          ).ref('child')
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        let el = $$('div').addClass('sc-parent')
+        if (this.props.show) {
+          el.append($$('div').ref('label').text('parent'))
+          el.append(this.props.children)
+        }
+        return el
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    let grandParent = GrandParent.render()
+    let parent = grandParent.refs.child
+    parent.extendProps({ show: true })
+    t.notNil(grandParent.find('.sc-child'), 'The grand-child should be rendered')
+    t.end()
+  })
 }
