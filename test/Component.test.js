@@ -1119,6 +1119,27 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('Updating classes and attributes.', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        let el = $$('div')
+        if (this.props.foo) el.setAttribute('data-foo', 'true')
+        if (this.props.foo) el.addClass('sm-foo')
+        return el
+      }
+    }
+    let comp = MyComponent.render()
+    t.notOk(comp.el.hasClass('sm-foo'), 'component should not have class set.')
+    t.notOk(comp.el.getAttribute('data-foo'), 'component should not have attribute set.')
+    comp.setProps({ foo: true })
+    t.ok(comp.el.hasClass('sm-foo'), 'component should have class set.')
+    t.ok(comp.el.getAttribute('data-foo'), 'component should have attribute set.')
+    comp.setProps({})
+    t.notOk(comp.el.hasClass('sm-foo'), 'component should not have class set.')
+    t.notOk(comp.el.getAttribute('data-foo'), 'component should not have attribute set.')
+    t.end()
+  })
+
   /* ##################### Integration tests / Issues ########################## */
 
   test('Preserve components when ref matches and rerender when props changed', t => {
@@ -1488,6 +1509,41 @@ function ComponentTests (debug, memory) {
     }
     Parent.mount({}, getMountPoint(t))
     t.ok(_foo, 'The action should have been handled')
+    t.end()
+  })
+
+  // Note: this test revealed a problem with debug rendering where the RenderingEngine
+  // threw an error because the injected components were not captured
+  // but only if the middle component decided not to render the injected components
+  test('Rerendering a component with injected children', t => {
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-grand-parent').append(
+          $$(Parent).append(
+            $$(Child).ref('grandChild')
+          ).ref('child')
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        let el = $$('div').addClass('sc-parent')
+        if (this.props.show) {
+          el.append($$('div').ref('label').text('parent'))
+          el.append(this.props.children)
+        }
+        return el
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    let grandParent = GrandParent.render()
+    let parent = grandParent.refs.child
+    parent.extendProps({ show: true })
+    t.notNil(grandParent.find('.sc-child'), 'The grand-child should be rendered')
     t.end()
   })
 }
