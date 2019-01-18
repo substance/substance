@@ -1395,16 +1395,6 @@ function ComponentTests (debug, memory) {
   })
 
   test('Forwarding Components', (t) => {
-    class MyComponent extends TestComponent {
-      render ($$) {
-        return $$('div').addClass('my-component').append('Foo')
-      }
-    }
-    class Forwarding extends TestComponent {
-      render ($$) {
-        return $$(MyComponent)
-      }
-    }
     class Parent extends Component {
       render ($$) {
         return $$('div').append(
@@ -1412,12 +1402,22 @@ function ComponentTests (debug, memory) {
         )
       }
     }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(Child)
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('my-component').append('Foo')
+      }
+    }
     let parent = Parent.mount({}, getMountPoint(t))
     let forwarding = parent.refs.forwarding
     t.equal(forwarding.didMount.callCount, 1, 'The forwarding component should be mounted')
     t.ok(forwarding.el.hasClass('my-component'), '.. should render the forwarded components element')
     t.equal(forwarding.el.textContent, 'Foo', '.. and it should have correct content')
-    t.ok(forwarding.isMounted(), '.. om')
+    t.ok(forwarding.isMounted(), '.. and should be mounted')
     t.end()
   })
 
@@ -1544,6 +1544,56 @@ function ComponentTests (debug, memory) {
     let parent = grandParent.refs.child
     parent.extendProps({ show: true })
     t.notNil(grandParent.find('.sc-child'), 'The grand-child should be rendered')
+    t.end()
+  })
+
+  // Note: this test revealed a problem with debug rendering where
+  // forwarded children do not get updated correctly
+  test('Rerendering a component with injected children that are forwarding components', t => {
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-grand-parent').append(
+          $$(Parent).append(
+            $$(Child, { mode: this.props.mode }).ref('grandChild')
+          ).ref('child')
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        let el = $$('div').addClass('sc-parent')
+        el.append($$('div').ref('label').text('parent'))
+        el.append(this.props.children)
+        return el
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        if (this.props.mode === 'b') {
+          return $$(ChildB)
+        } else {
+          return $$(ChildA)
+        }
+      }
+    }
+    class ChildA extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    let grandParent = GrandParent.render()
+    let parent = grandParent.refs.child
+    let childA = grandParent.find('.sc-child-a')
+    parent.rerender()
+    t.equal(childA.dispose.callCount, 0, 'forwarded component should have been preserved')
+    grandParent.setProps({ mode: 'b' })
+    t.equal(childA.dispose.callCount, 1, 'the original forwarded component should have been disposed')
+    t.ok(Boolean(grandParent.find('.sc-child-b')), 'and replaced with a different forwarded component')
     t.end()
   })
 }

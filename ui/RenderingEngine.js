@@ -1,7 +1,7 @@
 import isFunction from '../util/isFunction'
 import forEach from '../util/forEach'
 import uuid from '../util/uuid'
-import substanceGlobals from '../util/substanceGlobals'
+// import substanceGlobals from '../util/substanceGlobals'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import VirtualElement from './VirtualElement'
 
@@ -143,6 +143,8 @@ class RenderingEngine {
   }
 }
 
+// called to initialize a captured component, i.e. creating a Component instance
+// from a VirtualElement
 function _create (state, vel) {
   var comp = vel._comp
   console.assert(!comp, 'Component instance should not exist when this method is used.')
@@ -172,6 +174,7 @@ function _create (state, vel) {
   return comp
 }
 
+// calling comp.render() and capturing recursively
 function _capture (state, vel, forceCapture) {
   if (state.isCaptured(vel)) {
     return vel
@@ -231,16 +234,16 @@ function _capture (state, vel, forceCapture) {
       // TODO: this does not yet work for forwarded components
       _prepareVirtualComponent(state, comp, content)
       // Descending
-      // HACK: we haven't managed to get the implementation right
-      // for 'forwarded components'; so we use the other approach for that
-      if (substanceGlobals.DEBUG_RENDERING && !vel._content._isForwarded) {
+      // FIXME: the debug version does a better job ATM for forwarded components
+      const FIXME = true
+      if (FIXME) {
         // in this case we use the render() function as iterating function, where
         // $$ is a function which creates components and renders them recursively.
         // first we can create all element components that can be reached
         // without recursion
-        var stack = content.children.slice(0)
+        let stack = content.children.slice(0)
         while (stack.length) {
-          var child = stack.shift()
+          let child = stack.shift()
           if (state.isCaptured(child)) continue
           // virtual components are addressed via recursion, not captured here
           if (child._isVirtualComponent) continue
@@ -252,18 +255,30 @@ function _capture (state, vel, forceCapture) {
           }
           state.setCaptured(child)
         }
-        state.setCaptured(content)
+        // ATTENTION: this is necessary for DescendingContext
+        // TODO: document why
+        if (!content._isForwarded) {
+          state.setCaptured(content)
+        }
         // then we run comp.render($$) with a special $$ that captures VirtualComponent's
         // recursively
-        var descendingContext = new DescendingContext(state, context)
+        let descendingContext = new DescendingContext(state, context)
         while (descendingContext.hasPendingCaptures()) {
           descendingContext.reset()
           comp.render(descendingContext.$$)
         }
+        // TODO: this can be improved. It would be better if _capture was called by DescendingContext()
+        // then the forwarded component would be rendered during the render() call of the forwarding component
+        if (content._isForwarded) {
+          _capture(state, content, true)
+        }
       } else {
         // a VirtualComponent has its content as a VirtualHTMLElement
         // which needs to be captured recursively
-        _capture(state, vel._content)
+        _capture(state, content)
+      }
+      if (content._isForwarded) {
+        content._comp._isForwarded = true
       }
     } else {
       state.setSkipped(vel)
@@ -299,6 +314,8 @@ function _render (state, vel) {
   console.assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
 
   // VirtualComponents apply changes to its content element
+  // ATTENTION: we have included the render logic for VirtualComponents into the general _render() method
+  // to reduce the number of call stacks. However, this is slightly confusing.
   if (vel._isVirtualComponent) {
     _render(state, vel._content)
 
@@ -315,13 +332,29 @@ function _render (state, vel) {
     comp.refs = refs
     comp.__foreignRefs__ = foreignRefs
 
-    // EXPERIMENTAL: allowing for forwarding components
+    // ATTENTION: EXPERIMENTAL: allowing for forwarding components
     // take the element of the forwarded component
     // and use it as element for this component
-    if (vel._content._isVirtualComponent) {
-      comp.el = vel._content._comp.el
-      vel._content._comp.triggerDidMount()
-      comp.triggerDidMount()
+    if (vel._content._isForwarded) {
+      let forwardedComp = vel._content._comp
+      // TODO: is this really the correct time to call didMount?
+      // shouldn't this be called when processed by the parent?
+      // TODO: this will not work with multiple forwarded components
+      // initial render
+      if (!comp.el) {
+        comp.el = forwardedComp.el
+        forwardedComp.triggerDidMount()
+        comp.triggerDidMount()
+      } else {
+        // EXPERIMENTAL: the forwarded comp has been updated
+        let oldForwardedComp = comp.el._comp
+        if (oldForwardedComp !== forwardedComp) {
+          oldForwardedComp.triggerDispose()
+          comp.el.parentNode.replaceChild(comp.el, forwardedComp.el)
+          comp.el = forwardedComp.el
+          forwardedComp.triggerDidMount()
+        }
+      }
     }
     return
   }
@@ -344,7 +377,12 @@ function _render (state, vel) {
     // With this implementation all external DOM mutations will be eliminated
     var oldChildren = []
     comp.el.getChildNodes().forEach(function (node) {
-      var childComp = node._comp
+      let childComp = node._comp
+
+      // EXPERIMENTAL: here we need to resolve the forwarding component, which can be resolved from the owner chain
+      while (childComp && childComp._isForwarded) {
+        childComp = childComp._owner
+      }
 
       // TODO: to allow mounting a prerendered DOM element
       // we would need to allow to 'take ownership' instead of removing
@@ -694,9 +732,8 @@ function _updateListeners (args) {
 }
 
 /*
-  Descending Context Used by RenderingEngine
+  Descending Context used by RenderingEngine
 */
-
 class DescendingContext {
   constructor (state, captureContext) {
     this.state = state
@@ -728,7 +765,7 @@ class DescendingContext {
     // TODO: instead of creating a new VirtualElement each time, we could return
     // an immutable wrapper for the already recorded element.
     vel = VirtualElement.createElement.apply(this, arguments)
-    // these variables need to be set make the 'ref()' API work
+    // these variables need to be set to make the 'ref()' API work
     vel._context = this
     vel._owner = this.owner
     // Note: important to deactivate these methods as otherwise the captured
@@ -808,13 +845,13 @@ class RenderingState {
   constructor (componentFactory, elementFactory) {
     this.componentFactory = componentFactory
     this.elementFactory = elementFactory
-    this.poluted = []
+    this.polluted = []
     this.id = '__' + uuid()
   }
 
   dispose () {
     var id = this.id
-    this.poluted.forEach(function (obj) {
+    this.polluted.forEach(function (obj) {
       delete obj[id]
     })
   }
@@ -824,7 +861,7 @@ class RenderingState {
     if (!info) {
       info = {}
       obj[this.id] = info
-      this.poluted.push(obj)
+      this.polluted.push(obj)
     }
     info[key] = val
   }
@@ -862,8 +899,8 @@ class RenderingState {
     return Boolean(this.get(c, 'detached'))
   }
 
-  setCaptured (vc) {
-    this.set(vc, 'captured', true)
+  setCaptured (vc, val = true) {
+    this.set(vc, 'captured', val)
   }
 
   isCaptured (vc) {
