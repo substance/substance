@@ -83,9 +83,10 @@ import VirtualElement from './VirtualElement'
   ## TODO
 
   - reuse unmapped elements that are compatible during rendering
+  - rethink 'Forwarding Components' regarding parent-child relationship.
+    ATM, there is no extra model for that hierarchy than the DOM, only comp.parent reflects the relationship correctly
 
-  These ideas could improve the implementation.
-
+  These ideas could improve the implementation:
   - remove outlets: outlets are just another way to change props.
   - try to fuse `virtualComponent._content` into virtualComponent: ATM, `VirtualComponent` uses a `VirtualHTMLElement`
     instance to store the result of `render()`. This makes understanding the virtual tree after rendering difficult,
