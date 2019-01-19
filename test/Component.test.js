@@ -1694,13 +1694,16 @@ function ComponentTests (debug, memory) {
       }
     }
     let parent = Parent.render({ mode: 1 })
-    let childB = parent.getChildAt(1)
+    let forwarded = parent.getChildAt(1)
     parent.setProps({ mode: 2 })
-    t.equal(childB.dispose.callCount, 1, 'childB should have been disposed')
-    let childC = parent.getChildAt(1)
+    t.equal(forwarded.dispose.callCount, 1, 'childB should have been disposed')
+    forwarded = parent.getChildAt(1)
+    // ATTENTION: ATM, there is no way to 'see' the forwarding component other than going back via 'parent' of the forwarded component
+    let forwarding = forwarded.parent
     parent.setProps({ mode: 1 })
-    t.equal(childC.dispose.callCount, 1, 'childC should have been disposed')
+    // NOTE: important is that not only the forwarded component is disposed, but also the forwarding component
+    t.equal(forwarding.dispose.callCount, 1, 'childC should have been disposed')
+    t.equal(forwarded.dispose.callCount, 1, 'childB forwarded by childC should have been disposed')
     t.end()
   })
-
 }
