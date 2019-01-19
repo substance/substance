@@ -506,9 +506,13 @@ export default class Component extends EventEmitter {
    @private
   */
   triggerDispose () {
-    this.getChildren().forEach(function (child) {
-      child.triggerDispose()
-    })
+    if (this._isForwarding()) {
+      this.el._comp.triggerDispose()
+    } else {
+      this.getChildren().forEach(function (child) {
+        child.triggerDispose()
+      })
+    }
     this.dispose()
     this.__isMounted__ = false
   }
@@ -520,6 +524,10 @@ export default class Component extends EventEmitter {
     Remember to unsubscribe all change listeners here.
   */
   dispose () {}
+
+  _isForwarding () {
+    return this.el._comp !== this
+  }
 
   /*
     Attention: this is used when a preserved component is relocated.
