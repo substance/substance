@@ -946,9 +946,11 @@ export default class Component extends EventEmitter {
 
   click () {
     if (this.el) {
-      this.el.click()
+      // Note: returning the result of DOMElement.click() which allows to detect if the click() had errors
+      // In the Browser a click runs in kind of a sandbox, not throwing on the callee side.
+      return this.el.click()
     }
-    return this
+    return false
   }
 
   getComponentPath () {

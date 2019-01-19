@@ -576,8 +576,12 @@ class BrowserDOMElement extends DOMElement {
   }
 
   click () {
+    // ATTENTION: unfortunately there is no way to detect an exception during the native click
+    // the Browser swallows an error displaying it on console without throwing on the caller side
+    // I have tried to register a hook once, but this does not work properly, because an exception could happen while bubbling up
+    // binding to document does not work neither, because the event might be stopped
     this.el.click()
-    return this
+    return true
   }
 
   getWidth () {
