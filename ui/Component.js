@@ -246,8 +246,8 @@ export default class Component extends EventEmitter {
     @return {Component} The root component
   */
   getRoot () {
-    var comp = this
-    var parent = comp
+    let comp = this
+    let parent = comp
     while (parent) {
       comp = parent
       parent = comp.getParent()
@@ -345,7 +345,7 @@ export default class Component extends EventEmitter {
     @example
 
     ```
-    var app = Texture.mount({
+    let app = Texture.mount({
       configurator: configurator,
       documentId: 'elife-15278'
     }, document.body)
@@ -425,8 +425,8 @@ export default class Component extends EventEmitter {
     @example
 
     ```
-    var frag = document.createDocumentFragment()
-    var comp = MyComponent.mount(frag)
+    let frag = document.createDocumentFragment()
+    let comp = MyComponent.mount(frag)
     ...
     $('body').append(frag)
     comp.triggerDidMount()
@@ -481,7 +481,7 @@ export default class Component extends EventEmitter {
     which is already in the DOM.
 
     ```javascript
-    var component = new MyComponent()
+    let component = new MyComponent()
     component.mount($('body')[0])
     ```
   */
@@ -542,7 +542,7 @@ export default class Component extends EventEmitter {
   */
   send (action) {
     // We start looking for handlers at the parent level
-    var comp = this
+    let comp = this
     while (comp) {
       if (comp._actionHandlers && comp._actionHandlers[action]) {
         comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1))
@@ -622,11 +622,11 @@ export default class Component extends EventEmitter {
     @param {object} newState an object with a partial update.
   */
   setState (newState) {
-    var oldProps = this.props
-    var oldState = this.state
+    let oldProps = this.props
+    let oldState = this.state
     // Note: while setting props it is allowed to call this.setState()
     // which will not lead to an extra rerender
-    var needRerender = !this.__isSettingProps__ &&
+    let needRerender = !this.__isSettingProps__ &&
       this.shouldRerender(this.getProps(), newState)
     // triggering this to provide a possibility to look at old before it is changed
     this.willUpdateState(newState)
@@ -671,9 +671,9 @@ export default class Component extends EventEmitter {
     @param {object} an object with properties
   */
   setProps (newProps) {
-    var oldProps = this.props
-    var oldState = this.state
-    var needRerender = this.shouldRerender(newProps, this.state)
+    let oldProps = this.props
+    let oldState = this.state
+    let needRerender = this.shouldRerender(newProps, this.state)
     this._setProps(newProps)
     if (needRerender) {
       this._rerender(oldProps, oldState)
@@ -702,7 +702,7 @@ export default class Component extends EventEmitter {
     @param {object} an object with properties
   */
   extendProps (updatedProps) {
-    var newProps = extend({}, this.props, updatedProps)
+    let newProps = extend({}, this.props, updatedProps)
     this.setProps(newProps)
   }
 
@@ -828,7 +828,7 @@ export default class Component extends EventEmitter {
 
   getChildNodes () {
     if (!this.el) return []
-    var childNodes = this.el.getChildNodes()
+    let childNodes = this.el.getChildNodes()
     childNodes = childNodes.map(_unwrapComp).filter(Boolean)
     return childNodes
   }
@@ -848,12 +848,12 @@ export default class Component extends EventEmitter {
   }
 
   find (cssSelector) {
-    var el = this.el.find(cssSelector)
+    let el = this.el.find(cssSelector)
     return _unwrapComp(el)
   }
 
   findAll (cssSelector) {
-    var els = this.el.findAll(cssSelector)
+    let els = this.el.findAll(cssSelector)
     return els.map(_unwrapComp).filter(Boolean)
   }
 
@@ -868,15 +868,15 @@ export default class Component extends EventEmitter {
     if (!childEl._isVirtualElement) {
       throw new Error('Invalid argument: "child" must be a VirtualElement.')
     }
-    var child = this.renderingEngine._renderChild(this, childEl)
+    let child = this.renderingEngine._renderChild(this, childEl)
     this.el.insertAt(pos, child.el)
     _mountChild(this, child)
   }
 
   removeAt (pos) {
-    var childEl = this.el.getChildAt(pos)
+    let childEl = this.el.getChildAt(pos)
     if (childEl) {
-      var child = _unwrapCompStrict(childEl)
+      let child = _unwrapCompStrict(childEl)
       _disposeChild(child)
       this.el.removeAt(pos)
     }
@@ -964,8 +964,8 @@ export default class Component extends EventEmitter {
   }
 
   _getContext () {
-    var context = {}
-    var parent = this.getParent()
+    let context = {}
+    let parent = this.getParent()
     if (parent) {
       context = extend(context, parent.context)
       if (parent.getChildContext) {
@@ -1009,8 +1009,8 @@ export default class Component extends EventEmitter {
 
   static render (props) {
     props = props || {}
-    var ComponentClass = this
-    var comp = new ComponentClass(null, props)
+    let ComponentClass = this
+    let comp = new ComponentClass(null, props)
     comp._render()
     return comp
   }
@@ -1022,7 +1022,7 @@ export default class Component extends EventEmitter {
     }
     if (!el) throw new Error("'el' is required.")
     if (isString(el)) {
-      var selector = el
+      let selector = el
       if (platform.inBrowser) {
         el = window.document.querySelector(selector)
       } else {
