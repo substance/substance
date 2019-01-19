@@ -1394,128 +1394,10 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Forwarding Components', (t) => {
-    class Parent extends Component {
-      render ($$) {
-        return $$('div').append(
-          $$(Forwarding).ref('forwarding')
-        )
-      }
-    }
-    class Forwarding extends TestComponent {
-      render ($$) {
-        return $$(Child)
-      }
-    }
-    class Child extends TestComponent {
-      render ($$) {
-        return $$('div').addClass('my-component').append('Foo')
-      }
-    }
-    let parent = Parent.mount({}, getMountPoint(t))
-    let forwarding = parent.refs.forwarding
-    t.equal(forwarding.didMount.callCount, 1, 'The forwarding component should be mounted')
-    t.ok(forwarding.el.hasClass('my-component'), '.. should render the forwarded components element')
-    t.equal(forwarding.el.textContent, 'Foo', '.. and it should have correct content')
-    t.ok(forwarding.isMounted(), '.. and should be mounted')
-    t.end()
-  })
-
-  test('Using refs in forwarding components', (t) => {
-    class MyComponent extends TestComponent {
-      render ($$) {
-        return $$('div').addClass('my-component').append('Foo')
-      }
-    }
-    class Forwarding extends TestComponent {
-      render ($$) {
-        return $$(MyComponent).ref('foo')
-      }
-    }
-    let comp = Forwarding.mount({}, getMountPoint(t))
-    let foo = comp.refs.foo
-    t.notNil(foo, 'The forwarding component should be have a ref to the child component')
-    comp.rerender()
-    t.isEqual(comp.refs.foo, foo, 'The forwarded component should be persisted during rerender')
-    t.end()
-  })
-
-  test('Handling actions from forwarded components', (t) => {
-    let _foo = null
-
-    class MyComponent extends TestComponent {
-      didMount () {
-        this.send('foo')
-      }
-      render ($$) {
-        return $$('div')
-      }
-    }
-    class Forwarding extends TestComponent {
-      constructor (...args) {
-        super(...args)
-
-        this.handleActions({
-          foo () {
-            _foo = true
-          }
-        })
-      }
-
-      render ($$) {
-        return $$(MyComponent).ref('foo')
-      }
-    }
-    class Parent extends TestComponent {
-      render ($$) {
-        return $$('div').append($$(Forwarding))
-      }
-    }
-    Parent.mount({}, getMountPoint(t))
-    t.ok(_foo, 'The action should have been handled')
-    t.end()
-  })
-
-  test('Handling actions from forwarded components (2)', (t) => {
-    let _foo = null
-
-    class MyComponent extends TestComponent {
-      didMount () {
-        this.send('foo')
-      }
-      render ($$) {
-        return $$('div')
-      }
-    }
-    class Forwarding extends TestComponent {
-      constructor (...args) {
-        super(...args)
-
-        this.handleActions({
-          foo () {
-            _foo = true
-          }
-        })
-      }
-
-      render ($$) {
-        return $$(MyComponent).ref('foo')
-      }
-    }
-    class Parent extends TestComponent {
-      render ($$) {
-        return $$('div').append($$(Forwarding))
-      }
-    }
-    Parent.mount({}, getMountPoint(t))
-    t.ok(_foo, 'The action should have been handled')
-    t.end()
-  })
-
   // Note: this test revealed a problem with debug rendering where the RenderingEngine
   // threw an error because the injected components were not captured
   // but only if the middle component decided not to render the injected components
-  test('Rerendering a component with injected children', t => {
+  test('[Passing Element] Rerendering a component with injected children', t => {
     class GrandParent extends TestComponent {
       render ($$) {
         return $$('div').addClass('sc-grand-parent').append(
@@ -1547,9 +1429,127 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Forwarding Component] rendering a forwarding component', (t) => {
+    class Parent extends Component {
+      render ($$) {
+        return $$('div').append(
+          $$(Forwarding).ref('forwarding')
+        )
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(Child)
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('my-component').append('Foo')
+      }
+    }
+    let parent = Parent.mount({}, getMountPoint(t))
+    let forwarding = parent.refs.forwarding
+    t.equal(forwarding.didMount.callCount, 1, 'The forwarding component should be mounted')
+    t.ok(forwarding.el.hasClass('my-component'), '.. should render the forwarded components element')
+    t.equal(forwarding.el.textContent, 'Foo', '.. and it should have correct content')
+    t.ok(forwarding.isMounted(), '.. and should be mounted')
+    t.end()
+  })
+
+  test('[Forwarding Component] Using refs in forwarding components', (t) => {
+    class MyComponent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('my-component').append('Foo')
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(MyComponent).ref('foo')
+      }
+    }
+    let comp = Forwarding.mount({}, getMountPoint(t))
+    let foo = comp.refs.foo
+    t.notNil(foo, 'The forwarding component should be have a ref to the child component')
+    comp.rerender()
+    t.isEqual(comp.refs.foo, foo, 'The forwarded component should be persisted during rerender')
+    t.end()
+  })
+
+  test('[Forwarding Component] Handling actions from forwarded components', (t) => {
+    let _foo = null
+
+    class MyComponent extends TestComponent {
+      didMount () {
+        this.send('foo')
+      }
+      render ($$) {
+        return $$('div')
+      }
+    }
+    class Forwarding extends TestComponent {
+      constructor (...args) {
+        super(...args)
+
+        this.handleActions({
+          foo () {
+            _foo = true
+          }
+        })
+      }
+
+      render ($$) {
+        return $$(MyComponent).ref('foo')
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append($$(Forwarding))
+      }
+    }
+    Parent.mount({}, getMountPoint(t))
+    t.ok(_foo, 'The action should have been handled')
+    t.end()
+  })
+
+  test('[Forwarding Component] Handling actions from forwarded components (2)', (t) => {
+    let _foo = null
+
+    class MyComponent extends TestComponent {
+      didMount () {
+        this.send('foo')
+      }
+      render ($$) {
+        return $$('div')
+      }
+    }
+    class Forwarding extends TestComponent {
+      constructor (...args) {
+        super(...args)
+
+        this.handleActions({
+          foo () {
+            _foo = true
+          }
+        })
+      }
+
+      render ($$) {
+        return $$(MyComponent).ref('foo')
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append($$(Forwarding))
+      }
+    }
+    Parent.mount({}, getMountPoint(t))
+    t.ok(_foo, 'The action should have been handled')
+    t.end()
+  })
+
   // Note: this test revealed a problem with debug rendering where
   // forwarded children do not get updated correctly
-  test('Rerendering a component with injected children that are forwarding components', t => {
+  test('[Forwarding Component] injected children that are forwarding components', t => {
     class GrandParent extends TestComponent {
       render ($$) {
         return $$('div').addClass('sc-grand-parent').append(
@@ -1588,12 +1588,119 @@ function ComponentTests (debug, memory) {
     }
     let grandParent = GrandParent.render()
     let parent = grandParent.refs.child
-    let childA = grandParent.find('.sc-child-a')
+    // Note: the Child Component instance is forwarding to another class
+    // still, the ref points to this instance, while in the DOM there is no element of it
+    let grandChild = grandParent.refs.grandChild
+    t.comment('rerendering parent...')
     parent.rerender()
-    t.equal(childA.dispose.callCount, 0, 'forwarded component should have been preserved')
+    t.equal(grandChild.dispose.callCount, 0, 'forwarding component should have been preserved')
+    let childA = grandParent.find('.sc-child-a')
+    t.equal(grandChild.el, childA.el, 'the forwarding component inherits the element from the forwarded component')
+    t.comment('rerendering grand parent with changed props...')
     grandParent.setProps({ mode: 'b' })
     t.equal(childA.dispose.callCount, 1, 'the original forwarded component should have been disposed')
     t.ok(Boolean(grandParent.find('.sc-child-b')), 'and replaced with a different forwarded component')
+    t.comment('rerendering grand child with changed props...')
+    grandChild.setProps({ mode: 'a' })
+    t.ok(grandChild.el.hasClass('sc-child-a'), 'grand child should have the correct element')
     t.end()
   })
+
+  // Note: this test revealed a problem with debug rendering where
+  // forwarded children do not get updated correctly
+  test("[Forwarding Component] injected children that are forwarding components with ref'd content", t => {
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-grand-parent').append(
+          $$(Parent).append(
+            $$(Child, { mode: this.props.mode }).ref('grandChild')
+          ).ref('child')
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        let el = $$('div').addClass('sc-parent')
+        el.append($$('div').ref('label').text('parent'))
+        el.append(this.props.children)
+        return el
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        if (this.props.mode === 'b') {
+          return $$(ChildB)
+        } else {
+          return $$(ChildA)
+        }
+      }
+    }
+    class ChildA extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    let grandParent = GrandParent.render()
+    let parent = grandParent.refs.child
+    // Note: the Child Component instance is forwarding to another class
+    // still, the ref points to this instance, while in the DOM there is no element of it
+    let grandChild = grandParent.refs.grandChild
+    t.comment('rerendering parent...')
+    parent.rerender()
+    t.equal(grandChild.dispose.callCount, 0, 'forwarding component should have been preserved')
+    let childA = grandParent.find('.sc-child-a')
+    t.equal(grandChild.el, childA.el, 'the forwarding component inherits the element from the forwarded component')
+    t.comment('rerendering grand parent with changed props...')
+    grandParent.setProps({ mode: 'b' })
+    t.equal(childA.dispose.callCount, 1, 'the original forwarded component should have been disposed')
+    t.ok(Boolean(grandParent.find('.sc-child-b')), 'and replaced with a different forwarded component')
+    t.comment('rerendering grand child with changed props...')
+    grandChild.setProps({ mode: 'a' })
+    t.ok(grandChild.el.hasClass('sc-child-a'), 'grand child should have the correct element')
+    t.end()
+  })
+
+  test('[Forwarding Component] mixing regular and forwarding children without refs', t => {
+    class Parent extends TestComponent {
+      render ($$) {
+        let el = $$('div').addClass('sc-parent')
+        el.append($$(ChildA))
+        if (this.props.mode === 1) {
+          el.append($$(ChildB))
+        } else {
+          el.append($$(ChildC))
+        }
+        return el
+      }
+    }
+    class ChildA extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    class ChildC extends TestComponent {
+      render ($$) {
+        return $$(ChildB)
+      }
+    }
+    let parent = Parent.render({ mode: 1 })
+    let childB = parent.getChildAt(1)
+    parent.setProps({ mode: 2 })
+    t.equal(childB.dispose.callCount, 1, 'childB should have been disposed')
+    let childC = parent.getChildAt(1)
+    parent.setProps({ mode: 1 })
+    t.equal(childC.dispose.callCount, 1, 'childC should have been disposed')
+    t.end()
+  })
+
 }
