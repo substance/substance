@@ -1651,4 +1651,26 @@ function ComponentTests (debug, memory) {
     t.equal(forwarded.dispose.callCount, 1, 'childB forwarded by childC should have been disposed')
     t.end()
   })
+
+  test('[Preserving] components that do not change the structure preserve child components', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        return $$('div').append(
+          $$('div').addClass('foo'),
+          $$(Simple).addClass('a'),
+          $$(Simple).addClass('b'),
+          $$('div').addClass('bar').append(
+            $$(Simple).addClass('c'),
+            $$(Simple).addClass('d')
+          )
+        )
+      }
+    }
+    let comp = MyComponent.render()
+    let expected = comp.find('.sc-simple')
+    comp.rerender()
+    let actual = comp.find('.sc-simple')
+    t.ok(isArrayEqual(expected, actual), 'all children should have been preserved')
+    t.end()
+  })
 }
