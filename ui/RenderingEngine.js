@@ -41,10 +41,11 @@ import VirtualElement from './VirtualElement'
         )
       }
     ```
-    At the time when this component gets rendered, `MyComponent` can not be instantiated, as it is not known what `Wrapper`
-    actually does with it.
-    While the general approach is working from top-to-down, in this case it has a bottom-to-up nature, i.e., the child needs
-    to be rendered to know what to do with the passed component.
+    At the time when this component gets rendered, `MyComponent` can not be
+    instantiated, as it is not known what `Wrapper` actually does with it.
+    While the general approach is working from top-to-down, in this case it has
+    a bottom-to-up nature, i.e., the child needs to be rendered to know what to
+    do with the passed component.
 
     Particularly, this is problematic when the passed component has a reference:
     ```
@@ -70,36 +71,61 @@ import VirtualElement from './VirtualElement'
       }
     ```
 
+  ## Algorithm
+
+  For a given Component `comp`:
+
+  1. Capturing a virtual DOM
+    1.1. Create a virtual DOM element by calling `comp.render()`
+    1.2. Map virtual elements to existing elements
+    1.3. Apply 1.1. and 1.2. recursively for every virtual Component
+  2. Update `comp.el` given a virtual DOM element
+
+  Notes:
+  - 1.2. is necessary to preserve components and capture DOM updates using the
+    correct instances
+  - 2. can be seen as an independent task, updating one DOM given a second one.
+
   ## Implementation
 
   > TODO: flesh this out
 
   - Rendering happens in two stages: capture and render/update.
-    In the capturing stage a VirtualComponent tree is created by calling Component.render() from top to down recursively.
-    In the rendering stage DOM elements are created and updated.
-  - DEBUG_RENDERING: recursive capturing is best done level by level, i.e. capture one VirtualComponent, and then descend into the child components.
-    Unfortunately this detaches one render() call of a parent component from the render() calls of the children component.
-    For this reason, we introduced a mode where the render() method is used as a vehicle to trigger recursive capturing.
-    This would not be necessary if we were using a recursive syntax, as React does. I.e. the code is more like functional programming.
-    While this works well for simple scenarios, the source code is getting harder to read control flow is necessary, e.g. for loops or if statements
-  - Refs: the programmer can use ref(id) to register a reference to a child component. Referenced components are always reused when rerendering, i.e. not disposed.
-    For other elements, there is no guarantee that the component and its DOM element is reused.
-    The RenderingEngine may do so if possible, e.g. if the structure does not change.
+    In the capturing stage a VirtualComponent tree is created by calling
+    `Component.render()` from top to down recursively. In the rendering stage
+    DOM elements are created and updated.
+  - DEBUG_RENDERING: recursive capturing is best done level by level, i.e.
+    capture one VirtualComponent, and then descend into the child components.
+    Unfortunately this detaches one render() call of a parent component from the
+    `render()` calls of the children component. For this reason, we introduced a
+    mode where the render() method is used as a vehicle to trigger recursive
+    capturing.
+    This would not be necessary if we were using a recursive syntax, as React
+    does, i.e. the code is more like functional programming.
+    While this works well for simple scenarios, the source code is getting
+    harder to read control flow is necessary, e.g. for loops or if statements
+  - Refs: the programmer can use ref(id) to register a reference to a child
+    component. Referenced components are always reused when rerendering, i.e.
+    not disposed. For other elements, there is no guarantee that the component
+    and its DOM element is reused. The RenderingEngine may do so if possible,
+    e.g. if the structure does not change.
 
   ## TODO
 
   - reuse unmapped elements that are compatible during rendering
   - rethink 'Forwarding Components' regarding parent-child relationship.
-    ATM, there is no extra model for that hierarchy than the DOM, only comp.parent reflects the relationship correctly
+    ATM, there is no extra model for that hierarchy than the DOM, only
+    `comp.parent` reflects the relationship correctly
 
   These ideas could improve the implementation:
   - remove outlets: outlets are just another way to change props.
-  - try to fuse `virtualComponent._content` into virtualComponent: ATM, `VirtualComponent` uses a `VirtualHTMLElement`
-    instance to store the result of `render()`. This makes understanding the virtual tree after rendering difficult,
-    as there is another layer via `virtualComponent._content`.
+  - try to fuse `virtualComponent._content` into virtualComponent:
+    ATM, `VirtualComponent` uses a `VirtualHTMLElement`
+    instance to store the result of `render()`. This makes understanding the
+    virtual tree after rendering difficult, as there is another layer via
+    `virtualComponent._content`.
 */
-export default
-class RenderingEngine {
+export default class RenderingEngine {
   constructor (options = {}) {
     this.componentFactory = options.componentFactory
     if (!this.componentFactory) throw new Error("'componentFactory' is mandatory")
@@ -118,7 +144,8 @@ class RenderingEngine {
       state.setOldState(vel, oldState)
     }
     try {
-      // capture: this calls the render() method of components, creating a virtual DOM
+      // capture: this calls the render() method of components, creating a
+      // virtual DOM
       // console.log('### capturing...')
       // let t0 = Date.now()
       _capture(state, vel, 'forceCapture')
@@ -126,7 +153,7 @@ class RenderingEngine {
 
       // console.log('### rendering...')
       // t0 = Date.now()
-      _render(state, vel)
+      _update(state, vel)
       // console.log('### ... finished in %s ms', Date.now()-t0)
 
       _triggerUpdate(state, vel)
@@ -137,6 +164,9 @@ class RenderingEngine {
   }
 
   // this is used together with the incremental Component API
+  // TODO: we could try to generalize this to allow partial rerenderings
+  // e.g. a component has a method to rerender just one element, which is then
+  // applied to update an element
   _renderChild (comp, vel) {
     // HACK: to make this work with the rest of the implementation
     // we ingest a fake parent
@@ -144,7 +174,7 @@ class RenderingEngine {
     vel.parent = { _comp: comp }
     try {
       _capture(state, vel)
-      _render(state, vel)
+      _update(state, vel)
       return vel._comp
     } finally {
       state.dispose()
@@ -154,37 +184,6 @@ class RenderingEngine {
   _createState () {
     return new RenderingState(this.componentFactory, this.elementFactory)
   }
-}
-
-// called to initialize a captured component, i.e. creating a Component instance
-// from a VirtualElement
-function _create (state, vel) {
-  let comp = vel._comp
-  console.assert(!comp, 'Component instance should not exist when this method is used.')
-  let parent = vel.parent._comp
-  // making sure the parent components have been instantiated
-  if (!parent) {
-    parent = _create(state, vel.parent)
-  }
-  if (vel._isVirtualComponent) {
-    console.assert(parent, 'A Component should have a parent.')
-    comp = state.componentFactory.createComponent(vel.ComponentClass, parent, vel.props)
-    // HACK: making sure that we have the right props
-    vel.props = comp.props
-    comp.__htmlConfig__ = vel._copyHTMLConfig()
-  } else if (vel._isVirtualHTMLElement) {
-    comp = state.componentFactory.createElementComponent(parent, vel)
-  } else if (vel._isVirtualTextNode) {
-    comp = state.componentFactory.createTextNodeComponent(parent, vel)
-  }
-  if (vel._ref) {
-    comp._ref = vel._ref
-  }
-  if (vel._owner) {
-    comp._owner = vel._owner._comp
-  }
-  vel._comp = comp
-  return comp
 }
 
 // calling comp.render() and capturing recursively
@@ -249,10 +248,10 @@ function _capture (state, vel, forceCapture) {
 
       // Descending
       if (substanceGlobals.DEBUG_RENDERING) {
-        // in this case we use the render() function as iterating function, where
-        // $$ is a function which creates components and renders them recursively.
-        // first we can create all element components that can be reached
-        // without recursion
+        // in this case we use the render() function as iterating function,
+        // where `$$` is a function which creates components and renders them
+        // recursively. First we can create all element components that can be
+        // reached without recursion
         let stack = content.children.slice(0)
         while (stack.length) {
           let child = stack.shift()
@@ -272,22 +271,25 @@ function _capture (state, vel, forceCapture) {
         if (!content._isForwarded) {
           state.setCaptured(content)
         }
-        // then we run comp.render($$) with a special $$ that captures VirtualComponent's
-        // recursively
+        // then we run comp.render($$) with a special $$ that captures
+        // VirtualComponents recursively
         let descendingContext = new DescendingContext(state, context)
         while (descendingContext.hasPendingCaptures()) {
           descendingContext.reset()
           comp.render(descendingContext.$$)
         }
-        // TODO: this can be improved. It would be better if _capture was called by DescendingContext()
-        // then the forwarded component would be rendered during the render() call of the forwarding component
+        // TODO: this can be improved. It would be better if _capture was called
+        // by DescendingContext() then the forwarded component would be rendered
+        // during the render() call of the forwarding component
         if (content._isForwarded) {
           _capture(state, content, true)
         }
       } else {
-        // ATTENTION: without DEBUG_RENDERING enabled the content is captured outside of the 'render()' call stack
-        // i.e. render() has finished already and provided a virtual element. Children component are rendered as part of this
-        // recursion, i.e. in the stack trace there will be RenderingEngine._capture() only
+        // ATTENTION: without DEBUG_RENDERING enabled the content is captured
+        // outside of the `render()` call stack i.e. `render()` has finished
+        // already and provided a virtual element. Children component are
+        // rendered as part of this recursion, i.e. in the stack trace there
+        // will be `RenderingEngine._capture()` only
         _capture(state, content)
       }
       if (content._isForwarded) {
@@ -305,18 +307,158 @@ function _capture (state, vel, forceCapture) {
   return vel
 }
 
-function _render (state, vel) {
+// called to initialize a captured component, i.e. creating a Component instance
+// from a VirtualElement
+function _create (state, vel) {
+  let comp = vel._comp
+  console.assert(!comp, 'Component instance should not exist when this method is used.')
+  let parent = vel.parent._comp
+  // making sure the parent components have been instantiated
+  if (!parent) {
+    parent = _create(state, vel.parent)
+  }
+  if (vel._isVirtualComponent) {
+    console.assert(parent, 'A Component should have a parent.')
+    comp = state.componentFactory.createComponent(vel.ComponentClass, parent, vel.props)
+    // HACK: making sure that we have the right props
+    vel.props = comp.props
+    comp.__htmlConfig__ = vel._copyHTMLConfig()
+  } else if (vel._isVirtualHTMLElement) {
+    comp = state.componentFactory.createElementComponent(parent, vel)
+  } else if (vel._isVirtualTextNode) {
+    comp = state.componentFactory.createTextNodeComponent(parent, vel)
+  }
+  if (vel._ref) {
+    comp._ref = vel._ref
+  }
+  if (vel._owner) {
+    comp._owner = vel._owner._comp
+  }
+  vel._comp = comp
+  return comp
+}
+
+/*
+  Prepares a new virtual component by comparing it with the old version.
+
+  It sets the _comp references in the new version where its ancestors
+  can be mapped to corresponding virtual components in the old version.
+*/
+function _prepareVirtualComponent (state, comp, vc) {
+  // refs are those ref'd using $$().ref()
+  let newRefs = {}
+  // foreignRefs are refs of those components which are passed via props
+  let foreignRefs = {}
+  // all other components which are not ref'd stored via a derived key based on trace
+  let otherComponents = {}
+
+  // TODO: iron this out.
+  // refs are stored on the context. It would be cleaner if they were on the
+  // VirtualComponent. Where vc._owner would need to be a VirtualComponent and
+  // not a component.
+  if (vc._context) {
+    newRefs = vc._context.refs
+    foreignRefs = vc._context.foreignRefs
+    otherComponents = _extractOtherComponentRefs(vc._context, 'virtual')
+  }
+  let oldRefs = comp.refs
+  let oldForeignRefs = comp.__foreignRefs__
+  let oldOtherComponents = comp.__otherComponents__ || {}
+
+  // map virtual components to existing ones
+  forEach(newRefs, (vc, ref) => {
+    let comp = oldRefs[ref]
+    if (comp) _mapComponents(state, comp, vc)
+  })
+  forEach(foreignRefs, (vc, ref) => {
+    let comp = oldForeignRefs[ref]
+    if (comp) _mapComponents(state, comp, vc)
+  })
+  forEach(otherComponents, (vc, ref) => {
+    let comp = oldOtherComponents[ref]
+    if (comp) _mapComponents(state, comp, vc)
+  })
+}
+
+/*
+  This tries to map the virtual component to existing component instances
+  by looking at the old and new refs, making sure that the element type is
+  compatible.
+*/
+function _mapComponents (state, comp, vc) {
+  if (!comp && !vc) return true
+  if (!comp || !vc) return false
+  // Stop if one them has been mapped already
+  // or the virtual element has its own component already
+  // or if virtual element and component do not match semantically
+  // Note: the owner component is mapped at very first, so this
+  // recursion will stop at the owner at the latest.
+  if (state.isMapped(vc) || state.isMapped(comp)) {
+    // if one of them has been mapped, then the comp must be equal,
+    // otherwise this is an invalid map
+    // TODO: how could is it possible that they are different?
+    return vc._comp === comp
+  }
+  // TODO: this is also called for the root component, which is not necessary.
+  // This branch is covering the case, but it could be done more explicitly
+  if (vc._comp) {
+    if (vc._comp === comp) {
+      state.setMapped(vc)
+      state.setMapped(comp)
+      return true
+    } else {
+      return false
+    }
+  }
+  if (!_isOfSameType(comp, vc)) {
+    return false
+  }
+
+  vc._comp = comp
+  state.setMapped(vc)
+  state.setMapped(comp)
+
+  let canMapParent
+  let parent = comp.getParent()
+  if (vc.parent) {
+    canMapParent = _mapComponents(state, parent, vc.parent)
+  // to be able to support implicit retaining of elements
+  // we need to propagate mapping through the 'preliminary' parent chain
+  // i.e. not taking the real parents as rendered, but the Components into which
+  // we have passed children (via vel.append() or vel.outlet().append())
+  } else if (vc._preliminaryParent) {
+    while (parent && parent._isElementComponent) {
+      parent = parent.getParent()
+    }
+    canMapParent = _mapComponents(state, parent, vc._preliminaryParent)
+  }
+  if (!canMapParent) {
+    state.setRelocated(vc)
+    state.setRelocated(comp)
+  }
+  return canMapParent
+}
+
+function _isOfSameType (comp, vc) {
+  return (
+    (comp._isElementComponent && vc._isVirtualHTMLElement) ||
+    (comp._isComponent && vc._isVirtualComponent && comp.constructor === vc.ComponentClass) ||
+    (comp._isTextNodeComponent && vc._isVirtualTextNode)
+  )
+}
+
+// Update a DOM element by applying changes derived from a given virtual element
+function _update (state, vel) {
   if (state.isSkipped(vel)) return
   // console.log('... rendering', vel._ref)
 
   // HACK: workaround for a problem found in DEBUG_RENDERING mode
-  // situation: a grand-parent injects via props a child component into a parent component
-  // which does render the children only in certain states (e.g. showChild=true|false)
+  // situation: a grand-parent injects via props a child component into a parent
+  // component, which does render the children only in certain states (e.g. showChild=true|false)
   // changing the state from hide to show on the parent component, caused errors here
+  // It would be more consistent to do this during the capturing phase of
+  // vel._preliminaryParent, i.e. the one that has appends injected component.
   // TODO: decide if this really a HACK
-  // Generally it would be more consistent to do this during the capturing phase of vel._preliminaryParent
-  // i.e. the one that has the injected component.
-  // However, it could be difficult, because a child could be ingested in many ways, e.g. via props.children, but also via a custom property
   if (!vel._comp) {
     if (vel._ref && vel._preliminaryParent !== vel._owner) {
       _capture(state, vel, true)
@@ -327,10 +469,11 @@ function _render (state, vel) {
   console.assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
 
   // VirtualComponents apply changes to its content element
-  // ATTENTION: we have included the render logic for VirtualComponents into the general _render() method
-  // to reduce the number of call stacks. However, this is slightly confusing.
+  // ATTENTION: we have included the render logic for VirtualComponents into
+  // the general _update() method to reduce the number of call stacks.
+  // However, this is slightly confusing.
   if (vel._isVirtualComponent) {
-    _render(state, vel._content)
+    _update(state, vel._content)
 
     // store refs and foreignRefs
     const context = vel._content._context
@@ -342,18 +485,17 @@ function _render (state, vel) {
     forEach(context.foreignRefs, (vel, ref) => {
       foreignRefs[ref] = vel._comp
     })
+    let otherComponents = _extractOtherComponentRefs(context)
     comp.refs = refs
     comp.__foreignRefs__ = foreignRefs
+    comp.__otherComponents__ = otherComponents
 
-    // ATTENTION: EXPERIMENTAL: allowing for forwarding components
-    // take the element of the forwarded component
-    // and use it as element for this component
+    // using the element of the forwarded component as element for this component
     if (vel._content._isForwarded) {
       let forwardedComp = vel._content._comp
-      // TODO: is this really the correct time to call didMount?
-      // shouldn't this be called when processed by the parent?
+      // TODO: is this really the correct time to call didMount? shouldn't this
+      // be called when processed by the parent?
       // TODO: this will not work with multiple forwarded components
-      // initial render
       if (!comp.el) {
         comp.el = forwardedComp.el
         forwardedComp.triggerDidMount()
@@ -377,9 +519,10 @@ function _render (state, vel) {
     comp.el = _createElement(state, vel)
     comp.el._comp = comp
   }
+  // TODO: shouldn't this be called in else-branch of previous if statement?
   _updateElement(comp, vel)
 
-  // structural updates are necessary only for HTML elements (without innerHTML set)
+  // structural updates are necessary only for HTML elements (without innerHTML)
   if (vel._isVirtualHTMLElement && !vel.hasInnerHTML()) {
     let newChildren = vel.children
     let oldComp, virtualComp, newComp
@@ -392,7 +535,8 @@ function _render (state, vel) {
     comp.el.getChildNodes().forEach(function (node) {
       let childComp = node._comp
 
-      // EXPERIMENTAL: here we need to resolve the forwarding component, which can be resolved from the owner chain
+      // EXPERIMENTAL: here we need to resolve the forwarding component,
+      // which can be resolved from the owner chain
       while (childComp && childComp._isForwarded) {
         childComp = childComp._owner
       }
@@ -414,7 +558,8 @@ function _render (state, vel) {
       // skip detached components
       // Note: components get detached when preserved nodes
       // are found in a swapped order. Then the only way is
-      // to detach one of them from the DOM, and reinsert it later at the new position
+      // to detach one of them from the DOM, and reinsert it later at the new
+      // position
       do {
         oldComp = oldChildren[pos1++]
       } while (oldComp && (state.isDetached(oldComp)))
@@ -438,7 +583,7 @@ function _render (state, vel) {
 
       // deep-render the virtual component if not yet done
       if (!state.isRendered(virtualComp)) {
-        _render(state, virtualComp)
+        _update(state, virtualComp)
       }
 
       newComp = virtualComp._comp
@@ -486,6 +631,45 @@ function _render (state, vel) {
   state.setRendered(vel)
 }
 
+function _extractOtherComponentRefs (context, virtual) {
+  let idCounts = new Map()
+  let refs = {}
+  for (let vc of context.components) {
+    // TODO: also skip those components which are not appended to the current comp
+    if (vc._ref) continue
+    let ref = _getVirtualComponentTrace(vc)
+    // disambiguate generated refs by appending '@<count>'
+    if (idCounts.has(ref)) {
+      let count = idCounts.get(ref) + 1
+      idCounts.set(ref, count)
+      ref = ref + '@' + count
+    } else {
+      idCounts.set(ref, 1)
+    }
+    if (virtual) {
+      refs[ref] = vc
+    } else {
+      refs[ref] = vc._comp
+    }
+  }
+  return refs
+}
+
+function _getVirtualComponentTrace (vc) {
+  // TODO: how to create a string from the class name?
+  let frags = [vc.ComponentClass.name]
+  if (!vc._isForwarded) {
+    let parent = vc.getParent()
+    while (parent) {
+      // ATTENTION if the vc has been appended then its ancestors are all virtual HTML elements
+      console.assert(parent._isVirtualHTMLElement)
+      frags.unshift(parent.tagName)
+      parent = parent.parent
+    }
+  }
+  return frags.join('/')
+}
+
 function _triggerUpdate (state, vel) {
   if (vel._isVirtualComponent) {
     if (!state.isSkipped(vel)) {
@@ -529,103 +713,6 @@ function _triggerDidMount (state, parent, child) {
       parent.isMounted() && !child.isMounted()) {
     child.triggerDidMount(true)
   }
-}
-
-/*
-  Prepares a new virtual component by comparing it with
-  the old version.
-
-  It sets the _comp references in the new version where its ancestors
-  can be mapped to corresponding virtual components in the old version.
-*/
-function _prepareVirtualComponent (state, comp, vc) {
-  let newRefs = {}
-  let foreignRefs = {}
-  // TODO: iron this out.
-  // refs are stored on the context. It would be cleaner if they were on the VirtualComponent
-  // Where vc._owner would need to be a VirtualComponent and not a
-  // component.
-  if (vc._context) {
-    newRefs = vc._context.refs
-    foreignRefs = vc._context.foreignRefs
-  }
-  let oldRefs = comp.refs
-  let oldForeignRefs = comp.__foreignRefs__
-  // map virtual components to existing ones
-  forEach(newRefs, (vc, ref) => {
-    let comp = oldRefs[ref]
-    if (comp) _mapComponents(state, comp, vc)
-  })
-  forEach(foreignRefs, function (vc, ref) {
-    let comp = oldForeignRefs[ref]
-    if (comp) _mapComponents(state, comp, vc)
-  })
-}
-
-/*
-  This tries to map the virtual component to existing component instances
-  by looking at the old and new refs, making sure that the element type is
-  compatible.
-*/
-function _mapComponents (state, comp, vc) {
-  if (!comp && !vc) return true
-  if (!comp || !vc) return false
-  // Stop if one them has been mapped already
-  // or the virtual element has its own component already
-  // or if virtual element and component do not match semantically
-  // Note: the owner component is mapped at very first, so this
-  // recursion will stop at the owner at the latest.
-  if (state.isMapped(vc) || state.isMapped(comp)) {
-    // if one of them has been mapped, then the comp must be equal,
-    // otherwise this is an invalid map
-    // TODO: how could is it possible that they are different?
-    return vc._comp === comp
-  }
-  // TODO: this is also called for the root component, which is not necessary. This branch is covering the case, but it could be done more explicitly
-  if (vc._comp) {
-    if (vc._comp === comp) {
-      state.setMapped(vc)
-      state.setMapped(comp)
-      return true
-    } else {
-      return false
-    }
-  }
-  if (!_isOfSameType(comp, vc)) {
-    return false
-  }
-
-  vc._comp = comp
-  state.setMapped(vc)
-  state.setMapped(comp)
-
-  let canMapParent
-  let parent = comp.getParent()
-  if (vc.parent) {
-    canMapParent = _mapComponents(state, parent, vc.parent)
-  // to be able to support implicit retaining of elements
-  // we need to propagate mapping through the 'preliminary' parent chain
-  // i.e. not taking the real parents as rendered, but the Components into which
-  // we have passed children (via vel.append() or vel.outlet().append())
-  } else if (vc._preliminaryParent) {
-    while (parent && parent._isElementComponent) {
-      parent = parent.getParent()
-    }
-    canMapParent = _mapComponents(state, parent, vc._preliminaryParent)
-  }
-  if (!canMapParent) {
-    state.setRelocated(vc)
-    state.setRelocated(comp)
-  }
-  return canMapParent
-}
-
-function _isOfSameType (comp, vc) {
-  return (
-    (comp._isElementComponent && vc._isVirtualHTMLElement) ||
-    (comp._isComponent && vc._isVirtualComponent && comp.constructor === vc.ComponentClass) ||
-    (comp._isTextNodeComponent && vc._isVirtualTextNode)
-  )
 }
 
 function _createElement (state, vel) {
