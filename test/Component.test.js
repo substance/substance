@@ -745,38 +745,6 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Implicit retaining should not override higher-level rules', t => {
-    // If a child component has refs, itself should not be retained without
-    // being ref'd by the parent
-    class Parent extends Component {
-      render ($$) {
-        // Child is not ref'd: this means the parent is not interested in keeping
-        // this instance on rerender
-        return $$('div').addClass('parent').append($$(Child))
-      }
-    }
-    class Child extends Component {
-      render ($$) {
-        // 'foo' is ref'd, so it should be retained when rerendering on this level
-        let el = $$('div').addClass('child').append(
-          $$('div').addClass('foo').ref('foo')
-        )
-        return el
-      }
-    }
-    let comp = Parent.render()
-    let child = comp.find('.child')
-    t.notNil(child, 'Child should exist.')
-    let foo = child.refs.foo
-    child.rerender()
-    t.ok(child.refs.foo === foo, "'foo' should have been retained.")
-    comp.rerender()
-    let child2 = comp.find('.child')
-    t.ok(child !== child2, 'Child should have been renewed.')
-    t.ok(foo !== child2.refs.foo, "'foo' should be different as well.")
-    t.end()
-  })
-
   test('Eventlisteners on child element', t => {
     class Parent extends Component {
       render ($$) {
@@ -808,21 +776,6 @@ function ComponentTests (debug, memory) {
   })
 
   /* ##################### Refs: Preserving Components ########################## */
-
-  test('Children without a ref are not retained', t => {
-    let comp = TestComponent.create(function ($$) {
-      return $$('div').append(
-        $$(Simple)
-      )
-    })
-    let child = comp.getChildAt(0)
-    comp.rerender()
-    let newChild = comp.getChildAt(0)
-    // as we did not apply a ref, the component should get rerendered from scratch
-    t.ok(newChild !== child, 'Child component should have been renewed.')
-    t.ok(newChild.el !== child.el, 'Child element should have been renewed.')
-    t.end()
-  })
 
   test('A ref must be unique in owner scope (fail on inadvertent reuse)', t => {
     class MyComponent extends TestComponent {
