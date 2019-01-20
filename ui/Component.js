@@ -79,10 +79,10 @@ const COMPONENT_FACTORY = {
   explanatory. If in doubt, please check out the method documentation below.
 
   1. {@link Component#didMount}
-  1. {@link Component#didUpdate}
-  1. {@link Component#dispose}
-  1. {@link Component#willReceiveProps}
-  1. {@link Component#willUpdateState}
+  2. {@link Component#didUpdate}
+  3. {@link Component#dispose}
+  4. {@link Component#willReceiveProps}
+  5. {@link Component#willUpdateState}
 
   @implements EventEmitter
 
@@ -501,10 +501,8 @@ export default class Component extends EventEmitter {
   }
 
   /**
-   Triggers dispose handlers recursively.
-
-   @private
-  */
+   * Triggers dispose handlers recursively.
+   */
   triggerDispose () {
     if (this._isForwarding()) {
       this.el._comp.triggerDispose()
@@ -518,11 +516,11 @@ export default class Component extends EventEmitter {
   }
 
   /**
-    A hook which is called when the component is unmounted, i.e. removed from DOM,
-    hence disposed. See {@link ui/Component#didMount} for example usage.
-
-    Remember to unsubscribe all change listeners here.
-  */
+   * A hook which is called when the component is unmounted, i.e. removed from DOM,
+   * hence disposed. See {@link ui/Component#didMount} for example usage.
+   *
+   * Remember to unsubscribe all change listeners here.
+   */
   dispose () {}
 
   _isForwarding () {

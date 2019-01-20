@@ -13,17 +13,22 @@ import VirtualElement from './VirtualElement'
 
   What makes our rendering algorithm so difficult?
 
-  - Dependency Injection requires a (direct) parent to allow constructor injection, i.e. that injected dependencies
-    are available in the constructor already. As a consequence a component tree must to be constructed from top to down.
+  - Dependency Injection requires a (direct) parent to allow constructor
+    injection, i.e. that injected dependencies are available in the constructor
+    already. As a consequence a component tree must to be constructed from top
+    to down.
 
-  - The earliest time to evaluate `$$(MyComponent)`, is when it has been attached to an existing component.
-    I.e., to run `MyComponent.render()` an instance of `MyComponent` is needed, which can only be created with an existing
-    parent component.
+  - The earliest time to evaluate `$$(MyComponent)`, is when it has been
+    attached to an existing component. I.e., to run `MyComponent.render()` an
+    instance of `MyComponent` is needed, which can only be created with an
+    existing parent component.
 
-  - In general, it is *not* possible to have a naturally descending rendering algorithm, i.e. a simple recursion calling
-    `render()` and creating or updating Components on the way, preserving a simple stack-trace.
-    Instead, it requires calling `render()` on one level, then doing comparisons with the existing tree
-    to be able to reuse components, and then descend into the sub-tree.
+  - In general, it is *not* possible to have a naturally descending rendering
+    algorithm, i.e. a simple recursion calling `render()` and creating or
+    updating Components on the way, preserving a simple stack-trace.
+    Instead, it requires calling `render()` on one level, then doing comparisons
+    with the existing tree to be able to reuse components, and then descend into
+    the sub-tree.
 
   - If components are passed down via props, things get even more difficult.
     For example, consider a situation where components are passed via props:
@@ -51,9 +56,10 @@ import VirtualElement from './VirtualElement'
         )
       }
     ```
-    As nothing is known at the time of descending about the content of `Wrapper` the rendering algorithm
-    can not tell that it ought to be preserved. For now, the correct way to deal with this situation is
-    to use a reference for the wrapper as well:
+    As nothing is known at the time of descending about the content of `Wrapper`
+    the rendering algorithm can not tell that it ought to be preserved. For now,
+    the correct way to deal with this situation is to use a reference for the
+    wrapper as well:
     ```
       render($$) {
         return $$('div').append(
