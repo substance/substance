@@ -34,15 +34,6 @@ function RenderingEngineTests (debug) {
   // by RenderingEnging to know, that a component can be reused. I.e.,
   // the VirtualComponent has been mapped successfully to a Component
 
-  test('Components without refs are not mapped', function (t) {
-    var comp = TestComponent.create(function ($$) {
-      return $$('div').append($$(Simple))
-    })
-    var vc = _capture(comp)
-    t.notOk(vc._isMapped(vc._content.children[0]), 'child element should not be mapped.')
-    t.end()
-  })
-
   test('A component with ref is mapped', function (t) {
     var comp = TestComponent.create(function ($$) {
       return $$('div').append($$(Simple).ref('foo'))

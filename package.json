@@ -41,7 +41,7 @@
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
     "substance-bundler": "0.25.6",
-    "substance-test": "0.13.0"
+    "substance-test": "0.13.1"
   },
   "files": [
     "collab",
