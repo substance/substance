@@ -137,6 +137,9 @@ export default class RenderingEngine {
     // let t0 = Date.now()
     let vel = _createWrappingVirtualComponent(comp)
     let state = this._createState()
+    // top-level comp and virtual component are mapped per se
+    state.setMapped(vel)
+    state.setMapped(comp)
     if (oldProps) {
       state.setOldProps(vel, oldProps)
     }
@@ -184,6 +187,11 @@ export default class RenderingEngine {
   _createState () {
     return new RenderingState(this.componentFactory, this.elementFactory)
   }
+
+  static createContext (comp) {
+    let vel = _createWrappingVirtualComponent(comp)
+    return new VirtualElement.CaptureContext(vel)
+  }
 }
 
 // calling comp.render() and capturing recursively
@@ -217,7 +225,7 @@ function _capture (state, vel, forceCapture) {
       }
     }
     if (needRerender) {
-      let context = new CaptureContext(vel)
+      let context = new VirtualElement.CaptureContext(vel)
       let content = comp.render(context.$$)
       if (!content) {
         throw new Error('Component.render() returned nil.')
@@ -278,6 +286,11 @@ function _capture (state, vel, forceCapture) {
           descendingContext.reset()
           comp.render(descendingContext.$$)
         }
+        // capture injected components recursively
+        // for the case that the owner is not re-rendered
+        for (let child of context.injectedComponents) {
+          _capture(state, child)
+        }
         // TODO: this can be improved. It would be better if _capture was called
         // by DescendingContext() then the forwarded component would be rendered
         // during the render() call of the forwarding component
@@ -299,8 +312,8 @@ function _capture (state, vel, forceCapture) {
       state.setSkipped(vel)
     }
   } else if (vel._isVirtualHTMLElement) {
-    for (let i = 0; i < vel.children.length; i++) {
-      _capture(state, vel.children[i])
+    for (let child of vel.children) {
+      _capture(state, child)
     }
   }
   state.setCaptured(vel)
@@ -396,7 +409,7 @@ function _mapComponents (state, comp, vc) {
   if (state.isMapped(vc) || state.isMapped(comp)) {
     // if one of them has been mapped, then the comp must be equal,
     // otherwise this is an invalid map
-    // TODO: how could is it possible that they are different?
+    // TODO: could it possible that they are different?
     return vc._comp === comp
   }
   // TODO: this is also called for the root component, which is not necessary.
@@ -531,21 +544,19 @@ function _update (state, vel) {
     // HACK: removing all childNodes that are not owned by a component
     // this happened in Edge every 1s. Don't know why.
     // With this implementation all external DOM mutations will be eliminated
+    let _childNodes = comp.el.getChildNodes()
     let oldChildren = []
-    comp.el.getChildNodes().forEach(function (node) {
+    _childNodes.forEach(function (node) {
       let childComp = node._comp
-
       // EXPERIMENTAL: here we need to resolve the forwarding component,
       // which can be resolved from the owner chain
       while (childComp && childComp._isForwarded) {
         childComp = childComp._owner
       }
-
       // TODO: to allow mounting a prerendered DOM element
       // we would need to allow to 'take ownership' instead of removing
       // the element. This being a special situation, we should only
       // do that when mounting
-
       // remove orphaned nodes and relocated components
       if (!childComp || state.isRelocated(childComp)) {
         comp.el.removeChild(node)
@@ -574,19 +585,24 @@ function _update (state, vel) {
         break
       }
 
-      // Try to reuse TextNodes to avoid unnecesary DOM manipulations
+      // reuse TextNodes to avoid unnecesary DOM manipulations
       if (oldComp && oldComp.el.isTextNode() &&
           virtualComp && virtualComp._isVirtualTextNode &&
           oldComp.el.textContent === virtualComp.text) {
         continue
       }
 
-      // deep-render the virtual component if not yet done
+      // update virtual component recursively
       if (!state.isRendered(virtualComp)) {
         _update(state, virtualComp)
       }
 
       newComp = virtualComp._comp
+
+      // nothing more to do if components are equal, i.e. have been mapped
+      if (newComp === oldComp) {
+        continue
+      }
 
       // update the parent for relocated components
       // ATTENTION: relocating a component does not update its context
@@ -602,10 +618,7 @@ function _update (state, vel) {
         continue
       // Differential update
       } else if (state.isMapped(virtualComp)) {
-        // identity
-        if (newComp === oldComp) {
-          // no structural change
-        } else if (state.isMapped(oldComp)) {
+        if (state.isMapped(oldComp)) {
           // the order of elements with ref has changed
           state.setDetached(oldComp)
           _removeChild(state, comp, oldComp)
@@ -845,6 +858,7 @@ class DescendingContext {
     this.pos = 0
     this.updates = captureContext.components.length
     this.remaining = this.updates
+    this.injectedComponents = captureContext.injectedComponents
 
     this.$$ = this._createComponent.bind(this)
   }
@@ -899,35 +913,6 @@ class DescendingContext {
   }
 }
 
-RenderingEngine._internal = {
-  _capture: _capture,
-  _wrap: _createWrappingVirtualComponent
-}
-
-class CaptureContext {
-  constructor (owner) {
-    this.owner = owner
-    this.refs = {}
-    this.foreignRefs = {}
-    this.elements = []
-    this.components = []
-    this.$$ = this._createComponent.bind(this)
-    this.$$.capturing = true
-  }
-
-  _createComponent () {
-    let vel = VirtualElement.createElement.apply(this, arguments)
-    vel._context = this
-    vel._owner = this.owner
-    if (vel._isVirtualComponent) {
-      // virtual components need to be captured recursively
-      this.components.push(vel)
-    }
-    this.elements.push(vel)
-    return vel
-  }
-}
-
 function _createWrappingVirtualComponent (comp) {
   let vel = new VirtualElement.Component(comp.constructor)
   vel._comp = comp
@@ -935,11 +920,6 @@ function _createWrappingVirtualComponent (comp) {
     vel._mergeHTMLConfig(comp.__htmlConfig__)
   }
   return vel
-}
-
-RenderingEngine.createContext = function (comp) {
-  let vel = _createWrappingVirtualComponent(comp)
-  return new CaptureContext(vel)
 }
 
 class RenderingState {
@@ -1055,4 +1035,9 @@ class RenderingState {
   getOldState (vc) {
     return this.get(vc, 'oldState')
   }
+}
+
+RenderingEngine._internal = {
+  _capture: _capture,
+  _wrap: _createWrappingVirtualComponent
 }
