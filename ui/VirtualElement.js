@@ -10,6 +10,7 @@ import isString from '../util/isString'
 import without from '../util/without'
 import map from '../util/map'
 import DOMElement from '../dom/DOMElement'
+import { deleteFromArray } from 'substance';
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
@@ -67,23 +68,8 @@ export default class VirtualElement extends DOMElement {
   */
   ref (ref) {
     if (!ref) throw new Error('Illegal argument')
-    /*
-      Attention: only the owner can create a ref()
-      If you run into this situation, e.g. when you pass down a virtual element
-      to a component which wants to have a ref itself,
-      then you have other options:
-
-      1. via props:
-      ```js
-        this.props.content.getComponent()
-      ```
-
-      2. via Component.getChildAt or Component.find()
-      ```
-        this.getChildAt(0)
-        this.find('.child')
-      ```
-    */
+    // Attention: only the owner should create a ref()
+    // unfortunately, with the current implementation this can not be ensured
     if (this._ref) throw new Error('A VirtualElement can only be referenced once.')
     this._ref = ref
     if (this._context) {
@@ -448,15 +434,25 @@ class VirtualHTMLElement extends VirtualElement {
 
   _attach (child) {
     child.parent = this
-    if (this._context && child._owner !== this._owner && child._ref) {
-      this._context.foreignRefs[child._ref] = child
+    if (this._context) {
+      if (child._isVirtualComponent) {
+        this._context.injectedComponents.push(child)
+      }
+      if (child._owner !== this._owner && child._ref) {
+        this._context.foreignRefs[child._ref] = child
+      }
     }
   }
 
   _detach (child) {
     child.parent = null
-    if (this._context && child._owner !== this._owner && child._ref) {
-      delete this.context.foreignRefs[child._ref]
+    if (this._context) {
+      if (child._isVirtualComponent) {
+        deleteFromArray(this._context.injectedComponents, child)
+      }
+      if (child._owner !== this._owner && child._ref) {
+        delete this.context.foreignRefs[child._ref]
+      }
     }
   }
 
@@ -544,13 +540,23 @@ class VirtualComponent extends VirtualHTMLElement {
   }
 
   _copyHTMLConfig () {
-    return {
-      classNames: clone(this.classNames),
-      attributes: clone(this.attributes),
-      htmlProps: clone(this.htmlProps),
-      style: clone(this.style),
-      eventListeners: clone(this.eventListeners)
+    let copy = {}
+    if (this.classNames) {
+      copy.classNames = clone(this.classNames)
     }
+    if (this.attributes) {
+      copy.attributes = clone(this.attributes)
+    }
+    if (this.htmlProps) {
+      copy.htmlProps = clone(this.htmlProps)
+    }
+    if (this.style) {
+      copy.style = clone(this.style)
+    }
+    if (this.eventListeners) {
+      copy.eventListeners = clone(this.eventListeners)
+    }
+    return copy
   }
 
   get _isVirtualHTMLElement () { return false }
@@ -689,4 +695,29 @@ VirtualElement.createElement = function () {
     content.append(flattenOften(Array.prototype.slice.call(arguments, 2), 3))
   }
   return content
+}
+
+VirtualElement.CaptureContext = class CaptureContext {
+  constructor (owner) {
+    this.owner = owner
+    this.refs = {}
+    this.foreignRefs = {}
+    this.elements = []
+    this.components = []
+    this.injectedComponents = []
+    this.$$ = this._createComponent.bind(this)
+    this.$$.capturing = true
+  }
+
+  _createComponent () {
+    let vel = VirtualElement.createElement.apply(this, arguments)
+    vel._context = this
+    vel._owner = this.owner
+    if (vel._isVirtualComponent) {
+      // virtual components need to be captured recursively
+      this.components.push(vel)
+    }
+    this.elements.push(vel)
+    return vel
+  }
 }

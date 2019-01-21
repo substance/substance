@@ -184,6 +184,11 @@ export default class RenderingEngine {
   _createState () {
     return new RenderingState(this.componentFactory, this.elementFactory)
   }
+
+  static createContext (comp) {
+    let vel = _createWrappingVirtualComponent(comp)
+    return new VirtualElement.CaptureContext(vel)
+  }
 }
 
 // calling comp.render() and capturing recursively
@@ -217,7 +222,7 @@ function _capture (state, vel, forceCapture) {
       }
     }
     if (needRerender) {
-      let context = new CaptureContext(vel)
+      let context = new VirtualElement.CaptureContext(vel)
       let content = comp.render(context.$$)
       if (!content) {
         throw new Error('Component.render() returned nil.')
@@ -277,6 +282,11 @@ function _capture (state, vel, forceCapture) {
         while (descendingContext.hasPendingCaptures()) {
           descendingContext.reset()
           comp.render(descendingContext.$$)
+        }
+        // capture injected components recursively
+        // for the case that the owner is not re-rendered
+        for (let child of context.injectedComponents) {
+          _capture(state, child)
         }
         // TODO: this can be improved. It would be better if _capture was called
         // by DescendingContext() then the forwarded component would be rendered
@@ -845,6 +855,7 @@ class DescendingContext {
     this.pos = 0
     this.updates = captureContext.components.length
     this.remaining = this.updates
+    this.injectedComponents = captureContext.injectedComponents
 
     this.$$ = this._createComponent.bind(this)
   }
@@ -899,35 +910,6 @@ class DescendingContext {
   }
 }
 
-RenderingEngine._internal = {
-  _capture: _capture,
-  _wrap: _createWrappingVirtualComponent
-}
-
-class CaptureContext {
-  constructor (owner) {
-    this.owner = owner
-    this.refs = {}
-    this.foreignRefs = {}
-    this.elements = []
-    this.components = []
-    this.$$ = this._createComponent.bind(this)
-    this.$$.capturing = true
-  }
-
-  _createComponent () {
-    let vel = VirtualElement.createElement.apply(this, arguments)
-    vel._context = this
-    vel._owner = this.owner
-    if (vel._isVirtualComponent) {
-      // virtual components need to be captured recursively
-      this.components.push(vel)
-    }
-    this.elements.push(vel)
-    return vel
-  }
-}
-
 function _createWrappingVirtualComponent (comp) {
   let vel = new VirtualElement.Component(comp.constructor)
   vel._comp = comp
@@ -935,11 +917,6 @@ function _createWrappingVirtualComponent (comp) {
     vel._mergeHTMLConfig(comp.__htmlConfig__)
   }
   return vel
-}
-
-RenderingEngine.createContext = function (comp) {
-  let vel = _createWrappingVirtualComponent(comp)
-  return new CaptureContext(vel)
 }
 
 class RenderingState {
@@ -1055,4 +1032,9 @@ class RenderingState {
   getOldState (vc) {
     return this.get(vc, 'oldState')
   }
+}
+
+RenderingEngine._internal = {
+  _capture: _capture,
+  _wrap: _createWrappingVirtualComponent
 }
