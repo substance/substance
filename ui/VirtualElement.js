@@ -1,4 +1,5 @@
 import clone from '../util/clone'
+import deleteFromArray from '../util/deleteFromArray'
 import flattenOften from '../util/flattenOften'
 import isArray from '../util/isArray'
 import isFunction from '../util/isFunction'
@@ -10,7 +11,6 @@ import isString from '../util/isString'
 import without from '../util/without'
 import map from '../util/map'
 import DOMElement from '../dom/DOMElement'
-import { deleteFromArray } from 'substance';
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
