@@ -1719,6 +1719,52 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  // similar to previous test, but additionally uses a forwarding component on the third level
+  test('[Forwarding Component] rerendering an injected and forwarding component', t => {
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Parent, {
+            child: $$(Child, {
+              model: this.props.model
+            })
+          }).ref('parent')
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          this.props.child
+        )
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$(Forwarded, { model: this.props.model })
+      }
+    }
+    class Forwarded extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child').append(
+          this.props.model.map(item => $$('div').ref(item.id).addClass('sc-item').attr('data-id', item.id))
+        )
+      }
+    }
+    let model = [{ id: 'foo' }]
+    let grandParent = GrandParent.render({ model })
+    let parent = grandParent.refs.parent
+    let forwarded = grandParent.find('.sc-child')
+    model.push({ id: 'bar' })
+    t.comment('Rerendering child...')
+    forwarded.rerender()
+    t.equal(grandParent.findAll('.sc-item').length, 2, 'there should be two items')
+    t.comment('Rerendering parent...')
+    parent.rerender()
+    t.equal(grandParent.findAll('.sc-item').length, 2, 'there should be two items')
+    t.end()
+  })
+
   test('[Preserving] components that do not change the structure preserve child components', t => {
     class MyComponent extends Component {
       render ($$) {
