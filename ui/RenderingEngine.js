@@ -312,8 +312,8 @@ function _capture (state, vel, forceCapture) {
       state.setSkipped(vel)
     }
   } else if (vel._isVirtualHTMLElement) {
-    for (let i = 0; i < vel.children.length; i++) {
-      _capture(state, vel.children[i])
+    for (let child of vel.children) {
+      _capture(state, child)
     }
   }
   state.setCaptured(vel)
@@ -409,7 +409,7 @@ function _mapComponents (state, comp, vc) {
   if (state.isMapped(vc) || state.isMapped(comp)) {
     // if one of them has been mapped, then the comp must be equal,
     // otherwise this is an invalid map
-    // TODO: how could is it possible that they are different?
+    // TODO: could it possible that they are different?
     return vc._comp === comp
   }
   // TODO: this is also called for the root component, which is not necessary.
@@ -544,21 +544,19 @@ function _update (state, vel) {
     // HACK: removing all childNodes that are not owned by a component
     // this happened in Edge every 1s. Don't know why.
     // With this implementation all external DOM mutations will be eliminated
+    let _childNodes = comp.el.getChildNodes()
     let oldChildren = []
-    comp.el.getChildNodes().forEach(function (node) {
+    _childNodes.forEach(function (node) {
       let childComp = node._comp
-
       // EXPERIMENTAL: here we need to resolve the forwarding component,
       // which can be resolved from the owner chain
       while (childComp && childComp._isForwarded) {
         childComp = childComp._owner
       }
-
       // TODO: to allow mounting a prerendered DOM element
       // we would need to allow to 'take ownership' instead of removing
       // the element. This being a special situation, we should only
       // do that when mounting
-
       // remove orphaned nodes and relocated components
       if (!childComp || state.isRelocated(childComp)) {
         comp.el.removeChild(node)
@@ -587,14 +585,14 @@ function _update (state, vel) {
         break
       }
 
-      // Try to reuse TextNodes to avoid unnecesary DOM manipulations
+      // reuse TextNodes to avoid unnecesary DOM manipulations
       if (oldComp && oldComp.el.isTextNode() &&
           virtualComp && virtualComp._isVirtualTextNode &&
           oldComp.el.textContent === virtualComp.text) {
         continue
       }
 
-      // deep-render the virtual component if not yet done
+      // update virtual component recursively
       if (!state.isRendered(virtualComp)) {
         _update(state, virtualComp)
       }
