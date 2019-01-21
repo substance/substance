@@ -1675,6 +1675,50 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Forwarding Component] rerendering an injected component', t => {
+    // three layers of components, where the grandparent injects the child
+    // via props into the parent. Then two consecutive re-renderings were done
+    // first on the child level, then on the parent level.
+    // The injected components must be captured recursively,
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Parent, {
+            child: $$(Child, {
+              model: this.props.model
+            })
+          }).ref('parent')
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          this.props.child
+        )
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child').append(
+          this.props.model.map(item => $$('div').ref(item.id).addClass('sc-item').attr('data-id', item.id))
+        )
+      }
+    }
+    let model = [{ id: 'foo' }]
+    let grandParent = GrandParent.render({ model })
+    let parent = grandParent.refs.parent
+    let child = grandParent.find('.sc-child')
+    model.push({ id: 'bar' })
+    t.comment('Rerendering child...')
+    child.rerender()
+    t.equal(grandParent.findAll('.sc-item').length, 2, 'there should be two items')
+    t.comment('Rerendering parent...')
+    parent.rerender()
+    t.equal(grandParent.findAll('.sc-item').length, 2, 'there should be two items')
+    t.end()
+  })
+
   test('[Preserving] components that do not change the structure preserve child components', t => {
     class MyComponent extends Component {
       render ($$) {
