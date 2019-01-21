@@ -124,7 +124,7 @@ function detect () {
       platform.devtools = true
     }
     // Note: _detector.toString() is only called by the DevTools console.log()
-    console.log('%c', _detector)
+    console.log('Detecting Developer Console.%c', _detector)
     if (platform.devtools) {
       let widthThreshold = window.outerWidth - window.innerWidth > 160
       let orientation = widthThreshold ? 'vertical' : 'horizontal'
