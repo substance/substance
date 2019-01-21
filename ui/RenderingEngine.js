@@ -601,7 +601,6 @@ function _update (state, vel) {
 
       // nothing more to do if components are equal, i.e. have been mapped
       if (newComp === oldComp) {
-        console.assert(state.isMapped(oldComp) && state.isMapped(newComp))
         continue
       }
 
@@ -618,7 +617,7 @@ function _update (state, vel) {
         _appendChild(state, comp, newComp)
         continue
       // Differential update
-      } else if (state.isMapped(newComp)) {
+      } else if (state.isMapped(virtualComp)) {
         if (state.isMapped(oldComp)) {
           // the order of elements with ref has changed
           state.setDetached(oldComp)
