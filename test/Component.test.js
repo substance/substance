@@ -1652,6 +1652,29 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Forwarding Component] updating attributes of a forwarded component', t => {
+    class Parent extends TestComponent {
+      render ($$) {
+        let el = $$(Child)
+        if (this.props.mode === 1) {
+          el.attr('disabled', true)
+        }
+        return el
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    let parent = Parent.render({ mode: 0 })
+    parent.setProps({ mode: 1 })
+    t.ok(parent.el.hasAttribute('disabled'), 'forwarded element should have attribute "disabled"')
+    parent.setProps({ mode: 0 })
+    t.notOk(parent.el.hasAttribute('disabled'), 'forwarded element should not have attribute "disabled"')
+    t.end()
+  })
+
   test('[Preserving] components that do not change the structure preserve child components', t => {
     class MyComponent extends Component {
       render ($$) {
