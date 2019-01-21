@@ -282,7 +282,7 @@ function _capture (state, vel, forceCapture) {
         // by DescendingContext() then the forwarded component would be rendered
         // during the render() call of the forwarding component
         if (content._isForwarded) {
-          _capture(state, content, true)
+          _capture(state, content)
         }
       } else {
         // ATTENTION: without DEBUG_RENDERING enabled the content is captured
@@ -461,7 +461,7 @@ function _update (state, vel) {
   // TODO: decide if this really a HACK
   if (!vel._comp) {
     if (vel._ref && vel._preliminaryParent !== vel._owner) {
-      _capture(state, vel, true)
+      _capture(state, vel)
     }
   }
 
