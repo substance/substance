@@ -137,6 +137,9 @@ export default class RenderingEngine {
     // let t0 = Date.now()
     let vel = _createWrappingVirtualComponent(comp)
     let state = this._createState()
+    // top-level comp and virtual component are mapped per se
+    state.setMapped(vel)
+    state.setMapped(comp)
     if (oldProps) {
       state.setOldProps(vel, oldProps)
     }
@@ -598,6 +601,12 @@ function _update (state, vel) {
 
       newComp = virtualComp._comp
 
+      // nothing more to do if components are equal, i.e. have been mapped
+      if (newComp === oldComp) {
+        console.assert(state.isMapped(oldComp) && state.isMapped(newComp))
+        continue
+      }
+
       // update the parent for relocated components
       // ATTENTION: relocating a component does not update its context
       if (state.isRelocated(newComp)) {
@@ -611,11 +620,8 @@ function _update (state, vel) {
         _appendChild(state, comp, newComp)
         continue
       // Differential update
-      } else if (state.isMapped(virtualComp)) {
-        // identity
-        if (newComp === oldComp) {
-          // no structural change
-        } else if (state.isMapped(oldComp)) {
+      } else if (state.isMapped(newComp)) {
+        if (state.isMapped(oldComp)) {
           // the order of elements with ref has changed
           state.setDetached(oldComp)
           _removeChild(state, comp, oldComp)
