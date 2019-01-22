@@ -134,7 +134,15 @@ export default class RenderingEngine {
   }
 
   _render (comp, oldProps, oldState) {
-    // let t0 = Date.now()
+    if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+      console.group('RenderingEngine')
+      if (!comp.el) {
+        console.log('Rendering Engine: initial render of %s', comp.constructor.name)
+      } else {
+        console.log('Rendering Engine: re-render of %s', comp.constructor.name)
+      }
+      console.time('rendering (total)')
+    }
     let vel = _createWrappingVirtualComponent(comp)
     let state = this._createState()
     // top-level comp and virtual component are mapped per se
@@ -147,23 +155,31 @@ export default class RenderingEngine {
       state.setOldState(vel, oldState)
     }
     try {
-      // capture: this calls the render() method of components, creating a
-      // virtual DOM
-      // console.log('### capturing...')
-      // let t0 = Date.now()
+      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+        console.time('capturing')
+      }
+      // capture: this calls the render() method of components, creating a virtual DOM
       _capture(state, vel, 'forceCapture')
-      // console.log('### ... finished in %s ms', Date.now()-t0)
+      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+        console.timeEnd('capturing')
+      }
 
-      // console.log('### rendering...')
-      // t0 = Date.now()
+      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+        console.time('updating')
+      }
       _update(state, vel)
-      // console.log('### ... finished in %s ms', Date.now()-t0)
+      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+        console.timeEnd('updating')
+      }
 
-      _triggerUpdate(state, vel)
+      _triggerDidUpdate(state, vel)
     } finally {
+      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+        console.timeEnd('rendering (total)')
+        console.groupEnd('RenderingEngine')
+      }
       state.dispose()
     }
-    // console.log("RenderingEngine: finished rendering in %s ms", Date.now()-t0)
   }
 
   // this is used together with the incremental Component API
@@ -683,16 +699,16 @@ function _getVirtualComponentTrace (vc) {
   return frags.join('/')
 }
 
-function _triggerUpdate (state, vel) {
+function _triggerDidUpdate (state, vel) {
   if (vel._isVirtualComponent) {
     if (!state.isSkipped(vel)) {
-      vel._content.children.forEach(_triggerUpdate.bind(null, state))
+      vel._content.children.forEach(_triggerDidUpdate.bind(null, state))
     }
     if (state.isUpdated(vel)) {
       vel._comp.didUpdate(state.getOldProps(vel), state.getOldState(vel))
     }
   } else if (vel._isVirtualHTMLElement) {
-    vel.children.forEach(_triggerUpdate.bind(null, state))
+    vel.children.forEach(_triggerDidUpdate.bind(null, state))
   }
 }
 
