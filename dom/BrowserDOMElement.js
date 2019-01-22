@@ -10,6 +10,8 @@ import DOMElement from './DOMElement'
 const SIGNATURE = uuid('_BrowserDOMElement')
 
 function _attach (nativeEl, browserDOMElement) {
+  if (!browserDOMElement._isBrowserDOMElement) throw new Error('Invalid argument')
+  if (nativeEl.hasOwnProperty(SIGNATURE)) throw new Error('Already attached')
   nativeEl[SIGNATURE] = browserDOMElement
 }
 
@@ -553,6 +555,7 @@ class BrowserDOMElement extends DOMElement {
     }
     this.el = newEl
     _detach(oldEl)
+    _detach(newEl)
     _attach(newEl, this)
   }
 
@@ -733,7 +736,7 @@ BrowserDOMElement.wrapNativeElement = function (el) {
     } else if (el instanceof window.Node) {
       return new BrowserDOMElement(el)
     } else if (el._isBrowserDOMElement) {
-      return new BrowserDOMElement(el.getNativeElement())
+      return el
     } else if (el === window) {
       return BrowserDOMElement.getBrowserWindow()
     }
@@ -755,6 +758,8 @@ class BrowserWindow {
     this.el = window
     _attach(window, this)
   }
+
+  get _isBrowserDOMElement () { return true }
 }
 
 BrowserWindow.prototype.on = BrowserDOMElement.prototype.on
