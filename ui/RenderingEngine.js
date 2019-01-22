@@ -321,9 +321,6 @@ function _capture (state, vel, forceCapture) {
         // will be `RenderingEngine._capture()` only
         _capture(state, content)
       }
-      if (content._isForwarded) {
-        content._comp._isForwarded = true
-      }
     } else {
       state.setSkipped(vel)
     }
@@ -527,8 +524,8 @@ function _update (state, vel) {
       // TODO: this will not work with multiple forwarded components
       if (!comp.el) {
         comp.el = forwardedComp.el
-        forwardedComp.triggerDidMount()
-        comp.triggerDidMount()
+        // forwardedComp.triggerDidMount()
+        // comp.triggerDidMount()
       } else {
         // EXPERIMENTAL: the forwarded comp has been updated
         let oldForwardedComp = comp.el._comp
@@ -566,7 +563,7 @@ function _update (state, vel) {
       let childComp = node._comp
       // EXPERIMENTAL: here we need to resolve the forwarding component,
       // which can be resolved from the owner chain
-      while (childComp && childComp._isForwarded) {
+      while (childComp && childComp._isForwarded()) {
         childComp = childComp._owner
       }
       // TODO: to allow mounting a prerendered DOM element

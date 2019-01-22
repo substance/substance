@@ -439,6 +439,13 @@ export default class Component extends EventEmitter {
     // NOTE: On the other hand, we had some occasions, where we
     // intuitively expected that this was done bottom-up, too
 
+    // ATTENTION: forwarding components are 'invisible' with respect to the
+    // DOM elements, i.e. not covered by the recursion done here using this.getChildren()
+    // so we trigger explicitly
+    if (this._isForwarded()) {
+      this.getParent().triggerDidMount()
+    }
+
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.
     if (!this.__isMounted__) {
@@ -446,11 +453,12 @@ export default class Component extends EventEmitter {
       this.didMount()
     }
     // Trigger didMount for the children first
-    this.getChildren().forEach(function (child) {
+    const children = this.getChildren()
+    for (let child of children) {
       // We pass isMounted=true to save costly calls to Component.isMounted
       // for each child / grandchild
       child.triggerDidMount(true)
-    })
+    }
   }
 
   /**
@@ -525,6 +533,11 @@ export default class Component extends EventEmitter {
 
   _isForwarding () {
     return this.el._comp !== this
+  }
+
+  _isForwarded () {
+    let parent = this.getParent()
+    return (parent && parent._isForwarding())
   }
 
   /*
