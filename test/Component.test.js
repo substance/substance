@@ -1394,10 +1394,10 @@ function ComponentTests (debug, memory) {
     }
     let parent = Parent.mount({}, getMountPoint(t))
     let forwarding = parent.refs.forwarding
-    t.equal(forwarding.didMount.callCount, 1, 'The forwarding component should be mounted')
+    t.ok(forwarding.isMounted(), 'The forwarding component should be mounted')
+    t.equal(forwarding.didMount.callCount, 1, '.. didMount() should have been called')
     t.ok(forwarding.el.hasClass('my-component'), '.. should render the forwarded components element')
     t.equal(forwarding.el.textContent, 'Foo', '.. and it should have correct content')
-    t.ok(forwarding.isMounted(), '.. and should be mounted')
     t.end()
   })
 
