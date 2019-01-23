@@ -28,18 +28,6 @@ export default class XMLTextElement extends TextNodeMixin(XMLDocumentNode) {
     return annos
   }
 
-  setText (text) {
-    const doc = this.getDocument()
-    const path = this.getPath()
-    const oldText = this.getText()
-    // delete old text first
-    if (oldText.length > 0) {
-      doc.update(path, { type: 'delete', start: 0, end: oldText.length })
-    }
-    doc.update(path, { type: 'insert', start: 0, text })
-    return this
-  }
-
   // DOMElement API (partial)
 
   getTextContent () {
