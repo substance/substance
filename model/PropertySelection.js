@@ -65,12 +65,10 @@ export default class PropertySelection extends Selection {
   }
 
   get startOffset () {
-    console.warn('DEPRECATED: Use sel.start.offset instead')
     return this.start.offset
   }
 
   get endOffset () {
-    console.warn('DEPRECATED: Use sel.end.offset instead')
     return this.end.offset
   }
 
