@@ -1,73 +1,78 @@
 import platform from './platform'
-import parseKeyEvent from './parseKeyEvent'
 import keys from './keys'
 
+/**
+ * Parses a key-combo such as 'CommandOrControl+Enter' and turns it into a
+ * record equivalent to a DOM KeyboardEvent.
+ *
+ * @param {string} combo a key-combo such as 'CommandOrControl+Enter'
+ */
 export default function parseKeyCombo (combo) {
   let frags = combo.split('+')
-  let data = {
+  let keyEvent = {
     keyCode: -1
   }
   for (var i = 0; i < frags.length; i++) {
     let frag = frags[i].toUpperCase()
     switch (frag) {
       case 'ALT': {
-        data.altKey = true
+        keyEvent.altKey = true
         break
       }
       case 'ALTGR': {
-        data.altKey = true
-        data.code = 'AltRight'
+        keyEvent.altKey = true
+        keyEvent.code = 'AltRight'
         break
       }
       case 'CMD': {
-        data.metaKey = true
+        keyEvent.metaKey = true
         break
       }
       case 'CTRL': {
-        data.ctrlKey = true
+        keyEvent.ctrlKey = true
         break
       }
       case 'COMMANDORCONTROL': {
         if (platform.isMac) {
-          data.metaKey = true
+          keyEvent.metaKey = true
         } else {
-          data.ctrlKey = true
+          keyEvent.ctrlKey = true
         }
         break
       }
       case 'MEDIANEXTTRACK': {
-        data.code = 'MediaTrackNext'
+        keyEvent.code = 'MediaTrackNext'
         break
       }
       case 'MEDIAPLAYPAUSE': {
-        data.code = 'MediaPlayPause'
+        keyEvent.code = 'MediaPlayPause'
         break
       }
       case 'MEDIAPREVIOUSTRACK': {
-        data.code = 'MediaPreviousTrack'
+        keyEvent.code = 'MediaPreviousTrack'
         break
       }
       case 'MEDIASTOP': {
-        data.code = 'MediaStop'
+        keyEvent.code = 'MediaStop'
         break
       }
       case 'SHIFT': {
-        data.shiftKey = true
+        keyEvent.shiftKey = true
         break
       }
       case 'SUPER': {
-        data.metaKey = true
+        keyEvent.metaKey = true
         break
       }
       default:
         if (frag.length === 1) {
-          data.keyCode = frag.charCodeAt(0)
+          keyEvent.keyCode = frag.charCodeAt(0)
         } else if (keys.hasOwnProperty(frag)) {
-          data.keyCode = keys[frag]
+          keyEvent.keyCode = keys[frag]
         } else {
           throw new Error('Unsupported keyboard command: ' + combo)
         }
     }
   }
-  return parseKeyEvent(data)
+  return keyEvent
 }

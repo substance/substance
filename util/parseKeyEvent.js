@@ -1,5 +1,11 @@
 export {default as keys} from './keys'
 
+/**
+ * Generates a normalized key from a records similar to a DOM KeyboardEvent.
+ *
+ * @param {object} event
+ * @param {boolean} onlyModifiers
+ */
 export default function parseKeyEvent (event, onlyModifiers) {
   let frags = []
   if (event.altKey) {

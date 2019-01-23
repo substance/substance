@@ -1,5 +1,6 @@
 import AbstractKeyboardManager from '../ui/AbstractKeyboardManager'
 import parseKeyCombo from '../util/parseKeyCombo'
+import parseKeyEvent from '../util/parseKeyEvent'
 
 /*
   @deprecated: we are trying to untangle editorSession and managers try to
@@ -22,7 +23,7 @@ export default class DeprecatedKeyboardManager extends AbstractKeyboardManager {
         let handler = new ExecuteCommandHandler(editorSession, spec.command)
         let hook = handler.execute.bind(handler)
         if (type === 'keydown') {
-          key = parseKeyCombo(key)
+          key = parseKeyEvent(parseKeyCombo(key))
           if (!this.keydownBindings[key]) this.keydownBindings[key] = []
           this.keydownBindings[key].push(hook)
         } else if (type === 'textinput') {
@@ -50,7 +51,7 @@ export default class DeprecatedKeyboardManager extends AbstractKeyboardManager {
     return this.context
   }
 
-  static parseCombo (...args) { return parseKeyCombo(...args) }
+  static parseCombo (...args) { return parseKeyEvent(parseKeyCombo(...args)) }
 }
 
 class ExecuteCommandHandler {
