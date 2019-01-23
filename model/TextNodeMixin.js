@@ -1,3 +1,5 @@
+import { deleteTextRange } from './documentHelpers'
+
 export default function (SuperClass) {
   class TextNodeMixin extends SuperClass {
     getTextPath () {
@@ -8,6 +10,17 @@ export default function (SuperClass) {
 
     getText () {
       return this.content
+    }
+
+    setText (text) {
+      const doc = this.getDocument()
+      const path = this.getPath()
+      const oldText = this.getText()
+      if (oldText.length > 0) {
+        deleteTextRange(doc, { path, offset: 0 })
+        doc.update(path, { type: 'insert', start: 0, text })
+      }
+      return this
     }
 
     isEmpty () {
