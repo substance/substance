@@ -1,8 +1,10 @@
 import { test } from 'substance-test'
-import { pick, Document, DocumentSchema, DocumentNode, CHILD, CHILDREN } from 'substance'
-
+import {
+  CHILD, CHILDREN, Document, DocumentSchema, DocumentNode, map, pick
+} from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
+import getTestConfig from './fixture/getTestConfig';
 
 test('Document: Create null selection.', function (t) {
   let doc = fixture(simple)
@@ -136,5 +138,19 @@ test('Document: resolve() throws for non-existing properties in strict mode', t 
   t.throws(() => {
     doc.resolve(['c1', 'bla'], 'strict')
   }, /Invalid path/, 'resolve() should throw for invalid paths in strict mode')
+  t.end()
+})
+
+test('Document: setting text', t => {
+  let config = getTestConfig()
+  let doc = new Document(config.getSchema())
+  let p = doc.create({ type: 'paragraph', content: 'abcdefg' })
+  doc.create({ type: 'strong', start: { path: p.getPath(), offset: 1 }, end: { offset: 3 } })
+  let annos = map(p.getAnnotations())
+  t.equal(annos.length, 1, 'initially there should be one annotation on the paragraph')
+  p.setText('foo')
+  t.equal(p.content, 'foo', 'the text content should have been updated')
+  t.equal(map(p.getAnnotations()).length, 0, 'no annotation should be left on the paragraph')
+  t.nil(doc.get(annos[0].id), 'the old annotation should have been removed from the document')
   t.end()
 })
