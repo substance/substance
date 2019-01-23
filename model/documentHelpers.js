@@ -384,6 +384,14 @@ export function append (doc, containerPath, id) {
   insertAt(doc, containerPath, doc.get(containerPath).length, id)
 }
 
+/**
+ * Removes an item from a CHILDREN or CONTAINER property.
+ *
+ * @param {Document} doc
+ * @param {string[]} containerPath
+ * @param {number} pos
+ * @returns the id of the removed child
+ */
 export function removeAt (doc, containerPath, pos) {
   let op = doc.update(containerPath, { type: 'delete', pos })
   if (op && op.diff) {
