@@ -1,3 +1,5 @@
+import { setText } from './documentHelpers'
+
 export default function (SuperClass) {
   class TextNodeMixin extends SuperClass {
     getTextPath () {
@@ -8,6 +10,11 @@ export default function (SuperClass) {
 
     getText () {
       return this.content
+    }
+
+    setText (text) {
+      setText(this.getDocument(), this.getPath(), text)
+      return this
     }
 
     isEmpty () {
