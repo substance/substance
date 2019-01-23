@@ -354,6 +354,15 @@ export function deleteListRange (doc, list, start, end) {
   }
 }
 
+export function setText (doc, textPath, text) {
+  const oldText = doc.get(textPath)
+  if (oldText.length > 0) {
+    deleteTextRange(doc, { path: textPath, offset: 0 })
+    doc.update(textPath, { type: 'insert', start: 0, text })
+  }
+  return this
+}
+
 export function mergeListItems (doc, listId, itemPos) {
   // HACK: make sure that the list is really from the doc
   let list = doc.get(listId)
