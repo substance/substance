@@ -4,7 +4,7 @@ import {
 } from 'substance'
 import fixture from './fixture/createTestArticle'
 import simple from './fixture/simple'
-import getTestConfig from './fixture/getTestConfig';
+import getTestConfig from './fixture/getTestConfig'
 
 test('Document: Create null selection.', function (t) {
   let doc = fixture(simple)
