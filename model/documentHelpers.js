@@ -485,7 +485,40 @@ export function getParent (node) {
   }
 }
 
+/**
+ * Create a node from JSON.
+ *
+ * The given JSON allows to initalize children with nested records.
+ * Every record must have 'type' and all required fields set.
+ *
+ * @param {Document} doc
+ * @param {object} data a JSON object
+ *
+ * @example
+ * ```
+ * documentHelpers.createNodeFromJson(doc, {
+ *    "type": "journal-article-ref",
+ *    "title": "VivosX, a disulfide crosslinking method to capture site-specific, protein-protein interactions in yeast and human cells",
+ *    "containerTitle": "eLife",
+ *    "volume": "7",
+ *    "doi": "10.7554/eLife.36654",
+ *    "year": "2018",
+ *    "month": "08",
+ *    "day": "09",
+ *    "uri": "https://elifesciences.org/articles/36654",
+ *    "authors": [
+ *      {
+ *       "type": "ref-contrib",
+ *       "name": "Mohan",
+ *       "givenNames": "Chitra"
+ *      }
+ *    ],
+ * })
+ * ```
+ */
 export function createNodeFromJson (doc, data) {
+  if (!data) throw new Error("'data' is mandatory")
+  if (!data.type) throw new Error("'data.type' is mandatory")
   if (!isFunction(doc.create)) throw new Error('First argument must be document or tx')
   let type = data.type
   let nodeSchema = doc.getSchema().getNodeSchema(type)
