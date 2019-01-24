@@ -44,12 +44,16 @@ export default class CustomSelection extends Selection {
   }
 
   toJSON () {
-    return {
+    let res = {
       type: 'custom',
       customType: this.customType,
-      data: cloneDeep(this.data),
-      surfaceId: this.surfaceId
+      nodeId: this.nodeId,
+      data: cloneDeep(this.data)
     }
+    if (this.surfaceId) {
+      res.surfaceId = this.surfaceId
+    }
+    return res
   }
 
   toString () {
