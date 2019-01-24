@@ -1765,6 +1765,179 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Forwarding Component] replacing a forwarded component', t => {
+    let mounts = []
+    let disposals = []
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Parent, { mode: this.props.mode })
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        if (this.props.mode === 1) {
+          return $$(ChildA)
+        } else {
+          return $$(ChildB)
+        }
+      }
+    }
+    class ChildA extends TestComponent {
+      didMount () {
+        mounts.push('ChildA')
+      }
+      dispose () {
+        disposals.push('ChildA')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      didMount () {
+        mounts.push('ChildB')
+      }
+      dispose () {
+        disposals.push('ChildB')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    let grandParent = GrandParent.mount({ mode: 1 }, getMountPoint(t))
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    mounts.length = 0
+    grandParent.setProps({ mode: 2 })
+    t.deepEqual(mounts, ['ChildB'], 'ChildB should have been mounted')
+    t.deepEqual(disposals, ['ChildA'], 'ChildA should have been disposed')
+    mounts.length = 0
+    disposals.length = 0
+    grandParent.setProps({ mode: 1 })
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    t.deepEqual(disposals, ['ChildB'], 'ChildB should have been disposed')
+    t.end()
+  })
+
+  test('[Forwarding Component] replacing an injected, forwarded component', t => {
+    let mounts = []
+    let disposals = []
+    class Main extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            title: 'Foo',
+            content: $$(Forwarding, { mode: this.props.mode })
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div').addClass('sc-title').text(this.props.title),
+          this.props.content
+        )
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        if (this.props.mode === 1) {
+          return $$(ChildA)
+        } else {
+          return $$(ChildB)
+        }
+      }
+    }
+    class ChildA extends TestComponent {
+      didMount () {
+        mounts.push('ChildA')
+      }
+      dispose () {
+        disposals.push('ChildA')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      didMount () {
+        mounts.push('ChildB')
+      }
+      dispose () {
+        disposals.push('ChildB')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    t.comment('initially rendering ChildA')
+    let main = Main.mount({ mode: 1 }, getMountPoint(t))
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    mounts.length = 0
+    t.comment('replacing ChildA with ChildB')
+    main.setProps({ mode: 2 })
+    t.deepEqual(mounts, ['ChildB'], 'ChildB should have been mounted')
+    t.deepEqual(disposals, ['ChildA'], 'ChildA should have been disposed')
+    mounts.length = 0
+    disposals.length = 0
+    t.comment('replacing ChildB with ChildA')
+    main.setProps({ mode: 1 })
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    t.deepEqual(disposals, ['ChildB'], 'ChildB should have been disposed')
+    t.end()
+  })
+
+  test('[Forwarding Component] rerendering a component with injected, forwarded children', t => {
+    let mounted = false
+    let disposed = false
+    class Main extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            title: 'Foo',
+            content: $$(Forwarding)
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div').addClass('sc-title').text(this.props.title),
+          this.props.content
+        )
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(Child)
+      }
+    }
+    class Child extends TestComponent {
+      didMount () {
+        mounted = true
+      }
+      dispose () {
+        disposed = true
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    t.comment('initial render')
+    let main = Main.mount({ mode: 1 }, getMountPoint(t))
+    t.ok(mounted, 'forwarded component should have been mounted')
+    t.notOk(disposed, '.. not disposed')
+    mounted = disposed = false
+    t.comment('rerendering top-level component')
+    main.rerender()
+    t.notOk(disposed, 'forwarded component should not have been disposed')
+    t.notOk(mounted, '.. and also not mounted again')
+    t.end()
+  })
+
   test('[Preserving] components that do not change the structure preserve child components', t => {
     class MyComponent extends Component {
       render ($$) {
