@@ -14,6 +14,9 @@ export default class CustomSelection extends Selection {
       surfaceId = _data.surfaceId
     }
 
+    if (!customType) { throw new Error("'customType' is required") }
+    if (!nodeId) { throw new Error("'nodeId' is required") }
+
     this.customType = customType
     this.data = data || {}
     this.nodeId = nodeId
