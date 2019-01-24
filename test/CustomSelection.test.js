@@ -18,7 +18,7 @@ test('CustomSelection: Creating a CustomSelection', t => {
     new CustomSelection({ // eslint-disable-line no-new
       customType: 'test'
     })
-  }, /customType/, 'should throw if nodeId not given')
+  }, /nodeId/, 'should throw if nodeId not given')
   t.end()
 })
 
