@@ -108,8 +108,16 @@ class BrowserDOMElement extends DOMElement {
     return this
   }
 
+  hasAttribute (name) {
+    return this.el.hasAttribute(name)
+  }
+
   getAttribute (name) {
-    return this.el.getAttribute(name)
+    // NOTE: returning undefined if the attribute is not present
+    // The native implementation returns null
+    if (this.el.hasAttribute(name)) {
+      return this.el.getAttribute(name)
+    }
   }
 
   setAttribute (name, value) {

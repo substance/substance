@@ -170,6 +170,7 @@ function DOMElementTests (impl) {
   test('getAttribute()', (t) => {
     const el = DefaultDOMElement.parseSnippet('<div foo="1">TEST</div>', 'html')
     t.equal(el.getAttribute('foo'), '1', 'should have return attribute "foo"')
+    t.equal(el.getAttribute('bar'), undefined, 'missing attributes should be undefined')
     t.end()
   })
 
