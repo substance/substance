@@ -35,10 +35,10 @@ function RenderingEngineTests (debug) {
   // the VirtualComponent has been mapped successfully to a Component
 
   test('A component with ref is mapped', function (t) {
-    var comp = TestComponent.create(function ($$) {
+    let comp = TestComponent.create(function ($$) {
       return $$('div').append($$(Simple).ref('foo'))
     })
-    var vc = _capture(comp)
+    let vc = _capture(comp)
     t.ok(vc._isMapped(vc._content), 'root element should be mapped')
     t.ok(vc._isMapped(vc._getRef('foo')), "'foo' should be mapped")
     t.end()
@@ -52,18 +52,18 @@ function RenderingEngineTests (debug) {
 
   test('Detecting relocation when injecting a new parent element', function (t) {
     function _render ($$) {
-      var el = $$('div')
-      var parent = el
+      let el = $$('div')
+      let parent = el
       if (this.props.extraLayer) {
-        var middle = $$('div')
+        let middle = $$('div')
         el.append(middle)
         parent = middle
       }
       parent.append($$(Simple).ref('foo'))
       return el
     }
-    var comp = TestComponent.create(_render)
-    var vc = _capture(comp)
+    let comp = TestComponent.create(_render)
+    let vc = _capture(comp)
     t.notOk(vc._isRelocated(vc._getRef('foo')), "'foo' is not relocated the first time.")
 
     comp = TestComponent.create(_render, { extraLayer: false })
@@ -96,11 +96,11 @@ function RenderingEngineTests (debug) {
       elements.
     */
     function _render ($$) {
-      var el = $$('div')
-      var parent = el
+      let el = $$('div')
+      let parent = el
       el.append('AAAA')
       if (this.props.extraLayer) {
-        var middle = $$(Simple).ref('selection')
+        let middle = $$(Simple).ref('selection')
         el.append(middle)
         parent = middle
       }
@@ -108,8 +108,8 @@ function RenderingEngineTests (debug) {
       el.append('CCCC')
       return el
     }
-    var comp = TestComponent.create(_render)
-    var vc = _capture(comp)
+    let comp = TestComponent.create(_render)
+    let vc = _capture(comp)
     t.notOk(vc._isRelocated(vc._getRef('foo')), "'foo' is not relocated the first time.")
 
     comp = TestComponent.create(_render, { extraLayer: false })
@@ -125,56 +125,12 @@ function RenderingEngineTests (debug) {
     t.end()
   })
 
-  // NOTE: Dunno if this is a good test. Obviously it depends too much on the performance of the device
-  // TODO: we should do some performance metrics somewhere else, not as a test
-  // test('(Performance) Rendering a large number of components with ref', (t) => {
-  //   const N = 100
-  //   const M = 52
-  //   const data = []
-  //   for (let i = 0; i < N; i++) {
-  //     let row = []
-  //     for (let j = 0; j < M; j++) {
-  //       row.push(`${i}-${j}`)
-  //     }
-  //     data.push(row)
-  //   }
-  //   class Matrix extends Component {
-  //     render ($$) {
-  //       let el = $$('table').css({
-  //         overflow: 'auto',
-  //         height: '100px'
-  //       })
-  //       const data = this.props.data
-  //       for (let i = 0; i < data.length; i++) {
-  //         let row = data[i]
-  //         let rowEl = $$('tr')
-  //         for (let j = 0; j < row.length; j++) {
-  //           rowEl.append(
-  //             $$('td')
-  //               .ref(row[j])
-  //               .text(row[j]))
-  //         }
-  //         el.append(rowEl)
-  //       }
-  //       return el
-  //     }
-  //   }
-  //   let t0 = Date.now()
-  //   let comp = Matrix.mount({data}, getMountPoint(t))
-  //   let t1 = Date.now() - t0
-  //   t0 = Date.now()
-  //   comp.setProps({data})
-  //   let t2 = Date.now() - t0
-  //   t.ok(t1 < 1000, 'First rendering should be finished in reasonable time')
-  //   t.ok(t2 < 1000, 'Second rendering should be finished in reasonable time')
-  //   t.end()
-  // })
 }
 
 function _capture (comp) {
-  var vc = internal._wrap(comp)
+  let vc = internal._wrap(comp)
   let renderingEngine = Component.createRenderingEngine()
-  var state = renderingEngine._createState()
+  let state = renderingEngine._createState()
   internal._capture(state, vc, 'force')
   vc._state = state
   vc._isMapped = function (o) { return state.isMapped(o) }
