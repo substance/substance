@@ -1897,6 +1897,9 @@ function ComponentTests (debug, memory) {
         return $$('div').append(
           $$(Template, {
             title: 'Foo',
+            // ATTENTION: this is actually working when adding a ref here
+            // but we want in such a case, without any change in structure
+            // that components get retained even without ref
             content: $$(Forwarding)
           })
         )
@@ -1934,6 +1937,53 @@ function ComponentTests (debug, memory) {
     t.comment('rerendering top-level component')
     main.rerender()
     t.notOk(disposed, 'forwarded component should not have been disposed')
+    t.notOk(mounted, '.. and also not mounted again')
+    t.end()
+  })
+
+  // TODO: trying to distill a problem observed in Texture
+  // where an Input lost focus when the parent component got rerendered
+  // In that use case, Parent corresponds to QueryComponent, Template to InputWithButton, and Child to Input
+  test('[Injected Component] injected components with ref must be retained', t => {
+    let mounted = false
+    let disposed = false
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            content: $$(Child).ref('foo'),
+            footer: this.props.mode === 1 ? $$('div').text('bar') : null
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          this.props.content,
+          this.props.footer
+        )
+      }
+    }
+    class Child extends TestComponent {
+      didMount () {
+        mounted = true
+      }
+      dispose () {
+        disposed = true
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    t.comment('initial render')
+    let main = Parent.mount({ mode: 1 }, getMountPoint(t))
+    t.ok(mounted, 'injected component should have been mounted')
+    t.notOk(disposed, '.. not disposed')
+    mounted = disposed = false
+    t.comment('rerendering top-level component')
+    main.setProps({ mode: 2 })
+    t.notOk(disposed, 'injected component should not have been disposed')
     t.notOk(mounted, '.. and also not mounted again')
     t.end()
   })

@@ -566,11 +566,16 @@ function _update (state, vel) {
       while (childComp && childComp._isForwarded()) {
         childComp = childComp._owner
       }
+
       // TODO: to allow mounting a prerendered DOM element
       // we would need to allow to 'take ownership' instead of removing
       // the element. This being a special situation, we should only
       // do that when mounting
+
       // remove orphaned nodes and relocated components
+      // ATTENTION: removing the elements of relocated components
+      // in advance, then the algorithm later becomes easier only considering
+      // add and remove.
       if (!childComp || state.isRelocated(childComp)) {
         comp.el.removeChild(node)
       } else {
@@ -818,6 +823,9 @@ function _updateHash (args) {
   const update = args.update
   const remove = args.remove
   let updatedKeys = {}
+  // FIXME: this is not working as expected in browser
+  // i.e. _hashGet does not take the 'AttrbutesMap' thing into account
+  // and provides 'undefined' for the most cases
   for (let key in newHash) {
     if (newHash.hasOwnProperty(key)) {
       let oldVal = _hashGet(oldHash, key)
