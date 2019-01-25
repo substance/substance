@@ -125,6 +125,46 @@ function RenderingEngineTests (debug) {
     t.end()
   })
 
+  test('Avoid invalid relocations', t => {
+    /*
+      This simulates a situation found in Texture with a Template Component.
+      Specifically, a input always lost focus when the parent got rerendered.
+      The reason was, that mapping was not working properly, and the component was
+      considered to be relocated, which has the effect, that the DOM element
+      is removed and added, without triggering dispose() and didMount().
+    */
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            content: $$(Child).ref('child'),
+            footer: this.props.mode === 1 ? $$('div').text('bar') : null
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          this.props.content,
+          this.props.footer
+        )
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+
+    let parent = Parent.render({ mode: 1 })
+
+    // changing the props without triggering rerender
+    _setProps(parent, { mode: 2 })
+    let vc = _capture(parent)
+    t.notOk(vc._isRelocated(vc._getRef('child')), "'child' should not be relocated.")
+    t.end()
+  })
 }
 
 function _capture (comp) {
