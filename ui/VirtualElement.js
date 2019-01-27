@@ -512,7 +512,7 @@ class VirtualHTMLElement extends VirtualElement {
         if (!thisVal) {
           this[name] = new Map(otherVal)
         } else {
-          this[name] = new Map(...thisVal, ...otherVal)
+          this[name] = new Map([...thisVal, ...otherVal])
         }
       }
     }
