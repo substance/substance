@@ -563,8 +563,8 @@ function ComponentTests (debug, memory) {
   })
 
   test('Special nesting situation', t => {
-    // problem was observed in TOCPanel where components (tocEntry) are ingested via dependency-injection
-    // and appended to a 'div' element (tocEntries) which then was ingested into a ScrollPane.
+    // problem was observed in TOCPanel where components (tocEntry) are injected
+    // and appended to a 'div' element (tocEntries) which then was injected into a ScrollPane.
     // The order of _capturing must be determined correctly, i.e. first the ScrollPane needs to
     // be captured, so that the parent of the 'div' element (tocEntries) is known.
     // only then the tocEntry components can be captured.
@@ -606,6 +606,8 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  // same as before, but with a different notation
+  // TODO: do we really need this? seems to be redundant
   test('Special nesting situation II', t => {
     class Parent extends Component {
       render ($$) {
@@ -885,24 +887,27 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Refs on grandchild elements.', t => {
-    let comp = TestComponent.create(function ($$) {
-      return $$('div').append(
-        $$('div').append(
-          $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
+  test('Elements with different refs have different component instances', t => {
+    class Foo extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div').append(
+            // changing the ref should force this element to be recreated
+            $$('div').ref(this.props.grandChildRef)
+          )
         )
-      )
-    }, { grandChildRef: 'foo' })
-
+      }
+    }
+    let comp = Foo.render({ grandChildRef: 'foo' })
     t.notNil(comp.refs.foo, "Ref 'foo' should be set.")
     let foo = comp.refs.foo
     comp.rerender()
-    t.ok(foo === comp.refs.foo, 'Referenced grandchild should have been retained.')
+    t.ok(foo === comp.refs.foo, 'Referenced element should have been retained.')
     spy(foo, 'dispose')
     comp.setProps({ grandChildRef: 'bar' })
-    t.ok(foo.dispose.callCount > 0, 'Former grandchild should have been disposed.')
+    t.ok(foo.dispose.callCount > 0, 'Former referenced element should have been disposed.')
     t.notNil(comp.refs.bar, "Ref 'bar' should be set.")
-    t.ok(foo !== comp.refs.bar, 'Grandchild should have been recreated.')
+    t.ok(foo !== comp.refs.bar, 'Referenced element should have been recreated.')
     t.end()
   })
 
@@ -1238,7 +1243,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Relocating a preserved component (#635)', t => {
+  test('Relocating a referenced component (#635)', t => {
     class Parent extends TestComponent {
       render ($$) {
         let el = $$('div')
@@ -1762,6 +1767,229 @@ function ComponentTests (debug, memory) {
     t.comment('Rerendering parent...')
     parent.rerender()
     t.equal(grandParent.findAll('.sc-item').length, 2, 'there should be two items')
+    t.end()
+  })
+
+  test('[Forwarding Component] replacing a forwarded component', t => {
+    let mounts = []
+    let disposals = []
+    class GrandParent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Parent, { mode: this.props.mode })
+        )
+      }
+    }
+    class Parent extends TestComponent {
+      render ($$) {
+        if (this.props.mode === 1) {
+          return $$(ChildA)
+        } else {
+          return $$(ChildB)
+        }
+      }
+    }
+    class ChildA extends TestComponent {
+      didMount () {
+        mounts.push('ChildA')
+      }
+      dispose () {
+        disposals.push('ChildA')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      didMount () {
+        mounts.push('ChildB')
+      }
+      dispose () {
+        disposals.push('ChildB')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    let grandParent = GrandParent.mount({ mode: 1 }, getMountPoint(t))
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    mounts.length = 0
+    grandParent.setProps({ mode: 2 })
+    t.deepEqual(mounts, ['ChildB'], 'ChildB should have been mounted')
+    t.deepEqual(disposals, ['ChildA'], 'ChildA should have been disposed')
+    mounts.length = 0
+    disposals.length = 0
+    grandParent.setProps({ mode: 1 })
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    t.deepEqual(disposals, ['ChildB'], 'ChildB should have been disposed')
+    t.end()
+  })
+
+  test('[Forwarding Component] replacing an injected, forwarded component', t => {
+    let mounts = []
+    let disposals = []
+    class Main extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            title: 'Foo',
+            content: $$(Forwarding, { mode: this.props.mode })
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div').addClass('sc-title').text(this.props.title),
+          this.props.content
+        )
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        if (this.props.mode === 1) {
+          return $$(ChildA)
+        } else {
+          return $$(ChildB)
+        }
+      }
+    }
+    class ChildA extends TestComponent {
+      didMount () {
+        mounts.push('ChildA')
+      }
+      dispose () {
+        disposals.push('ChildA')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-a')
+      }
+    }
+    class ChildB extends TestComponent {
+      didMount () {
+        mounts.push('ChildB')
+      }
+      dispose () {
+        disposals.push('ChildB')
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child-b')
+      }
+    }
+    t.comment('initially rendering ChildA')
+    let main = Main.mount({ mode: 1 }, getMountPoint(t))
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    mounts.length = 0
+    t.comment('replacing ChildA with ChildB')
+    main.setProps({ mode: 2 })
+    t.deepEqual(mounts, ['ChildB'], 'ChildB should have been mounted')
+    t.deepEqual(disposals, ['ChildA'], 'ChildA should have been disposed')
+    mounts.length = 0
+    disposals.length = 0
+    t.comment('replacing ChildB with ChildA')
+    main.setProps({ mode: 1 })
+    t.deepEqual(mounts, ['ChildA'], 'ChildA should have been mounted')
+    t.deepEqual(disposals, ['ChildB'], 'ChildB should have been disposed')
+    t.end()
+  })
+
+  test('[Forwarding Component] rerendering a component with injected, forwarded children', t => {
+    let mounted = false
+    let disposed = false
+    class Main extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            title: 'Foo',
+            // ATTENTION: this is actually working when adding a ref here
+            // but we want in such a case, without any change in structure
+            // that components get retained even without ref
+            content: $$(Forwarding)
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div').addClass('sc-title').text(this.props.title),
+          this.props.content
+        )
+      }
+    }
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(Child)
+      }
+    }
+    class Child extends TestComponent {
+      didMount () {
+        mounted = true
+      }
+      dispose () {
+        disposed = true
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    t.comment('initial render')
+    let main = Main.mount({ mode: 1 }, getMountPoint(t))
+    t.ok(mounted, 'forwarded component should have been mounted')
+    t.notOk(disposed, '.. not disposed')
+    mounted = disposed = false
+    t.comment('rerendering top-level component')
+    main.rerender()
+    t.notOk(disposed, 'forwarded component should not have been disposed')
+    t.notOk(mounted, '.. and also not mounted again')
+    t.end()
+  })
+
+  // TODO: trying to distill a problem observed in Texture
+  // where an Input lost focus when the parent component got rerendered
+  // In that use case, Parent corresponds to QueryComponent, Template to InputWithButton, and Child to Input
+  test('[Injected Component] injected components with ref must be retained', t => {
+    let mounted = false
+    let disposed = false
+    class Parent extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$(Template, {
+            content: $$(Child).ref('foo'),
+            footer: this.props.mode === 1 ? $$('div').text('bar') : null
+          })
+        )
+      }
+    }
+    class Template extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          this.props.content,
+          this.props.footer
+        )
+      }
+    }
+    class Child extends TestComponent {
+      didMount () {
+        mounted = true
+      }
+      dispose () {
+        disposed = true
+      }
+      render ($$) {
+        return $$('div').addClass('sc-child')
+      }
+    }
+    t.comment('initial render')
+    let main = Parent.mount({ mode: 1 }, getMountPoint(t))
+    t.ok(mounted, 'injected component should have been mounted')
+    t.notOk(disposed, '.. not disposed')
+    mounted = disposed = false
+    t.comment('rerendering top-level component')
+    main.setProps({ mode: 2 })
+    t.notOk(disposed, 'injected component should not have been disposed')
+    t.notOk(mounted, '.. and also not mounted again')
     t.end()
   })
 

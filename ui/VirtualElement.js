@@ -1,4 +1,3 @@
-import clone from '../util/clone'
 import deleteFromArray from '../util/deleteFromArray'
 import flattenOften from '../util/flattenOften'
 import isArray from '../util/isArray'
@@ -74,10 +73,10 @@ export default class VirtualElement extends DOMElement {
     this._ref = ref
     if (this._context) {
       const refs = this._context.refs
-      if (refs[ref]) {
+      if (refs.has(ref)) {
         throw new Error('An item with reference "' + ref + '" already exists.')
       }
-      refs[ref] = this
+      refs.set(ref, this)
     }
     return this
   }
@@ -144,42 +143,44 @@ class VirtualHTMLElement extends VirtualElement {
 
   removeAttribute (name) {
     if (this.attributes) {
-      delete this.attributes[name]
+      this.attributes.delete(name)
     }
     return this
   }
 
   getAttribute (name) {
     if (this.attributes) {
-      return this.attributes[name]
+      return this.attributes.get(name)
     }
   }
 
   setAttribute (name, value) {
     if (!this.attributes) {
-      this.attributes = {}
+      this.attributes = new Map()
     }
-    this.attributes[name] = value
+    this.attributes.set(name, value)
     return this
   }
 
   getAttributes () {
-    // we are having separated storages for differet
+    // we are having separated storages for different
     // kind of attributes which we now pull together
     // in the same way as a native DOM element has it
-    var attributes = {}
+    // TODO: is this really a good idea?
+    // maybe we should also treat the others as attributes
+    let entries = []
     if (this.attributes) {
-      Object.assign(attributes, this.attributes)
+      entries = Array.from(this.attributes)
     }
     if (this.classNames) {
-      attributes.class = this.classNames.join(' ')
+      entries.push(['class', this.classNames.join(' ')])
     }
     if (this.style) {
-      attributes.style = map(this.style, function (val, key) {
+      entries.push(['style', map(this.style, function (val, key) {
         return key + ':' + val
-      }).join(';')
+      }).join(';')])
     }
-    return attributes
+    return new Map(entries)
   }
 
   getId () {
@@ -335,37 +336,37 @@ class VirtualHTMLElement extends VirtualElement {
 
   getProperty (name) {
     if (this.htmlProps) {
-      return this.htmlProps[name]
+      return this.htmlProps.get(name)
     }
   }
 
   setProperty (name, value) {
     if (!this.htmlProps) {
-      this.htmlProps = {}
+      this.htmlProps = new Map()
     }
-    this.htmlProps[name] = value
+    this.htmlProps.set(name, value)
     return this
   }
 
   removeProperty (name) {
     if (this.htmlProps) {
-      delete this.htmlProps[name]
+      this.htmlProps.delete(name)
     }
     return this
   }
 
   getStyle (name) {
     if (this.style) {
-      return this.style[name]
+      return this.style.get(name)
     }
   }
 
   setStyle (name, value) {
     if (!this.style) {
-      this.style = {}
+      this.style = new Map()
     }
     if (DOMElement.pxStyles[name] && isNumber(value)) value = value + 'px'
-    this.style[name] = value
+    this.style.set(name, value)
     return this
   }
 
@@ -435,7 +436,9 @@ class VirtualHTMLElement extends VirtualElement {
   _attach (child) {
     child.parent = this
     if (this._context) {
-      if (child._isVirtualComponent) {
+      // TODO: this is still confusing it would make more sense to add this only if owner is different
+      // otherwise every appended component is considered 'injected' which is incorrect
+      if (child._owner !== this._owner && child._isVirtualComponent) {
         this._context.injectedComponents.push(child)
       }
       if (child._owner !== this._owner && child._ref) {
@@ -451,41 +454,66 @@ class VirtualHTMLElement extends VirtualElement {
         deleteFromArray(this._context.injectedComponents, child)
       }
       if (child._owner !== this._owner && child._ref) {
-        delete this.context.foreignRefs[child._ref]
+        this._context.foreignRefs.delete(child._ref)
       }
     }
   }
 
-  _mergeHTMLConfig (other) {
-    if (other.classNames) {
-      if (!this.classNames) {
-        this.classNames = []
+  _copy () {
+    if (this.classNames || this.attributes || this.eventListeners || this.htmlProps || this.style) {
+      let copy = {}
+      if (this.classNames) {
+        copy.classNames = this.classNames.slice()
       }
-      this.classNames = this.classNames.concat(other.classNames)
+      if (this.attributes) {
+        copy.attributes = new Map(this.attributes)
+      }
+      if (this.eventListeners) {
+        copy.eventListeners = this.eventListeners.slice()
+      }
+      if (this.htmlProps) {
+        copy.htmlProps = new Map(this.htmlProps)
+      }
+      if (this.style) {
+        copy.style = new Map(this.style)
+      }
+      return copy
     }
-    if (other.attributes) {
-      if (!this.attributes) {
-        this.attributes = {}
+  }
+
+  _clear () {
+    this.classNames = null
+    this.attributes = null
+    this.htmlProps = null
+    this.style = null
+    this.eventListeners = null
+  }
+
+  _merge (other) {
+    if (!other) return
+    const ARRAY_TYPE_VALS = ['classNames', 'eventListeners']
+    for (let name of ARRAY_TYPE_VALS) {
+      let otherVal = other[name]
+      if (otherVal) {
+        let thisVal = this[name]
+        if (!thisVal) {
+          this[name] = otherVal.slice()
+        } else {
+          this[name] = thisVal.concat(otherVal)
+        }
       }
-      Object.assign(this.attributes, other.attributes)
     }
-    if (other.htmlProps) {
-      if (!this.htmlProps) {
-        this.htmlProps = {}
+    const MAP_TYPE_VALS = ['attributes', 'htmlProps', 'style']
+    for (let name of MAP_TYPE_VALS) {
+      let otherVal = other[name]
+      if (otherVal) {
+        let thisVal = this[name]
+        if (!thisVal) {
+          this[name] = new Map(otherVal)
+        } else {
+          this[name] = new Map([...thisVal, ...otherVal])
+        }
       }
-      Object.assign(this.htmlProps, other.htmlProps)
-    }
-    if (other.style) {
-      if (!this.style) {
-        this.style = {}
-      }
-      Object.assign(this.style, other.style)
-    }
-    if (other.eventListeners) {
-      if (!this.eventListeners) {
-        this.eventListeners = []
-      }
-      this.eventListeners = this.eventListeners.concat(other.eventListeners)
     }
   }
 
@@ -527,8 +555,14 @@ class VirtualComponent extends VirtualHTMLElement {
     return 'component'
   }
 
+  // TODO: this seems to be not so useful
+  // as this is also possible by just using props
   outlet (name) {
     return new Outlet(this, name)
+  }
+
+  setInnerHTML () {
+    throw new Error('Can not set innerHTML of a Component')
   }
 
   _attach (child) {
@@ -537,26 +571,6 @@ class VirtualComponent extends VirtualHTMLElement {
 
   _detach (child) {
     child._preliminaryParent = null
-  }
-
-  _copyHTMLConfig () {
-    let copy = {}
-    if (this.classNames) {
-      copy.classNames = clone(this.classNames)
-    }
-    if (this.attributes) {
-      copy.attributes = clone(this.attributes)
-    }
-    if (this.htmlProps) {
-      copy.htmlProps = clone(this.htmlProps)
-    }
-    if (this.style) {
-      copy.style = clone(this.style)
-    }
-    if (this.eventListeners) {
-      copy.eventListeners = clone(this.eventListeners)
-    }
-    return copy
   }
 
   get _isVirtualHTMLElement () { return false }
@@ -697,13 +711,19 @@ VirtualElement.createElement = function () {
   return content
 }
 
-VirtualElement.CaptureContext = class CaptureContext {
+VirtualElement.Context = class VirtualElementContext {
   constructor (owner) {
     this.owner = owner
-    this.refs = {}
-    this.foreignRefs = {}
+    // used to track refs created via `el.ref()`
+    this.refs = new Map()
+    // used to keep refs that are set by a different owner, when a component is
+    // passed via props
+    this.foreignRefs = new Map()
+    // all VirtualElements created such as `$$('div')`
     this.elements = []
+    // all VirtualComponents created such as `$$(Foo)`
     this.components = []
+    // all VirtualComponents that are appended but not owned, i.e. injected from parent
     this.injectedComponents = []
     this.$$ = this._createComponent.bind(this)
     this.$$.capturing = true

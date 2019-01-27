@@ -439,6 +439,8 @@ export default class Component extends EventEmitter {
     // NOTE: On the other hand, we had some occasions, where we
     // intuitively expected that this was done bottom-up, too
 
+    // FIXME: this is not working as expected.
+
     // ATTENTION: forwarding components are 'invisible' with respect to the
     // DOM elements, i.e. not covered by the recursion done here using this.getChildren()
     // so we trigger explicitly
@@ -448,6 +450,7 @@ export default class Component extends EventEmitter {
 
     // To prevent from multiple calls to didMount, which can happen under
     // specific circumstances we use a guard.
+    // TODO: what are these circumstances exactly?
     if (!this.__isMounted__) {
       this.__isMounted__ = true
       this.didMount()
@@ -459,6 +462,21 @@ export default class Component extends EventEmitter {
       // for each child / grandchild
       child.triggerDidMount(true)
     }
+  }
+
+  /**
+   * Triggers dispose handlers recursively.
+   */
+  triggerDispose () {
+    if (this._isForwarding()) {
+      this.el._comp.triggerDispose()
+    } else {
+      this.getChildren().forEach(function (child) {
+        child.triggerDispose()
+      })
+    }
+    this.dispose()
+    this.__isMounted__ = false
   }
 
   /**
@@ -509,21 +527,6 @@ export default class Component extends EventEmitter {
   }
 
   /**
-   * Triggers dispose handlers recursively.
-   */
-  triggerDispose () {
-    if (this._isForwarding()) {
-      this.el._comp.triggerDispose()
-    } else {
-      this.getChildren().forEach(function (child) {
-        child.triggerDispose()
-      })
-    }
-    this.dispose()
-    this.__isMounted__ = false
-  }
-
-  /**
    * A hook which is called when the component is unmounted, i.e. removed from DOM,
    * hence disposed. See {@link ui/Component#didMount} for example usage.
    *
@@ -538,6 +541,12 @@ export default class Component extends EventEmitter {
   _isForwarded () {
     let parent = this.getParent()
     return (parent && parent._isForwarding())
+  }
+
+  _getForwardedComponent () {
+    if (this.el) {
+      return this.el._comp
+    }
   }
 
   /*
@@ -788,6 +797,12 @@ export default class Component extends EventEmitter {
       this.el.setProperty(name, val)
     }
     return this
+  }
+
+  get tagName () {
+    if (this.el) {
+      return this.el.tagName
+    }
   }
 
   hasClass (name) {

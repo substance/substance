@@ -1,7 +1,7 @@
 import { spy } from 'substance-test'
 import { Component } from 'substance'
 
-class TestComponent extends Component {
+export default class TestComponent extends Component {
   constructor (...args) {
     super(...args)
     this._enableSpies()
@@ -18,31 +18,29 @@ class TestComponent extends Component {
       this[name].restore()
     })
   }
-}
 
-TestComponent.create = function (renderFunc, props) {
-  const comp = new TestComponent(null, props)
-  if (renderFunc) {
-    comp.render = renderFunc
+  static create (renderFunc, props) {
+    const comp = new TestComponent(null, props)
+    if (renderFunc) {
+      comp.render = renderFunc
+    }
+    if (props) {
+      comp.setProps(props)
+    } else {
+      comp.rerender()
+    }
+    return comp
   }
-  if (props) {
-    comp.setProps(props)
-  } else {
-    comp.rerender()
-  }
-  return comp
+
+  static get Simple () { return SimpleComponent }
 }
 
 class SimpleComponent extends TestComponent {
   render ($$) {
-    var el = $$('div').addClass('simple-component')
+    var el = $$('div').addClass('simple')
     if (this.props.children) {
       el.append(this.props.children)
     }
     return el
   }
 }
-
-TestComponent.Simple = SimpleComponent
-
-export default TestComponent
