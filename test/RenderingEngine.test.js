@@ -460,6 +460,14 @@ function RenderingEngineTests (debug) {
     let nested = vc.getChildAt(0)
     t.ok(_isLinked(state, nested), 'nested component should be linked')
     t.ok(nested.hasClass('bar'), 'update of classNames should be captured')
+
+    // capture updates for only the nested component
+    // element props set by owner should be retained
+    let nestedComp = comp.getChildAt(0)
+    ;({vc} = _capture(nestedComp))
+    // ATTENTION: the above update was not applied
+    t.ok(vc.hasClass('foo'), 'element props should have been retained')
+
     t.end()
   })
 

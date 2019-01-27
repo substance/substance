@@ -226,6 +226,8 @@ function _capture (state, vel, mode) {
       state.set(MAPPED, comp)
       state.set(LINKED, vel)
       state.set(LINKED, comp)
+      let compData = _getInternalComponentData(comp)
+      vel.elementProps = compData.elementProps
     } else {
       // NOTE: don't ask shouldRerender if no element is there yet
       needRerender = !comp.el || comp.shouldRerender(vel.props, comp.state)
@@ -436,7 +438,6 @@ function _forEachComponent (state, comp, vc, hook) {
         let comp
         if (oldVc) {
           comp = oldVc._comp
-          console.assert(comp, 'virtual component should have a component instance')
         }
         entries.push({ vc, comp })
       }
@@ -1101,10 +1102,6 @@ class DescendingContext {
 function _createWrappingVirtualComponent (comp) {
   let vel = new VirtualElement.Component(comp.constructor)
   vel._comp = comp
-  let compData = _getInternalComponentData(comp)
-  if (compData.elementProps) {
-    vel._merge(compData.elementProps)
-  }
   return vel
 }
 
