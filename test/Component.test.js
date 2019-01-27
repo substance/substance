@@ -563,8 +563,8 @@ function ComponentTests (debug, memory) {
   })
 
   test('Special nesting situation', t => {
-    // problem was observed in TOCPanel where components (tocEntry) are ingested via dependency-injection
-    // and appended to a 'div' element (tocEntries) which then was ingested into a ScrollPane.
+    // problem was observed in TOCPanel where components (tocEntry) are injected
+    // and appended to a 'div' element (tocEntries) which then was injected into a ScrollPane.
     // The order of _capturing must be determined correctly, i.e. first the ScrollPane needs to
     // be captured, so that the parent of the 'div' element (tocEntries) is known.
     // only then the tocEntry components can be captured.
@@ -606,6 +606,8 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  // same as before, but with a different notation
+  // TODO: do we really need this? seems to be redundant
   test('Special nesting situation II', t => {
     class Parent extends Component {
       render ($$) {
@@ -885,24 +887,27 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Refs on grandchild elements.', t => {
-    let comp = TestComponent.create(function ($$) {
-      return $$('div').append(
-        $$('div').append(
-          $$('div').ref(this.props.grandChildRef) // eslint-disable-line no-invalid-this
+  test('Elements with different refs have different component instances', t => {
+    class Foo extends TestComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div').append(
+            // changing the ref should force this element to be recreated
+            $$('div').ref(this.props.grandChildRef)
+          )
         )
-      )
-    }, { grandChildRef: 'foo' })
-
+      }
+    }
+    let comp = Foo.render({ grandChildRef: 'foo' })
     t.notNil(comp.refs.foo, "Ref 'foo' should be set.")
     let foo = comp.refs.foo
     comp.rerender()
-    t.ok(foo === comp.refs.foo, 'Referenced grandchild should have been retained.')
+    t.ok(foo === comp.refs.foo, 'Referenced element should have been retained.')
     spy(foo, 'dispose')
     comp.setProps({ grandChildRef: 'bar' })
-    t.ok(foo.dispose.callCount > 0, 'Former grandchild should have been disposed.')
+    t.ok(foo.dispose.callCount > 0, 'Former referenced element should have been disposed.')
     t.notNil(comp.refs.bar, "Ref 'bar' should be set.")
-    t.ok(foo !== comp.refs.bar, 'Grandchild should have been recreated.')
+    t.ok(foo !== comp.refs.bar, 'Referenced element should have been recreated.')
     t.end()
   })
 
@@ -1238,7 +1243,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('Relocating a preserved component (#635)', t => {
+  test('Relocating a referenced component (#635)', t => {
     class Parent extends TestComponent {
       render ($$) {
         let el = $$('div')
