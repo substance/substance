@@ -1,4 +1,3 @@
-import clone from '../util/clone'
 import deleteFromArray from '../util/deleteFromArray'
 import flattenOften from '../util/flattenOften'
 import isArray from '../util/isArray'

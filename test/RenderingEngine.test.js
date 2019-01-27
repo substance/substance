@@ -53,7 +53,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing an element with innerHTML', t => {
     class Foo extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').html('<b>TEST</b>')
       }
     }
@@ -174,7 +174,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing an injected element with child component', t => {
     class Parent extends Component {
-      render($$) {
+      render ($$) {
         return $$('div').addClass('parent').append(
           $$(Child, {
             children: [
@@ -187,7 +187,7 @@ function RenderingEngineTests (debug) {
       }
     }
     class Child extends Component {
-      render($$) {
+      render ($$) {
         let el = $$('div').addClass('child').append(
           this.props.children
         )
@@ -195,7 +195,7 @@ function RenderingEngineTests (debug) {
       }
     }
     class Grandchild extends Component {
-      render($$) {
+      render ($$) {
         return $$('div').addClass('grandchild')
       }
     }
@@ -448,7 +448,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing updates for a nested component', t => {
     class Foo extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$(Simple).addClass(this.props.classNames)
         )
@@ -465,7 +465,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing updates for a forwarding component', t => {
     class Foo extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$(Simple).addClass(this.props.classNames)
       }
     }
@@ -480,7 +480,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing updates for an injected component', t => {
     class Parent extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$(Child, {
             content: $$(Simple).addClass(this.props.classNames).ref('foo')
@@ -489,7 +489,7 @@ function RenderingEngineTests (debug) {
       }
     }
     class Child extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').addClass('child').append(
           this.props.content
         )
@@ -508,7 +508,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing updates for an injected component that is forwarding', t => {
     class Parent extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$(Child, {
             content: $$(GrandChild, { mode: this.props.mode }).addClass(this.props.classNames).ref('foo')
@@ -517,14 +517,14 @@ function RenderingEngineTests (debug) {
       }
     }
     class Child extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').addClass('child').append(
           this.props.content
         )
       }
     }
     class GrandChild extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$(Simple).addClass(this.props.mode === 1 ? 'bla' : 'blupp')
       }
     }
@@ -544,7 +544,7 @@ function RenderingEngineTests (debug) {
 
   test('capturing updates for a relocated component', t => {
     class Parent extends TestComponent {
-      render($$) {
+      render ($$) {
         let el = $$('div')
         el.append('X')
         if (this.props.nested) {
@@ -599,7 +599,7 @@ function RenderingEngineTests (debug) {
 
   test('rerendering a component with a referenced element', t => {
     class Foo extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$('div').addClass('label').text('Name:'),
           $$('input').attr('type', 'text').ref('input').val(this.props.value)
@@ -617,7 +617,7 @@ function RenderingEngineTests (debug) {
 
   test('rerendering a component with a nested component', t => {
     class Foo extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$(Simple).addClass(this.props.classNames)
         )
@@ -634,7 +634,7 @@ function RenderingEngineTests (debug) {
 
   test('rerendering a forwarding component', t => {
     class Foo extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$(Simple).addClass(this.props.classNames)
       }
     }
@@ -649,7 +649,7 @@ function RenderingEngineTests (debug) {
 
   test('rerendering an injected component', t => {
     class Parent extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$(Child, {
             content: $$(Simple).addClass(this.props.classNames).ref('foo')
@@ -658,7 +658,7 @@ function RenderingEngineTests (debug) {
       }
     }
     class Child extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').addClass('child').append(
           this.props.content
         )
@@ -677,7 +677,7 @@ function RenderingEngineTests (debug) {
 
   test('rerendering an injected component that is forwarding', t => {
     class Parent extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').append(
           $$(Child, {
             content: $$(GrandChild, { mode: this.props.mode }).addClass(this.props.classNames).ref('foo')
@@ -686,14 +686,14 @@ function RenderingEngineTests (debug) {
       }
     }
     class Child extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$('div').addClass('child').append(
           this.props.content
         )
       }
     }
     class GrandChild extends TestComponent {
-      render($$) {
+      render ($$) {
         return $$(Simple).addClass(this.props.mode === 1 ? 'bla' : 'blupp')
       }
     }

@@ -1,5 +1,4 @@
 import isFunction from '../util/isFunction'
-import forEach from '../util/forEach'
 import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
@@ -659,8 +658,6 @@ function _update (state, vel) {
           return childComp
         }
       }).filter(Boolean)
-
-      let newComp
 
       // TODO: it might be easier to understand to separate DOM analysis, i.e.
       // what to do with the DOM, from the actual DOM manipulation.
