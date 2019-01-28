@@ -487,14 +487,6 @@ function _isMapped (state, comp, vc) {
   const vcIsMapped = state.is(MAPPED, vc)
   const compIsMapped = state.is(MAPPED, comp)
   if (vcIsMapped || compIsMapped) {
-    if (!vcIsMapped) {
-      console.error('FIXME: comp is mapped, but not virtual component')
-      state.set(MAPPED, vc)
-    }
-    if (!compIsMapped) {
-      console.error('FIXME: comp is mapped, but not virtual component')
-      state.set(MAPPED, vc)
-    }
     return true
   }
   return false
