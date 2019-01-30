@@ -14,7 +14,7 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     let el = $$('span')
     el.addClass(this.getClassNames())
       .addClass('sc-inline-node')
-      .addClass('sm-' + this.props.node.type)
+      .addClass('sm-' + node.type)
       .attr('data-id', node.id)
       .attr('data-inline', '1')
 
@@ -54,7 +54,9 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     // However, there is some weird behavior:
     // rerendering with `draggable=false` does
     // not remove the attribute
-    el.attr('draggable', true)
+    if (node.shouldBeDraggable) {
+      el.attr('draggable', true)
+    }
 
     return el
   }
