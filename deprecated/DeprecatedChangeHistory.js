@@ -1,4 +1,4 @@
-class ChangeHistory {
+export default class DeprecatedChangeHistory {
   constructor () {
     this.reset()
   }
@@ -25,5 +25,3 @@ class ChangeHistory {
     this.undoneChanges = []
   }
 }
-
-export default ChangeHistory
