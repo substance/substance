@@ -2,6 +2,7 @@ import * as selectionHelpers from './selectionHelpers'
 import * as operationHelpers from './operationHelpers'
 import * as documentHelpers from './documentHelpers'
 
+export { default as AbstractEditorSession } from './AbstractEditorSession'
 export { default as annotationHelpers } from './annotationHelpers'
 export { default as AnnotationIndex } from './AnnotationIndex'
 export { default as AnnotationMixin } from './AnnotationMixin'
