@@ -22,6 +22,7 @@ import { createNodeSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
 import { SNIPPET_ID, getContainerRoot, compareCoordinates } from './documentHelpers'
+import { transformDocumentChange } from './operationHelpers'
 
 const converter = new JSONConverter()
 
@@ -504,6 +505,12 @@ export default class Document extends EventEmitter {
       return snippetContainer
     }
     return snippet
+  }
+
+  rebase (change, onto) {
+    onto = onto.map(c => c.clone())
+    transformDocumentChange(change, onto)
+    return change
   }
 
   createFromDocument (doc) {
