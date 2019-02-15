@@ -16,7 +16,6 @@ test('CommandManager: Command state changing with selection', (t) => {
   t.equal(commandStates.paragraph.disabled, false, 'Paragraph should not be disabled for collapsed selection')
   t.equal(commandStates.strong.active, false, 'Strong should not be active for collapsed selection')
   t.equal(commandStates.strong.disabled, true, 'Strong should be disabled for collapsed selection')
-  t.end()
 
   editorSession.setSelection({
     type: 'property',
@@ -29,4 +28,6 @@ test('CommandManager: Command state changing with selection', (t) => {
   commandStates = editorSession.getCommandStates()
   t.equal(commandStates.strong.active, false, 'Strong should not be active for non-collapsed selection without strong annotation')
   t.equal(commandStates.strong.disabled, false, 'Strong should not be disabled for non-collapsed selection')
+
+  t.end()
 })

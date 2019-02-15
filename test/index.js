@@ -1,6 +1,7 @@
 import './AnnotationCommand.test'
 import './annotationHelpers.test'
 import './ArrayOperation.test'
+import './ChangeHistory.test'
 import './Clipboard.test'
 import './CommandManager.test'
 import './Component.test'
