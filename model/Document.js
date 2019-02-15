@@ -509,7 +509,7 @@ export default class Document extends EventEmitter {
 
   rebase (change, onto) {
     onto = onto.map(c => c.clone())
-    transformDocumentChange(change, onto)
+    transformDocumentChange(onto, change)
     return change
   }
 

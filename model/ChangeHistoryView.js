@@ -1,53 +1,61 @@
-import last from '../util/last'
-
 export default class ChangeHistoryView {
   constructor (documentSession) {
     this.documentSession = documentSession
-    this.done = []
-    this.undone = []
+    this._undo = []
+    this._redo = []
   }
 
   canUndo () {
-    return this.done.length > 0
+    return this._undo.length > 0
   }
 
   canRedo () {
-    return this.undone.length > 0
+    return this._redo.length > 0
   }
 
   commit (change, info) {
     let idx = this.documentSession._history.length
     this.documentSession._commitChange(change, info)
-    this.done.push(idx)
+    this._undo.push(idx)
     // whenever a change is committed via this view
     // then undone is cleared, i.e. these changes can not be redone
-    this.undone.length = 0
+    this._redo.length = 0
   }
 
   undo () {
+    if (this._undo.length === 0) return
+    const history = this.documentSession._history
+    let newIdx = history.length
     // take the last index of done
-    let idx = last(this.done)
-    this.undone.unshift(this.done.pop())
+    let idx = this._undo.pop()
+    let change
     try {
-      this.documentSession.revert(idx)
+      change = this.documentSession.revert(idx)
+      this._redo.push(newIdx)
     } catch (err) {
-      this.done.push(this.undone.shift())
+      this._undo.push(idx)
     }
+    return change
   }
 
   redo () {
+    if (this._redo.length === 0) return
+    const history = this.documentSession._history
+    let newIdx = history.length
     // take the last index of done
-    let idx = last(this.undone)
-    this.done.push(this.undone.shift())
+    let idx = this._redo.pop()
+    let change
     try {
-      this.documentSession.reapply(idx)
+      change = this.documentSession.revert(idx)
+      this._undo.push(newIdx)
     } catch (err) {
-      this.undone.unshift(this.done.pop())
+      this._redo.push(idx)
     }
+    return change
   }
 
   reset () {
-    this.done.length = 0
-    this.undone.length = 0
+    this._undo.length = 0
+    this._redo.length = 0
   }
 }
