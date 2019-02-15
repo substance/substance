@@ -5,6 +5,13 @@ import { transformSelection } from './operationHelpers'
 import Selection from './Selection'
 import Transaction from './Transaction'
 
+/**
+ * An EditorSession provides access to the state of an editor
+ * for a single document, and provides means to manipulate the underlying document.
+ *
+ * The EditorSession may be part of a complex application bound to a scope
+ * containing only state variables for a single editor.
+ */
 export default class AbstractEditorSession extends EventEmitter {
   constructor (id, documentSession, history) {
     super()
