@@ -1,8 +1,8 @@
 import DefaultDOMElement from '../dom/DefaultDOMElement'
-import forEach from '../util/forEach'
+import map from '../util/map'
 import EventEmitter from '../util/EventEmitter'
 
-class Router extends EventEmitter {
+export default class Router extends EventEmitter {
   constructor (...args) {
     super(...args)
     this.__isStarted__ = false
@@ -72,9 +72,9 @@ class Router extends EventEmitter {
     this.__isSaving__ = true
     try {
       if (opts.replace) {
-        window.history.replaceState({}, '', '#' + route)
+        window.history.replaceState({}, '', `#${route}`)
       } else {
-        window.history.pushState({}, '', '#' + route)
+        window.history.pushState({}, '', `#${route}`)
       }
     } finally {
       this.__isSaving__ = false
@@ -103,29 +103,30 @@ class Router extends EventEmitter {
       this.__isLoading__ = false
     }
   }
-}
 
-Router.objectToRouteString = function (obj) {
-  let route = []
-  forEach(obj, function (val, key) {
-    route.push(key + '=' + val)
-  })
-  return route.join(',')
-}
+  static objectToRouteString (obj) {
+    let routeStr = map(obj, (val, key) => {
+      return `${key}=${val}`
+    }).join(',')
+    return routeStr
+  }
 
-Router.routeStringToObject = function (routeStr) {
-  let obj = {}
-  // Empty route maps to empty route object
-  if (!routeStr) return obj
-  let params = routeStr.split(',')
-  params.forEach(function (param) {
-    let tuple = param.split('=')
-    if (tuple.length !== 2) {
-      throw new Error('Illegal route.')
+  static routeStringToObject (routeStr) {
+    let obj = {}
+    // Empty route maps to empty route object
+    if (!routeStr) return obj
+    let params = routeStr.split(',')
+    for (let param of params) {
+      if (param.indexOf('=') >= 0) {
+        let tuple = param.split('=')
+        if (tuple.length !== 2) {
+          throw new Error('Illegal route.')
+        }
+        obj[tuple[0].trim()] = tuple[1].trim()
+      } else {
+        obj[param] = true
+      }
     }
-    obj[tuple[0].trim()] = tuple[1].trim()
-  })
-  return obj
+    return obj
+  }
 }
-
-export default Router
