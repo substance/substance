@@ -7,6 +7,14 @@ export default class DocumentSession extends EventEmitter {
 
     this._document = doc
     this._history = []
+
+    // ATTENTION: we still allow to do operations on the document directly
+    // these changes trigger a document:changed event which has to go into the history
+    doc.on('document:changed', this._onDocumentChange, this)
+  }
+
+  dispose () {
+    this._document.off(this)
   }
 
   getDocument () {
@@ -42,21 +50,26 @@ export default class DocumentSession extends EventEmitter {
     change = doc.invert(change)
     change = doc.rebase(change, this._history.slice(changeIdx + 1))
     this._applyChange(change, { replay: 'true' })
-    this._history.push(change)
     return change
   }
 
   _commitChange (change, info) {
     change.timestamp = Date.now()
     this._applyChange(change, info)
-    this._history.push(change)
   }
 
   _applyChange (change, info) {
     if (!change) throw new Error('Invalid change')
     const doc = this.getDocument()
+    // ATTENTION: the history is updated via document:changed listener
     doc._apply(change)
     doc._notifyChangeListeners(change, info)
     this.emit('change', change, info)
+  }
+
+  _onDocumentChange (change) {
+    if (change && change.ops.length > 0) {
+      this._history.push(change)
+    }
   }
 }

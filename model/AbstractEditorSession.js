@@ -3,7 +3,7 @@ import isPlainObject from '../util/isPlainObject'
 import ChangeHistoryView from './ChangeHistoryView'
 import { transformSelection } from './operationHelpers'
 import Selection from './Selection'
-import Transaction from './Transaction'
+import DocumentStage from './DocumentStage'
 
 /**
  * An EditorSession provides access to the state of an editor
@@ -22,7 +22,7 @@ export default class AbstractEditorSession extends EventEmitter {
     this._document = doc
     this._documentSession = documentSession
     this._history = history || new ChangeHistoryView(documentSession)
-    this._transaction = new Transaction(doc)
+    this._stage = new DocumentStage(documentSession)
 
     this._initialize()
   }
@@ -92,19 +92,16 @@ export default class AbstractEditorSession extends EventEmitter {
     return sel
   }
 
-  transaction (fn, info) {
-    let tx = this._transaction.tx
-    // HACK: setting the state of 'tx' here
-    // TODO: find out a way to pass a tx state for the transaction
-    // then we could derive this state from the editorState
-    let selBefore = this._getSelection()
-    tx.selection = selBefore
-    let change = this._recordChange(fn, info)
+  transaction (transformation, info = {}) {
+    const stage = this._stage
+    let before = {
+      selection: this._getSelection()
+    }
+    let change = stage._transaction(transformation, info, before)
     if (change) {
-      let selAfter = tx.selection
+      let after = change.after
+      let selAfter = after.selection
       this._setSelection(this._normalizeSelection(selAfter))
-      change.before = { selection: selBefore }
-      change.after = { selection: selAfter }
       // console.log('EditorSession.transaction()', change)
       this._commit(change, info)
     }
@@ -137,13 +134,6 @@ export default class AbstractEditorSession extends EventEmitter {
 
   _commit (change, info) {
     this._history.commit(change, info)
-  }
-
-  _recordChange (transformation, info) {
-    const t = this._transaction
-    info = info || {}
-    t._sync()
-    return t._recordChange(transformation, info)
   }
 
   _normalizeSelection (sel) {
