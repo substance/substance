@@ -762,7 +762,7 @@ export default class MemoryDOMElement extends DOMElement {
   static getBrowserWindow () {
     // HACK: this is a bit awkward
     if (!_browserWindowStub) {
-      _browserWindowStub = MemoryDOMElement.createDocument('html')
+      _browserWindowStub = new MemoryWindowStub()
     }
     return _browserWindowStub
   }
@@ -843,6 +843,39 @@ class MemoryDOMElementEvent {
 class DOMElementStub {
   on () {}
   off () {}
+}
+
+// EXPERIMENTAL: we want to be able to use the Router in
+// tests using MemoryDOM
+class MemoryWindowStub extends MemoryDOMElement {
+  constructor () {
+    super('window', { ownerDocument: MemoryDOMElement.createDocument('html') })
+
+    let location = {
+      href: '',
+      hash: ''
+    }
+
+    function _updateLocation (url) {
+      let hashIdx = url.indexOf('#')
+      location.href = url
+      if (hashIdx >= 0) {
+        location.hash = url.slice(hashIdx)
+      }
+    }
+
+    let history = {
+      replaceState (stateObj, title, url) {
+        _updateLocation(url)
+      },
+      pushState (stateObj, title, url) {
+        _updateLocation(url)
+      }
+    }
+
+    this.location = location
+    this.history = history
+  }
 }
 
 function nameWithoutNS (name) {
