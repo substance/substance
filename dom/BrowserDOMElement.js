@@ -770,6 +770,7 @@ class BrowserWindow {
   get _isBrowserDOMElement () { return true }
 }
 
+BrowserWindow.prototype.getNativeElement = BrowserDOMElement.prototype.getNativeElement
 BrowserWindow.prototype.on = BrowserDOMElement.prototype.on
 BrowserWindow.prototype.off = BrowserDOMElement.prototype.off
 BrowserWindow.prototype.addEventListener = BrowserDOMElement.prototype.addEventListener

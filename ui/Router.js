@@ -65,10 +65,12 @@ export default class Router extends EventEmitter {
   }
 
   getRouteString () {
+    let window = DefaultDOMElement.getBrowserWindow().getNativeElement()
     return window.location.hash.slice(1)
   }
 
   _writeRoute (route, opts) {
+    let window = DefaultDOMElement.getBrowserWindow().getNativeElement()
     this.__isSaving__ = true
     try {
       if (opts.replace) {
