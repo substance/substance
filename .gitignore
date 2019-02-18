@@ -44,3 +44,4 @@ experiment.html
 # Overriding karma.conf.js
 karma.conf.local.js
 
+.DS_Store
