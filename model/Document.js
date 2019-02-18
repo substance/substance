@@ -597,9 +597,10 @@ export default class Document extends EventEmitter {
   }
 
   _apply (documentChange) {
-    forEach(documentChange.ops, (op) => {
+    let ops = documentChange.ops
+    for (let op of ops) {
       this._applyOp(op)
-    })
+    }
     // extract aggregated information, such as which property has been affected etc.
     documentChange._extractInformation(this)
   }

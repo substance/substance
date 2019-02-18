@@ -94,13 +94,13 @@ export default class AbstractEditorSession extends EventEmitter {
 
   transaction (transformation, info = {}) {
     const stage = this._stage
-    // HACK: setting the state of 'tx' here
-    // TODO: it would be cleaner to pass a state for the transaction
-    let change = stage._transaction(transformation, info, {
+    let before = {
       selection: this._getSelection()
-    })
+    }
+    let change = stage._transaction(transformation, info, before)
     if (change) {
-      let selAfter = change.after.selection
+      let after = change.after
+      let selAfter = after.selection
       this._setSelection(this._normalizeSelection(selAfter))
       // console.log('EditorSession.transaction()', change)
       this._commit(change, info)
