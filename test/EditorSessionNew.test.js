@@ -75,6 +75,22 @@ test('EditorSessionNew: selections after undo/redo', t => {
   t.end()
 })
 
+// Note: if an error occurs during an transaction
+// all changes on the stage document have to be reverted
+test('EditorSessionNew: rolling back changes on error', t => {
+  let { editorSession } = _setup(simple)
+  try {
+    editorSession.transaction(tx => {
+      tx.set(['p1', 'content'], 'XXX')
+      throw new Error()
+    })
+  } catch (err) {}
+  let stage = editorSession._stage
+  stage._sync()
+  t.equal(stage.stageDocument.get(['p1', 'content']), '0123456789', 'the stage should have been rolled back')
+  t.end()
+})
+
 function _setup (seed) {
   let doc = createTestArticle(seed)
   let documentSession = new DocumentSession(doc)
