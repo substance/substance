@@ -90,7 +90,8 @@ export default class DocumentStage {
     const stageVersion = this.stageVersion
     if (stageVersion < masterVersion) {
       let stageDocument = this.stageDocument
-      let changes = this.masterSession._history.slice(stageVersion + 1)
+      // ATTENTION: version corresponds to index+1
+      let changes = this.masterSession._history.slice(stageVersion)
       for (let change of changes) {
         stageDocument._apply(change)
       }
