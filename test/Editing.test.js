@@ -14,7 +14,7 @@ import {
   _li1plus, _li2plus,
   LI1_TEXT, LI2_TEXT, LI3_TEXT,
   _l2, _l21, _l22,
-  _t1, _t1Sparse, T_CONTENT
+  _t1, _t1Sparse, T_CONTENT, LI22_TEXT, LI21_TEXT
 } from './fixture/samples'
 
 // TODO: consolidate specification and 'category labels' of tests
@@ -2164,6 +2164,167 @@ test('Editing: CP10: Copy and Pasting a List partially', (t) => {
   t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
   t.equal(li1.getItemAt(0).getText(), LI1_TEXT.slice(3), 'First list item should be truncated')
   t.equal(li1.getItemAt(1).getText(), LI2_TEXT.slice(0, 3), 'Second list item should be truncated')
+  t.end()
+})
+
+test('Editing: CP11: Copy and Pasting ListItems', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l1Empty)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l1-1', 'content'],
+      startOffset: 0,
+      endPath: ['l1-2', 'content'],
+      endOffset: LI2_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-empty', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  let nodes = body.getNodes()
+  t.deepEqual(nodes.map(n => n.type), ['list'], 'there should be one list node')
+  let list = body.getNodeAt(0)
+  t.equal(list.getLength(), 4, 'there should be four list items')
+  t.deepEqual(list.resolve('items').map(item => item.getText()), [LI1_TEXT, LI2_TEXT, LI1_TEXT, LI2_TEXT], '.. with correct text content')
+  t.end()
+})
+
+test('Editing: CP12: Pasting ListItems into an empty list', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l1Empty, _l2, _l21, _l22)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l2-1', 'content'],
+      startOffset: 0,
+      endPath: ['l2-2', 'content'],
+      endOffset: LI22_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-empty', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let l1 = doc.get('l1')
+  t.equal(l1.getLength(), 2, 'there should be two list items')
+  t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI21_TEXT, LI22_TEXT], '.. with correct text content')
+  t.end()
+})
+
+test('Editing: CP13: Pasting ListItems before a list item', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l2-1', 'content'],
+      startOffset: 0,
+      endPath: ['l2-2', 'content'],
+      endOffset: LI22_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let l1 = doc.get('l1')
+  t.equal(l1.getLength(), 4, 'there should be four list items')
+  t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI21_TEXT, LI22_TEXT, LI1_TEXT, LI2_TEXT], '.. with correct text content')
+  t.end()
+})
+
+test('Editing: CP14: Pasting ListItems after a list item', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l2-1', 'content'],
+      startOffset: 0,
+      endPath: ['l2-2', 'content'],
+      endOffset: LI22_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: LI1_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let l1 = doc.get('l1')
+  t.equal(l1.getLength(), 4, 'there should be four list items')
+  t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT, LI21_TEXT, LI22_TEXT, LI2_TEXT], '.. with correct text content')
+  t.end()
+})
+
+test('Editing: CP15: Pasting ListItems inside a list item', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l2-1', 'content'],
+      startOffset: 0,
+      endPath: ['l2-2', 'content'],
+      endOffset: LI22_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: 3,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let l1 = doc.get('l1')
+  t.equal(l1.getLength(), 5, 'there should be five list items')
+  t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT.slice(0, 3), LI21_TEXT, LI22_TEXT, LI1_TEXT.slice(3), LI2_TEXT], '.. with correct text content')
+  t.end()
+})
+
+test('Editing: CP15: Pasting a List and a paragraph into a List', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22, _p1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['l2-1', 'content'],
+      startOffset: 0,
+      endPath: ['p1', 'content'],
+      endOffset: P1_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-2', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'list', 'list', 'paragraph'], 'list should have been split by paste')
+  let l1 = doc.get('l1')
+  t.equal(l1.getLength(), 3, 'first list should have four items')
+  t.equal(body.getNodeAt(1).getText(), P1_TEXT, 'pasted paragraph should have correct content')
   t.end()
 })
 
