@@ -252,14 +252,14 @@ function _pasteDocument (tx, pasteDoc) {
         snippet.removeAt(0)
         insertPos = list.getPosition() + 1
       } else {
-        // if on first position of list, paste all content before the list
-        if (listItem.getPosition() === 0 && sel.start.offset === 0) {
-          insertPos = list.getPosition()
         // if the list is empty then remove it
-        } else if (list.getLength() === 1 && listItem.getLength() === 0) {
+        if (list.getLength() === 1 && listItem.getLength() === 0) {
           insertPos = list.getPosition()
           removeAt(tx, containerPath, insertPos)
           deepDeleteNode(tx, list)
+        // if on first position of list, paste all content before the list
+        } else if (listItem.getPosition() === 0 && sel.start.offset === 0) {
+          insertPos = list.getPosition()
         // if cursor is at the last position of the list paste all content after the list
         } else if (listItem.getPosition() === list.getLength() - 1 && sel.end.offset >= listItem.getLength()) {
           insertPos = list.getPosition() + 1
@@ -336,10 +336,22 @@ function _pasteListItems (tx, list, otherList, insertPos) {
 }
 
 function _breakListApart (tx, containerPath, list) {
-  // HACK: breaking twice will create an empty paragraph
-  // TODO: this should be done in a more sensitive way
+  // HACK: using tx.break() to break the list
   let nodePos = list.getPosition()
+  // first split the current item with a break
+  let oldSel = tx.selection
   tx.break()
+  let listItem = tx.get(tx.selection.start.getNodeId())
+  // if the list item is empty, another tx.break() splits the list
+  // otherwise doing the same again
+  if (listItem.getLength() > 0) {
+    tx.setSelection(oldSel)
+    tx.break()
+  }
+  console.assert(tx.get(tx.selection.start.getNodeId()).getLength() === 0, 'at this point the current list-item should be empty')
+  // breaking a list on an empty list-item breaks the list apart
+  // but this creates an empty paragraph which we need to removed
+  // TODO: maybe we should add an option to tx.break() that allows break without insert of empty text node
   tx.break()
   let p = removeAt(tx, containerPath, nodePos + 1)
   deepDeleteNode(tx, p)

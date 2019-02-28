@@ -2328,6 +2328,176 @@ test('Editing: CP15: Pasting a List and a paragraph into a List', (t) => {
   t.end()
 })
 
+// Note: the first paragarph is pasted into the list-item, and the second one splits the lists
+test('Editing: CP16: Pasting two paragraphs before a List', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['p1', 'content'],
+      startOffset: 0,
+      endPath: ['p2', 'content'],
+      endOffset: P2_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'list', 'paragraph', 'paragraph'], 'nodes should have been pasted at the correct location')
+  t.end()
+})
+
+// Note: the first paragarph is pasted into the list-item, and the second inserted after the list
+test('Editing: CP17: Pasting two paragraphs after a List', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['p1', 'content'],
+      startOffset: 0,
+      endPath: ['p2', 'content'],
+      endOffset: P2_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-2', 'content'],
+      startOffset: LI2_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  let l1 = doc.get('l1')
+  t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'paragraph', 'paragraph'], 'nodes should have been pasted at the correct location')
+  t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT, LI2_TEXT + P1_TEXT], 'list items should have correct content')
+  t.end()
+})
+
+// Note: the first paragarph is pasted into the list-item, and the second one splits the lists
+test('Editing: CP18: Pasting two paragraphs into a List', (t) => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'container',
+      startPath: ['p1', 'content'],
+      startOffset: 0,
+      endPath: ['p2', 'content'],
+      endOffset: P2_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: LI1_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  let l1 = doc.get('l1')
+  t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'list', 'paragraph', 'paragraph'], 'the list should have been split apart')
+  t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT + P1_TEXT], 'list items should have correct content')
+  t.end()
+})
+
+test('Editing: CP19: Pasting a structured node before a List', t => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'node',
+      nodeId: 'in1',
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.getNodes().map(n => n.type), ['structured-node', 'list', 'structured-node'], 'content should have been pasted at the correct location')
+  t.end()
+})
+
+test('Editing: CP20: Pasting a structured node after a List', t => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'node',
+      nodeId: 'in1',
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-2', 'content'],
+      startOffset: LI2_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.getNodes().map(n => n.type), ['list', 'structured-node', 'structured-node'], 'content should have been pasted at the correct location')
+  t.end()
+})
+
+test('Editing: CP21: Pasting a structured node inside a List', t => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'node',
+      nodeId: 'in1',
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-1', 'content'],
+      startOffset: LI1_TEXT.length,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.getNodes().map(n => n.type), ['list', 'structured-node', 'list', 'structured-node'], 'content should have been pasted at the correct location')
+  t.end()
+})
+
+test('Editing: CP22: Pasting a structured node into an empty List', t => {
+  let { doc, editorSession } = setupEditor(t, _l1, _l1Empty, _in1)
+  editorSession.transaction((tx) => {
+    tx.setSelection({
+      type: 'node',
+      nodeId: 'in1',
+      containerPath: ['body', 'nodes']
+    })
+    let copy = tx.copySelection()
+    tx.setSelection({
+      type: 'property',
+      path: ['l1-empty', 'content'],
+      startOffset: 0,
+      containerPath: ['body', 'nodes']
+    })
+    tx.paste(copy)
+  })
+  let body = doc.get('body')
+  t.deepEqual(body.getNodes().map(n => n.type), ['structured-node', 'structured-node'], 'content should have been pasted at the correct location')
+  t.end()
+})
+
 test('Editing: AN1: Annotating without unknown annotation type', (t) => {
   let { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection({
