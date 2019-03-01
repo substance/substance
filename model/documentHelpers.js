@@ -363,8 +363,8 @@ export function setText (doc, textPath, text) {
   const oldText = doc.get(textPath)
   if (oldText.length > 0) {
     deleteTextRange(doc, { path: textPath, offset: 0 })
-    doc.update(textPath, { type: 'insert', start: 0, text })
   }
+  doc.update(textPath, { type: 'insert', start: 0, text })
   return this
 }
 
