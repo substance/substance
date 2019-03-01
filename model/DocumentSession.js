@@ -47,10 +47,11 @@ export default class DocumentSession extends EventEmitter {
     let change = this._history[changeIdx]
     if (!change) throw new Error('Illegal change index')
     const doc = this.getDocument()
-    change = doc.invert(change)
-    change = doc.rebase(change, this._history.slice(changeIdx + 1))
-    this._applyChange(change, { replay: 'true' })
-    return change
+    let inverted = doc.invert(change)
+    let otherChanges = this._history.slice(changeIdx + 1)
+    let rebased = doc.rebase(inverted, otherChanges)
+    this._applyChange(rebased, { replay: 'true' })
+    return rebased
   }
 
   _commitChange (change, info) {
