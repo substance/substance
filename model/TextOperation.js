@@ -224,10 +224,6 @@ function transform (a, b, options) {
   if (options['no-conflict'] && _hasConflict(a, b)) {
     throw new Conflict(a, b)
   }
-  if (!options.inplace) {
-    a = a.clone()
-    b = b.clone()
-  }
   if (a.type === INSERT && b.type === INSERT) {
     transformInsertInsert(a, b)
   } else if (a.type === DELETE && b.type === DELETE) {

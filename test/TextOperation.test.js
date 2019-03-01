@@ -2,7 +2,7 @@ import { test } from 'substance-test'
 import { TextOperation } from 'substance'
 
 function checkTextTransform (test, a, b, input, expected) {
-  let ops = TextOperation.transform(a, b)
+  let ops = TextOperation.transform(a.clone(), b.clone())
   let output = ops[1].apply(a.apply(input))
   test.deepEqual(output, expected, `(b' o a)('${input}') == '${expected}' with a=${a.toString()}, b'=${ops[1].toString()}`)
   output = ops[0].apply(b.apply(input))

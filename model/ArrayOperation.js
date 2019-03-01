@@ -165,54 +165,63 @@ function transformInsertInsert (a, b) {
   }
 }
 
-function transformDeleteDelete (a, b) {
+function transformDeleteDelete (a, b, options = {}) {
   // turn the second of two concurrent deletes into a NOP
   if (a.pos === b.pos) {
-    b.type = NOP
-    a.type = NOP
-    return
-  }
-  if (a.pos < b.pos) {
+    // ATTENTION: don't update for rebase. If we find a delete on the same
+    // index it better be for the same value
+    if (a.val !== b.val) {
+      console.error('FIXME: transforming array delete-delete at the same position but with different values.')
+    }
+    if (!options.rebase) {
+      b.type = NOP
+      a.type = NOP
+    }
+  } else if (a.pos < b.pos) {
     b.pos -= 1
   } else {
     a.pos -= 1
   }
 }
 
-function transformInsertDelete (a, b) {
+function transformInsertDelete (a, b, options = {}) {
   // reduce to a normalized case
   if (a.type === DELETE) {
-    var tmp = a
-    a = b
-    b = tmp
+    ([a, b] = [b, a])
   }
-  if (a.pos <= b.pos) {
-    b.pos += 1
+  // HACK: trying to get rebasing working
+  // TODO: we need a different strategy for this
+  // the OT approach is not what need in case of 'rebasing' a list of changes
+  // e.g. used in for the undo history, but also for merging changes from different sources
+  if (options.rebase) {
+    if (a.pos < b.pos) {
+      b.pos += 1
+    } else if (a.pos > b.pos) {
+      a.pos -= 1
+    }
   } else {
-    a.pos -= 1
+    if (a.pos <= b.pos) {
+      b.pos += 1
+    } else {
+      a.pos -= 1
+    }
   }
 }
 
-var transform = function (a, b, options) {
-  options = options || {}
+var transform = function (a, b, options = {}) {
   // enable conflicts when you want to notify the user of potential problems
   // Note that even in these cases, there is a defined result.
   if (options['no-conflict'] && hasConflict(a, b)) {
     throw new Conflict(a, b)
   }
-  // this is used internally only as optimization, e.g., when rebasing an operation
-  if (!options.inplace) {
-    a = a.clone()
-    b = b.clone()
-  }
   if (a.type === NOP || b.type === NOP) {
     // nothing to transform
   } else if (a.type === INSERT && b.type === INSERT) {
-    transformInsertInsert(a, b)
+    transformInsertInsert(a, b, options)
   } else if (a.type === DELETE && b.type === DELETE) {
-    transformDeleteDelete(a, b)
+    transformDeleteDelete(a, b, options)
   } else {
-    transformInsertDelete(a, b)
+    transformInsertDelete(a, b, options)
   }
   return [a, b]
 }

@@ -2,7 +2,7 @@ import { test } from 'substance-test'
 import { ObjectOperation, ArrayOperation, TextOperation, PathObject, cloneDeep } from 'substance'
 
 function checkObjectOperationTransform (test, a, b, input, expected) {
-  let ops = ObjectOperation.transform(a, b)
+  let ops = ObjectOperation.transform(a.clone(), b.clone())
   let output = ops[1].apply(a.apply(cloneDeep(input)))
   test.deepEqual(output, expected, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`)
   output = ops[0].apply(b.apply(cloneDeep(input)))

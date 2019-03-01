@@ -4,7 +4,7 @@ import { ArrayOperation } from 'substance'
 const NOP = ArrayOperation.NOP
 
 function checkArrayOperationTransform (t, a, b, input, expected) {
-  let ops = ArrayOperation.transform(a, b)
+  let ops = ArrayOperation.transform(a.clone(), b.clone())
   let output = ops[1].apply(a.apply(input.slice(0)))
   t.deepEqual(output, expected, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`)
   output = ops[0].apply(b.apply(input.slice(0)))
