@@ -97,25 +97,27 @@ export default class CoordinateOperation {
   static get SHIFT () { return SHIFT }
 }
 
-function transformShiftShift (a, b) {
-  // FIXME: the idea of having explicit ops for coordinates does not word
-  // The actual source of the change is usually a text operation. If that text-operation
-  // is changed due to transformation, also should the coordinate shifts.
-  // On the other hand, if the text operations remains unchanged, so should be the coordinate shifts
-  // Deactivating this a s a quick-fix, to have get a less worse behavior
-  // a.val += b.val
-  // b.val += a.val
+function transformShiftShift (a, b, options) {
+  if (options.rebase) {
+    // FIXME: the idea of having explicit ops for coordinates does not word
+    // The actual source of the change is usually a text operation. If that text-operation
+    // is changed due to transformation, also should the coordinate shifts.
+    // On the other hand, if the text operations remains unchanged, so should be the coordinate shifts
+    // Deactivating this a s a quick-fix, to have get a less worse behavior
+  } else {
+    a.val += b.val
+    b.val += a.val
+  }
 }
 
-function transform (a, b, options) {
-  options = options || {}
+function transform (a, b, options = {}) {
   // TODO: support conflict detection?
   if (!options.inplace) {
     a = a.clone()
     b = b.clone()
   }
   if (a.type === SHIFT && b.type === SHIFT) {
-    transformShiftShift(a, b)
+    transformShiftShift(a, b, options)
   } else {
     throw new Error('Illegal type')
   }
