@@ -281,7 +281,7 @@ export function deleteTextRange (doc, start, end) {
   })
 }
 
-export function deleteListRange (doc, list, start, end) {
+export function deleteListRange (doc, list, start, end, options = {}) {
   // HACK: resolving the right node
   // TODO: we should not do this, instead fix the calling code
   if (doc !== list.getDocument()) {
@@ -342,9 +342,14 @@ export function deleteListRange (doc, list, start, end) {
   if (firstEntirelySelected) {
     // NOTE: this does not work well, because then
     // the item where the selection remains would have gone
-    // list.removeItemAt(startPos)
-    // deepDeleteNode(doc, startItem)
-    deleteTextRange(doc, start, null)
+    // But when used by copySelection to truncate head and tail
+    // we want this.
+    if (options.deleteEmptyFirstItem) {
+      list.removeItemAt(startPos)
+      deepDeleteNode(doc, startItem)
+    } else {
+      deleteTextRange(doc, start, null)
+    }
   } else {
     deleteTextRange(doc, start, null)
   }

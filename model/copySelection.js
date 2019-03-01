@@ -107,7 +107,7 @@ function _copyContainerSelection (tx, sel) {
     if (startNode.isText()) {
       deleteTextRange(snippet, null, start)
     } else if (startNode.isList()) {
-      deleteListRange(snippet, startNode, null, start)
+      deleteListRange(snippet, startNode, null, start, { deleteEmptyFirstItem: true })
     }
   }
   if (!skippedLast) {

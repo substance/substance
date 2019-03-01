@@ -65,28 +65,16 @@ export function isLast (doc, containerPath, coor) {
 }
 
 export function isEntirelySelected (doc, node, start, end) {
-  let { isEntirelySelected } = getRangeInfo(doc, node, start, end)
+  let { isEntirelySelected } = _getRangeInfo(doc, node, start, end)
   return isEntirelySelected
 }
 
-export function getRangeInfo (doc, node, start, end) {
+function _getRangeInfo (doc, node, start, end) {
   let isFirst = true
   let isLast = true
-  if (node.isText()) {
+  if (node.isText() || node.isListItem()) {
     if (start && start.offset !== 0) isFirst = false
     if (end && end.offset < node.getLength()) isLast = false
-  } else if (node.isList()) {
-    if (start) {
-      let itemId = start.path[0]
-      let itemPos = node.getItemPosition(itemId)
-      if (itemPos > 0 || start.offset !== 0) isFirst = false
-    }
-    if (end) {
-      let itemId = end.path[0]
-      let itemPos = node.getItemPosition(itemId)
-      let item = doc.get(itemId)
-      if (itemPos < node.items.length - 1 || end.offset < item.getLength()) isLast = false
-    }
   }
   let isEntirelySelected = isFirst && isLast
   return {isFirst, isLast, isEntirelySelected}
