@@ -284,7 +284,7 @@ export default class ObjectOperation {
   static fromJSON (data) {
     data = cloneDeep(data)
     if (data.type === 'update') {
-      data.diff = _deserializeDiffOp(data.type, data.diff)
+      data.diff = _deserializeDiffOp(data.propertyType, data.diff)
     }
     let op = new ObjectOperation(data)
     return op
