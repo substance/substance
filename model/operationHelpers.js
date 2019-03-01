@@ -12,7 +12,7 @@ import ObjectOperation from './ObjectOperation'
      \ B - A' /
 */
 export function transformDocumentChange (A, B, options = {}) {
-  _transformInplaceBatch(A, B, options)
+  _transformBatch(A, B, options)
 }
 
 export function transformSelection (sel, a, options) {
@@ -25,33 +25,45 @@ export function transformSelection (sel, a, options) {
   }
 }
 
-function _transformInplaceSingle (a, b, options = {}) {
-  // TODO: we should introduce a means to control individually whether or not ops should be changed inplace
-  let _options = Object.assign({ inplace: true }, options)
+function _transformSingle (a, b, options = {}) {
+  // For OT no options needed
+  // For doc.rebase() we use immutableLeft = true
+  let immutableLeft = options.immutableLeft
+  let immutableRight = options.immutableRight
   for (let i = 0; i < a.ops.length; i++) {
-    let opA = a.ops[i]
     for (let j = 0; j < b.ops.length; j++) {
+      let opA = a.ops[i]
       let opB = b.ops[j]
+      if (immutableLeft) {
+        opA = opA.clone()
+      }
+      if (immutableRight) {
+        opB = opB.clone()
+      }
       // ATTENTION: order of arguments is important.
       // First argument is the dominant one, i.e. it is treated as if it was applied before
-      ObjectOperation.transform(opA, opB, _options)
+      ObjectOperation.transform(opA, opB, options)
     }
   }
-  if (a.before) {
-    _transformSelectionInplace(a.before.selection, b, _options)
+  if (!immutableLeft) {
+    if (a.before) {
+      _transformSelectionInplace(a.before.selection, b, options)
+    }
+    if (a.after) {
+      _transformSelectionInplace(a.after.selection, b, options)
+    }
   }
-  if (a.after) {
-    _transformSelectionInplace(a.after.selection, b, _options)
-  }
-  if (b.before) {
-    _transformSelectionInplace(b.before.selection, a, _options)
-  }
-  if (b.after) {
-    _transformSelectionInplace(b.after.selection, a, _options)
+  if (!immutableRight) {
+    if (b.before) {
+      _transformSelectionInplace(b.before.selection, a, options)
+    }
+    if (b.after) {
+      _transformSelectionInplace(b.after.selection, a, options)
+    }
   }
 }
 
-function _transformInplaceBatch (A, B, options = {}) {
+function _transformBatch (A, B, options = {}) {
   if (!isArray(A)) {
     A = [A]
   }
@@ -62,7 +74,7 @@ function _transformInplaceBatch (A, B, options = {}) {
     let a = A[i]
     for (let j = 0; j < B.length; j++) {
       let b = B[j]
-      _transformInplaceSingle(a, b, options)
+      _transformSingle(a, b, options)
     }
   }
 }

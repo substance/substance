@@ -156,17 +156,7 @@ export default class ObjectOperation {
     } else if (this.type === DELETE) {
       result.type = CREATE
     } else if (this.type === UPDATE) {
-      var invertedDiff
-      if (this.diff._isTextOperation) {
-        invertedDiff = TextOperation.fromJSON(this.diff.toJSON()).invert()
-      } else if (this.diff._isArrayOperation) {
-        invertedDiff = ArrayOperation.fromJSON(this.diff.toJSON()).invert()
-      } else if (this.diff._isCoordinateOperation) {
-        invertedDiff = CoordinateOperation.fromJSON(this.diff.toJSON()).invert()
-      } else {
-        throw new Error('Illegal type')
-      }
-      result.diff = invertedDiff
+      result.diff = this.diff.clone().invert()
     } else /* if (this.type === SET) */ {
       result.val = this.original
       result.original = this.val
@@ -294,19 +284,7 @@ export default class ObjectOperation {
   static fromJSON (data) {
     data = cloneDeep(data)
     if (data.type === 'update') {
-      switch (data.propertyType) {
-        case 'string':
-          data.diff = TextOperation.fromJSON(data.diff)
-          break
-        case 'array':
-          data.diff = ArrayOperation.fromJSON(data.diff)
-          break
-        case 'coordinate':
-          data.diff = CoordinateOperation.fromJSON(data.diff)
-          break
-        default:
-          throw new Error('Unsupported update diff:' + JSON.stringify(data.diff))
-      }
+      data.diff = _deserializeDiffOp(data.type, data.diff)
     }
     let op = new ObjectOperation(data)
     return op
@@ -332,53 +310,50 @@ function hasConflict (a, b) {
   return isEqual(a.path, b.path)
 }
 
-function transformDeleteDelete (a, b) {
-  // both operations have the same effect.
-  // the transformed operations are turned into NOPs
-  a.type = NOP
-  b.type = NOP
-}
-
-function transformCreateCreate () {
-  throw new Error('Can not transform two concurring creates of the same property')
-}
-
-function transformDeleteCreate () {
-  throw new Error('Illegal state: can not create and delete a value at the same time.')
-}
-
-function _transformDeleteUpdate (a, b, flipped) {
-  if (a.type !== DELETE) {
-    return _transformDeleteUpdate(b, a, true)
-  }
-  var op
-  switch (b.propertyType) {
-    case 'string':
-      op = TextOperation.fromJSON(b.diff)
-      break
-    case 'array':
-      op = ArrayOperation.fromJSON(b.diff)
-      break
-    case 'coordinate':
-      op = CoordinateOperation.fromJSON(b.diff)
-      break
-    default:
-      throw new Error('Illegal type')
-  }
-  // (DELETE, UPDATE) is transformed into (DELETE, CREATE)
-  if (!flipped) {
+function transformDeleteDelete (a, b, options = {}) {
+  // no destructive transformation for rebase
+  if (!options.rebase) {
+    // both operations have the same effect.
+    // the transformed operations are turned into NOPs
     a.type = NOP
-    b.type = CREATE
-    b.val = op.apply(a.val)
-  // (UPDATE, DELETE): the delete is updated to delete the updated value
-  } else {
-    a.val = op.apply(a.val)
     b.type = NOP
   }
 }
 
-function transformDeleteUpdate (a, b) {
-  return _transformDeleteUpdate(a, b, false)
+function transformCreateCreate (a, b, options = {}) {
+  if (!options.rebase) {
+    throw new Error('Can not transform two concurring creates of the same property')
+  }
+}
+
+function transformDeleteCreate (a, b, options = {}) {
+  if (!options.rebase) {
+    throw new Error('Illegal state: can not create and delete a value at the same time.')
+  }
+}
+
+function _transformDeleteUpdate (a, b, flipped, options = {}) {
+  // no destructive transformation for rebase
+  if (!options.rebase) {
+    if (a.type !== DELETE) {
+      return _transformDeleteUpdate(b, a, true, options)
+    }
+    let op = _deserializeDiffOp(b.propertyType, b.diff)
+    // (DELETE, UPDATE) is transformed into (DELETE, CREATE)
+    if (!flipped) {
+      a.type = NOP
+      b.type = CREATE
+      b.val = op.apply(a.val)
+    // (UPDATE, DELETE): the delete is updated to delete the updated value
+    } else {
+      a.val = op.apply(a.val)
+      b.type = NOP
+    }
+  }
+}
+
+function transformDeleteUpdate (a, b, options = {}) {
+  return _transformDeleteUpdate(a, b, false, options)
 }
 
 function transformCreateUpdate () {
@@ -388,21 +363,17 @@ function transformCreateUpdate () {
 
 function transformUpdateUpdate (a, b, options = {}) {
   // Note: this is a conflict the user should know about
-  let opA, opB, t
+  let opA = _deserializeDiffOp(a.propertyType, a.diff)
+  let opB = _deserializeDiffOp(b.propertyType, b.diff)
+  let t
   switch (b.propertyType) {
     case 'string':
-      opA = TextOperation.fromJSON(a.diff)
-      opB = TextOperation.fromJSON(b.diff)
       t = TextOperation.transform(opA, opB, options)
       break
     case 'array':
-      opA = ArrayOperation.fromJSON(a.diff)
-      opB = ArrayOperation.fromJSON(b.diff)
       t = ArrayOperation.transform(opA, opB, options)
       break
     case 'coordinate':
-      opA = CoordinateOperation.fromJSON(a.diff)
-      opB = CoordinateOperation.fromJSON(b.diff)
       t = CoordinateOperation.transform(opA, opB, options)
       break
     default:
@@ -412,33 +383,57 @@ function transformUpdateUpdate (a, b, options = {}) {
   b.diff = t[1]
 }
 
-function transformCreateSet () {
-  throw new Error('Illegal state: can not create and set a value at the same time.')
-}
-
-function _transformDeleteSet (a, b, flipped) {
-  if (a.type !== DELETE) return _transformDeleteSet(b, a, true)
-  if (!flipped) {
-    a.type = NOP
-    b.type = CREATE
-    b.original = undefined
-  } else {
-    a.val = b.val
-    b.type = NOP
+function _deserializeDiffOp (propertyType, diff) {
+  if (diff._isOperation) return diff
+  switch (propertyType) {
+    case 'string':
+      return TextOperation.fromJSON(diff)
+    case 'array':
+      return ArrayOperation.fromJSON(diff)
+    case 'coordinate':
+      return CoordinateOperation.fromJSON(diff)
+    default:
+      throw new Error('Illegal operation type')
   }
 }
 
-function transformDeleteSet (a, b) {
-  return _transformDeleteSet(a, b, false)
+function transformCreateSet (a, b, options = {}) {
+  if (!options.rebase) {
+    throw new Error('Illegal state: can not create and set a value at the same time.')
+  }
 }
 
-function transformUpdateSet () {
-  throw new Error('Unresolvable conflict: update + set.')
+function _transformDeleteSet (a, b, flipped, options = {}) {
+  if (a.type !== DELETE) return _transformDeleteSet(b, a, true, options)
+  // no destructive transformation for rebase
+  if (!options.rebase) {
+    if (!flipped) {
+      a.type = NOP
+      b.type = CREATE
+      b.original = undefined
+    } else {
+      a.val = b.val
+      b.type = NOP
+    }
+  }
 }
 
-function transformSetSet (a, b) {
-  a.type = NOP
-  b.original = a.val
+function transformDeleteSet (a, b, options = {}) {
+  return _transformDeleteSet(a, b, false, options)
+}
+
+function transformUpdateSet (a, b, options = {}) {
+  if (!options.rebase) {
+    throw new Error('Unresolvable conflict: update + set.')
+  }
+}
+
+function transformSetSet (a, b, options = {}) {
+  // no destructive transformation for rebase
+  if (!options.rebase) {
+    a.type = NOP
+    b.original = a.val
+  }
 }
 
 const _NOP = 0
@@ -477,10 +472,6 @@ const __transform__ = (() => {
 function transform (a, b, options = {}) {
   if (options['no-conflict'] && hasConflict(a, b)) {
     throw new Conflict(a, b)
-  }
-  if (!options.inplace) {
-    a = a.clone()
-    b = b.clone()
   }
   if (a.isNOP() || b.isNOP()) {
     return [a, b]

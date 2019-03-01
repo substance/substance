@@ -111,11 +111,6 @@ function transformShiftShift (a, b, options) {
 }
 
 function transform (a, b, options = {}) {
-  // TODO: support conflict detection?
-  if (!options.inplace) {
-    a = a.clone()
-    b = b.clone()
-  }
   if (a.type === SHIFT && b.type === SHIFT) {
     transformShiftShift(a, b, options)
   } else {
