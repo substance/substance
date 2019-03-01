@@ -1,7 +1,7 @@
 import map from '../util/map'
 import last from '../util/last'
 import uuid from '../util/uuid'
-import { deepDeleteNode, SNIPPET_ID, TEXT_SNIPPET_ID, removeAt, getContainerPosition, insertAt } from './documentHelpers'
+import { deepDeleteNode, SNIPPET_ID, TEXT_SNIPPET_ID, removeAt, getContainerPosition, getContainerRoot, insertAt } from './documentHelpers'
 import { setCursor } from './selectionHelpers'
 import _transferWithDisambiguatedIds from './_transferWithDisambiguatedIds'
 
@@ -186,25 +186,89 @@ function _pasteAnnotatedText (tx, copy) {
 }
 
 function _pasteDocument (tx, pasteDoc) {
+  let snippet = pasteDoc.get(SNIPPET_ID)
+  if (snippet.getLength() === 0) return
+
   let sel = tx.selection
   let containerPath = sel.containerPath
   let insertPos
+  // FIXME: this does not work for lists
+  // IMO we need to add a special implementation for lists
+  // i.e. check if the cursor is inside a list-item, then either break the list if first node is not a list
+  // otherwise merge the list into the current, and if there are more nodes then break the list and proceed on container level
   if (sel.isPropertySelection()) {
     let startPath = sel.start.path
-    let nodeId = sel.start.getNodeId()
-    let startPos = getContainerPosition(tx, containerPath, nodeId)
-    let text = tx.get(startPath)
-    // Break, unless we are at the last character of a node,
-    // then we can simply insert after the node
-    if (text.length === 0) {
-      insertPos = startPos
-      removeAt(tx, containerPath, insertPos)
-      deepDeleteNode(tx, tx.get(nodeId))
-    } else if (text.length === sel.start.offset) {
-      insertPos = startPos + 1
-    } else {
-      tx.break()
-      insertPos = startPos + 1
+    let node = getContainerRoot(tx, containerPath, sel.start.getNodeId())
+    // if cursor is in a text node then break the text node
+    // unless it is empty, then we remove the node
+    // and if cursor is at the end we paste the content after the node
+    if (node.isText()) {
+      let startPos = node.getPosition()
+      let text = tx.get(startPath)
+      if (text.length === 0) {
+        insertPos = startPos
+        removeAt(tx, containerPath, insertPos)
+        deepDeleteNode(tx, tx.get(node.id))
+      } else if (text.length === sel.start.offset) {
+        insertPos = startPos + 1
+      } else {
+        tx.break()
+        insertPos = startPos + 1
+      }
+    // Special behavior for lists:
+    // if the first pasted nodes happens to be a list, we merge it into the current list
+    // otherwise we break the list into two lists pasting the remaining content inbetween
+    // unless the list is empty, then we remove it
+    // TODO: try to reuse code for breaking lists from Editing.js
+    } else if (node.isList()) {
+      let list = node
+      let listItem = tx.get(sel.start.getNodeId())
+      let first = snippet.getNodeAt(0)
+      if (first.isList()) {
+        if (first.getLength() > 0) {
+          let itemPos = listItem.getPosition()
+          if (listItem.getLength() === 0) {
+            // replace the list item with the items from the pasted list
+            removeAt(tx, list.getItemsPath(), itemPos)
+            deepDeleteNode(tx, listItem)
+            _pasteListItems(tx, list, first, itemPos)
+          } else if (sel.start.offset === 0) {
+            // insert items before the current list item
+            _pasteListItems(tx, list, first, itemPos)
+          } else if (sel.start.offset >= listItem.getLength()) {
+            // insert items after the current list item
+            _pasteListItems(tx, list, first, itemPos + 1)
+          } else {
+            tx.break()
+            _pasteListItems(tx, list, first, itemPos + 1)
+          }
+          // if there is more content than just the list,
+          // break the list apart
+          if (snippet.getLength() > 1) {
+            _breakListApart(tx, containerPath, list)
+          }
+        }
+        // remove the first and continue with pasting the remaining content after the current list
+        snippet.removeAt(0)
+        insertPos = list.getPosition() + 1
+      } else {
+        // if the list is empty then remove it
+        if (list.getLength() === 1 && listItem.getLength() === 0) {
+          insertPos = list.getPosition()
+          removeAt(tx, containerPath, insertPos)
+          deepDeleteNode(tx, list)
+        // if on first position of list, paste all content before the list
+        } else if (listItem.getPosition() === 0 && sel.start.offset === 0) {
+          insertPos = list.getPosition()
+        // if cursor is at the last position of the list paste all content after the list
+        } else if (listItem.getPosition() === list.getLength() - 1 && sel.end.offset >= listItem.getLength()) {
+          insertPos = list.getPosition() + 1
+        // break the list at the current position (splitting)
+        } else {
+          insertPos = list.getPosition() + 1
+          _breakListApart(tx, containerPath, list)
+        }
+      }
     }
   } else if (sel.isNodeSelection()) {
     let nodePos = getContainerPosition(tx, containerPath, sel.getNodeId())
@@ -216,6 +280,11 @@ function _pasteDocument (tx, pasteDoc) {
       throw new Error('Illegal state: the selection should be collapsed.')
     }
   }
+
+  _pasteContainerNodes(tx, pasteDoc, containerPath, insertPos)
+}
+
+function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
   // transfer nodes from content document
   let nodeIds = pasteDoc.get(SNIPPET_ID).nodes
   let insertedNodes = []
@@ -245,4 +314,45 @@ function _pasteDocument (tx, pasteDoc) {
     let lastNode = last(insertedNodes)
     setCursor(tx, lastNode, containerPath, 'after')
   }
+}
+
+function _pasteListItems (tx, list, otherList, insertPos) {
+  let sel = tx.getSelection()
+  let items = otherList.resolve('items')
+  let visited = {}
+  let lastItem
+  for (let item of items) {
+    let newId = _transferWithDisambiguatedIds(item.getDocument(), tx, item.id, visited)
+    insertAt(tx, list.getItemsPath(), insertPos++, newId)
+    lastItem = tx.get(newId)
+  }
+  tx.setSelection({
+    type: 'property',
+    path: lastItem.getPath(),
+    startOffset: lastItem.getLength(),
+    surfaceId: sel.surfaceId,
+    containerPath: sel.containerPath
+  })
+}
+
+function _breakListApart (tx, containerPath, list) {
+  // HACK: using tx.break() to break the list
+  let nodePos = list.getPosition()
+  // first split the current item with a break
+  let oldSel = tx.selection
+  tx.break()
+  let listItem = tx.get(tx.selection.start.getNodeId())
+  // if the list item is empty, another tx.break() splits the list
+  // otherwise doing the same again
+  if (listItem.getLength() > 0) {
+    tx.setSelection(oldSel)
+    tx.break()
+  }
+  console.assert(tx.get(tx.selection.start.getNodeId()).getLength() === 0, 'at this point the current list-item should be empty')
+  // breaking a list on an empty list-item breaks the list apart
+  // but this creates an empty paragraph which we need to removed
+  // TODO: maybe we should add an option to tx.break() that allows break without insert of empty text node
+  tx.break()
+  let p = removeAt(tx, containerPath, nodePos + 1)
+  deepDeleteNode(tx, p)
 }

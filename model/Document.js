@@ -508,8 +508,13 @@ export default class Document extends EventEmitter {
   }
 
   rebase (change, onto) {
-    onto = onto.map(c => c.clone())
-    transformDocumentChange(onto, change)
+    if (onto.length > 0) {
+      // HACK: cloning the 'onto' changes so that the original is not affected by the transformation
+      // which is done in place
+      // TODO: instead we should come up with an implementation that allows to control if the argument should be affected or not
+      onto = onto.map(c => c.clone())
+      transformDocumentChange(onto, change)
+    }
     return change
   }
 

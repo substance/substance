@@ -33,6 +33,7 @@ export default class ChangeHistoryView {
       change = this.documentSession.revert(idx)
       this._redo.push(newIdx)
     } catch (err) {
+      console.error(err)
       this._undo.push(idx)
     }
     return change
@@ -49,6 +50,7 @@ export default class ChangeHistoryView {
       change = this.documentSession.revert(idx)
       this._undo.push(newIdx)
     } catch (err) {
+      console.error(err)
       this._redo.push(idx)
     }
     return change
