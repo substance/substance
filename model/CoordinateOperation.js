@@ -98,8 +98,13 @@ export default class CoordinateOperation {
 }
 
 function transformShiftShift (a, b) {
-  a.val += b.val
-  b.val += a.val
+  // FIXME: the idea of having explicit ops for coordinates does not word
+  // The actual source of the change is usually a text operation. If that text-operation
+  // is changed due to transformation, also should the coordinate shifts.
+  // On the other hand, if the text operations remains unchanged, so should be the coordinate shifts
+  // Deactivating this a s a quick-fix, to have get a less worse behavior
+  // a.val += b.val
+  // b.val += a.val
 }
 
 function transform (a, b, options) {
