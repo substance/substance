@@ -513,7 +513,10 @@ export default class Document extends EventEmitter {
       // which is done in place
       // TODO: instead we should come up with an implementation that allows to control if the argument should be affected or not
       onto = onto.map(c => c.clone())
-      transformDocumentChange(onto, change)
+      // ATTENTION: rebase uses mostly the same implementation as transform
+      // with some exceptions
+      // FIXME: IMO this is mostly because of wrong design
+      transformDocumentChange(onto, change, { rebase: true })
     }
     return change
   }

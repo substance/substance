@@ -347,9 +347,9 @@ function transformDeleteCreate () {
   throw new Error('Illegal state: can not create and delete a value at the same time.')
 }
 
-function transformDeleteUpdate (a, b, flipped) {
+function _transformDeleteUpdate (a, b, flipped) {
   if (a.type !== DELETE) {
-    return transformDeleteUpdate(b, a, true)
+    return _transformDeleteUpdate(b, a, true)
   }
   var op
   switch (b.propertyType) {
@@ -377,29 +377,33 @@ function transformDeleteUpdate (a, b, flipped) {
   }
 }
 
+function transformDeleteUpdate (a, b) {
+  return _transformDeleteUpdate(a, b, false)
+}
+
 function transformCreateUpdate () {
   // it is not possible to reasonably transform this.
   throw new Error('Can not transform a concurring create and update of the same property')
 }
 
-function transformUpdateUpdate (a, b) {
+function transformUpdateUpdate (a, b, options = {}) {
   // Note: this is a conflict the user should know about
   let opA, opB, t
   switch (b.propertyType) {
     case 'string':
       opA = TextOperation.fromJSON(a.diff)
       opB = TextOperation.fromJSON(b.diff)
-      t = TextOperation.transform(opA, opB, {inplace: true})
+      t = TextOperation.transform(opA, opB, options)
       break
     case 'array':
       opA = ArrayOperation.fromJSON(a.diff)
       opB = ArrayOperation.fromJSON(b.diff)
-      t = ArrayOperation.transform(opA, opB, {inplace: true})
+      t = ArrayOperation.transform(opA, opB, options)
       break
     case 'coordinate':
       opA = CoordinateOperation.fromJSON(a.diff)
       opB = CoordinateOperation.fromJSON(b.diff)
-      t = CoordinateOperation.transform(opA, opB, {inplace: true})
+      t = CoordinateOperation.transform(opA, opB, options)
       break
     default:
       throw new Error('Illegal type')
@@ -412,8 +416,8 @@ function transformCreateSet () {
   throw new Error('Illegal state: can not create and set a value at the same time.')
 }
 
-function transformDeleteSet (a, b, flipped) {
-  if (a.type !== DELETE) return transformDeleteSet(b, a, true)
+function _transformDeleteSet (a, b, flipped) {
+  if (a.type !== DELETE) return _transformDeleteSet(b, a, true)
   if (!flipped) {
     a.type = NOP
     b.type = CREATE
@@ -422,6 +426,10 @@ function transformDeleteSet (a, b, flipped) {
     a.val = b.val
     b.type = NOP
   }
+}
+
+function transformDeleteSet (a, b) {
+  return _transformDeleteSet(a, b, false)
 }
 
 function transformUpdateSet () {
@@ -466,8 +474,7 @@ const __transform__ = (() => {
   return t
 })()
 
-function transform (a, b, options) {
-  options = options || {}
+function transform (a, b, options = {}) {
   if (options['no-conflict'] && hasConflict(a, b)) {
     throw new Conflict(a, b)
   }
@@ -481,7 +488,7 @@ function transform (a, b, options) {
   var sameProp = isEqual(a.path, b.path)
   // without conflict: a' = a, b' = b
   if (sameProp) {
-    __transform__[CODE[a.type] | CODE[b.type]](a, b)
+    __transform__[CODE[a.type] | CODE[b.type]](a, b, options)
   }
   return [a, b]
 }
