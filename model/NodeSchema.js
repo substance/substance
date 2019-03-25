@@ -1,8 +1,6 @@
-import forEach from '../util/forEach'
-
 export default class NodeSchema {
   constructor (properties, superTypes) {
-    this.properties = properties
+    this._properties = properties
     this._superTypes = superTypes
     // Analysing ownership:
     // This is for hierarchal aspects in the model
@@ -11,16 +9,16 @@ export default class NodeSchema {
     // this has an effect on cascaded deletions, or the order of cloning, for example.
     this._ownedPropNames = new Set()
     this._ownedProps = []
-    forEach(properties, (prop) => {
+    for (let prop of properties.values()) {
       if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
         this._ownedPropNames.add(prop.name)
         this._ownedProps.push(prop)
       }
-    })
+    }
   }
 
   getProperty (name) {
-    return this.properties[name]
+    return this._properties.get(name)
   }
 
   hasOwnedProperties () {
@@ -44,20 +42,6 @@ export default class NodeSchema {
   }
 
   [Symbol.iterator] () {
-    const properties = this.properties
-    let ids = Object.keys(properties)
-    let idx = 0
-    return { // Iterator
-      next () {
-        let done = idx > ids.length - 1
-        if (done) {
-          return { done }
-        } else {
-          return {
-            value: properties[ids[idx++]]
-          }
-        }
-      }
-    }
+    return this._properties.values()
   }
 }
