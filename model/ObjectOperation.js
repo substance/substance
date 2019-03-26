@@ -47,7 +47,7 @@ export default class ObjectOperation {
         } else if (data.diff._isCoordinateOperation) {
           this.propertyType = 'coordinate'
         } else {
-          throw new Error('Invalid data: diff must be a TextOperation or an ArrayOperation.')
+          throw new Error('Invalid data: unsupported operation type for incremental update.')
         }
       } else {
         throw new Error('Invalid data: diff is mandatory for update operation.')
@@ -96,7 +96,7 @@ export default class ObjectOperation {
           break
         }
         default:
-          throw new Error('Invalid state.')
+          throw new Error('Unsupported property type for incremental update: ' + this.propertyType)
       }
     } else if (this.type === SET) {
       // clone here as the operations value must not be changed
@@ -377,7 +377,7 @@ function transformUpdateUpdate (a, b, options = {}) {
       t = CoordinateOperation.transform(opA, opB, options)
       break
     default:
-      throw new Error('Illegal type')
+      throw new Error('Unsupported property type for incremental update')
   }
   a.diff = t[0]
   b.diff = t[1]
@@ -393,7 +393,7 @@ function _deserializeDiffOp (propertyType, diff) {
     case 'coordinate':
       return CoordinateOperation.fromJSON(diff)
     default:
-      throw new Error('Illegal operation type')
+      throw new Error('Unsupported property type for incremental update.')
   }
 }
 

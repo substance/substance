@@ -14,6 +14,12 @@ export const STRING_ARRAY = { type: ['array', 'string'], default: [] }
 
 export const BOOLEAN = { type: 'boolean', default: false }
 
+export function ENUM (values, opts = {}) {
+  let def = { type: 'enum', values }
+  Object.assign(def, opts)
+  return def
+}
+
 export function MANY (...nodeTypes) {
   nodeTypes = flatten(nodeTypes)
   return { type: ['array', 'id'], targetTypes: nodeTypes, default: [] }

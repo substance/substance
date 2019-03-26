@@ -9,7 +9,7 @@ import EventEmitter from '../util/EventEmitter'
 import NodeProperty from './NodeProperty'
 import NodeSchema from './NodeSchema'
 
-const VALUE_TYPES = new Set(['string', 'number', 'boolean', 'object', 'array', 'coordinate'])
+const VALUE_TYPES = new Set(['id', 'string', 'number', 'boolean', 'enum', 'object', 'array', 'coordinate'])
 
 /*
   Base node implementation.
@@ -23,6 +23,7 @@ export default class Node extends EventEmitter {
   constructor (...args) {
     super()
 
+    // plain object to store the nodes data
     this._properties = {}
 
     // NOTE: this indirection allows us to implement a overridable initializer
@@ -159,7 +160,7 @@ Object.defineProperty(Node, 'schema', {
     if (!NodeClass.hasOwnProperty('_schema')) {
       let ParentNodeClass = _getParentClass(NodeClass)
       let parentSchema = ParentNodeClass.schema
-      NodeClass._schema = new NodeSchema(parentSchema.properties, _getSuperTypes(NodeClass))
+      NodeClass._schema = new NodeSchema(parentSchema._properties, _getSuperTypes(NodeClass))
     }
     return NodeClass._schema
   },
@@ -184,19 +185,29 @@ Node.schema = {
 
 // ### Internal implementation
 
+function _assign (maps) {
+  let result = new Map()
+  for (let m of maps) {
+    for (let [key, value] of m) {
+      if (result.has(key)) result.delete(key)
+      result.set(key, value)
+    }
+  }
+  return result
+}
+
 function compileSchema (NodeClass, schema) {
   let compiledSchema = _compileSchema(schema)
   let schemas = [compiledSchema]
   let Clazz = _getParentClass(NodeClass)
   while (Clazz) {
     if (Clazz && Clazz._schema) {
-      schemas.unshift(Clazz._schema.properties)
+      schemas.unshift(Clazz._schema._properties)
     }
     Clazz = _getParentClass(Clazz)
   }
-  schemas.unshift({})
   let superTypes = _getSuperTypes(NodeClass)
-  let _schema = new NodeSchema(Object.assign.apply(null, schemas), superTypes)
+  let _schema = new NodeSchema(_assign(schemas), superTypes)
 
   // define property getter and setters
   for (let prop of _schema) {
@@ -217,7 +228,7 @@ function compileSchema (NodeClass, schema) {
 }
 
 function _compileSchema (schema) {
-  let compiledSchema = {}
+  let compiledSchema = new Map()
   forEach(schema, function (definition, name) {
     // skip 'type'
     if (name === 'type') return
@@ -228,7 +239,7 @@ function _compileSchema (schema) {
     }
     definition = _compileDefintion(definition)
     definition.name = name
-    compiledSchema[name] = new NodeProperty(name, definition)
+    compiledSchema.set(name, new NodeProperty(name, definition))
   })
   return compiledSchema
 }
@@ -310,6 +321,7 @@ function _checked (prop, value) {
     throw new Error('Value for property ' + name + ' is undefined.')
   }
   if ((type === 'string' && !isString(value)) ||
+      (type === 'enum' && !isString(value)) ||
       (type === 'boolean' && !isBoolean(value)) ||
       (type === 'number' && !isNumber(value)) ||
       (type === 'array' && !isArray(value)) ||

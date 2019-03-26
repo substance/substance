@@ -1,4 +1,5 @@
 import Registry from '../deprecated/DeprecatedRegistry'
+import isString from '../util/isString'
 
 /*
   Registry for Nodes.
@@ -14,8 +15,8 @@ export default class NodeRegistry extends Registry {
    */
   register (nodeClazz) {
     var type = nodeClazz.prototype.type
-    if (typeof type !== 'string' || type === '') {
-      throw new Error('Node names must be strings and must not be empty')
+    if (!isString(type) || !type) {
+      throw new Error('Node type must be string and not empty')
     }
     if (!(nodeClazz.prototype._isNode)) {
       throw new Error('Nodes must be subclasses of Substance.Data.Node')

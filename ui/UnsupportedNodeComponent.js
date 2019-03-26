@@ -9,7 +9,7 @@ export default class UnsupportedNodeComponent extends Component {
         contentEditable: false
       })
       .append(
-        JSON.stringify(this.props.node.properties, null, 2)
+        JSON.stringify(this.props.node.toJSON(), null, 2)
       )
   }
 }

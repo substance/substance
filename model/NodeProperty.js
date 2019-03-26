@@ -59,18 +59,16 @@ export default class NodeProperty {
       return []
     }
     switch (this.definition.type) {
-      case 'object':
-        return {}
-      case 'number':
-        return -1
-      case 'coordinate':
-        return new Coordinate([], 0)
       case 'boolean':
         return false
-      case 'id':
-        return null
       case 'string':
         return ''
+      case 'number':
+        return -1
+      case 'object':
+        return {}
+      case 'coordinate':
+        return new Coordinate([], 0)
       default:
         return null
     }
@@ -86,5 +84,9 @@ export default class NodeProperty {
 
   get defaultTextType () {
     return this.definition.defaultTextType
+  }
+
+  get values () {
+    return this.definition.values
   }
 }
