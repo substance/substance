@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { Node } from 'substance'
+import { Node, ENUM } from 'substance'
 
 test('NodeSchema: properties of type ["object"] (#1169)', t => {
   class MyNode extends Node {}
@@ -91,5 +91,18 @@ test('NodeSchema: Node inheritance', t => {
   t.ok(Node.isInstanceOf(ChildNode, 'parent'), "'child' should be considered an instance of 'parent'")
   t.equal(schema.getProperty('foo').type, 'string', "'child' should have a string property 'foo'")
   t.equal(schema.getProperty('bar').type, 'number', "'child' should have a number property 'bar'")
+  t.end()
+})
+
+test('NodeSchema: enum type', t => {
+  class MyNode extends Node { }
+  MyNode.schema = {
+    type: 'mynode',
+    foo: ENUM(['a', 'b', 'c'])
+  }
+  let schema = MyNode.schema
+  let foo = schema.getProperty('foo')
+  t.equal(foo.type, 'enum', "node should have an enum type property 'foo'")
+  t.deepEqual(foo.values, ['a', 'b', 'c'], 'with defined values')
   t.end()
 })

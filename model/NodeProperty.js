@@ -85,4 +85,8 @@ export default class NodeProperty {
   get defaultTextType () {
     return this.definition.defaultTextType
   }
+
+  get values () {
+    return this.definition.values
+  }
 }
