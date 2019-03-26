@@ -9,7 +9,7 @@ import EventEmitter from '../util/EventEmitter'
 import NodeProperty from './NodeProperty'
 import NodeSchema from './NodeSchema'
 
-const VALUE_TYPES = new Set(['string', 'number', 'boolean', 'object', 'array', 'coordinate'])
+const VALUE_TYPES = new Set(['id', 'string', 'number', 'boolean', 'enum', 'object', 'array', 'coordinate'])
 
 /*
   Base node implementation.
@@ -189,6 +189,7 @@ function _assign (maps) {
   let result = new Map()
   for (let m of maps) {
     for (let [key, value] of m) {
+      if (result.has(key)) result.delete(key)
       result.set(key, value)
     }
   }
@@ -320,6 +321,7 @@ function _checked (prop, value) {
     throw new Error('Value for property ' + name + ' is undefined.')
   }
   if ((type === 'string' && !isString(value)) ||
+      (type === 'enum' && !isString(value)) ||
       (type === 'boolean' && !isBoolean(value)) ||
       (type === 'number' && !isNumber(value)) ||
       (type === 'array' && !isArray(value)) ||
