@@ -39,7 +39,7 @@ export default class AnnotatedTextComponent extends Component {
   }
 
   _onDocumentChange (update) {
-    if (update.change && update.change.updated[this.getPath()]) {
+    if (update.change && update.change.hasUpdated(this.getPath())) {
       this.rerender()
     }
   }
