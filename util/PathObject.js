@@ -47,7 +47,8 @@ class PathObject {
       return undefined
     }
     if (isString(path)) {
-      return this.getRoot()[path]
+      let id = path
+      return this.getRoot()[id]
     }
     if (arguments.length > 1) {
       path = Array.prototype.slice(arguments, 0)
@@ -63,7 +64,8 @@ class PathObject {
       throw new Error('Illegal argument: PathObject.set(>path<, value) - path is mandatory.')
     }
     if (isString(path)) {
-      this.getRoot()[path] = value
+      let id = path
+      this.getRoot()[id] = value
     } else {
       setWith(this.getRoot(), path, value)
     }
@@ -71,7 +73,8 @@ class PathObject {
 
   delete (path) {
     if (isString(path)) {
-      delete this.getRoot()[path]
+      let id = path
+      delete this.getRoot()[id]
     } else if (path.length === 1) {
       delete this.getRoot()[path[0]]
     } else {

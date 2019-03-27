@@ -1,7 +1,9 @@
-import isPlainObject from '../util/isPlainObject'
 import clone from '../util/clone'
 import cloneDeep from '../util/cloneDeep'
 import forEach from '../util/forEach'
+import getKeyForPath from '../util/getKeyForPath'
+import isPlainObject from '../util/isPlainObject'
+import isString from '../util/isString'
 import map from '../util/map'
 import uuid from '../util/uuid'
 import OperationSerializer from './OperationSerializer'
@@ -101,7 +103,7 @@ class DocumentChange {
         deleted[op.val.id] = op.val
       }
       if (op.type === 'set' || op.type === 'update') {
-        updated[op.path] = true
+        updated[getKeyForPath(op.path)] = true
         // also mark the node itself as dirty
         updated[op.path[0]] = true
       }
@@ -121,7 +123,7 @@ class DocumentChange {
           path = [node.id]
         }
         if (!deleted[node.id]) {
-          updated[path] = true
+          updated[getKeyForPath(path)] = true
         }
       }
     })
@@ -129,7 +131,7 @@ class DocumentChange {
     // remove all deleted nodes from updated
     if (Object.keys(deleted).length > 0) {
       forEach(updated, function (_, key) {
-        let nodeId = key.split(',')[0]
+        let nodeId = key.split('.')[0]
         if (deleted[nodeId]) {
           delete updated[key]
         }
@@ -160,20 +162,14 @@ class DocumentChange {
     return inverted
   }
 
-  /* istanbul ignore start */
-  isAffected (path) {
-    console.error('DEPRECATED: use change.hasUpdated() instead')
-    return this.hasUpdated(path)
-  }
-
-  isUpdated (path) {
-    console.error('DEPRECATED: use change.hasUpdated() instead')
-    return this.hasUpdated(path)
-  }
-  /* istanbul ignore end */
-
   hasUpdated (path) {
-    return this.updated[path]
+    let key
+    if (isString(path)) {
+      key = path
+    } else {
+      key = getKeyForPath(path)
+    }
+    return this.updated[key]
   }
 
   hasDeleted (id) {
