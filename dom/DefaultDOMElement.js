@@ -70,9 +70,13 @@ DefaultDOMElement.isReverse = function (anchorNode, anchorOffset, focusNode, foc
   return _getDefaultImpl().isReverse(anchorNode, anchorOffset, focusNode, focusOffset)
 }
 
+// used for testing
+DefaultDOMElement._forceMemoryDOM = false
+
 function _getDefaultImpl () {
-  // ATTENTION: in Browsers as well as in Elect
-  if (platform.inBrowser || platform.inElectron) {
+  if (DefaultDOMElement._forceMemoryDOM) {
+    return MemoryDOMElement
+  } else if (platform.inBrowser || platform.inElectron) {
     return BrowserDOMElement
   } else {
     return MemoryDOMElement
