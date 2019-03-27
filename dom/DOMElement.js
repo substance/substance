@@ -787,14 +787,13 @@ export default class DOMElement {
     @param {DOMElement|String} child An element or text to append
     @returns {this}
    */
-  append (child) {
-    var children
+  append (children) {
     if (arguments.length === 1) {
-      if (isArray(child)) {
-        children = child
+      if (isArray(children)) {
+        children = children.slice()
       } else {
-        this.appendChild(child)
-        return this
+        let child = children
+        return this.appendChild(child)
       }
     } else {
       children = arguments
