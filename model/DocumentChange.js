@@ -65,11 +65,11 @@ class DocumentChange {
         case 'create':
         case 'delete': {
           let node = op.val
-          if (node.hasOwnProperty('start')) {
-            updated[node.start.path] = true
+          if (node.hasOwnProperty('start') && node.start.path) {
+            updated[getKeyForPath(node.start.path)] = true
           }
-          if (node.hasOwnProperty('end')) {
-            updated[node.end.path] = true
+          if (node.hasOwnProperty('end') && node.end.path) {
+            updated[getKeyForPath(node.end.path)] = true
           }
           break
         }
@@ -79,7 +79,7 @@ class DocumentChange {
           let node = doc.get(op.path[0])
           if (node) {
             if (node.isPropertyAnnotation()) {
-              updated[node.start.path] = true
+              updated[getKeyForPath(node.start.path)] = true
             } else if (node.isContainerAnnotation()) {
               affectedContainerAnnos.push(node)
             }
