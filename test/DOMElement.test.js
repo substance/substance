@@ -740,6 +740,21 @@ function DOMElementTests (impl) {
     t.equal(els.length, 1, 'there should be exactly one element found')
     t.end()
   })
+
+  test('Re-attaching elements', t => {
+    const html = `
+    <div>
+      <div>Lorem ipsum <span>dolor</span> sit amet.</div>
+      <div></div>
+    </div>
+    `
+    const rootEl = DefaultDOMElement.parseSnippet(html.trim(), 'html')
+    let [first, second] = rootEl.getChildren()
+    second.append(first.childNodes)
+    t.equal(second.getChildCount(), 3, 'all three nodes should have been re-attached')
+    t.ok(second.childNodes.every(el => el.parentNode === second), '.. with correct parent node')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {
