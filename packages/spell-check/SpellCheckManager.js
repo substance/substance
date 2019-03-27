@@ -1,6 +1,7 @@
 import debounce from '../../util/debounce'
 import isString from '../../util/isString'
 import sendRequest from '../../util/sendRequest'
+import getKeyForPath from '../../util/getKeyForPath'
 
 const DEFAULT_API_URL = 'http://localhost:4777/api/check'
 
@@ -27,7 +28,7 @@ class SpellCheckManager {
   }
 
   check (path) {
-    this._runSpellCheck(String(path))
+    this._runSpellCheck(getKeyForPath(path))
   }
 
   runGlobalCheck () {
@@ -50,7 +51,7 @@ class SpellCheckManager {
 
   _runSpellCheck (pathStr) {
     // console.log('Running spell-checker on', pathStr)
-    let path = pathStr.split(',')
+    let path = pathStr.split('.')
     let text = this.editorSession.getDocument().get(path)
     let lang = this.editorSession.getLanguage()
     if (!text || !isString(text)) return

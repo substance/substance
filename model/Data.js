@@ -72,17 +72,20 @@ export default class Data extends EventEmitter {
     if (!path) return undefined
     let result
     if (isString(path)) {
-      result = this.nodes[path]
+      let id = path
+      result = this.nodes[id]
     } else if (path.length === 1) {
-      result = this.nodes[path[0]]
+      let id = path[0]
+      result = this.nodes[id]
     } else if (path.length > 1) {
-      let context = this.nodes[path[0]]
+      let id = path[0]
+      let obj = this.nodes[id]
       for (let i = 1; i < path.length - 1; i++) {
-        if (!context) return undefined
-        context = context[path[i]]
+        if (!obj) return undefined
+        obj = obj[path[i]]
       }
-      if (!context) return undefined
-      result = context[path[path.length - 1]]
+      if (!obj) return undefined
+      result = obj[path[path.length - 1]]
     }
     return result
   }

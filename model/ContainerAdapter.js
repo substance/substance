@@ -1,8 +1,9 @@
 import Container from './Container'
+import getKeyForPath from '../util/getKeyForPath'
 
 export default class ContainerAdapter extends Container {
   constructor (doc, path) {
-    super(doc, { id: String(path) })
+    super(doc, { id: getKeyForPath(path) })
     this.document = doc
     this.path = path
 

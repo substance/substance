@@ -7,15 +7,7 @@ class TreeNode {}
 
 /*
  * A tree-structure for indexes.
- *
- * @class TreeIndex
- * @param {object} [obj] An object to operate on
- * @memberof module:Basics
- * @example
- *
- * var index = new TreeIndex({a: "aVal", b: {b1: 'b1Val', b2: 'b2Val'}});
  */
-
 export default class TreeIndex {
   /**
    * Get value at path.
@@ -31,9 +23,7 @@ export default class TreeIndex {
     if (arguments.length > 1) {
       path = Array.prototype.slice(arguments, 0)
     }
-    if (isString(path)) {
-      path = [path]
-    }
+    path = _pathify(path)
     return get(this, path)
   }
 
@@ -41,34 +31,29 @@ export default class TreeIndex {
     if (arguments.length > 1) {
       path = Array.prototype.slice(arguments, 0)
     }
-    if (isString(path)) {
-      path = [path]
-    }
+    path = _pathify(path)
     if (!isArray(path)) {
       throw new Error('Illegal argument for TreeIndex.get()')
     }
-    var node = get(this, path)
+    let node = get(this, path)
     return this._collectValues(node)
   }
 
   set (path, value) {
-    if (isString(path)) {
-      path = [path]
-    }
+    path = _pathify(path)
     setWith(this, path, value, function (val) {
       if (!val) return new TreeNode()
     })
   }
 
   delete (path) {
-    if (isString(path)) {
-      delete this[path]
-    } else if (path.length === 1) {
+    path = _pathify(path)
+    if (path.length === 1) {
       delete this[path[0]]
     } else {
-      var key = path[path.length - 1]
+      let key = path[path.length - 1]
       path = path.slice(0, -1)
-      var parent = get(this, path)
+      let parent = get(this, path)
       if (parent) {
         delete parent[key]
       }
@@ -76,8 +61,8 @@ export default class TreeIndex {
   }
 
   clear () {
-    var root = this
-    for (var key in root) {
+    let root = this
+    for (let key in root) {
       if (root.hasOwnProperty(key)) {
         delete root[key]
       }
@@ -93,11 +78,11 @@ export default class TreeIndex {
   }
 
   _traverse (root, path, fn) {
-    var id
+    let id
     for (id in root) {
       if (!root.hasOwnProperty(id)) continue
-      var child = root[id]
-      var childPath = path.concat([id])
+      let child = root[id]
+      let childPath = path.concat([id])
       if (child instanceof TreeNode) {
         this._traverse(child, childPath, fn)
       } else {
@@ -109,12 +94,20 @@ export default class TreeIndex {
   _collectValues (root) {
     // TODO: don't know if this is the best solution
     // We use this only for indexes, e.g., to get all annotation on one node
-    var vals = {}
+    let vals = {}
     this._traverse(root, [], function (val, path) {
-      var key = path[path.length - 1]
+      let key = path[path.length - 1]
       vals[key] = val
     })
     return vals
+  }
+}
+
+function _pathify (path) {
+  if (isString(path)) {
+    return [path]
+  } else {
+    return path
   }
 }
 
@@ -138,13 +131,11 @@ class TreeIndexArrays extends TreeIndex {
   }
 
   add (path, value) {
-    if (isString(path)) {
-      path = [path]
-    }
+    path = _pathify(path)
     if (!isArray(path)) {
       throw new Error('Illegal arguments.')
     }
-    var arr
+    let arr
 
     // We are using setWith, as it allows us to create nodes on the way down
     // setWith can be controlled via a hook called for each key in the path
@@ -166,7 +157,7 @@ class TreeIndexArrays extends TreeIndex {
   }
 
   remove (path, value) {
-    var arr = get(this, path)
+    let arr = get(this, path)
     if (arr instanceof TreeNode) {
       if (arguments.length === 1) {
         delete arr.__values__
@@ -177,7 +168,7 @@ class TreeIndexArrays extends TreeIndex {
   }
 
   _collectValues (root) {
-    var vals = []
+    let vals = []
     this._traverse(root, [], function (val) {
       vals.push(val)
     })
