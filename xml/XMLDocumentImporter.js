@@ -46,9 +46,9 @@ export default class XMLDocumentImporter extends DOMImporter {
   }
 
   _initialize () {
-    const schema = this.schema
+    const schema = this._getSchema()
     const defaultTextType = schema.getDefaultTextType()
-    const converters = this.converters
+    const converters = this.config.converters
 
     this._allConverters = []
     this._propertyAnnotationConverters = []
