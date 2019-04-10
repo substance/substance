@@ -1,19 +1,14 @@
 import forEach from '../util/forEach'
 
-class JSONConverter {
+export default class JSONConverter {
   importDocument (doc, json) {
     if (!json.nodes) {
       throw new Error('Invalid JSON format.')
     }
-    var schema = doc.getSchema()
-    if (json.schema && schema.name !== json.schema.name) {
-      throw new Error('Incompatible schema.')
-    }
     // the json should just be an array of nodes
-    var nodes = json.nodes
+    let nodes = json.nodes
     // import data in a block with deactivated indexers and listeners
-    // as the data contains cyclic references which
-    // cause problems.
+    // as the data may contain cyclic references which causes problems.
     doc.import(function (tx) {
       forEach(nodes, function (node) {
         // overwrite existing nodes
@@ -27,11 +22,7 @@ class JSONConverter {
   }
 
   exportDocument (doc) {
-    var schema = doc.getSchema()
-    var json = {
-      schema: {
-        name: schema.name
-      },
+    let json = {
       nodes: {}
     }
     forEach(doc.getNodes(), function (node) {
@@ -42,5 +33,3 @@ class JSONConverter {
     return json
   }
 }
-
-export default JSONConverter

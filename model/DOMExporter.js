@@ -4,7 +4,7 @@ import encodeXMLEntities from '../util/encodeXMLEntities'
 import Fragmenter from './Fragmenter'
 import { Registry } from '../deprecated'
 
-class DOMExporter {
+export default class DOMExporter {
   constructor (config, context) {
     this.context = context || {}
     if (!config.converters) {
@@ -12,14 +12,14 @@ class DOMExporter {
     }
     if (!config.converters._isRegistry) {
       this.converters = new Registry()
-      config.converters.forEach(function (Converter) {
+      config.converters.forEach(Converter => {
         let converter = isFunction(Converter) ? new Converter() : Converter
         if (!converter.type) {
           console.error('Converter must provide the type of the associated node.', converter)
           return
         }
         this.converters.add(converter.type, converter)
-      }.bind(this))
+      })
     } else {
       this.converters = config.converters
     }
@@ -223,5 +223,3 @@ class DOMExporter {
     return el
   }
 }
-
-export default DOMExporter

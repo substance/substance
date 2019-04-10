@@ -17,24 +17,21 @@ const INVISIBLE_CHARACTER = '\u200B'
 /**
  * A generic base implementation for XML/HTML importers.
  *
- * @param {Object} config
- * @param {DocumentSchema} config.schema
- * @param {object[]} config.converters
+ * @param {Document} config.document an empty document instance used to import into
+ * @param {object[]} config.converters a list of converters
  */
 export default class DOMImporter {
   constructor (config, context) {
     this.context = context || {}
-
-    if (!config.schema) {
-      throw new Error('"config.schema" is mandatory')
+    // Allow to provide 'config.schema' for legacy reasons
+    if (!config.document && !config.schema) {
+      throw new Error('"config.document" is mandatory')
     }
     if (!config.converters) {
       throw new Error('"config.converters" is mandatory')
     }
 
     this.config = Object.assign({ idAttribute: 'id' }, config)
-    this.schema = config.schema
-    this.converters = config.converters
     this.state = null
 
     this._defaultBlockConverter = null
@@ -43,6 +40,8 @@ export default class DOMImporter {
     this._propertyAnnotationConverters = []
 
     this.state = new DOMImporter.State()
+    // initially start with the provided document instance
+    this.state.doc = this.config.document
 
     this._initialize()
   }
@@ -52,9 +51,10 @@ export default class DOMImporter {
     and registers them depending on the type in different sets.
   */
   _initialize () {
-    const schema = this.schema
+    const schema = this._getSchema()
+    const converters = this.config.converters
+    // LEGACY: in older versions we had a globally defined defaultTextType
     const defaultTextType = schema.getDefaultTextType()
-    const converters = this.converters
     for (let i = 0; i < converters.length; i++) {
       let converter
       if (typeof converters[i] === 'function') {
@@ -76,7 +76,9 @@ export default class DOMImporter {
       if (!NodeClass) {
         throw new Error('No node type defined for converter')
       }
-      if (!this._defaultBlockConverter && defaultTextType === converter.type) {
+      // LEGACY: see above
+      // TODO: try to get rid of this
+      if (defaultTextType && !this._defaultBlockConverter && defaultTextType === converter.type) {
         this._defaultBlockConverter = converter
       }
       this._allConverters.push(converter)
@@ -168,6 +170,7 @@ export default class DOMImporter {
    * @returns {object} the created node as JSON
    */
   convertElement (el) {
+    const schema = this._getSchema()
     if (!this.state.doc) this.reset()
     let isTopLevel = !this.state.isConverting
     if (isTopLevel) {
@@ -177,7 +180,7 @@ export default class DOMImporter {
     let nodeData, annos
     const converter = this._getConverterForElement(el)
     if (converter) {
-      const NodeClass = this.schema.getNodeClass(converter.type)
+      const NodeClass = schema.getNodeClass(converter.type)
       nodeData = this._createNodeData(el, converter.type)
       this.state.pushContext(el.tagName, converter)
       // Note: special treatment for property annotations and inline nodes
@@ -328,13 +331,19 @@ export default class DOMImporter {
     return this._getNextId(el.getOwnerDocument(), type)
   }
 
-  // Note: this is e.g. shared by ClipboardImporter which has a different
-  // implementation of this.createDocument()
+  _getSchema () {
+    return this.config.schema || this.config.document.getSchema()
+  }
+
   _createDocument () {
-    // create an empty document and initialize the container if not present
-    const schema = this.config.schema
-    const DocumentClass = schema.getDocumentClass()
-    return new DocumentClass(schema)
+    if (this.config.document) {
+      return this.config.document.newInstance()
+    } else {
+      // create an empty document and initialize the container if not present
+      const schema = this.config.schema
+      const DocumentClass = schema.getDocumentClass()
+      return new DocumentClass(schema)
+    }
   }
 
   _convertPropertyAnnotation (el, nodeData) {
@@ -396,6 +405,7 @@ export default class DOMImporter {
    * Internal function for parsing annotated text
    */
   _annotatedText (iterator) {
+    const schema = this._getSchema()
     const state = this.state
     const context = last(state.stack)
     /* istanbul ignore next */
@@ -437,7 +447,7 @@ export default class DOMImporter {
         // node instantly (self-managed)
         var startOffset = context.offset
         const annoType = annoConverter.type
-        const AnnoClass = this.schema.getNodeClass(annoType)
+        const AnnoClass = schema.getNodeClass(annoType)
         if (!AnnoClass) {
           throw new Error(`No Node class registered for type ${annoType}.`)
         }
@@ -534,6 +544,7 @@ export default class DOMImporter {
   _wrapInlineElementsIntoBlockElement (childIterator) {
     if (!childIterator.hasNext()) return
 
+    const schema = this._getSchema()
     const converter = this._defaultBlockConverter
     if (!converter) {
       throw new Error('Wrapping inline elements automatically is not supported in this schema.')
@@ -551,7 +562,7 @@ export default class DOMImporter {
       }
       wrapper.append(el.clone())
     }
-    const type = this.schema.getDefaultTextType()
+    const type = schema.getDefaultTextType()
     const id = this._getNextId(dom, type)
     let nodeData = { type, id }
     this.state.pushContext('wrapper', converter)
