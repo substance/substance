@@ -37,7 +37,6 @@ export default class DefaultLabelProvider {
     let qualityRegex = /\${(\w+)}/g
     let matches
     let vars = []
-
     while (matches = qualityRegex.exec(rawLabel)) { // eslint-disable-line
       vars.push(matches[1])
     }

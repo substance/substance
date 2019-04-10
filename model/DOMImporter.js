@@ -17,9 +17,8 @@ const INVISIBLE_CHARACTER = '\u200B'
 /**
  * A generic base implementation for XML/HTML importers.
  *
- * @param {Object} config
- * @param {DocumentSchema} config.schema
- * @param {object[]} config.converters
+ * @param {Document} config.document an empty document instance used to import into
+ * @param {object[]} config.converters a list of converters
  */
 export default class DOMImporter {
   constructor (config, context) {
