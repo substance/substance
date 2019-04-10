@@ -1058,7 +1058,7 @@ export default class Component extends EventEmitter {
     return comp
   }
 
-  static mount (props, el) {
+  static mount (props, el, options = {}) {
     if (arguments.length === 1) {
       el = props
       props = {}
@@ -1074,7 +1074,7 @@ export default class Component extends EventEmitter {
     }
     el = DefaultDOMElement.wrap(el)
     const ComponentClass = this
-    let comp = new ComponentClass(null, props)
+    let comp = new ComponentClass(null, props, options)
     comp.mount(el)
     return comp
   }
