@@ -7,12 +7,14 @@ import _isTextNodeEmpty from './_isTextNodeEmpty'
 const { TEXT } = DFA
 
 export default class XMLSchema {
-  constructor (elementSchemas, startElement) {
+  constructor (elementSchemas, startElement, publicId, dtd) {
     if (!elementSchemas[startElement]) {
       throw new Error('startElement must be a valid element.')
     }
     this._elementSchemas = {}
     this.startElement = startElement
+    this.publicId = publicId
+    this.dtd = dtd
     // wrap schemas into ElementSchemas
     forEach(elementSchemas, (spec, name) => {
       this._elementSchemas[name] = new ElementSchema(spec.name, spec.type, spec.attributes, spec.expr)
@@ -25,6 +27,10 @@ export default class XMLSchema {
 
   getTagNames () {
     return Object.keys(this._elementSchemas)
+  }
+
+  getDocTypeParams () {
+    return [this.startElement, this.publicId, this.dtd]
   }
 
   getElementSchema (name) {
@@ -71,13 +77,13 @@ export default class XMLSchema {
   }
 }
 
-XMLSchema.fromJSON = function (data) {
+XMLSchema.fromJSON = function (data, startElement, publicId, dtd) {
   let elementSchemas = {}
   forEach(data.elements, (elData) => {
     let elSchema = ElementSchema.fromJSON(elData)
     elementSchemas[elSchema.name] = elSchema
   })
-  return new XMLSchema(elementSchemas, data.start)
+  return new XMLSchema(elementSchemas, startElement, publicId, dtd)
 }
 
 class ElementSchema {
@@ -154,13 +160,7 @@ function _validateElement (elementSchema, el) {
   if (elementSchema.type === 'external' || elementSchema.type === 'not-implemented') {
     // skip
   } else {
-    // HACK: special treatment for our text elements which are not real DOM elements
-    let res
-    if (el._isXMLTextElement) {
-      res = _checkChildren(elementSchema, el.toXML())
-    } else {
-      res = _checkChildren(elementSchema, el)
-    }
+    let res = _checkChildren(elementSchema, el)
     if (!res.ok) {
       errors = errors.concat(res.errors)
       valid = false

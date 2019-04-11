@@ -115,6 +115,7 @@ function _transformRNG (grammar) {
   })
 
   // infer element types
+  // TODO: do we need this anymore?
   const elementTypes = grammar.findAll('elementType')
   elementTypes.forEach(typeEl => {
     const name = typeEl.attr('name')
@@ -135,6 +136,7 @@ function _transformRNG (grammar) {
 
 function _transformElementDefinition (doc, name, orig, defs) {
   let el = doc.createElement('element').attr('name', name)
+  // TODO: remove this
   // NOTE: setting type to implicit by default
   // this is refined when calling analyzeSchema
   el.attr('type', 'implicit')

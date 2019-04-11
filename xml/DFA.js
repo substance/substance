@@ -5,8 +5,7 @@ const END = 'END'
 const EPSILON = 'EPSILON'
 const TEXT = 'TEXT'
 
-export default
-class DFA {
+export default class DFA {
   constructor (transitions) {
     if (!transitions || Object.keys(transitions).length === 0) {
       transitions = { START: { EPSILON: END } }
