@@ -1,5 +1,3 @@
-import * as xmlNodeHelpers from './xmlNodeHelpers'
-
 export { default as _analyzeSchema } from './_analyzeSchema'
 export { default as _expandIncludes } from './_expandIncludes'
 export { default as _isTextNodeEmpty } from './_isTextNodeEmpty'
@@ -13,5 +11,4 @@ export { default as nameWithoutNS } from './nameWithoutNS'
 export { default as prettyPrintXML } from './prettyPrintXML'
 export { default as validateXML } from './validateXML'
 export { default as ValidatingChildNodeIterator } from './ValidatingChildNodeIterator'
-export { xmlNodeHelpers }
 export { default as XMLSchema } from './XMLSchema'
