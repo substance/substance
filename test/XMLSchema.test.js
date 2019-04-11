@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { compileRNG, DefaultDOMElement, validateXMLSchema } from 'substance'
+import { compileRNG, DefaultDOMElement, validateXML } from 'substance'
 
 test('XMLSchema: Sequence', (t) => {
   const RNG = `
@@ -38,7 +38,7 @@ test('XMLSchema: Sequence', (t) => {
       <c/>
     </foo>
   `)
-  result = validateXMLSchema(xmlSchema, doc)
+  result = validateXML(xmlSchema, doc)
   t.ok(result.ok, '(a,b,c) should be valid')
 
   doc = DefaultDOMElement.parseXML(`
@@ -47,7 +47,7 @@ test('XMLSchema: Sequence', (t) => {
       <c/>
     </foo>
   `)
-  result = validateXMLSchema(xmlSchema, doc)
+  result = validateXML(xmlSchema, doc)
   t.notOk(result.ok, '(a,c) should not be valid')
 
   t.end()
@@ -91,7 +91,7 @@ test('XMLSchema: Interleaving', (t) => {
       <c/>
     </foo>
   `)
-  result = validateXMLSchema(xmlSchema, doc)
+  result = validateXML(xmlSchema, doc)
   t.ok(result.ok, '(a,b,c) should be valid')
 
   doc = DefaultDOMElement.parseXML(`
@@ -101,7 +101,7 @@ test('XMLSchema: Interleaving', (t) => {
       <b/>
     </foo>
   `)
-  result = validateXMLSchema(xmlSchema, doc)
+  result = validateXML(xmlSchema, doc)
   t.ok(result.ok, '(a,c,b) should be valid, too')
 
   doc = DefaultDOMElement.parseXML(`
@@ -110,7 +110,7 @@ test('XMLSchema: Interleaving', (t) => {
       <b/>
     </foo>
   `)
-  result = validateXMLSchema(xmlSchema, doc)
+  result = validateXML(xmlSchema, doc)
   t.notOk(result.ok, 'but (a,b) should not be valid')
 
   t.end()
@@ -131,7 +131,7 @@ const TEXT = `
 test('XMLSchema: Text elements should be allowed to be empty', t => {
   let xmlSchema = _compileRNG(TEXT, 'foo')
   let doc = DefaultDOMElement.parseXML(`<foo></foo>`)
-  let result = validateXMLSchema(xmlSchema, doc)
+  let result = validateXML(xmlSchema, doc)
   t.ok(result.ok, 'empty text element is valid')
   t.end()
 })
@@ -139,7 +139,7 @@ test('XMLSchema: Text elements should be allowed to be empty', t => {
 test('XMLSchema: Text elements should allow for CDATA', t => {
   let xmlSchema = _compileRNG(TEXT, 'foo')
   let doc = DefaultDOMElement.parseXML(`<foo><![CDATA[x^2 > y]]></foo>`)
-  let result = validateXMLSchema(xmlSchema, doc)
+  let result = validateXML(xmlSchema, doc)
   t.ok(result.ok, 'text element with CDATA is valid')
   t.end()
 })
