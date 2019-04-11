@@ -3,7 +3,6 @@ export * from './dom/index'
 export * from './model/index'
 export * from './ui/index'
 export * from './util/index'
-export * from './xml/index'
 export * from './packages/index'
 
 // patched cssSelect

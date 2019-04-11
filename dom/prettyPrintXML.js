@@ -1,11 +1,7 @@
-import DOM from '../dom/DefaultDOMElement'
-import isString from '../util/isString'
+import DOM from './DefaultDOMElement'
 import _isTextNodeEmpty from './_isTextNodeEmpty'
+import isString from '../util/isString'
 
-/*
-  Schema drive pretty-printer, that inserts indentation for
-  structural elements, and preserves white-spaces for text nodes and inline-elements
-*/
 export default function prettyPrintXML (xml) {
   let dom
   if (isString(xml)) {
