@@ -154,13 +154,7 @@ function _validateElement (elementSchema, el) {
   if (elementSchema.type === 'external' || elementSchema.type === 'not-implemented') {
     // skip
   } else {
-    // HACK: special treatment for our text elements which are not real DOM elements
-    let res
-    if (el._isXMLTextElement) {
-      res = _checkChildren(elementSchema, el.toXML())
-    } else {
-      res = _checkChildren(elementSchema, el)
-    }
+    let res = _checkChildren(elementSchema, el)
     if (!res.ok) {
       errors = errors.concat(res.errors)
       valid = false
