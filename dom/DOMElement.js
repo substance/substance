@@ -741,13 +741,13 @@ export default class DOMElement {
     throw new Error('NOT_IMPLEMENTED')
   }
 
+  /**
+   * @param {*} qualifiedNameStr the name of the root element
+   * @param {*} publicId the id of the schema
+   * @param {*} systemId typically a DTD URI
+   */
   setDoctype(qualifiedNameStr, publicId, systemId) { // eslint-disable-line
     throw new Error('NOT_IMPLEMENTED')
-  }
-
-  setDocType (...args) {
-    console.error('DEPRECATED: use setDoctype() instead')
-    return this.setDoctype(...args)
   }
 
   /**
