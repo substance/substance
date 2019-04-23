@@ -362,7 +362,7 @@ export default class Component extends EventEmitter {
     this._render()
     el.appendChild(this.el)
     if (el.isInDocument()) {
-      this.triggerDidMount(true)
+      this.triggerDidMount()
     }
     return this
   }
@@ -460,7 +460,7 @@ export default class Component extends EventEmitter {
     for (let child of children) {
       // We pass isMounted=true to save costly calls to Component.isMounted
       // for each child / grandchild
-      child.triggerDidMount(true)
+      child.triggerDidMount()
     }
   }
 
@@ -943,7 +943,7 @@ export default class Component extends EventEmitter {
     _disposeChild(oldChild)
     this.el.replaceChild(newChild.el, oldChild.el)
     if (this.isMounted()) {
-      newChild.triggerDidMount(true)
+      newChild.triggerDidMount()
     }
   }
 
@@ -1119,7 +1119,7 @@ function _disposeChild (child) {
 // NOTE: this is used for incremental updates only
 function _mountChild (parent, child) {
   if (parent.isMounted()) {
-    child.triggerDidMount(true)
+    child.triggerDidMount()
   }
   if (child._owner && child._ref) {
     child._owner.refs[child._ref] = child
