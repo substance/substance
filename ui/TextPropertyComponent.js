@@ -1,3 +1,4 @@
+import getKeyForPath from '../util/getKeyForPath'
 import isNumber from '../util/isNumber'
 import Coordinate from '../model/Coordinate'
 import Component from './Component'
@@ -5,21 +6,17 @@ import AnnotatedTextComponent from './AnnotatedTextComponent'
 import SelectionFragmentComponent from './SelectionFragmentComponent'
 
 /**
-  Renders a text property. Used internally by different components to render
-  editable text.
-
-  @prop {String[]} path path to a text property
-  @prop {String} [tagName] specifies which tag should be used - defaults to `div`
-
-  @example
-
-  ```js
-  $$(TextProperty, {
-    path: [ 'paragraph-1', 'content']
-  })
-  ```
-*/
-
+ * Renders a text property. Used internally by different components to render
+ * editable text.
+ *
+ * @example
+ *
+ * ```js
+ * $$(TextProperty, {
+ *   path: [ 'paragraph-1', 'content']
+ * })
+ * ```
+ */
 export default class TextPropertyComponent extends AnnotatedTextComponent {
   getInitialState () {
     const markersManager = this.context.markersManager
@@ -58,7 +55,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     let el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
-        'data-path': path.join('.')
+        'data-path': getKeyForPath(path)
       })
       .css({
         'white-space': 'pre-wrap'
@@ -67,11 +64,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     if (this.isEmpty()) {
       el.addClass('sm-empty')
       if (this.props.placeholder) {
-        el.append(
-          $$('span').addClass('se-placeholder').append(
-            this.props.placeholder
-          )
-        )
+        el.setAttribute('data-placeholder', this.props.placeholder)
       }
     }
 
