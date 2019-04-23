@@ -367,7 +367,6 @@ export default class DOMSelection {
         if (childComp && childComp._isTextPropertyComponent) {
           prop = child
         }
-        // let prop = last(child.findAll('data-path'))
         if (prop) {
           coor = TextPropertyComponent.getCoordinate(nodeEl, prop, (offset > 0) ? prop.getChildCount() : 0)
         }
