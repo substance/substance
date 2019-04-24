@@ -114,7 +114,7 @@ class IncrementalData extends Data {
   */
   _getDiffOp (path, diff) {
     var diffOp = null
-    if (diff.isOperation) {
+    if (diff._isOperation) {
       diffOp = diff
     } else {
       var value = this.get(path)
