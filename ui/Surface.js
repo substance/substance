@@ -238,6 +238,13 @@ export default class Surface extends Component {
     throw new Error('This method is abstract.')
   }
 
+  type (ch) {
+    const editorSession = this.getEditorSession()
+    editorSession.transaction((tx) => {
+      tx.insertText(ch)
+    }, { action: 'type' })
+  }
+
   // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
   rerenderDOMSelection () {
     if (this.isDisabled()) return
@@ -315,13 +322,10 @@ export default class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-    let text = event.data
+    let ch = event.data
     const keyboardManager = this.getKeyboardManager()
-    if (!keyboardManager || !keyboardManager.onTextInput(text)) {
-      const editorSession = this.getEditorSession()
-      editorSession.transaction((tx) => {
-        tx.insertText(text)
-      }, { action: 'type' })
+    if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+      this.type(ch)
     }
   }
 
@@ -357,13 +361,10 @@ export default class Surface extends Component {
       event.stopPropagation()
       if (!event.data) return
       this._delayed(() => {
-        let text = event.data
+        let ch = event.data
         const keyboardManager = this.getKeyboardManager()
-        if (!keyboardManager || !keyboardManager.onTextInput(text)) {
-          const editorSession = this.getEditorSession()
-          editorSession.transaction((tx) => {
-            tx.insertText(text)
-          }, { action: 'type' })
+        if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+          this.type(ch)
         }
       })
     }
@@ -383,18 +384,16 @@ export default class Surface extends Component {
     ) {
       return
     }
-    let character = String.fromCharCode(event.which)
+    let ch = String.fromCharCode(event.which)
     if (!event.shiftKey) {
-      character = character.toLowerCase()
+      ch = ch.toLowerCase()
     }
     event.preventDefault()
     event.stopPropagation()
     const keyboardManager = this.getKeyboardManager()
-    if (!keyboardManager || !keyboardManager.onTextInput(character)) {
-      if (character.length > 0) {
-        this.getEditorSession().transaction((tx) => {
-          tx.insertText(character)
-        }, { action: 'type' })
+    if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+      if (ch.length > 0) {
+        this.type(ch)
       }
     }
   }
@@ -655,13 +654,10 @@ export default class Surface extends Component {
   _handleSpaceKey (event) {
     event.stopPropagation()
     event.preventDefault()
-    const text = ' '
+    const ch = ' '
     const keyboardManager = this.getKeyboardManager()
-    if (!keyboardManager || !keyboardManager.onTextInput(text)) {
-      const editorSession = this.getEditorSession()
-      editorSession.transaction((tx) => {
-        tx.insertText(text)
-      }, { action: 'type' })
+    if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+      this.type(ch)
     }
   }
 
