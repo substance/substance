@@ -5,6 +5,11 @@ import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
 import setupEditor from './shared/setupEditor'
 
+// TODO: add tests for missed branches of TextPropertyComponent._getCharPos()
+// -> however this is not easy, as some cases seem to be there to handle
+// observed edge cases. Unfortunately I have not documented these cases
+// nor have I added tests covering these branches.
+
 test('TextPropertyComponent: Get coordinate of empty property', t => {
   let doc = createTestArticle(simple)
   doc.create({
