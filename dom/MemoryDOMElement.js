@@ -275,7 +275,7 @@ export default class MemoryDOMElement extends DOMElement {
     let oldDocType = _findDocTypeElement(doc)
     let newDocType = this.createDocumentType(qualifiedNameStr, publicId, systemId)
     if (oldDocType) {
-      doc.replaceChild(newDocType, oldDocType)
+      doc.replaceChild(oldDocType, newDocType)
     } else {
       // insert it before the first ELEMENT
       doc.insertBefore(newDocType, doc.getChildren()[0])

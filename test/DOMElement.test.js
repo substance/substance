@@ -755,6 +755,23 @@ function DOMElementTests (impl) {
     t.ok(second.childNodes.every(el => el.parentNode === second), '.. with correct parent node')
     t.end()
   })
+
+  test('Setting doctype', t => {
+    let oldPublicId = '-//BLA//DTD Bla 20190208//EN'
+    let oldSystemId = 'bar.dtd'
+    let newPublicId = '-//BLUPP//DTD Blupp 20190208//EN'
+    let newSystemId = 'baz.dtd'
+    function _xmlStr (publicId, systemId) {
+      return `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE foo PUBLIC "${publicId}" "${systemId}"><foo/>`
+    }
+    const oldXmlStr = _xmlStr(oldPublicId, oldSystemId)
+    let xmlDom = DefaultDOMElement.parseXML(oldXmlStr)
+    let oldDoctype = xmlDom.getDoctype()
+    t.deepEqual([oldDoctype.publicId, oldDoctype.systemId], [oldPublicId, oldSystemId], 'docType should have been parsed correctly')
+    xmlDom.setDoctype('foo', newPublicId, newSystemId)
+    t.equal(xmlDom.serialize(), _xmlStr(newPublicId, newSystemId), 'docType should have been updated')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {
