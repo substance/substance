@@ -934,14 +934,17 @@ export default class Component extends EventEmitter {
     this.el.removeChild(child.el)
   }
 
-  replaceChild (oldChild, newChild) {
-    if (!newChild || !oldChild ||
-        !newChild._isComponent || !oldChild._isComponent) {
-      throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
+  replaceChild (oldChild, newVirtualChild) {
+    if (!oldChild || !oldChild._isComponent) {
+      throw new Error('replaceChild(): oldChild must be a child component.')
     }
+    if (!newVirtualChild || !newVirtualChild._isVirtualElement || newVirtualChild._owner._comp !== this) {
+      throw new Error('replaceChild(): newVirtualChild must be a VirtualElement instance created with a rendering context for this component.')
+    }
+    let newChild = this.renderingEngine._renderChild(this, newVirtualChild)
     // Attention: Node.replaceChild has weird semantics
     _disposeChild(oldChild)
-    this.el.replaceChild(newChild.el, oldChild.el)
+    this.el.replaceChild(oldChild.el, newChild.el)
     if (this.isMounted()) {
       newChild.triggerDidMount()
     }
