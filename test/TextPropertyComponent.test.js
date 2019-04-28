@@ -2,7 +2,6 @@ import { test } from 'substance-test'
 import { TextPropertyComponent } from 'substance'
 import { getMountPoint } from './shared/testHelpers'
 import createTestArticle from './shared/createTestArticle'
-import getTestConfig from './shared/getTestConfig'
 import simple from './fixture/simple'
 import setupEditor from './shared/setupEditor'
 
