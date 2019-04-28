@@ -1,6 +1,6 @@
 import { DocumentIndex } from 'substance'
 import { test, spy } from 'substance-test'
-import fixture from './fixture/createTestArticle'
+import fixture from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 test('DocumentIndex: index should have been warmed up with existing nodes.', t => {

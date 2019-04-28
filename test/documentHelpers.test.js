@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { documentHelpers, getChangeFromDocument } from 'substance'
-import fixture from './fixture/createTestArticle'
+import fixture from './shared/createTestArticle'
 import simple from './fixture/simple'
 import containerAnnoSample from './fixture/containerAnnoSample'
 import { _l1, _l11, _l12, _l13, LI1_TEXT, LI2_TEXT, LI3_TEXT } from './fixture/samples'

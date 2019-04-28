@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { documentHelpers, EditingInterface, toUnixLineEndings } from 'substance'
-import fixture from './fixture/createTestArticle'
+import fixture from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 test('paste: Pasting plain text', t => {

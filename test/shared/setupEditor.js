@@ -1,4 +1,4 @@
-import { getMountPoint } from '../shared/testHelpers'
+import { getMountPoint } from './testHelpers'
 import TestEditor from './TestEditor'
 import createTestEditorSession from './createTestEditorSession'
 

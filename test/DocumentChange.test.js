@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { Document, ChangeRecorder, DocumentChange } from 'substance'
-import getTestConfig from './fixture/getTestConfig'
+import getTestConfig from './shared/getTestConfig'
 import simple from './fixture/simple'
 
 test('DocumentChange: hasUpdated()', t => {

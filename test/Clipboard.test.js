@@ -3,9 +3,9 @@ import {
   DefaultDOMElement, Clipboard,
   platform, find
 } from 'substance'
+import setupEditor from './shared/setupEditor'
 
 import simple from './fixture/simple'
-import setupEditor from './fixture/setupEditor'
 import BrowserLinuxPLainTextFixture from './fixture/html/browser-linux-plain-text'
 import BrowserLinuxAnnotatedTextFixture from './fixture/html/browser-linux-annotated-text'
 import BrowserLinuxTwoParagraphsFixture from './fixture/html/browser-linux-two-paragraphs'

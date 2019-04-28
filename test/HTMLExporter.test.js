@@ -1,8 +1,8 @@
 import { test as substanceTest } from 'substance-test'
 import { DefaultDOMElement, MemoryDOMElement, platform } from 'substance'
-import createTestArticle from './fixture/createTestArticle'
+import createTestArticle from './shared/createTestArticle'
+import getTestConfig from './shared/getTestConfig'
 import simple from './fixture/simple'
-import getTestConfig from './fixture/getTestConfig'
 
 const CONTENT = '0123456789'
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-invalid-this */
 import { test } from 'substance-test'
 import { platform, BrowserDOMElement, parseKeyCombo } from 'substance'
-import setupEditor from './fixture/setupEditor'
+import setupEditor from './shared/setupEditor'
 import { createSurfaceEvent } from './shared/testHelpers'
 
 function uiTest (title, fn) {

@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
+import setupEditor from './shared/setupEditor'
 import simple from './fixture/simple'
-import setupEditor from './fixture/setupEditor'
 
 test('CommandManager: Command state changing with selection', (t) => {
   let { editorSession } = setupEditor(t, simple)

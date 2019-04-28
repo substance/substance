@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { EditingInterface } from 'substance'
-import setupEditor from './fixture/setupEditor'
+import setupEditor from './shared/setupEditor'
 import twoParagraphs from './fixture/twoParagraphs'
 
 // NOTE: surface ids are a bit ids of Surfaces and IsolatedNodes are not very intuitive

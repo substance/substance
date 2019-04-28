@@ -1,5 +1,8 @@
 import { test } from 'substance-test'
-import { Document, DocumentSchema, DocumentNode, CHILD, OPTIONAL, CHILDREN, TextNode, PropertyAnnotation } from 'substance'
+import {
+  Document, DocumentSchema, DocumentNode, CHILD, OPTIONAL, CHILDREN, TextNode,
+  PropertyAnnotation
+} from 'substance'
 
 /*
  Tests:

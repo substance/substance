@@ -2,9 +2,9 @@ import { test } from 'substance-test'
 import {
   CHILD, CHILDREN, Document, DocumentSchema, DocumentNode, map, pick
 } from 'substance'
-import fixture from './fixture/createTestArticle'
+import fixture from './shared/createTestArticle'
+import getTestConfig from './shared/getTestConfig'
 import simple from './fixture/simple'
-import getTestConfig from './fixture/getTestConfig'
 
 test('Document: Create null selection.', function (t) {
   let doc = fixture(simple)

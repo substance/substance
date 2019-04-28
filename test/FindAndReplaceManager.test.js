@@ -1,7 +1,7 @@
 import { test } from 'substance-test'
-import setupEditor from './fixture/setupEditor'
+import setupEditor from './shared/setupEditor'
+import TestFindAndReplaceManager from './shared/TestFindAndReplaceManager'
 import simple from './fixture/simple'
-import TestFindAndReplaceManager from './fixture/TestFindAndReplaceManager'
 
 /*
 Priorities:

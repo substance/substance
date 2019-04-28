@@ -1,7 +1,7 @@
 import { test as substanceTest, spy } from 'substance-test'
 import { DefaultDOMElement, substanceGlobals, isEqual, Component, platform, isArrayEqual, RenderingEngine } from 'substance'
 import { getMountPoint } from './shared/testHelpers'
-import TestComponent from './fixture/TestComponent'
+import TestComponent from './shared/TestComponent'
 
 class Simple extends TestComponent {
   render ($$) {
