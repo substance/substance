@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { DocumentSession, ChangeHistoryView, AbstractEditorSession } from 'substance'
-import createTestArticle from './fixture/createTestArticle'
+import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 test('ChangeHistory: undoing and redoing changes by a single user', t => {

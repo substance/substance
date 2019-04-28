@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import setupEditor from './fixture/setupEditor'
+import setupEditor from './shared/setupEditor'
 import simple from './fixture/simple'
 
 test('EditorSession: Keeping TransactionDocument up-to-date.', function (t) {

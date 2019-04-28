@@ -1,7 +1,7 @@
 import { test } from 'substance-test'
 import { DefaultDOMElement } from 'substance'
-import checkValues from './fixture/checkValues'
-import getTestConfig from './fixture/getTestConfig'
+import checkValues from './shared/checkValues'
+import getTestConfig from './shared/getTestConfig'
 
 const CONTENT = '0123456789'
 

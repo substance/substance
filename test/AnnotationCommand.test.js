@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { AnnotationCommand } from 'substance'
-import setupEditor from './fixture/setupEditor'
+import setupEditor from './shared/setupEditor'
 import containerAnnoSample from './fixture/containerAnnoSample'
 import simple from './fixture/simple'
 

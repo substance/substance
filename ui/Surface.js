@@ -112,8 +112,8 @@ export default class Surface extends Component {
         // as it contains the actual inserted string.
         // Though, it is not available in FF and not working properly in IE
         // where we fall back to a ContentEditable backed implementation.
-        if (platform.inBrowser && window.TextEvent && !platform.isIE) {
-          el.on('textInput', this.onTextInput)
+        if (platform.isChromium || platform.isOpera) {
+          el.on('input', this.onTextInput)
         } else {
           el.on('keypress', this.onTextInputShim)
         }
@@ -238,6 +238,13 @@ export default class Surface extends Component {
     throw new Error('This method is abstract.')
   }
 
+  type (ch) {
+    const editorSession = this.getEditorSession()
+    editorSession.transaction((tx) => {
+      tx.insertText(ch)
+    }, { action: 'type' })
+  }
+
   // As the DOMSelection is owned by the Editor now, rerendering could now be done by someone else, e.g. the SurfaceManager?
   rerenderDOMSelection () {
     if (this.isDisabled()) return
@@ -274,8 +281,7 @@ export default class Surface extends Component {
 
     // keyboard shortcuts
     const keyboardManager = this.getKeyboardManager()
-    let custom = keyboardManager.onKeydown(event)
-    if (!custom) {
+    if (!keyboardManager || !keyboardManager.onKeydown(event)) {
       // core handlers for cursor movements and editor interactions
       switch (event.keyCode) {
         // Cursor movements
@@ -315,13 +321,10 @@ export default class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-    let text = event.data
+    let ch = event.data
     const keyboardManager = this.getKeyboardManager()
-    if (!keyboardManager || !keyboardManager.onTextInput(text)) {
-      const editorSession = this.getEditorSession()
-      editorSession.transaction((tx) => {
-        tx.insertText(text)
-      }, { action: 'type' })
+    if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+      this.type(ch)
     }
   }
 
@@ -357,19 +360,17 @@ export default class Surface extends Component {
       event.stopPropagation()
       if (!event.data) return
       this._delayed(() => {
-        let text = event.data
+        let ch = event.data
         const keyboardManager = this.getKeyboardManager()
-        if (!keyboardManager || !keyboardManager.onTextInput(text)) {
-          const editorSession = this.getEditorSession()
-          editorSession.transaction((tx) => {
-            tx.insertText(text)
-          }, { action: 'type' })
+        if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+          this.type(ch)
         }
       })
     }
   }
 
-  // TODO: do we need this anymore?
+  // ATTENTION: this is needed for most browsers other than Chrome
+  // because most of them do not support InputEvent.data (or will maybe never)
   onTextInputShim (event) {
     if (!this._shouldConsumeEvent(event)) return
     // Filter out non-character keys
@@ -383,18 +384,16 @@ export default class Surface extends Component {
     ) {
       return
     }
-    let character = String.fromCharCode(event.which)
+    let ch = String.fromCharCode(event.which)
     if (!event.shiftKey) {
-      character = character.toLowerCase()
+      ch = ch.toLowerCase()
     }
     event.preventDefault()
     event.stopPropagation()
     const keyboardManager = this.getKeyboardManager()
-    if (!keyboardManager || !keyboardManager.onTextInput(character)) {
-      if (character.length > 0) {
-        this.getEditorSession().transaction((tx) => {
-          tx.insertText(character)
-        }, { action: 'type' })
+    if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+      if (ch.length > 0) {
+        this.type(ch)
       }
     }
   }
@@ -655,13 +654,10 @@ export default class Surface extends Component {
   _handleSpaceKey (event) {
     event.stopPropagation()
     event.preventDefault()
-    const text = ' '
+    const ch = ' '
     const keyboardManager = this.getKeyboardManager()
-    if (!keyboardManager || !keyboardManager.onTextInput(text)) {
-      const editorSession = this.getEditorSession()
-      editorSession.transaction((tx) => {
-        tx.insertText(text)
-      }, { action: 'type' })
+    if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
+      this.type(ch)
     }
   }
 

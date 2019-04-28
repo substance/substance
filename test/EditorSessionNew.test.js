@@ -1,7 +1,7 @@
 import { test } from 'substance-test'
 import { AbstractEditorSession, DocumentSession } from 'substance'
+import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
-import createTestArticle from './fixture/createTestArticle'
 
 // ATTENTION: I am in the middle of a refactor
 // replacing the old EditorSession and throwing away all deprecated stuff

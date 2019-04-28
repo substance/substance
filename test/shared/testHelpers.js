@@ -25,3 +25,15 @@ export function getMountPoint (t) {
     return htmlDoc.find('body')
   }
 }
+
+export class DOMEvent {
+  constructor (props) {
+    Object.assign(this, props)
+  }
+  stopPropagation () {}
+  preventDefault () {}
+}
+
+export function createSurfaceEvent (surface, eventData) {
+  return new DOMEvent(Object.assign({ target: surface.getNativeElement() }, eventData))
+}

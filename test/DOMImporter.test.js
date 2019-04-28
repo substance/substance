@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { DOMImporter, DefaultDOMElement } from 'substance'
-import getTestConfig from './fixture/getTestConfig'
+import getTestConfig from './shared/getTestConfig'
 
 const pConverter = {
   type: 'paragraph',

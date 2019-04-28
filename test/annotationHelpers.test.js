@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
 import { annotationHelpers, EditingInterface } from 'substance'
-import createTestArticle from './fixture/createTestArticle'
+import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 let truncateAnnotation = annotationHelpers.truncateAnnotation

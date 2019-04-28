@@ -1,7 +1,7 @@
 import { test as substanceTest, spy } from 'substance-test'
-import { DefaultDOMElement, substanceGlobals, isEqual, Component, platform, isArrayEqual } from 'substance'
+import { DefaultDOMElement, substanceGlobals, isEqual, Component, platform, isArrayEqual, RenderingEngine } from 'substance'
 import { getMountPoint } from './shared/testHelpers'
-import TestComponent from './fixture/TestComponent'
+import TestComponent from './shared/TestComponent'
 
 class Simple extends TestComponent {
   render ($$) {
@@ -1106,8 +1106,6 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  /* ##################### Integration tests / Issues ########################## */
-
   test('Preserve components when ref matches and rerender when props changed', t => {
     class ItemComponent extends TestComponent {
       shouldRerender (nextProps) {
@@ -2012,6 +2010,75 @@ function ComponentTests (debug, memory) {
     comp.rerender()
     let actual = comp.find('.sc-simple')
     t.ok(isArrayEqual(expected, actual), 'all children should have been preserved')
+    t.end()
+  })
+
+  test('[Incremental] inserting a virtual element', t => {
+    class ParentComponent extends Component {
+      render ($$) {
+        return $$('div')
+      }
+    }
+    class ChildComponent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass(this.props.className)
+      }
+    }
+    let comp = ParentComponent.mount(getMountPoint(t))
+    let { $$ } = RenderingEngine.createContext(comp)
+    comp.appendChild($$(ChildComponent, {className: 'foo'}))
+    let foo = comp.find('.foo')
+    t.notNil(foo, 'component should have been appended')
+    t.equal(foo.didMount.callCount, 1, '.. and its didMount() should have been called ')
+    comp.insertAt(0, $$(ChildComponent, {className: 'bar'}))
+    let bar = comp.getChildAt(0)
+    t.ok(bar.hasClass('bar'), 'component should have been inserted at first position')
+    t.equal(bar.didMount.callCount, 1, '.. and its didMount() should have been called ')
+    t.end()
+  })
+
+  test('[Incremental] removing a child component', t => {
+    class ParentComponent extends Component {
+      render ($$) {
+        return $$('div').append(
+          $$(ChildComponent, { className: 'foo' }).ref('foo')
+        )
+      }
+    }
+    class ChildComponent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass(this.props.className)
+      }
+    }
+    let comp = ParentComponent.mount(getMountPoint(t))
+    let foo = comp.refs.foo
+    comp.removeAt(0)
+    t.equal(comp.getChildCount(), 0, 'component should have been removed')
+    t.equal(foo.dispose.callCount, 1, '.. and its dispose() should have been called ')
+    t.end()
+  })
+
+  test('[Incremental] replacing a child component', t => {
+    class ParentComponent extends Component {
+      render ($$) {
+        return $$('div').append(
+          $$(ChildComponent, { className: 'foo' })
+        )
+      }
+    }
+    class ChildComponent extends TestComponent {
+      render ($$) {
+        return $$('div').addClass(this.props.className)
+      }
+    }
+    let comp = ParentComponent.mount(getMountPoint(t))
+    let foo = comp.getChildAt(0)
+    let { $$ } = RenderingEngine.createContext(comp)
+    comp.replaceChild(foo, $$(ChildComponent, { className: 'bar' }))
+    let bar = comp.getChildAt(0)
+    t.ok(bar.hasClass('bar'), 'old component should have been replaced')
+    t.equal(foo.dispose.callCount, 1, '.. and dispose() of the old child should have been called ')
+    t.equal(bar.didMount.callCount, 1, '.. and didMount() of the new child should have been called ')
     t.end()
   })
 }

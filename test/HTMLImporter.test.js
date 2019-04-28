@@ -1,7 +1,7 @@
 import { test as substanceTest } from 'substance-test'
 import { DefaultDOMElement, platform } from 'substance'
-import checkValues from './fixture/checkValues'
-import getTestConfig from './fixture/getTestConfig'
+import checkValues from './shared/checkValues'
+import getTestConfig from './shared/getTestConfig'
 
 const CONTENT = '0123456789'
 

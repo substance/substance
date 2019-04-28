@@ -1,7 +1,7 @@
 import { test } from 'substance-test'
 import { platform, setDOMSelection, EditingInterface } from 'substance'
-import setupEditor from './fixture/setupEditor'
-import checkValues from './fixture/checkValues'
+import setupEditor from './shared/setupEditor'
+import checkValues from './shared/checkValues'
 import { _p1, _empty } from './fixture/samples'
 
 function uiTest (title, fn) {
@@ -191,46 +191,6 @@ uiTest('DOMSelection: Rendering a cursor after inline node at the end of a prope
   t.equal(end.offset, 6, 'focusOffset should be correct.')
   t.end()
 })
-
-// uiTest("Rendering a cursor before isolated node", function(t) {
-//   let { doc, surface } = setupEditor(t, _t1)
-//   let domSelection = surface.context.domSelection
-//   let sel = doc.createSelection({
-//     type: 'node',
-//     nodeId: 't1',
-//     mode: 'before',
-//     containerPath: ['body', 'nodes'],
-//     surfaceId: 'body'
-//   })
-//   domSelection.setSelection(sel)
-//   // let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
-//   // let pSpan = editor.el.find('[data-path="p.content"]')
-//   // t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
-//   // t.equal(start.offset, 6, 'anchorOffset should be correct.')
-//   // t.ok(end.container === start.container, 'focusNode should be correct.')
-//   // t.equal(end.offset, 6, 'focusOffset should be correct.')
-//   t.end()
-// })
-
-// uiTest("Rendering a cursor after isolated node", function(t) {
-//   let { doc, surface } = setupEditor(t, _t1)
-//   let domSelection = surface.context.domSelection
-//   let sel = doc.createSelection({
-//     type: 'node',
-//     nodeId: 't1',
-//     mode: 'after',
-//     containerPath: ['body', 'nodes'],
-//     surfaceId: 'body'
-//   })
-//   domSelection.setSelection(sel)
-//   // let {start, end} = domSelection.mapModelToDOMCoordinates(sel)
-//   // let pSpan = editor.el.find('[data-path="p.content"]')
-//   // t.ok(start.container === pSpan.getNativeElement(), 'anchorNode should be correct.')
-//   // t.equal(start.offset, 6, 'anchorOffset should be correct.')
-//   // t.ok(end.container === start.container, 'focusNode should be correct.')
-//   // t.equal(end.offset, 6, 'focusOffset should be correct.')
-//   t.end()
-// })
 
 function surfaceWithParagraphs (doc, body) {
   let tx = new EditingInterface(doc)

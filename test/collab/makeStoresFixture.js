@@ -1,7 +1,7 @@
 import { SnapshotStore, ChangeStore } from 'substance'
 import computeSnapshot from './computeTestSnapshot'
-import createTestArticle from '../fixture/createTestArticle'
-import createChangeset from '../fixture/createChangeset'
+import createTestArticle from '../shared/createTestArticle'
+import createChangeset from '../shared/createChangeset'
 import twoParagraphs from '../fixture/twoParagraphs'
 
 const EMPTY_DOC = {nodes: {}}

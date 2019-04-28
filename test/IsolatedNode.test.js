@@ -1,6 +1,6 @@
 import { test } from 'substance-test'
+import setupEditor from './shared/setupEditor'
 import nestedContainers from './fixture/nestedContainers'
-import setupEditor from './fixture/setupEditor'
 
 test("IsolatedNode: IsolatedNodes should be 'not-selected' when selection is null", t => {
   let { editorSession, editor } = setupEditor(t, nestedContainers)
