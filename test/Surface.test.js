@@ -1,6 +1,6 @@
 /* eslint-disable no-invalid-this */
 import { test } from 'substance-test'
-import { platform, BrowserDOMElement } from 'substance'
+import { platform, BrowserDOMElement, parseKeyCombo } from 'substance'
 import setupEditor from './fixture/setupEditor'
 import { createSurfaceEvent } from './shared/testHelpers'
 
@@ -111,5 +111,19 @@ test('Surface: input events (shim)', t => {
   })
   surface.onTextInputShim(createSurfaceEvent(surface, { which: 'x'.charCodeAt(0) }))
   t.equal(doc.get(['p1', 'content']), 'x' + P1_TEXT, 'text should have been updated')
+  t.end()
+})
+
+test('Surface: space', t => {
+  let { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
+  editorSession.setSelection({
+    type: 'property',
+    path: ['p1', 'content'],
+    startOffset: 0,
+    endOffset: 0,
+    surfaceId: surface.id
+  })
+  surface.onKeyDown(createSurfaceEvent(surface, parseKeyCombo('Space')))
+  t.equal(doc.get(['p1', 'content']), ' ' + P1_TEXT, 'text should have been updated')
   t.end()
 })
