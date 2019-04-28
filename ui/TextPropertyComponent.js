@@ -277,7 +277,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
           charPos = this._getCharPos(parent, 0) + offset
         }
       } else {
-        // the node has a predecessor so we can apply recurse using the child index
+        // the node has a predecessor so we can call recursively
         childIdx = parent.getChildIndex(node)
         charPos = this._getCharPos(parent, childIdx) + offset
       }

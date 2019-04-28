@@ -46,9 +46,22 @@ test('TextPropertyComponent: Get coordinate if cursor is inside inline-node', t 
     })
     body.append(p1)
   })
+  let rootEl = surface.getElement()
   let p1 = doc.get('p1')
   let in1Comp = surface.find('[data-id=in1]')
-  let coor = TextPropertyComponent.getCoordinate(surface.getElement(), in1Comp.getElement(), 1)
-  t.deepEqual(coor.toJSON(), { path: p1.getPath(), offset: 4 })
+  let el, coor
+  // Note: the inline-node case has the most exceptions re cursor mapping
+  el = in1Comp.getElement()
+  coor = TextPropertyComponent.getCoordinate(rootEl, el, 1)
+  t.deepEqual(coor.toJSON(), { path: p1.getPath(), offset: 4 }, 'coordinate should be mapped correctly')
+
+  el = in1Comp.getElement().getChildAt(0)
+  coor = TextPropertyComponent.getCoordinate(rootEl, el, 1)
+  t.deepEqual(coor.toJSON(), { path: p1.getPath(), offset: 4 }, 'coordinate should be mapped correctly')
+
+  el = in1Comp.getElement().getChildAt(0).getChildAt(0)
+  coor = TextPropertyComponent.getCoordinate(rootEl, el, 1)
+  t.deepEqual(coor.toJSON(), { path: p1.getPath(), offset: 4 }, 'coordinate should be mapped correctly')
+
   t.end()
 })
