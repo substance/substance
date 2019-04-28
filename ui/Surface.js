@@ -112,8 +112,8 @@ export default class Surface extends Component {
         // as it contains the actual inserted string.
         // Though, it is not available in FF and not working properly in IE
         // where we fall back to a ContentEditable backed implementation.
-        if (platform.inBrowser && window.TextEvent && !platform.isIE) {
-          el.on('textInput', this.onTextInput)
+        if (platform.isChromium || platform.isOpera) {
+          el.on('input', this.onTextInput)
         } else {
           el.on('keypress', this.onTextInputShim)
         }
@@ -281,8 +281,7 @@ export default class Surface extends Component {
 
     // keyboard shortcuts
     const keyboardManager = this.getKeyboardManager()
-    let custom = keyboardManager.onKeydown(event)
-    if (!custom) {
+    if (!keyboardManager || !keyboardManager.onKeydown(event)) {
       // core handlers for cursor movements and editor interactions
       switch (event.keyCode) {
         // Cursor movements
@@ -370,7 +369,8 @@ export default class Surface extends Component {
     }
   }
 
-  // TODO: do we need this anymore?
+  // ATTENTION: this is needed for most browsers other than Chrome
+  // because most of them do not support InputEvent.data (or will maybe never)
   onTextInputShim (event) {
     if (!this._shouldConsumeEvent(event)) return
     // Filter out non-character keys
