@@ -635,6 +635,11 @@ function _update (state, vel) {
       let _childNodes = comp.el.getChildNodes()
       let oldChildren = _childNodes.map(child => {
         let childComp = child._comp
+        // NOTE: don't know why, but sometimes it happens that there appear elements that are not rendered via Component.js
+        if (!childComp) {
+          comp.el.removeChild(child)
+          return null
+        }
         // EXPERIMENTAL: trying to get forwarding components right.
         // the problem is that on the DOMElement level, forwarding components are not
         // 'visible', as they do not have an own element.
