@@ -1,319 +1,261 @@
-import forEach from '../util/forEach'
 import isString from '../util/isString'
 
-const ENTER = 1
-const EXIT = -1
+const OPEN = 1
+const CLOSE = -1
 const ANCHOR = -2
 
-// Fragmenter
-// --------
-//
-// An algorithm that is used to fragment overlapping structure elements
-// following a priority rule set.
-// E.g., we use this for creating DOM elements for annotations. The annotations
-// can partially be overlapping. However this is not allowed in general for DOM elements
-// or other hierarchical structures.
-//
-// Example: For the annotation use case consider a 'comment' spanning partially
-// over an 'emphasis' annotation.
-// 'The <comment>quick brown <bold>fox</comment> jumps over</bold> the lazy dog.'
-// We want to be able to create a valid XML structure:
-// 'The <comment>quick brown <bold>fox</bold></comment><bold> jumps over</bold> the lazy dog.'
-//
-// For that one would choose
-//
-//     {
-//        'comment': 0,
-//        'bold': 1
-//     }
-//
-// as priority levels.
-// In case of structural violations as in the example, elements with a higher level
-// would be fragmented and those with lower levels would be preserved as one piece.
-//
-// TODO: If a violation for nodes of the same level occurs an Error should be thrown.
-// Currently, in such cases the first element that is opened earlier is preserved.
+export default class Fragmenter {
+  onText (context, text, fragment) {}
 
-class Fragmenter {
-  constructor (options) {
-    Object.assign(this, options)
-  }
+  onOpen (fragment, parentContext) { return {} }
+
+  onClose (fragment, context, parentContext) {}
 
   start (rootContext, text, annotations) {
     if (!isString(text)) {
       throw new Error("Illegal argument: 'text' must be a String, but was " + text)
     }
-    this._start(rootContext, text, annotations)
-  }
-
-  onText(context, text, entry) { // eslint-disable-line
-  }
-
-  // should return the created user context
-  onEnter(entry, parentContext) { // eslint-disable-line
-    return null
-  }
-
-  onExit(entry, context, parentContext) { // eslint-disable-line
-  }
-
-  _enter (entry, parentContext) {
-    entry.counter++
-    return this.onEnter(entry, parentContext)
-  }
-
-  _exit (entry, context, parentContext) {
-    this.onExit(entry, context, parentContext)
-  }
-
-  _createText (context, text, entry) {
-    this.onText(context, text, entry)
-  }
-
-  _start (rootContext, text, annotations) {
-    var entries = _extractEntries.call(this, annotations)
-    var stack = [{context: rootContext, entry: null}]
-
-    var pos = 0
-    for (var i = 0; i < entries.length; i++) {
-      var entry = entries[i]
-      var textFragment = text.substring(pos, entry.pos)
-      if (textFragment) {
-        // add the last text to the current element
-        this._createText(stack[stack.length - 1].context, textFragment, entry)
+    let state = this._init(rootContext, text, annotations)
+    let B = state.boundaries
+    let S = state.stack
+    let TOP = () => S[S.length - 1]
+    let currentPos = 0
+    let __runs = 0
+    let MAX_RUNS = B.length * 2
+    while (B.length > 0) {
+      __runs++
+      if (__runs > MAX_RUNS) throw new Error('FIXME: infinity loop in Fragmenter implementation')
+      let b = B.shift()
+      let topContext = TOP().context
+      if (b.offset > currentPos) {
+        let textFragment = text.slice(currentPos, b.offset)
+        this.onText(topContext, textFragment)
+        currentPos = b.offset
       }
-
-      pos = entry.pos
-      var stackLevel, idx, _entry
-      if (entry.mode === ENTER || entry.mode === ANCHOR) {
-        // find the correct position and insert an entry
-        for (stackLevel = 1; stackLevel < stack.length; stackLevel++) {
-          if (entry.level < stack[stackLevel].entry.level) {
-            break
+      switch (b.type) {
+        case ANCHOR: {
+          let parentContext = topContext
+          let anchorContext = this.onOpen(b, parentContext)
+          this._close(b, anchorContext, parentContext)
+          break
+        }
+        case CLOSE: {
+          // ATTENTION: we have to make sure that closers are sorted correctly
+          let { context, entry } = TOP()
+          if (entry.node !== b.node) {
+            B.unshift(b)
+            this._fixOrderOfClosers(S, B, 0)
+            // restart this iteration
+            continue
           }
+          S.pop()
+          let parentContext = TOP().context
+          this._close(b, context, parentContext)
+          break
         }
-        // create elements which are open, and are now stacked ontop of the
-        // entered entry
-        for (idx = stack.length - 1; idx >= stackLevel; idx--) {
-          _entry = stack[idx].entry
-          // compute number of characters since last 'enter'
-          _entry.length = pos - _entry.pos
-          this._exit(_entry, stack[idx].context, stack[idx - 1].context)
-        }
-        stack.splice(stackLevel, 0, {entry: entry})
-        // create new elements for all lower entries
-        for (idx = stackLevel; idx < stack.length; idx++) {
-          _entry = stack[idx].entry
-          // bump 'enter' pos
-          _entry.pos = pos
-          stack[idx].context = this._enter(_entry, stack[idx - 1].context)
-        }
-      }
-      if (entry.mode === EXIT || entry.mode === ANCHOR) {
-        // find the according entry and remove it from the stack
-        for (stackLevel = 1; stackLevel < stack.length; stackLevel++) {
-          if (stack[stackLevel].entry.node === entry.node) {
-            break
+        case OPEN: {
+          let a = TOP().entry
+          if (!a || a.endOffset >= b.endOffset) {
+            b.stackLevel = S.length
+            let context = this.onOpen(b, topContext)
+            S.push({ context, entry: b })
+          } else {
+            // splitting annotation b
+            if (b.weight <= a.weight) {
+              b.stackLevel = S.length
+              // new closer at the splitting pos
+              let closer = {
+                type: CLOSE,
+                offset: a.endOffset,
+                node: b.node,
+                opener: b
+              }
+              // and re-opening with fragment counter increased
+              let opener = {
+                type: OPEN,
+                offset: a.endOffset,
+                node: b.node,
+                fragmentCount: b.fragmentCount + 1,
+                endOffset: b.endOffset,
+                weight: b.weight,
+                // attaching the original closer
+                closer: b.closer
+              }
+              // and vice-versa
+              b.closer.opener = opener
+              // and fixing b for sake of consistency
+              b.closer = closer
+              b.endOffset = a.endOffset
+              this._insertBoundary(B, closer)
+              this._insertBoundary(B, opener)
+              let context = this.onOpen(b, topContext)
+              S.push({ context, entry: b })
+            // splitting annotation a
+            } else {
+              // In this case we put boundary back
+              // and instead insert boundaries splitting annotation a
+              B.unshift(b)
+              // new closer at the splitting pos
+              let closer = {
+                type: CLOSE,
+                offset: b.offset,
+                node: a.node,
+                opener: a
+              }
+              // and re-opening with fragment counter increased
+              let opener = {
+                type: OPEN,
+                offset: b.offset,
+                node: a.node,
+                fragmentCount: a.fragmentCount + 1,
+                endOffset: a.endOffset,
+                weight: a.weight,
+                // attaching the original closer
+                closer: a.closer
+              }
+              // .. and vice-versa
+              a.closer.opener = opener
+              // and fixing b for sake of consistency
+              a.closer = closer
+              a.endOffset = b.offset
+              this._insertBoundary(B, closer)
+              this._insertBoundary(B, opener)
+              continue
+            }
           }
+          break
         }
-        for (idx = stack.length - 1; idx >= stackLevel; idx--) {
-          _entry = stack[idx].entry
-          // compute number of characters since last 'enter'
-          _entry.length = pos - _entry.pos
-          this._exit(_entry, stack[idx].context, stack[idx - 1].context)
-        }
-        stack.splice(stackLevel, 1)
-        // create new elements for all lower entries
-        for (idx = stackLevel; idx < stack.length; idx++) {
-          _entry = stack[idx].entry
-          // bump 'enter' pos
-          _entry.pos = pos
-          stack[idx].context = this._enter(_entry, stack[idx - 1].context)
-        }
+        default:
+          //
       }
     }
-
     // Finally append a trailing text node
-    var trailingText = text.substring(pos)
+    let trailingText = text.substring(currentPos)
     if (trailingText) {
-      this._createText(rootContext, trailingText)
+      this.onText(rootContext, trailingText)
     }
   }
-}
 
-Fragmenter.SHOULD_NOT_SPLIT = 0
-Fragmenter.NORMAL = 10
-Fragmenter.ANY = 100
-Fragmenter.ALWAYS_ON_TOP = Number.MAX_VALUE
-
-// This is a sweep algorithm wich uses a set of ENTER/EXIT entries
-// to manage a stack of active elements.
-// Whenever a new element is entered it will be appended to its parent element.
-// The stack is ordered by the annotation types.
-//
-// Examples:
-//
-// - simple case:
-//
-//       [top] -> ENTER(idea1) -> [top, idea1]
-//
-//   Creates a new 'idea' element and appends it to 'top'
-//
-// - stacked ENTER:
-//
-//       [top, idea1] -> ENTER(bold1) -> [top, idea1, bold1]
-//
-//   Creates a new 'bold' element and appends it to 'idea1'
-//
-// - simple EXIT:
-//
-//       [top, idea1] -> EXIT(idea1) -> [top]
-//
-//   Removes 'idea1' from stack.
-//
-// - reordering ENTER:
-//
-//       [top, bold1] -> ENTER(idea1) -> [top, idea1, bold1]
-//
-//   Inserts 'idea1' at 2nd position, creates a new 'bold1', and appends itself to 'top'
-//
-// - reordering EXIT
-//
-//       [top, idea1, bold1] -> EXIT(idea1)) -> [top, bold1]
-//
-//   Removes 'idea1' from stack and creates a new 'bold1'
-//
-
-function _extractEntries (annotations) {
-  let openers = []
-  let closers = []
-  forEach(annotations, function (a) {
-    let isAnchor = a.isAnchor()
-    // special treatment for zero-width annos such as ContainerAnnotation.Anchors
-    if (isAnchor) {
-      openers.push({
-        mode: ANCHOR,
-        pos: a.offset,
-        id: a.id,
-        level: Fragmenter.ALWAYS_ON_TOP,
-        type: 'anchor',
-        node: a,
-        counter: -1,
-        length: 0
-      })
-    } else {
-      // TODO better naming, `Node.level` does not say enough
-      // Better would be `Node.fragmentation = Fragmenter.SHOULD_NOT_SPLIT;`
-      // meaning, that the fragmenter should try to render the fragment as one single
-      // element, and not splitting it up on different stack levels.
-      // E.g. When bold an link are overlapping
-      // the fragmenter should not split the link element such as A<b>B<a>CD</a></b><a>EF</a>GH
-      // but should instead A<b>B</b><a><b>CD</b><a>EF</a>GH
-
-      // use a weak default level when not given
-      var l = Fragmenter.NORMAL
-      var isInline = a.isInlineNode()
-      if (isInline) {
-        l = Number.MAX_VALUE
-      } else if (a.constructor.hasOwnProperty('fragmentation')) {
-        l = a.constructor.fragmentation
-      } else if (a.hasOwnProperty('fragmentationHint')) {
-        l = a.fragmentationHint
-      }
-      var startOffset = Math.min(a.start.offset, a.end.offset)
-      var endOffset = Math.max(a.start.offset, a.end.offset)
-      var opener = {
-        pos: startOffset,
-        mode: ENTER,
-        level: l,
-        id: a.id,
-        type: a.type,
-        node: a,
-        length: 0,
-        counter: -1
-      }
-      openers.push(opener)
-      closers.push({
-        pos: endOffset,
-        mode: EXIT,
-        level: l,
-        id: a.id,
-        type: a.type,
-        node: a,
-        opener: opener
-      })
-    }
-  })
-
-  // sort the openers
-  openers.sort(_compareOpeners)
-  // store indexes for openers
-  for (var i = openers.length - 1; i >= 0; i--) {
-    openers[i].idx = i
-  }
-  closers.sort(_compareClosers)
-  // merge openers and closers, sorted by pos
-  var entries = new Array(openers.length + closers.length)
-  var idx = 0
-  var idx1 = 0
-  var idx2 = 0
-  var opener = openers[idx1]
-  var closer = closers[idx2]
-  while (opener || closer) {
-    if (opener && closer) {
-      // close before open
-      if (closer.pos <= opener.pos && closer.opener !== opener) {
-        entries[idx] = closer
-        idx2++
+  _init (rootContext, text, annotations) {
+    let boundaries = []
+    annotations.forEach(a => {
+      if (a.isAnchor() || a.start.offset === a.end.offset) {
+        boundaries.push({
+          type: ANCHOR,
+          offset: a.start.offset,
+          endOffset: a.start.offset,
+          length: 0,
+          node: a
+        })
       } else {
-        entries[idx] = opener
-        idx1++
+        let opener = {
+          type: OPEN,
+          offset: a.start.offset,
+          node: a,
+          fragmentCount: 0,
+          endOffset: a.end.offset,
+          weight: a._getFragmentWeight()
+        }
+        let closer = {
+          type: CLOSE,
+          offset: a.end.offset,
+          node: a,
+          opener
+        }
+        opener.closer = closer
+        boundaries.push(opener)
+        boundaries.push(closer)
       }
-    } else if (opener) {
-      entries[idx] = opener
-      idx1++
-    } else if (closer) {
-      entries[idx] = closer
-      idx2++
+    })
+    boundaries.sort(this._compareBoundaries.bind(this))
+    let state = {
+      stack: [{context: rootContext, entry: null}],
+      boundaries
     }
-    opener = openers[idx1]
-    closer = closers[idx2]
-    idx++
+    return state
   }
-  return entries
-}
 
-function _compareOpeners (a, b) {
-  if (a.pos < b.pos) return -1
-  if (a.pos > b.pos) return 1
-  if (a.mode < b.mode) return -1
-  if (a.mode > b.mode) return 1
-  if (a.mode === b.mode) {
-    if (a.level < b.level) return -1
-    if (a.level > b.level) return 1
+  _close (fragment, context, parentContext) {
+    if (fragment.type === CLOSE) {
+      fragment = fragment.opener
+      fragment.length = fragment.endOffset - fragment.offset
+    }
+    this.onClose(fragment, context, parentContext)
   }
-  return 0
-}
 
-// sort in inverse order of openers
-function _compareClosers (a, b) {
-  if (a.pos < b.pos) return -1
-  if (a.pos > b.pos) return 1
-  // this makes closer be sorted in inverse order of openers
-  // to reduce stack sice
-  // HACK: a bit trial error. When we have to collapsed annotations
-  // at the same position then we want the closers in the same order
-  // as the openers.
-  if (a.pos === a.opener.pos && b.pos === b.opener.pos) {
-    if (a.opener.idx < b.opener.idx) {
-      return -1
+  _compareBoundaries (a, b) {
+    if (a.offset < b.offset) return -1
+    if (a.offset > b.offset) return 1
+    if (a.type < b.type) return -1
+    if (a.type > b.type) return 1
+    if (a.type === OPEN) {
+      if (a.endOffset > b.endOffset) return -1
+      if (a.endOffset < b.endOffset) return 1
+      if (a.weight > b.weight) return -1
+      if (a.weight < b.weight) return 1
+      if (a.stackLevel && b.stackLevel) {
+        return a.stackLevel - b.stackLevel
+      }
+      return 0
+    } else if (a.type === CLOSE) {
+      return -this._compareBoundaries(a.opener, b.opener)
     } else {
-      return 1
+      return 0
     }
   }
-  if (a.opener.idx > b.opener.idx) return -1
-  if (a.opener.idx < b.opener.idx) return 1
-  return 0
+
+  _insertBoundary (B, b, startIndex = 0) {
+    for (let idx = startIndex, l = B.length; idx < l; idx++) {
+      if (this._compareBoundaries(b, B[idx]) === -1) {
+        B.splice(idx, 0, b)
+        return idx
+      }
+    }
+    // if not inserted before, append
+    B.push(b)
+    return B.length - 1
+  }
+
+  // Note: due to fragmentation of overlapping nodes, the original
+  // order of closers might become invalid
+  _fixOrderOfClosers (S, B, startIndex) {
+    let activeOpeners = {}
+    let first = B[startIndex]
+    let closers = [first]
+    for (let idx = startIndex + 1, l = B.length; idx < l; idx++) {
+      let b = B[startIndex + idx]
+      if (b.type !== CLOSE || b.offset !== first.offset) break
+      closers.push(b)
+    }
+    for (let idx = S.length - 1; idx >= 1; idx--) {
+      let opener = S[idx].entry
+      activeOpeners[opener.node.id] = opener
+    }
+    for (let idx = 0, l = closers.length; idx < l; idx++) {
+      let closer = closers[idx]
+      let opener = activeOpeners[closer.node.id]
+      if (!opener) {
+        throw new Error('Fragmenter Error: there is no opener for closer')
+      }
+      closer.opener = opener
+    }
+    closers.sort(this._compareBoundaries.bind(this))
+
+    const _checkClosers = () => {
+      for (let idx = 0; idx < closers.length; idx++) {
+        if (S[S.length - 1 - idx].entry.node !== closers[idx].node) return false
+      }
+      return true
+    }
+    console.assert(_checkClosers(), 'Fragmenter: closers should be alligned with the current stack of elements')
+
+    B.splice(startIndex, closers.length, ...closers)
+  }
 }
 
-export default Fragmenter
+// Fragment weight values that are used to influence how fragments
+// get stacked when they are overlapping
+Fragmenter.MUST_NOT_SPLIT = Number.MAX_VALUE
+Fragmenter.SHOULD_NOT_SPLIT = 1000
+Fragmenter.NORMAL = 100
+Fragmenter.ALWAYS_ON_TOP = 0
