@@ -95,7 +95,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
         el.ref(id + '@' + fragment.counter)
       }
     }
-    el.attr('data-offset', fragment.pos)
+    el.attr('data-offset', fragment.offset)
     return el
   }
 

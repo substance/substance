@@ -4,6 +4,7 @@ import cloneDeep from '../util/cloneDeep'
 import { getTextForSelection } from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
+import Fragmenter from './Fragmenter'
 
 export default function (DocumentNode) {
   class AbstractAnnotation extends DocumentNode {
@@ -158,6 +159,17 @@ export default function (DocumentNode) {
       } else {
         throw new Error('Invalid selection.')
       }
+    }
+
+    mustNotBeSplit () { return false }
+
+    shouldNotBeSplit () { return false }
+
+    _getFragmentWeight () {
+      if (this.mustNotBeSplit()) return Fragmenter.MUST_NOT_SPLIT
+      if (this.shouldNotBeSplit()) return Fragmenter.SHOULD_NOT_SPLIT
+      if (this.getFragmentWeight) return this.getFragmentWeight()
+      return Fragmenter.NORMAL
     }
 
     static isAnnotation () { return true }

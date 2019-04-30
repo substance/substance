@@ -56,8 +56,8 @@ export default class DOMExporter {
    *
    * convertDocument(doc) {
    *   let container = doc.get('body')
-   *   var elements = this.convertContainer(container)
-   *   var out = elements.map(el => {
+   *   let elements = this.convertContainer(container)
+   *   let out = elements.map(el => {
    *     return el.outerHTML
    *   })
    *   return out.join('')
@@ -87,7 +87,7 @@ export default class DOMExporter {
     } else {
       this.state.doc = node.getDocument()
     }
-    var converter = this.getNodeConverter(node)
+    let converter = this.getNodeConverter(node)
     // special treatment for annotations, i.e. if someone calls
     // `exporter.convertNode(anno)`
     if (node.isPropertyAnnotation() && (!converter || !converter.export)) {
@@ -96,7 +96,7 @@ export default class DOMExporter {
     if (!converter) {
       converter = this.getDefaultBlockConverter()
     }
-    var el
+    let el
     if (converter.tagName) {
       el = this.$$(converter.tagName)
     } else {
@@ -113,15 +113,15 @@ export default class DOMExporter {
 
   convertProperty (doc, path, options) {
     this.initialize(doc, options)
-    var wrapper = this.$$('div')
+    let wrapper = this.$$('div')
       .append(this.annotatedText(path))
     return wrapper.innerHTML
   }
 
   annotatedText (path) {
-    var doc = this.state.doc
-    var text = doc.get(path)
-    var annotations = doc.getIndex('annotations').get(path)
+    let doc = this.state.doc
+    let text = doc.get(path)
+    let annotations = doc.getIndex('annotations').get(path)
     return this._annotatedText(text, annotations)
   }
 
@@ -146,9 +146,9 @@ export default class DOMExporter {
   }
 
   _annotatedText (text, annotations) {
-    var self = this
+    let self = this
 
-    var annotator = new Fragmenter()
+    let annotator = new Fragmenter()
     annotator.onText = function (context, text) {
       if (text) {
         // ATTENTION: only encode if this is desired, e.g. '"' would be encoded as '&quot;' but as Clipboard HTML this is not understood by
@@ -159,20 +159,18 @@ export default class DOMExporter {
         context.children.push(text)
       }
     }
-    annotator.onEnter = function (fragment) {
-      var anno = fragment.node
+    annotator.onOpen = function (fragment) {
       return {
-        annotation: anno,
         children: []
       }
     }
-    annotator.onExit = function (fragment, context, parentContext) {
-      var anno = context.annotation
-      var converter = self.getNodeConverter(anno)
+    annotator.onClose = (fragment, context, parentContext) => {
+      let anno = fragment.node
+      let converter = self.getNodeConverter(anno)
       if (!converter) {
         converter = self.getDefaultPropertyAnnotationConverter()
       }
-      var el
+      let el
       if (converter.tagName) {
         el = this.$$(converter.tagName)
       } else {
@@ -204,8 +202,8 @@ export default class DOMExporter {
         throw new Error('Illegal element type: only inline nodes and annotations are allowed within a TextNode')
       }
       parentContext.children.push(el)
-    }.bind(this)
-    var wrapper = { children: [] }
+    }
+    let wrapper = { children: [] }
     annotator.start(wrapper, text, annotations)
     return wrapper.children
   }
@@ -218,8 +216,8 @@ export default class DOMExporter {
   */
   _convertPropertyAnnotation (anno) {
     // take only the annotations within the range of the anno
-    var wrapper = this.$$('div').append(this.annotatedText(anno.path))
-    var el = wrapper.find('[' + this.config.idAttribute + '="' + anno.id + '"]')
+    let wrapper = this.$$('div').append(this.annotatedText(anno.path))
+    let el = wrapper.find('[' + this.config.idAttribute + '="' + anno.id + '"]')
     return el
   }
 }
