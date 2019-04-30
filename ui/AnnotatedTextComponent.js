@@ -49,11 +49,10 @@ export default class AnnotatedTextComponent extends Component {
     let annotations = this.getAnnotations()
     let el = $$(this._getTagName() || 'span')
     if (annotations && annotations.length > 0) {
-      let fragmenter = new Fragmenter({
-        onText: this._renderTextNode.bind(this),
-        onEnter: this._renderFragment.bind(this, $$),
-        onExit: this._finishFragment.bind(this)
-      })
+      let fragmenter = new Fragmenter()
+      fragmenter.onText = this._renderTextNode.bind(this)
+      fragmenter.onOpen = this._renderFragment.bind(this, $$)
+      fragmenter.onClose = this._finishFragment.bind(this)
       fragmenter.start(el, text, annotations)
     } else {
       el.append(text)
