@@ -2,9 +2,6 @@ import isEqual from '../util/isEqual'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 import Component from './Component'
 
-// TODO: rename it to IsolatedInlineNodeComponent
-// The thing is that InlineNodeComponent as a general implementation is
-// actually an IsolatedNodeComponent, but the current naming does not reveal that.
 export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeComponent {
   render ($$) {
     const node = this.props.node
