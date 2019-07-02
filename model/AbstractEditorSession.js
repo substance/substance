@@ -2,7 +2,8 @@ import EventEmitter from '../util/EventEmitter'
 import isPlainObject from '../util/isPlainObject'
 import { transformSelection } from './operationHelpers'
 import Selection from './Selection'
-import DocumentStage from './DocumentStage'
+import DocumentChange from './DocumentChange'
+import SimpleChangeHistory from './SimpleChangeHistory'
 
 /**
  * An EditorSession provides access to the state of an editor
@@ -12,16 +13,15 @@ import DocumentStage from './DocumentStage'
  * containing only state variables for a single editor.
  */
 export default class AbstractEditorSession extends EventEmitter {
-  constructor (id, documentSession, history) {
+  constructor (id, document, history) {
     super()
 
-    const doc = documentSession.getDocument()
-
     this._id = id
-    this._document = doc
-    this._documentSession = documentSession
-    this._history = history
-    this._stage = new DocumentStage(documentSession)
+    this._document = document
+    this._history = history || new SimpleChangeHistory(this)
+
+    this._tx = document.createEditingInterface()
+    this._txOps = []
 
     this._initialize()
   }
@@ -92,29 +92,84 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   transaction (transformation, info = {}) {
-    const stage = this._stage
-    let before = {
-      selection: this._getSelection()
+    let doc = this._document
+    let selBefore = this._getSelection()
+    let tx = this._tx
+    let ops = doc._ops
+    ops.length = 0
+    tx.selection = selBefore
+    let transformationCaptured = false
+    try {
+      transformation(tx)
+      transformationCaptured = true
+    } finally {
+      if (!transformationCaptured) {
+        this._revert(ops)
+      }
     }
-    let change = stage._transaction(transformation, info, before)
+    let change = null
+    if (transformationCaptured) {
+      if (ops.length > 0) {
+        let selAfter = tx.selection
+        change = new DocumentChange(ops, {
+          selection: selBefore
+        }, {
+          selection: selAfter
+        })
+        change.info = info
+        this._setSelection(this._normalizeSelection(selAfter))
+      }
+    }
     if (change) {
-      let after = change.after
-      let selAfter = after.selection
-      this._setSelection(this._normalizeSelection(selAfter))
-      // console.log('EditorSession.transaction()', change)
-      this._commit(change, info)
+      let changeApplied = false
+      try {
+        let after = change.after
+        let selAfter = after.selection
+        this._setSelection(this._normalizeSelection(selAfter))
+        doc._notifyChangeListeners(change, info)
+        this.emit('change', change, info)
+        this._history.commit(change)
+        changeApplied = true
+      } finally {
+        if (!changeApplied) {
+          change = null
+          this._revert(ops)
+          this._setSelection(selBefore)
+          // TODO: we should use this to reset the UI if something went horribly wrong
+          this.emit('rescue')
+        }
+      }
     }
+    ops.length = 0
     return change
+  }
+
+  // EXPERIMENTAL: for certain cases it is useful to store volatile information on nodes
+  // Then the data does not need to be disposed when a node is deleted.
+  updateNodeStates (tuples, options = {}) {
+    // using a pseudo change to get into the existing updating mechanism
+    const doc = this._document
+    let change = new DocumentChange([], {}, {})
+    let info = { action: 'node-state-update' }
+    change._extractInformation()
+    change.info = info
+    for (let [id, state] of tuples) {
+      let node = doc.get(id)
+      if (!node) continue
+      if (!node.state) node.state = {}
+      Object.assign(node.state, state)
+      change.updated[id] = true
+    }
+    if (!options.silent) {
+      doc._notifyChangeListeners(change, info)
+      this.emit('change', change, info)
+    }
   }
 
   undo () {
     let change = this._history.undo()
     // TODO: why is this necessary?
     if (change) this._setSelection(this._normalizeSelection(change.after.selection))
-  }
-
-  updateNodeStates (tuples, options = {}) {
-    this._documentSession.updateNodeStates(tuples, options)
   }
 
   redo () {
@@ -131,8 +186,19 @@ export default class AbstractEditorSession extends EventEmitter {
     this._history.reset()
   }
 
-  _commit (change, info) {
-    this._history.commit(change, info)
+  _applyChange (change, info = {}) {
+    if (!change) throw new Error('Invalid change')
+    const doc = this.getDocument()
+    doc._apply(change)
+    if (!info.replay) {
+      this._history.addChange(change)
+    }
+    // TODO: why is this necessary?
+    doc._notifyChangeListeners(change, info)
+    this.emit('change', change, info)
+    if (info.replay) {
+      this._setSelection(this._normalizeSelection(change.after.selection))
+    }
   }
 
   _normalizeSelection (sel) {
@@ -151,6 +217,19 @@ export default class AbstractEditorSession extends EventEmitter {
 
   _setSelection (sel) {
     // store the selection somewhere
+  }
+
+  _onTxOperation (op) {
+    this._txOps.push(op)
+  }
+
+  _revert () {
+    let doc = this._document
+    for (let idx = this._txOps.length - 1; idx--; idx > 0) {
+      let op = this._txOps[idx]
+      let inverted = op.invert()
+      doc._applyOp(inverted)
+    }
   }
 
   _transformSelection (change) {

@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { DocumentSession, AbstractEditorSession } from 'substance'
+import { AbstractEditorSession } from 'substance'
 import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
 
@@ -75,9 +75,8 @@ test('ChangeHistory: undoing and redoing changes by a single user', t => {
 
 function _setup () {
   let doc = createTestArticle(simple)
-  let documentSession = new DocumentSession(doc)
-  let editorSession = new TestEditorSession('test', documentSession)
-  return { doc, documentSession, editorSession }
+  let editorSession = new TestEditorSession('test', doc)
+  return { doc, editorSession }
 }
 
 class TestEditorSession extends AbstractEditorSession {

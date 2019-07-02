@@ -1,8 +1,8 @@
 import last from '../util/last'
 
 export default class SimpleChangeHistory {
-  constructor (documentSession) {
-    this._documentSession = documentSession
+  constructor (editorSession) {
+    this._editorSession = editorSession
     this._done = []
     this._undone = []
   }
@@ -15,7 +15,7 @@ export default class SimpleChangeHistory {
     return this._undone.length > 0
   }
 
-  addChange (change) {
+  commit (change) {
     this._done.push(change)
     // undone changes are cleared whenever a new change is recorded
     if (this._undone.length > 0) {
@@ -27,17 +27,16 @@ export default class SimpleChangeHistory {
     let change = last(this._done)
     if (change) {
       let inverted = change.invert()
-      this._documentSession._applyChange(inverted, { replay: true })
+      this._editorSession._applyChange(inverted, { replay: true })
       this._done.pop()
-      this.undone.push(change)
+      this._undone.push(change)
     }
   }
 
   redo () {
     let change = last(this._undone)
     if (change) {
-      let inverted = change.invert()
-      this._documentSession._applyChange(inverted, { replay: true })
+      this._editorSession._applyChange(change, { replay: true })
       this._undone.pop()
       this._done.push(change)
     }
