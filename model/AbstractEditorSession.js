@@ -1,6 +1,5 @@
 import EventEmitter from '../util/EventEmitter'
 import isPlainObject from '../util/isPlainObject'
-import ChangeHistoryView from './ChangeHistoryView'
 import { transformSelection } from './operationHelpers'
 import Selection from './Selection'
 import DocumentStage from './DocumentStage'
@@ -21,7 +20,7 @@ export default class AbstractEditorSession extends EventEmitter {
     this._id = id
     this._document = doc
     this._documentSession = documentSession
-    this._history = history || new ChangeHistoryView(documentSession)
+    this._history = history
     this._stage = new DocumentStage(documentSession)
 
     this._initialize()
