@@ -1,16 +1,13 @@
 import EventEmitter from '../util/EventEmitter'
 import DocumentChange from './DocumentChange'
+import SimpleChangeHistory from './SimpleChangeHistory'
 
 export default class DocumentSession extends EventEmitter {
   constructor (doc) {
     super()
 
     this._document = doc
-    this._history = []
-
-    // ATTENTION: we still allow to do operations on the document directly
-    // these changes trigger a document:changed event which has to go into the history
-    doc.on('document:changed', this._onDocumentChange, this)
+    this._history = new SimpleChangeHistory(this)
   }
 
   dispose () {
@@ -51,15 +48,9 @@ export default class DocumentSession extends EventEmitter {
   _applyChange (change, info) {
     if (!change) throw new Error('Invalid change')
     const doc = this.getDocument()
-    // ATTENTION: the history is updated via document:changed listener
     doc._apply(change)
+    this._history.addChange(change)
     doc._notifyChangeListeners(change, info)
     this.emit('change', change, info)
-  }
-
-  _onDocumentChange (change) {
-    if (change && change.ops.length > 0) {
-      this._history.push(change)
-    }
   }
 }

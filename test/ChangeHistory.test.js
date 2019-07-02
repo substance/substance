@@ -76,9 +76,8 @@ test('ChangeHistory: undoing and redoing changes by a single user', t => {
 function _setup () {
   let doc = createTestArticle(simple)
   let documentSession = new DocumentSession(doc)
-  let history = null
-  let editorSession = new TestEditorSession('test', documentSession, history)
-  return { doc, documentSession, history, editorSession }
+  let editorSession = new TestEditorSession('test', documentSession)
+  return { doc, documentSession, editorSession }
 }
 
 class TestEditorSession extends AbstractEditorSession {
