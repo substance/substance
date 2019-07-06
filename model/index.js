@@ -68,6 +68,7 @@ export { default as Schema } from './Schema'
 export * from './schemaHelpers'
 export { default as Selection } from './Selection'
 export { selectionHelpers }
+export { default as SimpleChangeHistory } from './SimpleChangeHistory'
 export { default as TextBlock } from './TextBlock'
 export { default as TextNode } from './TextNode'
 export { default as TextNodeMixin } from './TextNodeMixin'
