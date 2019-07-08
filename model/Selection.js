@@ -88,6 +88,10 @@ export default class Selection {
     return this.getType()
   }
 
+  getNodeId () {
+    return null
+  }
+
   /**
     @returns {Boolean} true if selection equals `other` selection
   */
