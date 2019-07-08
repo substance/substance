@@ -123,12 +123,7 @@ export default class AbstractEditorSession extends EventEmitter {
     if (change) {
       let changeApplied = false
       try {
-        let after = change.after
-        let selAfter = after.selection
-        this._setSelection(this._normalizeSelection(selAfter))
-        doc._notifyChangeListeners(change, info)
-        this.emit('change', change, info)
-        this._history.commit(change)
+        this._commit(change, info)
         changeApplied = true
       } finally {
         if (!changeApplied) {
@@ -142,6 +137,15 @@ export default class AbstractEditorSession extends EventEmitter {
     }
     ops.length = 0
     return change
+  }
+
+  _commit (change, info = {}) {
+    let after = change.after
+    let selAfter = after.selection
+    this._setSelection(this._normalizeSelection(selAfter))
+    this._document._notifyChangeListeners(change, info)
+    this.emit('change', change, info)
+    this._history.commit(change)
   }
 
   // EXPERIMENTAL: for certain cases it is useful to store volatile information on nodes
