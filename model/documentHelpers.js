@@ -413,7 +413,7 @@ export function removeAt (doc, containerPath, pos) {
   }
 }
 
-export function remove (doc, containerPath, id) {
+export function removeFromCollection (doc, containerPath, id) {
   let index = doc.get(containerPath).indexOf(id)
   if (index >= 0) {
     return removeAt(doc, containerPath, index)
