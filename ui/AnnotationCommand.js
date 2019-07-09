@@ -86,13 +86,14 @@ export default class AnnotationCommand extends Command {
     Checks if new annotations could be created.
     There should be no annotation overlapping, selection must be not collapsed.
 
-    @param {Array} annos annotations
-    @param {Object} sel selection
+    @param {array} annos annotations
+    @param {Selection} sel selection
+    @param {object} context
 
     @returns {Boolean} Whether or not annotation could be created.
    */
   // When there's no existing annotation overlapping, we create a new one.
-  canCreate (annos, sel) {
+  canCreate (annos, sel, context) {
     // to create an annotation we need an expanded selection
     if (sel.isCollapsed()) return false
     // fine if there is no other anno of this type yet
@@ -192,7 +193,7 @@ export default class AnnotationCommand extends Command {
       active: false,
       mode: null
     }
-    if (this.canCreate(annos, sel)) {
+    if (this.canCreate(annos, sel, context)) {
       newState.mode = 'create'
     } else if (this.canFuse(annos, sel)) {
       newState.mode = 'fuse'
