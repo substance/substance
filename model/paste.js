@@ -170,8 +170,8 @@ function _pasteAnnotatedText (tx, copy) {
     let annos = map(annotations)
     // NOTE: filtering annotations which are not explicitly white-listed via property.targetTypes
     let allowedTypes = targetProp.targetTypes
-    if (allowedTypes) {
-      annos = annos.filter(anno => allowedTypes.indexOf(anno.type) >= 0)
+    if (allowedTypes && allowedTypes.size > 0) {
+      annos = annos.filter(anno => allowedTypes.has(anno.type))
     }
     for (let anno of annos) {
       let data = anno.toJSON()
@@ -295,8 +295,8 @@ function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
   let containerProperty = tx.getProperty(containerPath)
   let targetTypes = containerProperty.targetTypes
   // TODO: instead of dropping all invalid ones we could try to convert text nodes to the default text node
-  if (targetTypes && targetTypes.length > 0) {
-    nodes = nodes.filter(node => targetTypes.indexOf(node.type) >= 0)
+  if (targetTypes && targetTypes.size > 0) {
+    nodes = nodes.filter(node => targetTypes.has(node.type))
   }
   for (let node of nodes) {
     // Note: this will on the one hand make sure node ids are changed
