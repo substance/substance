@@ -159,6 +159,10 @@ export default class PropertySelection extends Selection {
     return this.start.path[0]
   }
 
+  getPropertyName () {
+    return this.start.path[1]
+  }
+
   /**
    * Checks if this selection is inside another one.
    *

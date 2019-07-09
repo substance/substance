@@ -31,7 +31,7 @@ test('NodeSchema: reference property with multiple target types', t => {
   // props with default values are optional
   t.ok(property.isArray(), 'property should be an array type')
   t.deepEqual(property.type, ['array', 'id'], 'property should have correct type')
-  t.deepEqual(property.targetTypes, ['foo', 'bar'], 'property should have targetTypes set')
+  t.deepEqual(Array.from(property.targetTypes), ['foo', 'bar'], 'property should have targetTypes set')
   t.end()
 })
 
@@ -46,7 +46,7 @@ test('NodeSchema: reference property with multiple target types (canonical notat
   t.ok(property.isArray(), 'property should be an array type')
   t.ok(property.isReference(), 'property should be a reference type')
   t.deepEqual(property.type, ['array', 'id'], 'property should have correct type')
-  t.deepEqual(property.targetTypes, ['foo', 'bar'], 'property should have targetTypes set')
+  t.deepEqual(Array.from(property.targetTypes), ['foo', 'bar'], 'property should have targetTypes set')
   t.end()
 })
 
@@ -72,7 +72,7 @@ test('NodeSchema: property of node type should be considered a reference', t => 
   // props with default values are optional
   t.ok(property.isReference(), 'property should be a reference type')
   t.deepEqual(property.type, 'id', 'property should have id type')
-  t.deepEqual(property.targetTypes, ['foo'], 'property should have correct target type')
+  t.deepEqual(Array.from(property.targetTypes), ['foo'], 'property should have correct target type')
   t.end()
 })
 

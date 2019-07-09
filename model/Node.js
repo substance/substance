@@ -299,6 +299,11 @@ function _compileDefintion (definition) {
     result.targetTypes = [type]
   }
 
+  // wrap the array into a Set
+  if (result.targetTypes) {
+    result.targetTypes = new Set(result.targetTypes)
+  }
+
   return result
 }
 
