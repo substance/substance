@@ -265,7 +265,7 @@ function _compileDefintion (definition) {
       result.type = defs.slice()
       // 'semi'-canonical
       if (last !== 'id' && !_isValueType(last)) {
-        result.targetTypes = new Set([last])
+        result.targetTypes = [last]
         result.type[lastIdx] = 'id'
       }
     } else {
@@ -276,13 +276,13 @@ function _compileDefintion (definition) {
           }
         })
         result.type = [ 'array', 'id' ]
-        result.targetTypes = new Set(defs)
+        result.targetTypes = defs
       } else {
         if (_isValueType(first)) {
           result.type = [ 'array', first ]
         } else {
           result.type = [ 'array', 'id' ]
-          result.targetTypes = new Set(defs)
+          result.targetTypes = defs
         }
       }
     }
@@ -291,12 +291,17 @@ function _compileDefintion (definition) {
       type: 'string',
       default: '',
       _isText: true,
-      targetTypes: new Set(definition.targetTypes)
+      targetTypes: definition.targetTypes
     }
   // single reference type
   } else if (type !== 'id' && !_isValueType(type)) {
     result.type = 'id'
-    result.targetTypes = new Set([type])
+    result.targetTypes = [type]
+  }
+
+  // wrap the array into a Set
+  if (result.targetTypes) {
+    result.targetTypes = new Set(result.targetTypes)
   }
 
   return result
