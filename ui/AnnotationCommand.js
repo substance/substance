@@ -243,7 +243,7 @@ export default class AnnotationCommand extends Command {
   executeCreate (params, context) {
     const editorSession = params.editorSession
     const annos = this._getAnnotationsForSelection(params, context)
-    this._checkPrecondition(params, annos, this.canCreate)
+    this._checkPrecondition(params, context, annos, this.canCreate)
     let annoData = this.getAnnotationData()
     annoData.type = this.getAnnotationType()
     let anno
@@ -256,9 +256,9 @@ export default class AnnotationCommand extends Command {
     }
   }
 
-  executeFuse (params) {
+  executeFuse (params, context) {
     let annos = this._getAnnotationsForSelection(params)
-    this._checkPrecondition(params, annos, this.canFuse)
+    this._checkPrecondition(params, context, annos, this.canFuse)
     this._applyTransform(params, tx => {
       annotationHelpers.fuseAnnotation(tx, annos)
     })
@@ -268,10 +268,10 @@ export default class AnnotationCommand extends Command {
     }
   }
 
-  executeTruncate (params) {
+  executeTruncate (params, context) {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
-    this._checkPrecondition(params, annos, this.canTruncate)
+    this._checkPrecondition(params, context, annos, this.canTruncate)
     this._applyTransform(params, tx => {
       annotationHelpers.truncateAnnotation(tx, anno, params.selection)
     })
@@ -281,10 +281,10 @@ export default class AnnotationCommand extends Command {
     }
   }
 
-  executeExpand (params) {
+  executeExpand (params, context) {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
-    this._checkPrecondition(params, annos, this.canExpand)
+    this._checkPrecondition(params, context, annos, this.canExpand)
     this._applyTransform(params, tx => {
       annotationHelpers.expandAnnotation(tx, anno, params.selection)
     })
@@ -294,10 +294,10 @@ export default class AnnotationCommand extends Command {
     }
   }
 
-  executeDelete (params) {
+  executeDelete (params, context) {
     let annos = this._getAnnotationsForSelection(params)
     let anno = annos[0]
-    this._checkPrecondition(params, annos, this.canDelete)
+    this._checkPrecondition(params, context, annos, this.canDelete)
     this._applyTransform(params, tx => {
       return tx.delete(anno.id)
     })
@@ -309,9 +309,9 @@ export default class AnnotationCommand extends Command {
 
   isAnnotationCommand () { return true }
 
-  _checkPrecondition (params, annos, checker) {
+  _checkPrecondition (params, context, annos, checker) {
     let sel = params.selection
-    if (!checker.call(this, annos, sel)) {
+    if (!checker.call(this, annos, sel, context)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString())
     }
   }
