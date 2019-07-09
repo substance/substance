@@ -1,5 +1,7 @@
 export { default as camelCase } from 'lodash-es/camelCase'
 export { default as capitalize } from 'lodash-es/capitalize'
+export { default as clone } from 'lodash-es/clone'
+export { default as cloneDeepWith } from 'lodash-es/cloneDeepWith'
 export { default as debounce } from 'lodash-es/debounce'
 export { default as get } from 'lodash-es/get'
 export { default as find } from 'lodash-es/find'

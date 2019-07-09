@@ -6768,5 +6768,3 @@ var _entities = {
 }
 
 export default _entities;
-
-//# sourceMappingURL=./entities.js.map

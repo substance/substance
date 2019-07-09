@@ -1073,5 +1073,3 @@ CSSselect._compileUnsafe = defaultCompile.compileUnsafe;
 CSSselect._compileToken = defaultCompile.compileToken;
 
 export default cssSelect;
-
-//# sourceMappingURL=./css-select.js.map
