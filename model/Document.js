@@ -239,7 +239,7 @@ export default class Document extends EventEmitter {
     if (op) {
       this._ops.push(op)
       if (!this._isTransactionDocument) {
-        this._emitChange(op)
+        this._emitInternalChange(op)
       }
       return this.get(nodeData.id)
     }
@@ -273,7 +273,7 @@ export default class Document extends EventEmitter {
     if (op) {
       this._ops.push(op)
       if (!this._isTransactionDocument) {
-        this._emitChange(op)
+        this._emitInternalChange(op)
       }
     }
     return node
@@ -300,7 +300,7 @@ export default class Document extends EventEmitter {
     if (op) {
       this._ops.push(op)
       if (!this._isTransactionDocument) {
-        this._emitChange(op)
+        this._emitInternalChange(op)
       }
     }
     return oldValue
@@ -344,7 +344,7 @@ export default class Document extends EventEmitter {
     if (op) {
       this._ops.push(op)
       if (!this._isTransactionDocument) {
-        this._emitChange(op)
+        this._emitInternalChange(op)
       }
     }
     return op
@@ -630,14 +630,13 @@ export default class Document extends EventEmitter {
     return this.data.update(path, diff)
   }
 
-  _emitChange (op) {
+  _emitInternalChange (op) {
     const change = new DocumentChange([op], {}, {})
     change._extractInformation(this)
-    this._notifyChangeListeners(change, { hidden: true })
+    this.emit('document:changed:internal', change, this)
   }
 
-  _notifyChangeListeners (change, info) {
-    info = info || {}
+  _notifyChangeListeners (change, info = {}) {
     this.emit('document:changed', change, info, this)
   }
 
