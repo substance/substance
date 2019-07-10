@@ -19,7 +19,7 @@ let count = 0
  */
 export default function uuid (prefix, len) {
   if (substanceGlobals.DETERMINISTIC_UUID) {
-    return count++
+    return String(count++)
   }
 
   if (prefix && prefix[prefix.length - 1] !== '-') {
