@@ -1,3 +1,5 @@
+import substanceGlobals from './substanceGlobals'
+
 /*!
 Math.uuid.js (v1.4)
 http://www.broofa.com
@@ -6,6 +8,8 @@ Copyright (c) 2010 Robert Kieffer
 Dual licensed under the MIT and GPL licenses.
 */
 
+let count = 0
+
 /**
  * Generates a unique id.
  *
@@ -13,7 +17,11 @@ Dual licensed under the MIT and GPL licenses.
  * @param {Number} [len] if provided a UUID with given length will be created.
  * @return A generated uuid.
  */
-function uuid (prefix, len) {
+export default function uuid (prefix, len) {
+  if (substanceGlobals.DETERMINISTIC_UUID) {
+    return count++
+  }
+
   if (prefix && prefix[prefix.length - 1] !== '-') {
     prefix = prefix.concat('-')
   }
@@ -42,5 +50,3 @@ function uuid (prefix, len) {
   }
   return (prefix || '') + uuid.join('')
 }
-
-export default uuid
