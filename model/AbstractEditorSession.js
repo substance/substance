@@ -42,6 +42,10 @@ export default class AbstractEditorSession extends EventEmitter {
     return this._history.canRedo()
   }
 
+  getChanges () {
+    return this._history.getChanges()
+  }
+
   getDocument () {
     return this._document
   }
@@ -145,7 +149,7 @@ export default class AbstractEditorSession extends EventEmitter {
     this._setSelection(this._normalizeSelection(selAfter))
     this._document._notifyChangeListeners(change, info)
     this.emit('change', change, info)
-    this._history.commit(change)
+    this._history.addChange(change)
   }
 
   // EXPERIMENTAL: for certain cases it is useful to store volatile information on nodes
@@ -190,7 +194,7 @@ export default class AbstractEditorSession extends EventEmitter {
     this._history.reset()
   }
 
-  _applyChange (change, info = {}) {
+  applyChange (change, info = {}) {
     if (!change) throw new Error('Invalid change')
     const doc = this.getDocument()
     doc._apply(change)
