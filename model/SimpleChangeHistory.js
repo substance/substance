@@ -15,7 +15,11 @@ export default class SimpleChangeHistory {
     return this._undone.length > 0
   }
 
-  commit (change) {
+  getChanges () {
+    return this._done.slice()
+  }
+
+  addChange (change) {
     this._done.push(change)
     // undone changes are cleared whenever a new change is recorded
     if (this._undone.length > 0) {
@@ -27,7 +31,7 @@ export default class SimpleChangeHistory {
     let change = last(this._done)
     if (change) {
       let inverted = change.invert()
-      this._editorSession._applyChange(inverted, { replay: true })
+      this._editorSession.applyChange(inverted, { replay: true })
       this._done.pop()
       this._undone.push(change)
     }
@@ -36,7 +40,7 @@ export default class SimpleChangeHistory {
   redo () {
     let change = last(this._undone)
     if (change) {
-      this._editorSession._applyChange(change, { replay: true })
+      this._editorSession.applyChange(change, { replay: true })
       this._undone.pop()
       this._done.push(change)
     }

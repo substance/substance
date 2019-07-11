@@ -1,6 +1,7 @@
 import DefaultDOMElement from '../dom/DefaultDOMElement'
-import map from '../util/map'
 import EventEmitter from '../util/EventEmitter'
+import forEach from '../util/forEach'
+import isNil from '../util/isNil'
 
 export default class Router extends EventEmitter {
   constructor (...args) {
@@ -28,8 +29,7 @@ export default class Router extends EventEmitter {
   /*
     Writes out a given route as a string url
   */
-  writeRoute (route, opts) {
-    opts = opts || {}
+  writeRoute (route, opts = {}) {
     let routeString = this.stringifyRoute(route)
     if (!routeString) {
       this.clearRoute(opts)
@@ -83,7 +83,7 @@ export default class Router extends EventEmitter {
     }
   }
 
-  clearRoute (opts) {
+  clearRoute (opts = {}) {
     this._writeRoute('', opts)
   }
 
@@ -107,10 +107,13 @@ export default class Router extends EventEmitter {
   }
 
   static objectToRouteString (obj) {
-    let routeStr = map(obj, (val, key) => {
-      return `${key}=${val}`
-    }).join(',')
-    return routeStr
+    let frags = []
+    forEach(obj, (val, key) => {
+      if (!isNil(val)) {
+        frags.push(`${key}=${val}`)
+      }
+    })
+    return frags.join(',')
   }
 
   static routeStringToObject (routeStr) {
