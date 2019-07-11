@@ -433,13 +433,8 @@ export default class Component extends EventEmitter {
     ```
   */
   triggerDidMount () {
-    // TODO: discuss and leave the decision here as a statement
-    // while rendering is done bottom up, IMO  it makes
-    // sense to propagate didMount() from top to down
-    // NOTE: On the other hand, we had some occasions, where we
-    // intuitively expected that this was done bottom-up, too
-
-    // FIXME: this is not working as expected.
+    // Following react's life-cycle, 'didMount' is triggered 'bottom-up'
+    // i.e. children first.
 
     // ATTENTION: forwarding components are 'invisible' with respect to the
     // DOM elements, i.e. not covered by the recursion done here using this.getChildren()
@@ -448,19 +443,20 @@ export default class Component extends EventEmitter {
       this.getParent().triggerDidMount()
     }
 
-    // To prevent from multiple calls to didMount, which can happen under
-    // specific circumstances we use a guard.
-    // TODO: what are these circumstances exactly?
-    if (!this.__isMounted__) {
-      this.__isMounted__ = true
-      this.didMount()
-    }
     // Trigger didMount for the children first
     const children = this.getChildren()
     for (let child of children) {
       // We pass isMounted=true to save costly calls to Component.isMounted
       // for each child / grandchild
       child.triggerDidMount()
+    }
+
+    // To prevent from multiple calls to didMount, which can happen under
+    // specific circumstances we use a guard.
+    // TODO: what are these circumstances exactly?
+    if (!this.__isMounted__) {
+      this.__isMounted__ = true
+      this.didMount()
     }
   }
 
