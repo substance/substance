@@ -30,7 +30,7 @@ export default class SimpleChangeHistory {
   undo () {
     let change = last(this._done)
     if (change) {
-      let inverted = change.invert()
+      let inverted = this._editorSession.getDocument().invert(change)
       this._editorSession.applyChange(inverted, { replay: true })
       this._done.pop()
       this._undone.push(change)
