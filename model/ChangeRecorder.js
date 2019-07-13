@@ -1,8 +1,7 @@
 import EditingInterface from './EditingInterface'
 import DocumentChange from './DocumentChange'
 
-export default
-class ChangeRecorder extends EditingInterface {
+export default class ChangeRecorder extends EditingInterface {
   constructor (doc) {
     super(doc.clone())
   }

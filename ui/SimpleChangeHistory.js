@@ -1,4 +1,4 @@
-import last from '../util/last'
+import { last } from '../util'
 
 export default class SimpleChangeHistory {
   constructor (editorSession) {
@@ -34,6 +34,7 @@ export default class SimpleChangeHistory {
       this._editorSession.applyChange(inverted, { replay: true })
       this._done.pop()
       this._undone.push(change)
+      return inverted
     }
   }
 
@@ -43,6 +44,7 @@ export default class SimpleChangeHistory {
       this._editorSession.applyChange(change, { replay: true })
       this._undone.pop()
       this._done.push(change)
+      return change
     }
   }
 }

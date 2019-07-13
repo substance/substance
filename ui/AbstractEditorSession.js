@@ -1,8 +1,9 @@
 import EventEmitter from '../util/EventEmitter'
 import isPlainObject from '../util/isPlainObject'
-import { transformSelection } from './operationHelpers'
-import Selection from './Selection'
-import DocumentChange from './DocumentChange'
+import { transformSelection } from '../model/operationHelpers'
+import Selection from '../model/Selection'
+import DocumentChange from '../model/DocumentChange'
+import EditorState from './EditorState'
 import SimpleChangeHistory from './SimpleChangeHistory'
 
 /**
@@ -13,25 +14,46 @@ import SimpleChangeHistory from './SimpleChangeHistory'
  * containing only state variables for a single editor.
  */
 export default class AbstractEditorSession extends EventEmitter {
-  constructor (id, document, history) {
+  constructor (id, document, initialEditorState = {}) {
     super()
 
     this._id = id
     this._document = document
-    this._history = history || new SimpleChangeHistory(this)
+    this._history = this._createChangeHistory()
 
     this._tx = document.createEditingInterface()
     this._txOps = []
 
-    this._initialize()
+    let editorState = new EditorState(this._createEditorState(document, initialEditorState))
+    this.editorState = editorState
   }
 
-  _initialize () {
-    // initialze hooks etc
+  _createChangeHistory () {
+    return new SimpleChangeHistory(this)
+  }
+
+  _createEditorState (document, initialState = {}) {
+    return Object.assign({
+      document,
+      history: this._history,
+      selection: Selection.nullSelection,
+      selectionState: {},
+      hasUnsavedChanges: false,
+      isBlurred: false
+    }, initialState)
+  }
+
+  // use this for setting up hooks
+  initialize () {
+    // EXPERIMENTAL: hook that records changes triggered via node state updates
+    this.editorState.document.on('document:changed', this._onDocumentChange, this)
   }
 
   dispose () {
-    // dispose hooks etc
+    let editorState = this.editorState
+    editorState.document.off(this)
+    editorState.off(this)
+    editorState.dispose()
   }
 
   canUndo () {
@@ -56,12 +78,24 @@ export default class AbstractEditorSession extends EventEmitter {
     // it should be part of the core implementation
   }
 
+  getSelection () {
+    return this._getSelection()
+  }
+
+  getSelectionState () {
+    return this.editorState.selectionState
+  }
+
   getSurface (surfaceId) {
     // implement this using a SurfaceManager
   }
 
-  getSelection () {
-    return this._getSelection()
+  hasUnsavedChanges () {
+    return Boolean(this.editorState.hasUnsavedChanges)
+  }
+
+  isBlurred () {
+    return Boolean(this.editorState.isBlurred)
   }
 
   setSelection (sel) {
@@ -91,7 +125,13 @@ export default class AbstractEditorSession extends EventEmitter {
         _addContainerPath(sel, this)
       }
     }
+    const editorState = this.editorState
+    if (editorState.isBlurred) {
+      editorState.isBlurred = false
+    }
     this._setSelection(this._normalizeSelection(sel))
+    editorState.propagateUpdates()
+
     return sel
   }
 
@@ -140,6 +180,9 @@ export default class AbstractEditorSession extends EventEmitter {
       }
     }
     ops.length = 0
+
+    this.editorState.propagateUpdates()
+
     return change
   }
 
@@ -172,18 +215,25 @@ export default class AbstractEditorSession extends EventEmitter {
       doc._notifyChangeListeners(change, info)
       this.emit('change', change, info)
     }
+    if (options.propagate) {
+      this.editorState.propagateUpdates()
+    }
   }
 
   undo () {
     let change = this._history.undo()
-    // TODO: why is this necessary?
-    if (change) this._setSelection(this._normalizeSelection(change.after.selection))
+    if (change) {
+      this._setSelection(this._normalizeSelection(change.after.selection))
+      this.editorState.propagateUpdates()
+    }
   }
 
   redo () {
     let change = this._history.redo()
-    // TODO: why is this necessary?
-    if (change) this._setSelection(this._normalizeSelection(change.after.selection))
+    if (change) {
+      this._setSelection(this._normalizeSelection(change.after.selection))
+      this.editorState.propagateUpdates()
+    }
   }
 
   /*
@@ -220,11 +270,27 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   _getSelection () {
-    // get the current selection
+    return this.editorState.selection
   }
 
   _setSelection (sel) {
-    // store the selection somewhere
+    this.editorState.selection = sel
+  }
+
+  _onDocumentChange (change, info) {
+    // console.log('_AbstractEditorSession._onDocumentChange', change, info)
+    const editorState = this.editorState
+    // ATTENTION: ATM we are using a DocumentChange to implement node states
+    // Now it happens, that something that reacts on document changes (particularly a CitationManager)
+    // updates the node state during a flow.
+    // HACK: In that case we 'merge' the state update into the already propagated document change
+    if (editorState.isDirty('document') && info.action === 'node-state-update') {
+      let propagatedChange = editorState.getUpdate('document').change
+      Object.assign(propagatedChange.updated, change.updated)
+    } else {
+      this.editorState._setUpdate('document', { change, info })
+      this.editorState.hasUnsavedChanges = true
+    }
   }
 
   _onTxOperation (op) {

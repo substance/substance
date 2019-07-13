@@ -1,6 +1,6 @@
 /* Inline Elements: Defaults
 ------------------------------------------------------- */
-@import './_variables.css';
+@import './styles/_variables.css';
 
 body,
 input,
