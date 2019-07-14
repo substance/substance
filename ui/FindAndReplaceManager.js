@@ -211,7 +211,7 @@ export default class FindAndReplaceManager {
     // leading to extra updates e.g. when the content is changed while
     // the FNR dialog is open
     if (!editorState._isUpdating()) {
-      this._editorState.propagateUpdates()
+      editorState.propagateUpdates()
     }
   }
 

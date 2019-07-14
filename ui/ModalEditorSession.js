@@ -29,13 +29,20 @@ export default class ModalEditorSession extends StageSession {
     this.keyboardManager = keyboardManager
     this.commandManager = commandManager
 
-    // EXPERIMENTAL: registering a 'reducer' that resets overlayId whenever the selection changes
+    this._rootComponent = null
+  }
+
+  initialize () {
+    super.initialize()
+
     this.editorState.addObserver(['selection'], this._resetOverlayId, this, { stage: 'update' })
     this.commandManager.initialize()
   }
 
   dispose () {
     super.dispose()
+
+    this.editorState.removeObserver(this)
     this.commandManager.dispose()
     this.markersManager.dispose()
     this.surfaceManager.dispose()
@@ -74,6 +81,14 @@ export default class ModalEditorSession extends StageSession {
 
   setContext (context) {
     this.context = context
+  }
+
+  setRootComponent (rootComponent) {
+    this._rootComponent = rootComponent
+  }
+
+  getRootComponent () {
+    return this._rootComponent
   }
 
   _resetOverlayId () {
