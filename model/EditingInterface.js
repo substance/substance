@@ -1,9 +1,9 @@
-import isPlainObject from '../util/isPlainObject'
+import { isPlainObject } from '../util'
 import copySelection from './copySelection'
-import Editing from './Editing'
 import Selection from './Selection'
 import { augmentSelection } from './selectionHelpers'
 import { deepDeleteNode } from './documentHelpers'
+import Editing from './Editing'
 
 /*
   Abstract base class for document editor APIs such as Transaction.

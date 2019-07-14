@@ -2,6 +2,7 @@ import { test as substanceTest } from 'substance-test'
 import { DefaultDOMElement, platform } from 'substance'
 import checkValues from './shared/checkValues'
 import getTestConfig from './shared/getTestConfig'
+import createTestArticle from './shared/createTestArticle'
 
 const CONTENT = '0123456789'
 
@@ -133,6 +134,7 @@ function HTMLImporterTests (memory) {
 
 function _setupImporter (options = {}) {
   let config = getTestConfig()
-  let importer = config.createImporter('html', {}, options)
+  let doc = createTestArticle()
+  let importer = config.createImporter('html', doc, options)
   return importer
 }

@@ -1,6 +1,8 @@
 import { test } from 'substance-test'
 import { DOMImporter, DefaultDOMElement } from 'substance'
 import getTestConfig from './shared/getTestConfig'
+import getTestSchema from './shared/getTestSchema'
+import createTestArticle from './shared/createTestArticle'
 
 const pConverter = {
   type: 'paragraph',
@@ -11,7 +13,7 @@ const pConverter = {
 }
 
 test('DOMImporter: creating a DOMImporter', (t) => {
-  const schema = getTestConfig().getSchema()
+  const schema = getTestSchema()
   // fail without converters
   t.throws(() => {
     new DOMImporter({ schema }) // eslint-disable-line no-new
@@ -159,19 +161,10 @@ test('DOMImporter: resolving id collisions', (t) => {
   t.end()
 })
 
-/*
-TODO:
-  - import with options
-*/
-
 function createImporter (converters) {
   const config = getTestConfig()
-  const schema = config.getSchema()
-  if (!converters) {
-    converters = config.getConverterRegistry().get('html').values()
-  }
+  let doc = createTestArticle()
   return new DOMImporter({
-    schema,
-    converters: converters
-  })
+    converters: converters || config.getConverters('html')
+  }, doc)
 }

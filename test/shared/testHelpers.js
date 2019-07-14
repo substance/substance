@@ -34,6 +34,32 @@ export class DOMEvent {
   preventDefault () {}
 }
 
+export class ClipboardEventData {
+  constructor () {
+    this.data = {}
+  }
+
+  getData (format) {
+    return this.data[format]
+  }
+
+  setData (format, data) {
+    this.data[format] = data
+  }
+
+  get types () {
+    return Object.keys(this.data)
+  }
+}
+
+export class ClipboardEvent {
+  constructor () {
+    this.clipboardData = new ClipboardEventData()
+  }
+  preventDefault () {}
+  stopPropagation () {}
+}
+
 export function createSurfaceEvent (surface, eventData) {
   return new DOMEvent(Object.assign({ target: surface.getNativeElement() }, eventData))
 }

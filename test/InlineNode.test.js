@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { EditingInterface } from 'substance'
+import { EditingInterface, documentHelpers } from 'substance'
 import setupEditor from './shared/setupEditor'
 import twoParagraphs from './fixture/twoParagraphs'
 
@@ -125,7 +125,7 @@ test('InlineNode: Click on InlineNode inside IsolatedNode should select InlineNo
     endOffset: sel.end.offset,
     surfaceId: sel.surfaceId
   }, {
-    path: ['sn', 'body'],
+    path: ['sn-body-p1', 'content'],
     startOffset: 3,
     endOffset: 4,
     surfaceId: 'body/sn/sn.body'
@@ -191,17 +191,22 @@ function nestedInlineNode (doc) {
 function inlineNodeInsideIsolatedNode (doc) {
   let tx = new EditingInterface(doc)
   let body = tx.get('body')
-  body.append(tx.create({
+  documentHelpers.createNodeFromJson(tx, {
     type: 'structured-node',
     id: 'sn',
     title: 'Foo',
-    body: 'abcdefgh'
-  }))
+    body: [{
+      type: 'paragraph',
+      id: 'sn-body-p1',
+      content: 'abcdefgh'
+    }]
+  })
+  body.append('sn')
   tx.setSelection({
     type: 'property',
-    path: ['sn', 'body'],
+    path: ['sn-body-p1', 'content'],
     startOffset: 3,
-    surfaceId: 'body/sn/sn.body'
+    surfaceId: 'body/sn/sn.body/sn-body-p1.content'
   })
   tx.insertInlineNode({
     type: 'test-inline-node',

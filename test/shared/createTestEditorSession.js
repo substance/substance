@@ -1,17 +1,17 @@
-import { Document, EditorSession } from 'substance'
+import { EditorSession, createEditorContext } from 'substance'
 import getTestConfig from './getTestConfig'
+import createTestArticle from './createTestArticle'
 
-export default function createEditorSession (...seeds) {
+export default function createTestEditorSession (...seeds) {
   let config = getTestConfig()
-  let doc = new Document(config.getSchema())
-  let body = doc.create({
-    type: 'body',
-    id: 'body'
-  })
-  seeds.forEach((seed) => {
-    seed(doc, body)
-  })
-  let editorSession = new EditorSession(doc, { configurator: config })
+  let doc = createTestArticle()
+  let body = doc.get('body')
+  seeds.forEach(seed => seed(doc, body))
+
+  let editorSession = new EditorSession('test', doc, config)
+  let context = createEditorContext(config, editorSession)
+  editorSession.setContext(context)
+
   let first = body.getNodeAt(0)
   if (first) {
     if (first.isText()) {

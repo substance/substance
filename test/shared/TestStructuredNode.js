@@ -1,12 +1,11 @@
-import { DocumentNode } from 'substance'
+import { DocumentNode, TEXT, CONTAINER } from 'substance'
+import { ANNOS_AND_INLINE_NODES, ANNOS } from './TestArticleConstants'
 
-export default class StructuredNode extends DocumentNode {
-  static isBlock () { return true }
-}
+export default class StructuredNode extends DocumentNode {}
 
 StructuredNode.schema = {
   type: 'structured-node',
-  title: 'text',
-  body: 'text',
-  caption: 'text'
+  title: TEXT(ANNOS),
+  body: CONTAINER({ nodeTypes: ['paragraph'], defaultTextType: 'paragraph' }),
+  caption: TEXT(ANNOS_AND_INLINE_NODES)
 }

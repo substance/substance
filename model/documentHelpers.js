@@ -147,27 +147,39 @@ export function deepDeleteNode (doc, node) {
     }
   }
   let nodeSchema = node.getSchema()
-  // Note: we have to delete from top to down
-  // i.e. first delete a parent then its children.
-  // This way when undone, children will be created first.
+  // Note: correct order of deletion is tricky here.
+  // 1. annos attached to text properties
+  // 2. the node itself
+  // 3. nodes that are referenced via owned properties
+  for (let prop of nodeSchema) {
+    if (prop.isText()) {
+      let annos = doc.getAnnotations([node.id, prop.name])
+      for (let anno of annos) {
+        deepDeleteNode(doc, anno)
+      }
+    }
+  }
   doc.delete(node.id)
   // Recursive deletion of owned nodes
-  let ownedProps = nodeSchema.getOwnedProperties()
-  ownedProps.forEach(prop => {
-    let value = node[prop.name]
-    if (prop.isArray()) {
-      let ids = value
-      if (ids.length > 0) {
-        // property can be a matrix
-        if (isArray(ids[0])) ids = flattenOften(ids, 2)
-        ids.forEach((id) => {
-          deepDeleteNode(doc, doc.get(id))
-        })
+  // 1. delete all 'owned' references to child nodes
+  // 2. delete all annos belonging to text properties
+  for (let prop of nodeSchema) {
+    if (prop.isOwned()) {
+      let value = node[prop.name]
+      if (prop.isArray()) {
+        let ids = value
+        if (ids.length > 0) {
+          // property can be a matrix
+          if (isArray(ids[0])) ids = flattenOften(ids, 2)
+          ids.forEach((id) => {
+            deepDeleteNode(doc, doc.get(id))
+          })
+        }
+      } else {
+        deepDeleteNode(doc, doc.get(value))
       }
-    } else {
-      deepDeleteNode(doc, doc.get(value))
     }
-  })
+  }
 }
 
 /*
@@ -386,7 +398,6 @@ export function mergeListItems (doc, listId, itemPos) {
 }
 
 // used by transforms copy, paste
-// and by ClipboardImporter/Exporter
 export const SNIPPET_ID = 'snippet'
 export const TEXT_SNIPPET_ID = 'text-snippet'
 

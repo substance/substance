@@ -1,8 +1,11 @@
-import { Container } from 'substance'
+import { Container, CONTAINER } from 'substance'
+import { BLOCK_NODES } from './TestArticleConstants'
 
-export default class Body extends Container {}
-
-Body.schema = {
+export default class TestBody extends Container {}
+TestBody.schema = {
   type: 'body',
-  nodes: { type: ['array', 'id'], default: [], owned: true, defaultTextType: 'paragraph' }
+  nodes: CONTAINER({
+    nodeTypes: BLOCK_NODES,
+    defaultTextType: 'paragraph'
+  })
 }

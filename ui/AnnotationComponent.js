@@ -45,7 +45,7 @@ export default class AnnotationComponent extends Component {
   }
 
   getClassNames () {
-    return 'sc-' + this.props.node.type
+    return `sc-annotation sm-${this.props.node.type}`
   }
 
   onHighlightedChanged () {

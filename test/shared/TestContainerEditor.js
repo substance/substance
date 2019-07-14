@@ -1,6 +1,6 @@
 import { Component, ContainerEditor } from 'substance'
 
-class TestContainerEditor extends Component {
+export default class TestContainerEditor extends Component {
   getChildContext () {
     return this.props.context
   }
@@ -14,5 +14,3 @@ class TestContainerEditor extends Component {
     )
   }
 }
-
-export default TestContainerEditor

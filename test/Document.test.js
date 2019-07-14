@@ -2,19 +2,18 @@ import { test } from 'substance-test'
 import {
   CHILD, CHILDREN, Document, DocumentSchema, DocumentNode, map, pick
 } from 'substance'
-import fixture from './shared/createTestArticle'
-import getTestConfig from './shared/getTestConfig'
 import simple from './fixture/simple'
+import createTestArticle from './shared/createTestArticle'
 
 test('Document: Create null selection.', function (t) {
-  let doc = fixture(simple)
+  let doc = createTestArticle(simple)
   let sel = doc.createSelection(null)
   t.ok(sel.isNull(), 'Selection should be null.')
   t.end()
 })
 
 test('Document: Create collapsed property selection.', function (t) {
-  let doc = fixture(simple)
+  let doc = createTestArticle(simple)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -28,7 +27,7 @@ test('Document: Create collapsed property selection.', function (t) {
 })
 
 test('Document: Create expanded property selection.', function (t) {
-  let doc = fixture(simple)
+  let doc = createTestArticle(simple)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -44,7 +43,7 @@ test('Document: Create expanded property selection.', function (t) {
 })
 
 test('Document: Node.toJSON() should not export undefined optional properties', function (t) {
-  let doc = fixture(simple)
+  let doc = createTestArticle(simple)
   let p = doc.create({
     type: 'paragraph',
     id: 'p',
@@ -55,7 +54,7 @@ test('Document: Node.toJSON() should not export undefined optional properties', 
 })
 
 test('Document: Setting a node property with DocumentNode.set()', t => {
-  let doc = fixture(simple)
+  let doc = createTestArticle(simple)
   let p1 = doc.get('p1')
   p1.set('content', 'XXX')
   t.equal(p1.content, 'XXX', 'property should have changed')
@@ -63,7 +62,7 @@ test('Document: Setting a node property with DocumentNode.set()', t => {
 })
 
 test('Document: Assigning multiple properties with DocumentNode.assign()', t => {
-  let doc = fixture()
+  let doc = createTestArticle()
   let node = doc.create({
     type: 'structured-node',
     id: 'sn'
@@ -79,7 +78,7 @@ test('Document: Assigning multiple properties with DocumentNode.assign()', t => 
 })
 
 test('Document: node.find()', t => {
-  let doc = fixture(simple)
+  let doc = createTestArticle(simple)
   let body = doc.get('body')
   let p2 = body.find('#p2')
   t.notNil(p2, 'body.find(#p2) should find a node')
@@ -142,8 +141,7 @@ test('Document: resolve() throws for non-existing properties in strict mode', t 
 })
 
 test('Document: setting text', t => {
-  let config = getTestConfig()
-  let doc = new Document(config.getSchema())
+  let doc = createTestArticle()
   let p = doc.create({ type: 'paragraph', content: 'abcdefg' })
   doc.create({ type: 'strong', start: { path: p.getPath(), offset: 1 }, end: { offset: 3 } })
   let annos = map(p.getAnnotations())

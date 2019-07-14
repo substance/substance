@@ -1,4 +1,4 @@
-import { Registry } from '../deprecated'
+import Registry from './Registry'
 
 /*
   Simple factory implementation.

@@ -1,15 +1,6 @@
-import isMatch from '../util/isMatch'
+import { isMatch } from '../util'
 import Command from './Command'
 
-/*
-  Usage in packages:
-
-  ```js
-  config.addCommand('heading1', SwitchTextTypeCommand, {
-    spec: { type: 'heading', level: 1 }
-  })
-  ```
-*/
 export default class SwitchTextTypeCommand extends Command {
   constructor (config) {
     super(config)
@@ -36,11 +27,8 @@ export default class SwitchTextTypeCommand extends Command {
     if (sel.isPropertySelection() && !isBlurred) {
       let path = sel.getPath()
       let node = doc.get(path[0])
-      if (node && node.isText() && node.isBlock()) {
+      if (node && node.isText()) {
         commandState.active = isMatch(node, this.config.spec)
-        // When cursor is at beginning of a text block we signal
-        // that we want the tool to appear contextually (e.g. in an overlay)
-        commandState.showInContext = sel.start.offset === 0 && sel.end.offset === 0
       } else {
         commandState.disabled = true
       }

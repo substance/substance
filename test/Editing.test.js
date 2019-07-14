@@ -14,7 +14,7 @@ import {
   _li1plus, _li2plus,
   LI1_TEXT, LI2_TEXT, LI3_TEXT,
   _l2, _l21, _l22,
-  _t1, _t1Sparse, T_CONTENT, LI22_TEXT, LI21_TEXT
+  LI22_TEXT, LI21_TEXT
 } from './fixture/samples'
 
 // TODO: consolidate specification and 'category labels' of tests
@@ -1348,11 +1348,22 @@ test('Editing: DEL34: Deleting using DEL at the end of a text property editor', 
 })
 
 test('Editing: DEL35: Deleting a NodeSelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _t1)
-  let table = doc.get('t1')
+  let { editorSession } = setupEditor(t, _in1, doc => {
+    doc.create({
+      type: 'strong',
+      id: 'in1-body-p1-s1',
+      start: {
+        path: ['in1-body-p1', 'content'],
+        offset: 2
+      },
+      end: {
+        offset: 4
+      }
+    })
+  })
   editorSession.setSelection({
     type: 'node',
-    nodeId: table.id,
+    nodeId: 'in1',
     containerPath: ['body', 'nodes']
   })
   let change = editorSession.transaction((tx) => {
@@ -1360,7 +1371,7 @@ test('Editing: DEL35: Deleting a NodeSelection', (t) => {
   })
   let deleteOps = change.ops.filter(op => op.isDelete())
   let deletedIds = deleteOps.map(op => op.path[0])
-  let expected = ['t1', 't1_a1', 't1_b1', 't1_a2', 't1_b2']
+  let expected = ['in1', 'in1-body-p1-s1', 'in1-body-p1']
   t.deepEqual(deletedIds, expected, 'The nodes should have been deleted hierarchically and in correct order.')
   t.end()
 })
@@ -2054,50 +2065,52 @@ test('Editing: CP6: Copying a paragraph and a ListItem', (t) => {
   t.end()
 })
 
-test('Editing: CP7 Copying a table', (t) => {
-  let { doc } = setupEditor(t, _t1)
-  let editor = new EditingInterface(doc)
-  editor.setSelection({
-    type: 'node',
-    nodeId: 't1',
-    containerPath: ['body', 'nodes']
-  })
-  let copy = editor.copySelection()
-  let t1 = copy.get('t1')
-  t.notNil(t1, 'Table node should exist')
-  t.equals(t1.getRowCount(), 2, '.. with two rows')
-  t.equals(t1.getColCount(), 2, '.. with two cols')
-  for (let row = 0; row < 2; row++) {
-    for (let col = 0; col < 2; col++) {
-      let cell = t1.getCellAt(row, col)
-      t.notNil(cell, `Cell (${row + 1},${col + 1}) should exist`)
-      t.equals(cell.content, T_CONTENT[row][col], '.. and have correct content')
-    }
-  }
-  t.end()
-})
+// TODO: decide if we want to add a table implementation to the test article
+// test('Editing: CP7 Copying a table', (t) => {
+//   let { doc } = setupEditor(t, _t1)
+//   let editor = new EditingInterface(doc)
+//   editor.setSelection({
+//     type: 'node',
+//     nodeId: 't1',
+//     containerPath: ['body', 'nodes']
+//   })
+//   let copy = editor.copySelection()
+//   let t1 = copy.get('t1')
+//   t.notNil(t1, 'Table node should exist')
+//   t.equals(t1.getRowCount(), 2, '.. with two rows')
+//   t.equals(t1.getColCount(), 2, '.. with two cols')
+//   for (let row = 0; row < 2; row++) {
+//     for (let col = 0; col < 2; col++) {
+//       let cell = t1.getCellAt(row, col)
+//       t.notNil(cell, `Cell (${row + 1},${col + 1}) should exist`)
+//       t.equals(cell.content, T_CONTENT[row][col], '.. and have correct content')
+//     }
+//   }
+//   t.end()
+// })
 
-test('Editing: CP8 Copying a sparse table', (t) => {
-  let { doc } = setupEditor(t, _t1Sparse)
-  let editor = new EditingInterface(doc)
-  editor.setSelection({
-    type: 'node',
-    nodeId: 't1',
-    containerPath: ['body', 'nodes']
-  })
-  let copy = editor.copySelection()
-  let t1 = copy.get('t1')
-  t.notNil(t1, 'Table node should exist')
-  t.equals(t1.getRowCount(), 2, '.. with two rows')
-  t.equals(t1.getColCount(), 2, '.. with two cols')
-  for (let i = 0; i < 2; i++) {
-    let cell = t1.getCellAt(i, i)
-    t.notNil(cell, `Cell (${i + 1},${i + 1}) should exist`)
-    t.equals(cell.content, T_CONTENT[i][i], '.. and have correct content')
-    t.nil(t1.getCellAt(1 - i, i), `Cell (${1 - i + 1},${i + 1}) should not exist`)
-  }
-  t.end()
-})
+// TODO: decide if we want to add a table implementation to the test article
+// test('Editing: CP8 Copying a sparse table', (t) => {
+//   let { doc } = setupEditor(t, _t1Sparse)
+//   let editor = new EditingInterface(doc)
+//   editor.setSelection({
+//     type: 'node',
+//     nodeId: 't1',
+//     containerPath: ['body', 'nodes']
+//   })
+//   let copy = editor.copySelection()
+//   let t1 = copy.get('t1')
+//   t.notNil(t1, 'Table node should exist')
+//   t.equals(t1.getRowCount(), 2, '.. with two rows')
+//   t.equals(t1.getColCount(), 2, '.. with two cols')
+//   for (let i = 0; i < 2; i++) {
+//     let cell = t1.getCellAt(i, i)
+//     t.notNil(cell, `Cell (${i + 1},${i + 1}) should exist`)
+//     t.equals(cell.content, T_CONTENT[i][i], '.. and have correct content')
+//     t.nil(t1.getCellAt(1 - i, i), `Cell (${1 - i + 1},${i + 1}) should not exist`)
+//   }
+//   t.end()
+// })
 
 // NOTE: with Copy'n'Paste within the same document,
 // we must make sure to check that things are cloned correctly,

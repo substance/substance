@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import isArray from '../util/isArray'
+import * as documentHelpers from './documentHelpers'
 
 const ERR_ABSTRACT = 'This method is abstract!'
 
@@ -9,23 +10,21 @@ export default function (DocumentNode) {
       throw new Error(ERR_ABSTRACT)
     }
 
-    getItems () {
-      throw new Error(ERR_ABSTRACT)
-    }
-
     getItemsPath () {
       throw new Error(ERR_ABSTRACT)
     }
 
-    insertItemAt (pos, item) {
+    getListTypeString () {
       throw new Error(ERR_ABSTRACT)
     }
 
-    removeItemAt (pos) {
+    setListTypeString (listTypeStr) {
       throw new Error(ERR_ABSTRACT)
     }
 
-    // general
+    getItems () {
+      return documentHelpers.getNodesForPath(this.getDocument(), this.getItemsPath())
+    }
 
     getItemAt (idx) {
       return this.getItems()[idx]
@@ -48,7 +47,7 @@ export default function (DocumentNode) {
     }
 
     appendItem (item) {
-      this.insertItemAt(this.items.length, item)
+      this.insertItemAt(this.getLength(), item)
     }
 
     removeItem (item) {
@@ -56,6 +55,14 @@ export default function (DocumentNode) {
       if (pos >= 0) {
         this.removeItemAt(pos)
       }
+    }
+
+    insertItemAt (pos, item) {
+      documentHelpers.insertAt(this.getDocument(), this.getItemsPath(), pos, item.id)
+    }
+
+    removeItemAt (pos) {
+      documentHelpers.removeAt(this.getDocument(), this.getItemsPath(), pos)
     }
 
     isEmpty () {

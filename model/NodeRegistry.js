@@ -1,4 +1,4 @@
-import Registry from '../deprecated/DeprecatedRegistry'
+import Registry from '../util/Registry'
 import isString from '../util/isString'
 
 /*

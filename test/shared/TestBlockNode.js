@@ -1,6 +1,6 @@
-import { BlockNode } from 'substance'
+import { DocumentNode } from 'substance'
 
-class TestBlockNode extends BlockNode {}
-TestBlockNode.type = 'test-block'
-
-export default TestBlockNode
+export default class TestBlockNode extends DocumentNode {}
+TestBlockNode.schema = {
+  type: 'test-block'
+}

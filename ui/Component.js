@@ -483,22 +483,6 @@ export default class Component extends EventEmitter {
     Remember to unsubscribe from all changes in the {@link ui/Component#dispose}
     method otherwise listeners you have attached may be called without a context.
 
-    @example
-
-    ```javascript
-    class Foo extends Component {
-      didMount() {
-        this.context.editorSession.onRender('document', this.rerender, this, {
-          path: [this.props.node.id, 'label']
-        })
-      }
-
-      dispose() {
-        this.context.editorSession.off(this)
-      }
-    }
-    ```
-
     Make sure that you call `component.mount(el)` using an element
     which is already in the DOM.
 

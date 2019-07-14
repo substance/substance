@@ -1,6 +1,6 @@
-import { Component, TextPropertyEditor } from 'substance'
+import { Component, TextPropertyEditor, ContainerEditor } from 'substance'
 
-class TestStructuredNodeComponent extends Component {
+export default class TestStructuredNodeComponent extends Component {
   render ($$) {
     var node = this.props.node
     var el = $$('div').addClass('sc-structured-node')
@@ -11,9 +11,9 @@ class TestStructuredNodeComponent extends Component {
       }).ref('titleEditor')
     )
     el.append(
-      $$(TextPropertyEditor, {
+      $$(ContainerEditor, {
         disabled: this.props.disabled,
-        path: [node.id, 'body']
+        containerPath: [node.id, 'body']
       }).ref('bodyEditor')
     )
     el.append(
@@ -27,5 +27,3 @@ class TestStructuredNodeComponent extends Component {
 }
 
 TestStructuredNodeComponent.fullWidth = true
-
-export default TestStructuredNodeComponent

@@ -1,8 +1,6 @@
 import { DocumentNode } from 'substance'
 
-export default class TestNode extends DocumentNode {
-  static isBlock () { return true }
-}
+export default class TestNode extends DocumentNode {}
 
 TestNode.schema = {
   type: 'test-node',

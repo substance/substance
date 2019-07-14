@@ -59,17 +59,25 @@ export default class ContainerEditor extends Surface {
   }
 
   didMount () {
-    super.didMount.apply(this, arguments)
-    let editorSession = this.getEditorSession()
-    editorSession.onUpdate('document', this._onContainerChanged, this, {
-      path: this.getContainerPath()
+    super.didMount()
+
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.addObserver(['selection'], this._onSelectionChanged, this, {
+      stage: 'render'
+    })
+    editorState.addObserver(['document'], this._onContainerChanged, this, {
+      stage: 'render',
+      document: {
+        path: this.containerPath
+      }
     })
   }
 
   dispose () {
-    super.dispose.apply(this, arguments)
-    let editorSession = this.getEditorSession()
-    editorSession.off(this)
+    super.dispose()
+
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.removeObserver(this)
   }
 
   render ($$) {
@@ -93,6 +101,15 @@ export default class ContainerEditor extends Surface {
     if (!this.props.disabled && !this.isEmpty()) {
       el.addClass('sm-enabled')
       el.setAttribute('contenteditable', true)
+    }
+
+    if (this.isEditable()) {
+      el.addClass('sm-editable')
+    } else {
+      el.addClass('sm-readonly')
+      // HACK: removing contenteditable if not editable
+      // TODO: we should fix substance.TextPropertyEditor to be consistent with props used in substance.Surface
+      el.setAttribute('contenteditable', false)
     }
 
     return el
@@ -121,11 +138,27 @@ export default class ContainerEditor extends Surface {
   }
 
   _getNodeComponentClass (node) {
-    let ComponentClass = this.getComponent(node.type)
-    if (node.isText() || ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
-      return ComponentClass
+    let ComponentClass = this.getComponent(node.type, 'not-strict')
+    if (ComponentClass) {
+      // text components are used directly
+      if (node.isText() || this.props.disabled) {
+        return ComponentClass
+      // other components are wrapped into an IsolatedNodeComponent
+      // except the component is itself a customized IsolatedNodeComponent
+      } else if (ComponentClass.prototype._isCustomNodeComponent || ComponentClass.prototype._isIsolatedNodeComponent) {
+        return ComponentClass
+      } else {
+        return this.getComponent('isolated-node')
+      }
     } else {
-      return this.getComponent('isolated-node')
+      // for text nodes without an component registered explicitly
+      // we use the default text component
+      if (node.isText()) {
+        return this.getComponent('text-node')
+      // otherwise component for unsupported nodes
+      } else {
+        return this.getComponent('unsupported-node')
+      }
     }
   }
 
@@ -156,6 +189,31 @@ export default class ContainerEditor extends Surface {
       return true
     }
     return false
+  }
+
+  _softBreak () {
+    let editorSession = this.getEditorSession()
+    let sel = editorSession.getSelection()
+    if (sel.isPropertySelection()) {
+      editorSession.transaction(tx => {
+        tx.insertText('\n')
+      }, { action: 'soft-break' })
+    } else {
+      editorSession.transaction((tx) => {
+        tx.break()
+      }, { action: 'break' })
+    }
+  }
+
+  _handleEnterKey (event) {
+    // for SHIFT-ENTER a line break is inserted (<break> if allowed, or \n alternatively)
+    if (event.shiftKey) {
+      event.preventDefault()
+      event.stopPropagation()
+      this._softBreak()
+    } else {
+      super._handleEnterKey(event)
+    }
   }
 
   _handleLeftOrRightArrowKey (event) {

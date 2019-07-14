@@ -1,16 +1,9 @@
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import DOMImporter from './DOMImporter'
 
-/*
-  Base class for custom XML importers. If you want to use HTML as your
-  exchange format see {@link model/HTMLImporter}.
-
-  TODO: provide example and activate reenable API docs
-*/
-
 export default class XMLImporter extends DOMImporter {
-  constructor (config, context) {
-    super(Object.assign({ idAttribute: 'id' }, config), context)
+  constructor (params, doc, options = {}) {
+    super(_defaultParams(params, options), doc, options)
   }
 
   importDocument (xml) {
@@ -25,4 +18,8 @@ export default class XMLImporter extends DOMImporter {
     if (!rootNode) throw new Error('XML Root node could not be found.')
     this.convertElement(rootNode)
   }
+}
+
+function _defaultParams (params, options) {
+  return Object.assign({ idAttribute: 'id' }, params, options)
 }

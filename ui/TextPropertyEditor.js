@@ -29,6 +29,22 @@ export default class TextPropertyEditor extends Surface {
     }
   }
 
+  didMount () {
+    super.didMount()
+
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.addObserver(['selection'], this._onSelectionChanged, this, {
+      stage: 'render'
+    })
+  }
+
+  dispose () {
+    super.dispose()
+
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.removeObserver(this)
+  }
+
   render ($$) {
     const TextPropertyComponent = this.getComponent('text-property')
 
@@ -52,6 +68,15 @@ export default class TextPropertyEditor extends Surface {
       }).ref('property')
     )
 
+    if (this.isEditable()) {
+      el.addClass('sm-editable')
+    } else {
+      el.addClass('sm-readonly')
+      // HACK: removing contenteditable if not editable
+      // TODO: we should fix substance.TextPropertyEditor to be consistent with props used in substance.Surface
+      el.setAttribute('contenteditable', false)
+    }
+
     return el
   }
 
@@ -74,19 +99,11 @@ export default class TextPropertyEditor extends Surface {
 
   _handleEnterKey (event) {
     event.stopPropagation()
-    if (this.props.handleEnter === false || !this.props.multiLine) {
-      event.preventDefault()
+    event.preventDefault()
+    if (this.props.multiLine) {
+      this.type('\n')
     }
-    this.el.emit('enter', {
-      altKey: event.altKey,
-      ctrlKey: event.ctrlKey,
-      metaKey: event.metaKey,
-      shiftKey: event.shiftKey,
-      code: event.code
-    })
   }
-
-  // TODO: this is somewhat manually, maybe we find a better way to
 
   _handleEscapeKey (event) {
     this.el.emit('escape', {

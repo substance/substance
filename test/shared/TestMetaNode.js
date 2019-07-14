@@ -1,10 +1,8 @@
-import { DocumentNode } from 'substance'
+import { DocumentNode, PLAIN_TEXT } from 'substance'
 
-class TestMetaNode extends DocumentNode {}
+export default class TestMetaNode extends DocumentNode {}
 
 TestMetaNode.schema = {
   type: 'meta',
-  title: 'text'
+  title: PLAIN_TEXT
 }
-
-export default TestMetaNode

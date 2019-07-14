@@ -2,6 +2,7 @@ import { test } from 'substance-test'
 import { DefaultDOMElement } from 'substance'
 import checkValues from './shared/checkValues'
 import getTestConfig from './shared/getTestConfig'
+import createTestArticle from './shared/createTestArticle'
 
 const CONTENT = '0123456789'
 
@@ -71,22 +72,9 @@ test('XMLImporter: Importing meta', t => {
   t.end()
 })
 
-// FIXME: broken since introduction of file nodes
-test('XMLImporter: Importing image', t => {
-  let importer = _setupImporter({ 'stand-alone': true })
-  let xml = '<img id="img1" src="someimage.png"></img>'
-  let el = DefaultDOMElement.parseSnippet(xml, 'xml')
-  let node = importer.convertElement(el)
-  t.equal(node.type, 'image', 'Created node should be of type "image"')
-  t.equal(node.id, 'img1', '.. with correct id')
-  let file = node.getImageFile()
-  t.notNil(file, 'A file node should have been created')
-  t.equal(file.url, 'someimage.png', '.. containing the correct URL')
-  t.end()
-})
-
 function _setupImporter (options = {}) {
   let config = getTestConfig()
-  let importer = config.createImporter('xml', {}, options)
+  let doc = createTestArticle()
+  let importer = config.createImporter('xml', doc, options)
   return importer
 }
