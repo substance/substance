@@ -15,7 +15,7 @@ const cssSelectAdapter = new DocumentNodeSelectAdapter()
   The following example shows how a new node type is defined.
 
   ```js
-  class Todo extends TextBlock {}
+  class Todo extends DocumentNode {}
   Todo.schema = {
     type: 'todo',
     content: 'text',
@@ -170,15 +170,6 @@ export default class DocumentNode extends DataNode {
    */
   isAnnotation () {
     return this.constructor.isAnnotation()
-  }
-
-  /**
-   * @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
-   */
-  isBlock () {
-    // TODO: This category did not help too much.
-    // Find out if we can get rid of this. Essentially everything which is not an annotation or an inline node is a block
-    return this.constructor.isBlock()
   }
 
   /**

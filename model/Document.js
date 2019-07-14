@@ -57,7 +57,7 @@ export default class Document extends EventEmitter {
       throw new Error('A document needs a schema for reflection.')
     }
 
-    // used internally (-> Transaction)
+    // used internally
     this._ops = []
 
     this._initialize(...args)
@@ -238,9 +238,7 @@ export default class Document extends EventEmitter {
     const op = this._create(nodeData)
     if (op) {
       this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitInternalChange(op)
-      }
+      this._emitInternalChange(op)
       return this.get(nodeData.id)
     }
   }
@@ -272,9 +270,7 @@ export default class Document extends EventEmitter {
     const op = this._delete(nodeId)
     if (op) {
       this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitInternalChange(op)
-      }
+      this._emitInternalChange(op)
     }
     return node
   }
@@ -299,9 +295,7 @@ export default class Document extends EventEmitter {
     const op = this._set(path, value)
     if (op) {
       this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitInternalChange(op)
-      }
+      this._emitInternalChange(op)
     }
     return oldValue
   }
@@ -343,9 +337,7 @@ export default class Document extends EventEmitter {
     const op = this._update(path, diff)
     if (op) {
       this._ops.push(op)
-      if (!this._isTransactionDocument) {
-        this._emitInternalChange(op)
-      }
+      this._emitInternalChange(op)
     }
     return op
   }
