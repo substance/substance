@@ -1,45 +1,53 @@
-import { test as substanceTest } from 'substance-test'
-import {
-  DefaultDOMElement, Clipboard,
-  platform, find
-} from 'substance'
+import { test as _test } from 'substance-test'
+import { DefaultDOMElement, platform, find, documentHelpers, Clipboard } from 'substance'
 import setupEditor from './shared/setupEditor'
+import { ClipboardEventData } from './shared/testHelpers'
 
-import simple from './fixture/simple'
-import BrowserLinuxPLainTextFixture from './fixture/html/browser-linux-plain-text'
-import BrowserLinuxAnnotatedTextFixture from './fixture/html/browser-linux-annotated-text'
-import BrowserLinuxTwoParagraphsFixture from './fixture/html/browser-linux-two-paragraphs'
-import BrowserWindowsPlainTextFixture from './fixture/html/browser-windows-plain-text'
-import BrowserWindowsAnnotatedTextFixture from './fixture/html/browser-windows-annotated-text'
-import BrowserWindowsTwoParagraphsFixture from './fixture/html/browser-windows-two-paragraphs'
-import BrowserLinuxFirefoxPlainTextFixture from './fixture/html/browser-linux-firefox-plain-text'
-import BrowserLinuxFirefoxAnnotatedTextFixture from './fixture/html/browser-linux-firefox-annotated-text'
-import BrowserLinuxFirefoxTwoParagraphsFixture from './fixture/html/browser-linux-firefox-two-paragraphs'
-import BrowserLinuxFirefoxWholePageFixture from './fixture/html/browser-linux-firefox-whole-page'
-import BrowserOSXFirefoxPlainTextFixture from './fixture/html/browser-osx-firefox-plain-text'
-import BrowserOSXFirefoxAnnotatedTextFixture from './fixture/html/browser-osx-firefox-annotated-text'
-import BrowserOSXFirefoxTwoParagraphsFixture from './fixture/html/browser-osx-firefox-two-paragraphs'
-import BrowserWindowsFirefoxPlainTextFixture from './fixture/html/browser-windows-firefox-plain-text'
-import BrowserWindowsFirefoxAnnotatedTextFixture from './fixture/html/browser-windows-firefox-annotated-text'
-import BrowserWindowsFirefoxTwoParagraphsFixture from './fixture/html/browser-windows-firefox-two-paragraphs'
-import BrowserWindowsEdgePlainTextFixture from './fixture/html/browser-windows-edge-plain-text'
-import BrowserWindowsEdgeAnnotatedTextFixture from './fixture/html/browser-windows-edge-annotated-text'
-import BrowserWindowsEdgeTwoParagraphsFixture from './fixture/html/browser-windows-edge-two-paragraphs'
-import GDocsOSXLinuxChromePlainTextFixture from './fixture/html/google-docs-osx-linux-chrome-plain-text'
-import GDocsOSXLinuxChromeAnnotatedTextFixture from './fixture/html/google-docs-osx-linux-chrome-annotated-text'
-import GDocsOSXLinuxChromeTwoParagraphsFixture from './fixture/html/google-docs-osx-linux-chrome-two-paragraphs'
-import GDocsOSXLinuxChromeExtendedFixture from './fixture/html/google-docs-osx-linux-chrome-extended'
-import GDocsLinuxFirefoxPlainTextFixture from './fixture/html/google-docs-linux-firefox-plain-text'
-import GDocsLinuxFirefoxAnnotatedTextFixture from './fixture/html/google-docs-linux-firefox-annotated-text'
-import GDocsOSXFirefoxPlainTextFixture from './fixture/html/google-docs-osx-firefox-plain-text'
-import LibreOfficeOSXPlainTextFixture from './fixture/html/libre-office-osx-linux-plain-text'
-import LibreOfficeOSXAnnotatedTextFixture from './fixture/html/libre-office-osx-linux-annotated-text'
-import LibreOfficeOSXTwoParagraphsFixture from './fixture/html/libre-office-osx-linux-two-paragraphs'
-import LibreOfficeOSXExtendedFixture from './fixture/html/libre-office-osx-linux-extended'
-import MSW11OSXPlainTextFixture from './fixture/html/word-11-osx-plain-text'
-import MSW11OSXAnnotatedTextFixture from './fixture/html/word-11-osx-annotated-text'
-import MSW11OSXTwoParagraphsFixture from './fixture/html/word-11-osx-two-paragraphs'
-import MSW11OSXExtendedFixture from './fixture/html/word-11-osx-extended'
+import simple from './clipboard/simple'
+import BrowserLinuxPLainTextFixture from './clipboard/browser-linux-plain-text'
+import BrowserLinuxAnnotatedTextFixture from './clipboard/browser-linux-annotated-text'
+import BrowserLinuxTwoParagraphsFixture from './clipboard/browser-linux-two-paragraphs'
+import BrowserWindowsPlainTextFixture from './clipboard/browser-windows-plain-text'
+import BrowserWindowsAnnotatedTextFixture from './clipboard/browser-windows-annotated-text'
+import BrowserWindowsTwoParagraphsFixture from './clipboard/browser-windows-two-paragraphs'
+import BrowserLinuxFirefoxPlainTextFixture from './clipboard/browser-linux-firefox-plain-text'
+import BrowserLinuxFirefoxAnnotatedTextFixture from './clipboard/browser-linux-firefox-annotated-text'
+import BrowserLinuxFirefoxTwoParagraphsFixture from './clipboard/browser-linux-firefox-two-paragraphs'
+import BrowserLinuxFirefoxWholePageFixture from './clipboard/browser-linux-firefox-whole-page'
+import BrowserOSXFirefoxPlainTextFixture from './clipboard/browser-osx-firefox-plain-text'
+import BrowserOSXFirefoxAnnotatedTextFixture from './clipboard/browser-osx-firefox-annotated-text'
+import BrowserOSXFirefoxTwoParagraphsFixture from './clipboard/browser-osx-firefox-two-paragraphs'
+import BrowserWindowsFirefoxPlainTextFixture from './clipboard/browser-windows-firefox-plain-text'
+import BrowserWindowsFirefoxAnnotatedTextFixture from './clipboard/browser-windows-firefox-annotated-text'
+import BrowserWindowsFirefoxTwoParagraphsFixture from './clipboard/browser-windows-firefox-two-paragraphs'
+import BrowserWindowsEdgePlainTextFixture from './clipboard/browser-windows-edge-plain-text'
+import BrowserWindowsEdgeAnnotatedTextFixture from './clipboard/browser-windows-edge-annotated-text'
+import BrowserWindowsEdgeTwoParagraphsFixture from './clipboard/browser-windows-edge-two-paragraphs'
+import GDocsOSXLinuxChromePlainTextFixture from './clipboard/google-docs-osx-linux-chrome-plain-text'
+import GDocsOSXLinuxChromeAnnotatedTextFixture from './clipboard/google-docs-osx-linux-chrome-annotated-text'
+import GDocsOSXLinuxChromeTwoParagraphsFixture from './clipboard/google-docs-osx-linux-chrome-two-paragraphs'
+import GDocsOSXLinuxChromeExtendedFixture from './clipboard/google-docs-osx-linux-chrome-extended'
+import GDocsLinuxFirefoxPlainTextFixture from './clipboard/google-docs-linux-firefox-plain-text'
+import GDocsLinuxFirefoxAnnotatedTextFixture from './clipboard/google-docs-linux-firefox-annotated-text'
+import GDocsOSXFirefoxPlainTextFixture from './clipboard/google-docs-osx-firefox-plain-text'
+import LibreOfficeOSXPlainTextFixture from './clipboard/libre-office-osx-linux-plain-text'
+import LibreOfficeOSXAnnotatedTextFixture from './clipboard/libre-office-osx-linux-annotated-text'
+import LibreOfficeOSXTwoParagraphsFixture from './clipboard/libre-office-osx-linux-two-paragraphs'
+import LibreOfficeOSXExtendedFixture from './clipboard/libre-office-osx-linux-extended'
+import MSW11OSXPlainTextFixture from './clipboard/word-11-osx-plain-text'
+import MSW11OSXAnnotatedTextFixture from './clipboard/word-11-osx-annotated-text'
+import MSW11OSXTwoParagraphsFixture from './clipboard/word-11-osx-two-paragraphs'
+import MSW11OSXExtendedFixture from './clipboard/word-11-osx-extended'
+
+const PARAGRAPH_TYPE = 'paragraph'
+const HEADING_TYPE = 'heading'
+const LINK_TYPE = 'link'
+const EMPHASIS_TYPE = 'emphasis'
+const STRONG_TYPE = 'strong'
+const SUPERSCRIPT_TYPE = 'superscript'
+const SUBSCRIPT_TYPE = 'subscript'
+const CODEBLOCK_TYPE = 'preformat'
+const BODY_CONTENT_PATH = ['body', 'nodes']
 
 ClipboardTests()
 
@@ -48,24 +56,22 @@ if (platform.inBrowser) {
 }
 
 function ClipboardTests (memory) {
-  const LABEL = `Clipboard${memory ? ' [memory]' : ''}`
-  const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
-    // before
-    if (memory) platform.inBrowser = false
-    try {
-      fn(t)
-    } finally {
-      // after
-      platform._reset()
-    }
-  })
+  function test (title, fn) {
+    _test('Clipboard' + (memory ? ' [memory]' : '') + ': ' + title, fn, {
+      before () {
+        if (memory) platform.inBrowser = false
+      },
+      after () {
+        platform._reset()
+      }
+    })
+  }
 
   test('Copying HTML, and plain text', t => {
-    let { editorSession, clipboard } = _fixture(t, simple)
+    let { editorSession, clipboard, context } = _setup(t, simple)
     editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
-    let event = new ClipboardEvent()
-    clipboard.onCopy(event)
-    let clipboardData = event.clipboardData
+    let clipboardData = _createClipboardData()
+    clipboard.copy(clipboardData, context)
     t.notNil(clipboardData.data['text/plain'], 'Clipboard should contain plain text data.')
     t.notNil(clipboardData.data['text/html'], 'Clipboard should contain HTML data.')
     let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
@@ -75,13 +81,11 @@ function ClipboardTests (memory) {
   })
 
   test('Copying a property selection', t => {
-    let { editorSession, clipboard } = _fixture(t, simple)
+    let { editorSession, clipboard, context } = _setup(t, simple)
     editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
     let TEXT = '01234'
-    let event = new ClipboardEvent()
-    clipboard.onCopy(event)
-
-    let clipboardData = event.clipboardData
+    let clipboardData = _createClipboardData()
+    clipboard.copy(clipboardData, context)
     t.equal(clipboardData.data['text/plain'], TEXT, 'Plain text should be correct.')
 
     let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
@@ -91,10 +95,10 @@ function ClipboardTests (memory) {
   })
 
   test('Copying a container selection', t => {
-    let { editorSession, clipboard } = _fixture(t, simple)
+    let { editorSession, clipboard, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'container',
-      containerPath: ['body', 'nodes'],
+      containerPath: BODY_CONTENT_PATH,
       startPath: ['p1', 'content'],
       startOffset: 1,
       endPath: ['p3', 'content'],
@@ -105,12 +109,11 @@ function ClipboardTests (memory) {
       '0123456789',
       '01234'
     ]
+    let LINE_SEP = '\n\n'
 
-    let event = new ClipboardEvent()
-    clipboard.onCopy(event)
-
-    let clipboardData = event.clipboardData
-    t.equal(clipboardData.data['text/plain'], TEXT.join('\n'), 'Plain text should be correct.')
+    let clipboardData = _createClipboardData()
+    clipboard.copy(clipboardData, context)
+    t.equal(clipboardData.data['text/plain'], TEXT.join(LINE_SEP), 'Plain text should be correct.')
 
     let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
     let elements = htmlDoc.find('body').getChildren()
@@ -128,47 +131,47 @@ function ClipboardTests (memory) {
   })
 
   test("Pasting text into ContainerEditor using 'text/plain'.", t => {
-    let { editorSession, clipboard, doc } = _fixture(t, simple)
+    let { editorSession, clipboard, doc, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
-      containerPath: ['body', 'nodes']
+      containerPath: BODY_CONTENT_PATH
     })
-    let event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', 'XXX')
-    clipboard.onPaste(event)
+    let clipboardData = _createClipboardData()
+    clipboardData.setData('text/plain', 'XXX')
+    clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0XXX123456789', 'Plain text should be correct.')
     t.end()
   })
 
   test('Pasting without any data given.', t => {
-    let { editorSession, clipboard, doc } = _fixture(t, simple)
+    let { editorSession, clipboard, doc, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
-      containerPath: ['body', 'nodes']
+      containerPath: BODY_CONTENT_PATH
     })
-    let event = new ClipboardEvent()
-    clipboard.onPaste(event)
+    let clipboardData = _createClipboardData()
+    clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0123456789', 'Text should be still the same.')
     t.end()
   })
 
   test("Pasting text into ContainerEditor using 'text/html'.", t => {
-    let { editorSession, clipboard, doc } = _fixture(t, simple)
+    let { editorSession, clipboard, doc, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
-      containerPath: ['body', 'nodes']
+      containerPath: BODY_CONTENT_PATH
     })
     let TEXT = 'XXX'
-    let event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', TEXT)
-    event.clipboardData.setData('text/html', TEXT)
-    clipboard.onPaste(event)
+    let clipboardData = _createClipboardData()
+    clipboardData.setData('text/plain', TEXT)
+    clipboardData.setData('text/html', TEXT)
+    clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0XXX123456789', 'Plain text should be correct.')
     t.end()
   })
@@ -176,10 +179,9 @@ function ClipboardTests (memory) {
   // this test revealed #700: the problem was that in source code there where
   // `"` and `'` characters which did not survive the way through HTML correctly
   test('Copy and Pasting source code.', t => {
-    let { editorSession, clipboard, doc } = _fixture(t, simple)
-    let body = doc.get('body')
+    let { editorSession, clipboard, doc, context } = _setup(t, simple)
     let cb = doc.create({
-      type: 'codeblock',
+      type: CODEBLOCK_TYPE,
       id: 'cb1',
       content: [
         'function hello_world() {',
@@ -187,20 +189,20 @@ function ClipboardTests (memory) {
         '}'
       ].join('\n')
     })
-    body.insertAt(body.getNodeIndex('p1') + 1, cb)
+    documentHelpers.insertAt(doc, BODY_CONTENT_PATH, doc.get('p1').getPosition() + 1, cb.id)
     editorSession.setSelection(doc.createSelection({
       type: 'container',
       startPath: ['p1', 'content'],
       startOffset: 1,
       endPath: ['p2', 'content'],
       endOffset: 1,
-      containerPath: ['body', 'nodes']
+      containerPath: BODY_CONTENT_PATH
     }))
-    let event = new ClipboardEvent()
-    clipboard.onCut(event)
+    let clipboardData = _createClipboardData()
+    clipboard.cut(clipboardData, context)
     let cb1 = doc.get('cb1')
     t.isNil(cb1, 'Codeblock should have been cutted.')
-    clipboard.onPaste(event)
+    clipboard.paste(clipboardData, context)
     cb1 = doc.get('cb1')
     t.notNil(cb1, 'Codeblock should have been pasted.')
     t.deepEqual(cb1.toJSON(), cb.toJSON(), 'Codeblock should have been pasted correctly.')
@@ -243,16 +245,17 @@ function ClipboardTests (memory) {
     _twoParagraphsTest(t, BrowserLinuxFirefoxTwoParagraphsFixture)
   })
 
+  // TODO: bring back an fall-back converter for unsupported content
   test('Browser - Firefox (Linux) - Whole Page', t => {
     let html = BrowserLinuxFirefoxWholePageFixture
-    _fixtureTest(t, html, function (doc, clipboard) {
-      let event = new ClipboardEvent()
-      event.clipboardData.setData('text/plain', 'XXX')
-      event.clipboardData.setData('text/html', html)
-      clipboard.onPaste(event)
+    _fixtureTest(t, html, (doc, clipboard, context) => {
+      let clipboardData = _createClipboardData()
+      clipboardData.setData('text/plain', 'XXX')
+      clipboardData.setData('text/html', html)
+      clipboard.paste(clipboardData, context)
       // make sure HTML paste succeeded, by checking against the result of plain text insertion
       t.notOk(doc.get('p1').getText() === '0XXX123456789', 'HTML conversion and paste should have been successful (not fall back to plain-text).')
-      t.ok(doc.get('body').getLength() > 30, 'There should be a lot of paragraphs')
+      t.ok(doc.get('body').getLength() > 10, 'There should be a lot of paragraphs')
       t.end()
     })
   })
@@ -354,64 +357,22 @@ function ClipboardTests (memory) {
   })
 }
 
-class ClipboardEventData {
-  constructor () {
-    this.data = {}
-  }
-
-  getData (format) {
-    return this.data[format]
-  }
-
-  setData (format, data) {
-    this.data[format] = data
-  }
-
-  get types () {
-    return Object.keys(this.data)
-  }
-}
-
-class ClipboardEvent {
-  constructor () {
-    this.clipboardData = new ClipboardEventData()
-  }
-  preventDefault () {}
-  stopPropagation () {}
-}
-
-function _fixture (t, seed) {
-  let { configurator, editorSession, doc } = setupEditor(t, seed)
-  let clipboard = new Clipboard(configurator, editorSession)
-  return { editorSession, doc, clipboard }
-}
-
 function _fixtureTest (t, html, impl, forceWindows) {
-  let { editorSession, clipboard, doc } = _fixture(t, simple)
+  let { editorSession, clipboard, doc, context } = _setup(t, simple)
   let _isWindows = platform.isWindows
   platform.isWindows = Boolean(forceWindows)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
-    containerPath: ['body', 'nodes']
+    containerPath: BODY_CONTENT_PATH
   })
-  impl(doc, clipboard)
+  impl(doc, clipboard, context)
   platform.isWindows = _isWindows
 }
 
-function _emptyParagraphSeed (tx) {
-  let body = tx.get('body')
-  tx.create({
-    type: 'paragraph',
-    id: 'p1',
-    content: ''
-  })
-  body.append('p1')
-}
-
 function _emptyFixtureTest (t, html, impl, forceWindows) {
-  let { editorSession, clipboard, doc } = _fixture(t, _emptyParagraphSeed)
+  let { context, editorSession, clipboard, doc } = _setup(t, _emptyParagraphSeed)
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used
@@ -421,97 +382,93 @@ function _emptyFixtureTest (t, html, impl, forceWindows) {
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 0,
-    containerPath: ['body', 'nodes']
+    containerPath: BODY_CONTENT_PATH
   })
-  impl(doc, clipboard)
+  impl(doc, clipboard, context)
 }
 
 function _plainTextTest (t, html, forceWindows) {
-  _fixtureTest(t, html, function (doc, clipboard) {
-    let event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    clipboard.onPaste(event)
+  _fixtureTest(t, html, (doc, clipboard, context) => {
+    let clipboardData = _createClipboardData()
+    clipboardData.setData('text/plain', '')
+    clipboardData.setData('text/html', html)
+    clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0XXX123456789', 'Content should have been pasted correctly.')
     t.end()
   }, forceWindows)
 }
 
 function _annotatedTextTest (t, html, forceWindows) {
-  _fixtureTest(t, html, function (doc, clipboard) {
-    let event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    clipboard.onPaste(event)
+  _fixtureTest(t, html, (doc, clipboard, context) => {
+    let clipboardData = _createClipboardData()
+    clipboardData.setData('text/plain', '')
+    clipboardData.setData('text/html', html)
+    clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0XXX123456789', 'Content should have been pasted correctly.')
     let annotations = doc.getIndex('annotations').get(['p1', 'content'])
     t.equal(annotations.length, 1, 'There should be one annotation on the property now.')
     let anno = annotations[0]
-    t.equal(anno.type, 'link', 'The annotation should be a link.')
+    t.equal(anno.type, LINK_TYPE, 'The annotation should be a link.')
     t.end()
   }, forceWindows)
 }
 
 function _twoParagraphsTest (t, html, forceWindows) {
-  _fixtureTest(t, html, function (doc, clipboard) {
-    let event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    clipboard.onPaste(event)
+  _fixtureTest(t, html, (doc, clipboard, context) => {
+    let clipboardData = _createClipboardData()
+    clipboardData.setData('text/plain', '')
+    clipboardData.setData('text/html', html)
+    clipboard.paste(clipboardData, context)
     let body = doc.get('body')
-    let p1 = body.getNodeAt(0)
+    let [p1, p2, p3] = body.getNodes()
     t.equal(p1.content, '0AAA', 'First paragraph should be truncated.')
-    let p2 = body.getNodeAt(1)
     t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
-    let p3 = body.getNodeAt(2)
     t.equal(p3.content, '123456789', 'Remainder of original p1 should go into forth paragraph.')
     t.end()
   }, forceWindows)
 }
 
 function _extendedTest (t, html, forceWindows) {
-  _emptyFixtureTest(t, html, function (doc, clipboard) {
-    let event = new ClipboardEvent()
-    event.clipboardData.setData('text/plain', '')
-    event.clipboardData.setData('text/html', html)
-    clipboard.onPaste(event)
-    let body = doc.get('body')
+  _emptyFixtureTest(t, html, (doc, clipboard, context) => {
+    let clipboardData = _createClipboardData()
+    clipboardData.setData('text/plain', '')
+    clipboardData.setData('text/html', html)
+    clipboard.paste(clipboardData, context)
     // First node is a paragraph with strong, emphasis, superscript and subscript annos
-    let node1 = body.getNodeAt(0)
-    t.equal(node1.type, 'paragraph', 'First node should be a paragraph.')
+    let body = doc.get('body')
+    let [node1, node2, node3] = body.getNodes()
+    t.equal(node1.type, PARAGRAPH_TYPE, 'First node should be a paragraph.')
     t.equal(node1.content.length, 121, 'First paragraph should contain 121 symbols.')
     let annotationsNode1 = doc.getIndex('annotations').get([node1.id, 'content']).sort((a, b) => {
       return a.start.offset - b.start.offset
     })
     t.equal(annotationsNode1.length, 4, 'There should be four annotations inside a first paragraph.')
     let annoFirstNode1 = annotationsNode1[0] || {}
-    t.equal(annoFirstNode1.type, 'emphasis', 'The annotation should be an emphasis.')
+    t.equal(annoFirstNode1.type, EMPHASIS_TYPE, 'The annotation should be an emphasis.')
     t.equal(annoFirstNode1.start.offset, 4, 'Emphasis annotation should start from 5th symbol.')
     t.equal(annoFirstNode1.end.offset, 11, 'Emphasis annotation should end at 12th symbol.')
     let annoSecondNode1 = annotationsNode1[1] || {}
-    t.equal(annoSecondNode1.type, 'strong', 'The annotation should be a strong.')
+    t.equal(annoSecondNode1.type, STRONG_TYPE, 'The annotation should be a strong.')
     t.equal(annoSecondNode1.start.offset, 18, 'Strong annotation should start from 19th symbol.')
     t.equal(annoSecondNode1.end.offset, 30, 'Strong annotation should end at 31th symbol.')
     let annoThirdNode1 = annotationsNode1[2] || {}
-    t.equal(annoThirdNode1.type, 'superscript', 'The annotation should be a superscript.')
+    t.equal(annoThirdNode1.type, SUPERSCRIPT_TYPE, 'The annotation should be a superscript.')
     t.equal(annoThirdNode1.start.offset, 41, 'Superscript annotation should start from 42th symbol.')
     t.equal(annoThirdNode1.end.offset, 49, 'Superscript annotation should end at 50th symbol.')
     let annoFourthNode1 = annotationsNode1[3] || {}
-    t.equal(annoFourthNode1.type, 'subscript', 'The annotation should be a subscript.')
+    t.equal(annoFourthNode1.type, SUBSCRIPT_TYPE, 'The annotation should be a subscript.')
     t.equal(annoFourthNode1.start.offset, 50, 'Subscript annotation should start from 51th symbol.')
     t.equal(annoFourthNode1.end.offset, 56, 'Subscript annotation should end at 57th symbol.')
 
     // Second node is a first level heading without annos
-    let node2 = body.getNodeAt(1)
-    t.equal(node2.type, 'heading', 'Second node should be a heading.')
+    t.equal(node2.type, HEADING_TYPE, 'Second node should be a heading.')
     t.equal(node2.level, 1, 'Second node should be a first level heading.')
     t.equal(node2.content.length, 12, 'Heading should contain 12 symbols.')
     let annotationsNode2 = doc.getIndex('annotations').get([node2.id, 'content'])
     t.equal(annotationsNode2.length, 0, 'There should be no annotations inside a heading.')
 
     // Third node is a paragraph with overlapping annos
-    let node3 = body.getNodeAt(2)
-    t.equal(node3.type, 'paragraph', 'Third node should be a paragraph.')
+    t.equal(node3.type, PARAGRAPH_TYPE, 'Third node should be a paragraph.')
     t.equal(node3.content.length, 178, 'Second paragraph should contain 178 symbols.')
     // let annotationsNode3 = doc.getIndex('annotations').get([node3.id, 'content']).sort((a, b) => {
     //   return a.start.offset - b.start.offset
@@ -532,46 +489,40 @@ function _extendedTest (t, html, forceWindows) {
     // Get annotations for range with string, emphasis and superscript annotations
     annos = doc.getIndex('annotations').get(path, 17, 18).sort(compare)
     t.equal(annos.length, 3, 'There should be three annotations within given range.')
-    t.isNotNil(find(annos, {type: 'emphasis'}), 'Should contain emphasis annotation.')
-    t.isNotNil(find(annos, {type: 'strong'}), 'Should contain strong annotation.')
-    t.isNotNil(find(annos, {type: 'superscript'}), 'Should contain superscript annotation.')
+    t.isNotNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
+    t.isNotNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
+    t.isNotNil(find(annos, { type: SUPERSCRIPT_TYPE }), 'Should contain superscript annotation.')
 
     // Get annotations for range with string, emphasis and subscript annotations
     annos = doc.getIndex('annotations').get(path, 22, 23).sort(compare)
-    t.isNotNil(find(annos, {type: 'emphasis'}), 'Should contain emphasis annotation.')
-    t.isNotNil(find(annos, {type: 'strong'}), 'Should contain strong annotation.')
-    t.isNotNil(find(annos, {type: 'subscript'}), 'Should contain subscript annotation.')
+    t.isNotNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
+    t.isNotNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
+    t.isNotNil(find(annos, { type: SUBSCRIPT_TYPE }), 'Should contain subscript annotation.')
 
     // Get annotations for range with string and emphasis
     annos = doc.getIndex('annotations').get(path, 27, 29).sort(compare)
-    t.isNotNil(find(annos, {type: 'emphasis'}), 'Should contain emphasis annotation.')
-    t.isNotNil(find(annos, {type: 'strong'}), 'Should contain strong annotation.')
+    t.isNotNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
+    t.isNotNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
 
-    // t.equal(annotationsNode3.length, 6, "There should be six annotations inside a second paragraph.")
-    // let annoFirstNode3 = annotationsNode3[0] || {}
-    // t.equal(annoFirstNode3.type, 'strong', "The annotation should be a strong.")
-    // t.equal(annoFirstNode3.start.offset, 14, "Strong annotation should start from 15th symbol.")
-    // t.equal(annoFirstNode3.end.offset, 25, "Strong annotation should end at 26th symbol.")
-    // let annoSecondNode3 = annotationsNode3[1] || {}
-    // t.equal(annoSecondNode3.type, 'emphasis', "The annotation should be an emphasis.")
-    // t.equal(annoSecondNode3.start.offset, 15, "Emphasis annotation should start from 16th symbol.")
-    // t.equal(annoSecondNode3.end.offset, 24, "Emphasis annotation should end at 25th symbol.")
-    // let annoThirdNode3 = annotationsNode3[2] || {}
-    // t.equal(annoThirdNode3.type, 'superscript', "The annotation should be a superscript.")
-    // t.equal(annoThirdNode3.start.offset, 16, "Superscript annotation should start from 17th symbol.")
-    // t.equal(annoThirdNode3.end.offset, 19, "Superscript annotation should end at 20th symbol.")
-    // let annoFourthNode3 = annotationsNode3[3] || {}
-    // t.equal(annoFourthNode3.type, 'subscript', "The annotation should be a subscript.")
-    // t.equal(annoFourthNode3.start.offset, 21, "Subscript annotation should start from 22th symbol.")
-    // t.equal(annoFourthNode3.end.offset, 23, "Subscript annotation should end at 23th symbol.")
-    // let annoFifthNode3 = annotationsNode3[4] || {}
-    // t.equal(annoFifthNode3.type, 'emphasis', "The annotation should be an emphasis.")
-    // t.equal(annoFifthNode3.start.offset, 26, "Emphasis annotation should start from 27th symbol.")
-    // t.equal(annoFifthNode3.end.offset, 30, "Emphasis annotation should end at 31th symbol.")
-    // let annoSixthNode3 = annotationsNode3[5] || {}
-    // t.equal(annoSixthNode3.type, 'strong', "The annotation should be a strong.")
-    // t.equal(annoSixthNode3.start.offset, 27, "Strong annotation should start from 28th symbol.")
-    // t.equal(annoSixthNode3.end.offset, 29, "Strong annotation should end at 30th symbol.")
     t.end()
   }, forceWindows)
+}
+
+function _createClipboardData () {
+  return new ClipboardEventData()
+}
+
+function _setup (t, seed) {
+  let { context, editorSession, doc } = setupEditor(t, seed)
+  let clipboard = new Clipboard()
+  return { context, editorSession, doc, clipboard }
+}
+
+function _emptyParagraphSeed (tx) {
+  tx.create({
+    type: PARAGRAPH_TYPE,
+    id: 'p1',
+    content: ''
+  })
+  documentHelpers.append(tx, BODY_CONTENT_PATH, 'p1')
 }

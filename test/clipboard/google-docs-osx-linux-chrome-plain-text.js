@@ -1,0 +1,2 @@
+/* eslint-disable */
+export default "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"><meta charset=\"utf-8\"><b style=\"font-weight:normal;\" id=\"docs-internal-guid-5bea85da-43d8-f5c6-8657-4da8de7325c0\"><span style=\"font-size:14px;font-family:Arial;color:#252525;background-color:#ffffff;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre-wrap;\">XXX</span></b>";

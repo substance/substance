@@ -8,17 +8,17 @@ const INLINENODES = ['a', 'b', 'big', 'i', 'small', 'tt', 'abbr', 'acronym', 'ci
   A rewrite of the original Substance.Clipboard, which uses a better JSONConverter implementation.
   Note: this should eventually moved back into Substance core.
 */
-export default class ClipboardNew {
+export default class Clipboard {
   copy (clipboardData, context) {
     // content specific manipulation API
-    let api = context.api
-    let snippet = api.copy()
+    let editorSession = context.editorSession
+    let snippet = editorSession.copy()
     this._setClipboardData(clipboardData, context, snippet)
   }
 
   cut (clipboardData, context) {
-    let api = context.api
-    let snippet = api.cut()
+    let editorSession = context.editorSession
+    let snippet = editorSession.cut()
     this._setClipboardData(clipboardData, context, snippet)
   }
 
@@ -131,7 +131,7 @@ export default class ClipboardNew {
         return false
       }
       bodyEl = this._wrapIntoParagraph(bodyEl)
-      snippet = context.appState.document.createSnippet()
+      snippet = context.editorSession.getDocument().createSnippet()
       let htmlImporter = context.configurator.createImporter('html', snippet)
       let container = snippet.get(documentHelpers.SNIPPET_ID)
       bodyEl.getChildren().forEach(el => {
@@ -141,15 +141,15 @@ export default class ClipboardNew {
         }
       })
     }
-    return context.api.paste(snippet, options)
+    return context.editorSession.paste(snippet, options)
   }
 
   _pasteText (text, context) {
-    context.api.insertText(text)
+    context.editorSession.insertText(text)
   }
 
   _importFromJSON (context, jsonStr) {
-    let snippet = context.appState.document.newInstance()
+    let snippet = context.editorSession.getDocument().newInstance()
     let jsonData = JSON.parse(jsonStr)
     let converter = new JSONConverter()
     converter.importDocument(snippet, jsonData)
