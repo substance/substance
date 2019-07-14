@@ -1,35 +1,52 @@
-import forEach from '../util/forEach'
+import { isArray, forEach } from '../util'
 
+/*
+  Note: this implementation is different to the core implementation
+  in that regard that it serializes child nodes before their parents
+*/
 export default class JSONConverter {
   importDocument (doc, json) {
     if (!json.nodes) {
       throw new Error('Invalid JSON format.')
     }
     // the json should just be an array of nodes
-    let nodes = json.nodes
-    // import data in a block with deactivated indexers and listeners
-    // as the data may contain cyclic references which causes problems.
-    doc.import(function (tx) {
-      forEach(nodes, function (node) {
-        // overwrite existing nodes
-        if (tx.get(node.id)) {
-          tx.delete(node.id)
-        }
-        tx.create(node)
-      })
+    var nodes = json.nodes
+    doc.import(tx => {
+      nodes.forEach(node => tx.create(node))
     })
     return doc
   }
 
   exportDocument (doc) {
-    let json = {
-      nodes: {}
+    var schema = doc.getSchema()
+    var json = {
+      schema: {
+        name: schema.name
+      },
+      nodes: []
     }
-    forEach(doc.getNodes(), function (node) {
-      if (node._isDocumentNode) {
-        json.nodes[node.id] = node.toJSON()
-      }
-    })
+    let visited = {}
+
+    function _export (node) {
+      if (!node) return
+      if (visited[node.id]) return
+      visited[node.id] = true
+      let nodeSchema = node.getSchema()
+      nodeSchema.getOwnedProperties().forEach(prop => {
+        let val = node[prop.name]
+        if (isArray(val)) {
+          val.forEach(id => {
+            _export(doc.get(id))
+          })
+        } else {
+          _export(doc.get(val))
+        }
+      })
+      json.nodes.push(node.toJSON())
+    }
+
+    forEach(doc.getNodes(), node => _export(node))
+
     return json
   }
 }

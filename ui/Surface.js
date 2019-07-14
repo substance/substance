@@ -7,7 +7,6 @@ import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from './Component'
 import Clipboard from './Clipboard'
 import DOMSelection from './DOMSelection'
-import UnsupportedNode from './UnsupportedNodeComponent'
 
 const BROWSER_DELAY = platform.isFF ? 1 : 0
 
@@ -748,7 +747,7 @@ export default class Surface extends Component {
     let ComponentClass = this.getComponent(node.type, true)
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
-      ComponentClass = UnsupportedNode
+      ComponentClass = this.getComponent('unsupported-node')
     }
     return $$(ComponentClass, this._getNodeProps(node))
   }
