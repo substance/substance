@@ -42,7 +42,6 @@ export { default as IsolatedInlineNodeComponent } from './IsolatedInlineNodeComp
 export { default as KeyboardManager } from './KeyboardManager'
 export { default as MarkersManager } from './MarkersManager'
 export { default as ModalEditorSession } from './ModalEditorSession'
-export { default as NodeComponent } from './NodeComponent'
 export { default as RedoCommand } from './RedoCommand'
 export { default as RenderingEngine } from './RenderingEngine'
 export { default as Router } from './Router'
