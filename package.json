@@ -44,11 +44,9 @@
     "substance-test": "0.13.1"
   },
   "files": [
-    "collab",
     "dist",
     "dom",
     "model",
-    "packages",
     "test",
     "ui",
     "util",
@@ -63,8 +61,7 @@
     "vendor/domutils.js",
     "vendor/entities.js",
     "vendor/htmlparser2.js",
-    "vendor/lodash-es.js",
-    "xml"
+    "vendor/lodash-es.js"
   ],
   "publishConfig": {
     "tag": "next"
