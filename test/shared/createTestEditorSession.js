@@ -1,7 +1,7 @@
 import { Document, EditorSession } from 'substance'
 import getTestConfig from './getTestConfig'
 
-export default function createEditorSession (...seeds) {
+export default function createTestEditorSession (...seeds) {
   let config = getTestConfig()
   let doc = new Document(config.getSchema())
   let body = doc.create({
@@ -11,7 +11,8 @@ export default function createEditorSession (...seeds) {
   seeds.forEach((seed) => {
     seed(doc, body)
   })
-  let editorSession = new EditorSession(doc, { configurator: config })
+  let contextProvider = { context: {} }
+  let editorSession = new EditorSession('test', doc, config, contextProvider)
   let first = body.getNodeAt(0)
   if (first) {
     if (first.isText()) {

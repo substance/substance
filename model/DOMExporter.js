@@ -1,8 +1,8 @@
 import isString from '../util/isString'
 import isFunction from '../util/isFunction'
 import encodeXMLEntities from '../util/encodeXMLEntities'
+import Registry from '../util/Registry'
 import Fragmenter from './Fragmenter'
-import { Registry } from '../deprecated'
 
 export default class DOMExporter {
   constructor (config, context) {
