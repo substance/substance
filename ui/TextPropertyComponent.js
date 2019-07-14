@@ -163,6 +163,10 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     }
   }
 
+  _onDocumentChange () {
+    this.rerender()
+  }
+
   _getUnsupportedInlineNodeComponentClass () {
     return this.getComponent('unsupported-inline-node')
   }

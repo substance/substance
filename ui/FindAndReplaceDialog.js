@@ -185,7 +185,7 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _getState () {
-    return this._editorSession.getEditorState().get('findAndReplace')
+    return this.context.editorSession.getEditorState().get('findAndReplace')
   }
 
   _getManager () {

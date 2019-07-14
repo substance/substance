@@ -38,12 +38,6 @@ export default class AnnotatedTextComponent extends Component {
     return this.props.tagName
   }
 
-  _onDocumentChange (update) {
-    if (update.change && update.change.hasUpdated(this.getPath())) {
-      this.rerender()
-    }
-  }
-
   _renderContent ($$) {
     let text = this.getText()
     let annotations = this.getAnnotations()
