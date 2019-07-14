@@ -91,13 +91,10 @@ function buildLib (target, production) {
   if (target === 'coverage') {
     config.istanbul = {
       include: [
-        'collab/*.js',
         'dom/*.js',
         'model/**/*.js',
-        'packages/**/*.js',
-        'util/*.js',
         'ui/*.js',
-        'xml/*.js'
+        'util/*.js'
       ]
     }
   }
