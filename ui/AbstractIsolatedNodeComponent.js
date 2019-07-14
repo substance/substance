@@ -34,17 +34,13 @@ export default class AbstractIsolatedNodeComponent extends Component {
   }
 
   didMount () {
-    super.didMount()
-
-    let editorSession = this.getEditorSession()
-    editorSession.onRender('selection', this._onSelectionChanged, this)
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.addObserver(['selection'], this._onSelectionChanged, this, { stage: 'render' })
   }
 
   dispose () {
-    super.dispose.call(this)
-
-    let editorSession = this.getEditorSession()
-    editorSession.off(this)
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.removeObserver(this)
   }
 
   renderContent ($$, node, options = {}) {

@@ -325,7 +325,7 @@ export default class Configurator {
       } else {
         converters = this.getConverters(type)
       }
-      return new ImporterClass(this, doc, Object.assign({}, options, { converters }))
+      return new ImporterClass({ converters }, doc, options, this)
     } else if (this.parent) {
       return this.parent.createImporter(type, doc, options)
     }
@@ -342,7 +342,7 @@ export default class Configurator {
       } else {
         converters = this.getConverters(type)
       }
-      return new ExporterClass(this, doc, Object.assign({}, options, { converters }))
+      return new ExporterClass({ converters }, doc, options, this)
     } else if (this.parent) {
       return this.parent.createExporter(type, doc, options)
     }

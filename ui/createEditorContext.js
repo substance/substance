@@ -1,11 +1,9 @@
 import createComponentContext from './createComponentContext'
 
-export default function createEditorContext (config, editorSession, editor) {
+export default function createEditorContext (config, editorSession) {
   return Object.assign(createComponentContext(config), {
     config,
-    editor,
     editorSession: editorSession,
-    appState: editorSession.editorState,
     surfaceManager: editorSession.surfaceManager,
     markersManager: editorSession.markersManager,
     globalEventHandler: editorSession.globalEventHandler,

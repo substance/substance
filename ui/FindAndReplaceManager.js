@@ -4,27 +4,26 @@ import { documentHelpers, Marker } from '../model'
 const UPDATE_DELAY = 200
 
 export default class FindAndReplaceManager {
-  constructor (editorSession, appState, editor) {
+  constructor (editorSession) {
     this._editorSession = editorSession
     this._doc = editorSession.getDocument()
-    this._appState = appState
-    this._editor = editor
     this._dirty = new Set()
 
     // Note: this is debounced to avoid slow down while typing by running searches too eagerly
     // Only for testing search updates are done synchronously
     this._updateSearchDebounced = debounce(this._updateSearch.bind(this, true), UPDATE_DELAY)
 
+    let editorState = this._editorSession.getEditorState()
     // during update stage we watch for changes on properties with matches
     // to keep the internal state up2date
-    appState.addObserver(['document'], this._onUpdate, this, { stage: 'update' })
+    editorState.addObserver(['document'], this._onUpdate, this, { stage: 'update' })
     // HACK: without this we see strange errors. As a temporary fix leave it here
     // but should try tor find the source of the problem ASAP
-    appState.addObserver(['document'], this._onRender, this, { stage: 'render' })
+    editorState.addObserver(['document'], this._onRender, this, { stage: 'render' })
   }
 
   dispose () {
-    this._appState.removeObserver(this)
+    this._editorSession.getEditorState().removeObserver(this)
   }
 
   openDialog (enableReplace) {
@@ -108,7 +107,7 @@ export default class FindAndReplaceManager {
           // updating the result for the current text property
           // and propagating changes so that so that text properties are updated
           this._updateSearchForProperty(getKeyForPath(m.path))
-          this._appState.propagateUpdates()
+          this._editorSession.getEditorState().propagateUpdates()
           // set the cursor back and scroll to the next
           state.cursor--
           this._nav('forward')
@@ -163,7 +162,7 @@ export default class FindAndReplaceManager {
   }
 
   _getState () {
-    return this._appState.get('findAndReplace') || FindAndReplaceManager.defaultState()
+    return this._editorSession.getEditorState().get('findAndReplace') || FindAndReplaceManager.defaultState()
   }
 
   _toggleOption (optionName) {
@@ -196,23 +195,23 @@ export default class FindAndReplaceManager {
   }
 
   _updateState (state, recoverSelection) {
-    const appState = this._appState
-    // HACK: touching appState.selection because we want that the applications recovers the selection
+    const editorState = this._editorSession.getEditorState()
+    // HACK: touching editorState.selection because we want that the applications recovers the selection
     if (recoverSelection) {
-      appState._setDirty('selection')
+      editorState._setDirty('selection')
     }
-    // console.log('Updating appState.findAndReplace', state)
-    appState.set('findAndReplace', state)
+    // console.log('Updating editorState.findAndReplace', state)
+    editorState.set('findAndReplace', state)
   }
 
   _propgateUpdates () {
-    let appState = this._appState
+    const editorState = this._editorSession.getEditorState()
     // TODO: we need to figure out if this is a problem
     // only in tests this is called synchronously
     // leading to extra updates e.g. when the content is changed while
     // the FNR dialog is open
-    if (!appState._isUpdating()) {
-      this._appState.propagateUpdates()
+    if (!editorState._isUpdating()) {
+      this._editorState.propagateUpdates()
     }
   }
 
@@ -373,15 +372,25 @@ export default class FindAndReplaceManager {
   }
 
   _getTextProperties () {
-    // EXPERIMENTAL: we need to retrieve all *editable* text properties in the correct order
-    // which is not possible just from the model (without further knowledge)
-    // However, doing it via DOM search is probably rather slow
-    return this._editor.getContentPanel().findAll('.sc-text-property')
+    let rootComponent = this._editorSession.getRootComponent()
+    if (rootComponent) {
+      // EXPERIMENTAL: we need to retrieve all *editable* text properties in the correct order
+      // which is not possible just from the model (without further knowledge)
+      // However, doing it via DOM search is probably rather slow
+      return rootComponent.findAll('.sc-text-property')
+    } else {
+      console.error('FindAndReplaceManager: no root component has been assigned yet.')
+    }
   }
 
   _getTextProperty (id) {
-    // EXPERIMENTAL: same as _getTextProperties()
-    return this._editor.getContentPanel().find(`.sc-text-property[data-path="${id}"]`)
+    let rootComponent = this._editorSession.getRootComponent()
+    if (rootComponent) {
+      // EXPERIMENTAL: same as _getTextProperties()
+      return rootComponent.find(`.sc-text-property[data-path="${id}"]`)
+    } else {
+      console.error('FindAndReplaceManager: no root component has been assigned yet.')
+    }
   }
 
   _nav (direction) {
@@ -465,7 +474,7 @@ export default class FindAndReplaceManager {
   }
 
   _onRender (change) {
-    // HACK: There seems to be a problem with registering observers in the appState
+    // HACK: There seems to be a problem with registering observers in the editorState
     // without registering this hook we see strange errors at other places
     // Probably related to a bug in the observer registration/deregistration
     // during propagation of AppState changes

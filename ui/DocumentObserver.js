@@ -3,9 +3,9 @@ import { getKeyForPath } from '../util'
 
 // kind of an index that is used to dispatch updates
 export default class DocumentObserver {
-  constructor (doc, appState) {
-    // console.log('Creating DocumentObserver for', appState.getId())
-    this.appState = appState
+  constructor (doc, editorState) {
+    // console.log('Creating DocumentObserver for', editorState.getId())
+    this.editorState = editorState
     this.doc = doc
     this.dirty = new Set()
 
@@ -41,7 +41,7 @@ export default class DocumentObserver {
     // ATTENTION: the change is not carrying reflection until change._extracted = true
     if (!change._extracted) change._extractInformation(this.doc)
 
-    // console.log('DocumentObserver._onDocumentChanged()', this.appState.getId(), change, change.updated)
+    // console.log('DocumentObserver._onDocumentChanged()', this.editorState.getId(), change, change.updated)
     let dirty = this.dirty
     Object.keys(change.updated).forEach(id => {
       dirty.add(id)

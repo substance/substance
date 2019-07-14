@@ -18,5 +18,4 @@ export default {
       converter.annotatedText(['meta', 'title'])
     ))
   }
-
 }

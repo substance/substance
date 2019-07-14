@@ -1,81 +1,106 @@
 import {
-  ImagePackage, Component, Configurator,
-  BasePackage,
-  ParagraphPackage, HeadingPackage, StrongPackage, EmphasisPackage,
-  ListPackage, LinkPackage, TablePackage, CodeblockPackage,
-  SubscriptPackage, SuperscriptPackage
-  // InlineWrapperPackage,
+  Component, Configurator, BasePackage, TextNodeComponent
 } from 'substance'
 
-import TestNode from './TestNode'
 import TestBlockNode from './TestBlockNode'
 import TestBody from './TestBody'
 import TestContainerAnnotation from './TestContainerAnnotation'
-import TestStructuredNode from './TestStructuredNode'
-import TestStructuredNodeComponent from './TestStructuredNodeComponent'
+import TestEmphasis from './TestEmphasis'
+import TestHeading from './TestHeading'
 import TestInlineNode from './TestInlineNode'
-import TestInlineNodeComponent from './TestInlineNodeComponent'
-import TestContainerComponent from './TestContainerComponent'
+import TestLink from './TestLink'
+import TestList from './TestList'
+import TestListItem from './TestListItem'
 import TestMetaNode from './TestMetaNode'
-import TestMetaNodeXMLConverter from './TestMetaNodeXMLConverter'
-import TestHTMLImporter from './TestHTMLImporter'
-import TestXMLImporter from './TestXMLImporter'
-import TestHTMLExporter from './TestHTMLExporter'
-import TestXMLExporter from './TestXMLExporter'
-import TestArticle from './TestArticle'
+import TestNode from './TestNode'
+import TestParagraph from './TestParagraph'
+import TestPreformat from './TestPreformat'
+import TestStrong from './TestStrong'
+import TestStructuredNode from './TestStructuredNode'
+import TestSubscript from './TestSubscript'
+import TestSuperscript from './TestSuperscript'
 
-// const { InlineWrapper, InlineWrapperComponent } = InlineWrapperPackage
+import TestContainerComponent from './TestContainerComponent'
+import TestEmphasisComponent from './TestEmphasisComponent'
+import TestHeadingComponent from './TestHeadingComponent'
+import TestInlineNodeComponent from './TestInlineNodeComponent'
+import TestStrongComponent from './TestStrongComponent'
+import TestStructuredNodeComponent from './TestStructuredNodeComponent'
+
+import {
+  EmphasisConverter, ParagraphConverter, ListItemConverter, ListConverter,
+  LinkConverter, HeadingConverter, PreformatConverter, StrongConverter,
+  SubscriptConverter, SuperscriptConverter
+} from './TestHTMLConverters'
+import TestMetaNodeXMLConverter from './TestMetaNodeXMLConverter'
+
+import TestHTMLImporter from './TestHTMLImporter'
+import TestHTMLExporter from './TestHTMLExporter'
+import TestXMLImporter from './TestXMLImporter'
+import TestXMLExporter from './TestXMLExporter'
+import TestPlaintextExporter from '../TestPlaintextExporter'
 
 export default function getTestConfig () {
   let config = new Configurator()
-  // TODO: I want to move away from making name and version required
-  // This is app specific and should be addressed somewhere else
-  config.defineSchema({
-    name: 'test-article',
-    DocumentClass: TestArticle,
-    defaultTextType: 'paragraph',
-    version: 1.0
-  })
+
   config.import(BasePackage)
-  config.import(ParagraphPackage)
-  config.import(HeadingPackage)
-  config.import(StrongPackage)
-  config.import(EmphasisPackage)
-  config.import(SubscriptPackage)
-  config.import(SuperscriptPackage)
-  config.import(LinkPackage)
-  config.import(ListPackage)
-  config.import(TablePackage)
-  config.import(CodeblockPackage)
-  config.import(ImagePackage)
+
+  config.addNode(TestBody)
+  config.addNode(TestBlockNode)
+  config.addNode(TestContainerAnnotation)
+  config.addNode(TestEmphasis)
+  config.addNode(TestHeading)
+  config.addNode(TestInlineNode)
+  config.addNode(TestLink)
+  config.addNode(TestList)
+  config.addNode(TestListItem)
+  config.addNode(TestMetaNode)
+  config.addNode(TestNode)
+  config.addNode(TestParagraph)
+  config.addNode(TestPreformat)
+  config.addNode(TestStrong)
+  config.addNode(TestStructuredNode)
+  config.addNode(TestSubscript)
+  config.addNode(TestSuperscript)
 
   config.addComponent('@container', TestContainerComponent)
-  config.addComponent('body', TestContainerComponent)
-
-  config.addNode(TestNode)
-  config.addNode(TestBody)
-
-  config.addNode(TestBlockNode)
+  config.addComponent(TestBody.type, TestContainerComponent)
   config.addComponent(TestBlockNode.type, Component)
-
-  config.addNode(TestContainerAnnotation)
-
-  config.addNode(TestInlineNode)
+  config.addComponent(TestEmphasis.type, TestEmphasisComponent)
+  config.addComponent(TestHeading.type, TestHeadingComponent)
   config.addComponent(TestInlineNode.type, TestInlineNodeComponent)
-
-  config.addNode(TestStructuredNode)
+  config.addComponent(TestParagraph.type, TextNodeComponent)
+  config.addComponent(TestStrong.type, TestStrongComponent)
   config.addComponent(TestStructuredNode.type, TestStructuredNodeComponent)
 
-  config.addNode(TestMetaNode)
+  config.addConverter('html', EmphasisConverter)
+  config.addConverter('html', HeadingConverter)
+  config.addConverter('html', LinkConverter)
+  config.addConverter('html', ListConverter)
+  config.addConverter('html', ListItemConverter)
+  config.addConverter('html', ParagraphConverter)
+  config.addConverter('html', PreformatConverter)
+  config.addConverter('html', StrongConverter)
+  config.addConverter('html', SubscriptConverter)
+  config.addConverter('html', SuperscriptConverter)
+
+  config.addConverter('xml', EmphasisConverter)
+  config.addConverter('xml', HeadingConverter)
+  config.addConverter('xml', LinkConverter)
+  config.addConverter('xml', ListConverter)
+  config.addConverter('xml', ListItemConverter)
+  config.addConverter('xml', ParagraphConverter)
+  config.addConverter('xml', PreformatConverter)
+  config.addConverter('xml', StrongConverter)
+  config.addConverter('xml', SubscriptConverter)
+  config.addConverter('xml', SuperscriptConverter)
   config.addConverter('xml', TestMetaNodeXMLConverter)
 
-  // config.addNode(InlineWrapper)
-  // config.addComponent(InlineWrapper.type, InlineWrapperComponent)
-
   config.addImporter('html', TestHTMLImporter)
-  config.addImporter('xml', TestXMLImporter)
   config.addExporter('html', TestHTMLExporter)
+  config.addImporter('xml', TestXMLImporter)
   config.addExporter('xml', TestXMLExporter)
+  config.addExporter('text', TestPlaintextExporter)
 
   return config
 }

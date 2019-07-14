@@ -72,6 +72,10 @@ export default class AbstractEditorSession extends EventEmitter {
     return this._document
   }
 
+  getEditorState () {
+    return this.editorState
+  }
+
   getFocusedSurface () {
     // implement this using a SurfaceManager
     // TODO: as the SurfaceManager is a vital part of the system
@@ -153,16 +157,16 @@ export default class AbstractEditorSession extends EventEmitter {
     }
     let change = null
     if (transformationCaptured) {
+      let selAfter = tx.selection
       if (ops.length > 0) {
-        let selAfter = tx.selection
         change = new DocumentChange(ops, {
           selection: selBefore
         }, {
           selection: selAfter
         })
         change.info = info
-        this._setSelection(this._normalizeSelection(selAfter))
       }
+      this._setSelection(this._normalizeSelection(selAfter))
     }
     if (change) {
       let changeApplied = false

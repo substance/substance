@@ -6,20 +6,19 @@ const DISABLED = Object.freeze({
 })
 
 export default class CommandManager {
-  constructor (appState, deps, commands, contextProvider) {
-    this.appState = appState
-    this.contextProvider = contextProvider
+  constructor (editorSession, deps, commands) {
+    this.editorSession = editorSession
     // commands are setup lazily so that we can take context into consideration
     // allowing to disable certain commands if they should not be considered
     // in a specifc context at all
     this._allCommands = commands
     this._commands = null
 
-    appState.addObserver(deps, this.reduce, this, { stage: 'update' })
+    editorSession.getEditorState().addObserver(deps, this.reduce, this, { stage: 'update' })
   }
 
   dispose () {
-    this.appState.off(this)
+    this.editorSession.getEditorState().off(this)
   }
 
   initialize () {
@@ -28,20 +27,19 @@ export default class CommandManager {
   }
 
   reduce () {
-    const appState = this.appState
     const commandStates = this._getCommandStates()
-    appState.set('commandStates', commandStates)
+    this.editorSession.getEditorState().set('commandStates', commandStates)
   }
 
   executeCommand (commandName, params = {}) {
-    const appState = this.appState
-    const cmdState = appState.commandStates[commandName]
+    const editorState = this.editorSession.getEditorState()
+    const cmdState = editorState.commandStates[commandName]
     if (!cmdState || cmdState.disabled) {
       return false
     } else {
       const commands = this._getCommands()
       const cmd = commands.get(commandName)
-      const context = this.contextProvider.context
+      const context = this.editorSession.getContext()
       params = Object.assign(new HandlerParams(context), params)
       params.commandState = cmdState
       cmd.execute(params, context)
@@ -52,13 +50,13 @@ export default class CommandManager {
   _getCommandStates () {
     if (!this._commands) this._initializeCommands()
 
-    const context = this.contextProvider.context
-    const appState = context.appState
+    const editorState = this.editorSession.getEditorState()
+    const context = this.editorSession.getContext()
     const params = new HandlerParams(context)
-    const doc = appState.document
-    const sel = appState.selection
-    const selectionState = appState.selectionState
-    const isBlurred = appState.isBlurred
+    const doc = editorState.document
+    const sel = editorState.selection
+    const selectionState = editorState.selectionState
+    const isBlurred = editorState.isBlurred
     const noSelection = !sel || sel.isNull() || !sel.isAttached()
 
     const commandStates = Object.assign({}, this._allDisabled)
@@ -113,7 +111,7 @@ export default class CommandManager {
   }
 
   _initializeCommands () {
-    const context = this.contextProvider.context
+    const context = this.editorSession.getContext()
     const allCommands = Array.from(this._allCommands)
     // remove disabled all commands that revoke by inspecting the context
     let commands = new Map(allCommands.filter(([name, command]) => {

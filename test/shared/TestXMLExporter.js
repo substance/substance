@@ -1,6 +1,6 @@
 import { XMLExporter } from 'substance'
 
-class TestXMLExporter extends XMLExporter {
+export default class TestXMLExporter extends XMLExporter {
   convertDocument (doc) {
     var articleEl = this.createElement('article')
     var body = doc.get('body')
@@ -10,5 +10,3 @@ class TestXMLExporter extends XMLExporter {
     return articleEl
   }
 }
-
-export default TestXMLExporter

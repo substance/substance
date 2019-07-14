@@ -38,10 +38,11 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
         .addClass('se-content')
     )
 
+    el.on('click', this.onClick)
+
     if (disabled) {
       el.addClass('sm-disabled')
         .attr('contenteditable', false)
-        .on('click', this.onClick)
     }
 
     // TODO: Chrome et al. does not display selections

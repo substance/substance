@@ -1,6 +1,6 @@
 import { HTMLExporter } from 'substance'
 
-class TestHTMLExporter extends HTMLExporter {
+export default class TestHTMLExporter extends HTMLExporter {
   convertDocument (doc) {
     let el = this.createElement('div')
     el.append(
@@ -9,5 +9,3 @@ class TestHTMLExporter extends HTMLExporter {
     return el
   }
 }
-
-export default TestHTMLExporter

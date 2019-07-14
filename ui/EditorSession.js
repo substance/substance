@@ -1,4 +1,5 @@
 import { getKeyForPath } from '../util'
+import { copySelection } from '../model'
 import AbstractEditorSession from './AbstractEditorSession'
 import SurfaceManager from './SurfaceManager'
 import MarkersManager from './MarkersManager'
@@ -15,28 +16,26 @@ export default class EditorSession extends AbstractEditorSession {
    * @param {object} contextProvider an object with getContext()
    * @param {object|EditorState} editorState a plain object with intial values or an EditorState instance for reuse
    */
-  constructor (id, document, config, editor, initialEditorState = {}) {
+  constructor (id, document, config, initialEditorState = {}) {
     super(id, document, initialEditorState)
 
     const editorState = this.editorState
-    this._config = config
-    this._editor = editor
-    this._contextProvider = editor
+    this.config = config
 
     let surfaceManager = new SurfaceManager(editorState)
     let markersManager = new MarkersManager(editorState)
     let globalEventHandler = new GlobalEventHandler(editorState)
     let keyboardManager = new KeyboardManager(config.getKeyboardShortcuts(), (commandName, params) => {
       return this.executeCommand(commandName, params)
-    }, this._contextProvider)
-    let commandManager = new CommandManager(editorState,
+    }, this)
+    let commandManager = new CommandManager(this,
       // update commands when document or selection have changed
       // TODO: is this really sufficient?
       ['document', 'selection'],
       config.getCommands(),
       this._contextProvider
     )
-    let findAndReplaceManager = new FindAndReplaceManager(this, editorState, editor)
+    let findAndReplaceManager = new FindAndReplaceManager(this)
 
     this.surfaceManager = surfaceManager
     this.markersManager = markersManager
@@ -44,6 +43,14 @@ export default class EditorSession extends AbstractEditorSession {
     this.keyboardManager = keyboardManager
     this.commandManager = commandManager
     this.findAndReplaceManager = findAndReplaceManager
+
+    // ATTENTION: we need a root DOM element e.g. for finding surfaces
+    // An editor component should call something like
+    // ```
+    // editorSession.setRootComponent(editor.getContent())
+    // ```
+    // during didMount()
+    this._rootComponent = null
   }
 
   initialize () {
@@ -72,6 +79,48 @@ export default class EditorSession extends AbstractEditorSession {
     }, super._createEditorState(document, initialState))
   }
 
+  copy () {
+    const sel = this.getSelection()
+    const doc = this.getDocument()
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
+      return copySelection(doc, sel)
+    }
+  }
+
+  cut () {
+    const sel = this.getSelection()
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
+      let snippet = this.copy()
+      this.deleteSelection()
+      return snippet
+    }
+  }
+
+  deleteSelection (options) {
+    const sel = this.getSelection()
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
+      this.transaction(tx => {
+        tx.deleteSelection(options)
+      }, { action: 'deleteSelection' })
+    }
+  }
+
+  paste (content, options) {
+    this.transaction(tx => {
+      tx.paste(content, options)
+    }, { action: 'paste' })
+    return true
+  }
+
+  insertText (text) {
+    const sel = this.getSelection()
+    if (sel && !sel.isNull()) {
+      this.transaction(tx => {
+        tx.insertText(text)
+      }, { action: 'insertText' })
+    }
+  }
+
   executeCommand (commandName, params) {
     return this.commandManager.executeCommand(commandName, params)
   }
@@ -80,12 +129,16 @@ export default class EditorSession extends AbstractEditorSession {
     return this.editorState.commandStates
   }
 
-  getConfigurator () {
-    return this._config
+  getConfig () {
+    return this.config
   }
 
   getContext () {
-    return this.contextProvider.context
+    return this.context
+  }
+
+  setContext (context) {
+    this.context = context
   }
 
   getFocusedSurface () {
@@ -94,6 +147,14 @@ export default class EditorSession extends AbstractEditorSession {
 
   getSurface (surfaceId) {
     return this.surfaceManager.getSurface(surfaceId)
+  }
+
+  setRootComponent (rootComponent) {
+    this._rootComponent = rootComponent
+  }
+
+  getRootComponent () {
+    return this._rootComponent
   }
 
   _resetOverlayId () {

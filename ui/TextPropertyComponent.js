@@ -18,35 +18,12 @@ import SelectionFragmentComponent from './SelectionFragmentComponent'
  * ```
  */
 export default class TextPropertyComponent extends AnnotatedTextComponent {
-  getInitialState () {
-    const markersManager = this.context.markersManager
-    let path = this.getPath()
-    let markers
-    if (markersManager) {
-      // get initial set of markers
-      markers = markersManager.getMarkers(path, {
-        surfaceId: this.getSurfaceId(),
-        containerPath: this.getContainerPath()
-      })
-    } else {
-      const doc = this.getDocument()
-      markers = doc.getAnnotations(path)
-    }
-    return { markers }
-  }
-
   didMount () {
-    const markersManager = this.context.markersManager
-    if (markersManager) {
-      markersManager.register(this)
-    }
+    this.context.editorSession.getEditorState().addObserver(['document'], this._onDocumentChange, this, { stage: 'render', document: { path: this.getPath() } })
   }
 
   dispose () {
-    const markersManager = this.context.markersManager
-    if (markersManager) {
-      markersManager.deregister(this)
-    }
+    this.context.editorSession.getEditorState().removeObserver(this)
   }
 
   render ($$) {
@@ -76,11 +53,13 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   getAnnotations () {
-    if (this.props.markers) {
-      return this.state.markers.concat(this.props.markers)
-    } else {
-      return this.state.markers
+    let path = this.getPath()
+    let annos = this.getDocument().getAnnotations(path) || []
+    let markersManager = this.context.markersManager
+    if (markersManager) {
+      annos = annos.concat(markersManager.getMarkers(path))
     }
+    return annos
   }
 
   _renderFragment ($$, fragment) {
@@ -182,6 +161,10 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
         }
       }
     }
+  }
+
+  _getUnsupportedInlineNodeComponentClass () {
+    return this.getComponent('unsupported-inline-node')
   }
 
   get _isTextPropertyComponent () { return true }

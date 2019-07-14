@@ -1,7 +1,7 @@
 import { test } from 'substance-test'
-import { Document, ChangeRecorder, DocumentChange } from 'substance'
-import getTestConfig from './shared/getTestConfig'
+import { ChangeRecorder, DocumentChange } from 'substance'
 import simple from './fixture/simple'
+import createTestArticle from './shared/createTestArticle'
 
 test('DocumentChange: hasUpdated()', t => {
   let tx = setup(simple)
@@ -59,9 +59,7 @@ test('DocumentChange: serialize() and deserialize()', t => {
 })
 
 function setup (...seeds) {
-  let config = getTestConfig()
-  let doc = new Document(config.getSchema())
-  doc.create({ id: 'body', type: '@container' })
+  let doc = createTestArticle()
   seeds.forEach(s => s(doc, doc.get('body')))
   return new ChangeRecorder(doc)
 }

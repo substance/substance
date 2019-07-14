@@ -11,16 +11,17 @@ import setupEditor from './shared/setupEditor'
 // nor have I added tests covering these branches.
 
 test('TextPropertyComponent: Get coordinate of empty property', t => {
-  let doc = createTestArticle(simple)
-  doc.create({
-    type: 'paragraph',
-    id: 'empty',
-    content: ''
+  let { editorSession, doc } = setupEditor(t, (doc, body) => {
+    doc.create({
+      type: 'paragraph',
+      id: 'empty',
+      content: ''
+    })
   })
   let comp = TextPropertyComponent.mount({
     doc: doc,
     path: ['empty', 'content']
-  }, getMountPoint(t))
+  }, getMountPoint(t), { context: editorSession.getContext() })
 
   let coor = comp.getDOMCoordinate(0)
 

@@ -62,10 +62,8 @@ export default class Surface extends Component {
   }
 
   didMount () {
-    const editorSession = this.getEditorSession()
-    editorSession.onRender('selection', this._onSelectionChanged, this)
     const surfaceManager = this.getSurfaceManager()
-    if (surfaceManager) {
+    if (surfaceManager && this.isEditable()) {
       surfaceManager.registerSurface(this)
     }
     const globalEventHandler = this.getGlobalEventHandler()
@@ -75,12 +73,9 @@ export default class Surface extends Component {
   }
 
   dispose () {
-    const editorSession = this.getEditorSession()
-    editorSession.off(this)
     const surfaceManager = this.getSurfaceManager()
-    if (surfaceManager) {
-      surfaceManager.unregisterSurface(this)
-    }
+    // ATTENTION: no matter if registered or not, we always try to unregister
+    surfaceManager.unregisterSurface(this)
     const globalEventHandler = this.getGlobalEventHandler()
     if (globalEventHandler) {
       globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
@@ -127,9 +122,12 @@ export default class Surface extends Component {
         // we will react on this to render a custom selection
         el.on('focus', this.onNativeFocus)
         el.on('blur', this.onNativeBlur)
+        // prevent click from bubbling up
+        el.on('click', this.onClick)
       }
       el.on('copy', this._onCopy)
     }
+
     return el
   }
 
@@ -154,15 +152,11 @@ export default class Surface extends Component {
   }
 
   isEditable () {
-    return (this.props.editing === 'full' || this.props.editing === undefined)
-  }
-
-  isSelectable () {
-    return (this.props.editing === 'selection' || this.props.editing === 'full')
+    return !this.isReadonly()
   }
 
   isReadonly () {
-    return this.props.editing === 'readonly'
+    return (this.props.editable === false || !this.parent.context.editable)
   }
 
   getElement () {
@@ -397,6 +391,15 @@ export default class Surface extends Component {
     }
   }
 
+  onClick (event) {
+    if (!this._shouldConsumeEvent(event)) {
+      // console.log('skipping mousedown', this.id)
+      return false
+    }
+    // stop bubbling up here
+    event.stopPropagation()
+  }
+
   // TODO: the whole mouse event based selection mechanism needs
   // to be redesigned. The current implementation works basically
   // though, there are some things which do not work well cross-browser
@@ -407,6 +410,8 @@ export default class Surface extends Component {
       // console.log('skipping mousedown', this.id)
       return false
     }
+    // stopping propagation because now the event is considered to be handled
+    event.stopPropagation()
 
     // EXPERIMENTAL: trying to 'reserve' a mousedown event
     // so that parents know that they shouldn't react
@@ -454,14 +459,23 @@ export default class Surface extends Component {
     // then the handler needs to kick in and recover a persisted selection or such
     this._state.skipNextFocusEvent = true
 
-    // HACK: we need to listen to mousup on document to catch events outside the surface
+    // this is important for the regular use case, where the mousup occurs within this component
+    this.el.on('mouseup', this.onMouseUp, this)
+    // NOTE: additionally we need to listen to mousup on document to catch events outside the surface
+    // TODO: it could still be possible not to receive this event, if mouseup is triggered on a component that consumes the event
     if (platform.inBrowser) {
       let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
-      documentEl.on('mouseup', this.onMouseUp, this, { once: true })
+      documentEl.on('mouseup', this.onMouseUp, this)
     }
   }
 
   onMouseUp (e) {
+    // console.log('Surface.onMouseUp', this.id)
+    this.el.off('mouseup', this.onMouseUp, this)
+    if (platform.inBrowser) {
+      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
+      documentEl.off('mouseup', this.onMouseUp, this)
+    }
     // console.log('Surface.onMouseup', this.id);
     // ATTENTION: filtering events does not make sense here,
     // as we need to make sure that pick the selection even
@@ -500,15 +514,25 @@ export default class Surface extends Component {
   }
 
   _onCopy (e) {
-    this.clipboard.onCopy(e)
+    e.preventDefault()
+    e.stopPropagation()
+    let clipboardData = e.clipboardData
+    this.clipboard.copy(clipboardData, this.context)
   }
 
   _onCut (e) {
-    this.clipboard.onCut(e)
+    e.preventDefault()
+    e.stopPropagation()
+    let clipboardData = e.clipboardData
+    this.clipboard.cut(clipboardData, this.context)
   }
 
   _onPaste (e) {
-    this.clipboard.onPaste(e)
+    e.preventDefault()
+    e.stopPropagation()
+    let clipboardData = e.clipboardData
+    // TODO: allow to force plain-text paste
+    this.clipboard.paste(clipboardData, this.context)
   }
 
   // Internal implementations

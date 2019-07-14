@@ -99,9 +99,17 @@ export default class AnnotatedTextComponent extends Component {
       ComponentClass = this.getComponent('inline-node')
     }
     if (!ComponentClass && !noDefault) {
-      ComponentClass = this._getUnsupportedInlineNodeComponentClass()
+      if (node._isAnnotation) {
+        ComponentClass = this._getUnsupportedAnnotationComponentClass()
+      } else {
+        ComponentClass = this._getUnsupportedInlineNodeComponentClass()
+      }
     }
     return ComponentClass
+  }
+
+  _getUnsupportedAnnotationComponentClass () {
+    return this.getComponent('annotation')
   }
 
   _getUnsupportedInlineNodeComponentClass () {

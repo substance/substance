@@ -4,7 +4,7 @@ import Command from './Command'
 /*
   Attention: in contrast to Substance.SelectAllCommand, this implementation does not take
   the surface type into consideration.
-  The problem is, that for that, appState.focusedSurface would need to be reduced
+  The problem is, that for that, editorState.focusedSurface would need to be reduced
   in an earlier stage, which is impossible, as Surfaces are rendered during 'render'
   stage. So this is kind of an chicken-egg problem.
   In general, we should avoid making commandStates depend on rendered components.
@@ -24,8 +24,8 @@ export default class SelectAllCommand extends Command {
   execute (params, context) {
     let editorSession = context.editorSession
     let doc = editorSession.getDocument()
-    let appState = context.appState
-    let focusedSurface = appState.focusedSurface
+    let editorState = editorSession.getEditorState()
+    let focusedSurface = editorState.focusedSurface
     if (focusedSurface) {
       let sel = null
       let surfaceId = focusedSurface.id

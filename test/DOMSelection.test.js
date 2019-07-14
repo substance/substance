@@ -18,7 +18,7 @@ function ffTest (title, fn) {
 
 uiTest('DOMSelection: Mapping a cursor inside a TextProperty from DOM to model', function (t) {
   let { editor, surface } = setupEditor(t, _p1)
-  let domSelection = surface.context.domSelection
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let node = editor.el.find('[data-path="p1.content"]').getFirstChild()
   setDOMSelection(node, 3)
   let sel = domSelection.getSelection()
@@ -35,7 +35,7 @@ uiTest('DOMSelection: Mapping a cursor inside a TextProperty from DOM to model',
 
 uiTest('DOMSelection: Mapping a cursor in an empty paragraph from DOM to model', function (t) {
   let { editor, surface } = setupEditor(t, _empty)
-  let domSelection = surface.context.domSelection
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let node = editor.el.find('[data-path="empty.content"]').getFirstChild()
   setDOMSelection(node, 0)
   let sel = domSelection.getSelection()
@@ -51,8 +51,8 @@ uiTest('DOMSelection: Mapping a cursor in an empty paragraph from DOM to model',
 })
 
 uiTest('DOMSelection: Mapping a ContainerSelection from DOM to model', function (t) {
-  let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
-  let domSelection = surface.context.domSelection
+  let { editor, surface } = setupEditor(t, _surfaceWithParagraphs)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let p1Text = editor.el.find('[data-path="p1.content"]').getFirstChild()
   let p2Text = editor.el.find('[data-path="p2.content"]').getFirstChild()
   setDOMSelection(p1Text, 1, p2Text, 2)
@@ -71,8 +71,8 @@ uiTest('DOMSelection: Mapping a ContainerSelection from DOM to model', function 
 })
 
 ffTest('DOMSelection: Issue #354: Wrong selection in FF when double clicking between lines', function (t) {
-  let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
-  let domSelection = surface.context.domSelection
+  let { editor, surface } = setupEditor(t, _surfaceWithParagraphs)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let surfaceEl = editor.el.find('[data-id="body"]')
   setDOMSelection(surfaceEl, 0, surfaceEl, 1)
   let sel = domSelection.getSelection()
@@ -89,8 +89,8 @@ ffTest('DOMSelection: Issue #354: Wrong selection in FF when double clicking bet
 
 // happens when using the same selection as in #354 in Chrome
 uiTest('DOMSelection: DOM selection that starts in a TextNode and ends in a paragraph on element level', function (t) {
-  let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
-  let domSelection = surface.context.domSelection
+  let { editor, surface } = setupEditor(t, _surfaceWithParagraphs)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let p1Text = editor.el.find('[data-path="p1.content"]').getFirstChild()
   let p2El = editor.el.find('[data-id="p2"]')
   setDOMSelection(p1Text, 0, p2El, 0)
@@ -109,8 +109,8 @@ uiTest('DOMSelection: DOM selection that starts in a TextNode and ends in a para
 })
 
 uiTest('DOMSelection: Issue #376: Wrong selection mapping at end of paragraph', function (t) {
-  let { editor, surface } = setupEditor(t, surfaceWithParagraphs)
-  let domSelection = surface.context.domSelection
+  let { editor, surface } = setupEditor(t, _surfaceWithParagraphs)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let p1span = editor.el.find('[data-id="p1"] span')
   let p2El = editor.el.find('[data-id="p2"]')
   setDOMSelection(p1span, 1, p2El, 0)
@@ -129,8 +129,8 @@ uiTest('DOMSelection: Issue #376: Wrong selection mapping at end of paragraph', 
 })
 
 uiTest('DOMSelection: Rendering a ContainerSelection', function (t) {
-  let { editor, doc, surface } = setupEditor(t, surfaceWithParagraphs)
-  let domSelection = surface.context.domSelection
+  let { editor, doc, surface } = setupEditor(t, _surfaceWithParagraphs)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let sel = doc.createSelection({
     type: 'container',
     startPath: ['p1', 'content'],
@@ -154,8 +154,8 @@ uiTest('DOMSelection: Rendering a ContainerSelection', function (t) {
 })
 
 uiTest('DOMSelection: Rendering a cursor after inline node', function (t) {
-  let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
-  let domSelection = surface.context.domSelection
+  let { editor, doc, surface } = setupEditor(t, _paragraphWithInlineNodes)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p', 'content'],
@@ -174,8 +174,8 @@ uiTest('DOMSelection: Rendering a cursor after inline node', function (t) {
 })
 
 uiTest('DOMSelection: Rendering a cursor after inline node at the end of a property', function (t) {
-  let { editor, doc, surface } = setupEditor(t, paragraphWithInlineNodes)
-  let domSelection = surface.context.domSelection
+  let { editor, doc, surface } = setupEditor(t, _paragraphWithInlineNodes)
+  let domSelection = _getDOMSelectionFromSurface(surface)
   let sel = doc.createSelection({
     type: 'property',
     path: ['p', 'content'],
@@ -192,7 +192,11 @@ uiTest('DOMSelection: Rendering a cursor after inline node at the end of a prope
   t.end()
 })
 
-function surfaceWithParagraphs (doc, body) {
+function _getDOMSelectionFromSurface (surface) {
+  return surface.domSelection || surface.context.domSelection
+}
+
+function _surfaceWithParagraphs (doc, body) {
   let tx = new EditingInterface(doc)
   body.append(tx.create({
     type: 'paragraph',
@@ -211,7 +215,7 @@ function surfaceWithParagraphs (doc, body) {
   }))
 }
 
-function paragraphWithInlineNodes (doc, body) {
+function _paragraphWithInlineNodes (doc, body) {
   let tx = new EditingInterface(doc)
   body.append(tx.create({
     type: 'paragraph',

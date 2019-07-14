@@ -1,4 +1,4 @@
-import { EditingInterface } from 'substance'
+import { EditingInterface, documentHelpers } from 'substance'
 
 export const H1_TEXT = 'h1:abcdefg'
 
@@ -207,14 +207,14 @@ export function _block2 (doc, body) {
 }
 
 export const IN1_TITLE = 'TITLE'
-export const IN1_BODY = 'BODY'
+export const IN1_BODY_P1 = 'BODY'
 export const IN1_CAPTION = 'CAPTION'
 export function _in1 (doc, body) {
-  doc.create({
+  documentHelpers.createNodeFromJson(doc, {
     type: 'structured-node',
     id: 'in1',
     title: IN1_TITLE,
-    body: IN1_BODY,
+    body: [{ type: 'paragraph', id: 'in1-body-p1', content: IN1_BODY_P1 }],
     caption: IN1_CAPTION
   })
   body.append('in1')

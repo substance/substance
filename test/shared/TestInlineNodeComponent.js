@@ -1,8 +1,7 @@
-import { InlineNodeComponent, TextPropertyEditor } from 'substance'
+import { IsolatedInlineNodeComponent, TextPropertyEditor } from 'substance'
 
-class TestInlineNodeComponent extends InlineNodeComponent {
+export default class TestInlineNodeComponent extends IsolatedInlineNodeComponent {
   getClassNames () {
-    // ATTENTION: ATM it is necessary to add .sc-inline-node
     return 'sc-test-inline sc-inline-node'
   }
 
@@ -18,5 +17,3 @@ class TestInlineNodeComponent extends InlineNodeComponent {
     )
   }
 }
-
-export default TestInlineNodeComponent

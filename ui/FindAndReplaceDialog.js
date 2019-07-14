@@ -15,11 +15,11 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   didMount () {
-    this.context.appState.addObserver(['findAndReplace'], this._onUpdate, this, { stage: 'render' })
+    this.context.editorSession.getEditorState().addObserver(['findAndReplace'], this._onUpdate, this, { stage: 'render' })
   }
 
   dispose () {
-    this.context.appState.removeObserver(this)
+    this.context.editorSession.getEditorState().removeObserver(this)
   }
 
   render ($$) {
@@ -185,7 +185,7 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _getState () {
-    return this.context.appState.get('findAndReplace')
+    return this._editorSession.getEditorState().get('findAndReplace')
   }
 
   _getManager () {
@@ -254,7 +254,7 @@ export default class FindAndReplaceDialog extends Component {
 
   _onFocus (e) {
     e.stopPropagation()
-    this.context.appState.set('isBlurred', true)
+    this._editorSession.getEditorState().set('isBlurred', true)
   }
 
   _onPatternKeydown (e) {

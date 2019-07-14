@@ -1,17 +1,17 @@
 import { documentHelpers, Selection, selectionHelpers } from '../model'
 
 export default class SelectionStateReducer {
-  constructor (appState) {
-    this.appState = appState
-    appState.addObserver(['document', 'selection'], this.update, this, { stage: 'update' })
+  constructor (editorState) {
+    this.editorState = editorState
+    editorState.addObserver(['document', 'selection'], this.update, this, { stage: 'update' })
   }
 
   update () {
-    const appState = this.appState
-    let doc = appState.get('document')
-    let sel = appState.get('selection')
+    const editorState = this.editorState
+    let doc = editorState.get('document')
+    let sel = editorState.get('selection')
     let newState = this.deriveState(doc, sel)
-    appState.set('selectionState', newState)
+    editorState.set('selectionState', newState)
   }
 
   deriveState (doc, sel) {

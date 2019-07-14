@@ -7,25 +7,22 @@ import CommandManager from './CommandManager'
 
 // TODO: extract shareble code (see EditorSession)
 export default class ModalEditorSession extends StageSession {
-  constructor (id, parentEditorSession, config, editor, initialEditorState) {
+  constructor (id, parentEditorSession, config, initialEditorState) {
     super(id, parentEditorSession, initialEditorState)
 
     const editorState = this.editorState
     this._config = config
-    this._editor = editor
-    this._contextProvider = editor
 
     let surfaceManager = new SurfaceManager(editorState)
     let markersManager = new MarkersManager(editorState)
     let keyboardManager = new KeyboardManager(config.getKeyboardShortcuts({ inherit: true }), (commandName, params) => {
       return this.executeCommand(commandName, params)
-    }, this._contextProvider)
-    let commandManager = new CommandManager(editorState,
+    }, this)
+    let commandManager = new CommandManager(this,
       // update commands when document or selection have changed
       // TODO: is this really sufficient?
       ['document', 'selection'],
-      config.getCommands({ inherit: true }),
-      this._contextProvider
+      config.getCommands({ inherit: true })
     )
     this.surfaceManager = surfaceManager
     this.markersManager = markersManager
@@ -64,7 +61,7 @@ export default class ModalEditorSession extends StageSession {
   }
 
   getContext () {
-    return this.contextProvider.context
+    return this.context
   }
 
   getFocusedSurface () {
@@ -73,6 +70,10 @@ export default class ModalEditorSession extends StageSession {
 
   getSurface (surfaceId) {
     return this.surfaceManager.getSurface(surfaceId)
+  }
+
+  setContext (context) {
+    this.context = context
   }
 
   _resetOverlayId () {
