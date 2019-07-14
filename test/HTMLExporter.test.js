@@ -98,8 +98,7 @@ function htmlExporterTests (memory) {
       end: {
         offset: 7
       },
-      url: 'foo',
-      title: 'bar'
+      href: 'foo'
     })
     let el = exporter.convertNode(p1)
     let childNodes = el.getChildNodes()
@@ -110,7 +109,6 @@ function htmlExporterTests (memory) {
     let a = childNodes[1]
     t.equal(a.attr('data-id'), 'l1', '.. <a> should have data-id set')
     t.equal(a.attr('href'), 'foo', '.. and correct href attribute')
-    t.equal(a.attr('title'), 'bar', '.. and correct title attribute')
     t.end()
   })
 

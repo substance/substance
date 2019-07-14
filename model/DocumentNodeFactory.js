@@ -1,4 +1,4 @@
-class DocumentNodeFactory {
+export default class DocumentNodeFactory {
   constructor (doc) {
     this.doc = doc
   }
@@ -11,5 +11,3 @@ class DocumentNodeFactory {
     return new NodeClass(this.doc, nodeData)
   }
 }
-
-export default DocumentNodeFactory

@@ -10,9 +10,9 @@ import DOMExporter from './DOMExporter'
   exchange format see {@link model/XMLExporter}.
 */
 
-class HTMLExporter extends DOMExporter {
-  constructor (config, context) {
-    super(_defaultConfig(config), context)
+export default class HTMLExporter extends DOMExporter {
+  constructor (params, options = {}) {
+    super(_defaultParams(params, options), options)
   }
 
   exportDocument (doc) {
@@ -29,14 +29,14 @@ class HTMLExporter extends DOMExporter {
   }
 }
 
-function _defaultConfig (config) {
-  config = Object.assign({
+function _defaultParams (params, options) {
+  params = Object.assign({
     idAttribute: 'data-id'
-  }, config)
-  if (!config.elementFactory) {
-    config.elementFactory = DefaultDOMElement.createDocument('html')
+  }, params, options)
+  if (!params.elementFactory) {
+    params.elementFactory = DefaultDOMElement.createDocument('html')
   }
-  return config
+  return params
 }
 
 const defaultAnnotationConverter = {
@@ -57,20 +57,33 @@ const defaultAnnotationConverter = {
 const defaultBlockConverter = {
   export: function (node, el, converter) {
     el.attr('data-type', node.type)
-    var properties = node.toJSON()
-    forEach(properties, function (value, name) {
-      if (name === 'id' || name === 'type') {
-        return
-      }
-      var prop = converter.$$('div').attr('property', name)
-      if (node.getPropertyType(name) === 'string' && value) {
-        prop.append(converter.annotatedText([node.id, name]))
+    const nodeSchema = node.getSchema()
+    for (let prop of nodeSchema) {
+      const name = prop.name
+      if (name === 'id' || name === 'type') continue
+      // using RDFa like attributes
+      let propEl = converter.$$('div').attr('property', name)
+      let value = node[name]
+      if (prop.isText()) {
+        propEl.append(converter.annotatedText([node.id, name]))
+      } else if (prop.isReference()) {
+        if (prop.isOwned()) {
+          value = node.resolve(name)
+          if (prop.isArray()) {
+            propEl.append(value.map(child => converter.convertNode(child)))
+          } else {
+            propEl.append(converter.convertNode(value))
+          }
+        } else {
+          // TODO: what to do with relations? maybe create a link pointing to the real one?
+          // or render a label of the other
+          // For now, we skip such props
+          continue
+        }
       } else {
-        prop.text(value)
+        propEl.append(value)
       }
-      el.append(prop)
-    })
+      el.append(propEl)
+    }
   }
 }
-
-export default HTMLExporter

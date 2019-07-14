@@ -115,8 +115,8 @@ function XMLExporterTests (memory) {
 
   function setup (t, fixture) {
     let config = getTestConfig()
-    let exporter = config.createExporter('xml', {}, { elementFactory: t.elementFactory })
     let doc = createTestArticle(fixture)
+    let exporter = config.createExporter('xml', doc, { elementFactory: t.elementFactory })
     return { exporter, doc }
   }
 }

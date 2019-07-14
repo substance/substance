@@ -9,9 +9,9 @@ import DOMExporter from './DOMExporter'
   Base class for custom XML exporters. If you want to use HTML as your
   exchange format see {@link model/HTMLExporter}.
 */
-class XMLExporter extends DOMExporter {
-  constructor (config, context) {
-    super(_defaultConfig(config), context)
+export default class XMLExporter extends DOMExporter {
+  constructor (params, options = {}) {
+    super(_defaultParams(params, options), options)
   }
 
   getDefaultBlockConverter () {
@@ -23,18 +23,18 @@ class XMLExporter extends DOMExporter {
   }
 }
 
-function _defaultConfig (config) {
-  config = Object.assign({
+function _defaultParams (params, options) {
+  params = Object.assign({
     idAttribute: 'id'
-  }, config)
-  if (!config.elementFactory) {
+  }, params, options)
+  if (!params.elementFactory) {
     let xmlParams = {
-      version: config.xmlVersion || '1.0',
-      encoding: config.xmlEncoding || 'UTF-8'
+      version: options.xmlVersion || '1.0',
+      encoding: options.xmlEncoding || 'UTF-8'
     }
-    config.elementFactory = DefaultDOMElement.createDocument('xml', xmlParams)
+    params.elementFactory = DefaultDOMElement.createDocument('xml', xmlParams)
   }
-  return config
+  return params
 }
 
 const defaultAnnotationConverter = {
@@ -70,5 +70,3 @@ const defaultBlockConverter = {
     })
   }
 }
-
-export default XMLExporter

@@ -17,22 +17,21 @@ const INVISIBLE_CHARACTER = '\u200B'
 /**
  * A generic base implementation for XML/HTML importers.
  *
- * @param {Document} config.document an empty document instance used to import into
- * @param {object[]} config.converters a list of converters
+ * @param {object[]} params.converters a list of converters
+ * @param {object[]} params.idAttribute the attribute to use as id
+ * @param {Document} doc an empty document instance used to import into
  */
 export default class DOMImporter {
-  constructor (config, context) {
-    this.context = context || {}
-    // Allow to provide 'config.schema' for legacy reasons
-    if (!config.document && !config.schema) {
-      throw new Error('"config.document" is mandatory')
+  constructor (params, doc, options = {}) {
+    if (!params.converters) {
+      throw new Error('"params.converters" is mandatory')
     }
-    if (!config.converters) {
-      throw new Error('"config.converters" is mandatory')
+    if (!doc) {
+      throw new Error('"doc" is mandatory')
     }
-
-    this.config = Object.assign({ idAttribute: 'id' }, config)
-    this.state = null
+    this.converters = params.converters
+    this.idAttribute = params.idAttribute || 'id'
+    this.options = options
 
     this._defaultBlockConverter = null
     this._allConverters = []
@@ -41,7 +40,7 @@ export default class DOMImporter {
 
     this.state = new DOMImporter.State()
     // initially start with the provided document instance
-    this.state.doc = this.config.document
+    this.state.doc = doc
 
     this._initialize()
   }
@@ -52,7 +51,7 @@ export default class DOMImporter {
   */
   _initialize () {
     const schema = this._getSchema()
-    const converters = this.config.converters
+    const converters = this.converters
     // LEGACY: in older versions we had a globally defined defaultTextType
     const defaultTextType = schema.getDefaultTextType()
     for (let i = 0; i < converters.length; i++) {
@@ -209,7 +208,7 @@ export default class DOMImporter {
 
     // HACK: to allow using an importer stand-alone
     // i.e. creating detached elements
-    if (this.config['stand-alone'] && isTopLevel) {
+    if (this.options['stand-alone'] && isTopLevel) {
       this.state.isConverting = false
       this.reset()
     }
@@ -326,24 +325,17 @@ export default class DOMImporter {
   }
 
   _getIdForElement (el, type) {
-    let id = el.getAttribute(this.config.idAttribute)
+    let id = el.getAttribute(this.idAttribute)
     if (id && !this.state.ids[id]) return id
     return this._getNextId(el.getOwnerDocument(), type)
   }
 
   _getSchema () {
-    return this.config.schema || this.config.document.getSchema()
+    return this.state.doc.getSchema()
   }
 
   _createDocument () {
-    if (this.config.document) {
-      return this.config.document.newInstance()
-    } else {
-      // create an empty document and initialize the container if not present
-      const schema = this.config.schema
-      const DocumentClass = schema.getDocumentClass()
-      return new DocumentClass(schema)
-    }
+    return this.state.doc.newInstance()
   }
 
   _convertPropertyAnnotation (el, nodeData) {
@@ -511,7 +503,7 @@ export default class DOMImporter {
   }
 
   _getConverterForElement (el, mode) {
-    var converters
+    let converters
     if (mode === 'block') {
       if (!el.tagName) return null
       converters = this._blockConverters
@@ -520,15 +512,28 @@ export default class DOMImporter {
     } else {
       converters = this._allConverters
     }
-    var converter = null
-    for (var i = 0; i < converters.length; i++) {
+    let converter = null
+    for (let i = 0; i < converters.length; i++) {
       if (this._converterCanBeApplied(converters[i], el)) {
         converter = converters[i]
         break
       }
     }
+    // fallback handling
+    if (!converter) {
+      if (mode === 'inline') {
+        return this._getUnsupportedInlineElementConverter()
+      } else {
+        return this._getUnsupportedElementConverter()
+      }
+    }
+
     return converter
   }
+
+  _getUnsupportedElementConverter () {}
+
+  _getUnsupportedInlineElementConverter () {}
 
   _converterCanBeApplied (converter, el) {
     return converter.matchElement(el, this)
@@ -605,7 +610,7 @@ export default class DOMImporter {
     // EXPERIMENTAL: also remove white-space within
     // this happens if somebody treats the text more like it would be done in Markdown
     // i.e. introducing line-breaks
-    if (this.config.REMOVE_INNER_WS || state.removeInnerWhitespace) {
+    if (this.options.REMOVE_INNER_WS || state.removeInnerWhitespace) {
       text = text.replace(WS_ALL, SPACE)
     }
     state.lastChar = text[text.length - 1] || state.lastChar

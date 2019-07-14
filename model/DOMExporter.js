@@ -1,39 +1,31 @@
-import isString from '../util/isString'
 import isFunction from '../util/isFunction'
 import encodeXMLEntities from '../util/encodeXMLEntities'
 import Registry from '../util/Registry'
 import Fragmenter from './Fragmenter'
 
 export default class DOMExporter {
-  constructor (config, context) {
-    this.context = context || {}
-    if (!config.converters) {
-      throw new Error('config.converters is mandatory')
+  constructor (params, options = {}) {
+    if (!params.converters) {
+      throw new Error('params.converters is mandatory')
     }
-    if (!config.converters._isRegistry) {
-      this.converters = new Registry()
-      config.converters.forEach(Converter => {
-        let converter = isFunction(Converter) ? new Converter() : Converter
-        if (!converter.type) {
-          console.error('Converter must provide the type of the associated node.', converter)
-          return
-        }
-        this.converters.add(converter.type, converter)
-      })
-    } else {
-      this.converters = config.converters
-    }
-
-    this.state = {
-      doc: null
-    }
-    this.config = config
     // NOTE: Subclasses (HTMLExporter and XMLExporter) must initialize this
     // with a proper DOMElement instance which is used to create new elements.
-    this._elementFactory = config.elementFactory
-    if (!this._elementFactory) {
+    if (!params.elementFactory) {
       throw new Error("'elementFactory' is mandatory")
     }
+    this.converters = new Registry()
+    params.converters.forEach(Converter => {
+      let converter = isFunction(Converter) ? new Converter() : Converter
+      if (!converter.type) {
+        console.error('Converter must provide the type of the associated node.', converter)
+        return
+      }
+      this.converters.add(converter.type, converter)
+    })
+    this.elementFactory = params.elementFactory
+    this.idAttribute = params.idAttribute || 'id'
+    this.state = { doc: null }
+    this.options = options
     this.$$ = this.createElement.bind(this)
   }
 
@@ -81,12 +73,7 @@ export default class DOMExporter {
   }
 
   convertNode (node) {
-    if (isString(node)) {
-      // Assuming this.state.doc has been set by convertDocument
-      node = this.state.doc.get(node)
-    } else {
-      this.state.doc = node.getDocument()
-    }
+    this.state.doc = node.getDocument()
     let converter = this.getNodeConverter(node)
     // special treatment for annotations, i.e. if someone calls
     // `exporter.convertNode(anno)`
@@ -102,7 +89,7 @@ export default class DOMExporter {
     } else {
       el = this.$$('div')
     }
-    el.attr(this.config.idAttribute, node.id)
+    el.attr(this.idAttribute, node.id)
     if (converter.export) {
       el = converter.export(node, el, this) || el
     } else {
@@ -112,14 +99,15 @@ export default class DOMExporter {
   }
 
   convertProperty (doc, path, options) {
+    this.state.doc = doc
     this.initialize(doc, options)
     let wrapper = this.$$('div')
       .append(this.annotatedText(path))
     return wrapper.innerHTML
   }
 
-  annotatedText (path) {
-    let doc = this.state.doc
+  annotatedText (path, doc) {
+    doc = doc || this.state.doc
     let text = doc.get(path)
     let annotations = doc.getIndex('annotations').get(path)
     return this._annotatedText(text, annotations)
@@ -142,18 +130,16 @@ export default class DOMExporter {
   }
 
   createElement (str) {
-    return this._elementFactory.createElement(str)
+    return this.elementFactory.createElement(str)
   }
 
   _annotatedText (text, annotations) {
-    let self = this
-
     let annotator = new Fragmenter()
-    annotator.onText = function (context, text) {
+    annotator.onText = (context, text) => {
       if (text) {
         // ATTENTION: only encode if this is desired, e.g. '"' would be encoded as '&quot;' but as Clipboard HTML this is not understood by
         // other applications such as Word.
-        if (self.config.ENCODE_ENTITIES_IN_TEXT) {
+        if (this.options.ENCODE_ENTITIES_IN_TEXT) {
           text = encodeXMLEntities(text)
         }
         context.children.push(text)
@@ -166,9 +152,9 @@ export default class DOMExporter {
     }
     annotator.onClose = (fragment, context, parentContext) => {
       let anno = fragment.node
-      let converter = self.getNodeConverter(anno)
+      let converter = this.getNodeConverter(anno)
       if (!converter) {
-        converter = self.getDefaultPropertyAnnotationConverter()
+        converter = this.getDefaultPropertyAnnotationConverter()
       }
       let el
       if (converter.tagName) {
@@ -176,14 +162,14 @@ export default class DOMExporter {
       } else {
         el = this.$$('span')
       }
-      el.attr(this.config.idAttribute, anno.id)
+      el.attr(this.idAttribute, anno.id)
       // inline nodes are special, because they are like an island in the text:
       // In a Substance TextNode, an InlineNode is anchored on an invisible character.
       // In the XML presentation, however, this character must not be inserted, instead the element
       // converted and then inserted at the very same location.
       if (anno.isInlineNode()) {
         if (converter.export) {
-          el = converter.export(anno, el, self) || el
+          el = converter.export(anno, el, this) || el
         } else {
           el = this.convertNode(anno) || el
         }
@@ -191,7 +177,7 @@ export default class DOMExporter {
         // allowing to provide a custom exporter
         // ATTENTION: a converter for the children of an annotation must not be
         if (converter.export) {
-          el = converter.export(anno, el, self) || el
+          el = converter.export(anno, el, this) || el
           if (el.children.length) {
             throw new Error('A converter for an annotation type must not convert children. The content of an annotation is owned by their TextNode.')
           }
@@ -217,7 +203,7 @@ export default class DOMExporter {
   _convertPropertyAnnotation (anno) {
     // take only the annotations within the range of the anno
     let wrapper = this.$$('div').append(this.annotatedText(anno.path))
-    let el = wrapper.find('[' + this.config.idAttribute + '="' + anno.id + '"]')
+    let el = wrapper.find('[' + this.idAttribute + '="' + anno.id + '"]')
     return el
   }
 }
