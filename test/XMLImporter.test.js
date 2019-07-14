@@ -2,7 +2,7 @@ import { test } from 'substance-test'
 import { DefaultDOMElement } from 'substance'
 import checkValues from './shared/checkValues'
 import getTestConfig from './shared/getTestConfig'
-import createTestArticle from './shared/createTestArticle';
+import createTestArticle from './shared/createTestArticle'
 
 const CONTENT = '0123456789'
 

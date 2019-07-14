@@ -2,7 +2,7 @@ import { test } from 'substance-test'
 import { DOMImporter, DefaultDOMElement } from 'substance'
 import getTestConfig from './shared/getTestConfig'
 import getTestSchema from './shared/getTestSchema'
-import createTestArticle from './shared/createTestArticle';
+import createTestArticle from './shared/createTestArticle'
 
 const pConverter = {
   type: 'paragraph',

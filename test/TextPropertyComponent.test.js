@@ -1,8 +1,6 @@
 import { test } from 'substance-test'
 import { TextPropertyComponent } from 'substance'
 import { getMountPoint } from './shared/testHelpers'
-import createTestArticle from './shared/createTestArticle'
-import simple from './fixture/simple'
 import setupEditor from './shared/setupEditor'
 
 // TODO: add tests for missed branches of TextPropertyComponent._getCharPos()
