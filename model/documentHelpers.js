@@ -398,7 +398,6 @@ export function mergeListItems (doc, listId, itemPos) {
 }
 
 // used by transforms copy, paste
-// and by ClipboardImporter/Exporter
 export const SNIPPET_ID = 'snippet'
 export const TEXT_SNIPPET_ID = 'text-snippet'
 

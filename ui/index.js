@@ -1,6 +1,5 @@
 export { default as AbstractAppState } from './AbstractAppState'
 export { default as AbstractEditorSession } from './AbstractEditorSession'
-export { default as AbstractClipboard } from './AbstractClipboard'
 export { default as AbstractIsolatedNodeComponent } from './AbstractIsolatedNodeComponent'
 export { default as AbstractScrollPane } from './AbstractScrollPane'
 export { default as AbstractGlobalEventHandler } from './AbstractGlobalEventHandler'
