@@ -43,7 +43,7 @@ export default class Surface extends Component {
   }
 
   _initializeClipboard () {
-    return new Clipboard(this.getConfigurator(), this.getEditorSession())
+    return new Clipboard()
   }
 
   _initializeDOMSelection () {
@@ -171,8 +171,8 @@ export default class Surface extends Component {
     return this.context.componentRegistry
   }
 
-  getConfigurator () {
-    return this.context.configurator
+  getConfig () {
+    return this.context.config
   }
 
   getEditorSession () {
