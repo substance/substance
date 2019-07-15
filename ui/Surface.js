@@ -228,7 +228,7 @@ export default class Surface extends Component {
   }
 
   selectFirst () {
-    throw new Error('This method is abstract.')
+    // not implemented
   }
 
   type (ch) {
