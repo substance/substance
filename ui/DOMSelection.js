@@ -118,7 +118,11 @@ export default class DOMSelection {
       focusNode: end.container,
       focusOffset: end.offset
     }
-    _set(state.dom)
+    // HACK: sometimes it happens that this fails
+    // doing a try-finally lets the debugger still stop, but continue
+    try {
+      _set(state.dom)
+    } finally {}
 
     function _set ({anchorNode, anchorOffset, focusNode, focusOffset}) {
       wSel.removeAllRanges()
