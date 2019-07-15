@@ -12,9 +12,6 @@ export default class CustomSurface extends Component {
     return {
       surface: this,
       parentSurfaceId: this.getId()
-      // HACK: clearing isolatedNodeComponent so that we can easily know
-      // if this surface is within an isolated node
-      // isolatedNodeComponent: null
     }
   }
 
@@ -64,7 +61,15 @@ export default class CustomSurface extends Component {
     return Boolean(this.props.disabled)
   }
 
+  selectFirst () {
+    // nothing by default
+  }
+
   _focus () {
+    // nothing by default
+  }
+
+  _blur () {
     // nothing by default
   }
 
