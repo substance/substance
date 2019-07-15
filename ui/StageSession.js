@@ -17,8 +17,6 @@ export default class StageSession extends AbstractEditorSession {
     // we need to listen to changes applied to the parent session
   }
 
-  dispose () {}
-
   commitChanges (options = {}) {
     // merge all changes into one big change
     let changes = this.getChanges()
