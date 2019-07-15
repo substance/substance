@@ -52,11 +52,12 @@ export default class SurfaceManager {
       return this.surfaces.get(canonicalId)
     }
     for (let surface of this.surfaces.values()) {
-      let surfacePath = (
-        surface.getContainerPath ? surface.getContainerPath() : (
-          surface.getPath ? surface.getPath() : null
-        )
-      )
+      let surfacePath = null
+      if (surface._isContainerEditor) {
+        surfacePath = surface.getContainerPath()
+      } else if (surface.getPath) {
+        surfacePath = surface.getPath()
+      }
       if (surfacePath && isArrayEqual(path, surfacePath)) {
         return surface
       }
