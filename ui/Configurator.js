@@ -403,12 +403,12 @@ export default class Configurator {
             name: commandName
           }
         })
-      case 'switcher':
       case 'prompt':
       case 'group':
       case 'dropdown':
         item.items = flatten(itemSpec.items.map(itemSpec => this._compileToolPanelItem(itemSpec)))
         break
+      case 'custom':
       case 'separator':
       case 'spacer':
         break
