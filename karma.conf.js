@@ -1,11 +1,11 @@
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     basePath: '.',
     frameworks: ['tap'],
     files: [
       'tmp/substance.cov.js',
       'node_modules/substance-test/dist/test.browser.js',
-      'tmp/tests.js',
+      'tmp/tests.js'
     ],
     browsers: ['Firefox', 'Chrome'],
     customLaunchers: {
@@ -18,6 +18,7 @@ module.exports = function(config) {
     reporters: ['tape', 'coverage'],
     coverageReporter: {
       reporters: [{type: 'lcov'}]
-    }
-  });
-};
+    },
+    logLevel: config.LOG_DISABLE
+  })
+}
