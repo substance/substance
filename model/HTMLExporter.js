@@ -81,7 +81,7 @@ const defaultBlockConverter = {
           continue
         }
       } else {
-        propEl.append(value)
+        propEl.append(String(value))
       }
       el.append(propEl)
     }
