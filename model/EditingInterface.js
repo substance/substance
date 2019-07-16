@@ -1,7 +1,9 @@
-import isPlainObject from '../util/isPlainObject'
-import copySelection from '../model/copySelection'
-import Editing from '../model/Editing'
-import Selection from '../model/Selection'
+import { isPlainObject } from '../util'
+import copySelection from './copySelection'
+import Selection from './Selection'
+import { augmentSelection } from './selectionHelpers'
+import { deepDeleteNode } from './documentHelpers'
+import Editing from './Editing'
 
 /*
   Abstract base class for document editor APIs such as Transaction.
@@ -12,79 +14,101 @@ import Selection from '../model/Selection'
   Low-level manipulations are dispatched to the edited document instance.
   Higher-level manipulations involve complex manipulations keeping the selection in a correct state.
  */
-class EditingInterface {
-
-  constructor(doc) {
+export default class EditingInterface {
+  constructor (doc, options = {}) {
     this._document = doc
     this._selection = null
-    // TODO: allow for custom editing implementation
-    this._impl = new Editing()
+    this._impl = options.editing || new Editing()
     this._direction = null
   }
 
-  getDocument() {
+  dispose () {}
+
+  getDocument () {
     return this._document
   }
 
   /* low-level API */
 
-  get(...args) {
+  get (...args) {
     return this._document.get(...args)
   }
 
-  contains(id) {
+  getProperty (...args) {
+    return this._document.getProperty(...args)
+  }
+
+  contains (id) {
     return this._document.contains(id)
   }
 
-  create(nodeData) {
+  find (cssSelector) {
+    return this._document.find(cssSelector)
+  }
+
+  findAll (cssSelector) {
+    return this._document.findAll(cssSelector)
+  }
+
+  create (nodeData) {
     return this._document.create(nodeData)
   }
 
-  createDefaultTextNode(content) {
-    return this._document.createDefaultTextNode(content, this._direction)
-  }
-
-  delete(nodeId) {
+  delete (nodeId) {
     return this._document.delete(nodeId)
   }
 
-  set(path, value) {
+  deepDeleteNode (nodeId) {
+    return deepDeleteNode(this._document.get(nodeId))
+  }
+
+  set (path, value) {
     return this._document.set(path, value)
   }
 
-  update(path, diffOp) {
+  update (path, diffOp) {
     return this._document.update(path, diffOp)
+  }
+
+  updateNode (id, newProps) {
+    return this._document.updateNode(id, newProps)
   }
 
   /* Selection API */
 
-  createSelection(...args) {
-    return this._document.createSelection(...args)
+  createSelection (selData) {
+    // TODO: we need to rethink this
+    // I'd like to make it convenient for the 99% use cases
+    // which means reusing containerPath and surfaceId
+    // However, it does not work well for cases
+    // where the surface changes
+    // Even better would be just to have surfaceId, and derive
+    // containerPath dynamically
+    selData = augmentSelection(selData, this._selection)
+    return this._document.createSelection(selData)
   }
 
-  setSelection(sel) {
-    if (!sel) sel = Selection.nullSelection
-    else if (isPlainObject(sel)) {
+  setSelection (sel) {
+    if (!sel) {
+      sel = Selection.nullSelection
+    } else if (isPlainObject(sel)) {
       sel = this.createSelection(sel)
-    }
-    let oldSel = this._selection
-    if (oldSel && sel && !sel.isNull()) {
-      if (!sel.containerId) {
-        sel.containerId = oldSel.containerId
-      }
+    } else if (!sel.isNull()) {
+      sel = augmentSelection(sel, this._selection)
     }
     this._selection = sel
+    return sel
   }
 
-  getSelection() {
+  getSelection () {
     return this._selection
   }
 
-  get selection() {
+  get selection () {
     return this._selection
   }
 
-  set selection(sel) {
+  set selection (sel) {
     this.setSelection(sel)
   }
 
@@ -92,117 +116,127 @@ class EditingInterface {
     ATTENTION/TODO: text direction could be different on different paragraphs
     I.e. it should probably be a TextNode property
   */
-  get textDirection() {
+  get textDirection () {
     return this._direction
   }
 
-  set textDirection(dir) {
+  set textDirection (dir) {
     this._direction = dir
   }
 
   /* High-level editing */
 
-  annotate(annotationData) {
-    if (this._selection && !this._selection.isNull()) {
+  annotate (annotationData) {
+    const sel = this._selection
+    if (sel && (sel.isPropertySelection() || sel.isContainerSelection())) {
       return this._impl.annotate(this, annotationData)
     }
   }
 
-  break() {
+  break () {
     if (this._selection && !this._selection.isNull()) {
       this._impl.break(this)
     }
   }
 
-  copySelection() {
-    if (this._selection && !this._selection.isNull()) {
-      return copySelection(this.getDocument(), this._selection)
+  copySelection () {
+    const doc = this.getDocument()
+    const sel = this._selection
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
+      return copySelection(doc, this._selection)
     }
   }
 
-  deleteSelection(options) {
-    if (this._selection && !this._selection.isNull()) {
+  deleteSelection (options) {
+    const sel = this._selection
+    if (sel && !sel.isNull() && !sel.isCollapsed()) {
       this._impl.delete(this, 'right', options)
     }
   }
 
-  deleteCharacter(direction) {
-    if (!this._selection || this._selection.isNull()) {
+  deleteCharacter (direction) {
+    const sel = this._selection
+    if (!sel || sel.isNull()) {
       // nothing
-    } else if (!this._selection.isCollapsed()) {
+    } else if (!sel.isCollapsed()) {
       this.deleteSelection()
     } else {
       this._impl.delete(this, direction)
     }
   }
 
-  insertText(text) {
-    if (this._selection && !this._selection.isNull()) {
+  insertText (text) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       this._impl.insertText(this, text)
     }
   }
 
   // insert an inline node with given data at the current selection
-  insertInlineNode(inlineNode) {
-    if (this._selection && !this._selection.isNull()) {
-      this._impl.insertInlineNode(this, inlineNode)
+  insertInlineNode (inlineNode) {
+    const sel = this._selection
+    if (sel && !sel.isNull() && sel.isPropertySelection()) {
+      return this._impl.insertInlineNode(this, inlineNode)
     }
   }
 
-  insertBlockNode(blockNode) {
-    if (this._selection && !this._selection.isNull()) {
-      this._impl.insertBlockNode(this, blockNode)
+  insertBlockNode (blockNode) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
+      return this._impl.insertBlockNode(this, blockNode)
     }
   }
 
-  paste(content) {
-    if (this._selection && !this._selection.isNull()) {
-      this._impl.paste(this, content)
+  paste (content) {
+    const sel = this._selection
+    if (sel && !sel.isNull() && !sel.isCustomSelection()) {
+      return this._impl.paste(this, content)
     }
   }
 
-  switchTextType(nodeData) {
-    if (this._selection && !this._selection.isNull()) {
+  switchTextType (nodeData) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.switchTextType(this, nodeData)
     }
   }
 
-  toggleList(params) {
-    if (this._selection && !this._selection.isNull()) {
+  toggleList (params) {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
       return this._impl.toggleList(this, params)
     }
   }
 
-  indent() {
-    if (this._selection && !this._selection.isNull()) {
-      this._impl.indent(this)
+  indent () {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
+      return this._impl.indent(this)
     }
   }
 
-  dedent() {
-    if (this._selection && !this._selection.isNull()) {
-      this._impl.dedent(this)
+  dedent () {
+    const sel = this._selection
+    if (sel && !sel.isNull()) {
+      return this._impl.dedent(this)
     }
   }
 
   /* Legacy low-level API */
 
-  getIndex(...args) {
+  getIndex (...args) {
     return this._document.getIndex(...args)
   }
 
-  getAnnotations(...args) {
+  getAnnotations (...args) {
     return this._document.getAnnotations(...args)
   }
 
-  getSchema() {
+  getSchema () {
     return this._document.getSchema()
   }
 
-  createSnippet() {
+  createSnippet () {
     return this._document.createSnippet()
   }
-
 }
-
-export default EditingInterface

@@ -1,58 +1,69 @@
 {
   "name": "substance",
-  "version": "1.0.0-beta.6.5",
+  "version": "0.157.0",
   "description": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/substance/substance.git"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "main": "dist/substance.cjs.js",
-  "jsnext:main": "index.es.js",
+  "jsnext:main": "dist/substance.es.js",
   "scripts": {
-    "linter": "eslint -c .eslintrc.js collab doc dom model packages test ui util index.es.js; exit 0",
-    "test": "node make build:test && (node .test/run-tests.js | node ./node_modules/substance-test/dist/tap-spec.js) && node make run:test:browser",
+    "prepack": "npm install && node make publish",
+    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"ui/**/*.js\" \"util/**/*.js\" index.es.js",
     "dev": "node make test:browser:pure -w -s",
-    "coverage": "node make run:test:coverage",
+    "pretest": "npm run lint",
+    "test": "node make test",
+    "test-and-cover": "npm run test && node make cover",
     "docs": "node make docs -w -s",
     "start": "node make dev -w -s"
   },
-  "author": "",
+  "author": {
+    "name": "Substance",
+    "email": "info@substance.io"
+  },
   "license": "MIT",
   "dependencies": {
-    "lodash-es": "4.13.1"
+    "boolbase": "1.0.0",
+    "css-what": "2.1.0",
+    "domelementtype": "1.3.0",
+    "entities": "1.1.1",
+    "lodash-es": "^4.17.10",
+    "nth-check": "1.0.1"
   },
   "devDependencies": {
-    "css-select": "1.2.0",
-    "domelementtype": "1.3.0",
-    "domutils": "1.5.1",
-    "htmlparser2": "3.9.2",
-    "karma": "0.13.22",
-    "karma-chrome-launcher": "1.0.1",
-    "karma-coverage": "^1.1.1",
-    "karma-firefox-launcher": "1.0.0",
-    "karma-source-map-support": "1.1.0",
-    "karma-tap": "1.0.4",
+    "karma": "1.x",
+    "karma-chrome-launcher": "2.2.0",
+    "karma-coverage": "1.1.2",
+    "karma-firefox-launcher": "1.1.0",
+    "karma-tap": "4.1.4",
     "karma-tape-reporter": "1.0.3",
-    "substance-bundler": "0.7.0",
-    "substance-docgen": "0.5.2",
-    "substance-test": "0.6.1"
+    "standard": "^11.0.1",
+    "substance": "1.0.0-preview.19",
+    "substance-bundler": "0.25.6",
+    "substance-test": "0.13.1"
   },
   "files": [
-    "collab",
     "dist",
-    "docs",
     "dom",
     "model",
-    "packages",
     "test",
     "ui",
     "util",
+    "CHANGELOG.md",
+    "index.es.js",
+    "LICENSE.md",
+    "make.js",
+    "README.md",
+    "package.json",
     "*.css",
-    "*.js",
-    "*.md",
-    "package.json"
+    "vendor/css-select.js",
+    "vendor/domutils.js",
+    "vendor/entities.js",
+    "vendor/htmlparser2.js",
+    "vendor/lodash-es.js"
   ]
 }

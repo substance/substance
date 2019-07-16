@@ -1,14 +1,14 @@
 import Component from './Component'
 
-class FontAwesomeIcon extends Component {
-  constructor(...args) {
-    super(...args)
+export default class FontAwesomeIcon extends Component {
+  render ($$) {
+    if (this.props.stack) {
+      return $$('span').addClass('fa-stack')
+        .append(this.props.stack.map(faClass => {
+          return $$('i').addClass('fa ' + faClass + ' fa-stack')
+        }))
+    } else {
+      return $$('i').addClass('fa ' + this.props.icon)
+    }
   }
-
-  render($$) {
-    return $$('i').addClass('fa ' + this.props.icon)
-  }
-
 }
-
-export default FontAwesomeIcon

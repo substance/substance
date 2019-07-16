@@ -1,31 +1,28 @@
-import isArray from '../util/isArray'
 import isEqual from '../util/isEqual'
 import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
-import isString from '../util/isString'
 import forEach from '../util/forEach'
 import last from '../util/last'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
-import PropertyIndex from './data/PropertyIndex'
+import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
-// import AnchorIndex from './AnchorIndex'
 import DocumentChange from './DocumentChange'
-import PathEventProxy from './PathEventProxy'
-import IncrementalData from './data/IncrementalData'
+import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
+import EditingInterface from './EditingInterface'
 import Selection from './Selection'
 import PropertySelection from './PropertySelection'
 import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
 import CustomSelection from './CustomSelection'
 import Coordinate from './Coordinate'
-import Range from './Range'
-import documentHelpers from './documentHelpers'
 import { createNodeSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
+import { SNIPPET_ID, getContainerRoot, compareCoordinates } from './documentHelpers'
+import { transformDocumentChange } from './operationHelpers'
 
 const converter = new JSONConverter()
 
@@ -47,70 +44,55 @@ const converter = new JSONConverter()
   ```
 */
 
-class Document extends EventEmitter {
-
+export default class Document extends EventEmitter {
   /**
     @param {DocumentSchema} schema The document schema.
   */
-  constructor(schema) {
+  constructor (schema, ...args) {
     super()
 
-    // HACK: to be able to inherit but not execute this ctor
-    if (arguments[0] === 'SKIP') return
-
-    this.__id__ = uuid()
-
+    this.schema = schema
+    /* istanbul ignore next */
     if (!schema) {
       throw new Error('A document needs a schema for reflection.')
     }
 
-    this.schema = schema
-    this.nodeFactory = new DocumentNodeFactory(this)
-    this.data = new IncrementalData(schema, {
-      nodeFactory: this.nodeFactory
-    })
+    // used internally
+    this._ops = []
 
+    this._initialize(...args)
+  }
+
+  _initialize () {
+    this.__id__ = uuid()
+    this.nodeFactory = new DocumentNodeFactory(this)
+    this.data = new IncrementalData(this.schema, this.nodeFactory)
     // all by type
     this.addIndex('type', new PropertyIndex('type'))
-
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
-
     // TODO: these are only necessary if there is a container annotation
     // in the schema
     // special index for (container-scoped) annotations
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
-    // this.addIndex('container-annotation-anchors', new AnchorIndex())
-
-    // change event proxies are triggered after a document change has been applied
-    // before the regular document:changed event is fired.
-    // They serve the purpose of making the event notification more efficient
-    // In earlier days all observers such as node views where listening on the same event 'operation:applied'.
-    // This did not scale with increasing number of nodes, as on every operation all listeners where notified.
-    // The proxies filter the document change by interest and then only notify a small set of observers.
-    // Example: NotifyByPath notifies only observers which are interested in changes to a certain path.
-    this.eventProxies = {
-      'path': new PathEventProxy(this),
-    }
-    this.on('document:changed', this._updateEventProxies, this)
     // TODO: maybe we want to have a generalized concept for such low-level hooks
     // e.g. indexes are similar
     ParentNodeHook.register(this)
   }
 
-  dispose() {
+  dispose () {
     this.off()
     this.data.off()
   }
 
-  get id() {
+  get id () {
     return this.__id__
   }
 
   /**
     @returns {model/DocumentSchema} the document's schema.
   */
-  getSchema() {
+  getSchema () {
     return this.schema
   }
 
@@ -119,7 +101,7 @@ class Document extends EventEmitter {
 
     @returns {Boolean} `true` if a node with id exists, `false` otherwise.
   */
-  contains(id) {
+  contains (id) {
     return this.data.contains(id)
   }
 
@@ -129,25 +111,67 @@ class Document extends EventEmitter {
     @param {String|String[]} path node id or path to property.
     @returns {DocumentNode|any|undefined} a Node instance, a value or undefined if not found.
   */
-  get(path, strict) {
+  get (path, strict) {
     return this.data.get(path, strict)
+  }
+
+  resolve (path, strict) {
+    let prop = this.getProperty(path)
+    if (!prop) {
+      if (strict) {
+        throw new Error('Invalid path')
+      } else {
+        return undefined
+      }
+    }
+    let val = this.get(path, strict)
+    if (prop.isReference()) {
+      if (prop.isArray()) {
+        return val.map(id => this.get(id))
+      } else {
+        return this.get(val)
+      }
+    } else {
+      return val
+    }
   }
 
   /**
     @return {Object} A hash of {@link model/DocumentNode} instances.
   */
-  getNodes() {
+  getNodes () {
     return this.data.getNodes()
+  }
+
+  getAnnotations (path) {
+    return this.getIndex('annotations').get(path)
+  }
+  /**
+   * Retrieve the NodeProperty for a given path
+   *
+   * @param {string[]} path
+   */
+  getProperty (path) {
+    if (path.length !== 2) {
+      throw new Error('path must have length=2')
+    }
+    let [nodeId, propName] = path
+    let node = this.get(nodeId)
+    if (node) {
+      return node.getSchema().getProperty(propName)
+    } else {
+      throw new Error('Invalid path.')
+    }
   }
 
   /**
     Creates a context like a transaction for importing nodes.
     This is important in presence of cyclic dependencies.
     Indexes will not be updated during the import but will afterwards
-    when all nodes are have been created.
+    when all nodes have been created.
 
     @private
-    @param {Function} importer a `function(doc)`, where with `doc` is a `model/AbstractDocument`
+    This is experimental.
 
     @example
 
@@ -175,7 +199,7 @@ class Document extends EventEmitter {
     off all listeners (such as indexes) until the data is consistent.
 
   */
-  import(importer) {
+  import (importer) {
     try {
       this.data._stopIndexing()
       importer(this)
@@ -195,7 +219,7 @@ class Document extends EventEmitter {
     @example
 
     ```js
-    doc.transaction(function(tx) {
+    editorSession.transaction((tx) => {
       tx.create({
         id: 'p1',
         type: 'paragraph',
@@ -204,15 +228,27 @@ class Document extends EventEmitter {
     })
     ```
   */
-  create(nodeData) {
+  create (nodeData) {
     if (!nodeData.id) {
       nodeData.id = uuid(nodeData.type)
     }
-    var op = this._create(nodeData)
-    var change = new DocumentChange([op], {}, {})
-    change._extractInformation(this)
-    this._notifyChangeListeners(change, { hidden: true })
-    return this.data.get(nodeData.id)
+    if (!nodeData.type) {
+      throw new Error('No node type provided')
+    }
+    const op = this._create(nodeData)
+    if (op) {
+      this._ops.push(op)
+      this._emitInternalChange(op)
+      return this.get(nodeData.id)
+    }
+  }
+
+  createDefaultTextNode (text, dir) {
+    return this.create({
+      type: this.getSchema().getDefaultTextType(),
+      content: text || '',
+      direction: dir
+    })
   }
 
   /**
@@ -229,12 +265,13 @@ class Document extends EventEmitter {
     })
     ```
   */
-  delete(nodeId) {
-    var node = this.get(nodeId)
-    var op = this._delete(nodeId)
-    var change = new DocumentChange([op], {}, {})
-    change._extractInformation(this)
-    this._notifyChangeListeners(change, { hidden: true })
+  delete (nodeId) {
+    const node = this.get(nodeId)
+    const op = this._delete(nodeId)
+    if (op) {
+      this._ops.push(op)
+      this._emitInternalChange(op)
+    }
     return node
   }
 
@@ -253,12 +290,13 @@ class Document extends EventEmitter {
     })
     ```
   */
-  set(path, value) {
-    var oldValue = this.get(path)
-    var op = this._set(path, value)
-    var change = new DocumentChange([op], {}, {})
-    change._extractInformation(this)
-    this._notifyChangeListeners(change, { hidden: true })
+  set (path, value) {
+    const oldValue = this.get(path)
+    const op = this._set(path, value)
+    if (op) {
+      this._ops.push(op)
+      this._emitInternalChange(op)
+    }
     return oldValue
   }
 
@@ -270,7 +308,6 @@ class Document extends EventEmitter {
     @returns {any} The value before applying the update.
 
     @example
-
 
     Inserting text into a string property:
     ```
@@ -292,16 +329,30 @@ class Document extends EventEmitter {
 
     Deleting from an array:
     ```
-    doc.update(['body', 'nodes'], { delete: 2 })
+    doc.update(['body', 'nodes'], { delete: { offset: 2 } })
     ```
     would turn `[1,2,3,4]` into `[1,2,4]`.
   */
-  update(path, diff) {
-    var op = this._update(path, diff)
-    var change = new DocumentChange([op], {}, {})
-    change._extractInformation(this)
-    this._notifyChangeListeners(change, { hidden: true })
+  update (path, diff) {
+    const op = this._update(path, diff)
+    if (op) {
+      this._ops.push(op)
+      this._emitInternalChange(op)
+    }
     return op
+  }
+
+  /*
+    Update multiple properties of a node by delegating to Document.set for each
+    changed property.
+  */
+  updateNode (id, newProps) {
+    let node = this.get(id)
+    forEach(newProps, (value, key) => {
+      if (!isEqual(node[key], newProps[key])) {
+        this.set([id, key], value)
+      }
+    })
   }
 
   /**
@@ -310,7 +361,7 @@ class Document extends EventEmitter {
     @param {String} name
     @param {DocumentIndex} index
   */
-  addIndex(name, index) {
+  addIndex (name, index) {
     return this.data.addIndex(name, index)
   }
 
@@ -318,7 +369,7 @@ class Document extends EventEmitter {
     @param {String} name
     @returns {DocumentIndex} the node index with given name.
   */
-  getIndex(name) {
+  getIndex (name) {
     return this.data.getIndex(name)
   }
 
@@ -339,7 +390,7 @@ class Document extends EventEmitter {
       path: [ 'text1', 'content'],
       startOffset: 10,
       endOffset: 20,
-      containerId: 'body'
+      containerPath: 'body'
     })
     ```
 
@@ -348,7 +399,7 @@ class Document extends EventEmitter {
     ```js
     doc.createSelection({
       type: 'container',
-      containerId: 'body',
+      containerPath: 'body',
       startPath: [ 'p1', 'content'],
       startOffset: 10,
       endPath: [ 'p2', 'content'],
@@ -362,11 +413,11 @@ class Document extends EventEmitter {
     doc.createSelection(null)
     ```
   */
-  createSelection(data) {
+  createSelection (data) {
     let sel
     if (isNil(data)) return Selection.nullSelection
     if (arguments.length !== 1 || !isPlainObject(data)) {
-      sel = _createSelectionLegacy(this, arguments)
+      throw new Error('Illegal argument: call createSelection({ type: ... }')
     } else {
       switch (data.type) {
         case 'property': {
@@ -374,7 +425,7 @@ class Document extends EventEmitter {
             data.endOffset = data.startOffset
           }
           if (!data.hasOwnProperty('reverse')) {
-            if (data.startOffset>data.endOffset) {
+            if (data.startOffset > data.endOffset) {
               [data.startOffset, data.endOffset] = [data.endOffset, data.startOffset]
               data.reverse = !data.reverse
             }
@@ -382,34 +433,27 @@ class Document extends EventEmitter {
           // integrity checks:
           let text = this.get(data.path, 'strict')
           if (data.startOffset < 0 || data.startOffset > text.length) {
-            throw new Error('Invalid startOffset: target property has length '+text.length+', given startOffset is ' + data.startOffset)
+            throw new Error('Invalid startOffset: target property has length ' + text.length + ', given startOffset is ' + data.startOffset)
           }
           if (data.endOffset < 0 || data.endOffset > text.length) {
-            throw new Error('Invalid startOffset: target property has length '+text.length+', given endOffset is ' + data.endOffset)
+            throw new Error('Invalid startOffset: target property has length ' + text.length + ', given endOffset is ' + data.endOffset)
           }
           sel = new PropertySelection(data)
           break
         }
         case 'container': {
-          let container = this.get(data.containerId, 'strict')
-          if (!container) throw new Error('Can not create ContainerSelection: container "'+data.containerId+'" does not exist.')
-          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset})
-          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset})
-          let startAddress = container.getAddress(start)
-          let endAddress = container.getAddress(end)
-          if (!startAddress) {
-            throw new Error('Invalid arguments for ContainerSelection: ', start.toString())
-          }
-          if (!endAddress) {
-            throw new Error('Invalid arguments for ContainerSelection: ', end.toString())
-          }
+          let containerPath = data.containerPath
+          let ids = this.get(containerPath)
+          if (!ids) throw new Error('Can not create ContainerSelection: container "' + containerPath + '" does not exist.')
+          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset, containerPath })
+          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset, containerPath })
           if (!data.hasOwnProperty('reverse')) {
-            if (endAddress.isBefore(startAddress, 'strict')) {
+            if (compareCoordinates(this, containerPath, start, end) > 0) {
               [start, end] = [end, start]
               data.reverse = true
             }
           }
-          sel = new ContainerSelection(container.id, start.path, start.offset, end.path, end.offset, data.reverse, data.surfaceId)
+          sel = new ContainerSelection(containerPath, start.path, start.offset, end.path, end.offset, data.reverse, data.surfaceId)
           break
         }
         case 'node': {
@@ -417,7 +461,7 @@ class Document extends EventEmitter {
             doc: this,
             nodeId: data.nodeId,
             mode: data.mode,
-            containerId: data.containerId,
+            containerPath: data.containerPath,
             reverse: data.reverse,
             surfaceId: data.surfaceId
           })
@@ -437,75 +481,83 @@ class Document extends EventEmitter {
     return sel
   }
 
-  getEventProxy(name) {
-    return this.eventProxies[name]
-  }
-
-  newInstance() {
+  newInstance () {
     var DocumentClass = this.constructor
     return new DocumentClass(this.schema)
   }
 
   // useful in combination with paste transformation
-  createSnippet() {
+  createSnippet () {
     var snippet = this.newInstance()
     var snippetContainer = snippet.create({
-      type: 'container',
-      id: Document.SNIPPET_ID
+      type: '@container',
+      id: SNIPPET_ID
     })
-    snippet.getContainer = function() {
+    snippet.getContainer = function () {
       return snippetContainer
-    }
-    snippet.show = function() {
-      snippetContainer.show.apply(snippetContainer, arguments)
     }
     return snippet
   }
 
-  fromSnapshot(data) {
-    var doc = this.newInstance()
-    doc.loadSeed(data)
-    return doc
+  rebase (change, onto) {
+    if (onto.length > 0) {
+      // ATTENTION: rebase uses mostly the same implementation as transform with some exceptions
+      // FIXME: IMO this is mostly because of wrong design
+      // ATTENTION 2: treating 'onto' as immutable, only updating 'change'
+      transformDocumentChange(onto, change, { rebase: true, immutableLeft: true })
+    }
+    return change
   }
 
-  getDocumentMeta() {
-    return this.get('document')
+  createFromDocument (doc) {
+    // clear all content, otherwise there would be an inconsistent mixture
+    this.clear()
+
+    // Note: trying to bring the nodes into a correct order
+    // so that they can be created safely without causing troubles
+    // For example, a list-item should be created before its parent list.
+    // But a paragraph should be created before their annotations
+    // TODO: we should rethink the exception with annotations here
+    // in XML the annotation would be a child of the paragraph
+    // and thus should be created before hand. However our annotation indexes need the annotation target to exist.
+    let nodes = Object.values(doc.getNodes())
+    let levels = {}
+    let visited = new Set()
+    nodes.forEach(n => {
+      if (!visited.has(n)) this._computeDependencyLevel(n, levels, visited)
+    })
+    // descending order: i.e. nodes with a deeper level get created first
+    nodes.sort((a, b) => {
+      return levels[b.id] - levels[a.id]
+    })
+    nodes.forEach(n => this.create(n))
+    return this
   }
 
-  _apply(documentChange) {
-    forEach(documentChange.ops, function(op) {
-      this.data.apply(op)
-      this.emit('operation:applied', op)
-    }.bind(this))
-    // extract aggregated information, such as which property has been affected etc.
-    documentChange._extractInformation(this)
-  }
-
-  _notifyChangeListeners(change, info) {
-    info = info || {}
-    this.emit('document:changed', change, info, this)
-  }
-
-  _updateEventProxies(change, info) {
-    forEach(this.eventProxies, function(proxy) {
-      proxy.onDocumentChanged(change, info, this)
-    }.bind(this))
-  }
-
-  /**
-   * DEPRECATED: We will drop support as this should be done in a more
-   *             controlled fashion using an importer.
-   * @skip
-   */
-  loadSeed(seed) {
-    // clear all existing nodes (as they should be there in the seed)
-    forEach(this.data.nodes, function(node) {
-      this.delete(node.id)
-    }.bind(this))
-    // create nodes
-    forEach(seed.nodes, function(nodeData) {
-      this.create(nodeData)
-    }.bind(this))
+  _computeDependencyLevel (node, levels, visited) {
+    if (!node) throw new Error('node was nil')
+    if (visited.has(node)) throw new Error('Cyclic node dependency')
+    visited.add(node)
+    // HACK: as of the comment above, annotations are currently treated as overlay
+    // not as children. So we assign level -1 to all annotations, meaning
+    // that they are 'on-top-of' the content, and being created at the very last
+    let level = 0
+    if (node.isAnnotation() || node.isInlineNode()) {
+      level = -1
+    } else {
+      let parent = node.getParent()
+      if (parent) {
+        let parentLevel
+        if (levels.hasOwnProperty(parent.id)) {
+          parentLevel = levels[parent.id]
+        } else {
+          parentLevel = this._computeDependencyLevel(parent, levels, visited)
+        }
+        level = parentLevel + 1
+      }
+    }
+    levels[node.id] = level
+    return level
   }
 
   /**
@@ -513,62 +565,82 @@ class Document extends EventEmitter {
 
     @returns {Object} Plain content.
   */
-  toJSON() {
+  toJSON () {
     return converter.exportDocument(this)
   }
 
-  getTextForSelection(sel) {
-    console.warn('DEPRECATED: use documentHelpers.getTextForSelection() instead.')
-    return documentHelpers.getTextForSelection(this, sel)
+  clone () {
+    let copy = this.newInstance()
+    copy.createFromDocument(this)
+    return copy
   }
 
-  setText(path, text, annotations) {
-    // TODO: this should go into document helpers.
-    var idx
-    var oldAnnos = this.getIndex('annotations').get(path)
-    // TODO: what to do with container annotations
-    for (idx = 0; idx < oldAnnos.length; idx++) {
-      this.delete(oldAnnos[idx].id)
+  clear () {
+    this.data.clear()
+    this._ops.length = 0
+  }
+
+  /*
+    Provides a high-level turtle-graphics style interface
+    to this document
+  */
+  createEditingInterface () {
+    return new EditingInterface(this)
+  }
+
+  invert (change) {
+    return change.invert()
+  }
+
+  _apply (documentChange) {
+    let ops = documentChange.ops
+    for (let op of ops) {
+      this._applyOp(op)
     }
-    this.set(path, text)
-    for (idx = 0; idx < annotations.length; idx++) {
-      this.create(annotations[idx])
-    }
+    // extract aggregated information, such as which property has been affected etc.
+    documentChange._extractInformation(this)
   }
 
-  getAnnotations(path) {
-    return this.getIndex('annotations').get(path)
+  _applyOp (op) {
+    this.data.apply(op)
+    this.emit('operation:applied', op)
   }
 
-  _create(nodeData) {
-    var op = this.data.create(nodeData)
-    return op
+  _create (nodeData) {
+    return this.data.create(nodeData)
   }
 
-  _delete(nodeId) {
-    var op = this.data.delete(nodeId)
-    return op
+  _delete (nodeId) {
+    return this.data.delete(nodeId)
   }
 
-  _update(path, diff) {
-    var op = this.data.update(path, diff)
-    return op
+  _set (path, value) {
+    return this.data.set(path, value)
   }
 
-  _set(path, value) {
-    var op = this.data.set(path, value)
-    return op
+  _update (path, diff) {
+    return this.data.update(path, diff)
+  }
+
+  _emitInternalChange (op) {
+    const change = new DocumentChange([op], {}, {})
+    change._extractInformation(this)
+    this.emit('document:changed:internal', change, this)
+  }
+
+  _notifyChangeListeners (change, info = {}) {
+    this.emit('document:changed', change, info, this)
   }
 
   // NOTE: this is still here because DOMSelection is using it
-  _createSelectionFromRange(range) {
+  _createSelectionFromRange (range) {
     if (!range) return Selection.nullSelection
     let inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
         // ATTENTION: we only create full NodeSelections
-        // when mapping from the DOM to Model  return new NodeSelection(range.containerId, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
-        return new NodeSelection(range.containerId, range.start.getNodeId(), 'full', range.reverse, range.surfaceId)
+        // when mapping from the DOM to Model  return new NodeSelection(range.containerPath, range.start.getNodeId(), mode, range.reverse, range.surfaceId)
+        return new NodeSelection(range.containerPath, range.start.getNodeId(), 'full', range.reverse, range.surfaceId)
       } else {
         return this.createSelection({
           type: 'property',
@@ -576,7 +648,7 @@ class Document extends EventEmitter {
           startOffset: range.start.offset,
           endOffset: range.end.offset,
           reverse: range.reverse,
-          containerId: range.containerId,
+          containerPath: range.containerPath,
           surfaceId: range.surfaceId
         })
       }
@@ -588,97 +660,34 @@ class Document extends EventEmitter {
         endPath: range.end.path,
         endOffset: range.end.offset,
         reverse: range.reverse,
-        containerId: range.containerId,
+        containerPath: range.containerPath,
         surfaceId: range.surfaceId
       })
     }
   }
 
-  _normalizeCoor({ path, offset }) {
+  _normalizeCoor ({ path, offset, containerPath }) {
     // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
     if (path.length === 1) {
-      let node = this.get(path[0]).getRoot()
+      // FIXME: originally getContainerRoot was called here
+      // however in this case
+      let node = getContainerRoot(this, containerPath, path[0])
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
-        return new Coordinate(node.getTextPath(), offset === 0 ? 0 : node.getLength())
+        return new Coordinate(node.getPath(), offset === 0 ? 0 : node.getLength())
       } else if (node.isList()) {
         // console.warn("DEPRECATED: don't use node coordinates for ListNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         if (offset === 0) {
           let item = node.getItemAt(0)
-          return new Coordinate(item.getTextPath(), 0)
+          return new Coordinate(item.getPath(), 0)
         } else {
           let item = this.get(last(node.items))
-          return new Coordinate(item.getTextPath(), item.getLength())
+          return new Coordinate(item.getPath(), item.getLength())
         }
       }
     }
     return new Coordinate(path, offset)
   }
 
+  get _isDocument () { return true }
 }
-
-Document.prototype._isDocument = true
-
-// used by transforms copy, paste
-// and by ClipboardImporter/Exporter
-Document.SNIPPET_ID = "snippet"
-
-Document.TEXT_SNIPPET_ID = "text-snippet"
-
-
-/* Internals */
-
-// DEPRECATED legacy support
-function _createSelectionLegacy(doc, args) {
-  console.warn('DEPRECATED: use document.createSelection({ type: ... }) instead')
-  // createSelection(coor)
-  if (args[0] instanceof Coordinate) {
-    let coor = args[0]
-    if (coor.isNodeCoordinate()) {
-      return NodeSelection._createFromCoordinate(coor)
-    } else {
-      return doc.createSelection({
-        type: 'property',
-        path: coor.path,
-        startOffset: coor.offset,
-      })
-    }
-  }
-  // createSelection(range)
-  else if (args[0] instanceof Range) {
-    return doc._createSelectionFromRange(args[0])
-  }
-  // createSelection(startPath, startOffset)
-  else if (args.length === 2 && isArray(args[0])) {
-    return doc.createSelection({
-      type: 'property',
-      path: args[0],
-      startOffset: args[1]
-    })
-  }
-  // createSelection(startPath, startOffset, endOffset)
-  else if (args.length === 3 && isArray(args[0])) {
-    return doc.createSelection({
-      type: 'property',
-      path: args[0],
-      startOffset: args[1],
-      endOffset: args[2]
-    })
-  }
-  // createSelection(containerId, startPath, startOffset, endPath, endOffset)
-  else if (args.length === 5 && isString(args[0])) {
-    return doc.createSelection({
-      type: 'container',
-      containerId: args[0],
-      startPath: args[1],
-      startOffset: args[2],
-      endPath: args[3],
-      endOffset: args[4]
-    })
-  } else {
-    console.error('Illegal arguments for document.createSelection().', args)
-    return doc.createSelection(null)
-  }
-}
-
-export default Document

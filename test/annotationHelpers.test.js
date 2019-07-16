@@ -1,17 +1,13 @@
-import { module } from 'substance-test'
-
-import annotationHelpers from '../model/annotationHelpers'
-import EditingInterface from '../model/EditingInterface'
-import createTestArticle from './fixture/createTestArticle'
+import { test } from 'substance-test'
+import { annotationHelpers, EditingInterface } from 'substance'
+import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
-
-const test = module('annotationHelpers')
 
 let truncateAnnotation = annotationHelpers.truncateAnnotation
 let expandAnnotation = annotationHelpers.expandAnnotation
 let fuseAnnotation = annotationHelpers.fuseAnnotation
 
-test("Truncate property annotation with a given property selection", function(t) {
+test('annotationHelpers: truncate property annotation with a given property selection', function (t) {
   let doc = fixture(A1)
   // Put cursor inside an the existing annotation
   let sel = doc.createSelection({
@@ -27,7 +23,7 @@ test("Truncate property annotation with a given property selection", function(t)
   t.end()
 })
 
-test("Truncate container annotation with a given property selection", function(t) {
+test('annotationHelpers: truncate container annotation with a given property selection', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'property',
@@ -41,15 +37,15 @@ test("Truncate container annotation with a given property selection", function(t
   t.end()
 })
 
-test("Truncate container annotation with a given container selection", function(t) {
+test('annotationHelpers: truncate container annotation with a given container selection', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
-    endOffset: 4,
+    endOffset: 4
   })
   let anno = doc.get('ca1')
   truncateAnnotation(doc, anno, sel)
@@ -58,7 +54,7 @@ test("Truncate container annotation with a given container selection", function(
   t.end()
 })
 
-test("Expand-right of property annotation for a given property selection", function(t) {
+test('annotationHelpers: expand-right of property annotation for a given property selection', function (t) {
   let doc = fixture(A1)
   let sel = doc.createSelection({
     type: 'property',
@@ -73,7 +69,7 @@ test("Expand-right of property annotation for a given property selection", funct
   t.end()
 })
 
-test("Expand container annotation for a given property selection (right expansion)", function(t) {
+test('annotationHelpers: expand container annotation for a given property selection (right expansion)', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'property',
@@ -87,15 +83,15 @@ test("Expand container annotation for a given property selection (right expansio
   t.end()
 })
 
-test("Expand container annotation for a given container selection (expand right)", function(t) {
+test('annotationHelpers: expand container annotation for a given container selection (expand right)', function (t) {
   let doc = fixture(CA1)
   let sel = doc.createSelection({
     type: 'container',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
     startOffset: 1,
     endPath: ['p3', 'content'],
-    endOffset: 6,
+    endOffset: 6
   })
   let anno = doc.get('ca1')
   expandAnnotation(doc, anno, sel)
@@ -104,7 +100,7 @@ test("Expand container annotation for a given container selection (expand right)
   t.end()
 })
 
-test("Fuse two property annotations for a given property selection", function(t) {
+test('annotationHelpers: fuse two property annotations for a given property selection', function (t) {
   let tx = new EditingInterface(fixture(A1, A2))
   // Put selection so that it touches both strong annotations
   tx.setSelection({
@@ -122,7 +118,7 @@ test("Fuse two property annotations for a given property selection", function(t)
   t.end()
 })
 
-test("Fuse two conatiner annotations for a given property selection", function(t) {
+test('annotationHelpers: fuse two conatiner annotations for a given property selection', function (t) {
   let tx = new EditingInterface(fixture(CA1, CA2))
   tx.setSelection({
     type: 'property',
@@ -141,21 +137,21 @@ test("Fuse two conatiner annotations for a given property selection", function(t
   t.end()
 })
 
-function fixture(...fns) {
+function fixture (...fns) {
   let doc = createTestArticle(simple)
-  fns.forEach((fn)=>{
+  fns.forEach((fn) => {
     fn(doc)
   })
   return doc
 }
 
-function A1(doc) {
+function A1 (doc) {
   doc.create({
     type: 'strong',
     id: 'a1',
     start: {
       path: ['p1', 'content'],
-      offset: 0,
+      offset: 0
     },
     end: {
       offset: 2
@@ -163,7 +159,7 @@ function A1(doc) {
   })
 }
 
-function A2(doc) {
+function A2 (doc) {
   doc.create({
     id: 'a2',
     type: 'strong',
@@ -177,34 +173,34 @@ function A2(doc) {
   })
 }
 
-function CA1(doc) {
+function CA1 (doc) {
   doc.create({
     type: 'test-container-anno',
     id: 'ca1',
     start: {
       path: ['p1', 'content'],
-      offset: 5,
+      offset: 5
     },
     end: {
       path: ['p3', 'content'],
       offset: 4
     },
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
 }
 
-function CA2(doc) {
+function CA2 (doc) {
   doc.create({
     type: 'test-container-anno',
     id: 'ca2',
-    containerId: 'body',
+    containerPath: ['body', 'nodes'],
     start: {
       path: ['p3', 'content'],
-      offset: 7,
+      offset: 7
     },
     end: {
       path: ['p4', 'content'],
-      offset: 9,
+      offset: 9
     }
   })
 }

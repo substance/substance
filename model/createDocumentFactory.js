@@ -1,5 +1,4 @@
-import EditorSession from './EditorSession'
-import Configurator from '../util/Configurator'
+import ChangeRecorder from './ChangeRecorder'
 
 /*
   Creates a factory for documents and the correspondent initial changeset
@@ -16,7 +15,7 @@ import Configurator from '../util/Configurator'
       type: 'paragraph',
       content: '0123456789'
     });
-    body.show('p1');
+    body.append('p1');
   });
 
   myDocFactory.ArticleClass;
@@ -24,27 +23,25 @@ import Configurator from '../util/Configurator'
   myDocFactory.createArticle();
   myDocFactory.createChangeset();
 */
-function createDocumentFactory(ArticleClass, create) {
+export default
+function createDocumentFactory (ArticleClass, create) {
   return {
     ArticleClass: ArticleClass,
-    createEmptyArticle: function() {
-      var doc = new ArticleClass()
+    createEmptyArticle: function () {
+      const doc = new ArticleClass()
       return doc
     },
-    createArticle: function() {
-      var doc = new ArticleClass()
+    createArticle: function () {
+      const doc = new ArticleClass()
       create(doc)
       return doc
     },
-    createChangeset: function() {
-      var doc = new ArticleClass()
-      var session = new EditorSession(doc, {
-        configurator: new Configurator()
-      })
-      var change = session.transaction(create)
+    createChangeset: function () {
+      const doc = new ArticleClass()
+      const tx = new ChangeRecorder(doc)
+      create(tx)
+      const change = tx.generateChange()
       return [change.toJSON()]
     }
   }
 }
-
-export default createDocumentFactory

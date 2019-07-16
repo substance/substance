@@ -1,8 +1,6 @@
 import isString from './isString'
 import isArray from './isArray'
-import get from 'lodash-es/get'
-import setWith from 'lodash-es/setWith'
-import unset from 'lodash-es/unset'
+import { get, setWith, unset } from 'lodash-es'
 
 /*
   An object that can be access via path API.
@@ -13,21 +11,20 @@ import unset from 'lodash-es/unset'
 */
 
 class PathObject {
-
   /*
     @param {object} [root] An object to operate on
   */
-  constructor(root) {
+  constructor (root) {
     if (root) {
       this.__root__ = root
     }
   }
 
-  contains(id) {
+  contains (id) {
     return Boolean(this.getRoot()[id])
   }
 
-  getRoot() {
+  getRoot () {
     if (this.__root__) {
       return this.__root__
     } else {
@@ -45,12 +42,13 @@ class PathObject {
     obj.get(['b', 'b1'])
     => b1Val
   */
-  get(path) {
+  get (path) {
     if (!path) {
       return undefined
     }
     if (isString(path)) {
-      return this.getRoot()[path]
+      let id = path
+      return this.getRoot()[id]
     }
     if (arguments.length > 1) {
       path = Array.prototype.slice(arguments, 0)
@@ -61,20 +59,22 @@ class PathObject {
     return get(this.getRoot(), path)
   }
 
-  set(path, value) {
+  set (path, value) {
     if (!path) {
       throw new Error('Illegal argument: PathObject.set(>path<, value) - path is mandatory.')
     }
     if (isString(path)) {
-      this.getRoot()[path] = value
+      let id = path
+      this.getRoot()[id] = value
     } else {
       setWith(this.getRoot(), path, value)
     }
   }
 
-  delete(path) {
+  delete (path) {
     if (isString(path)) {
-      delete this.getRoot()[path]
+      let id = path
+      delete this.getRoot()[id]
     } else if (path.length === 1) {
       delete this.getRoot()[path[0]]
     } else {
@@ -85,7 +85,7 @@ class PathObject {
     }
   }
 
-  clear() {
+  clear () {
     var root = this.getRoot()
     for (var key in root) {
       if (root.hasOwnProperty(key)) {
@@ -93,7 +93,6 @@ class PathObject {
       }
     }
   }
-
 }
 
 PathObject.prototype._isPathObject = true

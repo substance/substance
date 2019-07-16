@@ -1,12 +1,9 @@
-import { module } from 'substance-test'
-import Document from '../model/Document'
-import EditingInterface from '../model/EditingInterface'
-import fixture from './fixture/createTestArticle'
+import { test } from 'substance-test'
+import { documentHelpers, EditingInterface, toUnixLineEndings } from 'substance'
+import fixture from './shared/createTestArticle'
 import simple from './fixture/simple'
 
-const test = module('paste')
-
-test("Pasting plain text", function(t) {
+test('paste: Pasting plain text', t => {
   let { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
@@ -19,21 +16,21 @@ test("Pasting plain text", function(t) {
   t.end()
 })
 
-test("Pasting a single paragraph", function(t) {
+test('paste: Pasting a single paragraph', t => {
   let { tx } = _fixture(simple)
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
   let p = snippet.create({
     type: 'paragraph',
-    id: Document.TEXT_SNIPPET_ID,
+    id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
-  container.show(p.id)
+  container.append(p.id)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
   let p1 = tx.get('p1')
@@ -41,28 +38,28 @@ test("Pasting a single paragraph", function(t) {
   t.end()
 })
 
-test("Pasting annotated text", function(t) {
+test('paste: Pasting annotated text', t => {
   let { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
   let p = snippet.create({
     type: 'paragraph',
-    id: Document.TEXT_SNIPPET_ID,
+    id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
   })
-  container.show(p.id)
+  container.append(p.id)
   snippet.create({
     type: 'strong',
     id: 's1',
     start: {
       path: [p.id, 'content'],
-      offset: 2,
+      offset: 2
     },
     end: {
       offset: 4
@@ -72,12 +69,12 @@ test("Pasting annotated text", function(t) {
   let p1 = tx.get('p1')
   t.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.')
   let s1 = tx.get('s1')
-  t.deepEqual(s1.path, [p1.id, 'content'], 'Annotation is bound to the correct path.')
+  t.deepEqual(s1.start.path, [p1.id, 'content'], 'Annotation is bound to the correct path.')
   t.deepEqual([s1.start.offset, s1.end.offset], [5, 7], 'Annotation has correct range.')
   t.end()
 })
 
-test("Pasting two paragraphs", function(t) {
+test('paste: Pasting two paragraphs', t => {
   let { tx } = _fixture(simple)
   let snippet = tx.createSnippet()
   let container = snippet.getContainer()
@@ -86,18 +83,18 @@ test("Pasting two paragraphs", function(t) {
     id: 'test1',
     content: 'AA'
   })
-  container.show(test1.id)
+  container.append(test1.id)
   let test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
   })
-  container.show(test2.id)
+  container.append(test2.id)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
-    containerId: 'body'
+    containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
   let body = tx.get('body')
@@ -109,7 +106,41 @@ test("Pasting two paragraphs", function(t) {
   t.end()
 })
 
-function _fixture(seed) {
+test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
+  let { tx } = _fixture(simple)
+  let detached = tx.create({
+    id: 'detached',
+    type: 'paragraph',
+    content: '012345'
+  })
+  let snippet = tx.createSnippet()
+  let container = snippet.getContainer()
+  let test1 = snippet.create({
+    type: 'paragraph',
+    id: 'test1',
+    content: 'AA'
+  })
+  container.append(test1.id)
+  let test2 = snippet.create({
+    type: 'paragraph',
+    id: 'test2',
+    content: 'BB'
+  })
+  container.append(test2.id)
+  tx.setSelection({
+    type: 'property',
+    path: detached.getPath(),
+    startOffset: 3,
+    // 'detached' is not part of a container
+    containerPath: null
+  })
+  tx.paste(snippet)
+  let actual = toUnixLineEndings(detached.content)
+  t.equal(actual, '012AA BB345', 'Plain text should have been inserted.')
+  t.end()
+})
+
+function _fixture (seed) {
   let doc = fixture(seed)
   let tx = new EditingInterface(doc)
   return { doc: doc, tx: tx }

@@ -1,9 +1,7 @@
-import PropertyAnnotation from './PropertyAnnotation'
+import DocumentNode from './DocumentNode'
+import AnnotationMixin from './AnnotationMixin'
 
-class InlineNode extends PropertyAnnotation {}
-
-InlineNode.prototype._isInlineNode = true
-
-InlineNode.isInline = true
-
-export default InlineNode
+export default class InlineNode extends AnnotationMixin(DocumentNode) {
+  mustNotBeSplit () { return true }
+  static isInlineNode () { return true }
+}

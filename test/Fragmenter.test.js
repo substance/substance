@@ -1,89 +1,99 @@
-import { module } from 'substance-test'
-import Fragmenter from '../model/Fragmenter'
-import Annotation from '../model/Annotation'
+import { test } from 'substance-test'
+import { Fragmenter, PropertyAnnotation } from 'substance'
 
-const test = module('Fragmenter')
+let TEXT = 'ABCDEFGHI'
 
-var TEXT = 'ABCDEFGHI'
-
-test("No annos.", function(t) {
-  var annos = []
-  var html = _render(TEXT, annos)
+test('Fragmenter: No annos.', function (t) {
+  let annos = []
+  let html = _render(TEXT, annos)
   t.equal(html, TEXT)
   t.end()
 })
 
-test("With one anno.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6)]
-  var html = _render(TEXT, annos)
+test('Fragmenter: With one anno.', function (t) {
+  let annos = [new Anno('b', 'b1', 3, 6)]
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>DEF</b>GHI')
   t.end()
 })
 
-test("With one anchor.", function(t) {
-  var annos = [new Anno('a', 'a1', 3, 3, {
+test('Fragmenter: With one anchor.', function (t) {
+  let annos = [new Anno('a', 'a1', 3, 3, {
     isAnchor: true
   })]
-  var html = _render(TEXT, annos)
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<a></a>DEFGHI')
   t.end()
 })
 
-test("With one inline.", function(t) {
-  var annos = [new Anno('i', 'i1', 3, 4)]
-  var html = _render(TEXT, annos)
+test('Fragmenter: With one inline.', function (t) {
+  let annos = [new Anno('i', 'i1', 3, 4)]
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<i>D</i>EFGHI')
   t.end()
 })
 
-test("One nested anno.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 5)]
-  var html = _render(TEXT, annos)
+test('Fragmenter: One nested anno.', function (t) {
+  let annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 5)]
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>D<i>E</i>F</b>GHI')
   t.end()
 })
 
-test("Overlapping annos.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 8)]
-  var html = _render(TEXT, annos)
+test('Fragmenter: Overlapping annos.', function (t) {
+  let annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 4, 8)]
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<b>D<i>EF</i></b><i>GH</i>I')
   t.end()
 })
 
-test("Equal annos.", function(t) {
-  var annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 3, 6)]
-  var html = _render(TEXT, annos)
+test('Fragmenter: Equal annos.', function (t) {
+  let annos = [new Anno('b', 'b1', 3, 6), new Anno('i', 'i1', 3, 6)]
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<b><i>DEF</i></b>GHI')
   t.end()
 })
 
-test("Overlapping with fragmentation hint.", function(t) {
-  var annos = [
-    new Anno('b', 'b1', 3, 6),
-    new Anno('a', 'link1', 4, 8, {
-      fragmentation: Fragmenter.SHOULD_NOT_SPLIT
+test('Fragmenter: Overlapping with fragment weight.', function (t) {
+  let annos = [
+    // typically one would specify a higher weight for nodes such as link
+    // in contrast to annotation nodes, such as bold or itallic,
+    // so that the link is renedered as a single element and not split apart
+    new Anno('bold', 'b1', 3, 6),
+    new Anno('link', 'link1', 4, 8, {
+      getFragmentWeight () { return Fragmenter.SHOULD_NOT_SPLIT }
     })
   ]
-  var html = _render(TEXT, annos)
-  t.equal(html, 'ABC<b>D</b><a><b>EF</b>GH</a>I')
+  let html = _render(TEXT, annos)
+  t.equal(html, 'ABC<bold>D</bold><link><bold>EF</bold>GH</link>I')
+
+  // on the other hand, the link is fine inside a bold, i.e. no need to split this bold
+  annos = [
+    new Anno('bold', 'b1', 2, 8),
+    new Anno('link', 'link1', 3, 7, {
+      getFragmentWeight () { return Fragmenter.SHOULD_NOT_SPLIT }
+    })
+  ]
+  html = _render(TEXT, annos)
+  t.equal(html, 'AB<bold>C<link>DEFG</link>H</bold>I')
+
   t.end()
 })
 
-test("Anchors should rendered as early as possible.", function(t) {
-  var annos = [
+test('Fragmenter: Anchors should rendered as early as possible.', function (t) {
+  let annos = [
     new Anno('b', 'b1', 3, 6),
     new Anno('a', 'a1', 3, 3, {
       isAnchor: true
     })
   ]
-  var html = _render(TEXT, annos)
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<a></a><b>DEF</b>GHI')
   t.end()
 })
 
-
-test("Two subsequent inline nodes.", function(t) {
-  var annos = [
+test('Fragmenter: Two subsequent inline nodes.', function (t) {
+  let annos = [
     new Anno('a', 'inline1', 3, 4, {
       isInline: true
     }),
@@ -91,51 +101,50 @@ test("Two subsequent inline nodes.", function(t) {
       isInline: true
     })
   ]
-  var html = _render(TEXT, annos)
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<a>D</a><b>E</b>FGHI')
   t.end()
 })
 
-test("Collapsed annotation.", function(t) {
-  var annos = [
+test('Fragmenter: Collapsed annotation.', function (t) {
+  let annos = [
     new Anno('a', 'a1', 0, 0, {
     })
   ]
-  var html = _render(TEXT, annos)
+  let html = _render(TEXT, annos)
   t.equal(html, '<a></a>ABCDEFGHI')
   t.end()
 })
 
-test("Two collapsed annotations.", function(t) {
-  var annos = [
+test('Fragmenter: Two collapsed annotations.', function (t) {
+  let annos = [
     new Anno('a', 'a1', 0, 0, {
     }),
     new Anno('b', 'b2', 0, 0, {
     })
   ]
-  var html = _render(TEXT, annos)
+  let html = _render(TEXT, annos)
   t.equal(html, '<a></a><b></b>ABCDEFGHI')
   t.end()
 })
 
-test("Anchors should not fragment other annotations.", function(t) {
-  var annos = [
+test('Fragmenter: Anchors should not fragment other annotations.', function (t) {
+  let annos = [
     new Anno('a', 'a1', 3, 6),
     new Anno('b', 'b1', 4, 4, {
       isAnchor: true
     })
   ]
-  var html = _render(TEXT, annos)
+  let html = _render(TEXT, annos)
   t.equal(html, 'ABC<a>D<b></b>EF</a>GHI')
   t.end()
 })
 
-class Anno extends Annotation {
-
-  constructor(tagName, id, startOffset, endOffset, opts) {
+class Anno extends PropertyAnnotation {
+  constructor (tagName, id, startOffset, endOffset, opts) {
     super(null, {
       id: id,
-      start: { path: [id, 'content'], offset: startOffset},
+      start: { path: [id, 'content'], offset: startOffset },
       end: { path: [id, 'content'], offset: endOffset }
     })
 
@@ -145,8 +154,8 @@ class Anno extends Annotation {
     this._isAnchor = false
     this._isInline = false
 
-    if (opts.hasOwnProperty('fragmentation')) {
-      this.fragmentationHint = opts.fragmentation
+    if (opts.getFragmentWeight) {
+      this.getFragmentWeight = opts.getFragmentWeight
     }
 
     if (opts.hasOwnProperty('isAnchor')) {
@@ -161,35 +170,34 @@ class Anno extends Annotation {
   }
 
   // anchors are special annotations that have zero width
-  isAnchor() {
+  isAnchor () {
     return this._isAnchor
   }
 
   // inline nodes are implementated as annotations bound to a single character
   // I.e. the always have a length of 1
-  isInline() {
+  isInline () {
     return this._isInline
   }
-
 }
 
-function _render(text, annotations, opts) {
+function _render (text, annotations, opts) {
   opts = opts || {}
-  var output = []
-  var fragmenter = new Fragmenter()
-  fragmenter.onText = function(context, text) {
+  let output = []
+  let fragmenter = new Fragmenter()
+  fragmenter.onText = function (context, text) {
     output.push(text)
   }
-  fragmenter.onEnter = function(fragment) {
-    var node = fragment.node
+  fragmenter.onOpen = function (fragment) {
+    let node = fragment.node
     if (opts.withId) {
-      output.push('<' + node.tagName + ' id="' + node.id +'">')
+      output.push('<' + node.tagName + ' id="' + node.id + '">')
     } else {
       output.push('<' + node.tagName + '>')
     }
   }
-  fragmenter.onExit = function(fragment) {
-    var node = fragment.node
+  fragmenter.onClose = function (fragment) {
+    let node = fragment.node
     output.push('</' + node.tagName + '>')
   }
   fragmenter.start(output, text, annotations)

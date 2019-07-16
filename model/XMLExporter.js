@@ -2,45 +2,47 @@ import forEach from '../util/forEach'
 import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
 import isString from '../util/isString'
-import DOMExporter from './DOMExporter'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
+import DOMExporter from './DOMExporter'
 
 /*
   Base class for custom XML exporters. If you want to use HTML as your
   exchange format see {@link model/HTMLExporter}.
 */
-class XMLExporter extends DOMExporter {
-
-  constructor(config, context) {
-    super(_defaultConfig(config), context)
+export default class XMLExporter extends DOMExporter {
+  constructor (params, options = {}) {
+    super(_defaultParams(params, options), options)
   }
 
-  getDefaultBlockConverter() {
+  getDefaultBlockConverter () {
     return defaultBlockConverter // eslint-disable-line no-use-before-define
   }
 
-  getDefaultPropertyAnnotationConverter() {
+  getDefaultPropertyAnnotationConverter () {
     return defaultAnnotationConverter // eslint-disable-line no-use-before-define
   }
-
 }
 
-function _defaultConfig(config) {
-  config = Object.assign({
+function _defaultParams (params, options) {
+  params = Object.assign({
     idAttribute: 'id'
-  }, config)
-  if (!config.elementFactory) {
-    config.elementFactory = DefaultDOMElement.createDocument('xml')
+  }, params, options)
+  if (!params.elementFactory) {
+    let xmlParams = {
+      version: options.xmlVersion || '1.0',
+      encoding: options.xmlEncoding || 'UTF-8'
+    }
+    params.elementFactory = DefaultDOMElement.createDocument('xml', xmlParams)
   }
-  return config
+  return params
 }
 
 const defaultAnnotationConverter = {
   tagName: 'annotation',
-  export: function(node, el) {
+  export: function (node, el) {
     el.attr('type', node.type)
     const properties = node.toJSON()
-    forEach(properties, function(value, name) {
+    forEach(properties, function (value, name) {
       if (name === 'id' || name === 'type') return
       if (isString(value) || isNumber(value) || isBoolean(value)) {
         el.attr(name, value)
@@ -51,10 +53,10 @@ const defaultAnnotationConverter = {
 
 const defaultBlockConverter = {
   tagName: 'block',
-  export: function(node, el, converter) {
+  export: function (node, el, converter) {
     el.attr('type', node.type)
     const properties = node.toJSON()
-    forEach(properties, function(value, name) {
+    forEach(properties, function (value, name) {
       if (name === 'id' || name === 'type') {
         return
       }
@@ -68,5 +70,3 @@ const defaultBlockConverter = {
     })
   }
 }
-
-export default XMLExporter

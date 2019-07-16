@@ -1,5 +1,4 @@
-import clone from '../util/clone'
-import extend from '../util/extend'
+import deleteFromArray from '../util/deleteFromArray'
 import flattenOften from '../util/flattenOften'
 import isArray from '../util/isArray'
 import isFunction from '../util/isFunction'
@@ -11,18 +10,17 @@ import isString from '../util/isString'
 import without from '../util/without'
 import map from '../util/map'
 import DOMElement from '../dom/DOMElement'
-import DOMEventListener from '../dom/DOMEventListener'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
 
-  A VirtualElement is just a description of a DOM structure. It represents a virtual
-  DOM mixed with Components. This virtual structure needs to be compiled to a {@link Component}
-  to actually create a real DOM element, which is done by {@link RenderingEngine}
+  A VirtualElement is just a description of a DOM structure. It represents a
+  virtual DOM mixed with Components. This virtual structure needs to be compiled
+  to a {@link Component} to actually create a real DOM element,
+  which is done by {@link RenderingEngine}
 */
-class VirtualElement extends DOMElement {
-
-  constructor(owner) {
+export default class VirtualElement extends DOMElement {
+  constructor (owner) {
     super()
 
     // set when this gets inserted into another virtual element
@@ -33,18 +31,26 @@ class VirtualElement extends DOMElement {
     this._ref = null
   }
 
-  getParent() {
+  getParent () {
     return this.parent
   }
 
-  get childNodes() {
+  get childNodes () {
     return this.getChildNodes()
+  }
+
+  getChildCount () {
+    return this.children.length
+  }
+
+  getChildAt (idx) {
+    return this.children[idx]
   }
 
   /*
     Provides the component after this VirtualElement has been rendered.
   */
-  getComponent() {
+  getComponent () {
     return this._comp
   }
 
@@ -59,44 +65,28 @@ class VirtualElement extends DOMElement {
 
     @param {String} ref id for the compiled Component
   */
-  ref(ref) {
+  ref (ref) {
     if (!ref) throw new Error('Illegal argument')
-    /*
-      Attention: only the owner can create a ref()
-      If you run into this situation, e.g. when you pass down a virtual element
-      to a component which wants to have a ref itself,
-      then you have other options:
-
-      1. via props:
-      ```js
-        this.props.content.getComponent()
-      ```
-
-      2. via Component.getChildAt or Component.find()
-      ```
-        this.getChildAt(0)
-        this.find('.child')
-      ```
-    */
+    // Attention: only the owner should create a ref()
+    // unfortunately, with the current implementation this can not be ensured
     if (this._ref) throw new Error('A VirtualElement can only be referenced once.')
     this._ref = ref
     if (this._context) {
       const refs = this._context.refs
-      if(refs[ref]) {
-        throw new Error('An item with reference "'+ref+'" already exists.')
+      if (refs.has(ref)) {
+        throw new Error('An item with reference "' + ref + '" already exists.')
       }
-      refs[ref] = this
+      refs.set(ref, this)
     }
     return this
   }
 
-  isInDocument() {
+  isInDocument () {
     return false
   }
 
+  get _isVirtualElement () { return true }
 }
-
-VirtualElement.prototype._isVirtualElement = true
 
 /*
   A virtual HTML element.
@@ -106,8 +96,7 @@ VirtualElement.prototype._isVirtualElement = true
   @extends ui/VirtualElement
 */
 class VirtualHTMLElement extends VirtualElement {
-
-  constructor(tagName) {
+  constructor (tagName) {
     super()
 
     this._tagName = tagName
@@ -121,23 +110,23 @@ class VirtualHTMLElement extends VirtualElement {
     this.children = []
   }
 
-  getTagName() {
+  getTagName () {
     return this._tagName
   }
 
-  setTagName(tagName) {
+  setTagName (tagName) {
     this._tagName = tagName
     return this
   }
 
-  hasClass(className) {
+  hasClass (className) {
     if (this.classNames) {
       return this.classNames.indexOf(className) > -1
     }
     return false
   }
 
-  addClass(className) {
+  addClass (className) {
     if (!this.classNames) {
       this.classNames = []
     }
@@ -145,77 +134,79 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeClass(className) {
+  removeClass (className) {
     if (this.classNames) {
       this.classNames = without(this.classNames, className)
     }
     return this
   }
 
-  removeAttribute(name) {
+  removeAttribute (name) {
     if (this.attributes) {
-      delete this.attributes[name]
+      this.attributes.delete(name)
     }
     return this
   }
 
-  getAttribute(name) {
+  getAttribute (name) {
     if (this.attributes) {
-      return this.attributes[name]
+      return this.attributes.get(name)
     }
   }
 
-  setAttribute(name, value) {
+  setAttribute (name, value) {
     if (!this.attributes) {
-      this.attributes = {}
+      this.attributes = new Map()
     }
-    this.attributes[name] = value
+    this.attributes.set(name, value)
     return this
   }
 
-  getAttributes() {
-    // we are having separated storages for differet
+  getAttributes () {
+    // we are having separated storages for different
     // kind of attributes which we now pull together
     // in the same way as a native DOM element has it
-    var attributes = {}
+    // TODO: is this really a good idea?
+    // maybe we should also treat the others as attributes
+    let entries = []
     if (this.attributes) {
-      extend(attributes, this.attributes)
+      entries = Array.from(this.attributes)
     }
     if (this.classNames) {
-      attributes.class = this.classNames.join(' ')
+      entries.push(['class', this.classNames.join(' ')])
     }
     if (this.style) {
-      attributes.style = map(this.style, function(val, key) {
-        return key + ":" + val
-      }).join(';')
+      entries.push(['style', map(this.style, function (val, key) {
+        return key + ':' + val
+      }).join(';')])
     }
-    return attributes
+    return new Map(entries)
   }
 
-  getId() {
+  getId () {
     return this.getAttribute('id')
   }
 
-  setId(id) {
+  setId (id) {
     this.setAttribute('id', id)
     return this
   }
 
-  setTextContent(text) {
+  setTextContent (text) {
     text = String(text || '')
     this.empty()
     this.appendChild(text)
     return this
   }
 
-  setInnerHTML(html) {
+  setInnerHTML (html) {
     html = html || ''
     this.empty()
     this._innerHTMLString = html
     return this
   }
 
-  getInnerHTML() {
+  getInnerHTML () {
     if (!this.hasOwnProperty('_innerHTMLString')) {
       throw new Error('Not supported.')
     } else {
@@ -223,42 +214,42 @@ class VirtualHTMLElement extends VirtualElement {
     }
   }
 
-  getValue() {
+  getValue () {
     return this.htmlProp('value')
   }
 
-  setValue(value) {
+  setValue (value) {
     this.htmlProp('value', value)
     return this
   }
 
-  getChildNodes() {
+  getChildNodes () {
     return this.children
   }
 
-  getChildren() {
-    return this.children.filter(function(child) {
-      return child.getNodeType() !== "text"
+  getChildren () {
+    return this.children.filter(function (child) {
+      return child.getNodeType() !== 'text'
     })
   }
 
-  isTextNode() {
+  isTextNode () {
     return false
   }
 
-  isElementNode() {
+  isElementNode () {
     return true
   }
 
-  isCommentNode() {
+  isCommentNode () {
     return false
   }
 
-  isDocumentNode() {
+  isDocumentNode () {
     return false
   }
 
-  append() {
+  append () {
     if (this._innerHTMLString) {
       throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.')
     }
@@ -266,7 +257,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  appendChild(child) {
+  appendChild (child) {
     if (this._innerHTMLString) {
       throw Error('It is not possible to mix $$.html() with $$.append(). You can call $$.empty() to reset this virtual element.')
     }
@@ -274,7 +265,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  insertAt(pos, child) {
+  insertAt (pos, child) {
     child = this._normalizeChild(child)
     if (!child) {
       throw new Error('Illegal child: ' + child)
@@ -289,7 +280,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  insertBefore(child, before) {
+  insertBefore (child, before) {
     var pos = this.children.indexOf(before)
     if (pos > -1) {
       this.insertAt(pos, child)
@@ -299,7 +290,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeAt(pos) {
+  removeAt (pos) {
     if (pos < 0 || pos >= this.children.length) {
       throw new Error('removeAt(): Index out of bounds.')
     }
@@ -307,7 +298,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  removeChild(child) {
+  removeChild (child) {
     if (!child || !child._isVirtualElement) {
       throw new Error('removeChild(): Illegal arguments. Expecting a CheerioDOMElement instance.')
     }
@@ -319,7 +310,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  replaceChild(oldChild, newChild) {
+  replaceChild (oldChild, newChild) {
     if (!newChild || !oldChild ||
         !newChild._isVirtualElement || !oldChild._isVirtualElement) {
       throw new Error('replaceChild(): Illegal arguments. Expecting BrowserDOMElement instances.')
@@ -333,7 +324,7 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  empty() {
+  empty () {
     var children = this.children
     while (children.length) {
       var child = children.pop()
@@ -343,80 +334,58 @@ class VirtualHTMLElement extends VirtualElement {
     return this
   }
 
-  getProperty(name) {
+  getProperty (name) {
     if (this.htmlProps) {
-      return this.htmlProps[name]
+      return this.htmlProps.get(name)
     }
   }
 
-  setProperty(name, value) {
+  setProperty (name, value) {
     if (!this.htmlProps) {
-      this.htmlProps = {}
+      this.htmlProps = new Map()
     }
-    this.htmlProps[name] = value
+    this.htmlProps.set(name, value)
     return this
   }
 
-  removeProperty(name) {
+  removeProperty (name) {
     if (this.htmlProps) {
-      delete this.htmlProps[name]
+      this.htmlProps.delete(name)
     }
     return this
   }
 
-  getStyle(name) {
+  getStyle (name) {
     if (this.style) {
-      return this.style[name]
+      return this.style.get(name)
     }
   }
 
-  setStyle(name, value) {
+  setStyle (name, value) {
     if (!this.style) {
-      this.style = {}
+      this.style = new Map()
     }
     if (DOMElement.pxStyles[name] && isNumber(value)) value = value + 'px'
-    this.style[name] = value
+    this.style.set(name, value)
     return this
   }
 
-  addEventListener(eventName, handler, options) {
-    var listener
-    if (arguments.length === 1 && arguments[0]._isDOMEventListener) {
-      listener = arguments[0]
-    } else {
-      options = options || {}
-      options.context = options.context || this._owner._comp
-      listener = new DOMEventListener(eventName, handler, options)
-    }
-    if (!this.eventListeners) {
-      this.eventListeners = []
-    }
-    this.eventListeners.push(listener)
-    return this
+  _createEventListener (eventName, handler, options) {
+    options.context = options.context || this._owner._comp
+    return super._createEventListener(eventName, handler, options)
   }
 
-  removeEventListener(eventName, handler) {
-    if (this.eventListeners) {
-      DOMElement._findEventListenerIndex(this.eventListeners, eventName, handler)
-    }
-    return this
+  getNodeType () {
+    return 'element'
   }
 
-  getEventListeners() {
-    return this.eventListeners
-  }
-
-  getNodeType() {
-    return "element"
-  }
-
-  hasInnerHTML() {
+  hasInnerHTML () {
     return Boolean(this._innerHTMLString)
   }
 
-  _normalizeChild(child) {
+  _normalizeChild (child) {
     if (isNil(child)) {
-      return
+
     } else if (child._isVirtualElement) {
       return child
     } else if (isString(child) || isBoolean(child) || isNumber(child)) {
@@ -426,7 +395,7 @@ class VirtualHTMLElement extends VirtualElement {
     }
   }
 
-  _append(outlet, args) {
+  _append (outlet, args) {
     if (args.length === 1 && !isArray(args[0])) {
       this._appendChild(outlet, args[0])
       return
@@ -435,14 +404,14 @@ class VirtualHTMLElement extends VirtualElement {
     if (isArray(args[0])) {
       children = args[0]
     } else if (arguments.length > 1) {
-      children = Array.prototype.slice.call(args,0)
+      children = Array.prototype.slice.call(args, 0)
     } else {
       return
     }
     children.forEach(this._appendChild.bind(this, outlet))
   }
 
-  _appendChild(outlet, child) {
+  _appendChild (outlet, child) {
     child = this._normalizeChild(child)
     // TODO: discuss. Having a bad feeling about this,
     // because it could obscure an implementation error
@@ -452,68 +421,104 @@ class VirtualHTMLElement extends VirtualElement {
     return child
   }
 
-  _insertAt(outlet, pos, child) {
+  _insertAt (outlet, pos, child) {
     if (!child) return
     outlet.splice(pos, 0, child)
     this._attach(child)
   }
 
-  _removeAt(outlet, pos) {
+  _removeAt (outlet, pos) {
     var child = outlet[pos]
     outlet.splice(pos, 1)
     this._detach(child)
   }
 
-  _attach(child) {
+  _attach (child) {
     child.parent = this
-    if (this._context && child._owner !== this._owner && child._ref) {
-      this._context.foreignRefs[child._ref] = child
+    if (this._context) {
+      // TODO: this is still confusing it would make more sense to add this only if owner is different
+      // otherwise every appended component is considered 'injected' which is incorrect
+      if (child._owner !== this._owner && child._isVirtualComponent) {
+        this._context.injectedComponents.push(child)
+      }
+      if (child._owner !== this._owner && child._ref) {
+        this._context.foreignRefs[child._ref] = child
+      }
     }
   }
 
-  _detach(child) {
+  _detach (child) {
     child.parent = null
-    if (this._context && child._owner !== this._owner && child._ref) {
-      delete this.context.foreignRefs[child._ref]
+    if (this._context) {
+      if (child._isVirtualComponent) {
+        deleteFromArray(this._context.injectedComponents, child)
+      }
+      if (child._owner !== this._owner && child._ref) {
+        this._context.foreignRefs.delete(child._ref)
+      }
     }
   }
 
-  _mergeHTMLConfig(other) {
-    if (other.classNames) {
-      if (!this.classNames) {
-        this.classNames = []
+  _copy () {
+    if (this.classNames || this.attributes || this.eventListeners || this.htmlProps || this.style) {
+      let copy = {}
+      if (this.classNames) {
+        copy.classNames = this.classNames.slice()
       }
-      this.classNames = this.classNames.concat(other.classNames)
-    }
-    if (other.attributes) {
-      if (!this.attributes) {
-        this.attributes = {}
+      if (this.attributes) {
+        copy.attributes = new Map(this.attributes)
       }
-      extend(this.attributes, other.attributes)
-    }
-    if (other.htmlProps) {
-      if (!this.htmlProps) {
-        this.htmlProps = {}
+      if (this.eventListeners) {
+        copy.eventListeners = this.eventListeners.slice()
       }
-      extend(this.htmlProps, other.htmlProps)
-    }
-    if (other.style) {
-      if (!this.style) {
-        this.style = {}
+      if (this.htmlProps) {
+        copy.htmlProps = new Map(this.htmlProps)
       }
-      extend(this.style, other.style)
-    }
-    if (other.eventListeners) {
-      if (!this.eventListeners) {
-        this.eventListeners = []
+      if (this.style) {
+        copy.style = new Map(this.style)
       }
-      this.eventListeners = this.eventListeners.concat(other.eventListeners)
+      return copy
     }
   }
+
+  _clear () {
+    this.classNames = null
+    this.attributes = null
+    this.htmlProps = null
+    this.style = null
+    this.eventListeners = null
+  }
+
+  _merge (other) {
+    if (!other) return
+    const ARRAY_TYPE_VALS = ['classNames', 'eventListeners']
+    for (let name of ARRAY_TYPE_VALS) {
+      let otherVal = other[name]
+      if (otherVal) {
+        let thisVal = this[name]
+        if (!thisVal) {
+          this[name] = otherVal.slice()
+        } else {
+          this[name] = thisVal.concat(otherVal)
+        }
+      }
+    }
+    const MAP_TYPE_VALS = ['attributes', 'htmlProps', 'style']
+    for (let name of MAP_TYPE_VALS) {
+      let otherVal = other[name]
+      if (otherVal) {
+        let thisVal = this[name]
+        if (!thisVal) {
+          this[name] = new Map(otherVal)
+        } else {
+          this[name] = new Map([...thisVal, ...otherVal])
+        }
+      }
+    }
+  }
+
+  get _isVirtualHTMLElement () { return true }
 }
-
-VirtualHTMLElement.prototype._isVirtualHTMLElement = true
-
 
 /*
   A virtual element which gets rendered by a custom component.
@@ -523,8 +528,7 @@ VirtualHTMLElement.prototype._isVirtualHTMLElement = true
   @extends ui/VirtualElement
 */
 class VirtualComponent extends VirtualHTMLElement {
-
-  constructor(ComponentClass, props) {
+  constructor (ComponentClass, props) {
     super()
 
     props = props || {}
@@ -537,53 +541,51 @@ class VirtualComponent extends VirtualHTMLElement {
     this.children = props.children
   }
 
-  get _isVirtualComponent() { return true; }
-
-  getComponent() {
+  getComponent () {
     return this._comp
   }
 
   // Note: for VirtualComponentElement we put children into props
   // so that the render method of ComponentClass can place it.
-  getChildren() {
+  getChildren () {
     return this.props.children
   }
 
-  getNodeType() {
+  getNodeType () {
     return 'component'
   }
 
-  outlet(name) {
+  // TODO: this seems to be not so useful
+  // as this is also possible by just using props
+  outlet (name) {
     return new Outlet(this, name)
   }
 
-  _attach(child) {
+  setInnerHTML () {
+    throw new Error('Can not set innerHTML of a Component')
+  }
+
+  _attach (child) {
     child._preliminaryParent = this
   }
 
-  _detach(child) {
+  _detach (child) {
     child._preliminaryParent = null
   }
 
-  _copyHTMLConfig() {
-    return {
-      classNames: clone(this.classNames),
-      attributes: clone(this.attributes),
-      htmlProps: clone(this.htmlProps),
-      style: clone(this.style),
-      eventListeners: clone(this.eventListeners)
-    }
-  }
+  get _isVirtualHTMLElement () { return false }
+
+  get _isVirtualComponent () { return true }
 }
 
 class Outlet {
-  constructor(virtualEl, name) {
+  constructor (virtualEl, name) {
     this.virtualEl = virtualEl
     this.name = name
     Object.freeze(this)
   }
 
-  _getOutlet() {
+  _getOutlet () {
     var outlet = this.virtualEl.props[this.name]
     if (!outlet) {
       outlet = []
@@ -592,15 +594,15 @@ class Outlet {
     return outlet
   }
 
-  append() {
+  append () {
     var outlet = this._getOutlet()
     this.virtualEl._append(outlet, arguments)
     return this
   }
 
-  empty() {
+  empty () {
     var arr = this.virtualEl.props[this.name]
-    arr.forEach(function(el) {
+    arr.forEach(function (el) {
       this._detach(el)
     }.bind(this))
     arr.splice(0, arr.length)
@@ -608,15 +610,13 @@ class Outlet {
   }
 }
 
-
 class VirtualTextNode extends VirtualElement {
-
-  constructor(text) {
+  constructor (text) {
     super()
     this.text = text
   }
 
-  get _isVirtualTextNode() { return true; }
+  get _isVirtualTextNode () { return true }
 }
 
 VirtualElement.Component = VirtualComponent
@@ -644,15 +644,15 @@ VirtualElement.TextNode = VirtualTextNode
   $$(HelloMessage, {name: 'John'})
   ```
 */
-VirtualElement.createElement = function() {
+VirtualElement.createElement = function () {
   var content
   var _first = arguments[0]
   var _second = arguments[1]
   var type
   if (isString(_first)) {
-    type = "element"
+    type = 'element'
   } else if (isFunction(_first) && _first.prototype._isComponent) {
-    type = "component"
+    type = 'component'
   } else if (isNil(_first)) {
     throw new Error('$$(null): provided argument was null or undefined.')
   } else {
@@ -662,10 +662,10 @@ VirtualElement.createElement = function() {
   var props = {}
   var classNames, ref
   var eventHandlers = []
-  for(var key in _second) {
+  for (var key in _second) {
     if (!_second.hasOwnProperty(key)) continue
     var val = _second[key]
-    switch(key) {
+    switch (key) {
       case 'class':
         classNames = val
         break
@@ -693,14 +693,14 @@ VirtualElement.createElement = function() {
   if (ref) {
     content.ref(ref)
   }
-  eventHandlers.forEach(function(h) {
+  eventHandlers.forEach(function (h) {
     if (isFunction(h.handler)) {
       content.on(h.name, h.handler)
     } else if (isPlainObject(h.handler)) {
       var params = h.handler
       content.on(h.name, params.handler, params.context, params)
     } else {
-      throw new Error('Illegal arguments for $$(_,{ on'+h.name+'})')
+      throw new Error('Illegal arguments for $$(_,{ on' + h.name + '})')
     }
   })
   // allow a notation similar to React.createElement
@@ -711,4 +711,33 @@ VirtualElement.createElement = function() {
   return content
 }
 
-export default VirtualElement
+VirtualElement.Context = class VirtualElementContext {
+  constructor (owner) {
+    this.owner = owner
+    // used to track refs created via `el.ref()`
+    this.refs = new Map()
+    // used to keep refs that are set by a different owner, when a component is
+    // passed via props
+    this.foreignRefs = new Map()
+    // all VirtualElements created such as `$$('div')`
+    this.elements = []
+    // all VirtualComponents created such as `$$(Foo)`
+    this.components = []
+    // all VirtualComponents that are appended but not owned, i.e. injected from parent
+    this.injectedComponents = []
+    this.$$ = this._createComponent.bind(this)
+    this.$$.capturing = true
+  }
+
+  _createComponent () {
+    let vel = VirtualElement.createElement.apply(this, arguments)
+    vel._context = this
+    vel._owner = this.owner
+    if (vel._isVirtualComponent) {
+      // virtual components need to be captured recursively
+      this.components.push(vel)
+    }
+    this.elements.push(vel)
+    return vel
+  }
+}

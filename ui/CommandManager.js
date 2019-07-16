@@ -1,128 +1,182 @@
-import extend from '../util/extend'
-import forEach from '../util/forEach'
-import isEqual from '../util/isEqual'
-import Registry from '../util/Registry'
+import { last } from '../util'
+import HandlerParams from './HandlerParams'
 
-/*
-  Listens to changes on the document and selection and updates the commandStates
-  accordingly.
+const DISABLED = Object.freeze({
+  disabled: true
+})
 
-  @class CommandManager
-*/
-class CommandManager {
+export default class CommandManager {
+  constructor (editorSession, deps, commands) {
+    this.editorSession = editorSession
+    // commands are setup lazily so that we can take context into consideration
+    // allowing to disable certain commands if they should not be considered
+    // in a specifc context at all
+    this._allCommands = commands
+    this._commands = null
 
-  constructor(context, commands) {
-    if (!context.editorSession) {
-      throw new Error('EditorSession required.')
-    }
-
-    this.editorSession = context.editorSession
-    this.doc = this.editorSession.getDocument()
-    this.context = extend({}, context, {
-      // for convenienve we provide access to the doc directly
-      doc: this.doc
-    })
-    // Set up command registry
-    this.commandRegistry = new Registry()
-    forEach(commands, function(command) {
-      if(!command._isCommand) {
-        throw new Error("Expecting instances of ui/Command.")
-      }
-      this.commandRegistry.add(command.name, command)
-    }.bind(this))
-
-    this.editorSession.onUpdate(this.onSessionUpdate, this)
-    this.updateCommandStates(this.editorSession)
+    editorSession.getEditorState().addObserver(deps, this.reduce, this, { stage: 'update' })
   }
 
-  dispose() {
-    this.editorSession.off(this)
+  dispose () {
+    this.editorSession.getEditorState().off(this)
   }
 
-  onSessionUpdate(editorSession) {
-    if (editorSession.hasChanged('change') || editorSession.hasChanged('selection')) {
-      this.updateCommandStates(editorSession)
-    }
+  initialize () {
+    this._initializeCommands()
+    this.reduce()
   }
 
-  /*
-    Compute new command states object
-  */
-  updateCommandStates(editorSession) {
-    let commandStates = {}
-    let commandContext = this.getCommandContext()
-    let params = this._getCommandParams()
-    this.commandRegistry.forEach(function(cmd) {
-      commandStates[cmd.getName()] = cmd.getCommandState(params, commandContext)
-    })
-    // poor-man's immutable style
-    if (!isEqual(this.commandStates, commandStates)) {
-      this.commandStates = commandStates
-      editorSession.setCommandStates(commandStates)
-    }
+  reduce () {
+    const commandStates = this._getCommandStates()
+    this.editorSession.getEditorState().set('commandStates', commandStates)
   }
 
-  /*
-    Execute a command, given a context and arguments.
-
-    Commands are run async if cmd.isAsync() returns true.
-  */
-  executeCommand(commandName, userParams, cb) {
-    let cmd = this.commandRegistry.get(commandName)
-    if (!cmd) {
-      console.warn('command', commandName, 'not registered')
-      return
-    }
-    let commandState = this.commandStates[commandName]
-    let params = extend(this._getCommandParams(), userParams, {
-      commandState: commandState
-    })
-
-    if (cmd.isAsync) {
-      // TODO: Request UI lock here
-      this.editorSession.lock()
-      cmd.execute(params, this.getCommandContext(), (err, info) => {
-        if (err) {
-          if (cb) {
-            cb(err)
-          } else {
-            console.error(err)
-          }
-        } else {
-          if (cb) cb(null, info)
-        }
-        this.editorSession.unlock()
-      })
+  executeCommand (commandName, params = {}) {
+    const editorState = this.editorSession.getEditorState()
+    const cmdState = editorState.commandStates[commandName]
+    if (!cmdState || cmdState.disabled) {
+      return false
     } else {
-      let info = cmd.execute(params, this.getCommandContext())
-      return info
+      const commands = this._getCommands()
+      const cmd = commands.get(commandName)
+      const context = this.editorSession.getContext()
+      params = Object.assign(new HandlerParams(context), params)
+      params.commandState = cmdState
+      cmd.execute(params, context)
+      return true
     }
   }
 
-  /*
-    Exposes the current commandStates object
-  */
-  getCommandStates() {
-    return this.commandStates
-  }
+  _getCommandStates () {
+    if (!this._commands) this._initializeCommands()
 
-  getCommandContext() {
-    return this.context
-  }
+    const editorState = this.editorSession.getEditorState()
+    const context = this.editorSession.getContext()
+    const params = new HandlerParams(context)
+    const doc = editorState.document
+    const sel = editorState.selection
+    const selectionState = editorState.selectionState
+    const isBlurred = editorState.isBlurred
+    const noSelection = !sel || sel.isNull() || !sel.isAttached()
 
-  // TODO: while we need it here this should go into the flow thingie later
-  _getCommandParams() {
-    let editorSession = this.context.editorSession
-    let selectionState = editorSession.getSelectionState()
-    let sel = selectionState.getSelection()
-    let surface = this.context.surfaceManager.getFocusedSurface()
-    return {
-      editorSession: editorSession,
-      selectionState: selectionState,
-      surface: surface,
-      selection: sel,
+    const commandStates = Object.assign({}, this._allDisabled)
+    // all editing commands are disabled if
+    // - this editorSession is blurred,
+    // - or the selection is null,
+    // - or the selection is inside a custom editor
+    if (!isBlurred && !noSelection && !sel.isCustomSelection()) {
+      const path = sel.start.path
+      const node = doc.get(path[0])
+
+      // TODO: is this really necessary. It rather seems to be
+      // a workaround for other errors, i.e., the selection pointing
+      // to a non existing node
+      // If really needed we should document why, and in which case.
+      if (!node) {
+        throw new Error('FIXME: explain when this happens')
+      }
+
+      const nodeProp = _getNodeProp(node, path)
+      const isInsideText = nodeProp ? nodeProp.isText() : false
+
+      // annotations can only be applied on PropertySelections inside
+      // text, and not on an inline-node
+      if (isInsideText && sel.isPropertySelection() && !selectionState.isInlineNodeSelection) {
+        Object.assign(commandStates, _disabledIfDisallowedTargetType(this._annotationCommands, nodeProp.targetTypes, params, context))
+      }
+
+      // for InsertCommands the selection must be inside a ContainerEditor
+      let containerPath = selectionState.containerPath
+      if (containerPath) {
+        let containerProp = doc.getProperty(containerPath)
+        if (containerProp) {
+          let targetTypes = containerProp.targetTypes
+          Object.assign(commandStates, _disabledIfDisallowedTargetType(this._insertCommands, targetTypes, params, context))
+          Object.assign(commandStates, _disabledIfDisallowedTargetType(this._switchTypeCommands, targetTypes, params, context))
+        }
+      }
     }
+
+    // other commands must check their own preconditions
+    Object.assign(commandStates, _getCommandStates(this._otherCommands, params, context))
+
+    return commandStates
+  }
+
+  _getCommands () {
+    if (!this._commands) {
+      this._initializeCommands()
+    }
+    return this._commands
+  }
+
+  _initializeCommands () {
+    const context = this.editorSession.getContext()
+    const allCommands = Array.from(this._allCommands)
+    // remove disabled all commands that revoke by inspecting the context
+    let commands = new Map(allCommands.filter(([name, command]) => {
+      // for legacy, keep commands enabled which do not proved a `shouldBeEnabled()` method
+      return !command.shouldBeEnabled || command.shouldBeEnabled(context)
+    }))
+    const annotationCommands = []
+    const insertCommands = []
+    const switchTypeCommands = []
+    const otherCommands = []
+    commands.forEach(command => {
+      if (command.isAnnotationCommand()) {
+        annotationCommands.push(command)
+      } else if (command.isInsertCommand()) {
+        insertCommands.push(command)
+      } else if (command.isSwitchTypeCommand()) {
+        switchTypeCommands.push(command)
+      } else {
+        otherCommands.push(command)
+      }
+    })
+    this._commands = commands
+    this._annotationCommands = annotationCommands
+    this._insertCommands = insertCommands
+    this._switchTypeCommands = switchTypeCommands
+    this._otherCommands = otherCommands
+    this._allDisabled = _disabled(Array.from(commands.values()))
   }
 }
 
-export default CommandManager
+function _getNodeProp (node, path) {
+  if (path.length === 2) {
+    let propName = last(path)
+    let prop = node.getSchema().getProperty(propName)
+    if (!prop) console.error('Could not find property for path', path, node)
+    return prop
+  }
+}
+
+function _disabled (commands) {
+  return commands.reduce((m, c) => {
+    m[c.getName()] = DISABLED
+    return m
+  }, {})
+}
+
+const EMPTY_SET = new Set()
+
+function _disabledIfDisallowedTargetType (commands, targetTypes, params, context) {
+  targetTypes = targetTypes || EMPTY_SET
+  return commands.reduce((m, cmd) => {
+    const type = cmd.getType()
+    const name = cmd.getName()
+    if (targetTypes.has(type)) {
+      m[name] = cmd.getCommandState(params, context)
+    } else {
+      m[name] = DISABLED
+    }
+    return m
+  }, {})
+}
+
+function _getCommandStates (commands, params, context) {
+  return commands.reduce((m, command) => {
+    m[command.getName()] = command.getCommandState(params, context)
+    return m
+  }, {})
+}

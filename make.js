@@ -1,297 +1,288 @@
-/*
-  IMPORTANT: Don't use ES6 here, as some people are still on Node 4.
-*/
+/* globals __dirname, process */
+const b = require('substance-bundler')
+const path = require('path')
+const install = require('substance-bundler/extensions/install')
+const fork = require('substance-bundler/extensions/fork')
+const karma = require('substance-bundler/extensions/karma')
 
-var b = require('substance-bundler')
-var path = require('path')
+const UGLIFY_VERSION = '^3.3.9'
 
 // Constants
 // ---------
 
-var DIST = 'dist/'
-var TEST ='.test/'
-var NPM = '.npm/'
-var NPMDIST = NPM+'dist/'
-var STUFF = [
-  'package.json',
-  'LICENSE.md',
-  'README.md',
-  'CHANGELOG.md',
-  'make.js'
-]
+const DIST = 'dist/'
 
 // Helpers
 // -------
 // Doing the actual work
 
-function _css(DIST) {
-  b.css('substance.css', DIST+'substance.css', { variables: true })
-  b.css('substance.css', DIST+'substance.next.css')
-  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.css', {variables: true})
-  b.css('substance-pagestyle.css', DIST+'substance-pagestyle.next.css')
-  b.css('substance-reset.css', DIST+'substance-reset.css', {variables: true})
-  b.css('substance-reset.css', DIST+'substance-reset.next.css')
+function css () {
+  b.css('substance.css', DIST + 'substance.css', { variables: true })
+  b.css('substance.css', DIST + 'substance.next.css')
+  b.css('substance-pagestyle.css', DIST + 'substance-pagestyle.css', {variables: true})
+  b.css('substance-pagestyle.css', DIST + 'substance-pagestyle.next.css')
+  b.css('substance-reset.css', DIST + 'substance-reset.css', {variables: true})
+  b.css('substance-reset.css', DIST + 'substance-reset.next.css')
 }
 
-// creates a browser bundle
-function _browser(DIST, transpileToES5, production) {
-  b.js('./index.es.js', {
-    target: {
-      dest: DIST+'substance.js',
-      format: 'umd', moduleName: 'substance',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance',
-      useStrict: !transpileToES5,
-    },
-    buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] },
-    cleanup: Boolean(production)
-  })
-}
-
-// creates a server bundle
-function _server(DIST, transpileToES5, production) {
-  b.js('./index.es.js', {
-    target: {
-      dest: DIST+'substance.cjs.js',
+function buildLib (target, production) {
+  let targets = []
+  const useStrict = production
+  if (target === 'browser' || target === 'all') {
+    targets.push({
+      file: DIST + 'substance.js',
+      format: 'umd',
+      name: 'substance',
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
+    })
+  }
+  if (target === 'browser:legacy') {
+    targets.push({
+      file: DIST + 'substance.es5.js',
+      format: 'umd',
+      name: 'substance',
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance',
+      strict: useStrict
+    })
+  }
+  if (target === 'node' || target === 'all') {
+    targets.push({
+      file: DIST + 'substance.cjs.js',
       format: 'cjs',
-      sourceMapRoot: __dirname, sourceMapPrefix: 'substance'
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
+    })
+  }
+  if (target === 'es' || target === 'all') {
+    targets.push({
+      file: DIST + 'substance.es.js',
+      format: 'es',
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
+    })
+  }
+  if (target === 'coverage') {
+    targets.push({
+      file: 'tmp/substance.cov.js',
+      format: 'umd',
+      name: 'substance',
+      sourcemapRoot: __dirname,
+      sourcemapPrefix: 'substance'
+    })
+  }
+  const config = {
+    output: targets,
+    alias: {
+      'domutils': path.join(__dirname, 'vendor/domutils.js'),
+      'entities': path.join(__dirname, 'vendor/entities.js'),
+      'lodash-es': path.join(__dirname, 'vendor/lodash-es.js')
     },
-    buble: transpileToES5,
-    eslint: { exclude: [ 'dom/vendor.js' ] },
-    cleanup: Boolean(production)
-  })
-}
-
-// bundles the test suite to be run in a browser
-function _testBrowser(transpileToES5, coverage) {
-
-  b.js('./test/index.js', {
-    target: {
-      dest: TEST+'tests.js',
-      format: 'umd', moduleName: 'tests'
-    },
-    buble: transpileToES5,
-    external: { 'substance-test': 'substanceTest' },
-    istanbul: coverage ? {
+    commonjs: {
       include: [
-        'collab/*.js',
+        'node_modules/boolbase/**/*',
+        'node_modules/css-what/**/*',
+        'node_modules/domelementtype/**/*',
+        'node_modules/nth-check/**/*'
+      ]
+    }
+  }
+  if (target === 'coverage') {
+    config.istanbul = {
+      include: [
         'dom/*.js',
         'model/**/*.js',
-        // 'packages/**/*.js',
         'ui/*.js',
-        // 'util/*.js'
-      ],
-      exclude: [ 'dom/vendor.js' ]
-    } : false
+        'util/*.js'
+      ]
+    }
+  }
+  if (target === 'browser:legacy') {
+    config.buble = true
+  }
+  if (production) {
+    config.cleanup = true
+  }
+  b.js('./index.es.js', config)
+}
+
+function buildTestsBrowser () {
+  b.js('test/index.js', {
+    output: [{
+      file: 'tmp/tests.js',
+      format: 'umd',
+      name: 'tests',
+      globals: {
+        'substance': 'window.substance',
+        'substance-test': 'window.substanceTest'
+      }
+    }],
+    external: [ 'substance', 'substance-test' ]
   })
 }
 
-function _testNode() {
-  b.js('./test/index.js', {
-    target: {
-      dest: TEST+'tests.cjs.js',
+function buildTestsNode () {
+  b.js('test/index.js', {
+    output: [{
+      file: 'tmp/tests.cjs.js',
       format: 'cjs'
-    },
+    }],
     external: ['substance-test'],
-    buble: true,
-    commonjs: true
-  })
-}
-
-function _runTestBrowser() {
-  b.custom('Running browser tests...', {
-    execute: function() {
-      let karma = require('karma')
-      const browser = process.env.TRAVIS ? 'ChromeTravis': 'Chrome'
-      return new Promise(function(resolve) {
-        let fails = 0
-        const server = new karma.Server({
-          configFile: __dirname + '/karma.conf.js',
-          browsers: [browser],
-          singleRun: true,
-          failOnEmptyTestSuite: false
-        }, function() {
-          // why is exitCode always == 1?
-          if (fails > 0) {
-            process.exit(1)
-          } else {
-            resolve()
-          }
-        })
-        server.on('run_complete', function(browsers, results) {
-          if (results && results.failed > 0) {
-            fails += results.failed
-          }
-        })
-        server.start()
-      })
+    alias: {
+      'substance': path.join(__dirname, 'dist/substance.es.js')
     }
   })
 }
 
-// generates API documentation
-function _docs(mode, dest) {
-  var docgen = require('substance-docgen')
-  docgen.bundle(b, {
-    src: [
-      './*.md',
-      './doc/*.md',
-      './collab/*.js',
-      './dom/*.js',
-      './model/**/*.js',
-      './packages/**/*.js',
-      './ui/*.js',
-      './util/*.js',
+function buildVendor () {
+  install(b, 'uglify-es', UGLIFY_VERSION)
+  const CLEANUP = true
+  const MINIFY = false
+  vendorRollup('entities', {
+    commonjs: true,
+    json: true,
+    cleanup: CLEANUP,
+    minify: MINIFY
+  })
+  vendorRollup('css-select', {
+    external: [
+      'domelementtype', 'entities', 'boolbase',
+      'css-what', 'domutils', 'nth-check'
     ],
-    dest: dest,
-    config: './.docgenrc.js',
-    mode: mode // one of: 'source', 'json', 'site' (default: 'json')
+    commonjs: {
+      include: ['vendor/css-select/**']
+    },
+    json: true,
+    cleanup: CLEANUP,
+    minify: MINIFY
+  })
+  vendorRollup('lodash-es', {
+    commonjs: true,
+    cleanup: CLEANUP,
+    minify: MINIFY
+  })
+  // ATTENTION!
+  // TODO: this is somehow exiting the build.
+  // as we have not been running this for ages, this slipped out of our control
+  vendorRollup('htmlparser2', {
+    commonjs: {
+      include: ['node_modules/**', 'vendor/htmlparser2/**']
+    },
+    ignore: ['events'],
+    // attention: the order is important:
+    // first the more specific ones
+    alias: {
+      'entities/lib/decode_codepoint.js':
+        path.join(__dirname, 'vendor/_entities_decodeCodepoint.js'),
+      'entities/maps/entities.json':
+        path.join(__dirname, 'vendor/_entities_entitiesJSON.js'),
+      'entities/maps/legacy.json':
+        path.join(__dirname, 'vendor/_entities_legacyJSON.js'),
+      'entities/maps/xml.json':
+        path.join(__dirname, 'vendor/_entities_xmlJSON.js'),
+      'entities':
+        path.join(__dirname, 'vendor/entities.js'),
+      'inherits':
+        path.join(__dirname, 'vendor/_inherits.js')
+    },
+    json: true,
+    cleanup: CLEANUP,
+    minify: MINIFY
   })
 }
 
-function _vendor_xdom() {
-  b.js('./dom/_vendor.js', {
-    target: {
-      dest: './dom/vendor.js',
-      format: 'es'
-    },
-    ignore: [ 'events', 'entities' ],
-    alias: {
-      'domutils': path.join(__dirname, 'dom/domUtils/index.js'),
-      'dom-serializer': path.join(__dirname, 'dom/_domSerializer.js'),
-      'inherits': path.join(__dirname, 'dom/_stub.js')
-    },
-    commonjs: true,
-    json: true
-  })
+function vendorRollup (name, opts = {}) {
+  let src = `./vendor/_${name}.js`
+  let dest = `./vendor/${name}.js`
+  let min = `./vendor/${name}.min.js`
+  const minify = opts.minify
+  delete opts.minify
+  b.js(src, Object.assign({
+    output: [{
+      file: dest,
+      format: 'es',
+      sourcemap: false
+    }],
+    cleanup: true
+  }, opts))
+  if (minify !== false) {
+    b.minify(dest, {
+      debug: false
+    })
+    b.copy(min, dest)
+    b.rm(min)
+  }
 }
 
 // Tasks
 // -----
 
-b.task('clean', function() {
+b.task('clean', () => {
   b.rm('./dist')
   b.rm('./.test')
-  b.rm('./.docs')
-  b.rm('./.npm')
 })
 
-b.task('css', function() {
-  _css(DIST)
+b.task('css', css)
+
+b.task('lib:browser', ['css'], () => {
+  buildLib('browser', 'production')
 })
 
-b.task('browser:pure', ['css'], function() {
-  _browser(DIST, false)
+b.task('lib:browser:dev', ['css'], () => {
+  buildLib('browser')
 })
 
-b.task('browser', ['css'], function() {
-  _browser(DIST, true)
+b.task('lib:dev', ['css'], () => {
+  buildLib('all')
 })
 
-b.task('server', function() {
-  // for the time being we transpile the cjs bundle
-  // so it works in node 4 too
-  _server(DIST, true)
+b.task('lib', ['css'], () => {
+  buildLib('all', 'production')
+  // FIXME: we can't use buble any more because I like to use 'for-of'
+  // We could switch to babel if we really need es5 support
+  // Note: legacy build can not be mixed with the other builds
+  // buildLib('browser:legacy', 'production')
 })
 
-b.task('server:pure', function() {
-  // for the time being we transpile the cjs bundle
-  // so it works in node 4 too
-  _server(DIST, false)
+b.task('test:browser', ['lib:browser:dev'], buildTestsBrowser)
+  .describe('builds the test-suite for the browser (open test/index.html)')
+
+b.task('test:node', () => {
+  buildLib('es')
+  buildTestsNode()
+  fork(b, require.resolve('substance-test/bin/test'),
+    './tmp/tests.cjs.js', { verbose: true })
 })
+  .describe('runs the test suite in nodejs')
 
-b.task('test:clean', function() {
-  b.rm(TEST)
-})
-
-b.task('test:assets', function() {
-  // TODO: it would be nice to treat such glob patterns
-  // differently, so that we do not need to specify glob root
-  b.copy('./node_modules/substance-test/dist/*', TEST, { root: './node_modules/substance-test/dist' })
-})
-
-b.task('test:browser', ['test:clean', 'test:assets'], function() {
-  // buble necessary here, as travis has old browser versions
-  _testBrowser(true)
-})
-
-b.task('test:browser:pure', ['test:clean', 'test:assets'], function() {
-  // Pure ES6, and no buble here, for better dev experience
-  _testBrowser(false)
-})
-
-b.task('test:browser:coverage', ['test:clean', 'test:assets'], function() {
-  _testBrowser(true, true)
-})
-
-b.task('test:node', ['test:clean', 'test:assets'], _testNode)
-
-b.task('build:test', ['test:clean', 'test:assets', 'test:browser', 'test:node'])
-
-b.task('run:test:browser', ['test:browser'], _runTestBrowser)
-
-b.task('run:test:coverage', ['test:browser:coverage'], _runTestBrowser)
-
-b.task('run:test', ['build:test'], _runTestBrowser)
-
-
-b.task('npm:clean', function() {
-  b.rm(NPM)
-})
-
-b.task('npm:copy:sources', function() {
-  b.copy('index.es.js', NPM)
-  b.copy('collab/*.js', NPM)
-  b.copy('dom/**/*.js', NPM)
-  b.copy('model/**/*.js', NPM)
-  b.copy('packages/**/*.js', NPM)
-  b.copy('ui/*.js', NPM)
-  b.copy('util/*.js', NPM)
-  b.copy('test/**/*.js', NPM)
-  b.copy('*.css', NPM)
-  b.copy('packages/**/*.css', NPM)
-  STUFF.forEach(function(f) {
-    b.copy(f, NPM)
+b.task('cover', () => {
+  buildLib('coverage')
+  buildTestsBrowser()
+  karma(b, {
+    browsers: process.env.TRAVIS ? ['ChromeTravis', 'Firefox'] : ['Chrome']
   })
 })
 
-b.task('docs', function() {
-  // creates a data.js file with prebuilt documentation
-  // this gives the best trade-off between build and load time
-  _docs('json', '.docs/')
+b.task('minify', () => {
+  install(b, 'uglify-es', UGLIFY_VERSION)
+  b.minify(DIST + 'substance.cjs.js', DIST + 'substance.cjs.min.js')
+  b.minify(DIST + 'substance.es.js', DIST + 'substance.es.min.js')
+  b.minify(DIST + 'substance.js', DIST + 'substance.min.js')
 })
 
-b.task('npm:docs', function() {
-  _docs('site', NPM+'docs/')
-})
+b.task('vendor', buildVendor)
+  .describe('pre-bundles vendor libraries')
 
-b.task('npm:browser', function() {
-  _css(NPMDIST)
-  _browser(NPMDIST, true, true)
-})
+b.task('default', ['clean', 'lib'])
 
-b.task('npm:server', function() {
-  _server(NPMDIST, true, true)
-})
-
-b.task('build', ['clean', 'browser', 'server'])
-
-b.task('build:pure', ['clean', 'browser:pure', 'server:pure'])
-
-b.task('npm', ['npm:clean', 'npm:copy:sources', 'npm:docs', 'npm:browser', 'npm:server'])
-
-b.task('vendor:xdom', _vendor_xdom)
-
-b.task('default', ['build'])
+b.task('publish', ['clean', 'lib', 'minify'])
 
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'browser:pure', 'test:assets', 'test:browser:pure' , 'docs'])
+b.task('dev', ['clean', 'lib:browser:dev', 'test:browser'])
 
-// HTTP server
-// -----------
+b.task('test', ['test:node', 'cover'])
+  .describe('runs the test suite')
 
-// starts a server when CLI argument '-s' is set
-b.setServerPort(5550)
-b.serve({ static: true, route: '/', folder: 'dist' })
-b.serve({ static: true, route: '/test/', folder: '.test' })
-b.serve({ static: true, route: '/docs/', folder: '.docs' })
+b.setServerPort(4001)
+b.serve({ static: true, route: '/', folder: '.' })

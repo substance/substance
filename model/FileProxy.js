@@ -4,31 +4,31 @@
   multiple internal states.
 */
 class FileProxy {
-  constructor(fileNode, context) {
+  constructor (fileNode, context) {
     this.fileNode = fileNode
     this.context = context
     fileNode.setProxy(this)
   }
 
-  get id() {
+  get id () {
     return this.fileNode.id
   }
 
   /*
     Fires a property update on the file node
   */
-  triggerUpdate() {
+  triggerUpdate () {
     let fileId = this.fileNode.id
     this.context.editorSession.transaction((tx) => {
       tx.set([fileId, '__changed__'], '')
     }, { history: false })
   }
 
-  getUrl() {
+  getUrl () {
     return ''
   }
 
-  sync() {
+  sync () {
     return Promise.reject(new Error('sync method not implemented'))
   }
 }

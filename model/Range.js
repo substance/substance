@@ -1,8 +1,8 @@
 import isPlainObject from '../util/isPlainObject'
+import isArrayEqual from '../util/isArrayEqual'
 
-class Range {
-
-  constructor(start, end, reverse, containerId, surfaceId) {
+export default class Range {
+  constructor (start, end, reverse, containerPath, surfaceId) {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
@@ -10,52 +10,50 @@ class Range {
       this.start = data.start
       this.end = data.end
       this.reverse = Boolean(data.reverse)
-      this.containerId = data.containerId
+      this.containerPath = data.containerPath
       this.surfaceId = data.surfaceId
     } else {
       this.start = start
       this.end = end
       this.reverse = Boolean(reverse)
-      this.containerId = containerId
+      this.containerPath = containerPath
       this.surfaceId = surfaceId
     }
   }
 
-  isCollapsed() {
+  isCollapsed () {
     return this.start.equals(this.end)
   }
 
-  equals(other) {
+  equals (other) {
     if (this === other) return true
     else {
       return (
-        this.containerId === other.containerId &&
+        isArrayEqual(this.containerPath, other.containerPath) &&
         this.start.equals(other.start) &&
         this.end.equals(other.end)
       )
     }
   }
 
-  isReverse() {
+  isReverse () {
     return this.reverse
   }
 
-  toString() {
+  toString () {
     let str = [this.start.toString(), '->', this.end.toString()]
     if (this.isReverse()) {
       str.push('[reverse]')
     }
-    if (this.containerId) {
-      str.push('[container='+this.containerId+']')
+    if (this.containerPath) {
+      str.push('[container=' + this.containerPath + ']')
     }
     if (this.surfaceId) {
-      str.push('[surface='+this.surfaceId+']')
+      str.push('[surface=' + this.surfaceId + ']')
     }
     return str.join('')
   }
 
+  // TODO: do we need this anymore?
+  get _isRange () { return true }
 }
-
-Range.prototype._isRange = true
-
-export default Range

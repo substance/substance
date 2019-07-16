@@ -4,6 +4,7 @@ import isString from '../util/isString'
 import isArray from '../util/isArray'
 import forEach from '../util/forEach'
 import ArrayIterator from '../util/ArrayIterator'
+import DOMEventListener from './DOMEventListener'
 
 const NOT_IMPLEMENTED = 'This method is not implemented.'
 
@@ -12,75 +13,161 @@ const NOT_IMPLEMENTED = 'This method is not implemented.'
 
   @abstract
 */
-class DOMElement {
-
+export default class DOMElement {
   /*
     The element's id.
-    @property {String} ui/DOMElement#id
+    @property {String} DOMElement#id
   */
 
   /*
     The element's tag name in lower case.
-    @property {String} ui/DOMElement#tagName
+    @property {String} DOMElement#tagName
   */
 
   /*
-    @property {String} ui/DOMElement#textContent
+    @property {String} DOMElement#textContent
    */
 
   /*
     The inner HTML string.
 
-    @property {String} ui/DOMElement#innerHTML
+    @property {String} DOMElement#innerHTML
    */
 
   /*
     The outer HTML string.
 
-    @property {String} ui/DOMElement#outerHTML
+    @property {String} DOMElement#outerHTML
    */
 
   /*
     An array of child nodes, including nodes such as TextNodes.
 
-    @property {Array<ui/DOMElement>} ui/DOMElement#childNodes
+    @property {Array<DOMElement>} DOMElement#childNodes
    */
 
   /*
     An array of child elements.
 
-    @property {Array<ui/DOMElement>} ui/DOMElement#children children
+    @property {Array<DOMElement>} DOMElement#children children
    */
 
   /*
     The computed height.
 
-    @property {Array<ui/DOMElement>} ui/DOMElement#height
+    @property {Array<DOMElement>} DOMElement#height
    */
 
   /*
     The computed width.
 
-    @property {Array<ui/DOMElement>} ui/DOMElement#width
+    @property {Array<DOMElement>} DOMElement#width
    */
 
   /**
-    @abstract
     @returns the native element
   */
-  getNativeElement() {
+  getNativeElement () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
   /**
+    Checks if the element is a TextNode.
+
+    @returns {Boolean} true if the element is of type `Node.TEXT_NODE`
+   */
+  isTextNode () {
+    /* istanbul ignore next */
+    return false
+  }
+
+  /**
+    Checks if the element is actually an element as opposed to a node.
+
+    @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
+   */
+  isElementNode () {
+    /* istanbul ignore next */
+    return false
+  }
+
+  /**
+    Checks if the element is a CommentNode.
+
+    @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
+   */
+  isCommentNode () {
+    /* istanbul ignore next */
+    return false
+  }
+
+  /**
+    Checks if the element is a DocumentNode.
+
+    @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
+   */
+  isDocumentNode () {
+    /* istanbul ignore next */
+    return false
+  }
+
+  /**
+    Get the tagName of this element.
+
+    @private
+    @note Considered as private API, in favor of the property {DOMElement.prototype.tagName}
+    @returns {String} the tag name in lower-case.
+   */
+  getTagName () {
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  /**
+    Set the tagName of this element.
+
+    @private
+    @note Considered as private API, in favor of the property {DOMElement.prototype.tagName}
+    @param {String} tagName the new tag name
+    @returns {this}
+  */
+  setTagName (tagName) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  /**
+    Get the id of this element.
+
+    @private
+    @note Considered as private API, in favor of the property {DOMElement.prototype.id}
+    @returns {String} the id.
+   */
+  getId () {
+    return this.getAttribute('id')
+  }
+
+  /**
+    Set the id of this element.
+
+    @private
+    @note Considered as private API, in favor of the property {DOMElement.prototype.id}
+    @param {String} id the new id
+    @returns {this}
+  */
+  setId (id) {
+    this.setAttribute('id', id)
+    return this
+  }
+
+  /**
     Checks if a CSS class is set.
 
-    @abstract
     @param {String} className
     @returns {Boolean} true if the CSS class is set
   */
-  hasClass(className) { // eslint-disable-line no-unused-vars
+  hasClass (className) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -88,11 +175,10 @@ class DOMElement {
   /**
     Adds a CSS class.
 
-    @abstract
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  addClass(classString) { // eslint-disable-line no-unused-vars
+  addClass (classString) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -100,29 +186,31 @@ class DOMElement {
   /**
     Removes a CSS class.
 
-    @abstract
     @param {String} classString A space-separated string with CSS classes
     @returns {this}
   */
-  removeClass(classString) { // eslint-disable-line no-unused-vars
+  removeClass (classString) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
+  }
+
+  hasAttribute (name) {
+    return Boolean(this.getAttribute(name))
   }
 
   /**
     jQuery style getter and setter for attributes.
 
-    @abstract
     @param {String} name
     @param {String} [value] if present the attribute will be set
     @returns {String|this} if used as getter the attribute value, otherwise this element for chaining
    */
-  attr() {
+  attr () {
     if (arguments.length === 1) {
       if (isString(arguments[0])) {
         return this.getAttribute(arguments[0])
       } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
+        forEach(arguments[0], function (value, name) {
           this.setAttribute(name, value)
         }.bind(this))
       }
@@ -135,16 +223,15 @@ class DOMElement {
   /**
     Removes an attribute.
 
-    @abstract
     @param {String} name
     @returns {this}
   */
-  removeAttr(name) {
+  removeAttr (name) {
     var names = name.split(/\s+/)
     if (names.length === 1) {
       this.removeAttribute(name)
     } else {
-      names.forEach(function(name) {
+      names.forEach(function (name) {
         this.removeAttribute(name)
       }.bind(this))
     }
@@ -154,10 +241,9 @@ class DOMElement {
   /**
     Get the attribute with a given name.
 
-    @abstract
     @returns {String} the attribute's value.
   */
-  getAttribute(name) { // eslint-disable-line no-unused-vars
+  getAttribute (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -165,21 +251,20 @@ class DOMElement {
   /**
     Set the attribute with a given name.
 
-    @abstract
     @param {String} the attribute's value.
     @returns {this}
   */
-  setAttribute(name, value) { // eslint-disable-line no-unused-vars
+  setAttribute (name, value) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeAttribute(name) { // eslint-disable-line no-unused-vars
+  removeAttribute (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getAttributes() {
+  getAttributes () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -187,17 +272,16 @@ class DOMElement {
   /**
     jQuery style getter and setter for HTML element properties.
 
-    @abstract
     @param {String} name
     @param {String} [value] if present the property will be set
     @returns {String|this} if used as getter the property value, otherwise this element for chaining
    */
-  htmlProp() {
+  htmlProp () {
     if (arguments.length === 1) {
       if (isString(arguments[0])) {
         return this.getProperty(arguments[0])
       } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
+        forEach(arguments[0], function (value, name) {
           this.setProperty(name, value)
         }.bind(this))
       }
@@ -207,81 +291,23 @@ class DOMElement {
     return this
   }
 
-  getProperty(name) { // eslint-disable-line no-unused-vars
+  getProperty (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setProperty(name, value) { // eslint-disable-line no-unused-vars
+  setProperty (name, value) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
-  }
-
-  removeProperty(name) { // eslint-disable-line no-unused-vars
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
-  }
-
-  /**
-    Get the tagName of this element.
-
-    @abstract
-    @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.tagName}
-    @returns {String} the tag name in lower-case.
-   */
-  getTagName() {
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
-  }
-
-  /**
-    Set the tagName of this element.
-
-    @abstract
-    @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.tagName}
-    @param {String} tagName the new tag name
-    @returns {this}
-  */
-  setTagName(tagName) { // eslint-disable-line no-unused-vars
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
-  }
-
-  /**
-    Get the id of this element.
-
-    @abstract
-    @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.id}
-    @returns {String} the id.
-   */
-  getId() {
-    return this.getAttribute('id')
-  }
-
-  /**
-    Set the id of this element.
-
-    @abstract
-    @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.id}
-    @param {String} id the new id
-    @returns {this}
-  */
-  setId(id) {
-    this.setAttribute('id', id)
   }
 
   /**
     jQuery style getter and setter for the *value* of an element.
 
-    @abstract
     @param {String} [value] The value to set.
     @returns {String|this} the value if used as a getter, `this` otherwise
   */
-  val(value) {
+  val (value) {
     if (arguments.length === 0) {
       return this.getValue()
     } else {
@@ -290,11 +316,11 @@ class DOMElement {
     }
   }
 
-  getValue() {
+  getValue () {
     return this.getProperty('value')
   }
 
-  setValue(value) {
+  setValue (value) {
     this.setProperty('value', value)
     return this
   }
@@ -306,12 +332,14 @@ class DOMElement {
     @param {String} [value] the style value
     @returns {String|this} the style value or this if used as a setter
   */
-  css() {
+  css () {
+    /* istanbul ignore else */
     if (arguments.length === 1) {
+      /* istanbul ignore else */
       if (isString(arguments[0])) {
         return this.getStyle(arguments[0])
       } else if (isObject(arguments[0])) {
-        forEach(arguments[0], function(value, name) {
+        forEach(arguments[0], function (value, name) {
           this.setStyle(name, value)
         }.bind(this))
       } else {
@@ -325,12 +353,12 @@ class DOMElement {
     return this
   }
 
-  getStyle(name) { // eslint-disable-line no-unused-vars
+  getStyle (name) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  setStyle(name, value) { // eslint-disable-line no-unused-vars
+  setStyle (name, value) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -338,11 +366,10 @@ class DOMElement {
   /**
     Gets or sets the text content of an element.
 
-    @abstract
     @param {String} [text] The text content to set.
     @returns {String|this} The text content if used as a getter, `this` otherwise
   */
-  text(text) {
+  text (text) {
     if (arguments.length === 0) {
       return this.getTextContent()
     } else {
@@ -354,12 +381,11 @@ class DOMElement {
   /**
     Get the textContent of this element.
 
-    @abstract
     @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.innerHTML}
+    @note Considered as private API, in favor of the property {DOMElement.prototype.innerHTML}
     @returns {String}
   */
-  getTextContent() {
+  getTextContent () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -367,13 +393,12 @@ class DOMElement {
   /**
     Set the textContent of this element.
 
-    @abstract
     @private
-    @note Considered as private API, in favor of the property {ui/DOMElement.prototype.innerHTML}
+    @note Considered as private API, in favor of the property {DOMElement.prototype.innerHTML}
     @param {String} text the new text content
     @returns {this}
   */
-  setTextContent(text) { // eslint-disable-line no-unused-vars
+  setTextContent (text) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -381,11 +406,10 @@ class DOMElement {
   /**
     jQuery style getter and setter for the innerHTML of an element.
 
-    @abstract
     @param {String} [html] The html to set.
     @returns {String|this} the inner html if used as a getter, `this` otherwise
    */
-  html(html) {
+  html (html) {
     if (arguments.length === 0) {
       return this.getInnerHTML()
     } else {
@@ -397,41 +421,54 @@ class DOMElement {
   /**
     Get the innerHTML of this element.
 
-    @abstract
     @private
-    @note Considered as private API, in favor of the property {@link ui/DOMElement.prototype.innerHTML}
+    @note Considered as private API, in favor of the property {@link DOMElement.prototype.innerHTML}
     @returns {String}
   */
-  getInnerHTML() {
+  getInnerHTML () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
+  }
+
+  /**
+    Just an alias for getInnerHTML() which feels
+    better when working with XML DOMs
+  */
+  getInnerXML () {
+    return this.getInnerHTML()
   }
 
   /**
     Set the innerHTML of this element.
 
-    @abstract
     @private
-    @note Considered as private API, in favor of the property {@link ui/DOMElement.prototype.innerHTML}
+    @note Considered as private API, in favor of the property {@link DOMElement.prototype.innerHTML}
     @param {String} text the new text content
     @returns {this}
   */
-  setInnerHTML(html) { // eslint-disable-line no-unused-vars
+  setInnerHTML (html) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
+  }
+
+  setInnerXML (xml) {
+    return this.setInnerHTML(xml)
   }
 
   /**
     Get the outerHTML of this element.
 
-    @abstract
     @private
-    @note Considered as private API, in favor of the property {@link ui/DOMElement.prototype.outerHTML}
+    @note Considered as private API, in favor of the property {@link DOMElement.prototype.outerHTML}
     @returns {String}
   */
-  getOuterHTML() {
+  getOuterHTML () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
+  }
+
+  getOuterXML () {
+    return this.getOuterHTML()
   }
 
   /**
@@ -441,11 +478,11 @@ class DOMElement {
     @param {Function} handler The handler function.
     @param {Object} [context] context where the function should be bound to
     @param {Object} [options]
-    @param {Object} [options.selector] for event delegation
     @param {Object} [options.capture] to register the event in the event's capture phase (bubbling top-down)
     @returns {this}
   */
-  on(eventName, handler, context, options) {
+  on (eventName, handler, context, options) {
+    /* istanbul ignore next */
     if (!isString(eventName)) {
       throw new Error('Illegal argument: "event" must be a String.')
     }
@@ -453,9 +490,7 @@ class DOMElement {
     if (context) {
       options.context = context
     }
-    if (options.selector && !isString(options.selector)) {
-      throw new Error('Illegal argument: selector must be a string.')
-    }
+    /* istanbul ignore next */
     if (!handler || !isFunction(handler)) {
       throw new Error('Illegal argument: invalid handler function for event ' + eventName)
     }
@@ -469,13 +504,13 @@ class DOMElement {
     @param {String} event The event name.
     @returns {this}
   */
-  off(eventName, handler) {
+  off (eventName, handler) {
     // el.off(this): disconnect all listeners bound to the given context
     if (arguments.length === 1 && !isString(eventName)) {
       let context = arguments[0]
-      this.getEventListeners().filter(function(l) {
+      this.getEventListeners().filter(function (l) {
         return l.context === context
-      }).forEach(function(l) {
+      }).forEach(function (l) {
         this.removeEventListener(l)
       }.bind(this))
     } else {
@@ -484,43 +519,78 @@ class DOMElement {
     return this
   }
 
-  addEventListener(eventName, handler, options) { // eslint-disable-line no-unused-vars
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
+  addEventListener (eventName, handler, options = {}) {
+    let listener
+    if (arguments.length === 1 && arguments[0]) {
+      listener = arguments[0]
+    } else {
+      listener = this._createEventListener(eventName, handler, options)
+    }
+    if (!this.eventListeners) {
+      this.eventListeners = []
+    }
+    listener._el = this
+    this.eventListeners.push(listener)
+    this._addEventListenerNative(listener)
+    return this
   }
 
-  removeEventListener(eventName, handler) { // eslint-disable-line no-unused-vars
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
+  _createEventListener (eventName, handler, options) {
+    return new DOMEventListener(eventName, handler, options)
   }
 
-  getEventListeners() {
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
+  _addEventListenerNative(listener) {} // eslint-disable-line
+
+  removeEventListener (eventName, handler) {
+    if (!this.eventListeners) return
+    // console.log('removing event listener', eventName, handler);
+    let listener = null
+    let idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
+    listener = this.eventListeners[idx]
+    if (idx > -1) {
+      this.eventListeners.splice(idx, 1)
+      // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
+      listener._el = null
+      this._removeEventListenerNative(listener)
+    }
+    return this
+  }
+
+  _removeEventListenerNative(listener) {} // eslint-disable-line
+
+  removeAllEventListeners () {
+    if (!this.eventListeners) return
+    for (let i = 0; i < this.eventListeners.length; i++) {
+      let listener = this.eventListeners[i]
+      // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
+      listener._el = null
+      this._removeEventListenerNative(listener)
+    }
+    delete this.eventListeners
+  }
+
+  getEventListeners () {
+    return this.eventListeners || []
   }
 
   /**
     Gets the type of this element in lower-case.
 
     @private
-    @note Considered as private API, in favor of the property {@link ui/DOMElement.prototype.nodeType}
+    @note Considered as private API, in favor of the property {@link DOMElement.prototype.nodeType}
     @returns {String}
   */
-  getNodeType() {
-    if (this.isTextNode()) {
-      return "text"
-    } else if (this.isCommentNode()) {
-      return "comment"
-    } else if (this.isElementNode()) {
-      return "element"
-    } else if (this.isDocumentNode()) {
-      return "document"
-    } else {
-      throw new Error("Unsupported node type")
-    }
+  getNodeType () {
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildCount() {
+  getContentType () {
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  getChildCount () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -531,11 +601,10 @@ class DOMElement {
     This method provides a new array with wrapped native elements.
     Better use getChildAt().
 
-    @abstract
-    @private Considered as private API, in favor of the property {ui/DOMElement.prototype.childNodes}
-    @returns {Array<ui/DOMElement>}
+    @private Considered as private API, in favor of the property {DOMElement.prototype.childNodes}
+    @returns {Array<DOMElement>}
    */
-  getChildNodes() {
+  getChildNodes () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -546,96 +615,54 @@ class DOMElement {
     This method provides a new array with wrapped native elements.
     Better use getChildAt().
 
-    @abstract
-    @private Considered as private API, in favor of the property {ui/DOMElement.prototype.children}
-    @returns {Array<ui/DOMElement>}
+    @private Considered as private API, in favor of the property {DOMElement.prototype.children}
+    @returns {Array<DOMElement>}
    */
-  getChildren() {
+  getChildren () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildAt(pos) { // eslint-disable-line no-unused-vars
+  getChildAt (pos) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildIndex(child) { // eslint-disable-line no-unused-vars
+  getChildIndex (child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getChildNodeIterator() {
+  getChildNodeIterator () {
     return new ArrayIterator(this.getChildNodes())
   }
 
-  getLastChild() {
+  getLastChild () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getFirstChild() {
+  getFirstChild () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getNextSibling() {
+  getNextSibling () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getPreviousSibling() {
+  getPreviousSibling () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
-  }
-
-  /**
-    Checks if the element is a TextNode.
-
-    @abstract
-    @returns {Boolean} true if the element is of type `Node.TEXT_NODE`
-   */
-  isTextNode() {
-    return false
-  }
-
-  /**
-    Checks if the element is actually an element as opposed to a node.
-
-    @abstract
-    @returns {Boolean} true if the element is of type `Node.ELEMENT_NODE`
-   */
-  isElementNode() {
-    return false
-  }
-
-  /**
-    Checks if the element is a CommentNode.
-
-    @abstract
-    @returns {Boolean} true if the element is of type `Node.COMMENT_NODE`
-   */
-  isCommentNode() {
-    return false
-  }
-
-  /**
-    Checks if the element is a DocumentNode.
-
-    @abstract
-    @returns {Boolean} true if the element is of type `Node.DOCUMENT_NODE`
-   */
-  isDocumentNode() {
-    return false
   }
 
   /**
     Creates a clone of the current element.
 
-    @abstract
-    @returns {ui/DOMElement} A clone of this element.
+    @returns {DOMElement} A clone of this element.
   */
-  clone() {
+  clone(deep) { // eslint-disable-line
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -644,14 +671,29 @@ class DOMElement {
     Creates a DOMElement.
 
     @param {String} str a tag name or an HTML element as string.
-    @returns {ui/DOMElement}
+    @returns {DOMElement}
   */
-  createElement(str) { // eslint-disable-line no-unused-vars
+  createElement (str) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  createTextNode(text) { // eslint-disable-line no-unused-vars
+  createTextNode (text) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  createComment (data) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  createProcessingInstruction (name, data) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
+  }
+
+  createCDATASection (data) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -660,14 +702,13 @@ class DOMElement {
     Checks if a given CSS selector matches for this element.
 
     **Attention**
-    This method is currently not implemented for {ui/VirtualElement}.
+    This method is currently not implemented for {VirtualElement}.
     This means you should use it only in importer implementations.
 
-    @abstract
     @param {String} cssSelector
     @returns {Boolean}
    */
-  is(cssSelector) { // eslint-disable-line no-unused-vars
+  is (cssSelector) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -675,23 +716,9 @@ class DOMElement {
   /**
     Get the parent element of this element.
 
-    @abstract
-    @returns {ui/DOMElement} the parent element
+    @returns {DOMElement} the parent element
    */
-  getParent() {
-    /* istanbul ignore next */
-    throw new Error(NOT_IMPLEMENTED)
-  }
-
-  /**
-    Get the root ancestor element of this element.
-
-    In the browser this is the `window.document`.
-
-    @abstract
-    @returns {ui/DOMElement} the root element
-   */
-  getRoot() {
+  getParent () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -699,12 +726,28 @@ class DOMElement {
   /**
     Get the ownerDocument of this element.
 
-    @abstract
-    @returns {ui/DOMElement} the document element
+    @returns {DOMElement} the document element
   */
-  getOwnerDocument() {
+  getOwnerDocument () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
+  }
+
+  /*
+    @returns {DOMElement} the doctype element `<!DOCTYPE <name> PUBLIC "<publicId>" "<systemId>" >`; null if not present
+  */
+  getDoctype () {
+    /* istanbul ignore next */
+    throw new Error('NOT_IMPLEMENTED')
+  }
+
+  /**
+   * @param {*} qualifiedNameStr the name of the root element
+   * @param {*} publicId the id of the schema
+   * @param {*} systemId typically a DTD URI
+   */
+  setDoctype(qualifiedNameStr, publicId, systemId) { // eslint-disable-line
+    throw new Error('NOT_IMPLEMENTED')
   }
 
   /**
@@ -712,14 +755,13 @@ class DOMElement {
     Note this differs from jQuery.find() that it returns only one element.
 
     **Attention**
-    This method is currently not implemented for {ui/VirtualElement}.
+    This method is currently not implemented for {VirtualElement}.
     This means you can use it only in importer implementations, but not in render or exporter implementations.
 
-    @abstract
     @param {String} cssSelector
-    @returns {ui/DOMElement} found element
+    @returns {DOMElement} found element
    */
-  find(cssSelector) { // eslint-disable-line no-unused-vars
+  find (cssSelector) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -728,14 +770,13 @@ class DOMElement {
     Find all descendant elements matching the given CSS selector.
 
     **Attention**
-    This method is currently not implemented for {ui/VirtualElement}.
+    This method is currently not implemented for {VirtualElement}.
     This means you can use it only in importer implementations, but not in render or exporter implementations.
 
-    @abstract
     @param {String} cssSelector
-    @returns {Array<ui/DOMElement>} found elements
+    @returns {Array<DOMElement>} found elements
    */
-  findAll(cssSelector) { // eslint-disable-line no-unused-vars
+  findAll (cssSelector) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -746,14 +787,13 @@ class DOMElement {
     @param {DOMElement|String} child An element or text to append
     @returns {this}
    */
-  append(child) {
-    var children
+  append (children) {
     if (arguments.length === 1) {
-      if (isArray(child)) {
-        children = child
+      if (isArray(children)) {
+        children = children.slice()
       } else {
-        this.appendChild(child)
-        return this
+        let child = children
+        return this.appendChild(child)
       }
     } else {
       children = arguments
@@ -764,7 +804,7 @@ class DOMElement {
     return this
   }
 
-  appendChild(child) { // eslint-disable-line no-unused-vars
+  appendChild (child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -772,17 +812,16 @@ class DOMElement {
   /**
     Insert a child element at a given position.
 
-    @abstract
     @param {Number} pos insert position
-    @param {ui/DOMElement|String} child The child element or text to insert.
+    @param {DOMElement|String} child The child element or text to insert.
     @returns {this}
   */
-  insertAt(pos, child) { // eslint-disable-line no-unused-vars
+  insertAt (pos, child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  insertBefore(newChild, before) { // eslint-disable-line no-unused-vars
+  insertBefore (newChild, before) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -790,21 +829,20 @@ class DOMElement {
   /**
     Remove the child at a given position.
 
-    @abstract
     @param {Number} pos
     @returns {this}
   */
-  removeAt(pos) { // eslint-disable-line no-unused-vars
+  removeAt (pos) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  removeChild(child) { // eslint-disable-line no-unused-vars
+  removeChild (child) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  replaceChild(oldChild, newChild) { // eslint-disable-line no-unused-vars
+  replaceChild (oldChild, newChild) { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
@@ -813,7 +851,7 @@ class DOMElement {
     Removes this element from its parent.
     @returns {this}
   */
-  remove() {
+  remove () {
     var parent = this.getParent()
     if (parent) {
       parent.removeChild(this)
@@ -823,21 +861,20 @@ class DOMElement {
   /**
     Removes all child nodes from this element.
 
-    @abstract
     @returns {this}
   */
-  empty() {
+  empty () {
     /* istanbul ignore next */
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  serialize() {
+  serialize () {
     return this.getOuterHTML()
   }
 
-  isInDocument() {
+  isInDocument () {
     let el = this
-    while(el) {
+    while (el) {
       if (el.isDocumentNode()) {
         return true
       }
@@ -851,52 +888,68 @@ class DOMElement {
     **Attention: this makes only sense for elements which are rendered in the browser**
 
   */
-  focus() {
+  focus () {
+    /* istanbul ignore next */
+    return this
+  }
+
+  /**
+    Selects this element.
+  */
+  select () {
+    /* istanbul ignore next */
     return this
   }
 
   /**
     Blur this element.
   */
-  blur() {
+  blur () {
+    /* istanbul ignore next */
     return this
   }
 
   /**
     Trigger a click event on this element.
   */
-  click() {
+  click () {
+    /* istanbul ignore next */
     return this
   }
 
   /* API to retrieve layout information */
 
-  getWidth() {
+  getWidth () {
+    /* istanbul ignore next */
     return 0
   }
 
-  getHeight() {
+  getHeight () {
+    /* istanbul ignore next */
     return 0
   }
 
   /**
     Outer height as provided by $.outerHeight(withMargin)
   */
-  getOuterHeight(withMargin) { // eslint-disable-line no-unused-vars
+  getOuterHeight (withMargin) { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     return 0
   }
 
   /**
     Offset values as provided by $.offset()
   */
-  getOffset() {
+  getOffset () {
+    /* istanbul ignore next */
     return { top: 0, left: 0 }
   }
 
   /**
     Position values as provided by $.position()
   */
-  getPosition() {
+  getPosition () {
+    /* istanbul ignore next */
     return { top: 0, left: 0 }
   }
 
@@ -908,96 +961,120 @@ class DOMElement {
     var $$ = el.getElementFactory()
     $$('div').append('bla')
   */
-  getElementFactory() {
+  getElementFactory () {
     return this.createElement.bind(this)
+  }
+
+  /**
+    Triggers a custom event.
+
+    @param {String} name
+    @param {Object} data
+  */
+  emit(name, data) { // eslint-disable-line
+    /* istanbul ignore next */
+    throw new Error(NOT_IMPLEMENTED)
   }
 
   // properties
 
-  get id() {
+  get id () {
     return this.getId()
   }
 
-  set id(id) {
+  set id (id) {
     this.setId(id)
   }
 
-  get tagName() {
+  get tagName () {
     return this.getTagName()
   }
 
-  set tagName(tagName) {
+  set tagName (tagName) {
     this.setTagName(tagName)
   }
 
-  get nodeName() {
+  get nodeName () {
     return this.getTagName()
   }
 
-  get nodeType() {
+  get nodeType () {
     return this.getNodeType()
   }
 
-  get className() {
+  get className () {
     return this.getAttribute('class')
   }
 
-  set className(className) {
+  set className (className) {
     this.setAttribute('class', className)
   }
 
-  get textContent() {
+  get textContent () {
     return this.getTextContent()
   }
 
-  set textContent(text) {
+  set textContent (text) {
     this.setTextContent(text)
   }
 
-  get innerHTML() {
+  get innerHTML () {
     return this.getInnerHTML()
   }
 
-  set innerHTML(html) {
+  set innerHTML (html) {
     this.setInnerHTML(html)
   }
 
-  get outerHTML() {
+  get outerHTML () {
     return this.getOuterHTML()
   }
 
-  get firstChild() {
+  get firstChild () {
     return this.getFirstChild()
   }
 
-  get lastChild() {
+  get lastChild () {
     return this.getLastChild()
   }
 
-  get nextSibling() {
+  get nextSibling () {
     return this.getNextSibling()
   }
 
-  get previousSibling() {
+  get previousSibling () {
     return this.getPreviousSibling()
   }
 
-  get parentNode() {
+  get parentNode () {
     return this.getParent()
   }
 
-  get height() {
+  get height () {
     return this.getHeight()
   }
 
-  get width() {
+  get width () {
     return this.getWidth()
   }
+
+  get value () {
+    return this.getValue()
+  }
+
+  set value (value) {
+    return this.setValue(value)
+  }
+
+  get _isDOMElement () { return true }
+
+  // TODO: probably we should just export these symbols
+  static get pxStyles () { return PX_STYLES }
+
+  static get EMPTY_HTML () { return EMPTY_HTML }
 }
 
-DOMElement.prototype._isDOMElement = true
-
-DOMElement.pxStyles = {
+const PX_STYLES = {
   top: true,
   bottom: true,
   left: true,
@@ -1006,6 +1083,4 @@ DOMElement.pxStyles = {
   width: true
 }
 
-DOMElement.EMPTY_HTML = '<html><head></head><body></body></html>'
-
-export default DOMElement
+const EMPTY_HTML = '<html><head></head><body></body></html>'

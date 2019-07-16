@@ -1,1 +1,1 @@
-export { default } from 'lodash-es/capitalize'
+export { capitalize as default } from 'lodash-es'

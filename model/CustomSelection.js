@@ -2,71 +2,85 @@ import cloneDeep from '../util/cloneDeep'
 import isEqual from '../util/isEqual'
 import Selection from './Selection'
 
-class CustomSelection extends Selection {
-
-  constructor(customType, data, surfaceId) {
+export default class CustomSelection extends Selection {
+  constructor (customType, data, nodeId, surfaceId) {
     super()
 
     if (arguments.length === 1) {
       let _data = arguments[0]
       customType = _data.customType
       data = _data.data
+      nodeId = _data.nodeId
       surfaceId = _data.surfaceId
     }
 
-    this.customType = customType;
-    this.data = data || {};
-    this.surfaceId = surfaceId;
+    if (!customType) { throw new Error("'customType' is required") }
+    if (!nodeId) { throw new Error("'nodeId' is required") }
+
+    this.customType = customType
+    this.data = data || {}
+    this.nodeId = nodeId
+    this.surfaceId = surfaceId
   }
 
-  isCustomSelection() {
-    return true;
+  isCustomSelection () {
+    return true
   }
 
-  getType() {
-    return 'custom';
+  getType () {
+    return 'custom'
   }
 
-  getCustomType() {
-    return this.customType;
+  getCustomType () {
+    return this.customType
   }
 
-  toJSON() {
-    return {
+  /**
+   * Provide the id of the node which is responsible for this selection.
+   * E.g. a table selection is interpreted by a specific table.
+   */
+  getNodeId () {
+    return this.nodeId
+  }
+
+  toJSON () {
+    let res = {
       type: 'custom',
       customType: this.customType,
-      data: cloneDeep(this.data),
-      surfaceId: this.surfaceId
-    };
+      nodeId: this.nodeId,
+      data: cloneDeep(this.data)
+    }
+    if (this.surfaceId) {
+      res.surfaceId = this.surfaceId
+    }
+    return res
   }
 
-  toString() {
+  toString () {
     /* istanbul ignore next */
     return [
       'CustomSelection(',
-      this.customType,', ',
+      this.customType, ', ',
       JSON.stringify(this.data),
-      ")"
-    ].join('');
+      ')'
+    ].join('')
   }
 
-  equals(other) {
+  equals (other) {
     return (
       Selection.prototype.equals.call(this, other) &&
       other.isCustomSelection() &&
       isEqual(this.data, other.data)
-    );
+    )
   }
 
-  _clone() {
+  _clone () {
     return new CustomSelection(this)
   }
+
+  get _isCustomSelection () { return true }
+
+  static fromJSON (data) {
+    return new CustomSelection(data)
+  }
 }
-
-CustomSelection.prototype._isCustomSelection = true
-
-CustomSelection.fromJSON = function(json) {
-  return new CustomSelection(json);
-}
-
-export default CustomSelection

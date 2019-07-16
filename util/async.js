@@ -3,13 +3,13 @@
 
   NOTE: You can not access results of the executed functions
 */
-export function series(tasks, cb, i) {
+export function series (tasks, cb, i) {
   i = i || 0
-  tasks[i](function(err) {
+  tasks[i](function (err, ...args) {
     // Always stop execution on error
     if (err) return cb(err)
-    if (i === tasks.length-1) {
-      cb(...arguments) // we are done
+    if (i === tasks.length - 1) {
+      cb(err, ...args) // we are done
     } else {
       series(tasks, cb, i + 1)
     }

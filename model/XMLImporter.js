@@ -1,31 +1,25 @@
-import DOMImporter from './DOMImporter'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
+import DOMImporter from './DOMImporter'
 
-/*
-  Base class for custom XML importers. If you want to use HTML as your
-  exchange format see {@link model/HTMLImporter}.
-
-  TODO: provide example and activate reenable API docs
-*/
-
-class XMLImporter extends DOMImporter {
-
-  constructor(config, context) {
-    super(Object.assign({ idAttribute: 'id' }, config), context)
-    // only used internally for creating wrapper elements
-    this._el = DefaultDOMElement.parseXML('<dummy></dummy>')
+export default class XMLImporter extends DOMImporter {
+  constructor (params, doc, options = {}) {
+    super(_defaultParams(params, options), doc, options)
   }
 
-  importDocument(xml) {
-    // initialization
+  importDocument (xml) {
     this.reset()
-    // converting to JSON first
-    var articleElement = DefaultDOMElement.parseXML(xml)
-    this.convertDocument(articleElement)
-    var doc = this.generateDocument()
-    return doc
+    let dom = DefaultDOMElement.parseXML(xml)
+    this.convertDocument(dom)
+    return this.state.doc
   }
 
+  convertDocument (xmlDocument) {
+    let rootNode = xmlDocument.children[0]
+    if (!rootNode) throw new Error('XML Root node could not be found.')
+    this.convertElement(rootNode)
+  }
 }
 
-export default XMLImporter
+function _defaultParams (params, options) {
+  return Object.assign({ idAttribute: 'id' }, params, options)
+}

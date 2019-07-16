@@ -1,5 +1,5 @@
-import isArrayEqual from '../util/isArrayEqual'
-import Annotation from './Annotation'
+import DocumentNode from './DocumentNode'
+import AnnotationMixin from './AnnotationMixin'
 
 /**
   A property annotation can be used to overlay text and give it a special meaning.
@@ -35,63 +35,20 @@ import Annotation from './Annotation'
   })
   ```
 */
-class PropertyAnnotation extends Annotation {
+export default class PropertyAnnotation extends AnnotationMixin(DocumentNode) {
+  // TODO: find out where we use these and try to get rid if we don't need them
+  get _isAnnotation () { return true }
 
-  get path() {
-    return this.start.path
-  }
+  get _isPropertyAnnotation () { return true }
 
-  getPath() {
-    return this.start.path
-  }
+  static isPropertyAnnotation () { return true }
 
-  getSelection() {
-    return this.getDocument().createSelection({
-      type: 'property',
-      path: this.path,
-      startOffset: this.start.offset,
-      endOffset: this.end.offset
-    })
-  }
-
-  // used by annotationHelpers
-  _updateRange(tx, sel) {
-    if (!sel.isPropertySelection()) {
-      throw new Error('Invalid argument: PropertyAnnotation._updateRange() requires a PropertySelection.')
-    }
-    if (!isArrayEqual(this.start.path, sel.start.path)) {
-      tx.set([this.id, 'path'], sel.start.path)
-    }
-    // TODO: these should be Coordinate ops
-    if (this.start.offset !== sel.start.offset) {
-      tx.set([this.id, 'start', 'offset'], sel.start.offset)
-    }
-    if (this.end.offset !== sel.end.offset) {
-      tx.set([this.id, 'end', 'offset'], sel.end.offset)
-    }
-  }
-
-  get startPath() {
-    return this.path
-  }
-
-  get endPath() {
-    return this.path
-  }
+  static get autoExpandRight () { return true }
 }
-
-PropertyAnnotation.isPropertyAnnotation = true
-PropertyAnnotation.autoExpandRight = true
-PropertyAnnotation.prototype._isAnnotation = true
-PropertyAnnotation.prototype._isPropertyAnnotation = true
 
 PropertyAnnotation.schema = {
-  type: "annotation",
-  start: "coordinate",
-  end: "coordinate",
+  type: '@annotation',
   // this is only used when an annotation is used 'stand-alone'
   // i.e. not attached to a property
-  _content: { type: "string", optional: true}
+  _content: { type: 'string', optional: true }
 }
-
-export default PropertyAnnotation

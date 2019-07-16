@@ -1,11 +1,13 @@
 import isArrayEqual from '../util/isArrayEqual'
 import isString from '../util/isString'
-import last from '../util/last'
 import uuid from '../util/uuid'
-import annotationHelpers from '../model/annotationHelpers'
-import documentHelpers from '../model/documentHelpers'
-import { setCursor, isEntirelySelected, selectNode } from '../model/selectionHelpers'
-import paste from '../model/paste'
+import annotationHelpers from './annotationHelpers'
+import {
+  deleteTextRange, deepDeleteNode, deleteListRange, mergeListItems,
+  insertAt, removeAt, getContainerRoot, getContainerPosition, getNextNode, getPreviousNode
+} from './documentHelpers'
+import { setCursor, isEntirelySelected, selectNode } from './selectionHelpers'
+import paste from './paste'
 
 /**
   Core editing implementation, that controls meta behavior
@@ -17,120 +19,110 @@ import paste from '../model/paste'
   Note: this is pretty much the same what we did with transforms before.
         We decided to move this here, to switch to a stateful editor implementation (aka turtle-graphics-style)
  */
-class Editing {
-
+export default class Editing {
   // create an annotation for the current selection using the given data
-  annotate(tx, annotation) {
+  annotate (tx, annotation) {
     let sel = tx.selection
-    if (!sel || sel.isNull() || sel.isCollapsed()) {
-      throw new Error('Non-collapsed selection required for tx.annotate()')
-    }
-    if (sel.isCollapsed()) return
     let schema = tx.getSchema()
     let AnnotationClass = schema.getNodeClass(annotation.type)
     if (!AnnotationClass) throw new Error('Unknown annotation type', annotation)
-    if (sel.isNodeSelection()) {
-      throw new Error('Node selections are not supported by tx.annotate()')
-    } else if (sel.isCustomSelection()) {
-      throw new Error('Custom selections are not supported by tx.annotate()')
-    }
     let start = sel.start
     let end = sel.end
-    let containerId = sel.containerId
-    let nodeData = { start, end, containerId }
+    let containerPath = sel.containerPath
+    let nodeData = { start, end, containerPath }
+    // TODO: we need to generalize how node category can be derived statically
+    /* istanbul ignore else  */
     if (sel.isPropertySelection()) {
-      if (!AnnotationClass.prototype._isAnnotation) {
+      if (!AnnotationClass.isAnnotation()) {
         throw new Error('Annotation can not be created for a selection.')
       }
     } else if (sel.isContainerSelection()) {
-      if (AnnotationClass.prototype._isPropertyAnnotation) {
+      if (AnnotationClass.isPropertyAnnotation()) {
         console.warn('NOT SUPPORTED YET: creating property annotations for a non collapsed container selection.')
       }
-    } else {
-      throw new Error('Unsupported selection.')
     }
     Object.assign(nodeData, annotation)
     return tx.create(nodeData)
   }
 
-  break(tx) {
+  break (tx) {
     let sel = tx.selection
     if (sel.isNodeSelection()) {
-      let containerId = sel.containerId
-      let container = tx.get(containerId)
+      let containerPath = sel.containerPath
       let nodeId = sel.getNodeId()
-      let nodePos = container.getPosition(nodeId, 'strict')
-      let textNode = tx.createDefaultTextNode()
+      let nodePos = getContainerPosition(tx, containerPath, nodeId)
+      let textNode = this.createTextNode(tx, containerPath)
       if (sel.isBefore()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: textNode.id })
+        insertAt(tx, containerPath, nodePos, textNode.id)
         // leave selection as is
       } else {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: textNode.id })
-        setCursor(tx, textNode, containerId, 'before')
+        insertAt(tx, containerPath, nodePos + 1, textNode.id)
+        setCursor(tx, textNode, containerPath, 'before')
       }
-    }
-    else if (sel.isCustomSelection()) {
+    } else if (sel.isCustomSelection()) {
       // TODO: what to do with custom selections?
-    }
-    else if (sel.isCollapsed() || sel.isPropertySelection()) {
-      let containerId = sel.containerId
+    } else if (sel.isCollapsed() || sel.isPropertySelection()) {
+      let containerPath = sel.containerPath
       if (!sel.isCollapsed()) {
         // delete the selection
-        this.deletePropertySelection(tx, sel)
+        this._deletePropertySelection(tx, sel)
         tx.setSelection(sel.collapse('left'))
       }
       // then break the node
-      if (containerId) {
-        let container = tx.get(containerId)
+      if (containerPath) {
         let nodeId = sel.start.path[0]
         let node = tx.get(nodeId)
-        this._breakNode(tx, node, sel.start, container)
-      } else {
-        this.insertText(tx, '\n')
+        this._breakNode(tx, node, sel.start, containerPath)
       }
-    }
-    else if (sel.isContainerSelection()) {
-      if (sel.start.hasSamePath(sel.end)) {
-        this.deleteContainerSelection(tx, sel)
-        this.break(tx)
-      } else {
-        let start = sel.start
-        let containerId = sel.containerId
-        let container = tx.get(containerId)
-        let startNodeId = start.path[0]
-        let nodePos = container.getPosition(startNodeId, 'strict')
-        this.deleteContainerSelection(tx, sel)
-        if (nodePos < container.length-1) {
-          setCursor(tx, container.getNodeAt(nodePos+1), containerId, 'before')
-        } else {
-          tx.setSelection(sel.collapse('left'))
-          this.break(tx)
-        }
-      }
+    } else if (sel.isContainerSelection()) {
+      let start = sel.start
+      let containerPath = sel.containerPath
+      let startNodeId = start.path[0]
+      let nodePos = getContainerPosition(tx, containerPath, startNodeId)
+      this._deleteContainerSelection(tx, sel, { noMerge: true })
+      setCursor(tx, getNextNode(tx, containerPath, nodePos), containerPath, 'before')
     }
   }
 
-  delete(tx, direction) {
+  createTextNode (tx, containerPath, text) { // eslint-disable-line no-unused-vars
+    let prop = tx.getProperty(containerPath)
+    if (!prop.defaultTextType) {
+      throw new Error('Container properties must have a "defaultTextType" defined in the schema')
+    }
+    return tx.create({
+      type: prop.defaultTextType,
+      content: text
+    })
+  }
+
+  createListNode (tx, containerPath, params = {}) { // eslint-disable-line no-unused-vars
+    // Note: override this create a different node type
+    // according to the context
+    return tx.create({ type: 'list', items: [], listType: params.listType || 'bullet' })
+  }
+
+  delete (tx, direction) {
     let sel = tx.selection
     // special implementation for node selections:
     // either delete the node (replacing with an empty text node)
     // or just move the cursor
+    /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
-      this.deleteNodeSelection(tx, sel, direction)
-    }
+      this._deleteNodeSelection(tx, sel, direction)
     // TODO: what to do with custom selections?
-    else if (sel.isCustomSelection()) {}
+    } else if (sel.isCustomSelection()) {
     // if the selection is collapsed this is the classical one-character deletion
     // either backwards (backspace) or forward (delete)
-    else if (sel.isCollapsed()) {
+    } else if (sel.isCollapsed()) {
       // Deletion of a single character leads to a merge
       // if cursor is at a text boundary (TextNode, ListItem)
       // and direction is towards that boundary
       let path = sel.start.path
-      let node = tx.get(path[0])
+      let nodeId = path[0]
+      let containerPath = sel.containerPath
       let text = tx.get(path)
       let offset = sel.start.offset
-      let needsMerge = (sel.containerId && (
+      let needsMerge = (containerPath && (
         (offset === 0 && direction === 'left') ||
         (offset === text.length && direction === 'right')
       ))
@@ -138,68 +130,73 @@ class Editing {
         // ATTENTION: deviation from standard implementation
         // for list items: Word and GDoc toggle a list item
         // when doing a BACKSPACE at the first position
-        let root = node.getRoot()
+        // IMO this is not 'consistent' because it is not the
+        // inverse of 'break'
+        // We will 'toggle' only if the cursor is on the first position
+        // of the first item
+        let root = getContainerRoot(tx, containerPath, nodeId)
         if (root.isList() && offset === 0 && direction === 'left') {
           return this.toggleList(tx)
         } else {
-          let container = tx.get(sel.containerId)
-          this._merge(tx, root, sel.start, direction, container)
+          this._merge(tx, root, sel.start, direction, containerPath)
         }
       } else {
-        let startOffset = (direction === 'left') ? offset-1 : offset
-        let endOffset = startOffset+1
+        // if we are not in a merge scenario, we stop at the boundaries
+        if ((offset === 0 && direction === 'left') ||
+          (offset === text.length && direction === 'right')) {
+          return
+        }
+        let startOffset = (direction === 'left') ? offset - 1 : offset
+        let endOffset = startOffset + 1
         let start = { path: path, offset: startOffset }
         let end = { path: path, offset: endOffset }
-        documentHelpers.deleteTextRange(tx, start, end)
+        deleteTextRange(tx, start, end)
         tx.setSelection({
           type: 'property',
           path: path,
           startOffset: startOffset,
-          containerId: sel.containerId
+          containerPath: sel.containerPath
         })
       }
-    }
     // deleting a range of characters within a text property
-    else if (sel.isPropertySelection()) {
-      documentHelpers.deleteTextRange(tx, sel.start, sel.end)
+    } else if (sel.isPropertySelection()) {
+      deleteTextRange(tx, sel.start, sel.end)
       tx.setSelection(sel.collapse('left'))
-    }
     // deleting a range within a container (across multiple nodes)
-    else if (sel.isContainerSelection()) {
-      this.deleteContainerSelection(tx, sel)
-    }
-    else {
+    } else if (sel.isContainerSelection()) {
+      this._deleteContainerSelection(tx, sel)
+    } else {
       console.warn('Unsupported case: tx.delete(%)', direction, sel)
     }
   }
 
-  deleteNodeSelection(tx, sel, direction) {
+  _deleteNodeSelection (tx, sel, direction) {
     let nodeId = sel.getNodeId()
-    let container = tx.get(sel.containerId)
-    let nodePos = container.getPosition(nodeId, 'strict')
+    let containerPath = sel.containerPath
+    let nodePos = getContainerPosition(tx, containerPath, nodeId)
     if (sel.isFull() ||
-        sel.isBefore() && direction === 'right' ||
-        sel.isAfter() && direction === 'left' ) {
+        (sel.isBefore() && direction === 'right') ||
+        (sel.isAfter() && direction === 'left')) {
       // replace the node with default text node
-      let contentPath = container.getContentPath()
-      tx.update(contentPath, { type: 'delete', pos: nodePos })
-      tx.delete(nodeId)
-      let newNode = tx.createDefaultTextNode()
-      tx.update(contentPath, { type: 'insert', pos: nodePos, value: newNode.id })
+      removeAt(tx, containerPath, nodePos)
+      deepDeleteNode(tx, tx.get(nodeId))
+      let newNode = this.createTextNode(tx, sel.containerPath)
+      insertAt(tx, containerPath, nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
-        path: newNode.getTextPath(),
+        path: newNode.getPath(),
         startOffset: 0,
-        containerId: container.id,
+        containerPath
       })
     } else {
+      /* istanbul ignore else  */
       if (sel.isBefore() && direction === 'left') {
         if (nodePos > 0) {
-          let previous = container.getNodeAt(nodePos-1)
+          let previous = getPreviousNode(tx, containerPath, nodePos)
           if (previous.isText()) {
             tx.setSelection({
               type: 'property',
-              path: previous.getTextPath(),
+              path: previous.getPath(),
               startOffset: previous.getLength()
             })
             this.delete(tx, direction)
@@ -207,19 +204,20 @@ class Editing {
             tx.setSelection({
               type: 'node',
               nodeId: previous.id,
-              containerId: container.id
+              containerPath
             })
           }
         } else {
           // nothing to do
         }
       } else if (sel.isAfter() && direction === 'right') {
-        if (nodePos < container.getLength()-1) {
-          let next = container.getNodeAt(nodePos+1)
+        let nodeIds = tx.get(containerPath)
+        if (nodePos < nodeIds.length - 1) {
+          let next = getNextNode(tx, containerPath, nodePos)
           if (next.isText()) {
             tx.setSelection({
               type: 'property',
-              path: next.getTextPath(),
+              path: next.getPath(),
               startOffset: 0
             })
             this.delete(tx, direction)
@@ -227,7 +225,7 @@ class Editing {
             tx.setSelection({
               type: 'node',
               nodeId: next.id,
-              containerId: container.id
+              containerPath
             })
           }
         } else {
@@ -239,7 +237,7 @@ class Editing {
     }
   }
 
-  deletePropertySelection(tx, sel) {
+  _deletePropertySelection (tx, sel) {
     let path = sel.start.path
     let start = sel.start.offset
     let end = sel.end.offset
@@ -248,24 +246,24 @@ class Editing {
   }
 
   // deletes all inner nodes and 'truncates' start and end node
-  deleteContainerSelection(tx, sel) {
-    let containerId = sel.containerId
-    let container = tx.get(containerId)
+  _deleteContainerSelection (tx, sel, options = {}) {
+    let containerPath = sel.containerPath
     let start = sel.start
     let end = sel.end
     let startId = start.getNodeId()
     let endId = end.getNodeId()
-    let startPos = container.getPosition(startId, 'strict')
-    let endPos = container.getPosition(endId, 'strict')
-
+    let startPos = getContainerPosition(tx, containerPath, startId)
+    let endPos = getContainerPosition(tx, containerPath, endId)
     // special case: selection within one node
     if (startPos === endPos) {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = tx.get(startId).getRoot()
+      // OUCH: how we will we do it
+      let node = getContainerRoot(tx, containerPath, startId)
+      /* istanbul ignore else  */
       if (node.isText()) {
-        documentHelpers.deleteTextRange(tx, start, end)
+        deleteTextRange(tx, start, end)
       } else if (node.isList()) {
-        documentHelpers.deleteListRange(tx, node, start, end)
+        deleteListRange(tx, node, start, end)
       } else {
         throw new Error('Not supported yet.')
       }
@@ -273,15 +271,10 @@ class Editing {
       return
     }
 
-    // normalize the range if it is 'reverse'
-    if (startPos > endPos) {
-      [start, end] = [end, start];
-      [startPos, endPos] = [endPos, startPos];
-      [startId, endId] = [endId, startId]
-    }
-
     // TODO: document the algorithm
 
+    let firstNodeId = start.getNodeId()
+    let lastNodeId = end.getNodeId()
     let firstNode = tx.get(start.getNodeId())
     let lastNode = tx.get(end.getNodeId())
     let firstEntirelySelected = isEntirelySelected(tx, firstNode, start, null)
@@ -289,38 +282,39 @@ class Editing {
 
     // delete or truncate last node
     if (lastEntirelySelected) {
-      tx.update([container.id, 'nodes'], { type: 'delete', pos: endPos })
-      documentHelpers.deleteNode(tx, lastNode)
+      removeAt(tx, containerPath, endPos)
+      deepDeleteNode(tx, lastNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = lastNode.getRoot()
+      let node = getContainerRoot(tx, containerPath, lastNodeId)
+      /* istanbul ignore else  */
       if (node.isText()) {
-        documentHelpers.deleteTextRange(tx, null, end)
+        deleteTextRange(tx, null, end)
       } else if (node.isList()) {
-        documentHelpers.deleteListRange(tx, node, null, end)
+        deleteListRange(tx, node, null, end)
       } else {
         // IsolatedNodes can not be selected partially
       }
     }
 
     // delete inner nodes
-    for (let i = endPos-1; i > startPos; i--) {
-      let nodeId = container.nodes[i]
-      tx.update([container.id, 'nodes'], { type: 'delete', pos: i })
-      documentHelpers.deleteNode(tx, tx.get(nodeId))
+    for (let i = endPos - 1; i > startPos; i--) {
+      let nodeId = removeAt(tx, containerPath, i)
+      deepDeleteNode(tx, tx.get(nodeId))
     }
 
     // delete or truncate the first node
     if (firstEntirelySelected) {
-      tx.update([container.id, 'nodes'], { type: 'delete', pos: startPos })
-      documentHelpers.deleteNode(tx, firstNode)
+      removeAt(tx, containerPath, startPos)
+      deepDeleteNode(tx, firstNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = firstNode.getRoot()
+      let node = getContainerRoot(tx, containerPath, firstNodeId)
+      /* istanbul ignore else  */
       if (node.isText()) {
-        documentHelpers.deleteTextRange(tx, start, null)
+        deleteTextRange(tx, start, null)
       } else if (node.isList()) {
-        documentHelpers.deleteListRange(tx, node, start, null)
+        deleteListRange(tx, node, start, null)
       } else {
         // IsolatedNodes can not be selected partially
       }
@@ -329,89 +323,30 @@ class Editing {
     // insert a new TextNode if all has been deleted
     if (firstEntirelySelected && lastEntirelySelected) {
       // insert a new paragraph
-      let textNode = tx.createDefaultTextNode()
-      tx.update([container.id, 'nodes'], { type: 'insert', pos: startPos, value: textNode.id })
+      let textNode = this.createTextNode(tx, containerPath)
+      insertAt(tx, containerPath, startPos, textNode.id)
       tx.setSelection({
         type: 'property',
-        path: textNode.getTextPath(),
+        path: textNode.getPath(),
         startOffset: 0,
-        containerId: containerId
+        containerPath: containerPath
       })
     } else if (!firstEntirelySelected && !lastEntirelySelected) {
-      this._merge(tx, firstNode, sel.start, 'right', container)
+      if (!options.noMerge) {
+        let firstNodeRoot = getContainerRoot(tx, containerPath, firstNode.id)
+        this._merge(tx, firstNodeRoot, sel.start, 'right', containerPath)
+      }
       tx.setSelection(sel.collapse('left'))
     } else if (firstEntirelySelected) {
-      setCursor(tx, lastNode, container.id, 'before')
+      setCursor(tx, lastNode, containerPath, 'before')
     } else {
-      setCursor(tx, firstNode, container.id, 'after')
+      setCursor(tx, firstNode, containerPath, 'after')
     }
   }
 
-  /*
-    Delete a node and all annotations attached to it,
-    and removes the node from the container.
-
-    @param {String} nodeId
-    @param {String} [containerId]
-   */
-  deleteNode(tx, nodeId, containerId) {
-    if (!nodeId) throw new Error('Parameter `nodeId` is mandatory.')
-    let node = tx.get(nodeId)
-    if (!node) throw new Error('Node does not exist')
-    if (containerId) {
-      let container = tx.get(containerId)
-      container.hide(nodeId)
-      // TODO: fix support for container annotations
-      // transfer anchors of ContainerAnnotations to previous or next node:
-      //  - start anchors go to the next node
-      //  - end anchors go to the previous node
-      // let anchors = tx.getIndex('container-annotation-anchors').get(nodeId)
-      // for (let i = 0; i < anchors.length; i++) {
-      //   let anchor = anchors[i]
-      //   container = tx.get(anchor.containerId)
-      //   // Note: during the course of this loop we might have deleted the node already
-      //   // so, don't do it again
-      //   if (!tx.get(anchor.id)) continue
-      //   let pos = container.getPosition(anchor.path[0])
-      //   let path, offset
-      //   if (anchor.isStart) {
-      //     if (pos < container.getLength()-1) {
-      //       let nextNode = container.getChildAt(pos+1)
-      //       if (nextNode.isText()) {
-      //         path = [nextNode.id, 'content']
-      //       } else {
-      //         path = [nextNode.id]
-      //       }
-      //       tx.set([anchor.id, 'start', 'path'], path)
-      //       tx.set([anchor.id, 'start', 'offset'], 0)
-      //     } else {
-      //       tx.delete(anchor.id)
-      //     }
-      //   } else {
-      //     if (pos > 0) {
-      //       let previousNode = container.getChildAt(pos-1)
-      //       if (previousNode.isText()) {
-      //         path = [previousNode.id, 'content']
-      //         offset = tx.get(path).length
-      //       } else {
-      //         path = [previousNode.id]
-      //         offset = 1
-      //       }
-      //       tx.set([anchor.id, 'endPath'], path)
-      //       tx.set([anchor.id, 'endOffset'], offset)
-      //     } else {
-      //       tx.delete(anchor.id)
-      //     }
-      //   }
-      // }
-    }
-    documentHelpers.deleteNode(tx, node)
-  }
-
-  insertInlineNode(tx, nodeData) {
+  insertInlineNode (tx, nodeData) {
     let sel = tx.selection
-    if (!sel.isPropertySelection()) throw new Error('insertInlineNode requires a PropertySelection')
-    let text = "\uFEFF"
+    let text = '\uFEFF'
     this.insertText(tx, text)
     sel = tx.selection
     let endOffset = tx.selection.end.offset
@@ -429,9 +364,9 @@ class Editing {
     return tx.create(nodeData)
   }
 
-  insertBlockNode(tx, nodeData) {
+  insertBlockNode (tx, nodeData) {
     let sel = tx.selection
-    if (!sel || sel.isNull()) throw new Error('Selection is null.')
+    let containerPath = sel.containerPath
     // don't create the node if it already exists
     let blockNode
     if (!nodeData._isNode || !tx.get(nodeData.id)) {
@@ -439,118 +374,119 @@ class Editing {
     } else {
       blockNode = tx.get(nodeData.id)
     }
+    /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
-      let containerId = sel.containerId
-      let container = tx.get(containerId)
       let nodeId = sel.getNodeId()
-      let nodePos = container.getPosition(nodeId, 'strict')
+      let nodePos = getContainerPosition(tx, containerPath, nodeId)
       // insert before
       if (sel.isBefore()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
-      }
+        insertAt(tx, containerPath, nodePos, blockNode.id)
       // insert after
-      else if (sel.isAfter()) {
-        tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
+      } else if (sel.isAfter()) {
+        insertAt(tx, containerPath, nodePos + 1, blockNode.id)
         tx.setSelection({
           type: 'node',
-          containerId: containerId,
+          containerPath,
           nodeId: blockNode.id,
           mode: 'after'
         })
       } else {
-        tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
-        tx.delete(sel.getNodeId())
-        tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
+        removeAt(tx, containerPath, nodePos)
+        deepDeleteNode(tx, tx.get(nodeId))
+        insertAt(tx, containerPath, nodePos, blockNode.id)
         tx.setSelection({
           type: 'node',
-          containerId: containerId,
+          containerPath,
           nodeId: blockNode.id,
           mode: 'after'
         })
       }
     } else if (sel.isPropertySelection()) {
-      if (!sel.containerId) throw new Error('insertBlockNode can only be used within a container.')
-      let container = tx.get(sel.containerId)
+      /* istanbul ignore next */
+      if (!containerPath) throw new Error('insertBlockNode can only be used within a container.')
       if (!sel.isCollapsed()) {
-        this.deletePropertySelection(tx)
+        this._deletePropertySelection(tx, sel)
         tx.setSelection(sel.collapse('left'))
       }
       let node = tx.get(sel.path[0])
+      /* istanbul ignore next */
       if (!node) throw new Error('Invalid selection.')
-      let nodePos = container.getPosition(node.id, 'strict')
+      let nodePos = getContainerPosition(tx, containerPath, node.id)
+      /* istanbul ignore else  */
       if (node.isText()) {
         let text = node.getText()
         // replace node
         if (text.length === 0) {
-          tx.update(container.getContentPath(), { type: 'delete', pos: nodePos })
-          tx.delete(node.id)
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: blockNode.id })
-          setCursor(tx, blockNode, container.id, 'after')
-        }
+          removeAt(tx, containerPath, nodePos)
+          deepDeleteNode(tx, node)
+          insertAt(tx, containerPath, nodePos, blockNode.id)
+          setCursor(tx, blockNode, containerPath, 'after')
         // insert before
-        else if (sel.start.offset === 0) {
-          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos, value: blockNode.id })
-        }
+        } else if (sel.start.offset === 0) {
+          insertAt(tx, containerPath, nodePos, blockNode.id)
         // insert after
-        else if (sel.start.offset === text.length) {
-          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
-          setCursor(tx, blockNode, container.id, 'before')
-        }
+        } else if (sel.start.offset === text.length) {
+          insertAt(tx, containerPath, nodePos + 1, blockNode.id)
+          setCursor(tx, blockNode, containerPath, 'before')
         // break
-        else {
+        } else {
           this.break(tx)
-          tx.update(container.getContentPath(), { type: 'insert', pos: nodePos+1, value: blockNode.id })
-          setCursor(tx, blockNode, container.id, 'after')
+          insertAt(tx, containerPath, nodePos + 1, blockNode.id)
+          setCursor(tx, blockNode, containerPath, 'after')
         }
       } else {
-        // TODO: this will be necessary for lists
-        console.error('Not yet implemented: insertBlockNode() on a custom node')
+        console.error('Not supported: insertBlockNode() on a custom node')
       }
     } else if (sel.isContainerSelection()) {
       if (sel.isCollapsed()) {
         let start = sel.start
+        /* istanbul ignore else  */
         if (start.isPropertyCoordinate()) {
           tx.setSelection({
             type: 'property',
             path: start.path,
             startOffset: start.offset,
-            containerId: sel.containerId,
+            containerPath
           })
         } else if (start.isNodeCoordinate()) {
           tx.setSelection({
             type: 'node',
-            containerId: sel.containerId,
+            containerPath,
             nodeId: start.path[0],
-            mode: start.offset === 0 ? 'before' : 'after',
+            mode: start.offset === 0 ? 'before' : 'after'
           })
         } else {
           throw new Error('Unsupported selection for insertBlockNode')
         }
         return this.insertBlockNode(tx, blockNode)
+      } else {
+        this.break(tx)
+        return this.insertBlockNode(tx, blockNode)
       }
     }
+    return blockNode
   }
 
-  insertText(tx, text) {
+  insertText (tx, text) {
     let sel = tx.selection
     // type over a selected node or insert a paragraph before
     // or after
+    /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
-      let containerId = sel.containerId
-      let container = tx.get(containerId)
+      let containerPath = sel.containerPath
       let nodeId = sel.getNodeId()
-      let nodePos = container.getPosition(nodeId, 'strict')
-      let textNode = tx.createDefaultTextNode(text)
+      let nodePos = getContainerPosition(tx, containerPath, nodeId)
+      let textNode = this.createTextNode(tx, containerPath, text)
       if (sel.isBefore()) {
-        container.show(textNode, nodePos)
+        insertAt(tx, containerPath, nodePos, textNode.id)
       } else if (sel.isAfter()) {
-        container.show(textNode, nodePos+1)
+        insertAt(tx, containerPath, nodePos + 1, textNode.id)
       } else {
-        container.hide(nodeId)
-        tx.delete(nodeId)
-        container.show(textNode, nodePos)
+        removeAt(tx, containerPath, nodePos)
+        deepDeleteNode(tx, tx.get(nodeId))
+        insertAt(tx, containerPath, nodePos, textNode.id)
       }
-      setCursor(tx, textNode, sel.containerId, 'after')
+      setCursor(tx, textNode, containerPath, 'after')
     } else if (sel.isCustomSelection()) {
       // TODO: what to do with custom selections?
     } else if (sel.isCollapsed() || sel.isPropertySelection()) {
@@ -558,13 +494,14 @@ class Editing {
       this._insertText(tx, sel, text)
       // console.log('### setting selection after typing: ', tx.selection.toString())
     } else if (sel.isContainerSelection()) {
-      this.deleteContainerSelection(tx, sel)
+      this._deleteContainerSelection(tx, sel)
       this.insertText(tx, text)
     }
   }
 
-  paste(tx, content) {
+  paste (tx, content) {
     if (!content) return
+    /* istanbul ignore else  */
     if (isString(content)) {
       paste(tx, {text: content})
     } else if (content._isDocument) {
@@ -575,178 +512,198 @@ class Editing {
   }
 
   /**
-    Switch text type for a given node. E.g. from `paragraph` to `heading`.
-
-    @param {Object} args object with `selection`, `containerId` and `data` with new node data
-    @return {Object} object with updated `selection`
-
-    @example
-
-    ```js
-    switchTextType(tx, {
-      selection: bodyEditor.getSelection(),
-      containerId: bodyEditor.getContainerId(),
-      data: {
-        type: 'heading',
-        level: 2
-      }
-    })
-    ```
-  */
-  switchTextType(tx, data) {
+   * Switch text type for a given node. E.g. from `paragraph` to `heading`.
+   *
+   * @param {Object} args object with `selection`, `containerPath` and `data` with new node data
+   * @return {Object} object with updated `selection`
+   *
+   * @example
+   *
+   * ```js
+   * switchTextType(tx, {
+   *   selection: bodyEditor.getSelection(),
+   *  containerPath: bodyEditor.getContainerPath(),
+   *   data: {
+   *     type: 'heading',
+   *     level: 2
+   *  }
+   * })
+   * ```
+   */
+  switchTextType (tx, data) {
     let sel = tx.selection
+    /* istanbul ignore next */
     if (!sel.isPropertySelection()) {
-      throw new Error("Selection must be a PropertySelection.")
+      throw new Error('Selection must be a PropertySelection.')
     }
-    let containerId = sel.containerId
-    if (!containerId) {
-      throw new Error("Selection must be within a container.")
+    let containerPath = sel.containerPath
+    /* istanbul ignore next */
+    if (!containerPath) {
+      throw new Error('Selection must be within a container.')
     }
     let path = sel.path
     let nodeId = path[0]
     let node = tx.get(nodeId)
-    if (!(node.isInstanceOf('text'))) {
-      throw new Error('Trying to use switchTextType on a non text node. Skipping.')
+    /* istanbul ignore next */
+    if (!(node.isText())) {
+      throw new Error('Trying to use switchTextType on a non text node.')
     }
+    const newId = uuid(data.type)
+    // Note: a TextNode is allowed to have its own way to store the plain-text
+    const oldPath = node.getPath()
+    console.assert(oldPath.length === 2, 'Currently we assume that TextNodes store the plain-text on the first level')
+    const textProp = oldPath[1]
+    let newPath = [newId, textProp]
     // create a new node and transfer annotations
-    let newNode = Object.assign({
-      id: uuid(data.type),
+    let newNodeData = Object.assign({
+      id: newId,
       type: data.type,
-      content: node.content,
       direction: node.direction
     }, data)
-    let newPath = [newNode.id, 'content']
-    newNode = tx.create(newNode)
+    newNodeData[textProp] = node.getText()
+
+    let newNode = tx.create(newNodeData)
     annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0)
 
-    // hide the old one, show the new node
-    let container = tx.get(sel.containerId)
-    let pos = container.getPosition(nodeId, 'strict')
-    container.hide(nodeId)
-    container.show(newNode.id, pos)
+    // hide and delete the old one, show the new node
+    let pos = getContainerPosition(tx, containerPath, nodeId)
+    removeAt(tx, containerPath, pos)
+    deepDeleteNode(tx, node)
+    insertAt(tx, containerPath, pos, newNode.id)
 
-    // remove the old one from the document
-    this.deleteNode(tx, node.id, containerId)
     tx.setSelection({
       type: 'property',
       path: newPath,
       startOffset: sel.start.offset,
       endOffset: sel.end.offset,
-      containerId: containerId
+      containerPath
     })
 
     return newNode
   }
 
-  toggleList(tx, params) {
+  toggleList (tx, params) {
     let sel = tx.selection
-    let container = tx.get(sel.containerId)
-    // not possible without container
-    if (!container) return
+    let containerPath = sel.containerPath
+    /* istanbul ignore next */
+    if (!containerPath) {
+      throw new Error('Selection must be within a container.')
+    }
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.path[0]
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = tx.get(nodeId).getRoot()
-      let nodePos = container.getPosition(node.id, 'strict')
+      let node = getContainerRoot(tx, containerPath, nodeId)
+      let nodePos = node.getPosition()
+      /* istanbul ignore else  */
       if (node.isText()) {
-        tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
-        // TODO: what if this should create a different list-item type?
-        let newItem = tx.create({
-          type: 'list-item',
-          content: node.getText(),
-        })
-        annotationHelpers.transferAnnotations(tx, node.getTextPath(), 0, newItem.getTextPath(), 0)
-        let newList = tx.create(Object.assign({
-          type: 'list',
-          items: [newItem.id]
-        }, params))
-        tx.delete(node.id)
-        tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newList.id })
+        removeAt(tx, containerPath, nodePos)
+        let newList = this.createListNode(tx, containerPath, params)
+        let newItem = newList.createListItem(node.getText())
+        annotationHelpers.transferAnnotations(tx, node.getPath(), 0, newItem.getPath(), 0)
+        newList.appendItem(newItem)
+        deepDeleteNode(tx, node)
+        insertAt(tx, containerPath, nodePos, newList.id)
         tx.setSelection({
           type: 'property',
-          path: newItem.getTextPath(),
+          path: newItem.getPath(),
           startOffset: sel.start.offset,
-          containerId: sel.containerId
+          containerPath
         })
       } else if (node.isList()) {
         let itemId = sel.start.path[0]
-        let itemPos = node.getItemPosition(itemId)
-        let item = node.getItemAt(itemPos)
-        let newTextNode = tx.createDefaultTextNode(item.getText())
-        annotationHelpers.transferAnnotations(tx, item.getTextPath(), 0, newTextNode.getTextPath(), 0)
+        let item = tx.get(itemId)
+        let itemPos = node.getItemPosition(item)
+        let newTextNode = this.createTextNode(tx, containerPath, item.getText())
+        annotationHelpers.transferAnnotations(tx, item.getPath(), 0, newTextNode.getPath(), 0)
         // take the item out of the list
         node.removeItemAt(itemPos)
-        if (node.getLength() === 0) {
-          tx.update([container.id, 'nodes'], { type: 'delete', pos: nodePos })
-          tx.delete(node.id)
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
+        if (node.isEmpty()) {
+          removeAt(tx, containerPath, nodePos)
+          deepDeleteNode(tx, node)
+          insertAt(tx, containerPath, nodePos, newTextNode.id)
         } else if (itemPos === 0) {
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos, value: newTextNode.id })
-        } else if (node.getLength() <= itemPos){
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
+          insertAt(tx, containerPath, nodePos, newTextNode.id)
+        } else if (node.getLength() <= itemPos) {
+          insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
         } else {
-          //split the
+          // split the
           let tail = []
-          const items = node.items.slice()
+          const items = node.getItems()
           const L = items.length
-          for (let i = L-1; i >= itemPos; i--) {
+          for (let i = L - 1; i >= itemPos; i--) {
             tail.unshift(items[i])
             node.removeItemAt(i)
           }
-          let newList = tx.create({
-            type: 'list',
-            items: tail,
-            ordered: node.ordered
-          })
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+1, value: newTextNode.id })
-          tx.update([container.id, 'nodes'], { type: 'insert', pos: nodePos+2, value: newList.id })
+          let newList = this.createListNode(tx, containerPath, node)
+          for (let i = 0; i < tail.length; i++) {
+            newList.appendItem(tail[i])
+          }
+          insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
+          insertAt(tx, containerPath, nodePos + 2, newList.id)
         }
         tx.setSelection({
           type: 'property',
-          path: newTextNode.getTextPath(),
+          path: newTextNode.getPath(),
           startOffset: sel.start.offset,
-          containerId: sel.containerId
+          containerPath
         })
+      } else {
+        // unsupported node type
       }
     } else if (sel.isContainerSelection()) {
       console.error('TODO: support toggleList with ContainerSelection')
     }
   }
 
-  indent(tx) {
+  indent (tx) {
     let sel = tx.selection
+    let containerPath = sel.containerPath
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.getNodeId()
       // ATTENTION: we need the root node here, e.g. the list, not the list items
-      let node = tx.get(nodeId).getRoot()
+      let node = getContainerRoot(tx, containerPath, nodeId)
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
+        let level = item.getLevel()
         // Note: allowing only 3 levels
-        if (item && item.level<3) {
-          tx.set([itemId, 'level'], item.level+1)
+        if (item && level < 3) {
+          item.setLevel(item.level + 1)
+          // a pseudo change to let the list know that something has changed
+          tx.set([node.id, '_itemsChanged'], true)
         }
       }
     } else if (sel.isContainerSelection()) {
-      // TODO support ContainerSelection
+      console.error('TODO: support toggleList with ContainerSelection')
     }
   }
 
-  dedent(tx) {
+  dedent (tx) {
     let sel = tx.selection
+    let containerPath = sel.containerPath
     if (sel.isPropertySelection()) {
       let nodeId = sel.start.getNodeId()
       // ATTENTION: we need the root node here, e.g. the list, not the list items
-      let node = tx.get(nodeId).getRoot()
+      let node = getContainerRoot(tx, containerPath, nodeId)
       if (node.isList()) {
         let itemId = sel.start.path[0]
         let item = tx.get(itemId)
-        if (item && item.level>1) {
-          tx.set([itemId, 'level'], item.level-1)
+        let level = item.getLevel()
+        if (item) {
+          if (level > 1) {
+            item.setLevel(item.level - 1)
+            // a pseudo change to let the list know that something has changed
+            tx.set([node.id, '_itemsChanged'], true)
+          }
+          // TODO: we could toggle the list item to paragraph
+          // if dedenting on the first level
+          //  else {
+          //   return this.toggleList(tx)
+          // }
         }
       }
     } else if (sel.isContainerSelection()) {
-      // TODO support ContainerSelection
+      console.error('TODO: support toggleList with ContainerSelection')
     }
   }
 
@@ -761,9 +718,10 @@ class Editing {
     VI: <-->|--|     :   noting if !anno.autoExpandRight
     VII: <-|--|->    :   move end by total span+L
   */
-  _insertText(tx, sel, text) {
+  _insertText (tx, sel, text) {
     let start = sel.start
     let end = sel.end
+    /* istanbul ignore next  */
     if (!isArrayEqual(start.path, end.path)) {
       throw new Error('Unsupported state: range should be on one property')
     }
@@ -780,54 +738,49 @@ class Editing {
     tx.update(path, { type: 'insert', start: startOffset, text: text })
     // update annotations
     let annos = tx.getAnnotations(path)
-    annos.forEach(function(anno) {
+    annos.forEach(function (anno) {
       let annoStart = anno.start.offset
       let annoEnd = anno.end.offset
+
+      /* istanbul ignore else  */
       // I anno is before
-      if (annoEnd<startOffset) {
-        return
-      }
+      if (annoEnd < startOffset) {
+
       // II anno is after
-      else if (annoStart>=endOffset) {
-        tx.update([anno.id, 'start'], { type: 'shift', value: startOffset-endOffset+L })
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
-      }
+      } else if (annoStart >= endOffset) {
+        tx.update([anno.id, 'start'], { type: 'shift', value: startOffset - endOffset + L })
+        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset + L })
       // III anno is deleted
       // NOTE: InlineNodes only have a length of one character
       // so they are always 'covered', and as they can not expand
       // they are deleted
-      else if (
-        (annoStart>=startOffset && annoEnd<endOffset) ||
-        (anno._isInlineNode && annoStart>=startOffset && annoEnd<=endOffset)
+      } else if (
+        (annoStart >= startOffset && annoEnd < endOffset) ||
+        (anno.isInlineNode() && annoStart >= startOffset && annoEnd <= endOffset)
       ) {
         tx.delete(anno.id)
-      }
       // IV anno.start between and anno.end after
-      else if (annoStart>=startOffset && annoEnd>=endOffset) {
+      } else if (annoStart >= startOffset && annoEnd >= endOffset) {
         // do not move start if typing over
-        if (annoStart>startOffset || !typeover) {
-          tx.update([anno.id, 'start'], { type: 'shift', value: startOffset-annoStart+L })
+        if (annoStart > startOffset || !typeover) {
+          tx.update([anno.id, 'start'], { type: 'shift', value: startOffset - annoStart + L })
         }
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
-      }
+        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset + L })
       // V anno.start before and anno.end between
-      else if (annoStart<startOffset && annoEnd<endOffset) {
+      } else if (annoStart < startOffset && annoEnd < endOffset) {
         // NOTE: here the anno gets expanded (that's the common way)
-        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-annoEnd+L })
-      }
+        tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - annoEnd + L })
       // VI
-      else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
-          // skip
-      }
+      } else if (annoEnd === startOffset && !anno.constructor.autoExpandRight) {
+        // skip
       // VII anno.start before and anno.end after
-      else if (annoStart<startOffset && annoEnd>=endOffset) {
-        if (anno._isInlineNode) {
+      } else if (annoStart < startOffset && annoEnd >= endOffset) {
+        if (anno.isInlineNode()) {
           // skip
         } else {
-          tx.update([anno.id, 'end'], { type: 'shift', value: startOffset-endOffset+L })
+          tx.update([anno.id, 'end'], { type: 'shift', value: startOffset - endOffset + L })
         }
-      }
-      else {
+      } else {
         console.warn('TODO: handle annotation update case.')
       }
     })
@@ -836,27 +789,28 @@ class Editing {
       type: 'property',
       path: start.path,
       startOffset: offset,
-      containerId: sel.containerId,
+      containerPath: sel.containerPath,
       surfaceId: sel.surfaceId
     })
   }
 
-  _breakNode(tx, node, coor, container) {
+  _breakNode (tx, node, coor, containerPath) {
     // ATTENTION: we need the root here, e.g. a list, not the list-item
-    node = node.getRoot()
+    node = getContainerRoot(tx, containerPath, node.id)
+    /* istanbul ignore else  */
     if (node.isText()) {
-      this._breakTextNode(tx, node, coor, container)
+      this._breakTextNode(tx, node, coor, containerPath)
     } else if (node.isList()) {
-      this._breakListNode(tx, node, coor, container)
+      this._breakListNode(tx, node, coor, containerPath)
     } else {
-      throw new Error('Not supported')
+      console.error('FIXME: _breakNode() not supported for type', node.type)
     }
   }
 
-  _breakTextNode(tx, node, coor, container) {
+  _breakTextNode (tx, node, coor, containerPath) {
     let path = coor.path
     let offset = coor.offset
-    let nodePos = container.getPosition(node.id, 'strict')
+    let nodePos = node.getPosition()
     let text = node.getText()
 
     // when breaking at the first position, a new node of the same
@@ -864,284 +818,294 @@ class Editing {
     if (offset === 0) {
       let newNode = tx.create({
         type: node.type,
-        content: ""
+        content: ''
       })
       // show the new node
-      container.show(newNode.id, nodePos)
+      insertAt(tx, containerPath, nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
         path: path,
         startOffset: 0,
-        containerId: container.id
+        containerPath
       })
-    }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
-    else {
-      let newNode = node.toJSON()
-      delete newNode.id
-      newNode.content = text.substring(offset)
+    } else {
+      const textPath = node.getPath()
+      const textProp = textPath[1]
+      const newId = uuid(node.type)
+      let newNodeData = node.toJSON()
+      newNodeData.id = newId
+      newNodeData[textProp] = text.substring(offset)
       // if at the end insert a default text node no matter in which text node we are
       if (offset === text.length) {
-        newNode.type = tx.getSchema().getDefaultTextType()
+        newNodeData.type = tx.getSchema().getDefaultTextType()
       }
-      newNode = tx.create(newNode)
+      let newNode = tx.create(newNodeData)
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, newNode.getTextPath(), 0)
+        annotationHelpers.transferAnnotations(tx, path, offset, newNode.getPath(), 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
       // show the new node
-      container.show(newNode.id, nodePos+1)
+      insertAt(tx, containerPath, nodePos + 1, newNode.id)
       // update the selection
       tx.setSelection({
         type: 'property',
-        path: newNode.getTextPath(),
+        path: newNode.getPath(),
         startOffset: 0,
-        containerId: container.id
+        containerPath
       })
     }
   }
 
-  _breakListNode(tx, node, coor, container) {
+  _breakListNode (tx, node, coor, containerPath) {
     let path = coor.path
     let offset = coor.offset
     let listItem = tx.get(path[0])
 
     let L = node.length
-    let itemPos = node.getItemPosition(listItem.id)
+    let itemPos = node.getItemPosition(listItem)
     let text = listItem.getText()
-    let newItem = listItem.toJSON()
-    delete newItem.id
+    let textProp = listItem.getPath()[1]
+    let newItemData = listItem.toJSON()
+    delete newItemData.id
     if (offset === 0) {
       // if breaking at an empty list item, then the list is split into two
       if (!text) {
         // if it is the first or last item, a default text node is inserted before or after, and the item is removed
         // if the list has only one element, it is removed
-        let nodePos = container.getPosition(node.id, 'strict')
-        let newTextNode = tx.createDefaultTextNode()
+        let nodePos = node.getPosition()
+        let newTextNode = this.createTextNode(tx, containerPath)
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
-          container.hide(node.id)
-          tx.delete(node.id)
-          container.show(newTextNode.id, nodePos)
-        }
+          removeAt(tx, containerPath, nodePos)
+          deepDeleteNode(tx, node)
+          insertAt(tx, containerPath, nodePos, newTextNode.id)
         // if at the first list item, remove the item
-        else if (itemPos === 0) {
-          node.remove(listItem.id)
-          tx.delete(listItem.id)
-          container.show(newTextNode.id, nodePos)
-        }
+        } else if (itemPos === 0) {
+          node.removeItem(listItem)
+          deepDeleteNode(tx, listItem)
+          insertAt(tx, containerPath, nodePos, newTextNode.id)
         // if at the last list item, remove the item and append the paragraph
-        else if (itemPos >= L-1) {
-          node.remove(listItem.id)
-          tx.delete(listItem.id)
-          container.show(newTextNode.id, nodePos+1)
-        }
+        } else if (itemPos >= L - 1) {
+          node.removeItem(listItem)
+          deepDeleteNode(tx, listItem)
+          insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
         // otherwise create a new list
-        else {
+        } else {
           let tail = []
-          const items = node.items.slice()
-          for (let i = L-1; i > itemPos; i--) {
+          const items = node.getItems().slice()
+          for (let i = L - 1; i > itemPos; i--) {
             tail.unshift(items[i])
-            node.remove(items[i])
+            node.removeItem(items[i])
           }
-          node.remove(items[itemPos])
-          let newList = tx.create({
-            type: 'list',
-            items: tail,
-            ordered: node.ordered
-          })
-          container.show(newTextNode.id, nodePos+1)
-          container.show(newList.id, nodePos+2)
+          node.removeItem(items[itemPos])
+          let newList = this.createListNode(tx, containerPath, node)
+          for (let i = 0; i < tail.length; i++) {
+            newList.appendItem(tail[i])
+          }
+          insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
+          insertAt(tx, containerPath, nodePos + 2, newList.id)
         }
         tx.setSelection({
           type: 'property',
-          path: newTextNode.getTextPath(),
+          path: newTextNode.getPath(),
           startOffset: 0
         })
-      }
       // insert a new paragraph above the current one
-      else {
-        newItem.content = ""
-        newItem = tx.create(newItem)
-        node.insertItemAt(itemPos, newItem.id)
+      } else {
+        newItemData[textProp] = ''
+        let newItem = tx.create(newItemData)
+        node.insertItemAt(itemPos, newItem)
         tx.setSelection({
           type: 'property',
-          path: listItem.getTextPath(),
+          path: listItem.getPath(),
           startOffset: 0
         })
       }
-    }
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
-    else {
-      newItem.content = text.substring(offset)
-      newItem = tx.create(newItem)
+    } else {
+      newItemData[textProp] = text.substring(offset)
+      let newItem = tx.create(newItemData)
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
-        annotationHelpers.transferAnnotations(tx, path, offset, [newItem.id,'content'], 0)
+        annotationHelpers.transferAnnotations(tx, path, offset, newItem.getPath(), 0)
         // truncate the original property
         tx.update(path, { type: 'delete', start: offset, end: text.length })
       }
-      node.insertItemAt(itemPos+1, newItem.id)
+      node.insertItemAt(itemPos + 1, newItem)
       tx.setSelection({
         type: 'property',
-        path: newItem.getTextPath(),
+        path: newItem.getPath(),
         startOffset: 0
       })
     }
   }
 
-  _merge(tx, node, coor, direction, container) {
+  _merge (tx, node, coor, direction, containerPath) {
     // detect cases where list items get merged
     // within a single list node
     if (node.isList()) {
       let list = node
       let itemId = coor.path[0]
-      let itemPos = list.getItemPosition(itemId)
+      let item = tx.get(itemId)
+      let itemPos = list.getItemPosition(item)
       let withinListNode = (
         (direction === 'left' && itemPos > 0) ||
-        (direction === 'right' && itemPos<list.items.length-1)
+        (direction === 'right' && itemPos < list.items.length - 1)
       )
       if (withinListNode) {
-        itemPos = (direction === 'left') ? itemPos-1 : itemPos
+        itemPos = (direction === 'left') ? itemPos - 1 : itemPos
         let target = list.getItemAt(itemPos)
         let targetLength = target.getLength()
-        documentHelpers.mergeListItems(tx, list.id, itemPos)
+        mergeListItems(tx, list.id, itemPos)
         tx.setSelection({
           type: 'property',
-          path: target.getTextPath(),
+          path: target.getPath(),
           startOffset: targetLength,
-          containerId: container.id
+          containerPath
         })
         return
       }
     }
     // in all other cases merge is done across node boundaries
-    let nodePos = container.getPosition(node, 'strict')
+    let nodeIds = tx.get(containerPath)
+    let nodePos = node.getPosition()
     if (direction === 'left' && nodePos > 0) {
-      this._mergeNodes(tx, container, nodePos-1, direction)
-    } else if (direction === 'right' && nodePos<container.getLength()-1) {
-      this._mergeNodes(tx, container, nodePos, direction)
+      this._mergeNodes(tx, containerPath, nodePos - 1, direction)
+    } else if (direction === 'right' && nodePos < nodeIds.length - 1) {
+      this._mergeNodes(tx, containerPath, nodePos, direction)
     }
   }
 
-  _mergeNodes(tx, container, pos, direction) {
-    let first = container.getChildAt(pos)
-    let second = container.getChildAt(pos+1)
+  _mergeNodes (tx, containerPath, pos, direction) {
+    let nodeIds = tx.get(containerPath)
+    let first = tx.get(nodeIds[pos])
+    let secondPos = pos + 1
+    let second = tx.get(nodeIds[secondPos])
     if (first.isText()) {
       // Simplification for empty nodes
       if (first.isEmpty()) {
-        container.hide(first.id)
-        tx.delete(first.id)
+        removeAt(tx, containerPath, pos)
+        secondPos--
+        deepDeleteNode(tx, first)
         // TODO: need to clear where to handle
         // selections ... probably better not to do it here
-        setCursor(tx, second, container.id, 'before')
+        setCursor(tx, second, containerPath, 'before')
         return
       }
       let target = first
-      let targetPath = target.getTextPath()
+      let targetPath = target.getPath()
       let targetLength = target.getLength()
       if (second.isText()) {
         let source = second
-        let sourcePath = source.getTextPath()
-        container.hide(source.id)
+        let sourcePath = source.getPath()
+        removeAt(tx, containerPath, secondPos)
         // append the text
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
         // transfer annotations
         annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        tx.delete(source.id)
+        deepDeleteNode(tx, source)
         tx.setSelection({
           type: 'property',
           path: targetPath,
           startOffset: targetLength,
-          containerId: container.id
+          containerPath
         })
       } else if (second.isList()) {
         let list = second
-        let source = list.getFirstItem()
-        let sourcePath = source.getTextPath()
-        // remove merged item from list
-        list.removeItemAt(0)
-        // append the text
-        tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
-        // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        // delete item and prune empty list
-        tx.delete(source.id)
-        if (list.getLength() === 0) {
-          container.hide(list.id)
-          tx.delete(list.id)
+        if (!second.isEmpty()) {
+          let source = list.getFirstItem()
+          let sourcePath = source.getPath()
+          // remove merged item from list
+          list.removeItemAt(0)
+          // append the text
+          tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+          // transfer annotations
+          annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+          // delete item and prune empty list
+          deepDeleteNode(tx, source)
+        }
+        if (list.isEmpty()) {
+          removeAt(tx, containerPath, secondPos)
+          deepDeleteNode(tx, list)
         }
         tx.setSelection({
           type: 'property',
           path: targetPath,
           startOffset: targetLength,
-          containerId: container.id
+          containerPath
         })
       } else {
-        selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
+        selectNode(tx, direction === 'left' ? first.id : second.id, containerPath)
       }
     } else if (first.isList()) {
       if (second.isText()) {
-        let source = second
-        let sourcePath = source.getTextPath()
         let target = first.getLastItem()
-        let targetPath = target.getTextPath()
+        let targetPath = target.getPath()
         let targetLength = target.getLength()
-        // hide source
-        container.hide(source.id)
-        // append the text
-        tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
-        // transfer annotations
-        annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
-        tx.delete(source.id)
+        let third = (nodeIds.length > pos + 2) ? tx.get(nodeIds[pos + 2]) : null
+        if (second.getLength() === 0) {
+          removeAt(tx, containerPath, secondPos)
+          deepDeleteNode(tx, second)
+        } else {
+          let source = second
+          let sourcePath = source.getPath()
+          removeAt(tx, containerPath, secondPos)
+          tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
+          annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
+          deepDeleteNode(tx, source)
+        }
+        // merge to lists if they were split by a paragraph
+        if (third && third.type === first.type) {
+          this._mergeTwoLists(tx, containerPath, first, third)
+        }
         tx.setSelection({
           type: 'property',
-          path: target.getTextPath(),
+          path: target.getPath(),
           startOffset: targetLength,
-          containerId: container.id
+          containerPath
         })
       } else if (second.isList()) {
-        container.hide(second.id)
-        let firstItems = first.items.slice()
-        let secondItems = second.items.slice()
-        for (let i=0; i<secondItems.length;i++) {
-          second.removeItemAt(0)
-          first.appendItem(secondItems[i])
+        /* istanbul ignore next */
+        if (direction !== 'right') {
+          // ATTENTION: merging two lists by using BACKSPACE is not possible,
+          // as BACKSPACE will first turn the list into a paragraph
+          throw new Error('Illegal state')
         }
-        tx.delete(second.id)
-        if (direction === 'left') {
-          tx.setSelection({
-            type: 'property',
-            path: tx.get(secondItems[0]).getTextPath(),
-            startOffset: 0,
-            containerId: container.id
-          })
-        } else {
-          let item = tx.get(last(firstItems))
-          tx.setSelection({
-            type: 'property',
-            path: item.getTextPath(),
-            startOffset: item.getLength(),
-            containerId: container.id
-          })
-        }
+        let item = first.getLastItem()
+        this._mergeTwoLists(tx, containerPath, first, second)
+        tx.setSelection({
+          type: 'property',
+          path: item.getPath(),
+          startOffset: item.getLength(),
+          containerPath
+        })
       } else {
-        selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
+        selectNode(tx, direction === 'left' ? first.id : second.id, containerPath)
       }
     } else {
       if (second.isText() && second.isEmpty()) {
-        container.hide(second.id)
-        tx.delete(second.id)
-        setCursor(tx, first, container.id, 'after')
+        removeAt(tx, containerPath, secondPos)
+        deepDeleteNode(tx, second)
+        setCursor(tx, first, containerPath, 'after')
       } else {
-        selectNode(tx, direction === 'left' ? first.id : second.id, container.id)
+        selectNode(tx, direction === 'left' ? first.id : second.id, containerPath)
       }
     }
   }
-}
 
-export default Editing
+  _mergeTwoLists (tx, containerPath, first, second) {
+    let secondPos = second.getPosition()
+    removeAt(tx, containerPath, secondPos)
+    let secondItems = second.getItems().slice()
+    for (let i = 0; i < secondItems.length; i++) {
+      second.removeItemAt(0)
+      first.appendItem(secondItems[i])
+    }
+    deepDeleteNode(tx, second)
+  }
+}

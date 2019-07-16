@@ -5,9 +5,9 @@ import findIndex from '../util/findIndex'
 /*
   Internal implementation used to store event bindings.
 */
-class DOMEventListener {
-
-  constructor(eventName, handler, options) {
+export default class DOMEventListener {
+  constructor (eventName, handler, options) {
+    /* istanbul ignore next */
     if (!isString(eventName) || !isFunction(handler)) {
       throw new Error("Illegal arguments: 'eventName' must be a String, and 'handler' must be a Function.")
     }
@@ -33,34 +33,32 @@ class DOMEventListener {
     this._el = null
   }
 
-}
+  // TODO: do we really need this?
+  get _isDOMEventListener () { return true }
 
-DOMEventListener.prototype._isDOMEventListener = true
-
-DOMEventListener.findIndex = function(eventListeners, eventName, handler) {
-  var idx = -1
-  if (arguments[1]._isDOMEventListener) {
-    idx = eventListeners.indexOf(arguments[1])
-  } else {
-    idx = findIndex(eventListeners,
-      _matches.bind(null, {
-        eventName: eventName,
-        originalHandler: handler
-      })
-    )
+  static findIndex (eventListeners, eventName, handler) {
+    var idx = -1
+    if (arguments[1]._isDOMEventListener) {
+      idx = eventListeners.indexOf(arguments[1])
+    } else {
+      idx = findIndex(eventListeners,
+        _matches.bind(null, {
+          eventName: eventName,
+          originalHandler: handler
+        })
+      )
+    }
+    return idx
   }
-  return idx
 }
 
-function _matches(l1, l2) {
+function _matches (l1, l2) {
   return l1.eventName === l2.eventName && l1.originalHandler === l2.originalHandler
 }
 
-function _once(listener, handler) {
-  return function(event) {
+function _once (listener, handler) {
+  return function (event) {
     handler(event)
     listener._el.removeEventListener(listener)
   }
 }
-
-export default DOMEventListener

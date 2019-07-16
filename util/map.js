@@ -1,18 +1,25 @@
-export default function map(iteratee, func) {
+export default function map (iteratee, func) {
   if (!iteratee) return []
-  if (!func) func = function(item) { return item }
+  if (!func) func = function (item) { return item }
   if (Array.isArray(iteratee)) {
     return iteratee.map(func)
-  } else if (typeof iteratee.length !== 'undefined') {
-    let l = iteratee.length
+  }
+  if (iteratee instanceof Map) {
     let result = []
-    for (var i = 0; i < l; i++) {
-      result.push(func(iteratee[i], i))
+    for (let [name, val] of iteratee) {
+      result.push(func(val, name))
     }
     return result
-  } else {
-    return Object.keys(iteratee).map(function(key) {
-      return func(iteratee[key], key)
-    })
   }
+  if (iteratee instanceof Set) {
+    let result = []
+    let idx = 0
+    iteratee.forEach(item => {
+      result.push(func(item, idx++))
+    })
+    return result
+  }
+  return Object.keys(iteratee).map(function (key) {
+    return func(iteratee[key], key)
+  })
 }

@@ -1,3 +1,3 @@
-export default function isArray(a) {
+export default function isArray (a) {
   return Array.isArray(a)
 }

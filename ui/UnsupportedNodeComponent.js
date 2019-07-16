@@ -1,18 +1,30 @@
 import Component from './Component'
+import IsolatedNodeComponent from './IsolatedNodeComponent'
 
-class UnsupportedNodeComponent extends Component {
-
-  render($$) {
-    return $$('pre')
-      .addClass('content-node unsupported')
-      .attr({
-        'data-id': this.props.node.id,
-        contentEditable: false
-      })
-      .append(
-        JSON.stringify(this.props.node.properties, null, 2)
-      )
+export default class UnsupportedNodeComponent extends IsolatedNodeComponent {
+  _getContentClass () {
+    return UnsupportedContentComponent
   }
 }
 
-export default UnsupportedNodeComponent
+class UnsupportedContentComponent extends Component {
+  render ($$) {
+    const node = this.props.node
+    let data
+    if (node._isXMLNode) {
+      data = node.toXML().serialize()
+    } else if (node.data) {
+      data = node.data
+    } else {
+      data = JSON.stringify(node.toJSON())
+    }
+    let el = $$('div').addClass('sc-unsupported').append(
+      $$('pre').text(data)
+    ).attr({
+      'data-id': node.id,
+      'contenteditable': false
+    })
+
+    return el
+  }
+}

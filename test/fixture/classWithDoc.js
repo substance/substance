@@ -2,15 +2,14 @@
  @class
  @export
 */
-function MyClass() {}
+function MyClass () {}
 
 // our ctor approach for prototype using 'this'
-MyClass.Prototype = function() {
-
+MyClass.Prototype = function () {
   /**
     FOO
   */
-  this.foo = function() {}
+  this.foo = function () {}
 
   /**
     BAR
@@ -24,7 +23,7 @@ MyClass.Prototype = function() {
 /**
   BLA
 */
-MyClass.prototype.bla = function() {}
+MyClass.prototype.bla = function () {}
 
 /**
   BLUPP
@@ -37,7 +36,7 @@ MyClass.prototype.blupp = 'blupp'
 /**
   ZIP
 */
-MyClass.zip = function() {}
+MyClass.zip = function () {}
 
 /**
   ZAP

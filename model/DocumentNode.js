@@ -1,5 +1,11 @@
-import DataNode from './data/Node'
-import EventEmitter from '../util/EventEmitter'
+import isArray from '../util/isArray'
+import isString from '../util/isString'
+import cssSelect from '../vendor/css-select'
+import DataNode from './Node'
+import XPathNode from './XPathNode'
+import DocumentNodeSelectAdapter from './_DocumentNodeSelectAdapter'
+
+const cssSelectAdapter = new DocumentNodeSelectAdapter()
 
 /**
   Base node type for document nodes.
@@ -9,7 +15,7 @@ import EventEmitter from '../util/EventEmitter'
   The following example shows how a new node type is defined.
 
   ```js
-  class Todo extends TextBlock {}
+  class Todo extends DocumentNode {}
   Todo.schema = {
     type: 'todo',
     content: 'text',
@@ -25,18 +31,20 @@ import EventEmitter from '../util/EventEmitter'
   - `bool` boolean values
   - `id` a node id referencing another node in the document
 */
-class DocumentNode extends DataNode {
-
-  /**
-    @param {Document} doc A document instance
-    @param {object} node properties
-  */
-  constructor(doc, props) {
-    super(props)
-    // being less strict here allows us to create a detached node
-    // which can be useful for testing
-    // if (!doc) throw new Error('Document instance is mandatory.')
+export default class DocumentNode extends DataNode {
+  _initialize (doc, props) {
     this.document = doc
+
+    super._initialize(props)
+
+    /**
+     * Experimental:
+     * Provides an XPathNode that leads back to the root.
+     * An XPath of a DocumentNode is a sequence of XPathNodes, where the first one contains a node id as entry point
+     * followed by zero or more nodes with property and position.
+     * For example, the xpath for the second paragraph in a document's body could look like this [{id: 'article'}, { property: 'body', pos: 2 }]
+     */
+    this._xpath = new XPathNode(this.id, this.type)
   }
 
   /**
@@ -44,8 +52,45 @@ class DocumentNode extends DataNode {
 
     @returns {Document}
   */
-  getDocument() {
+  getDocument () {
     return this.document
+  }
+
+  resolve (propName) {
+    let val = this[propName]
+    if (val) {
+      let doc = this.getDocument()
+      if (isArray(val)) {
+        return val.map(id => doc.get(id))
+      } else {
+        return doc.get(val)
+      }
+    }
+  }
+
+  /**
+   * Set the value of a node's property
+   *
+   * > Attention: setting a node's property directly is usually not appropriate, such as `node.content = 'abc'`
+   * > because this does not use the document's manipulation API. This is necessary to recorde an operation, e.g. during a transaction.
+   *
+   * @param {string} propName
+   * @param {any} value
+   */
+  set (propName, value) {
+    this.getDocument().set([this.id, propName], value)
+  }
+
+  /**
+   * Convenience method to assign multiple values.
+   *
+   * @param {object} props
+   */
+  assign (props) {
+    if (!props) return
+    Object.keys(props).forEach(propName => {
+      this.set(propName, props[propName])
+    })
   }
 
   /**
@@ -55,15 +100,21 @@ class DocumentNode extends DataNode {
 
     @returns {Boolean}
   */
-  hasParent() {
+  hasParent () {
     return Boolean(this.parent)
   }
 
   /**
     @returns {DocumentNode} the parent node
   */
-  getParent() {
-    return this.document.get(this.parent)
+  getParent () {
+    if (isString(this.parent)) return this.document.get(this.parent)
+    return this.parent
+  }
+
+  setParent (parent) {
+    if (isString(parent)) parent = this.document.get(parent)
+    this.parent = parent
   }
 
   /**
@@ -74,172 +125,153 @@ class DocumentNode extends DataNode {
 
     @returns {DocumentNode}
   */
-  getRoot() {
+  getRoot () {
     let node = this
-    while(node.parent) {
+    while (node.parent) {
       node = node.parent
     }
     return node
   }
 
-  /**
-    Checks whether this node has children.
+  find (cssSelector) {
+    return cssSelect.selectOne(cssSelector, this, { xmlMode: true, adapter: cssSelectAdapter })
+  }
 
-    @returns {Boolean} default: false
-  */
-  hasChildren() {
-    return false
+  findAll (cssSelector) {
+    return cssSelect.selectAll(cssSelector, this, { xmlMode: true, adapter: cssSelectAdapter })
   }
 
   /**
-    Get the index of a given child.
-
-    @returns {Number} default: -1
-  */
-  getChildIndex(child) { // eslint-disable-line
-    return -1
+   * The xpath of this node.
+   */
+  getXpath () {
+    return this._xpath
   }
 
   /**
-    Get a child node at a given position.
-
-    @returns {DocumentNode} default: null
-  */
-  getChildAt(idx) { // eslint-disable-line
-    return null
-  }
-
-  /**
-    Get the number of children nodes.
-
-    @returns {Number} default: 0
-  */
-  getChildCount() {
-    return 0
-  }
-
-  // TODO: should this really be here?
-  // volatile property necessary to render highlighted node differently
-  // TODO: We should get this out here
-  setHighlighted(highlighted, scope) {
-    if (this.highlighted !== highlighted) {
-      this.highlightedScope = scope
-      this.highlighted = highlighted
-      this.emit('highlighted', highlighted)
-    }
-  }
-
-  // Experimental: we are working on a simpler API replacing the
-  // rather inconvenient EventProxy API.
-  on(eventName, handler, ctx) {
-    var match = _matchPropertyEvent(eventName)
-    if (match) {
-      var propertyName = match[1]
-      if (this.constructor.schema[propertyName]) {
-        var doc = this.getDocument()
-        doc.getEventProxy('path')
-          .on([this.id, propertyName], handler, ctx)
-      }
-    }
-    EventEmitter.prototype.on.apply(this, arguments)
-  }
-
-  off(ctx, eventName, handler) {
-    var doc = this.getDocument()
-    var match = false
-    if (!eventName) {
-      doc.getEventProxy('path').off(ctx)
-    } else {
-      match = _matchPropertyEvent(eventName)
-    }
-    if (match) {
-      var propertyName = match[1]
-      doc.getEventProxy('path')
-        .off(ctx, [this.id, propertyName], handler)
-    }
-    EventEmitter.prototype.off.apply(this, arguments)
-  }
-
-  _onPropertyChange(propertyName) {
-    var args = [propertyName + ':changed']
-      .concat(Array.prototype.slice.call(arguments, 1))
-    this.emit.apply(this, args)
+   * The position in the parent's children property.
+   */
+  getPosition () {
+    return this._xpath.pos
   }
 
   // Node categories
   // --------------------
 
   /**
-    @returns {Boolean} true if node is a block node (e.g. Paragraph, Figure, List, Table)
-  */
-  isBlock() {
-    return Boolean(this.constructor.isBlock)
+   * An anchor is an inline-node with zero-width.
+   */
+  isAnchor () {
+    return this.constructor.isAnchor()
+  }
+
+  /**
+   * An annotation has a `start` and an `end` coordinate that is used to anchor it within the document.
+   */
+  isAnnotation () {
+    return this.constructor.isAnnotation()
+  }
+
+  /**
+   * A DocumentNode with a sequence of child nodes.
+   */
+  isContainer () {
+    return this.constructor.isContainer()
+  }
+
+  /**
+   * A ContainerAnnotation may span over multiple nodes, i.e. `start` and `end` may be located on different text nodes within a Container.
+   */
+  isContainerAnnotation () {
+    return this.constructor.isContainerAnnotation()
+  }
+
+  /**
+   * @returns {Boolean} true if node is an inline node (e.g. Inline Formula)
+   *
+   * > Attention: InlineNodes are substantially different to Annotations, as they **own** their content.
+   *  In contrast, annotations do not own the content, they are just 'overlays' to text owned by other nodes.
+   */
+  isInlineNode () {
+    return this.constructor.isInlineNode()
+  }
+
+  /**
+   * A DocumentNode used for modelling a List, consisting of a list of ListItems and a definition of ordering types.
+   */
+  isList () {
+    return this.constructor.isList()
+  }
+
+  /**
+   * A ListItem is may only be a direct child of a ListNode and should be a TextNode.
+   */
+  isListItem () {
+    return this.constructor.isListItem()
+  }
+
+  /**
+   * A PropertyAnnotation is an Annotation that is anchored to a single text property.
+   */
+  isPropertyAnnotation () {
+    return this.constructor.isPropertyAnnotation()
   }
 
   /**
     @returns {Boolean} true if node is a text node (e.g. Paragraph, Codebock)
   */
-  isText() {
-    return Boolean(this.constructor.isText)
+  isText () {
+    return this.constructor.isText()
   }
+
+  // actual implementations are static
+
+  static isAnchor () { return false }
+
+  static isAnnotation () { return false }
 
   /**
-    @returns {Boolean} true if node is an inline node (e.g. Citation)
+    Declares a node to be treated as block-type node.
+
+    BlockNodes are considers the direct descendant of `Container` nodes.
+    @type {Boolean} default: false
   */
-  isInline() {
-    return Boolean(this.constructor.isInline)
-  }
+  static isBlock () { return false }
 
-  isList() {
-    return Boolean(this.constructor.isList)
-  }
+  static isContainer () { return false }
 
-  isIsolatedNode() {
-    return !this.isText() && !this.isList()
-  }
+  /**
+    Declares a node to be treated as {@link model/ContainerAnnotation}.
 
+    @type {Boolean} default: false
+  */
+  static isContainerAnnotation () { return false }
+
+  /**
+   * Declares a node to be treated as {@link model/InlineNode}.
+   *
+   * @type {Boolean} default: false
+   */
+  static isInlineNode () { return false }
+
+  static isList () { return false }
+
+  static isListItem () { return false }
+
+  /**
+   * Declares a node to be treated as {@link model/PropertyAnnotation}.
+   *
+   * @type {Boolean} default: false
+   */
+  static isPropertyAnnotation () { return false }
+
+  /**
+    Declares a node to be treated as text-ish node.
+
+    @type {Boolean} default: false
+  */
+  static isText () { return false }
+
+  // used for 'instanceof' comparison
+  get _isDocumentNode () { return true }
 }
-
-DocumentNode.prototype._isDocumentNode = true
-
-/**
-  Declares a node to be treated as block-type node.
-
-  BlockNodes are considers the direct descendant of `Container` nodes.
-  @type {Boolean} default: false
-*/
-DocumentNode.isBlock = false
-
-/**
-  Declares a node to be treated as text-ish node.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isText = false
-
-/**
-  Declares a node to be treated as {@link model/PropertyAnnotation}.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isPropertyAnnotation = false
-
-/**
-  Declares a node to be treated as {@link model/ContainerAnnotation}.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isContainerAnnotation = false
-
-/**
-  Declares a node to be treated as {@link model/InlineNode}.
-
-  @type {Boolean} default: false
-*/
-DocumentNode.isInline = false
-
-function _matchPropertyEvent(eventName) {
-  return /([a-zA-Z_0-9]+):changed/.exec(eventName)
-}
-
-export default DocumentNode

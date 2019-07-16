@@ -1,41 +1,24 @@
 import DocumentNode from './DocumentNode'
+import TextNodeMixin from './TextNodeMixin'
 
 /**
-  A base class for all text-ish nodes, such as Paragraphs, Headings,
-  Prerendered, etc.
+  A base class for all text-ish nodes, such as Paragraphs, Headings, Prerendered, etc.
 */
-class TextNode extends DocumentNode {
-
-  getTextPath() {
-    // TODO: deprecate this
-    // console.warn('DEPRECATED: use node.getPath()')
-    return this.getPath()
-  }
-
-  getPath() {
+export default class TextNode extends TextNodeMixin(DocumentNode) {
+  getPath () {
     return [this.id, 'content']
   }
 
-  getText() {
+  getText () {
     return this.content
   }
 
-  isEmpty() {
-    return !this.content
-  }
-
-  getLength() {
-    return this.content.length
-  }
-
+  static isText () { return true }
 }
-
-TextNode.isText = true
 
 TextNode.schema = {
-  type: "text",
-  content: "text",
-  direction: { type: "string", optional: true }
+  type: 'text-node',
+  content: 'text',
+  direction: { type: 'enum', optional: true, values: ['left', 'right'] },
+  textAlign: { type: 'enum', default: 'left', values: ['left', 'right'] }
 }
-
-export default TextNode

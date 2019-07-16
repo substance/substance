@@ -1,34 +1,25 @@
-import Surface from '../packages/surface/Surface'
-import TextProperty from './TextPropertyComponent'
+import Surface from './Surface'
 
 /**
-  Editor for a text property (annotated string). Needs to be
-  instantiated inside a {@link ui/Controller} context.
-
-  @class
-  @component
-  @extends ui/Surface
-
-  @prop {String} name unique editor name
-  @prop {String[]} path path to a text property
-  @prop {ui/SurfaceCommand[]} commands array of command classes to be available
-
-  @example
-
-  Create a `TextPropertyEditor` for the `name` property of an author object. Allow emphasis annotations.
-
-  ```js
-  $$(TextPropertyEditor, {
-    name: 'authorNameEditor',
-    path: ['author_1', 'name'],
-    commands: [EmphasisCommand]
-  })
-  ```
-*/
-
-class TextPropertyEditor extends Surface {
-
-  constructor(parent, props) {
+ * Editor for a text property (annotated string). Needs to be
+ * instantiated inside a {@link ui/Controller} context.
+ *
+ * @param {string} props.name unique editor name
+ * @param {string[]} props.path path to a text property
+ *
+ * @example
+ *
+ * Create a `TextPropertyEditor` for the `name` property of an author object.
+ *
+ * ```js
+ * $$(TextPropertyEditor, {
+ *   name: 'authorNameEditor',
+ *   path: ['author_1', 'name']
+ * })
+ * ```
+ */
+export default class TextPropertyEditor extends Surface {
+  constructor (parent, props) {
     // making props.name optional
     props.name = props.name || props.path.join('.')
     super(parent, props)
@@ -38,9 +29,26 @@ class TextPropertyEditor extends Surface {
     }
   }
 
-  render($$) {
+  didMount () {
+    super.didMount()
+
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.addObserver(['selection'], this._onSelectionChanged, this, {
+      stage: 'render'
+    })
+  }
+
+  dispose () {
+    super.dispose()
+
+    let editorState = this.context.editorSession.getEditorState()
+    editorState.removeObserver(this)
+  }
+
+  render ($$) {
+    const TextPropertyComponent = this.getComponent('text-property')
+
     let el = super.render.apply(this, arguments)
-    el.addClass("sc-text-property-editor")
 
     if (!this.props.disabled) {
       el.addClass('sm-enabled')
@@ -50,29 +58,62 @@ class TextPropertyEditor extends Surface {
     }
 
     el.append(
-      $$(TextProperty, {
-        tagName: this.props.tagName || "div",
+      $$(TextPropertyComponent, {
+        doc: this.getDocument(),
+        placeholder: this.props.placeholder,
+        tagName: this.props.tagName || 'div',
         path: this.props.path,
+        markers: this.props.markers,
         withoutBreak: this.props.withoutBreak
-      })
+      }).ref('property')
     )
+
+    if (this.isEditable()) {
+      el.addClass('sm-editable')
+    } else {
+      el.addClass('sm-readonly')
+      // HACK: removing contenteditable if not editable
+      // TODO: we should fix substance.TextPropertyEditor to be consistent with props used in substance.Surface
+      el.setAttribute('contenteditable', false)
+    }
 
     return el
   }
 
-  _handleEnterKey(event) {
-    event.preventDefault()
+  _getClassNames () {
+    return 'sc-text-property-editor sc-surface'
+  }
+
+  selectFirst () {
+    this.editorSession.setSelection({
+      type: 'property',
+      path: this.getPath(),
+      startOffset: 0,
+      surfaceId: this.id
+    })
+  }
+
+  getPath () {
+    return this.props.path
+  }
+
+  _handleEnterKey (event) {
     event.stopPropagation()
+    event.preventDefault()
     if (this.props.multiLine) {
-      super._handleEnterKey(event)
+      this.type('\n')
     }
   }
 
-  getPath() {
-    return this.props.path
+  _handleEscapeKey (event) {
+    this.el.emit('escape', {
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
+      code: event.code
+    })
   }
+
+  get _isTextPropertyEditor () { return true }
 }
-
-TextPropertyEditor.prototype._isTextPropertyEditor = true
-
-export default TextPropertyEditor

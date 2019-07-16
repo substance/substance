@@ -1,3 +1,5 @@
+import HandlerParams from './HandlerParams'
+
 /**
   Commands are used to perform UI triggered actions on the document. For instance the
   {@link ui/AnnotationCommand} takes care of creating, expanding, truncating and
@@ -25,31 +27,31 @@
   }
   ```
 */
-class Command {
-
+export default class Command {
   /**
     Construcutor is only used internally.
 
     @constructor
     @param {Object} config    Config provided during command registration
   */
-  constructor(config) {
+  constructor (config) {
     this.config = config || {}
     this.name = this.config.name
     if (!this.name) {
-      throw new Error("'name' is required");
+      throw new Error("'name' is required")
     }
   }
 
-  get isAsync() {
+  // TODO: is this really used?
+  get isAsync () {
     return false
   }
 
   /**
     Get the command name specified at command registration. See
-    {@link util/Configurator#addCommand}
+    {@link Configurator#addCommand}
   */
-  getName() {
+  getName () {
     return this.name
   }
 
@@ -64,7 +66,7 @@ class Command {
     ```
     getCommandState(params) {
       const sel = this._getSelection(params)
-      const annos = params.selectionState.getAnnotationsForType(this.config.nodeType)
+      const annos = params.selectionState.annosByType[this.config.nodeType] || []
       const newState = {
         disabled: true,
       }
@@ -76,7 +78,7 @@ class Command {
     }
     ```
 
-    @param {Object} params      Provides editorSession, selectionState, surface, selection
+    @param {Object} params      Provides editorSession, selction, selectionState, surface
     @param {Object} context     Provides app-specific context.
   */
   getCommandState(params, context) { // eslint-disable-line
@@ -95,24 +97,32 @@ class Command {
     throw new Error('Command.execute() is abstract.')
   }
 
-  _getEditorSession(params, context) {
-    let editorSession = params.editorSession || context.editorSession
-    if (!editorSession) {
-      throw new Error("'editorSession' is required.")
-    }
-    return editorSession
+  /*
+    @returns true if this command is creating or editing an annotation
+  */
+  isAnnotationCommand () {
+    return false
   }
 
-  _getSelection(params) {
-    let sel = params.selection || params.selectionState.getSelection()
-    if (!sel) {
-      throw new Error("'selection' is required.")
-    }
-    return sel
+  /*
+    @returns true if this command is inserting a node into a container
+  */
+  isInsertCommand () {
+    return false
   }
 
+  /*
+    @returns true if this command is switching the type of a block-level text node
+  */
+  isSwitchTypeCommand () {
+    return false
+  }
+
+  getParams (context) {
+    return new HandlerParams(context)
+  }
+
+  get _isCommand () { return true }
 }
 
-Command.prototype._isCommand = true
-
-export default Command
+Command.DISABLED = Object.freeze({ disabled: true, active: false })

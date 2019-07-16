@@ -6,7 +6,7 @@ import TreeIndex from '../util/TreeIndex'
 import DocumentIndex from './DocumentIndex'
 
 /*
-  Index for Annotations.
+  Index for Annotations and InlineNodes.
 
   @example
   Lets us look up existing annotations by path and type
@@ -20,27 +20,25 @@ import DocumentIndex from './DocumentIndex'
 
     aIndex.get(["text_1", "content"], 23, 45)
 */
-class AnnotationIndex extends DocumentIndex {
-
-  constructor() {
+export default class AnnotationIndex extends DocumentIndex {
+  constructor () {
     super()
 
     this.byPath = new TreeIndex()
     this.byType = new TreeIndex()
   }
 
-  select(node) {
-    return Boolean(node._isPropertyAnnotation)
+  select (node) {
+    return node.isPropertyAnnotation() || node.isInlineNode()
   }
 
-  reset(data) {
+  clear () {
     this.byPath.clear()
     this.byType.clear()
-    this._initialize(data)
   }
 
   // TODO: use object interface? so we can combine filters (path and type)
-  get(path, start, end, type) {
+  get (path, start, end, type) {
     var annotations
     if (isString(path) || path.length === 1) {
       annotations = this.byPath.getAll(path) || {}
@@ -57,31 +55,36 @@ class AnnotationIndex extends DocumentIndex {
     return annotations
   }
 
-  create(anno) {
+  create (anno) {
+    const path = anno.start.path
     this.byType.set([anno.type, anno.id], anno)
-    this.byPath.set(anno.start.path.concat([anno.id]), anno)
+    if (path && path.length > 0) {
+      this.byPath.set(anno.start.path.concat([anno.id]), anno)
+    }
   }
 
-  delete(anno) {
+  delete (anno) {
     this._delete(anno.type, anno.id, anno.start.path)
   }
 
-  _delete(type, id, path) {
+  _delete (type, id, path) {
     this.byType.delete([type, id])
-    this.byPath.delete(path.concat([id]))
+    if (path && path.length > 0) {
+      this.byPath.delete(path.concat([id]))
+    }
   }
 
-  update(node, path, newValue, oldValue) {
+  update (node, path, newValue, oldValue) {
     // TODO: this should better be a coordinate op
-    if (this.select(node) && path[1] === 'start' && path[2] === "path") {
+    if (this.select(node) && path[1] === 'start' && path[2] === 'path') {
       this._delete(node.type, node.id, oldValue)
       this.create(node)
     }
   }
 }
 
-AnnotationIndex.filterByRange = function(start, end) {
-  return function(anno) {
+AnnotationIndex.filterByRange = function (start, end) {
+  return function (anno) {
     var aStart = anno.start.offset
     var aEnd = anno.end.offset
     var overlap = (aEnd >= start)
@@ -92,5 +95,3 @@ AnnotationIndex.filterByRange = function(start, end) {
     return overlap
   }
 }
-
-export default AnnotationIndex

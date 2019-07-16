@@ -1,7 +1,4 @@
-/*
-  DOM selection helper
-*/
-export default function setDOMSelection(startNode, startOffset, endNode, endOffset) {
+export default function setDOMSelection (startNode, startOffset, endNode, endOffset) {
   let wsel = window.getSelection()
   let wrange = window.document.createRange()
   if (startNode._isDOMElement) {

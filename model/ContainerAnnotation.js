@@ -1,7 +1,6 @@
-import isEqual from '../util/isEqual'
 import forEach from '../util/forEach'
-import Annotation from './Annotation'
-import Selection from './Selection'
+import DocumentNode from './DocumentNode'
+import AnnotationMixin from './AnnotationMixin'
 
 /*
   Describes an annotation sticking on a container that can span over multiple
@@ -15,7 +14,7 @@ import Selection from './Selection'
   {
     "id": "subject_reference_1",
     "type": "subject_reference",
-    "containerId": "content",
+    "containerPath": ["body", "content"],
     "start": {
       "path": ["text_2", "content"],
       "offset": 100,
@@ -28,66 +27,26 @@ import Selection from './Selection'
   ```
  */
 
-class ContainerAnnotation extends Annotation {
-
-  /**
-    Provides a selection which has the same range as this annotation.
-
-    @return {model/ContainerSelection}
-  */
-  getSelection() {
-    var doc = this.getDocument()
-    // Guard: when this is called while this node has been detached already.
-    if (!doc) {
-      console.warn('Trying to use a ContainerAnnotation which is not attached to the document.')
-      return Selection.nullSelection()
-    }
-    return doc.createSelection({
-      type: "container",
-      containerId: this.containerId,
-      startPath: this.start.path,
-      startOffset: this.start.offset,
-      endPath: this.end.path,
-      endOffset: this.end.offset
-    })
-  }
-
-  setHighlighted(highlighted, scope) {
+export default class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
+  setHighlighted (highlighted, scope) {
     if (this.highlighted !== highlighted) {
       this.highlighted = highlighted
       this.highlightedScope = scope
       this.emit('highlighted', highlighted, scope)
-      forEach(this.fragments, function(frag) {
+      forEach(this.fragments, function (frag) {
         frag.emit('highlighted', highlighted, scope)
       })
     }
   }
 
-  _updateRange(tx, sel) {
-    if (!sel.isContainerSelection()) {
-      throw new Error('Invalid argument.')
-    }
-    // TODO: use coordinate ops
-    if (!isEqual(this.start.path, sel.start.path)) {
-      tx.set([this.id, 'start', 'path'], sel.start.path)
-    }
-    if (this.start.offset !== sel.start.offset) {
-      tx.set([this.id, 'start', 'offset'], sel.start.offset)
-    }
-    if (!isEqual(this.end.path, sel.end.path)) {
-      tx.set([this.id, 'end', 'path'], sel.end.path)
-    }
-    if (this.end.offset !== sel.end.offset) {
-      tx.set([this.id, 'end', 'offset'], sel.end.offset)
-    }
-  }
+  static isAnnotation () { return true }
+
+  static isContainerAnnotation () { return true }
 }
 
 ContainerAnnotation.schema = {
-  type: "container-annotation",
-  containerId: "string"
+  type: '@container-annotation',
+  containerPath: { type: ['array', 'id'] },
+  start: 'coordinate',
+  end: 'coordinate'
 }
-
-ContainerAnnotation.prototype._isContainerAnnotation = true
-
-export default ContainerAnnotation

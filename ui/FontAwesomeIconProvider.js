@@ -1,28 +1,41 @@
 import forEach from '../util/forEach'
-import Icon from './FontAwesomeIcon'
+import isString from '../util/isString'
+import FontAwesomeIcon from './FontAwesomeIcon'
 
-class FontAwesomeIconProvider {
-
-  constructor(icons) {
-    this.map = {}
-    forEach(icons, function(config, name) {
-      let faClass = config['fontawesome']
-      if (faClass) {
-        this.addIcon(name, faClass)
+export default class FontAwesomeIconProvider {
+  constructor (icons) {
+    this.faMap = {}
+    this.textMap = {}
+    forEach(icons, (config, name) => {
+      let faConfig = config['fontawesome']
+      if (faConfig) {
+        if (isString(faConfig)) {
+          faConfig = { icon: faConfig }
+        }
+        this.addFAIcon(name, faConfig)
       }
-    }.bind(this))
+      let text = config['text']
+      if (text) {
+        this.addTextIcon(name, text)
+      }
+    })
   }
 
-  renderIcon($$, name) {
-    let iconClass = this.map[name]
-    if (iconClass) {
-      return $$(Icon, {icon:iconClass})
+  renderIcon ($$, name) {
+    let faProps = this.faMap[name]
+    let text = this.textMap[name]
+    if (faProps) {
+      return $$(FontAwesomeIcon, faProps)
+    } else if (text) {
+      return text
     }
   }
 
-  addIcon(name, faClass) {
-    this.map[name] = faClass
+  addFAIcon (name, faClass) {
+    this.faMap[name] = faClass
+  }
+
+  addTextIcon (name, text) {
+    this.textMap[name] = text
   }
 }
-
-export default FontAwesomeIconProvider

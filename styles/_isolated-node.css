@@ -1,0 +1,55 @@
+.sc-isolated-node {
+  position: relative;
+}
+
+.sc-isolated-node.sm-default-style.sm-selected,
+.sc-isolated-node.sm-default-style.sm-co-selected {
+  /*background: rgba(163,205,253, 0.6);*/
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
+}
+.sc-isolated-node.sm-default-style.sm-focused,
+.sc-isolated-node.sm-default-style.sm-co-focused {
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
+}
+
+/* Hide selection fragments when in selected-state */
+.sc-isolated-node.sm-selected ::selection {
+  background: transparent;
+}
+
+.sc-isolated-node.sm-selected {
+  outline: 2px solid;
+  outline-color: var(--local-selection-color);
+}
+
+.sc-isolated-node-blocker {
+  position: absolute;
+  top: 0px; bottom: 0px; left: 0px; right: 0px;
+  cursor: default;
+}
+
+.sc-isolated-node.sm-no-blocker .sc-isolated-node-blocker {
+  display: none;
+}
+
+.sc-isolated-node > .se-bracket {
+  height: 1px;
+  width: 1px;
+  opacity: 0;
+}
+
+.sc-isolated-node.sm-no-blocker > .se-bracket {
+  visibility: hidden;
+}
+
+.sc-isolated-node.sm-no-blocker.sm-selected > .se-bracket,
+.sc-isolated-node.sm-no-blocker.sm-co-selected > .se-bracket {
+  /*
+    ATTENTION: we must not have brackets hidden
+     when rendering a node selection, otherwise Chrome's DOM selection
+     'leaks' into the previous/next line
+  */
+  visibility: visible;
+}

@@ -17,123 +17,163 @@ import isArray from '../util/isArray'
   We do not want to store a the id of a parent node into the children, as this would be redundant, and would increase the amount of necessary operations.
   Instead we want to establish a link dynamically on the Node instance when the id is set in the parent (during construction or when updated).
 
-  The most in-obstrusive implementation is to add an 'operation:applied' hook, watching for such changes
-  and setting the reference. First we will apply this only for specific node types.
-  Later this will be derived from the schema.
-  With Texture we want to investigate a further option: replacing the node model with a DOM.
+  The most unobtrusive implementation is to add an 'operation:applied' hook, watching for such changes
+  and setting the reference.
 */
-
-class ParentNodeHook {
-
-  constructor(doc) {
+export default class ParentNodeHook {
+  constructor (doc) {
     this.doc = doc
-    this.table = {}
+
+    // remembering parents for children, when nodes are loaded in wrong order
+    // key: node.id, value: { parent, property }
+    this.parents = {}
+
     doc.data.on('operation:applied', this._onOperationApplied, this)
   }
 
-  _onOperationApplied(op) {
+  _onOperationApplied (op) {
     const doc = this.doc
-    const table = this.table
     let node = doc.get(op.path[0])
-    // TODO: instead of hard coding this here we should compile a matcher
-    // based on the document schema
-    switch(op.type) {
+    let hasOwnedProperties = false
+    let isAnnotation = false
+    let nodeSchema
+    if (node) {
+      nodeSchema = node.getSchema()
+      hasOwnedProperties = nodeSchema.hasOwnedProperties()
+      isAnnotation = node.isAnnotation()
+    }
+    switch (op.type) {
       case 'create': {
-        switch (node.type) {
-          case 'list':
-            _setParent(node, node.items)
-            break
-          case 'list-item': {
-            _setRegisteredParent(node)
-            break
+        if (hasOwnedProperties) {
+          for (let p of nodeSchema.getOwnedProperties()) {
+            let isChildren = p.isArray()
+            let refs = node[p.name]
+            if (refs) {
+              this._setParent(node, refs, p.name, isChildren)
+            }
+            if (isChildren) this._updateContainerPositions([node.id, p.name])
           }
-          case 'table':
-            _setParent(node, node.cells)
-            break
-          case 'table-cell': {
-            _setRegisteredParent(node)
-            break
-          }
-          default:
-            //
         }
+        if (isAnnotation) {
+          this._setAnnotationParent(node)
+        }
+        this._setRegisteredParent(node)
         break
       }
       case 'update': {
-        // ATTENTION: we only set parents but don't remove when they are deleted
-        // assuming that if the parent gets deleted, the children get deleted too
-        let update = op.diff
-        switch(node.type) {
-          case 'list':
-            if (op.path[1] === 'items') {
-              if (update.isInsert()) {
-                _setParent(node, update.getValue())
-              }
+        if (hasOwnedProperties) {
+          let propName = op.path[1]
+          if (nodeSchema.isOwned(propName)) {
+            let update = op.diff
+            let isChildren = update._isArrayOperation
+            if (update.isDelete()) {
+              this._setParent(null, update.getValue(), propName, isChildren)
+            } else {
+              this._setParent(node, update.getValue(), propName, isChildren)
             }
-            break
-          case 'table':
-            if (op.path[1] === 'cells') {
-              if (update.isInsert()) {
-                _setParent(node, update.getValue())
-              }
-            }
-            break
-          default:
-            //
+            if (isChildren) this._updateContainerPositions(op.path)
+          }
         }
         break
       }
       case 'set': {
-        switch(node.type) {
-          case 'list':
-            if (op.path[1] === 'items') {
-              _setParent(node, op.getValue())
-            }
-            break
-          case 'table':
-            if (op.path[1] === 'cells') {
-              _setParent(node, op.getValue())
-            }
-            break
-          default:
-            //
+        if (hasOwnedProperties) {
+          let propName = op.path[1]
+          if (nodeSchema.isOwned(propName)) {
+            let prop = nodeSchema.getProperty(propName)
+            let isChildren = prop.isArray()
+            let oldValue = op.getOldValue()
+            let newValue = op.getValue()
+            // Note: _setParent takes either an array or a single id
+            this._setParent(null, oldValue, propName, isChildren)
+            this._setParent(node, newValue, propName, isChildren)
+            if (isChildren) this._updateContainerPositions(op.path)
+          }
+        }
+        if (isAnnotation && op.path[1] === 'start' && op.path[2] === 'path') {
+          this._setAnnotationParent(node)
         }
         break
       }
       default:
         //
     }
+  }
 
-    function _setParent(parent, ids) {
-      if (ids) {
-        if (isArray(ids)) {
-          ids.forEach(_set)
-        } else {
-          _set(ids)
-        }
-      }
-      function _set(id) {
-        // Note: it can happen, e.g. during deserialization, that the child node
-        // is created later than the parent node
-        // so we store the parent for later
-        table[id] = parent
-        let child = doc.get(id)
-        if (child) {
-          child.parent = parent
-        }
-      }
-    }
-    function _setRegisteredParent(child) {
-      let parent = table[child.id]
-      if (parent) {
-        child.parent = parent
+  _setParent (parent, ids, property, isChildren) {
+    if (ids) {
+      if (isArray(ids)) {
+        ids.forEach(id => this.__setParent(parent, id, property, isChildren))
+      } else {
+        this.__setParent(parent, ids, property, isChildren)
       }
     }
   }
+
+  __setParent (parent, id, property, isChildren) {
+    let child = this.doc.get(id)
+    if (child) {
+      this._setParentAndXpath(parent, child, property)
+    } else {
+      // Note: it can happen, e.g. during deserialization, that the child node
+      // is created later than the parent so we store the parent for later
+      // While on Document.createFromDocument() we consider the order via dependeny analysis
+      // this can still happen when a document is loaded from some other sources,
+      // which does not take any measures to create nodes in a correct order.
+      // So, we must be prepared.
+      this.parents[id] = { parent, property, isChildren }
+    }
+  }
+
+  _setRegisteredParent (child) {
+    let entry = this.parents[child.id]
+    if (entry) {
+      let { parent, property, isChildren } = entry
+      this._setParentAndXpath(parent, child, property)
+      if (isChildren) {
+        child._xpath.pos = parent[property].indexOf(child.id)
+      }
+      delete this.parents[child.id]
+    }
+  }
+
+  _setParentAndXpath (parent, child, property) {
+    child.setParent(parent)
+    let xpath = child._xpath
+    if (parent) {
+      xpath.prev = parent._xpath
+      xpath.property = property
+    } else {
+      xpath.prev = null
+      xpath.property = null
+      // ATTENTION: need to remove this here, because
+      // it will otherwise not be updated
+      xpath.pos = null
+    }
+  }
+
+  _updateContainerPositions (containerPath) {
+    let doc = this.doc
+    let ids = doc.get(containerPath)
+    if (ids) {
+      for (let pos = 0; pos < ids.length; pos++) {
+        let id = ids[pos]
+        let child = doc.get(id)
+        if (child) {
+          child._xpath.pos = pos
+        }
+      }
+    }
+  }
+
+  _setAnnotationParent (anno) {
+    let doc = anno.getDocument()
+    let path = anno.start.path
+    let annoParent = doc.get(path[0])
+    this._setParent(annoParent, anno.id, path[1])
+  }
 }
 
-ParentNodeHook.register = function(doc) {
+ParentNodeHook.register = function (doc) {
   return new ParentNodeHook(doc)
 }
-
-export default ParentNodeHook
