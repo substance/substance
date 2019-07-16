@@ -31,7 +31,7 @@
     "css-what": "2.1.0",
     "domelementtype": "1.3.0",
     "entities": "1.1.1",
-    "lodash-es": "^4.17.10",
+    "lodash-es": "4.17.14",
     "nth-check": "1.0.1"
   },
   "devDependencies": {
