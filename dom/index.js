@@ -9,3 +9,4 @@ export { domHelpers }
 export { default as MemoryDOMElement } from './MemoryDOMElement'
 export { default as nameWithoutNS } from './nameWithoutNS'
 export { default as prettyPrintXML } from './prettyPrintXML'
+export { default as sanitizeHTML } from './sanitizeHTML'
