@@ -345,6 +345,9 @@ export default class DomUtils {
     let output = []
     const attributes = this.getAttributes(el)
     attributes.forEach(([key, value]) => {
+      if (opts.disallowHandlers && /^\s*on/.exec(key)) return
+      if (opts.disallowHandlers && /^javascript[:]/.exec(value)) return
+      if (opts.disallowedAttributes && opts.disallowedAttributes.has(key)) return
       if (!value && booleanAttributes[key]) {
         output.push(key)
       } else {
@@ -376,11 +379,15 @@ export default class DomUtils {
           break
         }
         case ElementType.CDATA: {
-          output.push(this.renderCdata(elem))
+          if (!opts.stripCDATA) {
+            output.push(this.renderCdata(elem))
+          }
           break
         }
         case ElementType.Comment: {
-          output.push(this.renderComment(elem))
+          if (!opts.stripComments) {
+            output.push(this.renderComment(elem))
+          }
           break
         }
         case ElementType.Directive: {
@@ -404,7 +411,13 @@ export default class DomUtils {
 
   renderTag (elem, opts) {
     const name = this.getName(elem)
-    if (name === 'svg') opts = {decodeEntities: opts.decodeEntities, xmlMode: true}
+    if (opts.allowedTags) {
+      if (!opts.allowedTags.has(this.getNameWithoutNS(elem))) return
+    }
+    if (opts.disallowedTags) {
+      if (opts.disallowedTags.has(this.getNameWithoutNS(elem))) return
+    }
+    if (name === 'svg') opts = Object.assign({}, opts, {decodeEntities: opts.decodeEntities, xmlMode: true})
     let tag = '<' + name
     let attribs = this.formatAttribs(elem, opts)
     if (attribs) {
