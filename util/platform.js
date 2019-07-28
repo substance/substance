@@ -109,8 +109,8 @@ function detect () {
     platform.isMac = (window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
   }
 
-  // TOOD: is there a more reliable way to detect NodeJS?
-  if (typeof process !== 'undefined') {
+  let _inNodeJS = (typeof process !== 'undefined' && process.release && process.release.name === 'node')
+  if (_inNodeJS) {
     if (platform.inBrowser) {
       platform.inElectron = true
     } else {
