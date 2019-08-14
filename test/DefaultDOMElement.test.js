@@ -180,4 +180,18 @@ function DOMElementTests (impl) {
     }, 'in HTML there are some allowed void elements, such as <input>')
     t.end()
   })
+
+  test('Parsing DOCTYPE', t => {
+    let doc
+    t.doesNotThrow(() => {
+      doc = DefaultDOMElement.parseHTML(`<!DOCTYPE html><html></html>`)
+    }, 'should parse DOCTYPE html correctly')
+    t.equal(doc.getDoctype().name, 'html', 'HTML doctype should be correct')
+    t.doesNotThrow(() => {
+      doc = DefaultDOMElement.parseXML(`<!DOCTYPE foo PUBLIC "-//FOO/BAR" "foo.dtd"><foo></foo>`)
+    }, 'should parse DOCTYPE html correctly')
+    let {name, publicId, systemId} = doc.getDoctype()
+    t.deepEqual({name, publicId, systemId}, {name: 'foo', publicId: '-//FOO/BAR', systemId: 'foo.dtd'}, 'XML doctype should be correct')
+    t.end()
+  })
 }
