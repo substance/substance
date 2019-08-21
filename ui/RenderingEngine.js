@@ -1,4 +1,5 @@
 import isFunction from '../util/isFunction'
+import isString from '../util/isString'
 import uuid from '../util/uuid'
 import substanceGlobals from '../util/substanceGlobals'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
@@ -11,11 +12,11 @@ const TOP_LEVEL_ELEMENT = Symbol('TOP_LEVEL_ELEMENT')
  *
  * ## Introduction
  *
- * What makes our rendering algorithm so difficult?
+ * The challenges of virtual rendering, particularly with the Substance specialities, namely
+ * fully initialized component after construction.
  *
- * - Dependency Injection requires a (direct) parent to allow constructor
- *   injection, i.e. that injected dependencies are available in the constructor
- *   already. As a consequence a component tree must to be constructed from top
+ * - Dependency Injection via constructor requires an existing parent.
+ *   As a consequence a component tree must be constructed from top
  *   to down.
  *
  * - The earliest time to evaluate `$$(MyComponent)`, is when it has been
@@ -103,7 +104,7 @@ const TOP_LEVEL_ELEMENT = Symbol('TOP_LEVEL_ELEMENT')
  *   This would not be necessary if we were using a recursive syntax, as React
  *   does, i.e. the code is more like functional programming.
  *   While this works well for simple scenarios, the source code is getting
- *   harder to read control flow is necessary, e.g. for loops or if statements
+ *   harder to read if control flow is necessary, e.g. for loops or if statements
  * - Refs: the programmer can use ref(id) to register a reference to a child
  *   component. Referenced components are always reused when rerendering, i.e.
  *   not disposed. For other elements, there is no guarantee that the component
@@ -126,6 +127,125 @@ export default class RenderingEngine {
     if (!this.componentFactory) throw new Error("'componentFactory' is mandatory")
     this.elementFactory = options.elementFactory || DefaultDOMElement.createDocument('html')
     if (!this.elementFactory) throw new Error("'elementFactory' is mandatory")
+
+    this._state = null
+  }
+
+  /**
+   * A React-compatible element factory used for JSX support.
+   *
+   * Use `this.renderingEngine.createElement` as factory for JSX-transpilers (e.g. babel or rollup)
+   *
+   * @param {string | Class<Component>} type a HTML element name, or Component class
+   * @param {object} props similar to React props
+   * @param  {...any} children
+   */
+  createElement (type, props, ...children) {
+    let renderingContext = this._state && this._state.getCurrentContext()
+    if (!renderingContext || !renderingContext.$$) {
+      throw new Error('Invalid state: createElement can only be used within Component.render()')
+    }
+    let createElement = renderingContext.$$
+    // TODO: (React conventions)
+    // 1. map className to classNames
+    // 2. map known event handlers, or simply /^on/
+    //    -> allow for React notation or just use toLowerCase() for event names
+    // 3. map known html props
+    //    - input.value
+    let _props = {}
+    let _classNames = null
+    let _styles = null
+    let _attributes = {}
+    let _htmlProps = {}
+    let _eventListeners = []
+    let _ref = null
+    if (props) {
+      let keys = Object.keys(props)
+      for (let key of keys) {
+        if (!props.hasOwnProperty(key)) continue
+        let val = props[key]
+        switch (key) {
+          case 'className': {
+            _classNames = val
+            break
+          }
+          case 'style': {
+            // ATTENTION: in React the 'style' property is always a hash
+            // this syntax is supported in Substance, too: `el.css({...})`
+            _styles = val
+            break
+          }
+          case 'ref': {
+            _ref = val
+            break
+          }
+          default: {
+            // ATTENTION: assuming that all event handlers start with 'on'
+            let m = /^on([A-Za-z]+)$/.exec(key)
+            if (m) {
+              // ATTENTION: IMO all native events are lower case
+              _eventListeners.push([m[1].toLowerCase(), val])
+            // HTML attributes or properties
+            } else if (isString(type)) {
+              switch (key) {
+                // ATTENTION: this list is utterly incomplete and IMO even incorrect
+                // TODO: Would need a complete list of 'reflected' properties, i.e. properties that are identical to attributes
+                // vs those who are only initialized with the attribute value. This should be solved in Substance generally (DOMElement, VirtualElement, and RenderingEngine)
+                // For now, this just represents 'non-reflected' properties that we have needed so far
+                // - type: for input elements
+                // - value: needed for all types of input elements
+                // - checked: input fields of type 'checkbox'
+                // - selected: options of input fields of type 'select'
+                case 'type':
+                case 'value':
+                case 'checked':
+                case 'selected': {
+                  // attribute is used as 'default' value
+                  _attributes[key] = val
+                  // and property as instance value
+                  _htmlProps[key] = val
+                  break
+                }
+                default: {
+                  _attributes[key] = val
+                }
+              }
+            // Component properties
+            } else {
+              switch (key) {
+                // TODO: are there more HTML attributes that need to be considered here?
+                case 'id': {
+                  _attributes[key] = val
+                  break
+                }
+                default: {
+                  _props[key] = val
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    let el = createElement(type, _props)
+    if (_ref) {
+      el.ref(_ref)
+    }
+    if (_classNames) {
+      el.addClass(_classNames)
+    }
+    if (_styles) {
+      el.css(_styles)
+    }
+    el.attr(_attributes)
+    el.htmlProp(_htmlProps)
+    for (let [eventName, handler] of _eventListeners) {
+      el.on(eventName, handler)
+    }
+    if (children.length > 0) {
+      el.append(children)
+    }
+    return el
   }
 
   _render (comp, oldProps, oldState) {
@@ -147,6 +267,7 @@ export default class RenderingEngine {
       state.set(OLDSTATE, vel, oldState)
     }
     try {
+      this._state = state
       if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
         console.time('capturing')
       }
@@ -171,6 +292,7 @@ export default class RenderingEngine {
         console.groupEnd('RenderingEngine')
       }
       state.dispose()
+      this._state = null
     }
   }
 
@@ -184,6 +306,7 @@ export default class RenderingEngine {
     let state = this._createState()
     vel.parent = { _comp: comp, _isFake: true }
     try {
+      this._state = state
       _capture(state, vel)
       _update(state, vel)
       return vel._comp
@@ -248,7 +371,16 @@ function _capture (state, vel, mode) {
     }
     if (needRerender) {
       let context = new VirtualElement.Context(vel)
-      let content = comp.render(context.$$)
+      let content
+      try {
+        // Note: storing a reference to the current element factory into the
+        // state so that it can be accessed during Component.render()
+        // to support JSX
+        state.pushContext(context)
+        content = comp.render(context.$$)
+      } finally {
+        state.popContext()
+      }
       if (!content) {
         throw new Error('Component.render() returned nil.')
       } else if (content._isVirtualComponent) {
@@ -323,9 +455,17 @@ function _capture (state, vel, mode) {
         // then we run comp.render($$) with a special $$ that captures
         // VirtualComponents recursively
         let descendingContext = new DescendingContext(state, context)
-        while (descendingContext.hasPendingCaptures()) {
-          descendingContext.reset()
-          comp.render(descendingContext.$$)
+        try {
+          state.pushContext(descendingContext)
+          while (descendingContext.hasPendingCaptures()) {
+            descendingContext.reset()
+            // Note: storing a reference to the current element factory into the
+            // state so that it can be accessed during Component.render()
+            // to support JSX
+            comp.render(descendingContext.$$)
+          }
+        } finally {
+          state.popContext()
         }
         // capture injected components recursively
         // for the case that the owner is not re-rendered
@@ -1121,6 +1261,7 @@ class RenderingState {
     this.componentFactory = componentFactory
     this.elementFactory = elementFactory
     this.polluted = []
+    this.contexts = []
     this.id = '__' + uuid()
   }
 
@@ -1129,6 +1270,7 @@ class RenderingState {
     this.polluted.forEach(function (obj) {
       delete obj[id]
     })
+    this.contexts = []
   }
 
   set (key, obj, val = true) {
@@ -1150,6 +1292,18 @@ class RenderingState {
 
   is (key, obj) {
     return Boolean(this.get(key, obj))
+  }
+
+  pushContext (context) {
+    this.contexts.push(context)
+  }
+
+  popContext () {
+    return this.contexts.pop()
+  }
+
+  getCurrentContext () {
+    return this.contexts[this.contexts.length - 1]
   }
 }
 
