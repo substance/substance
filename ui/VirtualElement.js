@@ -436,8 +436,6 @@ class VirtualHTMLElement extends VirtualElement {
   _attach (child) {
     child.parent = this
     if (this._context) {
-      // TODO: this is still confusing it would make more sense to add this only if owner is different
-      // otherwise every appended component is considered 'injected' which is incorrect
       if (child._owner !== this._owner && child._isVirtualComponent) {
         this._context.injectedComponents.push(child)
       }
