@@ -2081,4 +2081,176 @@ function ComponentTests (debug, memory) {
     t.equal(bar.didMount.callCount, 1, '.. and didMount() of the new child should have been called ')
     t.end()
   })
+
+  /*
+    Note: for JSX support we only check that the mapping between React notation
+    and Substance notation is working. We do not really apply a JSX transpiler
+    here, instead use the factory method directly.
+    Note, that this is an alternative to using the $$ factory method passed
+    as argument to Component.render($$)
+  */
+
+  test('[JSX] simple HTML element', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('h1')
+      }
+    }
+    let comp = MyComponent.render()
+    t.ok(comp.getElement().is('h1'), 'component element should be rendered correctly')
+    t.end()
+  })
+
+  test('[JSX] className', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', { className: 'foo bar' })
+      }
+    }
+    let comp = MyComponent.render()
+    t.ok(comp.getElement().is('div.foo.bar'), 'component element should be rendered correctly')
+    t.end()
+  })
+
+  test('[JSX] inline style', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', { style: { width: '100px' } })
+      }
+    }
+    let comp = MyComponent.render()
+    t.equal(comp.el.css('width'), '100px', 'component inline style should be rendered correctly')
+    t.end()
+  })
+
+  test('[JSX] html properties', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$(this.props.tagName, this.props)
+      }
+    }
+    let comp = MyComponent.render({ tagName: 'input', value: 'foo' })
+    t.ok(comp.el.is('input'), 'component element type should be correct')
+    t.equal(comp.el.val(), 'foo', 'component value should be correct')
+    comp.extendProps({value: 'bar'})
+    t.equal(comp.el.val(), 'bar', 'component value should be correct')
+    comp.setProps({ tagName: 'input', type: 'checkbox', checked: true })
+    t.equal(comp.getElement().getProperty('type'), 'checkbox', 'input type should be updated') // NOTE: it would not be updated if an attribute was set instead of the property
+    t.ok(comp.getElement().getProperty('checked'), 'component element should be checked')
+    t.end()
+  })
+
+  test('[JSX] attributes', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', { 'id': 'foo', 'data-id': 'bar' })
+      }
+    }
+    let comp = MyComponent.render()
+    t.ok(comp.el.is('div#foo[data-id="bar"]'), 'component element should be rendered correctly')
+    t.end()
+  })
+
+  test('[JSX] event handlers', t => {
+    class MyComponent extends Component {
+      constructor (...args) {
+        super(...args)
+        this.clicks = 0
+        this.keydowns = 0
+      }
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', { onClick: this.onClick, onKeyDown: this.onKeydown })
+      }
+      onClick () {
+        this.clicks++
+      }
+      onKeydown () {
+        this.keydowns++
+      }
+    }
+    let comp = MyComponent.render()
+    let el = comp.getElement()
+    el.emit('click')
+    t.equal(comp.clicks, 1, 'click event should have been handled')
+    el.emit('keydown')
+    t.equal(comp.keydowns, 1, 'keydown event should have been handled')
+    t.end()
+  })
+
+  test('[JSX] children', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', { className: 'parent' },
+          $$('div', { className: 'firstChild' },
+            $$('div', { className: 'firstGrandChild' })
+          ),
+          $$('div', { className: 'secondChild' },
+            $$('div', { className: 'secondGrandChild' })
+          )
+        )
+      }
+    }
+    let comp = MyComponent.render()
+    t.notNil(comp.find('.firstChild > .firstGrandChild'), 'first grandchild component should be rendered')
+    t.notNil(comp.find('.secondChild > .secondGrandChild'), 'second grandchild component should be rendered')
+    t.end()
+  })
+
+  test('[JSX] child components', t => {
+    class ParentComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', {},
+          $$(ChildComponent, { id: 'foo', className: 'first', name: 'max' }, 'bla'),
+          $$(ChildComponent, { id: 'bar', className: 'second', name: 'moritz' }, 'blupp')
+        )
+      }
+    }
+    class ChildComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', { 'data-name': this.props.name }, ...this.props.children)
+      }
+    }
+    let comp = ParentComponent.render()
+    let first = comp.find('#foo')
+    t.notNil(first, 'first child should be rendered')
+    t.ok(first.hasClass('first'), '.. with correct class')
+    t.equal(first.getAttribute('data-name'), 'max', '.. and correct attribute')
+    t.equal(first.text(), 'bla', '.. and correct content')
+    let second = comp.find('#bar')
+    t.notNil(second, 'second child should be rendered')
+    t.ok(second.hasClass('second'), '.. with correct class')
+    t.equal(second.getAttribute('data-name'), 'moritz', '.. and correct attribute')
+    t.equal(second.text(), 'blupp', '.. and correct content')
+    t.end()
+  })
+
+  test('[JSX] refs', t => {
+    class MyComponent extends Component {
+      render () {
+        let $$ = _getCreateElement(this)
+        return $$('div', {},
+          $$('div', { ref: 'child' },
+            $$('div', { ref: 'grandchild' })
+          )
+        )
+      }
+    }
+    let comp = MyComponent.render()
+    t.notNil(comp.refs.child, 'component should have a ref to the child element')
+    t.notNil(comp.refs.grandchild, 'component should have a ref to the grandchild element')
+    t.end()
+  })
+}
+
+function _getCreateElement (comp) {
+  return comp.renderingEngine.createElement.bind(comp.renderingEngine)
 }
