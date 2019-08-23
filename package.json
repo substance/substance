@@ -9,19 +9,12 @@
   "engines": {
     "node": ">=8"
   },
-  "main": "./dist/substance.cjs.js",
-  "esnext": "index.es.js",
-  "browser": "./dist/substance.js",
-  "module": "./dist/substance.es.js",
-  "sideEffects": false,
   "scripts": {
-    "prepack": "npm install && node make publish",
+    "prepack": "npm install && node make build",
     "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"ui/**/*.js\" \"util/**/*.js\" index.es.js",
-    "dev": "node make test:browser:pure -w -s",
     "pretest": "npm run lint",
     "test": "node make test",
-    "test-and-cover": "npm run test && node make cover",
-    "docs": "node make docs -w -s",
+    "test-and-cover": "node make test && node make cover",
     "start": "node make dev -w -s"
   },
   "author": {
@@ -50,7 +43,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
-    "substance-bundler": "0.25.6",
+    "substance-bundler": "0.27.0",
     "substance-test": "0.13.1"
   },
   "files": [
@@ -71,5 +64,10 @@
     "vendor/entities.js",
     "vendor/htmlparser2.js",
     "vendor/lodash-es.js"
-  ]
+  ],
+  "sideEffects": false,
+  "main": "./dist/substance.cjs.js",
+  "esnext": "index.es.js",
+  "browser": "./dist/substance.js",
+  "module": "./dist/substance.es.js"
 }
