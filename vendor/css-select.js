@@ -1,7 +1,7 @@
-import BaseFuncs from 'boolbase';
-import nthCheck from 'nth-check';
+import domutils from '../dom/domutils';
+import boolbase from 'boolbase';
 import cssWhat from 'css-what';
-import domutils from 'domutils';
+import nthCheck from 'nth-check';
 
 var universal = 50;
 var tag = 30;
@@ -34,14 +34,22 @@ var procedure$1 = /*#__PURE__*/Object.freeze({
   parent: parent,
   sibling: sibling,
   adjacent: adjacent,
-  default: procedure
+  'default': procedure
 });
 
-var procedure$2 = ( procedure$1 && procedure ) || procedure$1;
+function getCjsExportFromNamespace (n) {
+	return n && n['default'] || n;
+}
+
+var procedure$2 = getCjsExportFromNamespace(procedure$1);
 
 var sort = sortByProcedure;
 
-
+/*
+	sort the parts of the passed selector,
+	as there is potential for optimization
+	(some types of selectors are faster than others)
+*/
 
 
 
@@ -81,27 +89,27 @@ function getProcedure(token){
 		proc = attributes[token.action];
 
 		if(proc === attributes.equals && token.name === "id"){
-			
+			//prefer ID selectors (eg. #ID)
 			proc = 9;
 		}
 
 		if(token.ignoreCase){
-			
-			
+			//ignoreCase adds some overhead, prefer "normal" token
+			//this is a binary operation, to ensure it's still an int
 			proc >>= 1;
 		}
 	} else if(proc === procedure$2.pseudo){
 		if(!token.data){
 			proc = 3;
 		} else if(token.name === "has" || token.name === "contains"){
-			proc = 0; 
+			proc = 0; //expensive in any case
 		} else if(token.name === "matches" || token.name === "not"){
 			proc = 0;
 			for(var i = 0; i < token.data.length; i++){
-				
+				//TODO better handling of complex selectors
 				if(token.data[i].length !== 1) continue;
 				var cur = getProcedure(token.data[i][0]);
-				
+				//avoid executing :has or :contains
 				if(cur === 0){
 					proc = 0;
 					break;
@@ -116,13 +124,15 @@ function getProcedure(token){
 	return proc;
 }
 
-var falseFunc = BaseFuncs.falseFunc;
+var falseFunc = boolbase.falseFunc;
 
-
+//https://github.com/slevithan/XRegExp/blob/master/src/xregexp.js#L469
 var reChars = /[-[\]{}()*+?.,\\^$|#\s]/g;
 
 function factory(adapter){
-	
+	/*
+		attribute selectors
+	*/
 	var attributeRules = {
 		__proto__: null,
 		equals: function(next, data){
@@ -305,14 +315,16 @@ function factory(adapter){
 var attributes$1 = factory;
 
 function generalFactory(adapter, Pseudos){
-	
+	/*
+		all available rules
+	*/
 	return {
 		__proto__: null,
 
 		attribute: attributes$1(adapter).compile,
 		pseudo: Pseudos.compile,
 
-		
+		//tags
 		tag: function(next, data){
 			var name = data.name;
 			return function tag(elem){
@@ -320,7 +332,7 @@ function generalFactory(adapter, Pseudos){
 			}
 		},
 
-		
+		//traversal
 		descendant: function(next){
 			return function descendant(elem){
 
@@ -334,7 +346,7 @@ function generalFactory(adapter, Pseudos){
 			};
 		},
 		_flexibleDescendant: function(next){
-			
+			// Include element itself, only used while querying an array
 			return function descendant(elem){
 
 				var found = next(elem);
@@ -400,14 +412,27 @@ function generalFactory(adapter, Pseudos){
 
 var general = generalFactory;
 
-var trueFunc          = BaseFuncs.trueFunc,
-	falseFunc$1         = BaseFuncs.falseFunc;
+/*
+	pseudo selectors
+
+	---
+
+	they are available in two forms:
+	* filters called when the selector
+	  is compiled and return a function
+	  that needs to return next()
+	* pseudos get called on execution
+	  they need to return a boolean
+*/
+
+var trueFunc          = boolbase.trueFunc,
+	falseFunc$1         = boolbase.falseFunc;
 
 function filtersFactory(adapter){
 	var attributes  = attributes$1(adapter),
 		checkAttrib = attributes.rules.equals;
 
-	
+	//helper methods
 	function equals(a, b){
 		if(typeof adapter.equals === "function") return adapter.equals(a, b);
 
@@ -441,7 +466,7 @@ function filtersFactory(adapter){
 			};
 		},
 
-		
+		//location specific methods
 		"nth-child": function(next, rule){
 			var func = nthCheck(rule);
 
@@ -519,7 +544,7 @@ function filtersFactory(adapter){
 			};
 		},
 
-		
+		//TODO determine the actual root element
 		root: function(next){
 			return function(elem){
 				return !adapter.getParent(elem) && next(elem);
@@ -528,12 +553,12 @@ function filtersFactory(adapter){
 
 		scope: function(next, rule, options, context){
 			if(!context || context.length === 0){
-				
+				//equivalent to :root
 				return filters.root(next);
 			}
 
 			if(context.length === 1){
-				
+				//NOTE: can't be unpacked, as :has uses this for side-effects
 				return function(elem){
 					return equals(context[0], elem) && next(elem);
 				};
@@ -544,7 +569,7 @@ function filtersFactory(adapter){
 			};
 		},
 
-		
+		//jQuery extensions (others follow as pseudos)
 		checkbox: getAttribFunc("type", "checkbox"),
 		file: getAttribFunc("type", "file"),
 		password: getAttribFunc("type", "password"),
@@ -557,14 +582,14 @@ function filtersFactory(adapter){
 }
 
 function pseudosFactory(adapter){
-	
+	//helper methods
 	function getFirstElement(elems){
 		for(var i = 0; elems && i < elems.length; i++){
 			if(adapter.isTag(elems[i])) return elems[i];
 		}
 	}
 
-	
+	//while filters are precompiled, pseudos get called when they are needed
 	var pseudos = {
 		empty: function(elem){
 			return !adapter.getChildren(elem).some(function(elem){
@@ -631,22 +656,22 @@ function pseudosFactory(adapter){
 			return true;
 		},
 
-		
+		//:matches(a, area, link)[href]
 		link: function(elem){
 			return adapter.hasAttrib(elem, "href");
 		},
-		visited: falseFunc$1, 
-		
+		visited: falseFunc$1, //seems to be a valid implementation
+		//TODO: :any-link once the name is finalized (as an alias of :link)
 
-		
-		
+		//forms
+		//to consider: :target
 
-		
+		//:matches([selected], select:not([multiple]):not(> option[selected]) > option:first-of-type)
 		selected: function(elem){
 			if(adapter.hasAttrib(elem, "selected")) return true;
 			else if(adapter.getName(elem) !== "option") return false;
 
-			
+			//the first <option> in a <select> is also selected
 			var parent = adapter.getParent(elem);
 
 			if(
@@ -672,38 +697,38 @@ function pseudosFactory(adapter){
 
 			return sawElem;
 		},
-		
-		
-		
-		
-		
-		
+		//https://html.spec.whatwg.org/multipage/scripting.html#disabled-elements
+		//:matches(
+		//  :matches(button, input, select, textarea, menuitem, optgroup, option)[disabled],
+		//  optgroup[disabled] > option),
+		// fieldset[disabled] * //TODO not child of first <legend>
+		//)
 		disabled: function(elem){
 			return adapter.hasAttrib(elem, "disabled");
 		},
 		enabled: function(elem){
 			return !adapter.hasAttrib(elem, "disabled");
 		},
-		
+		//:matches(:matches(:radio, :checkbox)[checked], :selected) (TODO menuitem)
 		checked: function(elem){
 			return adapter.hasAttrib(elem, "checked") || pseudos.selected(elem);
 		},
-		
+		//:matches(input, select, textarea)[required]
 		required: function(elem){
 			return adapter.hasAttrib(elem, "required");
 		},
-		
+		//:matches(input, select, textarea):not([required])
 		optional: function(elem){
 			return !adapter.hasAttrib(elem, "required");
 		},
 
-		
+		//jQuery extensions
 
-		
+		//:not(:empty)
 		parent: function(elem){
 			return !pseudos.empty(elem);
 		},
-		
+		//:matches(h1, h2, h3, h4, h5, h6)
 		header: function(elem){
 			var name = adapter.getName(elem);
 			return name === "h1" ||
@@ -714,14 +739,14 @@ function pseudosFactory(adapter){
 					name === "h6";
 		},
 
-		
+		//:matches(button, input[type=button])
 		button: function(elem){
 			var name = adapter.getName(elem);
 			return name === "button" ||
 					name === "input" &&
 					adapter.getAttributeValue(elem, "type") === "button";
 		},
-		
+		//:matches(input, textarea, select, button)
 		input: function(elem){
 			var name = adapter.getName(elem);
 			return name === "input" ||
@@ -729,7 +754,7 @@ function pseudosFactory(adapter){
 					name === "select" ||
 					name === "button";
 		},
-		
+		//input:matches(:not([type!='']), [type='text' i])
 		text: function(elem){
 			var attr;
 			return adapter.getName(elem) === "input" && (
@@ -754,7 +779,7 @@ function verifyArgs(func, name, subselect){
 	}
 }
 
-
+//FIXME this feels hacky
 var re_CSS3 = /^(?:(?:nth|last|first|only)-(?:child|of-type)|root|empty|(?:en|dis)abled|checked|not)$/;
 
 function factory$1(adapter){
@@ -793,10 +818,14 @@ function factory$1(adapter){
 
 var pseudos = factory$1;
 
+/*
+	compiles a selector to an executable function
+*/
+
 var compile = compileFactory;
 
-var trueFunc$1       = BaseFuncs.trueFunc,
-	falseFunc$2      = BaseFuncs.falseFunc;
+var trueFunc$1       = boolbase.trueFunc,
+	falseFunc$2      = boolbase.falseFunc;
 
 function compileFactory(adapter){
 	var Pseudos     = pseudos(adapter),
@@ -835,10 +864,10 @@ function compileFactory(adapter){
 		SCOPE_TOKEN = {type: "pseudo", name: "scope"},
 		PLACEHOLDER_ELEMENT = {};
 
-	
-	
+	//CSS 4 Spec (Draft): 3.3.1. Absolutizing a Scope-relative Selector
+	//http://www.w3.org/TR/selectors4/#absolutizing
 	function absolutize(token, context){
-		
+		//TODO better check if context is document
 		var hasContext = !!context && !!context.length && context.every(function(e){
 			return e === PLACEHOLDER_ELEMENT || !!adapter.getParent(e);
 		});
@@ -914,9 +943,9 @@ function compileFactory(adapter){
 		return t.some(isTraversal);
 	}
 
-	
-	
-	
+	//:not, :has and :matches have to compile selectors
+	//doing this in lib/pseudos.js would lead to circular dependencies,
+	//so we add them here
 	filters.not = function(next, token, options, context){
 		var opts = {
 			xmlMode: !!(options && options.xmlMode),
@@ -945,7 +974,7 @@ function compileFactory(adapter){
 			strict: !!(options && options.strict)
 		};
 
-		
+		//FIXME: Uses an array as a pointer to the current element (side effects)
 		var context = token.some(containsTraversal) ? [PLACEHOLDER_ELEMENT] : null;
 
 		var func = compileToken(token, opts, context);
@@ -991,7 +1020,7 @@ function compileFactory(adapter){
 
 var cssSelect = CSSselect;
 
-var falseFunc$3      = BaseFuncs.falseFunc,
+var falseFunc$3      = boolbase.falseFunc,
 	defaultCompile = compile(domutils);
 
 function adapterCompile(adapter){
@@ -1005,9 +1034,9 @@ function getSelectorFunc(searchFunc){
 	return function select(query, elems, options){
 		options = options || {};
 		options.adapter = options.adapter || domutils;
-		var compile$$1 = adapterCompile(options.adapter);
+		var compile = adapterCompile(options.adapter);
 
-		if(typeof query !== "function") query = compile$$1.compileUnsafe(query, options, elems);
+		if(typeof query !== "function") query = compile.compileUnsafe(query, options, elems);
 		if(query.shouldTestNextSiblings) elems = appendNextSiblings((options && options.context) || elems, options.adapter);
 		if(!Array.isArray(elems)) elems = options.adapter.getChildren(elems);
 		else elems = options.adapter.removeSubsets(elems);
@@ -1024,7 +1053,7 @@ function getNextSiblings(elem, adapter){
 }
 
 function appendNextSiblings(elems, adapter){
-	
+	// Order matters because jQuery seems to check the children before the siblings
 	if(!Array.isArray(elems)) elems = [elems];
 	var newElems = elems.slice(0);
 
@@ -1046,11 +1075,13 @@ var selectOne = getSelectorFunc(function selectOne(query, elems, options){
 function is(elem, query, options){
 	options = options || {};
 	options.adapter = options.adapter || domutils;
-	var compile$$1 = adapterCompile(options.adapter);
-	return (typeof query === "function" ? query : compile$$1(query, options))(elem);
+	var compile = adapterCompile(options.adapter);
+	return (typeof query === "function" ? query : compile(query, options))(elem);
 }
 
-
+/*
+	the exported interface
+*/
 function CSSselect(query, elems, options){
 	return selectAll(query, elems, options);
 }
@@ -1064,11 +1095,11 @@ CSSselect.selectOne = selectOne;
 
 CSSselect.is = is;
 
-
+//legacy methods (might be removed)
 CSSselect.parse = defaultCompile;
 CSSselect.iterate = selectAll;
 
-
+//hooks
 CSSselect._compileUnsafe = defaultCompile.compileUnsafe;
 CSSselect._compileToken = defaultCompile.compileToken;
 
