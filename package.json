@@ -42,6 +42,10 @@
     "karma-firefox-launcher": "1.1.0",
     "karma-tap": "4.1.4",
     "karma-tape-reporter": "1.0.3",
+    "rollup": "^1.20.1",
+    "rollup-plugin-commonjs": "^10.0.2",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
     "substance-bundler": "0.25.6",
@@ -62,7 +66,6 @@
     "package.json",
     "*.css",
     "vendor/css-select.js",
-    "vendor/domutils.js",
     "vendor/entities.js",
     "vendor/htmlparser2.js",
     "vendor/lodash-es.js"

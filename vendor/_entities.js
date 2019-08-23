@@ -1,13 +1,15 @@
 import encode from 'entities/lib/encode'
-import decodeCodepoint from 'entities/lib/decode_codepoint.js'
-import entitiesJSON from 'entities/maps/entities.json'
-import legacyJSON from 'entities/maps/legacy.json'
-import xmlJSON from 'entities/maps/xml.json'
+import decode_codepoint from 'entities/lib/decode_codepoint.js'
+import entities from 'entities/maps/entities.json'
+import legacy from 'entities/maps/legacy.json'
+import xml from 'entities/maps/xml.json'
 
-export default {
-  encodeXML: encode.XML,
-  decodeCodepoint,
-  entitiesJSON,
-  legacyJSON,
-  xmlJSON
+const encodeXML = encode.XML
+
+export {
+  decode_codepoint,
+  entities,
+  legacy,
+  xml,
+  encodeXML
 }
