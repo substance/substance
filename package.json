@@ -31,6 +31,7 @@
     "nth-check": "1.0.1"
   },
   "devDependencies": {
+    "istanbul-lib-instrument": "^3.3.0",
     "karma": "1.x",
     "karma-chrome-launcher": "2.2.0",
     "karma-coverage": "1.1.2",
