@@ -1,5 +1,7 @@
 const nodeResolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
+const istanbul = require('substance-bundler/extensions/rollup/rollup-plugin-istanbul')
+
 const DIST = 'dist/'
 
 module.exports = function (commandLineArgs) {
@@ -59,14 +61,16 @@ module.exports = function (commandLineArgs) {
     ]
   }
   if (target === 'coverage') {
-    config.istanbul = {
-      include: [
-        'dom/*.js',
-        'model/**/*.js',
-        'ui/*.js',
-        'util/*.js'
-      ]
-    }
+    config.plugins.push(
+      istanbul({
+        include: [
+          'dom/*.js',
+          'model/*.js',
+          'ui/*.js',
+          'util/*.js'
+        ]
+      })
+    )
   }
   return config
 }
