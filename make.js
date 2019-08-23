@@ -21,7 +21,7 @@ b.task('default', ['clean', 'css', 'lib'])
 // Default dev mode, only browser bundles are made and no ES5 transpilation happens
 b.task('dev', ['clean', 'css', 'lib:browser', 'test:browser'])
 
-b.task('build', ['clean', 'css', 'lib', 'minify'])
+b.task('build', ['clean', 'css', 'lib'])
 
 b.task('test', ['test:node', 'cover'])
   .describe('runs the test suite')
@@ -55,12 +55,6 @@ b.task('lib:node', () => {
 
 b.task('lib:es', () => {
   rollup(b, libConfig({ target: 'es' }))
-})
-
-b.task('minify', () => {
-  b.minify(DIST + 'substance.cjs.js', DIST + 'substance.cjs.min.js')
-  b.minify(DIST + 'substance.es.js', DIST + 'substance.es.min.js')
-  b.minify(DIST + 'substance.js', DIST + 'substance.min.js')
 })
 
 b.task('test', ['test:browser', 'test:node'])
