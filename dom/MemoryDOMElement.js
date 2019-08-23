@@ -6,7 +6,7 @@ import last from '../util/last'
 import inBrowser from '../util/inBrowser'
 import ElementType from 'domelementtype'
 import cssSelect from '../vendor/css-select'
-import DomUtils from '../vendor/domutils'
+import DomUtils from './domutils'
 import DOMElement from './DOMElement'
 import parseMarkup from './parseMarkup'
 

@@ -1,5 +1,5 @@
 import parseMarkup from './parseMarkup'
-import DomUtils from '../vendor/domutils'
+import DomUtils from './domutils'
 import MemoryDOMElement from './MemoryDOMElement'
 
 const ELEMENT_BLACK_LIST = new Set(['script', 'object', 'embed', 'link', 'math', 'iframe', 'comment', 'base'])

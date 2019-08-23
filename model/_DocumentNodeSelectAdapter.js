@@ -1,4 +1,4 @@
-import DomUtils from '../vendor/domutils'
+import DomUtils from '../dom/domutils'
 import { getChildren, getParent } from './documentHelpers'
 
 export default class DocumentNodeSelectAdapter extends DomUtils.DomUtils {

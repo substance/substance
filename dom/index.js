@@ -6,6 +6,7 @@ export { default as DefaultDOMElement } from './DefaultDOMElement'
 export { default as DOMElement } from './DOMElement'
 export { default as DOMEventListener } from './DOMEventListener'
 export { domHelpers }
+export { default as DomUtils } from './domutils'
 export { default as MemoryDOMElement } from './MemoryDOMElement'
 export { default as nameWithoutNS } from './nameWithoutNS'
 export { default as prettyPrintXML } from './prettyPrintXML'
