@@ -10,8 +10,9 @@
     "node": ">=8"
   },
   "main": "./dist/substance.cjs.js",
-  "jsnext:main": "./dist/substance.es.js",
+  "esnext": "index.es.js",
   "browser": "./dist/substance.js",
+  "module": "./dist/substance.es.js",
   "sideEffects": false,
   "scripts": {
     "prepack": "npm install && node make publish",
