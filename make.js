@@ -60,17 +60,17 @@ b.task('lib:es', () => {
 b.task('test', ['test:browser', 'test:node'])
 
 b.task('test:browser', ['lib:browser'], () => {
-  rollup(b, testConfig('browser'))
+  rollup(b, testConfig({ target: 'browser' }))
 }).describe('builds the test-suite for the browser (open test/index.html)')
 
 b.task('test:node', ['lib:node'], () => {
-  rollup(b, testConfig('node'))
+  rollup(b, testConfig({ target: 'node' }))
   fork(b, require.resolve('substance-test/bin/test'), ['./tmp/tests.cjs.js'], { verbose: true })
 }).describe('runs the test suite in nodejs')
 
 b.task('cover', () => {
   rollup(b, libConfig({ target: 'coverage' }))
-  rollup(b, testConfig('browser'))
+  rollup(b, testConfig({ target: 'browser' }))
   karma(b, {
     browsers: process.env.TRAVIS ? ['ChromeTravis', 'Firefox'] : ['Chrome']
   })
