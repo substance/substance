@@ -2,8 +2,8 @@ import { decode_codepoint } from './entities';
 import { entities } from './entities';
 import { legacy } from './entities';
 import { xml } from './entities';
-import inherits from './_inherits';
-import events from './_events';
+import inherits from './inherits';
+import events from './events';
 
 var Tokenizer_1 = Tokenizer;
 

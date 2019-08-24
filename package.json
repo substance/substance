@@ -1,6 +1,6 @@
 {
   "name": "substance",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "",
   "repository": {
     "type": "git",
@@ -61,10 +61,7 @@
     "README.md",
     "package.json",
     "*.css",
-    "vendor/css-select.js",
-    "vendor/entities.js",
-    "vendor/htmlparser2.js",
-    "vendor/lodash-es.js"
+    "vendor/*.js"
   ],
   "sideEffects": false,
   "main": "./dist/substance.cjs.js",

@@ -92,8 +92,8 @@ function _patchHtmlparser2 () {
       output.code = output.code.replace("import entities from 'entities/maps/entities.json'", "import { entities } from './entities'")
       output.code = output.code.replace("import legacy from 'entities/maps/legacy.json'", "import { legacy } from './entities'")
       output.code = output.code.replace("import xml from 'entities/maps/xml.json'", "import { xml } from './entities'")
-      output.code = output.code.replace("import inherits from 'inherits'", "import inherits from './_inherits'")
-      output.code = output.code.replace("import events from 'events'", "import events from './_events'")
+      output.code = output.code.replace("import inherits from 'inherits'", "import inherits from './inherits'")
+      output.code = output.code.replace("import events from 'events'", "import events from './events'")
     }
   }
 }
