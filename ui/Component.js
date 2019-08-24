@@ -351,16 +351,22 @@ export default class Component extends EventEmitter {
     }, document.body)
     ```
   */
-  mount (el) {
+  mount (el, options = {}) {
     if (!el) {
       throw new Error('Element is required.')
     }
     el = DefaultDOMElement.wrap(el)
-    // Makes sure a new element is created for the component
-    this.el = null
+    if (options.adoptElement) {
+      this.el = el
+    } else {
+      // Makes sure a new element is created for the component
+      this.el = null
+    }
     this.renderingEngine = Component.createRenderingEngine(el.getOwnerDocument())
-    this._render()
-    el.appendChild(this.el)
+    this._render(this.props, this.state, options)
+    if (!options.adoptElement) {
+      el.appendChild(this.el)
+    }
     if (el.isInDocument()) {
       this.triggerDidMount()
     }
@@ -399,13 +405,13 @@ export default class Component extends EventEmitter {
     }
   }
 
-  _render (oldProps, oldState) {
+  _render (oldProps, oldState, options = {}) {
     if (this.__isRendering__) {
       throw new Error('Component is rendering already.')
     }
     this.__isRendering__ = true
     try {
-      this.renderingEngine._render(this, oldProps, oldState)
+      this.renderingEngine._render(this, oldProps, oldState, options)
     } finally {
       delete this.__isRendering__
     }
@@ -1057,8 +1063,9 @@ export default class Component extends EventEmitter {
     }
     el = DefaultDOMElement.wrap(el)
     const ComponentClass = this
-    let comp = new ComponentClass(null, props, options)
-    comp.mount(el)
+    let comp
+    comp = new ComponentClass(null, props, options)
+    comp.mount(el, options)
     return comp
   }
 

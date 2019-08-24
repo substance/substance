@@ -248,7 +248,7 @@ export default class RenderingEngine {
     return el
   }
 
-  _render (comp, oldProps, oldState) {
+  _render (comp, oldProps, oldState, options = {}) {
     if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
       console.group('RenderingEngine')
       if (!comp.el) {
@@ -277,15 +277,25 @@ export default class RenderingEngine {
         console.timeEnd('capturing')
       }
 
-      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-        console.time('updating')
-      }
-      _update(state, vel)
-      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-        console.timeEnd('updating')
-      }
+      if (options.adoptElement) {
+        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          console.time('adopting')
+        }
+        _adopt(state, vel, comp.el)
+        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          console.timeEnd('adopting')
+        }
+      } else {
+        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          console.time('updating')
+        }
+        _update(state, vel)
+        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          console.timeEnd('updating')
+        }
 
-      _triggerDidUpdate(state, vel)
+        _triggerDidUpdate(state, vel)
+      }
     } finally {
       if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
         console.timeEnd('rendering (total)')
@@ -758,11 +768,6 @@ function _update (state, vel) {
       _updateDOMElement(el, vel)
     }
 
-    // TODO: to allow mounting a prerendered DOM element
-    // we would need to allow to 'take ownership' instead of removing
-    // the element. This being a special situation, we should only
-    // do that when mounting
-
     // structural updates are necessary only for non-forwarding Components and HTML elements without innerHTML
     if ((vel._isVirtualComponent || vel._isVirtualHTMLElement) && !vel.hasInnerHTML()) {
       let newChildren = vel.children
@@ -927,6 +932,81 @@ function _update (state, vel) {
   state.set(RENDERED, comp)
 }
 
+function _adopt (state, vel, el) {
+  let comp = vel._comp
+  if ((vel._isVirtualComponent || vel._isVirtualHTMLElement) && !el.isElementNode()) {
+    throw new Error('Provided DOM element is not compatible.')
+  }
+  comp.el = el
+  _updateDOMElement(el, vel)
+  _propagateForwardedEl(vel, el)
+
+  if ((vel._isVirtualComponent || vel._isVirtualHTMLElement)) {
+    let existingChildNodes = el.childNodes
+    let virtualChildNodes = vel.children
+    let pos1 = 0; let pos2 = 0
+    while (pos1 < existingChildNodes.length || pos2 < virtualChildNodes.length) {
+      let child1 = existingChildNodes[pos1]
+      let child2 = virtualChildNodes[pos2]
+      // remove all remaining DOM nodes
+      if (!child2) {
+        while (child1) {
+          child1.remove()
+          pos1++
+          child1 = existingChildNodes[pos1]
+        }
+      }
+      if (!child1) {
+        while (child2) {
+          el.appendChild(_createEl(state, child2))
+          pos2++
+          child2 = virtualChildNodes[pos2]
+        }
+      }
+      // continue with the forwarded element
+      while (child2._isForwarding) {
+        child2 = child2._forwardedEl
+      }
+      // remove incompatible DOM elements
+      if (
+        (child1.isElementNode() && (child2._isVirtualHTMLElement || child2._isVirtualComponent)) ||
+        (child1.isTextNode() && child2._isVirtualTextNode)
+      ) {
+        _adopt(state, child2, child1)
+        pos1++
+        pos2++
+      } else {
+        child1.remove()
+        pos1++
+        continue
+      }
+    }
+  }
+}
+
+function _createEl (state, vel) {
+  let el = _createDOMElement(state, vel)
+  vel._comp.el = el
+  _propagateForwardedEl(vel, el)
+
+  if ((vel._isVirtualComponent || vel._isVirtualHTMLElement)) {
+    vel.children.forEach(vc => {
+      el.appendChild(_createEl(state, vc))
+    })
+  }
+  return el
+}
+
+function _propagateForwardedEl (vel, el) {
+  if (vel._isForwarded) {
+    let parent = vel.parent
+    while (parent && parent._isForwarding) {
+      parent._comp.el = el
+      parent = vel.parent
+    }
+  }
+}
+
 function _getInternalComponentData (comp) {
   if (!comp.__internal__) {
     comp.__internal__ = new InternalComponentData()
@@ -1056,7 +1136,9 @@ function _createDOMElement (state, vel) {
 function _updateDOMElement (el, vel) {
   // special handling for text nodes
   if (vel._isVirtualTextNode) {
-    el.setTextContent(vel.text)
+    if (el.textContent !== vel.text) {
+      el.setTextContent(vel.text)
+    }
     return
   }
   let tagName = el.getTagName()

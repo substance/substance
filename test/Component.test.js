@@ -1,5 +1,8 @@
 import { test as substanceTest, spy } from 'substance-test'
-import { DefaultDOMElement, substanceGlobals, isEqual, Component, platform, isArrayEqual, RenderingEngine } from 'substance'
+import {
+  DefaultDOMElement, substanceGlobals, isEqual, Component, platform, isArrayEqual,
+  RenderingEngine, domHelpers
+} from 'substance'
 import { getMountPoint } from './shared/testHelpers'
 import TestComponent from './shared/TestComponent'
 
@@ -60,7 +63,7 @@ function ComponentTests (debug, memory) {
   })
 
   test('Mounting a component', t => {
-    // Mounting a detached element
+    // Mounting onto a detached element
     let doc = t._document.createDocument('html')
     let el = doc.createElement('div')
     let comp = Simple.mount(el)
@@ -2247,6 +2250,26 @@ function ComponentTests (debug, memory) {
     let comp = MyComponent.render()
     t.notNil(comp.refs.child, 'component should have a ref to the child element')
     t.notNil(comp.refs.grandchild, 'component should have a ref to the grandchild element')
+    t.end()
+  })
+
+  test('[Adopt] Mounting a component on a prerendered element', t => {
+    class Foo extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').text('Foo')
+      }
+    }
+    function _getElements (el) {
+      let els = []
+      domHelpers.walk(el, _el => els.push(_el))
+      return els
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head><title>Test</title></head><body><div id="foo">Foo</div></body></html>')
+    let htmlEl = doc.find('html')
+    let origEls = _getElements(htmlEl)
+    Foo.mount({}, doc.find('#foo'), { adoptElement: true })
+    let newEls = _getElements(htmlEl)
+    t.ok(isArrayEqual(newEls, origEls), 'all elements should have been reused')
     t.end()
   })
 }
