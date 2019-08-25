@@ -44,7 +44,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "standard": "^11.0.1",
     "substance": "1.0.0-preview.19",
-    "substance-bundler": "0.27.0",
+    "substance-bundler": "0.27.1",
     "substance-test": "0.13.1"
   },
   "files": [
