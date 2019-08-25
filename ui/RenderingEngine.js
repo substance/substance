@@ -192,11 +192,9 @@ export default class RenderingEngine {
                 // TODO: Would need a complete list of 'reflected' properties, i.e. properties that are identical to attributes
                 // vs those who are only initialized with the attribute value. This should be solved in Substance generally (DOMElement, VirtualElement, and RenderingEngine)
                 // For now, this just represents 'non-reflected' properties that we have needed so far
-                // - type: for input elements
                 // - value: needed for all types of input elements
                 // - checked: input fields of type 'checkbox'
                 // - selected: options of input fields of type 'select'
-                case 'type':
                 case 'value':
                 case 'checked':
                 case 'selected': {
@@ -1202,7 +1200,7 @@ function _updateDOMElement (el, vel) {
 }
 
 function _hashGet (hash, key) {
-  if (hash instanceof Map) {
+  if (isFunction(hash.get)) {
     return hash.get(key)
   } else {
     return hash[key]

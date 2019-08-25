@@ -2142,7 +2142,7 @@ function ComponentTests (debug, memory) {
     comp.extendProps({value: 'bar'})
     t.equal(comp.el.val(), 'bar', 'component value should be correct')
     comp.setProps({ tagName: 'input', type: 'checkbox', checked: true })
-    t.equal(comp.getElement().getProperty('type'), 'checkbox', 'input type should be updated') // NOTE: it would not be updated if an attribute was set instead of the property
+    t.equal(comp.getElement().getAttribute('type'), 'checkbox', 'input type should be updated') // NOTE: it would not be updated if an attribute was set instead of the property
     t.ok(comp.getElement().getProperty('checked'), 'component element should be checked')
     t.end()
   })
