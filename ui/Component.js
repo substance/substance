@@ -523,10 +523,11 @@ export default class Component extends EventEmitter {
   // EXPERIMENTAL
   // TODO: rethink this. We need this for triggerDidMount() and triggerDispose()
   // in case of forwarded / forwarding components
-  // however this implicit el._comp comparison is not very good.
-  // It might be better to have something more explicit
+  // however this implicit el._comp comparison is not very good,
+  // because it does not reflect the forwarding semantically.
+  // We need something more explicit.
   _isForwarding () {
-    if (this.el) {
+    if (this.el && this.el._comp) {
       return this.el._comp !== this
     } else {
       return false

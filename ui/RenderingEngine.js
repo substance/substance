@@ -281,6 +281,9 @@ export default class RenderingEngine {
         if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
           console.time('adopting')
         }
+        // NOTE: if root is forwarding then use the forwarded child
+        // instead. The DOM element will be propagated upwards.
+        vel = _getForwardedEl(vel)
         _adopt(state, vel, comp.el)
         if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
           console.timeEnd('adopting')
@@ -942,7 +945,7 @@ function _adopt (state, vel, el) {
   _propagateForwardedEl(vel, el)
 
   if ((vel._isVirtualComponent || vel._isVirtualHTMLElement)) {
-    let existingChildNodes = el.childNodes
+    let existingChildNodes = el.childNodes.slice()
     let virtualChildNodes = vel.children
     let pos1 = 0; let pos2 = 0
     while (pos1 < existingChildNodes.length || pos2 < virtualChildNodes.length) {
@@ -955,6 +958,7 @@ function _adopt (state, vel, el) {
           pos1++
           child1 = existingChildNodes[pos1]
         }
+        break
       }
       if (!child1) {
         while (child2) {
@@ -962,11 +966,11 @@ function _adopt (state, vel, el) {
           pos2++
           child2 = virtualChildNodes[pos2]
         }
+        break
       }
       // continue with the forwarded element
-      while (child2._isForwarding) {
-        child2 = child2._forwardedEl
-      }
+      child2 = _getForwardedEl(child2)
+
       // remove incompatible DOM elements
       if (
         (child1.isElementNode() && (child2._isVirtualHTMLElement || child2._isVirtualComponent)) ||
@@ -997,12 +1001,22 @@ function _createEl (state, vel) {
   return el
 }
 
+function _getForwardedEl (vel) {
+  // Note: if the root component is forwarding
+  // we have to use the forwarded element instead
+  // _propagateForwardedEl() will latern propagate the element up-tree
+  while (vel._isForwarding) {
+    vel = vel._forwardedEl
+  }
+  return vel
+}
+
 function _propagateForwardedEl (vel, el) {
   if (vel._isForwarded) {
     let parent = vel.parent
     while (parent && parent._isForwarding) {
       parent._comp.el = el
-      parent = vel.parent
+      parent = parent.parent
     }
   }
 }

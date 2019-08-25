@@ -2253,27 +2253,141 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[Adopt] Mounting a component on a prerendered element', t => {
-    class Foo extends Component {
+  test('[Adopt] Adopting a simple element', t => {
+    let _didMount = false
+    class MyComponent extends Component {
       render ($$) {
         return $$('div').attr('id', 'foo').text('Foo')
       }
-    }
-    function _getElements (el) {
-      let els = []
-      domHelpers.walk(el, _el => els.push(_el))
-      return els
+      didMount () {
+        _didMount = true
+      }
     }
     let doc = DefaultDOMElement.parseHTML('<html><head><title>Test</title></head><body><div id="foo">Foo</div></body></html>')
     let htmlEl = doc.find('html')
     let origEls = _getElements(htmlEl)
-    Foo.mount({}, doc.find('#foo'), { adoptElement: true })
+    MyComponent.mount({}, doc.find('#foo'), { adoptElement: true })
     let newEls = _getElements(htmlEl)
     t.ok(isArrayEqual(newEls, origEls), 'all elements should have been reused')
+    t.ok(_didMount, 'didMount() should have been called')
+    t.end()
+  })
+
+  test('[Adopt] Adopting an element tree', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('h1').attr('id', 'bar'),
+          $$('p').attr('id', 'baz')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"><div id="bar"></div><div id="baz"></div></div></body></html>')
+    let htmlEl = doc.find('html')
+    let origEls = _getElements(htmlEl)
+    MyComponent.mount({}, doc.find('#foo'), { adoptElement: true })
+    let newEls = _getElements(htmlEl)
+    t.ok(isArrayEqual(newEls, origEls), 'all elements should have been reused')
+    t.end()
+  })
+
+  test('[Adopt] Adopting an empty element', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('h1').attr('id', 'bar'),
+          $$('p').attr('id', 'baz')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
+    let fooEl = doc.find('#foo')
+    MyComponent.mount({}, fooEl, { adoptElement: true })
+    let elTypes = _getElementTypes(fooEl)
+    t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been rendered')
+    t.end()
+  })
+
+  test('[Adopt] Adopting an incompatible tree', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('h1').attr('id', 'bar'),
+          $$('p').attr('id', 'baz')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"><span><span></span></span><span></span><span></span><span></span><span></span></div></body></html>')
+    let fooEl = doc.find('#foo')
+    MyComponent.mount({}, fooEl, { adoptElement: true })
+    let elTypes = _getElementTypes(fooEl)
+    t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
+    t.end()
+  })
+
+  // Note: this is rather typical for pretty printed HTML, i.e. lots of TextNodes between the actual rendered elements
+  test('[Adopt] Adopting an incompatible tree (stripping incompatible DOM nodes)', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('h1').attr('id', 'bar'),
+          $$('p').attr('id', 'baz')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"><!--comment-->some text<div></div>abcde<div></div></div></body></html>')
+    let fooEl = doc.find('#foo')
+    MyComponent.mount({}, fooEl, { adoptElement: true })
+    let elTypes = _getElementTypes(fooEl)
+    t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
+    t.end()
+  })
+
+  test('[Adopt] Adopting with forwarding components', t => {
+    class A extends Component {
+      render ($$) {
+        return $$(B).addClass('a')
+      }
+    }
+    class B extends Component {
+      render ($$) {
+        return $$(C).addClass('b')
+      }
+    }
+    class C extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('h1').attr('id', 'bar'),
+          $$('p').attr('id', 'baz')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
+    let fooEl = doc.find('#foo')
+    A.mount({}, fooEl, { adoptElement: true })
+    let elTypes = _getElementTypes(fooEl)
+    t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
     t.end()
   })
 }
 
 function _getCreateElement (comp) {
   return comp.renderingEngine.createElement.bind(comp.renderingEngine)
+}
+
+function _getElements (el) {
+  let els = []
+  domHelpers.walk(el, _el => els.push(_el))
+  return els
+}
+
+function _getElementTypes (el) {
+  let els = _getElements(el)
+  return els.map(el => {
+    if (el.isElementNode()) {
+      return el.tagName
+    } else {
+      return el.getNodeType()
+    }
+  })
 }
