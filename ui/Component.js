@@ -1096,6 +1096,18 @@ export default class Component extends EventEmitter {
     })
   }
 
+  /**
+   * Turns a given function into a component.
+   *
+   * Similar to react's concept of a Function Component,
+   * but mainly just for convenience.
+   * The given function is wrapped into an Anonymous Component class,
+   * which is just a regular component.
+   * However, it is not possible to access the component instance
+   * as the function is not bound to the component.
+   *
+   * @param {function} func
+   */
   static createFunctionComponent (func) {
     let ComponentClass = func._Component
     if (!ComponentClass) {
