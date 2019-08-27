@@ -96,16 +96,6 @@ const TOP_LEVEL_ELEMENT = Symbol('TOP_LEVEL_ELEMENT')
  *   In the capturing stage a VirtualComponent tree is created by calling
  *   `Component.render()` from top to down recursively. In the rendering stage
  *   DOM elements are created and updated.
- * - DEBUG_RENDERING: recursive capturing is best done level by level, i.e.
- *   capture one VirtualComponent, and then descend into the child components.
- *   Unfortunately this detaches one render() call of a parent component from the
- *   `render()` calls of the children component. For this reason, we introduced a
- *   mode where the render() method is used as a vehicle to trigger recursive
- *   capturing.
- *   This would not be necessary if we were using a recursive syntax, as React
- *   does, i.e. the code is more like functional programming.
- *   While this works well for simple scenarios, the source code is getting
- *   harder to read if control flow is necessary, e.g. for loops or if statements
  * - Refs: the programmer can use ref(id) to register a reference to a child
  *   component. Referenced components are always reused when rerendering, i.e.
  *   not disposed. For other elements, there is no guarantee that the component
@@ -444,64 +434,16 @@ function _capture (state, vel, mode) {
       // correct instances.
       _forEachComponent(state, comp, vel, _linkComponent)
 
-      // Descending
-      if (substanceGlobals.DEBUG_RENDERING) {
-        // in this case we use the render() function as iterating function,
-        // where `$$` is a function which creates components and renders them
-        // recursively. First we can create all element components that can be
-        // reached without recursion
-        let stack = vel.children.slice(0)
-        while (stack.length) {
-          let child = stack.shift()
-          if (state.is(CAPTURED, child)) continue
-          // virtual components are addressed via recursion, not captured here
-          if (child._isVirtualComponent) continue
-          if (!child._comp) {
-            _create(state, child)
-          }
-          if (child._isVirtualHTMLElement && child.children.length > 0) {
-            stack = stack.concat(child.children)
-          }
-          state.set(CAPTURED, child)
-        }
-        // then we run comp.render($$) with a special $$ that captures
-        // VirtualComponents recursively
-        let descendingContext = new DescendingContext(state, context)
-        try {
-          state.pushContext(descendingContext)
-          while (descendingContext.hasPendingCaptures()) {
-            descendingContext.reset()
-            // Note: storing a reference to the current element factory into the
-            // state so that it can be accessed during Component.render()
-            // to support JSX
-            comp.render(descendingContext.$$)
-          }
-        } finally {
-          state.popContext()
-        }
-        // capture injected components recursively
-        // for the case that the owner is not re-rendered
-        for (let child of context.injectedComponents) {
-          _capture(state, child)
-        }
-        // TODO: this can be improved. It would be better if _capture was called
-        // by DescendingContext() then the forwarded component would be rendered
-        // during the render() call of the forwarding component
-        if (vel._forwardedEl) {
-          _capture(state, vel._forwardedEl)
-        }
+      // ATTENTION: without DEBUG_RENDERING enabled the content is captured
+      // outside of the `render()` call stack i.e. `render()` has finished
+      // already and provided a virtual element. Children component are
+      // rendered as part of this recursion, i.e. in the stack trace there
+      // will be `RenderingEngine._capture()` only
+      if (vel._forwardedEl) {
+        _capture(state, vel._forwardedEl)
       } else {
-        // ATTENTION: without DEBUG_RENDERING enabled the content is captured
-        // outside of the `render()` call stack i.e. `render()` has finished
-        // already and provided a virtual element. Children component are
-        // rendered as part of this recursion, i.e. in the stack trace there
-        // will be `RenderingEngine._capture()` only
-        if (vel._forwardedEl) {
-          _capture(state, vel._forwardedEl)
-        } else {
-          for (let child of vel.children) {
-            _capture(state, child)
-          }
+        for (let child of vel.children) {
+          _capture(state, child)
         }
       }
       _forEachComponent(state, comp, vel, _propagateLinking)
@@ -1269,65 +1211,6 @@ function _findForwardingChildOfComponent (comp, forwarded) {
       return current
     }
     current = parent
-  }
-}
-
-/*
-  Descending Context used by RenderingEngine
-*/
-class DescendingContext {
-  constructor (state, captureContext) {
-    this.state = state
-    this.owner = captureContext.owner
-    this.refs = new Map()
-    this.foreignRefs = new Map()
-    this.internalRefs = null
-    this.elements = captureContext.elements
-    this.pos = 0
-    this.updates = captureContext.components.length
-    this.remaining = this.updates
-    this.injectedComponents = captureContext.injectedComponents
-
-    this.$$ = this._$$.bind(this)
-  }
-
-  _$$ () {
-    let state = this.state
-    let vel = this.elements[this.pos++]
-    // only capture VirtualComponent's with a captured parent
-    // all others have been captured at this point already
-    // or will either be captured by a different owner
-    if (!state.is(CAPTURED, vel) && vel._isVirtualComponent) {
-      let parent = vel.parent
-      if (parent && (parent === this.owner || state.is(CAPTURED, vel.parent))) {
-        _capture(state, vel)
-        this.updates++
-        this.remaining--
-      }
-    }
-    // Note: we return a new VirtualElement so that the render method does work
-    // as expected.
-    // TODO: instead of creating a new VirtualElement each time, we could return
-    // an immutable wrapper for the already recorded element.
-    vel = VirtualElement.createElement.apply(this, arguments)
-    // these variables need to be set to make the 'ref()' API work
-    vel._context = this
-    vel._owner = this.owner
-    // Note: important to deactivate these methods as otherwise the captured
-    // element will be damaged when calling el.append()
-    vel._attach = function () {}
-    vel._detach = function () {}
-    return vel
-  }
-
-  hasPendingCaptures () {
-    return this.updates > 0 && this.remaining > 0
-  }
-
-  reset () {
-    this.pos = 0
-    this.updates = 0
-    this.refs.clear()
   }
 }
 
