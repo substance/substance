@@ -1,6 +1,7 @@
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
 import uuid from '../util/uuid'
+import flatten from '../util/flatten'
 import substanceGlobals from '../util/substanceGlobals'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import VirtualElement from './VirtualElement'
@@ -241,7 +242,7 @@ export default class RenderingEngine {
       el.on(eventName, handler)
     }
     if (children.length > 0) {
-      el.append(children)
+      el.append(flatten(children))
     }
     return el
   }
