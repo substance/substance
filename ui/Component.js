@@ -12,8 +12,8 @@ import VirtualElement from './VirtualElement'
 
 const COMPONENT_FACTORY = {
   createComponent (ComponentClass, parent, props) {
-    if (!ComponentClass.prototype._isComponent) {
-      ComponentClass = Component.getFunctionComponent(ComponentClass)
+    if (!ComponentClass.prototpe || !ComponentClass.prototype._isComponent) {
+      ComponentClass = Component.createFunctionComponent(ComponentClass)
     }
     return new ComponentClass(parent, props)
   },
@@ -1096,11 +1096,11 @@ export default class Component extends EventEmitter {
     })
   }
 
-  static getFunctionComponent (func) {
+  static createFunctionComponent (func) {
     let ComponentClass = func._Component
     if (!ComponentClass) {
       // if the given argument is actually a Class Component then just return that
-      if (func.prototype._isComponent) {
+      if (func.prototype && func.prototype._isComponent) {
         return func
       }
       ComponentClass = class FunctionComponent extends Component {
