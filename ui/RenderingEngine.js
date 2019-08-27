@@ -118,8 +118,6 @@ export default class RenderingEngine {
     if (!this.componentFactory) throw new Error("'componentFactory' is mandatory")
     this.elementFactory = options.elementFactory || DefaultDOMElement.createDocument('html')
     if (!this.elementFactory) throw new Error("'elementFactory' is mandatory")
-
-    this._state = null
   }
 
   /**
@@ -131,11 +129,8 @@ export default class RenderingEngine {
    * @param {object} props similar to React props
    * @param  {...any} children
    */
-  createElement (type, props, ...children) {
-    let renderingContext = this._state && this._state.getCurrentContext()
-    if (!renderingContext || !renderingContext.$$) {
-      throw new Error('Invalid state: createElement can only be used within Component.render()')
-    }
+  static createElement (type, props, ...children) {
+    let renderingContext = _getRenderingContext()
     let createElement = renderingContext.$$
     // TODO: (React conventions)
     // 1. map className to classNames
@@ -327,6 +322,18 @@ export default class RenderingEngine {
   }
 }
 
+function _getRenderingContext () {
+  let renderingContext = substanceGlobals.__rendering_context__
+  if (!renderingContext) {
+    renderingContext = new VirtualElement.Context()
+  }
+  return renderingContext
+}
+
+function _setRenderingContext (renderingContext) {
+  substanceGlobals.__rendering_context__ = renderingContext
+}
+
 // calling comp.render() and capturing recursively
 function _capture (state, vel, mode) {
   if (state.is(CAPTURED, vel)) {
@@ -375,13 +382,10 @@ function _capture (state, vel, mode) {
       let context = new VirtualElement.Context(vel)
       let content
       try {
-        // Note: storing a reference to the current element factory into the
-        // state so that it can be accessed during Component.render()
-        // to support JSX
-        state.pushContext(context)
+        _setRenderingContext(context)
         content = comp.render(context.$$)
       } finally {
-        state.popContext()
+        _setRenderingContext(null)
       }
       if (!content) {
         throw new Error('Component.render() returned nil.')
