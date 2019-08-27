@@ -74,6 +74,20 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('Mounting a function component', t => {
+    // Mounting onto a detached element
+    let doc = t._document.createDocument('html')
+    let el = doc.createElement('div')
+    let Foo = (props, $$) => {
+      return $$('div').addClass('foo').text(props.text)
+    }
+    Component.mount(Foo, {text: 'bar'}, el)
+    let fooEl = el.find('.foo')
+    t.notNil(fooEl, 'function component should have been rendered')
+    t.equal(fooEl.textContent, 'bar', 'element should have content provided via props')
+    t.end()
+  })
+
   test('Render an HTML element', t => {
     let comp = TestComponent.create(function ($$) {
       return $$('div')

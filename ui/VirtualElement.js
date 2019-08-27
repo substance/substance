@@ -391,6 +391,7 @@ class VirtualHTMLElement extends VirtualElement {
     } else if (isString(child) || isBoolean(child) || isNumber(child)) {
       return new VirtualTextNode(String(child))
     } else {
+      console.error('Unsupported child type', child)
       throw new Error('Unsupported child type')
     }
   }
@@ -649,7 +650,7 @@ VirtualElement.createElement = function () {
   var type
   if (isString(_first)) {
     type = 'element'
-  } else if (isFunction(_first) && _first.prototype._isComponent) {
+  } else if (isFunction(_first)) {
     type = 'component'
   } else if (isNil(_first)) {
     throw new Error('$$(null): provided argument was null or undefined.')
@@ -723,11 +724,11 @@ VirtualElement.Context = class VirtualElementContext {
     this.components = []
     // all VirtualComponents that are appended but not owned, i.e. injected from parent
     this.injectedComponents = []
-    this.$$ = this._createComponent.bind(this)
+    this.$$ = this._createElement.bind(this)
     this.$$.capturing = true
   }
 
-  _createComponent () {
+  _createElement () {
     let vel = VirtualElement.createElement.apply(this, arguments)
     vel._context = this
     vel._owner = this.owner

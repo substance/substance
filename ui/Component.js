@@ -12,6 +12,9 @@ import VirtualElement from './VirtualElement'
 
 const COMPONENT_FACTORY = {
   createComponent (ComponentClass, parent, props) {
+    if (!ComponentClass.prototype._isComponent) {
+      ComponentClass = Component.getFunctionComponent(ComponentClass)
+    }
     return new ComponentClass(parent, props)
   },
   createElementComponent (parent, virtualElement) {
@@ -494,7 +497,7 @@ export default class Component extends EventEmitter {
 
     ```javascript
     let component = new MyComponent()
-    component.mount($('body')[0])
+    component.mount(window.document.body)
     ```
   */
   didMount () {}
@@ -1091,6 +1094,23 @@ export default class Component extends EventEmitter {
       componentFactory: COMPONENT_FACTORY,
       elementFactory
     })
+  }
+
+  static getFunctionComponent (func) {
+    let ComponentClass = func._Component
+    if (!ComponentClass) {
+      // if the given argument is actually a Class Component then just return that
+      if (func.prototype._isComponent) {
+        return func
+      }
+      ComponentClass = class FunctionComponent extends Component {
+        render ($$) {
+          return func(this.props, $$)
+        }
+      }
+      func._Component = ComponentClass
+    }
+    return ComponentClass
   }
 
   // TODO: try to get rid of this. If realy used extract into extra files
