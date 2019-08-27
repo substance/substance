@@ -2250,6 +2250,20 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[JSX] Creating a detached virtual element', t => {
+    let vel = RenderingEngine.createElement('h1', { className: 'foo' },
+      RenderingEngine.createElement('p', { className: 'bar' })
+    )
+    t.nil(vel.owner, 'virtual element should not have an owner')
+    let elements = _getElements(vel)
+    let actual = elements.map(vel => {
+      return { tagName: vel._tagName, classNames: vel.classNames }
+    })
+    let expected = [{tagName: 'h1', classNames: ['foo']}, {tagName: 'p', classNames: ['bar']}]
+    t.deepEqual(actual, expected, 'virtual dom should have been rendered correctly')
+    t.end()
+  })
+
   test('[Adopt] Adopting a simple element', t => {
     let _didMount = false
     class MyComponent extends Component {
@@ -2398,9 +2412,7 @@ function ComponentTests (debug, memory) {
   test('[JSX][FunctionComponent] Using a function component as child', t => {
     const Foo = (props) => {
       let $$ = RenderingEngine.createElement
-      return $$('div').addClass('foo').append(
-        $$(Bar, props)
-      )
+      return $$('div', { className: 'foo' }, $$(Bar, props))
     }
     const Bar = (props) => {
       let $$ = RenderingEngine.createElement
@@ -2412,6 +2424,23 @@ function ComponentTests (debug, memory) {
     t.notNil(barEl, 'child component should have been rendered')
     t.ok(barEl.hasClass('bar'), 'child element should have correct class')
     t.equal(barEl.textContent, 'baz', 'content provided via props should have been rendered correctly')
+    t.end()
+  })
+
+  // NOT: in this case the ref would be only used
+  // to make sure a child component is retained during rerender.
+  test('[FunctionComponent] refs', t => {
+    const Foo = (props, $$) => {
+      return $$('div').addClass('foo').append(
+        $$(Bar, props).ref('bar')
+      )
+    }
+    const Bar = (props, $$) => {
+      return $$('div').addClass('bar').text(props.text)
+    }
+    let foo = Component.createFunctionComponent(Foo).render({text: 'baz'})
+    let bar = foo.refs['bar']
+    t.notNil(bar, 'the ref should have been set')
     t.end()
   })
 }
