@@ -19,9 +19,6 @@ class Simple extends TestComponent {
 // regular rendering using default DOM elements
 ComponentTests()
 
-// RenderingEngine in debug mode
-ComponentTests('debug')
-
 // in the browser do an extra run using MemoryDOM
 if (platform.inBrowser) {
   ComponentTests(false, 'memory')
@@ -71,20 +68,6 @@ function ComponentTests (debug, memory) {
     // Mounting an attached element
     comp = Simple.mount(doc.firstChild)
     t.equal(comp.didMount.callCount, 1, 'didMount() should have been called')
-    t.end()
-  })
-
-  test('Mounting a function component', t => {
-    // Mounting onto a detached element
-    let doc = t._document.createDocument('html')
-    let el = doc.createElement('div')
-    let Foo = (props, $$) => {
-      return $$('div').addClass('foo').text(props.text)
-    }
-    Component.mount(Foo, {text: 'bar'}, el)
-    let fooEl = el.find('.foo')
-    t.notNil(fooEl, 'function component should have been rendered')
-    t.equal(fooEl.textContent, 'bar', 'element should have content provided via props')
     t.end()
   })
 
@@ -2110,7 +2093,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] simple HTML element', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('h1')
       }
     }
@@ -2122,7 +2105,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] className', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', { className: 'foo bar' })
       }
     }
@@ -2134,7 +2117,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] inline style', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', { style: { width: '100px' } })
       }
     }
@@ -2146,7 +2129,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] html properties', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$(this.props.tagName, this.props)
       }
     }
@@ -2164,7 +2147,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] attributes', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', { 'id': 'foo', 'data-id': 'bar' })
       }
     }
@@ -2181,7 +2164,7 @@ function ComponentTests (debug, memory) {
         this.keydowns = 0
       }
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', { onClick: this.onClick, onKeyDown: this.onKeydown })
       }
       onClick () {
@@ -2203,7 +2186,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] children', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', { className: 'parent' },
           $$('div', { className: 'firstChild' },
             $$('div', { className: 'firstGrandChild' })
@@ -2223,7 +2206,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] child components', t => {
     class ParentComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', {},
           $$(ChildComponent, { id: 'foo', className: 'first', name: 'max' }, 'bla'),
           $$(ChildComponent, { id: 'bar', className: 'second', name: 'moritz' }, 'blupp')
@@ -2232,7 +2215,7 @@ function ComponentTests (debug, memory) {
     }
     class ChildComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', { 'data-name': this.props.name }, ...this.props.children)
       }
     }
@@ -2253,7 +2236,7 @@ function ComponentTests (debug, memory) {
   test('[JSX] refs', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = _getCreateElement(this)
+        let $$ = RenderingEngine.createElement
         return $$('div', {},
           $$('div', { ref: 'child' },
             $$('div', { ref: 'grandchild' })
@@ -2383,10 +2366,54 @@ function ComponentTests (debug, memory) {
     t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
     t.end()
   })
-}
 
-function _getCreateElement (comp) {
-  return comp.renderingEngine.createElement.bind(comp.renderingEngine)
+  test('[FunctionComponent] rendering a function component', t => {
+    let Foo = (props, $$) => {
+      return $$('div').addClass('foo').text(props.text)
+    }
+    let comp = Component.createFunctionComponent(Foo).render({text: 'bar'})
+    let el = comp.getElement()
+    t.ok(el.hasClass('foo'), 'element should have class rendered')
+    t.equal(el.textContent, 'bar', 'element should have content provided via props')
+    t.end()
+  })
+
+  test('[FunctionComponent] Using a function component as child', t => {
+    const Foo = (props, $$) => {
+      return $$('div').addClass('foo').append(
+        $$(Bar)
+      )
+    }
+    const Bar = (props, $$) => {
+      return $$('div').addClass('bar')
+    }
+    let foo = Component.createFunctionComponent(Foo).render()
+    let fooEl = foo.getElement()
+    let barEl = fooEl.getChildAt(0)
+    t.notNil(barEl, 'child component should have been rendered')
+    t.ok(barEl.hasClass('bar'), 'child element should have correct class')
+    t.end()
+  })
+
+  test('[JSX][FunctionComponent] Using a function component as child', t => {
+    const Foo = (props) => {
+      let $$ = RenderingEngine.createElement
+      return $$('div').addClass('foo').append(
+        $$(Bar, props)
+      )
+    }
+    const Bar = (props) => {
+      let $$ = RenderingEngine.createElement
+      return $$('div').addClass('bar').text(props.text)
+    }
+    let foo = Component.createFunctionComponent(Foo).render({text: 'baz'})
+    let fooEl = foo.getElement()
+    let barEl = fooEl.getChildAt(0)
+    t.notNil(barEl, 'child component should have been rendered')
+    t.ok(barEl.hasClass('bar'), 'child element should have correct class')
+    t.equal(barEl.textContent, 'baz', 'content provided via props should have been rendered correctly')
+    t.end()
+  })
 }
 
 function _getElements (el) {
