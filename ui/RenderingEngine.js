@@ -886,6 +886,7 @@ function _adopt (state, vel, el) {
     throw new Error('Provided DOM element is not compatible.')
   }
   comp.el = el
+  el._comp = comp
   _updateDOMElement(el, vel)
   _propagateForwardedEl(vel, el)
 
@@ -930,12 +931,17 @@ function _adopt (state, vel, el) {
         continue
       }
     }
+
+    if (vel._isVirtualComponent) {
+      _storeInternalData(comp, vel)
+    }
   }
 }
 
 function _createEl (state, vel) {
   let el = _createDOMElement(state, vel)
   vel._comp.el = el
+  el._comp = vel._comp
   _propagateForwardedEl(vel, el)
 
   if ((vel._isVirtualComponent || vel._isVirtualHTMLElement)) {
@@ -961,6 +967,7 @@ function _propagateForwardedEl (vel, el) {
     let parent = vel.parent
     while (parent && parent._isForwarding) {
       parent._comp.el = el
+      _storeInternalData(parent._comp, parent)
       parent = parent.parent
     }
   }
@@ -1179,7 +1186,7 @@ function _updateHash ({ newHash, oldHash, update, remove }) {
   // TODO: try to consolidate this.
   // we have a horrible mixture of Objects and Maps here
   // want to move to the Map based impl
-  if (isFunction(oldHash.keys) && oldHash.size > 0) {
+  if (isFunction(oldHash.keys)) {
     let keys = Array.from(oldHash.keys())
     keys.forEach((key) => {
       if (!updatedKeys[key]) {
