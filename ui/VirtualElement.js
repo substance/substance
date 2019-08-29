@@ -158,7 +158,7 @@ class VirtualHTMLElement extends VirtualElement {
     if (!this.attributes) {
       this.attributes = new Map()
     }
-    this.attributes.set(name, value)
+    this.attributes.set(name, String(value))
     return this
   }
 
