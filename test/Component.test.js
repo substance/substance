@@ -2354,6 +2354,48 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Adopt] Adopting elements with refs', t => {
+    class MyComponent extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('h1').attr('id', 'bar').ref('bar')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
+    let fooEl = doc.find('#foo')
+    let comp = MyComponent.mount({}, fooEl, { adoptElement: true })
+    t.notNil(comp.refs.bar, 'component should have set refs correctly')
+    t.end()
+  })
+
+  test('[Adopt] Adopting forwarded elements with refs', t => {
+    class A extends Component {
+      render ($$) {
+        return $$(B).ref('b')
+      }
+    }
+    class B extends Component {
+      render ($$) {
+        return $$(C).ref('c')
+      }
+    }
+    class C extends Component {
+      render ($$) {
+        return $$('div').attr('id', 'foo').append(
+          $$('div').ref('bar')
+        )
+      }
+    }
+    let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
+    let fooEl = doc.find('#foo')
+    let a = A.mount({}, fooEl, { adoptElement: true })
+    t.notNil(a.refs.b, 'refs should be set correctly')
+    t.notNil(a.refs.b.refs.c, 'refs should be set correctly')
+    t.notNil(a.refs.b.refs.c.refs.bar, 'refs should be set correctly')
+    t.end()
+  })
+
   test('[Adopt] Adopting with forwarding components', t => {
     class A extends Component {
       render ($$) {
