@@ -1,3 +1,9 @@
+import RenderingEngine from './RenderingEngine'
+
+// expose the static factory for virtual elements
+// used in render methods
+const $$ = RenderingEngine.createVirtualElement
+
 export { default as AbstractAppState } from './AbstractAppState'
 export { default as AbstractEditorSession } from './AbstractEditorSession'
 export { default as AbstractIsolatedNodeComponent } from './AbstractIsolatedNodeComponent'
@@ -58,3 +64,5 @@ export { default as TextPropertyComponent } from './TextPropertyComponent'
 export { default as TextPropertyEditor } from './TextPropertyEditor'
 export { default as UndoCommand } from './UndoCommand'
 export { default as VirtualElement } from './VirtualElement'
+
+export { $$ }
