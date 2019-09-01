@@ -4,6 +4,7 @@ import forEach from '../util/forEach'
 import getKeyForPath from '../util/getKeyForPath'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
+import _isDefined from '../util/_isDefined'
 import map from '../util/map'
 import uuid from '../util/uuid'
 import OperationSerializer from './OperationSerializer'
@@ -65,10 +66,10 @@ class DocumentChange {
         case 'create':
         case 'delete': {
           let node = op.val
-          if (node.hasOwnProperty('start') && node.start.path) {
+          if (_isDefined(node.start) && node.start.path) {
             updated[getKeyForPath(node.start.path)] = true
           }
-          if (node.hasOwnProperty('end') && node.end.path) {
+          if (_isDefined(node.end) && node.end.path) {
             updated[getKeyForPath(node.end.path)] = true
           }
           break

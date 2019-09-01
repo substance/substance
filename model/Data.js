@@ -1,5 +1,6 @@
 import isArray from '../util/isArray'
 import isString from '../util/isString'
+import _isDefined from '../util/_isDefined'
 import forEach from '../util/forEach'
 import EventEmitter from '../util/EventEmitter'
 import isPlainObject from '../util/isPlainObject'
@@ -312,7 +313,7 @@ export default class Data extends EventEmitter {
         }
       }
     } else if (value._isCoordinate) {
-      if (diff.hasOwnProperty('shift')) {
+      if (_isDefined(diff.shift)) {
         console.warn('DEPRECATED: use doc.update(path, {type:"shift", value:2}) instead')
         diff = {
           type: 'shift',

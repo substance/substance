@@ -1,5 +1,6 @@
 import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
+import _isDefined from '../util/_isDefined'
 import keys from '../util/keys'
 import * as selectionHelpers from '../model/selectionHelpers'
 import Surface from './Surface'
@@ -164,7 +165,7 @@ export default class ContainerEditor extends Surface {
 
   _deriveInternalState (props) {
     let _state = this._state
-    if (!props.hasOwnProperty('enabled') || props.enabled) {
+    if (!_isDefined(props.enabled) || props.enabled) {
       _state.enabled = true
     } else {
       _state.enabled = false

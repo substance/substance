@@ -4,6 +4,7 @@ import isPlainObject from '../util/isPlainObject'
 import forEach from '../util/forEach'
 import last from '../util/last'
 import uuid from '../util/uuid'
+import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
 import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
@@ -424,7 +425,7 @@ export default class Document extends EventEmitter {
           if (isNil(data.endOffset)) {
             data.endOffset = data.startOffset
           }
-          if (!data.hasOwnProperty('reverse')) {
+          if (!_isDefined(data.reverse)) {
             if (data.startOffset > data.endOffset) {
               [data.startOffset, data.endOffset] = [data.endOffset, data.startOffset]
               data.reverse = !data.reverse
@@ -447,7 +448,7 @@ export default class Document extends EventEmitter {
           if (!ids) throw new Error('Can not create ContainerSelection: container "' + containerPath + '" does not exist.')
           let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset, containerPath })
           let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset, containerPath })
-          if (!data.hasOwnProperty('reverse')) {
+          if (!_isDefined(data.reverse)) {
             if (compareCoordinates(this, containerPath, start, end) > 0) {
               [start, end] = [end, start]
               data.reverse = true

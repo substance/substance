@@ -1,6 +1,7 @@
 import isArrayEqual from '../util/isArrayEqual'
 import isEqual from '../util/isEqual'
 import cloneDeep from '../util/cloneDeep'
+import _isDefined from '../util/_isDefined'
 import { getTextForSelection } from './documentHelpers'
 import Coordinate from './Coordinate'
 import Selection from './Selection'
@@ -186,7 +187,7 @@ export default function (DocumentNode) {
 function _normalizedProps (props) {
   // in the beginning we used startPath + endPath etc.
   // now we use coodinates start and end where each coordinate has path + offset
-  if (!props.hasOwnProperty('start')) {
+  if (!_isDefined(props.start)) {
     /*
       Instead of
         { path: [...], startOffset: 0, endOffset: 10 }
@@ -196,13 +197,13 @@ function _normalizedProps (props) {
     // TODO: it would be good if we could get rid of the normalization on the long run
     // console.warn('DEPRECATED: create Annotation with "start" and "end" coordinate instead.')
     let start, end
-    if (props.hasOwnProperty('startPath') || props.hasOwnProperty('path')) {
+    if (_isDefined(props.startPath) || _isDefined(props.path)) {
       start = {
         path: props.startPath || props.path,
         offset: props.startOffset
       }
     }
-    if (props.hasOwnProperty('endPath') || props.hasOwnProperty('endOffset')) {
+    if (_isDefined(props.endPath) || _isDefined(props.endOffset)) {
       end = {
         path: props.endPath || props.path,
         offset: props.endOffset
@@ -221,7 +222,7 @@ function _normalizedProps (props) {
       props.start = start
       props.end = end
     }
-  } else if (props.hasOwnProperty('end') && !props.end.path) {
+  } else if (_isDefined(props.end) && !props.end.path) {
     props.end.path = props.start.path
   }
   return props

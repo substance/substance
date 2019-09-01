@@ -5,6 +5,7 @@ import isBoolean from '../util/isBoolean'
 import isNumber from '../util/isNumber'
 import isObject from '../util/isObject'
 import isString from '../util/isString'
+import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
 import NodeProperty from './NodeProperty'
 import NodeSchema from './NodeSchema'
@@ -85,7 +86,7 @@ export default class Node extends EventEmitter {
   getTypeNames () {
     let NodeClass = this.constructor
     let typeNames = this.schema.getSuperTypes()
-    if (NodeClass.hasOwnProperty('type')) {
+    if (_isDefined(NodeClass.type)) {
       typeNames.unshift(NodeClass.type)
     }
     return typeNames
@@ -157,7 +158,7 @@ Object.defineProperty(Node, 'schema', {
   get () {
     let NodeClass = this
     // If the schema has not been set explicitly, derive it from the parent schema
-    if (!NodeClass.hasOwnProperty('_schema')) {
+    if (!_isDefined(NodeClass._schema)) {
       let ParentNodeClass = _getParentClass(NodeClass)
       let parentSchema = ParentNodeClass.schema
       NodeClass._schema = new NodeSchema(parentSchema._properties, _getSuperTypes(NodeClass))
@@ -341,7 +342,7 @@ function _getSuperTypes (NodeClass) {
   var typeNames = []
   let SuperClass = _getParentClass(NodeClass)
   while (SuperClass && SuperClass.type !== '@node') {
-    if (SuperClass.hasOwnProperty('type')) {
+    if (_isDefined(SuperClass.type)) {
       typeNames.push(SuperClass.type)
     }
     SuperClass = _getParentClass(SuperClass)

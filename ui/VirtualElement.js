@@ -7,6 +7,7 @@ import isBoolean from '../util/isBoolean'
 import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
+import _isDefined from '../util/_isDefined'
 import without from '../util/without'
 import map from '../util/map'
 import DOMElement from '../dom/DOMElement'
@@ -207,7 +208,7 @@ class VirtualHTMLElement extends VirtualElement {
   }
 
   getInnerHTML () {
-    if (!this.hasOwnProperty('_innerHTMLString')) {
+    if (!_isDefined(this._innerHTMLString)) {
       throw new Error('Not supported.')
     } else {
       return this._innerHTMLString

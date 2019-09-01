@@ -1,5 +1,6 @@
 import isArray from '../util/isArray'
 import last from '../util/last'
+import _isDefined from '../util/_isDefined'
 import Coordinate from './Coordinate'
 
 /*
@@ -47,7 +48,7 @@ export default class NodeProperty {
   }
 
   hasDefault () {
-    return this.definition.hasOwnProperty('default')
+    return _isDefined(this.definition.default)
   }
 
   getDefault () {
