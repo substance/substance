@@ -162,7 +162,8 @@ export default class FindAndReplaceManager {
   }
 
   _getState () {
-    return this._editorSession.getEditorState().get('findAndReplace') || FindAndReplaceManager.defaultState()
+    const editorState = this._editorSession.getEditorState()
+    return editorState.findAndReplace || FindAndReplaceManager.defaultState()
   }
 
   _toggleOption (optionName) {
@@ -201,7 +202,7 @@ export default class FindAndReplaceManager {
       editorState._setDirty('selection')
     }
     // console.log('Updating editorState.findAndReplace', state)
-    editorState.set('findAndReplace', state)
+    editorState.findAndReplace = state
   }
 
   _propgateUpdates () {

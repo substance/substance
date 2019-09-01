@@ -185,7 +185,8 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _getState () {
-    return this.context.editorSession.getEditorState().get('findAndReplace')
+    const editorState = this.context.editorSession.getEditorState()
+    return editorState.findAndReplace
   }
 
   _getManager () {
@@ -255,7 +256,7 @@ export default class FindAndReplaceDialog extends Component {
   _onFocus (e) {
     e.stopPropagation()
     // TODO: should this be propagated?
-    this.context.editorState.set('isBlurred', true)
+    this.context.editorState.isBlurred = true
   }
 
   _onPatternKeydown (e) {

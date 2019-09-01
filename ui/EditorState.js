@@ -156,7 +156,7 @@ class Slot {
           break
         }
         default:
-          spec.handler(state.get(name))
+          spec.handler(state._get(name))
       }
     } else {
       spec.handler()

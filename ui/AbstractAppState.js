@@ -21,11 +21,11 @@ export default class AbstractAppState {
     return this._getImpl().isDirty(name)
   }
 
-  get (name) {
+  _get (name) {
     return this._getImpl().get(name)
   }
 
-  set (name, value, propagateImmediately) {
+  _set (name, value) {
     const impl = this._getImpl()
     let oldVal = impl.get(name)
     let hasChanged
@@ -37,9 +37,6 @@ export default class AbstractAppState {
     if (hasChanged) {
       impl.set(name, value)
       impl.setDirty(name)
-      if (propagateImmediately) {
-        this.propagateUpdates()
-      }
     }
   }
 
@@ -73,11 +70,14 @@ export default class AbstractAppState {
       throw new Error(`State variable '${name}' is already declared.`)
     }
     impl.set(name, initialValue)
+    // TODO: don't know if that will be working with mangling
+    // IMO the code using the prop will be mangled
+    // but not this definition
     Object.defineProperty(this, name, {
       configurable: false,
       enumerable: false,
-      get: () => { return this.get(name) },
-      set: (value) => { this.set(name, value) }
+      get: () => { return this._get(name) },
+      set: (value) => { this._set(name, value) }
     })
   }
 
@@ -102,8 +102,8 @@ export class AppStateImpl {
   constructor () {
     this.id = uuid()
     this.values = new Map()
-    this.dirty = {}
-    this.updates = {}
+    this.dirty = new Set()
+    this.updates = new Map()
   }
 
   get (name) {
@@ -119,23 +119,23 @@ export class AppStateImpl {
   }
 
   setDirty (name) {
-    this.dirty[name] = true
+    this.dirty.add(name)
   }
 
   isDirty (name) {
-    return Boolean(this.dirty[name])
+    return this.dirty.has(name)
   }
 
   getUpdate (name) {
-    return this.updates[name]
+    return this.updates.get(name)
   }
 
   setUpdate (name, update) {
-    this.updates[name] = update
+    this.updates.set(name, update)
   }
 
   reset () {
-    this.dirty = {}
-    this.updates = {}
+    this.dirty.clear()
+    this.updates.clear()
   }
 }

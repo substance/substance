@@ -164,10 +164,10 @@ export default function EditorSessionMixin (AbstractEditorSession) {
       if (sel && sel.customType === 'value') {
         let valueId = getKeyForPath(sel.data.path)
         if (overlayId !== valueId) {
-          this.editorState.set('overlayId', valueId)
+          this.editorState.overlayId = valueId
         }
       } else {
-        this.editorState.set('overlayId', null)
+        this.editorState.overlayId = null
       }
     }
   }

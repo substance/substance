@@ -27,8 +27,9 @@ export default class CommandManager {
   }
 
   reduce () {
+    const editorState = this.editorSession.getEditorState()
     const commandStates = this._getCommandStates()
-    this.editorSession.getEditorState().set('commandStates', commandStates)
+    editorState.commandStates = commandStates
   }
 
   executeCommand (commandName, params = {}) {

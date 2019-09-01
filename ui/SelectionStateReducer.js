@@ -8,10 +8,10 @@ export default class SelectionStateReducer {
 
   update () {
     const editorState = this.editorState
-    let doc = editorState.get('document')
-    let sel = editorState.get('selection')
+    let doc = editorState.document
+    let sel = editorState.selection
     let newState = this.deriveState(doc, sel)
-    editorState.set('selectionState', newState)
+    editorState.selectionState = newState
   }
 
   deriveState (doc, sel) {
