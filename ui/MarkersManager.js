@@ -137,7 +137,6 @@ export default class MarkersManager extends EventEmitter {
   }
 }
 
-// TODO: move getKeyForPath() into substance land, and change ArrayTree implementation to use it
 class MarkersIndex {
   add (path, val) {
     let key = getKeyForPath(path)

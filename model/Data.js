@@ -118,9 +118,9 @@ export default class Data extends EventEmitter {
     }
     this.nodes[node.id] = node
 
-    var change = {
+    let change = {
       type: 'create',
-      node: node
+      node
     }
 
     if (this.__QUEUE_INDEXING__) {
@@ -144,7 +144,7 @@ export default class Data extends EventEmitter {
     node.dispose()
     delete this.nodes[nodeId]
 
-    var change = {
+    let change = {
       type: 'delete',
       node: node
     }
@@ -338,7 +338,7 @@ export default class Data extends EventEmitter {
     })
     return {
       schema: [this.schema.id, this.schema.version],
-      nodes: nodes
+      nodes
     }
   }
 
