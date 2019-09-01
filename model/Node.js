@@ -131,6 +131,10 @@ export default class Node extends EventEmitter {
     this._properties.set(propName, value)
   }
 
+  set (propName, value) {
+    this._set(propName, value)
+  }
+
   get (propName) {
     return this._properties.get(propName)
   }

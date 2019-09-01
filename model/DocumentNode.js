@@ -68,15 +68,6 @@ export default class DocumentNode extends DataNode {
     }
   }
 
-  /**
-   * Set the value of a node's property
-   *
-   * > Attention: setting a node's property directly is usually not appropriate, such as `node.content = 'abc'`
-   * > because this does not use the document's manipulation API. This is necessary to recorde an operation, e.g. during a transaction.
-   *
-   * @param {string} propName
-   * @param {any} value
-   */
   set (propName, value) {
     this.getDocument().set([this.id, propName], value)
   }

@@ -459,8 +459,7 @@ function _setValue (nodes, path, newValue) {
     oldValue = ctx[valName]
     ctx[valName] = newValue
   } else {
-    // ATTENTION: not using node.set() here, because that would
-    // again trigger an operation
+    // _set() does not trigger an operation
     node._set(propName, newValue)
   }
   return oldValue
