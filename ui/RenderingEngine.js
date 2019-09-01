@@ -129,7 +129,7 @@ export default class RenderingEngine {
    * @param {object} props similar to React props
    * @param  {...any} children
    */
-  static createElement (type, props, ...children) {
+  static createVirtualElement (type, props, ...children) {
     let renderingContext = _getRenderingContext()
     let createElement = renderingContext.$$
     // TODO: (React conventions)
