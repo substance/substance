@@ -28,15 +28,15 @@ export default class Configurator {
     this._services = new Map()
 
     // hierarchical registries
-    this._valuesRegistry = new HierarchicalRegistry(this, '_values')
-    this._commandRegistry = new HierarchicalRegistry(this, '_commands')
-    this._componentRegistry = new HierarchicalRegistry(this, '_components')
-    this._iconRegistry = new HierarchicalRegistry(this, '_icons')
-    this._labelRegistry = new HierarchicalRegistry(this, '_labels')
-    this._serviceRegistry = new HierarchicalRegistry(this, '_services')
-    this._toolPanelRegistry = new HierarchicalRegistry(this, '_toolPanels')
-    this._keyboardShortcutsByCommandNameRegistry = new HierarchicalRegistry(this, '_keyboardShortcutsByCommandName')
-    this._commandGroupRegistry = new HierarchicalRegistry(this, '_commandGroups')
+    this._valuesRegistry = new HierarchicalRegistry(this, c => c._values)
+    this._commandRegistry = new HierarchicalRegistry(this, c => c._commands)
+    this._componentRegistry = new HierarchicalRegistry(this, c => c._components)
+    this._iconRegistry = new HierarchicalRegistry(this, c => c._icons)
+    this._labelRegistry = new HierarchicalRegistry(this, c => c._labels)
+    this._serviceRegistry = new HierarchicalRegistry(this, c => c._services)
+    this._toolPanelRegistry = new HierarchicalRegistry(this, c => c._toolPanels)
+    this._keyboardShortcutsByCommandNameRegistry = new HierarchicalRegistry(this, c => c._keyboardShortcutsByCommandName)
+    this._commandGroupRegistry = new HierarchicalRegistry(this, c => c._commandGroups)
 
     // TODO: document why this is necessary, beyond legacy reasons
     this._compiledToolPanels = new Map()
@@ -420,16 +420,16 @@ export default class Configurator {
 }
 
 class HierarchicalRegistry {
-  constructor (config, key) {
+  constructor (config, getter) {
     this._config = config
-    this._key = key
+    this._getter = getter
   }
 
   get (name, strict) {
     let config = this._config
-    const key = this._key
+    const getter = this._getter
     while (config) {
-      let registry = config[key]
+      let registry = getter(config)
       if (registry.has(name)) {
         return registry.get(name)
       } else {
@@ -442,9 +442,9 @@ class HierarchicalRegistry {
   getAll () {
     let config = this._config
     let registries = []
-    const key = this._key
+    const getter = this._getter
     while (config) {
-      let registry = config[key]
+      let registry = getter(config)
       if (registry) {
         registries.unshift(registry)
       }
@@ -456,9 +456,9 @@ class HierarchicalRegistry {
   getRecords (name) {
     let config = this._config
     let records = []
-    const key = this._key
+    const getter = this._getter
     while (config) {
-      let registry = config[key]
+      let registry = getter(config)
       if (registry) {
         let record = registry.get(name)
         if (record) {
