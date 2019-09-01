@@ -5,7 +5,7 @@ import simple from './fixture/simple'
 
 test('DocumentIndex: index should have been warmed up with existing nodes.', t => {
   let { doc, index } = _setup()
-  let N = Object.keys(doc.getNodes()).length
+  let N = doc.getNodes().size
   t.equal(index.select.callCount, N, 'index.select() should have been called for all nodes')
   t.equal(index.create.callCount, N, 'index.create() should have been called for all nodes')
   t.end()

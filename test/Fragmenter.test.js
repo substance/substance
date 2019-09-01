@@ -1,5 +1,5 @@
 import { test } from 'substance-test'
-import { Fragmenter, PropertyAnnotation } from 'substance'
+import { Fragmenter, PropertyAnnotation, _isDefined } from 'substance'
 
 let TEXT = 'ABCDEFGHI'
 
@@ -158,13 +158,13 @@ class Anno extends PropertyAnnotation {
       this.getFragmentWeight = opts.getFragmentWeight
     }
 
-    if (opts.hasOwnProperty('isAnchor')) {
+    if (_isDefined(opts.isAnchor)) {
       this._isAnchor = opts.isAnchor
       this.zeroWidth = true
       this.offset = startOffset
     }
 
-    if (opts.hasOwnProperty('isInline')) {
+    if (_isDefined(opts.isInline)) {
       this._isInline = opts.isInline
     }
   }

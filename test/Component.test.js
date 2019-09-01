@@ -1,7 +1,7 @@
 import { test as substanceTest, spy } from 'substance-test'
 import {
   DefaultDOMElement, substanceGlobals, isEqual, Component, platform, isArrayEqual,
-  RenderingEngine, domHelpers
+  RenderingEngine, domHelpers, $$
 } from 'substance'
 import { getMountPoint } from './shared/testHelpers'
 import TestComponent from './shared/TestComponent'
@@ -1419,7 +1419,7 @@ function ComponentTests (debug, memory) {
     let foo = comp.refs.foo
     t.notNil(foo, 'The forwarding component should be have a ref to the child component')
     comp.rerender()
-    t.isEqual(comp.refs.foo, foo, 'The forwarded component should be persisted during rerender')
+    t.equal(comp.refs.foo, foo, 'The forwarded component should be persisted during rerender')
     t.end()
   })
 
@@ -2093,7 +2093,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] simple HTML element', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('h1')
       }
     }
@@ -2105,7 +2104,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] className', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', { className: 'foo bar' })
       }
     }
@@ -2117,7 +2115,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] inline style', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', { style: { width: '100px' } })
       }
     }
@@ -2129,7 +2126,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] html properties', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$(this.props.tagName, this.props)
       }
     }
@@ -2147,7 +2143,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] attributes', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', { 'id': 'foo', 'data-id': 'bar' })
       }
     }
@@ -2164,7 +2159,6 @@ function ComponentTests (debug, memory) {
         this.keydowns = 0
       }
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', { onClick: this.onClick, onKeyDown: this.onKeydown })
       }
       onClick () {
@@ -2186,7 +2180,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] children', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', { className: 'parent' },
           $$('div', { className: 'firstChild' },
             $$('div', { className: 'firstGrandChild' })
@@ -2206,7 +2199,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] child components', t => {
     class ParentComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', {},
           $$(ChildComponent, { id: 'foo', className: 'first', name: 'max' }, 'bla'),
           $$(ChildComponent, { id: 'bar', className: 'second', name: 'moritz' }, 'blupp')
@@ -2215,7 +2207,6 @@ function ComponentTests (debug, memory) {
     }
     class ChildComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', { 'data-name': this.props.name }, ...this.props.children)
       }
     }
@@ -2236,7 +2227,6 @@ function ComponentTests (debug, memory) {
   test('[JSX] refs', t => {
     class MyComponent extends Component {
       render () {
-        let $$ = RenderingEngine.createElement
         return $$('div', {},
           $$('div', { ref: 'child' },
             $$('div', { ref: 'grandchild' })
@@ -2251,8 +2241,8 @@ function ComponentTests (debug, memory) {
   })
 
   test('[JSX] Creating a detached virtual element', t => {
-    let vel = RenderingEngine.createElement('h1', { className: 'foo' },
-      RenderingEngine.createElement('p', { className: 'bar' })
+    let vel = $$('h1', { className: 'foo' },
+      $$('p', { className: 'bar' })
     )
     t.nil(vel.owner, 'virtual element should not have an owner')
     let elements = _getElements(vel)
@@ -2453,11 +2443,9 @@ function ComponentTests (debug, memory) {
 
   test('[JSX][FunctionComponent] Using a function component as child', t => {
     const Foo = (props) => {
-      let $$ = RenderingEngine.createElement
       return $$('div', { className: 'foo' }, $$(Bar, props))
     }
     const Bar = (props) => {
-      let $$ = RenderingEngine.createElement
       return $$('div').addClass('bar').text(props.text)
     }
     let foo = Component.createFunctionComponent(Foo).render({text: 'baz'})
