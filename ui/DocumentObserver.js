@@ -77,7 +77,7 @@ class RelationshipIndex extends NodeIndex {
     let relations = this._getRelations(node)
     if (!relations) return
     for (let [name, type] of relations) {
-      const val = node[name]
+      const val = node.get(name)
       if (!val) continue
       if (type === ONE) {
         this._add(val, node.id)
@@ -91,7 +91,7 @@ class RelationshipIndex extends NodeIndex {
     let relations = this._getRelations(node)
     if (!relations) return
     for (let [name, type] of relations) {
-      const val = node[name]
+      const val = node.get(name)
       if (!val) continue
       if (type === ONE) {
         this._remove(val, node.id)

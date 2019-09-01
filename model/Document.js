@@ -350,7 +350,7 @@ export default class Document extends EventEmitter {
   updateNode (id, newProps) {
     let node = this.get(id)
     forEach(newProps, (value, key) => {
-      if (!isEqual(node[key], newProps[key])) {
+      if (!isEqual(node.get(key), value)) {
         this.set([id, key], value)
       }
     })
@@ -521,7 +521,7 @@ export default class Document extends EventEmitter {
     // TODO: we should rethink the exception with annotations here
     // in XML the annotation would be a child of the paragraph
     // and thus should be created before hand. However our annotation indexes need the annotation target to exist.
-    let nodes = Object.values(doc.getNodes())
+    let nodes = Array.from(doc.getNodes().values())
     let levels = {}
     let visited = new Set()
     nodes.forEach(n => {

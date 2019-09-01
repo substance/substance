@@ -77,12 +77,14 @@ export default class SelectionStateReducer {
 
   deriveAnnoState (state, doc, sel) {
     // create a mapping by type for the currently selected annotations
-    let annosByType = {}
+    let annosByType = new Map()
     function _add (anno) {
-      if (!annosByType[anno.type]) {
-        annosByType[anno.type] = []
+      let annos = annosByType.get(anno.type)
+      if (!annos) {
+        annos = []
+        annosByType.set(anno.type, annos)
       }
-      annosByType[anno.type].push(anno)
+      annos.push(anno)
     }
     const propAnnos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
     propAnnos.forEach(_add)

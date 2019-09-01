@@ -13,8 +13,8 @@ export default function (DocumentNode) {
       super(doc, _normalizedProps(props))
 
       // making sure that coordinates are Coordinate instances
-      this._properties.start = new Coordinate(this.start)
-      this._properties.end = new Coordinate(this.end)
+      this._set('start', new Coordinate(this.get('start')))
+      this._set('end', new Coordinate(this.get('end')))
     }
 
     /* istanbul ignore start */
@@ -177,8 +177,8 @@ export default function (DocumentNode) {
   }
 
   AbstractAnnotation.schema = {
-    start: { type: 'coordinate', default: { path: [], offset: 0 } },
-    end: { type: 'coordinate', default: { path: [], offset: 0 } }
+    'start': { type: 'coordinate', default: { 'path': [], 'offset': 0 } },
+    'end': { type: 'coordinate', default: { 'path': [], 'offset': 0 } }
   }
 
   return AbstractAnnotation

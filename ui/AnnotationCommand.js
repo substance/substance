@@ -318,7 +318,7 @@ export default class AnnotationCommand extends Command {
 
   _getAnnotationsForSelection (params) {
     const selectionState = params.selectionState
-    return selectionState.annosByType[this.getAnnotationType()] || []
+    return selectionState.annosByType.get(this.getAnnotationType()) || []
   }
 
   /**

@@ -57,7 +57,7 @@ export default class DocumentNode extends DataNode {
   }
 
   resolve (propName) {
-    let val = this[propName]
+    let val = this.get(propName)
     if (val) {
       let doc = this.getDocument()
       if (isArray(val)) {

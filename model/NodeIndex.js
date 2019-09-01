@@ -1,5 +1,3 @@
-import forEach from '../util/forEach'
-
 /**
   Index for Nodes.
 
@@ -80,11 +78,11 @@ class NodeIndex {
   }
 
   _initialize (data) {
-    forEach(data.getNodes(), function (node) {
+    for (let node of data.getNodes().values()) {
       if (this.select(node)) {
         this.create(node)
       }
-    }.bind(this))
+    }
   }
 }
 

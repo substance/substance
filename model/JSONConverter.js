@@ -1,4 +1,4 @@
-import { isArray, forEach } from '../util'
+import { isArray } from '../util'
 
 /*
   Note: this implementation is different to the core implementation
@@ -10,9 +10,9 @@ export default class JSONConverter {
       throw new Error('Invalid JSON format.')
     }
     // the json should just be an array of nodes
-    var nodes = json.nodes
+    let nodeEntries = json.nodes
     doc.import(tx => {
-      nodes.forEach(node => tx.create(node))
+      nodeEntries.forEach(data => tx.create(data))
     })
     return doc
   }
@@ -33,7 +33,7 @@ export default class JSONConverter {
       visited[node.id] = true
       let nodeSchema = node.getSchema()
       nodeSchema.getOwnedProperties().forEach(prop => {
-        let val = node[prop.name]
+        let val = node.get(prop.name)
         if (isArray(val)) {
           val.forEach(id => {
             _export(doc.get(id))
@@ -45,7 +45,9 @@ export default class JSONConverter {
       json.nodes.push(node.toJSON())
     }
 
-    forEach(doc.getNodes(), node => _export(node))
+    for (let node of doc.getNodes().values()) {
+      _export(node)
+    }
 
     return json
   }

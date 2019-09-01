@@ -47,7 +47,7 @@ export default class ParentNodeHook {
         if (hasOwnedProperties) {
           for (let p of nodeSchema.getOwnedProperties()) {
             let isChildren = p.isArray()
-            let refs = node[p.name]
+            let refs = node.get(p.name)
             if (refs) {
               this._setParent(node, refs, p.name, isChildren)
             }

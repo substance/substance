@@ -19,7 +19,7 @@ export default class ContainerAnnotationIndex extends DocumentIndex {
   }
 
   get (containerPath, type) {
-    var annotations = map(this.byId.get(String(containerPath)))
+    let annotations = map(this.byId.get(String(containerPath)))
     if (isString(type)) {
       annotations = filter(annotations, DocumentIndex.filterByType)
     }

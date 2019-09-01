@@ -25,7 +25,7 @@ export default class Node extends EventEmitter {
     super()
 
     // plain object to store the nodes data
-    this._properties = {}
+    this._properties = new Map()
 
     // NOTE: this indirection allows us to implement a overridable initializer
     // For instance, DocumentNode sets the document instance and the props
@@ -47,9 +47,9 @@ export default class Node extends EventEmitter {
         throw new Error('Property ' + name + ' is mandatory for node type ' + this.type)
       }
       if (propIsGiven) {
-        this._properties[name] = _checked(property, data[name])
+        this._properties.set(name, _checked(property, data[name]))
       } else if (hasDefault) {
-        this._properties[name] = cloneDeep(_checked(property, property.getDefault()))
+        this._properties.set(name, cloneDeep(_checked(property, property.getDefault())))
       } else {
         // property is optional
       }
@@ -113,7 +113,7 @@ export default class Node extends EventEmitter {
     }
     const schema = this.getSchema()
     for (let prop of schema) {
-      let val = this[prop.name]
+      let val = this._properties.get(prop.name)
       if (prop.isOptional() && val === undefined) continue
       if (isArray(val) || isObject(val)) {
         val = cloneDeep(val)
@@ -128,7 +128,11 @@ export default class Node extends EventEmitter {
   }
 
   _set (propName, value) {
-    this._properties[propName] = value
+    this._properties.set(propName, value)
+  }
+
+  get (propName) {
+    return this._properties.get(propName)
   }
 
   /**
@@ -215,7 +219,7 @@ function compileSchema (NodeClass, schema) {
     let name = prop.name
     Object.defineProperty(NodeClass.prototype, name, {
       get () {
-        return this._properties[name]
+        return this.get(name)
       },
       set (val) {
         this.set(name, val)
