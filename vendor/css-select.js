@@ -3,45 +3,17 @@ import boolbase from 'boolbase';
 import cssWhat from 'css-what';
 import nthCheck from 'nth-check';
 
-var universal = 50;
-var tag = 30;
-var attribute = 1;
-var pseudo = 0;
-var descendant = -1;
-var child = -1;
-var parent = -1;
-var sibling = -1;
-var adjacent = -1;
-var procedure = {
-	universal: universal,
-	tag: tag,
-	attribute: attribute,
-	pseudo: pseudo,
-	descendant: descendant,
-	child: child,
-	parent: parent,
-	sibling: sibling,
-	adjacent: adjacent
-};
-
-var procedure$1 = /*#__PURE__*/Object.freeze({
-  universal: universal,
-  tag: tag,
-  attribute: attribute,
-  pseudo: pseudo,
-  descendant: descendant,
-  child: child,
-  parent: parent,
-  sibling: sibling,
-  adjacent: adjacent,
-  'default': procedure
-});
-
-function getCjsExportFromNamespace (n) {
-	return n && n['default'] || n;
-}
-
-var procedure$2 = getCjsExportFromNamespace(procedure$1);
+var procedure = new Map([
+  ["universal", 50],
+  ["tag", 30],
+  ["attribute", 1],
+  ["pseudo", 0],
+  ["descendant", -1],
+  ["child", -1],
+  ["parent", -1],
+  ["sibling", -1],
+  ["adjacent", -1]
+]);
 
 var sort = sortByProcedure;
 
@@ -53,17 +25,16 @@ var sort = sortByProcedure;
 
 
 
-var attributes = {
-	__proto__: null,
-	exists: 10,
-	equals: 8,
-	not: 7,
-	start: 6,
-	end: 6,
-	any: 5,
-	hyphen: 4,
-	element: 4
-};
+let attributes = new Map([
+	['exists', 10],
+	['equals', 8],
+	['not', 7],
+	['start', 6],
+	['end', 6],
+	['any', 5],
+	['hyphen', 4],
+	['element', 4]
+]);
 
 function sortByProcedure(arr){
 	var procs = arr.map(getProcedure);
@@ -83,12 +54,12 @@ function sortByProcedure(arr){
 }
 
 function getProcedure(token){
-	var proc = procedure$2[token.type];
+	var proc = procedure.get(token.type);
 
-	if(proc === procedure$2.attribute){
-		proc = attributes[token.action];
+	if(proc === procedure.get('attribute')){
+		proc = attributes.get(token.action);
 
-		if(proc === attributes.equals && token.name === "id"){
+		if(proc === attributes.get('equals') && token.name === "id"){
 			//prefer ID selectors (eg. #ID)
 			proc = 9;
 		}
@@ -98,7 +69,7 @@ function getProcedure(token){
 			//this is a binary operation, to ensure it's still an int
 			proc >>= 1;
 		}
-	} else if(proc === procedure$2.pseudo){
+	} else if(proc === procedure.get('pseudo')){
 		if(!token.data){
 			proc = 3;
 		} else if(token.name === "has" || token.name === "contains"){
@@ -130,183 +101,196 @@ var falseFunc = boolbase.falseFunc;
 var reChars = /[-[\]{}()*+?.,\\^$|#\s]/g;
 
 function factory(adapter){
-	/*
-		attribute selectors
-	*/
-	var attributeRules = {
-		__proto__: null,
-		equals: function(next, data){
-			var name  = data.name,
-				value = data.value;
 
-			if(data.ignoreCase){
-				value = value.toLowerCase();
+	function _equals(next, data){
+		var name  = data.name,
+			value = data.value;
 
-				return function equalsIC(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null && attr.toLowerCase() === value && next(elem);
-				};
-			}
+		if(data.ignoreCase){
+			value = value.toLowerCase();
 
-			return function equals(elem){
-				return adapter.getAttributeValue(elem, name) === value && next(elem);
-			};
-		},
-		hyphen: function(next, data){
-			var name  = data.name,
-				value = data.value,
-				len = value.length;
-
-			if(data.ignoreCase){
-				value = value.toLowerCase();
-
-				return function hyphenIC(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null &&
-							(attr.length === len || attr.charAt(len) === "-") &&
-							attr.substr(0, len).toLowerCase() === value &&
-							next(elem);
-				};
-			}
-
-			return function hyphen(elem){
+			return function equalsIC(elem){
 				var attr = adapter.getAttributeValue(elem, name);
-				return attr != null &&
-						attr.substr(0, len) === value &&
-						(attr.length === len || attr.charAt(len) === "-") &&
-						next(elem);
-			};
-		},
-		element: function(next, data){
-			var name = data.name,
-				value = data.value;
-			if (data.name === 'class') {
-				let value = data.value;
-				if (/\s/.test(value)) return function() { return false }
-				return function clazz(elem) {
-					let classes = elem.classes;
-					return classes && classes.has(value) && next(elem)
-				}
-			} else {
-				if(/\s/.test(value)){
-					return falseFunc;
-				}
-
-				value = value.replace(reChars, "\\$&");
-
-				var pattern = "(?:^|\\s)" + value + "(?:$|\\s)",
-					flags = data.ignoreCase ? "i" : "",
-					regex = new RegExp(pattern, flags);
-
-				return function element(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null && regex.test(attr) && next(elem);
-				};
-			}
-		},
-		exists: function(next, data){
-			var name = data.name;
-			return function exists(elem){
-				return adapter.hasAttrib(elem, name) && next(elem);
-			};
-		},
-		start: function(next, data){
-			var name  = data.name,
-				value = data.value,
-				len = value.length;
-
-			if(len === 0){
-				return falseFunc;
-			}
-
-			if(data.ignoreCase){
-				value = value.toLowerCase();
-
-				return function startIC(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null && attr.substr(0, len).toLowerCase() === value && next(elem);
-				};
-			}
-
-			return function start(elem){
-				var attr = adapter.getAttributeValue(elem, name);
-				return attr != null && attr.substr(0, len) === value && next(elem);
-			};
-		},
-		end: function(next, data){
-			var name  = data.name,
-				value = data.value,
-				len   = -value.length;
-
-			if(len === 0){
-				return falseFunc;
-			}
-
-			if(data.ignoreCase){
-				value = value.toLowerCase();
-
-				return function endIC(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null && attr.substr(len).toLowerCase() === value && next(elem);
-				};
-			}
-
-			return function end(elem){
-				var attr = adapter.getAttributeValue(elem, name);
-				return attr != null && attr.substr(len) === value && next(elem);
-			};
-		},
-		any: function(next, data){
-			var name  = data.name,
-				value = data.value;
-
-			if(value === ""){
-				return falseFunc;
-			}
-
-			if(data.ignoreCase){
-				var regex = new RegExp(value.replace(reChars, "\\$&"), "i");
-
-				return function anyIC(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null && regex.test(attr) && next(elem);
-				};
-			}
-
-			return function any(elem){
-				var attr = adapter.getAttributeValue(elem, name);
-				return attr != null && attr.indexOf(value) >= 0 && next(elem);
-			};
-		},
-		not: function(next, data){
-			var name  = data.name,
-				value = data.value;
-
-			if(value === ""){
-				return function notEmpty(elem){
-					return !!adapter.getAttributeValue(elem, name) && next(elem);
-				};
-			} else if(data.ignoreCase){
-				value = value.toLowerCase();
-
-				return function notIC(elem){
-					var attr = adapter.getAttributeValue(elem, name);
-					return attr != null && attr.toLowerCase() !== value && next(elem);
-				};
-			}
-
-			return function not(elem){
-				return adapter.getAttributeValue(elem, name) !== value && next(elem);
+				return attr != null && attr.toLowerCase() === value && next(elem);
 			};
 		}
-	};
+
+		return function equals(elem){
+			return adapter.getAttributeValue(elem, name) === value && next(elem);
+		};
+	}
+
+	function _hyphen(next, data){
+		var name  = data.name,
+			value = data.value,
+			len = value.length;
+
+		if(data.ignoreCase){
+			value = value.toLowerCase();
+
+			return function hyphenIC(elem){
+				var attr = adapter.getAttributeValue(elem, name);
+				return attr != null &&
+						(attr.length === len || attr.charAt(len) === "-") &&
+						attr.substr(0, len).toLowerCase() === value &&
+						next(elem);
+			};
+		}
+
+		return function (elem){
+			var attr = adapter.getAttributeValue(elem, name);
+			return attr != null &&
+					attr.substr(0, len) === value &&
+					(attr.length === len || attr.charAt(len) === "-") &&
+					next(elem);
+		};
+	}
+
+	function _element(next, data){
+		var name = data.name,
+			value = data.value;
+		if (data.name === 'class') {
+			let value = data.value;
+			if (/\s/.test(value)) return function() { return false }
+			return function(elem) {
+				let classes = elem.classes;
+				return classes && classes.has(value) && next(elem)
+			}
+		} else {
+			if(/\s/.test(value)){
+				return falseFunc;
+			}
+
+			value = value.replace(reChars, "\\$&");
+
+			var pattern = "(?:^|\\s)" + value + "(?:$|\\s)",
+				flags = data.ignoreCase ? "i" : "",
+				regex = new RegExp(pattern, flags);
+
+			return function(elem){
+				var attr = adapter.getAttributeValue(elem, name);
+				return attr != null && regex.test(attr) && next(elem);
+			}
+		}
+	}
+
+	function _exists(next, data){
+		var name = data.name;
+		return function(elem){
+			return adapter.hasAttrib(elem, name) && next(elem);
+		};
+	}
+
+	function _start(next, data){
+		var name  = data.name,
+			value = data.value,
+			len = value.length;
+
+		if(len === 0){
+			return falseFunc;
+		}
+
+		if(data.ignoreCase){
+			value = value.toLowerCase();
+
+			return function (elem){
+				var attr = adapter.getAttributeValue(elem, name);
+				return attr != null && attr.substr(0, len).toLowerCase() === value && next(elem);
+			};
+		}
+
+		return function (elem){
+			var attr = adapter.getAttributeValue(elem, name);
+			return attr != null && attr.substr(0, len) === value && next(elem);
+		}
+	}
+
+	function _end(next, data){
+		var name  = data.name,
+			value = data.value,
+			len   = -value.length;
+
+		if(len === 0){
+			return falseFunc;
+		}
+
+		if(data.ignoreCase){
+			value = value.toLowerCase();
+
+			return function endIC(elem){
+				var attr = adapter.getAttributeValue(elem, name);
+				return attr != null && attr.substr(len).toLowerCase() === value && next(elem);
+			};
+		}
+
+		return function (elem){
+			var attr = adapter.getAttributeValue(elem, name);
+			return attr != null && attr.substr(len) === value && next(elem);
+		};
+	}
+
+	function _any(next, data){
+		var name  = data.name,
+			value = data.value;
+
+		if(value === ""){
+			return falseFunc;
+		}
+
+		if(data.ignoreCase){
+			var regex = new RegExp(value.replace(reChars, "\\$&"), "i");
+
+			return function (elem){
+				var attr = adapter.getAttributeValue(elem, name);
+				return attr != null && regex.test(attr) && next(elem);
+			};
+		}
+
+		return function (elem){
+			var attr = adapter.getAttributeValue(elem, name);
+			return attr != null && attr.indexOf(value) >= 0 && next(elem);
+		};
+	}
+
+	function _not(next, data){
+		var name  = data.name,
+			value = data.value;
+
+		if(value === ""){
+			return function notEmpty(elem){
+				return !!adapter.getAttributeValue(elem, name) && next(elem);
+			};
+		} else if(data.ignoreCase){
+			value = value.toLowerCase();
+
+			return function notIC(elem){
+				var attr = adapter.getAttributeValue(elem, name);
+				return attr != null && attr.toLowerCase() !== value && next(elem);
+			};
+		}
+
+		return function not(elem){
+			return adapter.getAttributeValue(elem, name) !== value && next(elem);
+		};
+	}
+
+	let attributeRules = new Map([
+		['equals', _equals],
+		['hyphen', _hyphen],
+		['element', _element],
+		['exists', _exists],
+		['start', _start],
+		['end', _end],
+		['any', _any],
+		['not', _not]
+	]);
 
 	return {
 		compile: function(next, data, options){
 			if(options && options.strict && (
 				data.ignoreCase || data.action === "not"
 			)) throw new Error("Unsupported attribute selector");
-			return attributeRules[data.action](next, data);
+			return attributeRules.get(data.action)(next, data);
 		},
 		rules: attributeRules
 	};
@@ -315,99 +299,105 @@ function factory(adapter){
 var attributes$1 = factory;
 
 function generalFactory(adapter, Pseudos){
-	/*
-		all available rules
-	*/
-	return {
-		__proto__: null,
 
-		attribute: attributes$1(adapter).compile,
-		pseudo: Pseudos.compile,
-
-		//tags
-		tag: function(next, data){
-			var name = data.name;
-			return function tag(elem){
-				return adapter.getNameWithoutNS(elem) === name && next(elem);
-			}
-		},
-
-		//traversal
-		descendant: function(next){
-			return function descendant(elem){
-
-				var found = false;
-
-				while(!found && (elem = adapter.getParent(elem))){
-					found = next(elem);
-				}
-
-				return found;
-			};
-		},
-		_flexibleDescendant: function(next){
-			// Include element itself, only used while querying an array
-			return function descendant(elem){
-
-				var found = next(elem);
-
-				while(!found && (elem = adapter.getParent(elem))){
-					found = next(elem);
-				}
-
-				return found;
-			};
-		},
-		parent: function(next, data, options){
-			if(options && options.strict) throw new Error("Parent selector isn't part of CSS3");
-
-			return function parent(elem){
-				return adapter.getChildren(elem).some(test);
-			};
-
-			function test(elem){
-				return adapter.isTag(elem) && next(elem);
-			}
-		},
-		child: function(next){
-			return function child(elem){
-				var parent = adapter.getParent(elem);
-				return !!parent && next(parent);
-			};
-		},
-		sibling: function(next){
-			return function sibling(elem){
-				var siblings = adapter.getSiblings(elem);
-
-				for(var i = 0; i < siblings.length; i++){
-					if(adapter.isTag(siblings[i])){
-						if(siblings[i] === elem) break;
-						if(next(siblings[i])) return true;
-					}
-				}
-
-				return false;
-			};
-		},
-		adjacent: function(next){
-			return function adjacent(elem){
-				var siblings = adapter.getSiblings(elem),
-					lastElement;
-
-				for(var i = 0; i < siblings.length; i++){
-					if(adapter.isTag(siblings[i])){
-						if(siblings[i] === elem) break;
-						lastElement = siblings[i];
-					}
-				}
-
-				return !!lastElement && next(lastElement);
-			};
-		},
-		universal: function(next){
-			return next;
+	//tags
+	function _tag(next, data){
+		var name = data.name;
+		return function tag(elem){
+			return adapter.getNameWithoutNS(elem) === name && next(elem);
 		}
-	};
+	}
+
+	//traversal
+	function _descendant(next){
+		return function descendant(elem){
+			var found = false;
+			while(!found && (elem = adapter.getParent(elem))){
+				found = next(elem);
+			}
+			return found;
+		};
+	}
+
+	function __flexibleDescendant(next){
+		// Include element itself, only used while querying an array
+		return function descendant(elem){
+			var found = next(elem);
+			while(!found && (elem = adapter.getParent(elem))){
+				found = next(elem);
+			}
+			return found;
+		};
+	}
+
+	function _parent(next, data, options){
+		if(options && options.strict) throw new Error("Parent selector isn't part of CSS3");
+
+		return function parent(elem){
+			return adapter.getChildren(elem).some(test);
+		};
+
+		function test(elem){
+			return adapter.isTag(elem) && next(elem);
+		}
+	}
+
+	function _child(next){
+		return function child(elem){
+			var parent = adapter.getParent(elem);
+			return !!parent && next(parent);
+		};
+	}
+
+	function _sibling(next){
+		return function sibling(elem){
+			var siblings = adapter.getSiblings(elem);
+
+			for(var i = 0; i < siblings.length; i++){
+				if(adapter.isTag(siblings[i])){
+					if(siblings[i] === elem) break;
+					if(next(siblings[i])) return true;
+				}
+			}
+
+			return false;
+		};
+	}
+
+	function _adjacent(next){
+		return function adjacent(elem){
+			var siblings = adapter.getSiblings(elem),
+				lastElement;
+
+			for(var i = 0; i < siblings.length; i++){
+				if(adapter.isTag(siblings[i])){
+					if(siblings[i] === elem) break;
+					lastElement = siblings[i];
+				}
+			}
+
+			return !!lastElement && next(lastElement);
+		};
+	}
+
+	function _universal(next){
+		return next;
+	}
+
+	const generalRules = new Map([
+		['attribute', attributes$1(adapter).compile],
+		['pseudo', Pseudos.compile],
+		['tag', _tag],
+		['descendant', _descendant],
+		['_flexibleDescendant', __flexibleDescendant],
+		['parent', _parent],
+		['child', _child],
+		['sibling', _sibling],
+		['adjacent', _adjacent],
+		['universal', _universal],
+	]);
+
+	return generalRules
 }
 
 var general = generalFactory;
@@ -430,7 +420,7 @@ var trueFunc          = boolbase.trueFunc,
 
 function filtersFactory(adapter){
 	var attributes  = attributes$1(adapter),
-		checkAttrib = attributes.rules.equals;
+		checkAttrib = attributes.rules.get('equals');
 
 	//helper methods
 	function equals(a, b){
@@ -452,133 +442,134 @@ function filtersFactory(adapter){
 		};
 	}
 
-	var filters = {
-		contains: function(next, text){
-			return function contains(elem){
-				return next(elem) && adapter.getText(elem).indexOf(text) >= 0;
-			};
-		},
-		icontains: function(next, text){
-			var itext = text.toLowerCase();
-			return function icontains(elem){
-				return next(elem) &&
-					adapter.getText(elem).toLowerCase().indexOf(itext) >= 0;
-			};
-		},
+	function _contains (next, text){
+		return function (elem){
+			return next(elem) && adapter.getText(elem).indexOf(text) >= 0;
+		}
+	}
 
-		//location specific methods
-		"nth-child": function(next, rule){
-			var func = nthCheck(rule);
+	function _icontains (next, text){
+		var itext = text.toLowerCase();
+		return function (elem){
+			return next(elem) &&
+				adapter.getText(elem).toLowerCase().indexOf(itext) >= 0;
+		}
+	}
 
-			if(func === falseFunc$1) return func;
-			if(func === trueFunc)  return getChildFunc(next);
-
-			return function nthChild(elem){
-				var siblings = adapter.getSiblings(elem);
-
-				for(var i = 0, pos = 0; i < siblings.length; i++){
-					if(adapter.isTag(siblings[i])){
-						if(siblings[i] === elem) break;
-						else pos++;
-					}
+	function _nthChild (next, rule){
+		var func = nthCheck(rule);
+		if(func === falseFunc$1) return func;
+		if(func === trueFunc)  return getChildFunc(next);
+		return function (elem) {
+			var siblings = adapter.getSiblings(elem);
+			for(var i = 0, pos = 0; i < siblings.length; i++){
+				if(adapter.isTag(siblings[i])){
+					if(siblings[i] === elem) break;
+					else pos++;
 				}
+			}
+			return func(pos) && next(elem);
+		}
+	}
 
-				return func(pos) && next(elem);
-			};
-		},
-		"nth-last-child": function(next, rule){
-			var func = nthCheck(rule);
+	function _nthLastChild (next, rule){
+		var func = nthCheck(rule);
+		if(func === falseFunc$1) return func;
+		if(func === trueFunc)  return getChildFunc(next);
 
-			if(func === falseFunc$1) return func;
-			if(func === trueFunc)  return getChildFunc(next);
-
-			return function nthLastChild(elem){
-				var siblings = adapter.getSiblings(elem);
-
-				for(var pos = 0, i = siblings.length - 1; i >= 0; i--){
-					if(adapter.isTag(siblings[i])){
-						if(siblings[i] === elem) break;
-						else pos++;
-					}
+		return function (elem){
+			var siblings = adapter.getSiblings(elem);
+			for(var pos = 0, i = siblings.length - 1; i >= 0; i--){
+				if(adapter.isTag(siblings[i])){
+					if(siblings[i] === elem) break;
+					else pos++;
 				}
+			}
+			return func(pos) && next(elem);
+		}
+	}
 
-				return func(pos) && next(elem);
-			};
-		},
-		"nth-of-type": function(next, rule){
-			var func = nthCheck(rule);
+	function _nthOfType (next, rule){
+		var func = nthCheck(rule);
 
-			if(func === falseFunc$1) return func;
-			if(func === trueFunc)  return getChildFunc(next);
+		if(func === falseFunc$1) return func;
+		if(func === trueFunc)  return getChildFunc(next);
 
-			return function nthOfType(elem){
-				var siblings = adapter.getSiblings(elem);
+		return function (elem) {
+			var siblings = adapter.getSiblings(elem);
 
-				for(var pos = 0, i = 0; i < siblings.length; i++){
-					if(adapter.isTag(siblings[i])){
-						if(siblings[i] === elem) break;
-						if(adapter.getName(siblings[i]) === adapter.getName(elem)) pos++;
-					}
+			for(var pos = 0, i = 0; i < siblings.length; i++){
+				if(adapter.isTag(siblings[i])){
+					if(siblings[i] === elem) break;
+					if(adapter.getName(siblings[i]) === adapter.getName(elem)) pos++;
 				}
-
-				return func(pos) && next(elem);
-			};
-		},
-		"nth-last-of-type": function(next, rule){
-			var func = nthCheck(rule);
-
-			if(func === falseFunc$1) return func;
-			if(func === trueFunc)  return getChildFunc(next);
-
-			return function nthLastOfType(elem){
-				var siblings = adapter.getSiblings(elem);
-
-				for(var pos = 0, i = siblings.length - 1; i >= 0; i--){
-					if(adapter.isTag(siblings[i])){
-						if(siblings[i] === elem) break;
-						if(adapter.getName(siblings[i]) === adapter.getName(elem)) pos++;
-					}
-				}
-
-				return func(pos) && next(elem);
-			};
-		},
-
-		//TODO determine the actual root element
-		root: function(next){
-			return function(elem){
-				return !adapter.getParent(elem) && next(elem);
-			};
-		},
-
-		scope: function(next, rule, options, context){
-			if(!context || context.length === 0){
-				//equivalent to :root
-				return filters.root(next);
 			}
 
-			if(context.length === 1){
-				//NOTE: can't be unpacked, as :has uses this for side-effects
-				return function(elem){
-					return equals(context[0], elem) && next(elem);
-				};
+			return func(pos) && next(elem);
+		}
+	}
+
+	function _nthLastOfType (next, rule){
+		var func = nthCheck(rule);
+
+		if(func === falseFunc$1) return func;
+		if(func === trueFunc)  return getChildFunc(next);
+
+		return function nthLastOfType(elem){
+			var siblings = adapter.getSiblings(elem);
+
+			for(var pos = 0, i = siblings.length - 1; i >= 0; i--){
+				if(adapter.isTag(siblings[i])){
+					if(siblings[i] === elem) break;
+					if(adapter.getName(siblings[i]) === adapter.getName(elem)) pos++;
+				}
 			}
 
-			return function(elem){
-				return context.indexOf(elem) >= 0 && next(elem);
-			};
-		},
+			return func(pos) && next(elem);
+		}
+	}
 
-		//jQuery extensions (others follow as pseudos)
-		checkbox: getAttribFunc("type", "checkbox"),
-		file: getAttribFunc("type", "file"),
-		password: getAttribFunc("type", "password"),
-		radio: getAttribFunc("type", "radio"),
-		reset: getAttribFunc("type", "reset"),
-		image: getAttribFunc("type", "image"),
-		submit: getAttribFunc("type", "submit")
-	};
-	return filters;
+	function _root (next){
+		return function (elem){
+			return !adapter.getParent(elem) && next(elem);
+		}
+	}
+
+	function _scope (next, rule, options, context){
+		if(!context || context.length === 0){
+			//equivalent to :root
+			return filters.get('root')(next);
+		}
+		if(context.length === 1){
+			//NOTE: can't be unpacked, as :has uses this for side-effects
+			return function (elem){
+				return equals(context[0], elem) && next(elem);
+			}
+		}
+		return function (elem){
+			return context.indexOf(elem) >= 0 && next(elem);
+		};
+	}
+
+	const filters = new Map([
+		['contains', _contains],
+		['icontains', _icontains],
+		['nth-child', _nthChild],
+		['nth-last-child', _nthLastChild],
+		['nth-of-type', _nthOfType],
+		['nth-last-of-type', _nthLastOfType],
+		['root', _root],
+		['scope', _scope],
+		['checkbox', getAttribFunc("type", "checkbox")],
+		['file', getAttribFunc("type", "file")],
+		['password', getAttribFunc("type", "password")],
+		['radio', getAttribFunc("type", "radio")],
+		['reset', getAttribFunc("type", "reset")],
+		['image', getAttribFunc("type", "image")],
+		['submit', getAttribFunc("type", "submit")]
+	]);
+
+	return filters
 }
 
 function pseudosFactory(adapter){
@@ -589,180 +580,201 @@ function pseudosFactory(adapter){
 		}
 	}
 
-	//while filters are precompiled, pseudos get called when they are needed
-	var pseudos = {
-		empty: function(elem){
-			return !adapter.getChildren(elem).some(function(elem){
-				return adapter.isTag(elem) || elem.type === "text";
-			});
-		},
+	function _empty(elem){
+		return !adapter.getChildren(elem).some(function(elem){
+			return adapter.isTag(elem) || elem.type === "text";
+		})
+	}
 
-		"first-child": function(elem){
-			return getFirstElement(adapter.getSiblings(elem)) === elem;
-		},
-		"last-child": function(elem){
-			var siblings = adapter.getSiblings(elem);
+	function _firstChild(elem){
+		return getFirstElement(adapter.getSiblings(elem)) === elem;
+	}
 
-			for(var i = siblings.length - 1; i >= 0; i--){
-				if(siblings[i] === elem) return true;
-				if(adapter.isTag(siblings[i])) break;
-			}
+	function _lastChild(elem){
+		var siblings = adapter.getSiblings(elem);
 
-			return false;
-		},
-		"first-of-type": function(elem){
-			var siblings = adapter.getSiblings(elem);
-
-			for(var i = 0; i < siblings.length; i++){
-				if(adapter.isTag(siblings[i])){
-					if(siblings[i] === elem) return true;
-					if(adapter.getName(siblings[i]) === adapter.getName(elem)) break;
-				}
-			}
-
-			return false;
-		},
-		"last-of-type": function(elem){
-			var siblings = adapter.getSiblings(elem);
-
-			for(var i = siblings.length - 1; i >= 0; i--){
-				if(adapter.isTag(siblings[i])){
-					if(siblings[i] === elem) return true;
-					if(adapter.getName(siblings[i]) === adapter.getName(elem)) break;
-				}
-			}
-
-			return false;
-		},
-		"only-of-type": function(elem){
-			var siblings = adapter.getSiblings(elem);
-
-			for(var i = 0, j = siblings.length; i < j; i++){
-				if(adapter.isTag(siblings[i])){
-					if(siblings[i] === elem) continue;
-					if(adapter.getName(siblings[i]) === adapter.getName(elem)) return false;
-				}
-			}
-
-			return true;
-		},
-		"only-child": function(elem){
-			var siblings = adapter.getSiblings(elem);
-
-			for(var i = 0; i < siblings.length; i++){
-				if(adapter.isTag(siblings[i]) && siblings[i] !== elem) return false;
-			}
-
-			return true;
-		},
-
-		//:matches(a, area, link)[href]
-		link: function(elem){
-			return adapter.hasAttrib(elem, "href");
-		},
-		visited: falseFunc$1, //seems to be a valid implementation
-		//TODO: :any-link once the name is finalized (as an alias of :link)
-
-		//forms
-		//to consider: :target
-
-		//:matches([selected], select:not([multiple]):not(> option[selected]) > option:first-of-type)
-		selected: function(elem){
-			if(adapter.hasAttrib(elem, "selected")) return true;
-			else if(adapter.getName(elem) !== "option") return false;
-
-			//the first <option> in a <select> is also selected
-			var parent = adapter.getParent(elem);
-
-			if(
-				!parent ||
-				adapter.getName(parent) !== "select" ||
-				adapter.hasAttrib(parent, "multiple")
-			) return false;
-
-			var siblings = adapter.getChildren(parent),
-				sawElem  = false;
-
-			for(var i = 0; i < siblings.length; i++){
-				if(adapter.isTag(siblings[i])){
-					if(siblings[i] === elem){
-						sawElem = true;
-					} else if(!sawElem){
-						return false;
-					} else if(adapter.hasAttrib(siblings[i], "selected")){
-						return false;
-					}
-				}
-			}
-
-			return sawElem;
-		},
-		//https://html.spec.whatwg.org/multipage/scripting.html#disabled-elements
-		//:matches(
-		//  :matches(button, input, select, textarea, menuitem, optgroup, option)[disabled],
-		//  optgroup[disabled] > option),
-		// fieldset[disabled] * //TODO not child of first <legend>
-		//)
-		disabled: function(elem){
-			return adapter.hasAttrib(elem, "disabled");
-		},
-		enabled: function(elem){
-			return !adapter.hasAttrib(elem, "disabled");
-		},
-		//:matches(:matches(:radio, :checkbox)[checked], :selected) (TODO menuitem)
-		checked: function(elem){
-			return adapter.hasAttrib(elem, "checked") || pseudos.selected(elem);
-		},
-		//:matches(input, select, textarea)[required]
-		required: function(elem){
-			return adapter.hasAttrib(elem, "required");
-		},
-		//:matches(input, select, textarea):not([required])
-		optional: function(elem){
-			return !adapter.hasAttrib(elem, "required");
-		},
-
-		//jQuery extensions
-
-		//:not(:empty)
-		parent: function(elem){
-			return !pseudos.empty(elem);
-		},
-		//:matches(h1, h2, h3, h4, h5, h6)
-		header: function(elem){
-			var name = adapter.getName(elem);
-			return name === "h1" ||
-					name === "h2" ||
-					name === "h3" ||
-					name === "h4" ||
-					name === "h5" ||
-					name === "h6";
-		},
-
-		//:matches(button, input[type=button])
-		button: function(elem){
-			var name = adapter.getName(elem);
-			return name === "button" ||
-					name === "input" &&
-					adapter.getAttributeValue(elem, "type") === "button";
-		},
-		//:matches(input, textarea, select, button)
-		input: function(elem){
-			var name = adapter.getName(elem);
-			return name === "input" ||
-					name === "textarea" ||
-					name === "select" ||
-					name === "button";
-		},
-		//input:matches(:not([type!='']), [type='text' i])
-		text: function(elem){
-			var attr;
-			return adapter.getName(elem) === "input" && (
-				!(attr = adapter.getAttributeValue(elem, "type")) ||
-				attr.toLowerCase() === "text"
-			);
+		for(var i = siblings.length - 1; i >= 0; i--){
+			if(siblings[i] === elem) return true;
+			if(adapter.isTag(siblings[i])) break;
 		}
-	};
+
+		return false;
+	}
+
+	function _firstOfType (elem){
+		var siblings = adapter.getSiblings(elem);
+
+		for(var i = 0; i < siblings.length; i++){
+			if(adapter.isTag(siblings[i])){
+				if(siblings[i] === elem) return true;
+				if(adapter.getName(siblings[i]) === adapter.getName(elem)) break;
+			}
+		}
+
+		return false;
+	}
+
+	function _lastOfType (elem){
+		var siblings = adapter.getSiblings(elem);
+
+		for(var i = siblings.length - 1; i >= 0; i--){
+			if(adapter.isTag(siblings[i])){
+				if(siblings[i] === elem) return true;
+				if(adapter.getName(siblings[i]) === adapter.getName(elem)) break;
+			}
+		}
+
+		return false;
+	}
+
+	function _onlyOfType (elem){
+		var siblings = adapter.getSiblings(elem);
+
+		for(var i = 0, j = siblings.length; i < j; i++){
+			if(adapter.isTag(siblings[i])){
+				if(siblings[i] === elem) continue;
+				if(adapter.getName(siblings[i]) === adapter.getName(elem)) return false;
+			}
+		}
+
+		return true;
+	}
+
+	function _onlyChild (elem){
+		var siblings = adapter.getSiblings(elem);
+
+		for(var i = 0; i < siblings.length; i++){
+			if(adapter.isTag(siblings[i]) && siblings[i] !== elem) return false;
+		}
+
+		return true;
+	}
+
+	//:matches(a, area, link)[href]
+	function _link (elem){
+		return adapter.hasAttrib(elem, "href");
+	}
+
+	//:matches([selected], select:not([multiple]):not(> option[selected]) > option:first-of-type)
+	function _selected (elem){
+		if(adapter.hasAttrib(elem, "selected")) return true;
+		else if(adapter.getName(elem) !== "option") return false;
+
+		//the first <option> in a <select> is also selected
+		var parent = adapter.getParent(elem);
+
+		if(
+			!parent ||
+			adapter.getName(parent) !== "select" ||
+			adapter.hasAttrib(parent, "multiple")
+		) return false;
+
+		var siblings = adapter.getChildren(parent),
+			sawElem  = false;
+
+		for(var i = 0; i < siblings.length; i++){
+			if(adapter.isTag(siblings[i])){
+				if(siblings[i] === elem){
+					sawElem = true;
+				} else if(!sawElem){
+					return false;
+				} else if(adapter.hasAttrib(siblings[i], "selected")){
+					return false;
+				}
+			}
+		}
+
+		return sawElem;
+	}
+
+	//https://html.spec.whatwg.org/multipage/scripting.html#disabled-elements
+	//:matches(
+	//  :matches(button, input, select, textarea, menuitem, optgroup, option)[disabled],
+	//  optgroup[disabled] > option),
+	// fieldset[disabled] * //TODO not child of first <legend>
+	//)
+	function _disabled (elem){
+		return adapter.hasAttrib(elem, "disabled");
+	}
+
+	function _enabled(elem){
+		return !adapter.hasAttrib(elem, "disabled");
+	}
+
+	//:matches(input, select, textarea)[required]
+	function _required(elem){
+		return adapter.hasAttrib(elem, "required");
+	}
+
+	//:matches(input, select, textarea):not([required])
+	function _optional(elem){
+		return !adapter.hasAttrib(elem, "required");
+	}
+
+	//:not(:empty)
+	function _parent (elem){
+		return !pseudos.get('empty')(elem);
+	}
+
+	//:matches(h1, h2, h3, h4, h5, h6)
+	function _header (elem){
+		var name = adapter.getName(elem);
+		return name === "h1" ||
+				name === "h2" ||
+				name === "h3" ||
+				name === "h4" ||
+				name === "h5" ||
+				name === "h6";
+	}
+
+	//:matches(button, input[type=button])
+	function _button(elem){
+		var name = adapter.getName(elem);
+		return name === "button" ||
+				name === "input" &&
+				adapter.getAttributeValue(elem, "type") === "button";
+	}
+
+	//:matches(input, textarea, select, button)
+	function _input(elem){
+		var name = adapter.getName(elem);
+		return name === "input" ||
+				name === "textarea" ||
+				name === "select" ||
+				name === "button";
+	}
+
+	//input:matches(:not([type!='']), [type='text' i])
+	function _text(elem){
+		var attr;
+		return adapter.getName(elem) === "input" && (
+			!(attr = adapter.getAttributeValue(elem, "type")) ||
+			attr.toLowerCase() === "text"
+		);
+	}
+
+
+	const pseudos = new Map([
+		['empty', _empty],
+		['first-child', _firstChild],
+		['last-child', _lastChild],
+		['first-of-type', _firstOfType],
+		['last-of-type', _lastOfType],
+		['only-of-type', _onlyOfType],
+		['only-child', _onlyChild],
+		['link', _link],
+		['visited', falseFunc$1],
+		['selected', _selected],
+		['disabled', _disabled],
+		['enabled', _enabled],
+		['required', _required],
+		['optional', _optional],
+		['parent', _parent],
+		['header', _header],
+		['button', _button],
+		['input', _input],
+		['text', _text]
+	]);
 
 	return pseudos;
 }
@@ -795,24 +807,23 @@ function factory$1(adapter){
 				throw new Error(":" + name + " isn't part of CSS3");
 			}
 
-			if(typeof filters[name] === "function"){
-				verifyArgs(filters[name], name,  subselect);
-				return filters[name](next, subselect, options, context);
-			} else if(typeof pseudos[name] === "function"){
-				var func = pseudos[name];
-				verifyArgs(func, name, subselect);
-
-				if(next === trueFunc) return func;
-
+			let filter = filters.get(name);
+			let pseudo = pseudos.get(name);
+			if(typeof filter === "function"){
+				verifyArgs(filter, name,  subselect);
+				return filter(next, subselect, options, context);
+			} else if(typeof pseudo === "function"){
+				verifyArgs(pseudo, name, subselect);
+				if(next === trueFunc) return pseudo;
 				return function pseudoArgs(elem){
-					return func(elem, subselect) && next(elem);
+					return pseudo(elem, subselect) && next(elem);
 				};
 			} else {
 				throw new Error("unmatched pseudo-class :" + name);
 			}
 		},
-		filters: filters,
-		pseudos: pseudos
+		filters,
+		pseudos
 	};
 }
 
@@ -916,13 +927,13 @@ function compileFactory(adapter){
 	}
 
 	function isTraversal(t){
-		return procedure$2[t.type] < 0;
+		return procedure.get(t.type) < 0;
 	}
 
 	function compileRules(rules, options, context){
 		return rules.reduce(function(func, rule){
 			if(func === falseFunc$2) return func;
-			return Rules[rule.type](func, rule, options, context);
+			return Rules.get(rule.type)(func, rule, options, context);
 		}, options && options.rootFunc || trueFunc$1);
 	}
 
@@ -946,12 +957,11 @@ function compileFactory(adapter){
 	//:not, :has and :matches have to compile selectors
 	//doing this in lib/pseudos.js would lead to circular dependencies,
 	//so we add them here
-	filters.not = function(next, token, options, context){
+	filters.set('not', function(next, token, options, context){
 		var opts = {
 			xmlMode: !!(options && options.xmlMode),
 			strict: !!(options && options.strict)
 		};
-
 		if(opts.strict){
 			if(token.length > 1 || token.some(containsTraversal)){
 				throw new Error("complex selectors in :not aren't allowed in strict mode");
@@ -966,9 +976,9 @@ function compileFactory(adapter){
 		return function(elem){
 			return !func(elem) && next(elem);
 		};
-	};
+	});
 
-	filters.has = function(next, token, options){
+	filters.set('has', function(next, token, options){
 		var opts = {
 			xmlMode: !!(options && options.xmlMode),
 			strict: !!(options && options.strict)
@@ -999,9 +1009,9 @@ function compileFactory(adapter){
 		return function has(elem){
 			return next(elem) && adapter.existsOne(func, adapter.getChildren(elem));
 		};
-	};
+	});
 
-	filters.matches = function(next, token, options, context){
+	filters.set('matches', function(next, token, options, context){
 		var opts = {
 			xmlMode: !!(options && options.xmlMode),
 			strict: !!(options && options.strict),
@@ -1009,7 +1019,7 @@ function compileFactory(adapter){
 		};
 
 		return compileToken(token, opts, context);
-	};
+	});
 
 	compile.compileToken = compileToken;
 	compile.compileUnsafe = compileUnsafe;

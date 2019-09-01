@@ -2,8 +2,6 @@ import { decode_codepoint } from './entities';
 import { entities } from './entities';
 import { legacy } from './entities';
 import { xml } from './entities';
-import inherits from './inherits';
-import events from './events';
 
 var Tokenizer_1 = Tokenizer;
 
@@ -895,7 +893,50 @@ Tokenizer.prototype._getSection = function(){
 };
 
 Tokenizer.prototype._emitToken = function(name){
-	this._cbs[name](this._getSection());
+	let section = this._getSection();
+	switch (name) {
+		case 'onattribute':
+			this._cbs.onattribute(section);
+			break
+		case 'onattribdata':
+			this._cbs.onattribdata(section);
+			break
+		case 'oncdatastart':
+			this._cbs.oncdatastart(section);
+			break
+		case 'oncdataend':
+			this._cbs.oncdataend(section);
+			break
+		case 'ontext':
+			this._cbs.ontext(section);
+			break
+		case 'onprocessinginstruction':
+			this._cbs.onprocessinginstruction(section);
+			break
+		case 'oncomment':
+			this._cbs.oncomment(section);
+			break
+		case 'oncommentend':
+			this._cbs.oncommentend(section);
+			break
+		case 'onclosetag':
+			this._cbs.onclosetag(section);
+			break
+		case 'onopentag':
+			this._cbs.onopentag(section);
+			break
+		case 'onopentagname':
+			this._cbs.onopentagname(section);
+			break
+		case 'onerror':
+			this._cbs.onerror(section);
+			break
+		case 'onend':
+			this._cbs.onend(section);
+			break
+		default:
+			throw new Error('Unsupported event: ' + name)
+	}
 	this._sectionStart = -1;
 };
 
@@ -932,72 +973,70 @@ var Tokenizer$1 = Tokenizer_1;
 	ontext
 */
 
-var formTags = {
-	input: true,
-	option: true,
-	optgroup: true,
-	select: true,
-	button: true,
-	datalist: true,
-	textarea: true
-};
+var formTags = new Set([
+	'input',
+	'option',
+	'optgroup',
+	'select',
+	'button',
+	'datalist',
+	'textarea'
+]);
 
-var openImpliesClose = {
-	tr      : { tr:true, th:true, td:true },
-	th      : { th:true },
-	td      : { thead:true, th:true, td:true },
-	body    : { head:true, link:true, script:true },
-	li      : { li:true },
-	p       : { p:true },
-	h1      : { p:true },
-	h2      : { p:true },
-	h3      : { p:true },
-	h4      : { p:true },
-	h5      : { p:true },
-	h6      : { p:true },
-	select  : formTags,
-	input   : formTags,
-	output  : formTags,
-	button  : formTags,
-	datalist: formTags,
-	textarea: formTags,
-	option  : { option:true },
-	optgroup: { optgroup:true }
-};
+var openImpliesClose = new Map([
+	['tr'      , new Set('tr','th','td')],
+	['th'      , new Set('th')],
+	['td'      , new Set('thead','th','td')],
+	['body'    , new Set('head','link','script')],
+	['li'      , new Set('li')],
+	['p'       , new Set('p')],
+	['h1'      , new Set('p')],
+	['h2'      , new Set('p')],
+	['h3'      , new Set('p')],
+	['h4'      , new Set('p')],
+	['h5'      , new Set('p')],
+	['h6'      , new Set('p')],
+	['select'  , formTags],
+	['input'   , formTags],
+	['output'  , formTags],
+	['button'  , formTags],
+	['datalist', formTags],
+	['textarea', formTags],
+	['option'  , new Set('option')],
+	['optgroup', new Set('optgroup')]
+]);
 
-var voidElements = {
-	__proto__: null,
-	area: true,
-	base: true,
-	basefont: true,
-	br: true,
-	col: true,
-	command: true,
-	embed: true,
-	frame: true,
-	hr: true,
-	img: true,
-	input: true,
-	isindex: true,
-	keygen: true,
-	link: true,
-	meta: true,
-	param: true,
-	source: true,
-	track: true,
-	wbr: true,
-
+var voidElements = new Set([
+	'area',
+	'base',
+	'basefont',
+	'br',
+	'col',
+	'command',
+	'embed',
+	'frame',
+	'hr',
+	'img',
+	'input',
+	'isindex',
+	'keygen',
+	'link',
+	'meta',
+	'param',
+	'source',
+	'track',
+	'wbr',
 	//common self closing svg elements
-	path: true,
-	circle: true,
-	ellipse: true,
-	line: true,
-	rect: true,
-	use: true,
-	stop: true,
-	polyline: true,
-	polygon: true
-};
+	'path',
+	'circle',
+	'ellipse',
+	'line',
+	'rect',
+	'use',
+	'stop',
+	'polyline',
+	'polygon'
+]);
 
 var re_nameEnd = /\s|\//;
 
@@ -1014,12 +1053,8 @@ function Parser(cbs, options){
 	this.startIndex = 0;
 	this.endIndex = null;
 
-	this._lowerCaseTagNames = "lowerCaseTags" in this._options ?
-									!!this._options.lowerCaseTags :
-									!this._options.xmlMode;
-	this._lowerCaseAttributeNames = "lowerCaseAttributeNames" in this._options ?
-									!!this._options.lowerCaseAttributeNames :
-									!this._options.xmlMode;
+	this._lowerCaseTagNames = this._options.lowerCaseTags || !this._options.xmlMode;
+	this._lowerCaseAttributeNames = this._options.lowerCaseAttributeNames || !this._options.xmlMode;
 
 	if(this._options.Tokenizer) {
 		Tokenizer$1 = this._options.Tokenizer;
@@ -1028,8 +1063,6 @@ function Parser(cbs, options){
 
 	if(this._cbs.onparserinit) this._cbs.onparserinit(this);
 }
-
-inherits(Parser, events.EventEmitter);
 
 Parser.prototype._updatePosition = function(initialOffset){
 	if(this.endIndex === null){
@@ -1058,15 +1091,18 @@ Parser.prototype.onopentagname = function(name){
 
 	this._tagname = name;
 
-	if(!this._options.xmlMode && name in openImpliesClose) {
-		for(
-			var el;
-			(el = this._stack[this._stack.length - 1]) in openImpliesClose[name];
-			this.onclosetag(el)
-		);
+	if(!this._options.xmlMode && openImpliesClose.has(name)) {
+		while (this._stack.length > 0) {
+			var el = this._stack[this._stack.length - 1];
+			if (openImpliesClose.get(name).has(el)) {
+				this.onclosetag(el);
+			} else {
+				break
+			}
+		}
 	}
 
-	if(this._options.xmlMode || !(name in voidElements)){
+	if(this._options.xmlMode || !(voidElements.has(name))){
 		this._stack.push(name);
 	}
 
@@ -1082,7 +1118,7 @@ Parser.prototype.onopentagend = function(){
 		this._attribs = null;
 	}
 
-	if(!this._options.xmlMode && this._cbs.onclosetag && this._tagname in voidElements){
+	if(!this._options.xmlMode && this._cbs.onclosetag && voidElements.has(this._tagname)){
 		this._cbs.onclosetag(this._tagname);
 	}
 
@@ -1111,7 +1147,7 @@ Parser.prototype.onclosetag = function(name){
 			this._cbs.onclosetag(last);
 		}
 	} else {
-		if(this._stack.length && (!(name in voidElements))) {
+		if(this._stack.length && (!(voidElements.has(name)))) {
 			let pos = this._stack.lastIndexOf(name);
 			if(pos !== -1){
 				if(this._cbs.onclosetag){
