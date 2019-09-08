@@ -24,6 +24,11 @@ export default class Node extends EventEmitter {
   constructor (...args) {
     super()
 
+    // Note: because the schema is defined lazily
+    // this makes sure that the schema is compiled
+    const NodeClass = this.constructor
+    NodeClass._ensureSchemaIsCompiled()
+
     // plain object to store the nodes data
     this._properties = new Map()
 
@@ -78,6 +83,10 @@ export default class Node extends EventEmitter {
     return this.constructor.schema
   }
 
+  get schema () {
+    return this.getSchema()
+  }
+
   /**
     Get a the list of all polymorphic types.
 
@@ -86,9 +95,7 @@ export default class Node extends EventEmitter {
   getTypeNames () {
     let NodeClass = this.constructor
     let typeNames = this.schema.getSuperTypes()
-    if (_isDefined(NodeClass.type)) {
-      typeNames.unshift(NodeClass.type)
-    }
+    typeNames.unshift(NodeClass.type)
     return typeNames
   }
 
@@ -127,6 +134,21 @@ export default class Node extends EventEmitter {
     return this.constructor.type
   }
 
+  /**
+   * This gets called during schema compilation.
+   *
+   * Override this method in sub-classes to provide the accord schema specification.
+   *
+   * > Note: it is not necessary to call super.define() because Node schemas inherit the parent node's schema
+   * > per se
+   */
+  define () {
+    return {
+      type: '@node',
+      id: 'string'
+    }
+  }
+
   _set (propName, value) {
     this._properties.set(propName, value)
   }
@@ -155,41 +177,41 @@ export default class Node extends EventEmitter {
 
   get _isNode () { return true }
 
-  // this is used only for testing
-  static _defineSchema (schema) {
-    Node.schema = schema
+  static get type () {
+    let NodeClass = this
+    return NodeClass.schema.type
   }
-}
 
-// Attention: this code and its deps will always be included in the bundle as rollup considers this as global side-effect
-Object.defineProperty(Node, 'schema', {
-  get () {
+  static get schema () {
+    let NodeClass = this
+    NodeClass._ensureSchemaIsCompiled()
+    return NodeClass['compiledSchema']
+  }
+
+  static set schema (spec) {
+    // Note: while the preferred way of defining a schema is via implementing Node.define()
+    // we still leave this here
+    this._compileSchema(spec)
+  }
+
+  static _ensureSchemaIsCompiled () {
     let NodeClass = this
     // If the schema has not been set explicitly, derive it from the parent schema
-    if (!_isDefined(NodeClass._schema)) {
-      let ParentNodeClass = _getParentClass(NodeClass)
-      let parentSchema = ParentNodeClass.schema
-      NodeClass._schema = new NodeSchema(parentSchema._properties, _getSuperTypes(NodeClass))
+    if (!NodeClass.hasOwnProperty('compiledSchema')) {
+      NodeClass._compileSchema()
     }
-    return NodeClass._schema
-  },
-  set (schema) {
-    let NodeClass = this
-    // TODO: discuss if we want this. Is a bit more convenient
-    // ATM we transfer 'type' to the static property
-    if (schema.type) {
-      NodeClass.type = schema.type
-    }
-    // collects a full schema considering the schemas of parent class
-    // we will use the unfolded schema, check integrity of the given props (mandatory, readonly)
-    // or fill in default values for undefined properties.
-    NodeClass._schema = compileSchema(NodeClass, schema)
   }
-})
 
-Node.schema = {
-  type: '@node',
-  id: 'string'
+  static _compileSchema (schema) {
+    let NodeClass = this
+    if (!schema) {
+      // Experimental: I'd like to allow schema definition as prototype method
+      // for sake of convenience
+      let define = NodeClass.prototype.define
+      schema = define()
+    }
+    NodeClass['compiledSchema'] = compileSchema(NodeClass, schema)
+  }
 }
 
 // ### Internal implementation
@@ -205,18 +227,23 @@ function _assign (maps) {
   return result
 }
 
-function compileSchema (NodeClass, schema) {
-  let compiledSchema = _compileSchema(schema)
-  let schemas = [compiledSchema]
-  let Clazz = _getParentClass(NodeClass)
-  while (Clazz) {
-    if (Clazz && Clazz._schema) {
-      schemas.unshift(Clazz._schema._properties)
-    }
-    Clazz = _getParentClass(Clazz)
+function compileSchema (NodeClass, spec) {
+  const type = spec.type
+  if (!_isDefined(type)) {
+    throw new Error('"type" is required')
+  }
+  let properties = _compileProperties(spec)
+  let allProperties = [properties]
+  let ParentNodeClass = _getParentNodeClass(NodeClass)
+  while (ParentNodeClass) {
+    // ATTENTION: this will actually lead to a recursive compileSchema() call
+    // if the parent class schema has not been compiled yet
+    let parentSchema = ParentNodeClass.schema
+    allProperties.unshift(parentSchema._properties)
+    ParentNodeClass = _getParentNodeClass(ParentNodeClass)
   }
   let superTypes = _getSuperTypes(NodeClass)
-  let _schema = new NodeSchema(_assign(schemas), superTypes)
+  let _schema = new NodeSchema(type, _assign(allProperties), superTypes)
 
   // define property getter and setters
   for (let prop of _schema) {
@@ -236,8 +263,8 @@ function compileSchema (NodeClass, schema) {
   return _schema
 }
 
-function _compileSchema (schema) {
-  let compiledSchema = new Map()
+function _compileProperties (schema) {
+  let properties = new Map()
   forEach(schema, function (definition, name) {
     // skip 'type'
     if (name === 'type') return
@@ -248,9 +275,9 @@ function _compileSchema (schema) {
     }
     definition = _compileDefintion(definition)
     definition.name = name
-    compiledSchema.set(name, new NodeProperty(name, definition))
+    properties.set(name, new NodeProperty(name, definition))
   })
-  return compiledSchema
+  return properties
 }
 
 function _isValueType (t) {
@@ -348,19 +375,17 @@ function _checked (prop, value) {
 
 function _getSuperTypes (NodeClass) {
   var typeNames = []
-  let SuperClass = _getParentClass(NodeClass)
-  while (SuperClass && SuperClass.type !== '@node') {
-    if (_isDefined(SuperClass.type)) {
-      typeNames.push(SuperClass.type)
-    }
-    SuperClass = _getParentClass(SuperClass)
+  let ParentNodeClass = _getParentNodeClass(NodeClass)
+  while (ParentNodeClass && ParentNodeClass.type !== '@node') {
+    typeNames.push(ParentNodeClass.type)
+    ParentNodeClass = _getParentNodeClass(ParentNodeClass)
   }
   return typeNames
 }
 
-function _getParentClass (Clazz) {
+function _getParentNodeClass (Clazz) {
   var parentProto = Object.getPrototypeOf(Clazz.prototype)
-  if (parentProto) {
+  if (parentProto && parentProto._isNode) {
     return parentProto.constructor
   }
 }

@@ -17,10 +17,12 @@ export default class TestList extends ListMixin(DocumentNode) {
   setListTypeString (listTypeStr) {
     this.listType = listTypeStr
   }
-}
 
-TestList.schema = {
-  type: 'list',
-  items: CHILDREN('list-item'),
-  listType: STRING
+  define () {
+    return {
+      type: 'list',
+      items: CHILDREN('list-item'),
+      listType: STRING
+    }
+  }
 }

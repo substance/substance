@@ -13,19 +13,31 @@ import {
     similar to above (maybe check xpath in other tests already)
 */
 
-class Parent extends DocumentNode {}
-Parent.schema = {
-  type: 'parent',
-  foo: OPTIONAL(CHILD('child'))
+class Parent extends DocumentNode {
+  define () {
+    return {
+      type: 'parent',
+      foo: OPTIONAL(CHILD('child'))
+    }
+  }
 }
-class Child extends DocumentNode {}
-Child.schema = {
-  type: 'child'
+class Child extends DocumentNode {
+  define () {
+    return {
+      type: 'child'
+    }
+  }
 }
-class SomeText extends TextNode {}
-SomeText.schema = { type: 'some-text' }
-class SomeAnno extends PropertyAnnotation {}
-SomeAnno.schema = { type: 'some-anno' }
+class SomeText extends TextNode {
+  define () {
+    return { type: 'some-text' }
+  }
+}
+class SomeAnno extends PropertyAnnotation {
+  define () {
+    return { type: 'some-anno' }
+  }
+}
 
 test('ParentNode: nodes referenced via CHILD should have parent set after creation', t => {
   let doc = new Document(new DocumentSchema({ nodes: [Parent, Child], DocumentClass: Document }))
@@ -73,10 +85,13 @@ test('ParentNode: parents should be updated when replacing a CHILD', t => {
   t.end()
 })
 
-class ParentWithChildren extends DocumentNode {}
-ParentWithChildren.schema = {
-  type: 'parent',
-  foo: CHILDREN('child')
+class ParentWithChildren extends DocumentNode {
+  define () {
+    return {
+      type: 'parent',
+      foo: CHILDREN('child')
+    }
+  }
 }
 
 test('ParentNode: CHILDREN should have parent', t => {

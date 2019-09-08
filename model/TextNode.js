@@ -14,11 +14,13 @@ export default class TextNode extends TextNodeMixin(DocumentNode) {
   }
 
   static isText () { return true }
-}
 
-TextNode.schema = {
-  type: 'text-node',
-  content: 'text',
-  direction: { type: 'enum', optional: true, values: ['left', 'right'] },
-  textAlign: { type: 'enum', default: 'left', values: ['left', 'right'] }
+  define () {
+    return {
+      type: 'text-node',
+      content: 'text',
+      direction: { type: 'enum', optional: true, values: ['left', 'right'] },
+      textAlign: { type: 'enum', default: 'left', values: ['left', 'right'] }
+    }
+  }
 }

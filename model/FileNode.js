@@ -19,12 +19,14 @@ export default class FileNode extends DocumentNode {
   get _isFileNode () { return true }
 
   static get _isFileNode () { return true }
-}
 
-FileNode.schema = {
-  type: 'file',
-  url: { type: 'string', optional: true },
-  fileType: { type: 'string', optional: true },
-  mimeType: { type: 'string', optional: true },
-  sourceFile: { type: 'object', optional: true }
+  define () {
+    return {
+      type: 'file',
+      url: { type: 'string', optional: true },
+      fileType: { type: 'string', optional: true },
+      mimeType: { type: 'string', optional: true },
+      sourceFile: { type: 'object', optional: true }
+    }
+  }
 }

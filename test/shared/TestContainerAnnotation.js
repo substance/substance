@@ -1,6 +1,9 @@
 import { ContainerAnnotation } from 'substance'
 
-export default class TestContainerAnnotation extends ContainerAnnotation {}
-TestContainerAnnotation.schema = {
-  type: 'test-container-anno'
+export default class TestContainerAnnotation extends ContainerAnnotation {
+  define () {
+    return {
+      type: 'test-container-anno'
+    }
+  }
 }

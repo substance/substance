@@ -16,9 +16,11 @@ export default class Container extends ContainerMixin(DocumentNode) {
   getContent () {
     return this.nodes
   }
-}
 
-Container.schema = {
-  type: '@container',
-  nodes: { type: ['array', 'id'], default: [], owned: true }
+  define () {
+    return {
+      type: '@container',
+      nodes: { type: ['array', 'id'], default: [], owned: true }
+    }
+  }
 }

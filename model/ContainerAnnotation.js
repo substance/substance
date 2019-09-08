@@ -42,11 +42,13 @@ export default class ContainerAnnotation extends AnnotationMixin(DocumentNode) {
   static isAnnotation () { return true }
 
   static isContainerAnnotation () { return true }
-}
 
-ContainerAnnotation.schema = {
-  type: '@container-annotation',
-  containerPath: { type: ['array', 'id'] },
-  start: 'coordinate',
-  end: 'coordinate'
+  define () {
+    return {
+      type: '@container-annotation',
+      containerPath: { type: ['array', 'id'] },
+      start: 'coordinate',
+      end: 'coordinate'
+    }
+  }
 }

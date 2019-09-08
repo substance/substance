@@ -15,11 +15,14 @@ const cssSelectAdapter = new DocumentNodeSelectAdapter()
   The following example shows how a new node type is defined.
 
   ```js
-  class Todo extends DocumentNode {}
-  Todo.schema = {
-    type: 'todo',
-    content: 'text',
-    done: { type: 'bool', default: false }
+  class Todo extends DocumentNode {
+    define () {
+      return {
+        type: 'todo',
+        content: 'text',
+        done: { type: 'bool', default: false }
+      }
+    }
   }
   ```
 

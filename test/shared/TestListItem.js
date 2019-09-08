@@ -46,10 +46,12 @@ export default class TestListItem extends TextNodeMixin(DocumentNode) {
   static isListItem () {
     return true
   }
-}
 
-TestListItem.schema = {
-  type: 'list-item',
-  level: { type: 'number', default: 1 },
-  content: TEXT(ANNOS_AND_INLINE_NODES)
+  define () {
+    return {
+      type: 'list-item',
+      level: { type: 'number', default: 1 },
+      content: TEXT(ANNOS_AND_INLINE_NODES)
+    }
+  }
 }

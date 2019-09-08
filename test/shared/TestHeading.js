@@ -26,10 +26,12 @@ export default class Heading extends TextNode {
   static get MIN_LEVEL () { return MIN_LEVEL }
 
   static get MAX_LEVEL () { return MAX_LEVEL }
-}
 
-Heading.schema = {
-  type: 'heading',
-  level: { type: 'number', default: 1 },
-  content: TEXT(ANNOS_AND_INLINE_NODES)
+  define () {
+    return {
+      type: 'heading',
+      level: { type: 'number', default: 1 },
+      content: TEXT(ANNOS_AND_INLINE_NODES)
+    }
+  }
 }

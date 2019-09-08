@@ -1,5 +1,6 @@
 export default class NodeSchema {
-  constructor (properties, superTypes) {
+  constructor (type, properties, superTypes) {
+    this.type = type
     this._properties = properties
     this._superTypes = superTypes
     // Analysing ownership:
