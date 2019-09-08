@@ -12,7 +12,7 @@ import ObjectOperation from './ObjectOperation'
 import { fromJSON as selectionFromJSON } from './selectionHelpers'
 import { getContainerPosition } from './documentHelpers'
 
-class DocumentChange {
+export default class DocumentChange {
   constructor (ops, before, after) {
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
       let data = arguments[0]
@@ -222,32 +222,30 @@ class DocumentChange {
     }
     return data
   }
-}
 
-DocumentChange.deserialize = function (str) {
-  let opSerializer = new OperationSerializer()
-  let data = JSON.parse(str)
-  data.ops = data.ops.map(function (opData) {
-    return opSerializer.deserialize(opData)
-  })
-  if (data.before.selection) {
-    data.before.selection = selectionFromJSON(data.before.selection)
+  static deserialize (str) {
+    let opSerializer = new OperationSerializer()
+    let data = JSON.parse(str)
+    data.ops = data.ops.map(function (opData) {
+      return opSerializer.deserialize(opData)
+    })
+    if (data.before.selection) {
+      data.before.selection = selectionFromJSON(data.before.selection)
+    }
+    if (data.after.selection) {
+      data.after.selection = selectionFromJSON(data.after.selection)
+    }
+    return new DocumentChange(data)
   }
-  if (data.after.selection) {
-    data.after.selection = selectionFromJSON(data.after.selection)
+
+  static fromJSON (data) {
+    // Don't write to original object on deserialization
+    let change = cloneDeep(data)
+    change.ops = data.ops.map(function (opData) {
+      return ObjectOperation.fromJSON(opData)
+    })
+    change.before.selection = selectionFromJSON(data.before.selection)
+    change.after.selection = selectionFromJSON(data.after.selection)
+    return new DocumentChange(change)
   }
-  return new DocumentChange(data)
 }
-
-DocumentChange.fromJSON = function (data) {
-  // Don't write to original object on deserialization
-  let change = cloneDeep(data)
-  change.ops = data.ops.map(function (opData) {
-    return ObjectOperation.fromJSON(opData)
-  })
-  change.before.selection = selectionFromJSON(data.before.selection)
-  change.after.selection = selectionFromJSON(data.after.selection)
-  return new DocumentChange(change)
-}
-
-export default DocumentChange

@@ -172,8 +172,8 @@ export default class ParentNodeHook {
     let annoParent = doc.get(path[0])
     this._setParent(annoParent, anno.id, path[1])
   }
-}
 
-ParentNodeHook.register = function (doc) {
-  return new ParentNodeHook(doc)
+  static register (doc) {
+    return new ParentNodeHook(doc)
+  }
 }

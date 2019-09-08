@@ -1,13 +1,4 @@
-/**
-  Index for Nodes.
-
-  Node indexes are first-class citizens in {@link model/data/Data}.
-  I.e., they are updated after each operation, and before any other listener is notified.
-
-  @abstract
-
- */
-class NodeIndex {
+export default class NodeIndex {
   /*
     Check if a node should be indexed.
 
@@ -16,7 +7,7 @@ class NodeIndex {
     @param {Node}
     @returns {Boolean} true if the given node should be added to the index.
    */
-  select (node) { // eslint-disable-line no-unused-vars
+  select (node) {
     throw new Error('This method is abstract.')
   }
 
@@ -29,7 +20,7 @@ class NodeIndex {
 
     @param {Node} node
    */
-  create (node) { // eslint-disable-line no-unused-vars
+  create (node) {
     throw new Error('This method is abstract.')
   }
 
@@ -38,7 +29,7 @@ class NodeIndex {
 
     @param {model/data/Node} node
    */
-  delete (node) { // eslint-disable-line no-unused-vars
+  delete (node) {
     throw new Error('This method is abstract.')
   }
 
@@ -52,7 +43,7 @@ class NodeIndex {
     @private
     @param {Node} node
    */
-  update (node, path, newValue, oldValue) { // eslint-disable-line no-unused-vars
+  update (node, path, newValue, oldValue) {
     throw new Error('This method is abstract.')
   }
 
@@ -72,8 +63,8 @@ class NodeIndex {
     @return A cloned NodeIndex.
    */
   clone () {
-    var NodeIndexClass = this.constructor
-    var clone = new NodeIndexClass()
+    let NodeIndexClass = this.constructor
+    let clone = new NodeIndexClass()
     return clone
   }
 
@@ -84,32 +75,18 @@ class NodeIndex {
       }
     }
   }
-}
 
-/**
-  Create a new NodeIndex using the given prototype as mixin.
-
-  @param {Object} prototype
-  @returns {NodeIndex} A customized NodeIndex.
- */
-NodeIndex.create = function (prototype) {
-  var index = Object.assign(new NodeIndex(), prototype)
-  index.clone = function () {
-    return NodeIndex.create(prototype)
+  static create (prototype) {
+    let index = Object.assign(new NodeIndex(), prototype)
+    index.clone = function () {
+      return NodeIndex.create(prototype)
+    }
+    return index
   }
-  return index
-}
 
-/**
-  Create a filter to filter nodes by type.
-
-  @param {String} type
-  @returns {function}
- */
-NodeIndex.filterByType = function (type) {
-  return function (node) {
-    return node.isInstanceOf(type)
+  static filterByType (type) {
+    return function (node) {
+      return node.isInstanceOf(type)
+    }
   }
 }
-
-export default NodeIndex

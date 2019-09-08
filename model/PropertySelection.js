@@ -359,8 +359,8 @@ export default class PropertySelection extends Selection {
   _clone () {
     return new PropertySelection(this.start.path, this.start.offset, this.end.offset, this.reverse, this.containerPath, this.surfaceId)
   }
-}
 
-PropertySelection.fromJSON = function (json) {
-  return new PropertySelection(json)
+  static fromJSON (json) {
+    return new PropertySelection(json)
+  }
 }

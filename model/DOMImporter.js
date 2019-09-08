@@ -649,6 +649,10 @@ export default class DOMImporter {
   _trimRight (text) {
     return text.replace(WS_RIGHT, '')
   }
+
+  static get State () { return DOMImporterState }
+
+  static get INVISIBLE_CHARACTER () { return INVISIBLE_CHARACTER }
 }
 
 class DOMImporterState {
@@ -689,7 +693,3 @@ class DOMImporterState {
     return last(this.contexts)
   }
 }
-
-DOMImporter.State = DOMImporterState
-
-DOMImporter.INVISIBLE_CHARACTER = INVISIBLE_CHARACTER

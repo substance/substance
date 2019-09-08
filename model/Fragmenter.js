@@ -251,11 +251,11 @@ export default class Fragmenter {
 
     B.splice(startIndex, closers.length, ...closers)
   }
-}
 
-// Fragment weight values that are used to influence how fragments
-// get stacked when they are overlapping
-Fragmenter.MUST_NOT_SPLIT = Number.MAX_VALUE
-Fragmenter.SHOULD_NOT_SPLIT = 1000
-Fragmenter.NORMAL = 100
-Fragmenter.ALWAYS_ON_TOP = 0
+  // Fragment weight values that are used to influence how fragments
+  // get stacked when they are overlapping
+  static get MUST_NOT_SPLIT () { return Number.MAX_VALUE }
+  static get SHOULD_NOT_SPLIT () { return 1000 }
+  static get NORMAL () { return 100 }
+  static get ALWAYS_ON_TOP () { return 0 }
+}
