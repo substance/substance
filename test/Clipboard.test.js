@@ -59,7 +59,7 @@ function ClipboardTests (memory) {
   function test (title, fn) {
     _test('Clipboard' + (memory ? ' [memory]' : '') + ': ' + title, fn, {
       before () {
-        if (memory) platform.inBrowser = false
+        if (memory) platform.values.inBrowser = false
       },
       after () {
         platform._reset()
@@ -359,16 +359,18 @@ function ClipboardTests (memory) {
 
 function _fixtureTest (t, html, impl, forceWindows) {
   let { editorSession, clipboard, doc, context } = _setup(t, simple)
-  let _isWindows = platform.isWindows
-  platform.isWindows = Boolean(forceWindows)
+  platform.values.isWindows = Boolean(forceWindows)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
     containerPath: BODY_CONTENT_PATH
   })
-  impl(doc, clipboard, context)
-  platform.isWindows = _isWindows
+  try {
+    impl(doc, clipboard, context)
+  } finally {
+    platform._reset()
+  }
 }
 
 function _emptyFixtureTest (t, html, impl, forceWindows) {

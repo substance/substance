@@ -29,7 +29,7 @@ function ComponentTests (debug, memory) {
   const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
     // before
     substanceGlobals.DEBUG_RENDERING = Boolean(debug)
-    if (memory) platform.inBrowser = false
+    if (memory) platform.values.inBrowser = false
     t._document = DefaultDOMElement.createDocument('html')
     try {
       fn(t)

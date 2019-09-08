@@ -16,7 +16,7 @@ function HTMLImporterTests (memory) {
   const LABEL = 'HTMLImporter' + (memory ? ' [memory]' : '')
   const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
     // before
-    if (memory) platform.inBrowser = false
+    if (memory) platform.values.inBrowser = false
     try {
       fn(t)
     } finally {

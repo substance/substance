@@ -1,61 +1,73 @@
-/**
-  @module
+class Platform {
+  constructor () {
+    // lazily initialized
+    this._values = null
+  }
 
-  Platform utilities such as browser detection etc.
+  get values () {
+    if (!this._values) {
+      this._values = detect()
+    }
+    return this._values
+  }
 
-  @example
+  get isWindows () {
+    return this.values.isWindows
+  }
 
-  ```js
-  import platform from 'substance/util/platform'
-  ```
-*/
-const platform = {
+  get isMac () {
+    return this.values.isMac
+  }
 
-  inBrowser: false,
+  get inBrowser () {
+    return this.values.inBrowser
+  }
 
-  inNodeJS: false,
+  get inNodeJS () {
+    return this.values.inNodeJS
+  }
 
-  inElectron: false,
+  get inElectron () {
+    return this.values.inElectron
+  }
 
-  /**
-    True if user agent is Internet Explorer or Microsoft Edge.
-  */
-  isIE: false,
-  /**
-    True if user agent is Firefox
-  */
+  get isIE () {
+    return this.values.isIE
+  }
 
-  isFF: false,
+  get isFF () {
+    return this.values.isFF
+  }
 
-  isOpera: false,
+  get isOpera () {
+    return this.values.isOpera
+  }
 
-  isWebkit: false,
+  get isWebkit () {
+    return this.values.isWebkit
+  }
 
-  isChromium: false,
+  get isChromium () {
+    return this.values.isChromium
+  }
 
-  /*
-    Major version
+  get devtools () {
+    return this.values.devtools
+  }
 
-    ATTENTION: at the moment only extracted for IE
-  */
-  version: -1,
+  get version () {
+    return this.values.version
+  }
 
-  // TODO: make sure that this is implemented correctly
-
-  isWindows: false,
-
-  isMac: false,
-
-  devtools: false,
-
-  // in tests we change the state of this to emulate execuatio under certain conditions
-  // to reset to defaults we call this function
-  _reset: detect
+  _reset () {
+    this._values = detect()
+  }
 }
 
 function detect () {
+  let values = {}
   if (typeof window !== 'undefined') {
-    platform.inBrowser = true
+    values.inBrowser = true
 
     // Detect Internet Explorer / Edge
     const ua = window.navigator.userAgent
@@ -68,57 +80,56 @@ function detect () {
 
     if (msie > 0) {
       // IE 10 or older => return version number
-      platform.isIE = true
-      platform.version = 10
+      values.isIE = true
+      values.version = 10
       // TODO: if we need someday, this would be the exact version number
       // parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10)
     } else if (trident > 0) {
       // IE 11 => return version number
-      platform.isIE = true
-      platform.version = 11
-      platform.isTrident = true
+      values.isIE = true
+      values.version = 11
+      values.isTrident = true
       // TODO: if we need someday, this would be the exact version number
       // var rv = ua.indexOf('rv:')
       // parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10)
     } else if (edge > 0) {
       // IE 12 => return version number
-      platform.isIE = true
-      platform.isEdge = true
-      platform.version = 12
+      values.isIE = true
+      values.isEdge = true
+      values.version = 12
       // TODO: if we need someday, this would be the exact version number
       parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10)
     }
 
     // Detect Firefox
-    platform.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+    values.isFF = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
     // TODO: explicit detection of Webkit&/Blink
-    platform.isWebkit = !platform.isFF && !platform.isIE
+    values.isWebkit = !values.isFF && !values.isIE
 
     // Detect Opera
-    platform.isOpera = typeof opera !== 'undefined'
+    values.isOpera = typeof opera !== 'undefined'
 
     // Detect Chromium
-    platform.isChromium = !!chrome && vn === 'Google Inc.' && !platform.isOpera && !platform.isEdge
+    values.isChromium = !!chrome && vn === 'Google Inc.' && !values.isOpera && !values.isEdge
   } else {
-    platform.inBrowser = false
+    values.inBrowser = false
   }
 
-  if (platform.inBrowser) {
-    platform.isWindows = (window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf('Win') !== -1)
-    platform.isMac = (window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
+  if (values.inBrowser) {
+    values.isWindows = (window.navigator !== undefined && window.navigator.appVersion && window.navigator.appVersion.indexOf('Win') !== -1)
+    values.isMac = (window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
   }
 
   let _inNodeJS = (typeof process !== 'undefined' && process.release && process.release.name === 'node')
   if (_inNodeJS) {
-    if (platform.inBrowser) {
-      platform.inElectron = true
+    if (values.inBrowser) {
+      values.inElectron = true
     } else {
-      platform.inNodeJS = true
+      values.inNodeJS = true
     }
   }
+  return values
 }
 
-detect()
-
-export default platform
+export default new Platform()

@@ -11,7 +11,7 @@ function prettyPrintTests (impl) {
   const LABEL = 'prettyPrintXML (' + impl + ')'
   const test = (title, fn) => substanceTest(`${LABEL}: ${title}`, t => {
     // before
-    if (impl === 'MemoryDOMElement') platform.inBrowser = false
+    if (impl === 'MemoryDOMElement') platform.values.inBrowser = false
     try {
       fn(t)
     } finally {
