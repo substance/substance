@@ -66,7 +66,7 @@ module.exports = function (commandLineArgs) {
         include: [
           'dom/*.js',
           'model/*.js',
-          'ui/*.js',
+          'editor/*.js',
           'util/*.js'
         ]
       })

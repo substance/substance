@@ -1,8 +1,8 @@
 import DefaultDOMElement from '../dom/DefaultDOMElement'
+import Component from '../dom/Component'
 import platform from '../util/platform'
 import Coordinate from '../model/Coordinate'
 import Range from '../model/Range'
-import Component from './Component'
 import TextPropertyComponent from './TextPropertyComponent'
 import IsolatedNodeComponent from './IsolatedNodeComponent'
 

@@ -3,7 +3,7 @@ import isString from '../util/isString'
 import uuid from '../util/uuid'
 import flatten from '../util/flatten'
 import substanceGlobals from '../util/substanceGlobals'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
+import DefaultDOMElement from './DefaultDOMElement'
 import VirtualElement from './VirtualElement'
 
 const TOP_LEVEL_ELEMENT = Symbol('TOP_LEVEL_ELEMENT')

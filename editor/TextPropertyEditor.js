@@ -1,8 +1,7 @@
 import Surface from './Surface'
 
 /**
- * Editor for a text property (annotated string). Needs to be
- * instantiated inside a {@link ui/Controller} context.
+ * Editor for a text property (annotated string).
  *
  * @param {string} props.name unique editor name
  * @param {string[]} props.path path to a text property

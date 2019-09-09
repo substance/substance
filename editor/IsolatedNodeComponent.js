@@ -1,5 +1,5 @@
 import Coordinate from '../model/Coordinate'
-import Component from './Component'
+import Component from '../dom/Component'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
 
 const BRACKET = 'X'

@@ -1,5 +1,5 @@
 import { debounce, keys, platform } from '../util'
-import Component from './Component'
+import Component from '../dom/Component'
 
 const UPDATE_DELAY = 300
 

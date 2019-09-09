@@ -1,5 +1,5 @@
 import { getKeyForPath } from '../util'
-import Component from './Component'
+import Component from '../dom/Component'
 
 export default class TextNodeComponent extends Component {
   /*

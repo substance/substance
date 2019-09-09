@@ -1,7 +1,7 @@
 import getKeyForPath from '../util/getKeyForPath'
 import isNumber from '../util/isNumber'
 import Coordinate from '../model/Coordinate'
-import Component from './Component'
+import Component from '../dom/Component'
 import AnnotatedTextComponent from './AnnotatedTextComponent'
 import SelectionFragmentComponent from './SelectionFragmentComponent'
 

@@ -1,6 +1,6 @@
 export * from './dom/index'
 export * from './model/index'
-export * from './ui/index'
+export * from './editor/index'
 export * from './util/index'
 
 // patched cssSelect

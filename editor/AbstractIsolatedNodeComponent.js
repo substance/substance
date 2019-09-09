@@ -1,6 +1,6 @@
 import keys from '../util/keys'
 import platform from '../util/platform'
-import Component from './Component'
+import Component from '../dom/Component'
 
 export default class AbstractIsolatedNodeComponent extends Component {
   constructor (...args) {

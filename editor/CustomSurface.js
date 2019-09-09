@@ -1,4 +1,4 @@
-import Component from './Component'
+import Component from '../dom/Component'
 
 export default class CustomSurface extends Component {
   constructor (...args) {

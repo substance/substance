@@ -4,7 +4,7 @@ import startsWith from '../util/startsWith'
 import parseKeyEvent from '../util/parseKeyEvent'
 import { getDOMRangeFromEvent } from '../util/windowUtils'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
-import Component from './Component'
+import Component from '../dom/Component'
 import Clipboard from './Clipboard'
 import DOMSelection from './DOMSelection'
 

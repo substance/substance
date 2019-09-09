@@ -2,10 +2,10 @@ import isArray from '../util/isArray'
 import isArrayEqual from '../util/isArrayEqual'
 import _isDefined from '../util/_isDefined'
 import keys from '../util/keys'
+import RenderingEngine from '../dom/RenderingEngine'
 import * as selectionHelpers from '../model/selectionHelpers'
-import Surface from './Surface'
-import RenderingEngine from './RenderingEngine'
 import { getContainerPosition } from '../model/documentHelpers'
+import Surface from './Surface'
 
 /**
  * Represents an editor for content rendered in a flow, such as a manuscript.

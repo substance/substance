@@ -7,9 +7,6 @@ import Command from './Command'
   See the example below to learn how to register an `AnnotationCommand`
   for a strong annotation.
 
-  @class AnnotationCommand
-  @extends ui/Command
-
   @example
 
   ```js

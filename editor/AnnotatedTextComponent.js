@@ -1,8 +1,8 @@
 import Fragmenter from '../model/Fragmenter'
-import Component from './Component'
+import Component from '../dom/Component'
 
 /**
-  Renders an anotated text. Used internally by {@link ui/TextPropertyComponent}.
+  Renders an anotated text. Used internally by `TextPropertyComponent`.
 
   @prop {String[]} path The property to be rendered.
 */

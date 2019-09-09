@@ -2,7 +2,7 @@ import HandlerParams from './HandlerParams'
 
 /**
   Commands are used to perform UI triggered actions on the document. For instance the
-  {@link ui/AnnotationCommand} takes care of creating, expanding, truncating and
+  `AnnotationCommand` takes care of creating, expanding, truncating and
   deleting annotations such as strong and emphasis. It does so by determining a
   commandState by inspecting the current selection, which is used to parametrize
   the corresponding tool component. E.g. the strong tool gets active and clickable
@@ -10,7 +10,6 @@ import HandlerParams from './HandlerParams'
   or a keyboard shortcut, the command gets executed by running the code specified in the
   execute method.
 
-  @class Command
   @abstract
 
   @example

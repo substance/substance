@@ -11,7 +11,7 @@
   },
   "scripts": {
     "prepack": "npm install && node make build",
-    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"ui/**/*.js\" \"util/**/*.js\" index.es.js",
+    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"editor/**/*.js\" \"util/**/*.js\" index.es.js",
     "pretest": "npm run lint",
     "test": "node make test",
     "test-and-cover": "node make test && node make cover",
@@ -52,7 +52,7 @@
     "dom",
     "model",
     "test",
-    "ui",
+    "editor",
     "util",
     "CHANGELOG.md",
     "index.es.js",

@@ -1,6 +1,6 @@
 import isEqual from '../util/isEqual'
+import Component from '../dom/Component'
 import AbstractIsolatedNodeComponent from './AbstractIsolatedNodeComponent'
-import Component from './Component'
 
 export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeComponent {
   render ($$) {

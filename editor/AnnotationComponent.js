@@ -1,11 +1,7 @@
-import Component from './Component'
+import Component from '../dom/Component'
 
 /**
-  Renders an annotation. Used internally by different components (e.g. ui/AnnotatedTextComponent)
-
-  @class
-  @component
-  @extends ui/Component
+  Renders an annotation. Used internally by different components (e.g. AnnotatedTextComponent)
 
   @prop {Object} doc document
   @prop {Object} node node which describes annotation

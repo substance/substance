@@ -5,8 +5,8 @@ import isFunction from '../util/isFunction'
 import uuid from '../util/uuid'
 import EventEmitter from '../util/EventEmitter'
 import platform from '../util/platform'
-import DOMElement from '../dom/DOMElement'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
+import DOMElement from './DOMElement'
+import DefaultDOMElement from './DefaultDOMElement'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
 
@@ -245,7 +245,6 @@ export default class Component extends EventEmitter {
 
   /**
     Get the top-most Component. This the component mounted using
-    {@link ui/Component.mount}
     @return {Component} The root component
   */
   getRoot () {
@@ -377,7 +376,7 @@ export default class Component extends EventEmitter {
   }
 
   /**
-    Determines if Component should be rendered again using {@link ui/Component#rerender}
+    Determines if Component should be rendered again using `Component#rerender`
     after changing props. For comparisons, you can use `this.props` and
     `newProps`.
 
@@ -489,7 +488,7 @@ export default class Component extends EventEmitter {
     this to set up subscriptions to changes in the document or in a node of
     your interest.
 
-    Remember to unsubscribe from all changes in the {@link ui/Component#dispose}
+    Remember to unsubscribe from all changes in the `Component#dispose`
     method otherwise listeners you have attached may be called without a context.
 
     Make sure that you call `component.mount(el)` using an element
@@ -517,7 +516,7 @@ export default class Component extends EventEmitter {
 
   /**
    * A hook which is called when the component is unmounted, i.e. removed from DOM,
-   * hence disposed. See {@link ui/Component#didMount} for example usage.
+   * hence disposed. See `Component#didMount` for example usage.
    *
    * Remember to unsubscribe all change listeners here.
    */
@@ -587,7 +586,7 @@ export default class Component extends EventEmitter {
         actions and the values define the handler to be invoked.
 
     These handlers are automatically removed once the Component is disposed, so
-    there is no need to unsubscribe these handlers in the {@link ui/Component#dispose}
+    there is no need to unsubscribe these handlers in the  `Component#dispose`
     hook.
 
     @example
@@ -636,7 +635,7 @@ export default class Component extends EventEmitter {
 
   /**
     Sets the state of this component, potentially leading to a rerender. It is
-    better practice to use {@link ui/Component#extendState}. That way, the code
+    better practice to use `Component#extendState`. That way, the code
     which updates state only updates part relevant to it.
 
     Eg. If you have a Component that has a dropdown open state flag and another

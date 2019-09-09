@@ -1,4 +1,4 @@
-import Component from './Component'
+import Component from '../dom/Component'
 import IsolatedNodeComponent from './IsolatedNodeComponent'
 
 export default class UnsupportedNodeComponent extends IsolatedNodeComponent {

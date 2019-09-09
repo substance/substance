@@ -1,6 +1,6 @@
-import Component from './Component'
+import Component from '../dom/Component'
 
-class SelectionFragmentComponent extends Component {
+export default class SelectionFragmentComponent extends Component {
   render ($$) {
     // TODO: we should rename se-cursor to sc-cursor
     let el = $$('span').addClass('se-selection-fragment')
@@ -14,5 +14,3 @@ class SelectionFragmentComponent extends Component {
     return el
   }
 }
-
-export default SelectionFragmentComponent

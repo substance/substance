@@ -10,7 +10,7 @@ import isString from '../util/isString'
 import _isDefined from '../util/_isDefined'
 import without from '../util/without'
 import map from '../util/map'
-import DOMElement from '../dom/DOMElement'
+import DOMElement from './DOMElement'
 
 /**
   A virtual {@link DOMElement} which is used by the {@link Component} API.
@@ -91,10 +91,6 @@ export default class VirtualElement extends DOMElement {
 
 /*
   A virtual HTML element.
-
-  @private
-  @class VirtualElement.VirtualHTMLElement
-  @extends ui/VirtualElement
 */
 class VirtualHTMLElement extends VirtualElement {
   constructor (tagName) {
@@ -522,10 +518,6 @@ class VirtualHTMLElement extends VirtualElement {
 
 /*
   A virtual element which gets rendered by a custom component.
-
-  @private
-  @class VirtualElement.VirtualComponent
-  @extends ui/VirtualElement
 */
 class VirtualComponent extends VirtualHTMLElement {
   constructor (ComponentClass, props) {

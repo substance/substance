@@ -1,8 +1,3 @@
-import RenderingEngine from './RenderingEngine'
-
-// expose the static factory for virtual elements
-// used in render methods
-const $$ = RenderingEngine.createVirtualElement
 
 export { default as AbstractAppState } from './AbstractAppState'
 export { default as AbstractEditorSession } from './AbstractEditorSession'
@@ -18,8 +13,6 @@ export { default as BasePackage } from './BasePackage'
 export { default as Clipboard } from './Clipboard'
 export { default as Command } from './Command'
 export { default as CommandManager } from './CommandManager'
-export { default as Component } from './Component'
-export * from './componentHelpers'
 export { default as ComponentRegistry } from './ComponentRegistry'
 export { default as ContainerEditor } from './ContainerEditor'
 export { default as Configurator } from './Configurator'
@@ -49,7 +42,6 @@ export { default as KeyboardManager } from './KeyboardManager'
 export { default as MarkersManager } from './MarkersManager'
 export { default as ModalEditorSession } from './ModalEditorSession'
 export { default as RedoCommand } from './RedoCommand'
-export { default as RenderingEngine } from './RenderingEngine'
 export { default as Router } from './Router'
 export { default as SelectAllCommand } from './SelectAllCommand'
 export { default as SelectionFragmentComponent } from './SelectionFragmentComponent'
@@ -63,6 +55,3 @@ export { default as TextNodeComponent } from './TextNodeComponent'
 export { default as TextPropertyComponent } from './TextPropertyComponent'
 export { default as TextPropertyEditor } from './TextPropertyEditor'
 export { default as UndoCommand } from './UndoCommand'
-export { default as VirtualElement } from './VirtualElement'
-
-export { $$ }

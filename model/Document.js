@@ -165,41 +165,6 @@ export default class Document extends EventEmitter {
     }
   }
 
-  /**
-    Creates a context like a transaction for importing nodes.
-    This is important in presence of cyclic dependencies.
-    Indexes will not be updated during the import but will afterwards
-    when all nodes have been created.
-
-    @private
-    This is experimental.
-
-    @example
-
-    Consider the following example from our documentation generator:
-    We want to have a member index, which keeps track of members of namespaces, modules, and classes.
-    grouped by type, and in the case of classes, also grouped by 'instance' and 'class'.
-
-    ```
-    ui
-      - class
-        - ui/Component
-    ui/Component
-      - class
-        - method
-          - mount
-      - instance
-        - method
-          - render
-    ```
-
-    To decide which grouping to apply, the parent type of a member needs to be considered.
-    Using an incremental approach, this leads to the problem, that the parent must exist
-    before the child. At the same time, e.g. when deserializing, the parent has already
-    a field with all children ids. This cyclic dependency is best address, by turning
-    off all listeners (such as indexes) until the data is consistent.
-
-  */
   import (importer) {
     try {
       this.data._stopIndexing()
