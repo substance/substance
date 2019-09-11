@@ -139,7 +139,7 @@ export default class RenderingEngine {
     // 3. map known html props
     //    - input.value
     let _props = {}
-    let _classNames = null
+    let _class = null
     let _styles = null
     let _attributes = {}
     let _htmlProps = {}
@@ -151,8 +151,9 @@ export default class RenderingEngine {
         if (!props.hasOwnProperty(key)) continue
         let val = props[key]
         switch (key) {
+          case 'class':
           case 'className': {
-            _classNames = val
+            _class = val
             break
           }
           case 'style': {
@@ -215,8 +216,8 @@ export default class RenderingEngine {
     if (_ref) {
       el.ref(_ref)
     }
-    if (_classNames) {
-      el.addClass(_classNames)
+    if (_class) {
+      el.addClass(_class)
     }
     if (_styles) {
       el.css(_styles)
