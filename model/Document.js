@@ -6,9 +6,9 @@ import last from '../util/last'
 import uuid from '../util/uuid'
 import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
-import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
+import TypeIndex from './TypeIndex'
 import DocumentChange from './DocumentChange'
 import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
@@ -69,7 +69,7 @@ export default class Document extends EventEmitter {
     this.nodeFactory = new DocumentNodeFactory(this)
     this.data = new IncrementalData(this.schema, this.nodeFactory)
     // all by type
-    this.addIndex('type', new PropertyIndex('type'))
+    this.addIndex('type', new TypeIndex('type'))
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
     // TODO: these are only necessary if there is a container annotation

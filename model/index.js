@@ -65,5 +65,6 @@ export { selectionHelpers }
 export { default as TextNode } from './TextNode'
 export { default as TextNodeMixin } from './TextNodeMixin'
 export { default as TextOperation } from './TextOperation'
+export { default as TypeIndex } from './TypeIndex'
 export { default as XMLExporter } from './XMLExporter'
 export { default as XMLImporter } from './XMLImporter'
