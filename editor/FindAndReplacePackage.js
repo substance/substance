@@ -81,6 +81,5 @@ export default {
     config.addLabel('regex-title', {
       en: 'Regex'
     })
-    config.addIcon('close', { 'fontawesome': 'fa-close' })
   }
 }
