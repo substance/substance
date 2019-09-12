@@ -121,12 +121,19 @@ export default class Configurator {
     })
   }
 
-  addIcon (iconName, options) {
+  addIcon (iconName, spec, options = {}) {
     if (!this._icons.has(iconName)) {
       this._icons.set(iconName, {})
     }
     let iconConfig = this._icons.get(iconName)
-    Object.assign(iconConfig, options)
+    for (const type of Object.keys(spec)) {
+      if (iconConfig[type]) {
+        if (!options.force) {
+          throw new Error(`Icon already specified: ${iconName}:${type}`)
+        }
+      }
+      iconConfig[type] = spec[type]
+    }
   }
 
   addImporter (format, ImporterClass, spec = {}) {
