@@ -1158,6 +1158,7 @@ export default class Component extends EventEmitter {
           return func(this.props, $$)
         }
       }
+      ComponentClass.displayName = func.name
       func._Component = ComponentClass
     }
     return ComponentClass
