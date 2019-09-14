@@ -1314,10 +1314,10 @@ function ComponentTests (debug, memory) {
 
     class Surface extends TestComponent {
       didMount () {
-        registry[this.props.id] = this
+        registry[this.props.name] = this
       }
       dispose () {
-        delete registry[this.props.id]
+        delete registry[this.props.name]
       }
       render ($$) {
         return $$('div').addClass('surface')
@@ -1326,17 +1326,17 @@ function ComponentTests (debug, memory) {
     class Parent extends TestComponent {
       render ($$) {
         let el = $$('div')
-        this.props.ids.forEach((id) => {
-          el.append($$('div').append(
-            $$(Surface, { id }).ref(id)
-          ))
-        })
+        el.append(
+          this.props.names.map(name => {
+            return $$(Surface, { name }).ref(name)
+          })
+        )
         return el
       }
     }
-    let comp = Parent.mount({ ids: ['foo', 'bar'] }, getMountPoint(t))
+    let comp = Parent.mount({ names: ['foo', 'bar'] }, getMountPoint(t))
     t.equal(Object.keys(registry).length, 2, 'There should be 2 surfaces registered.')
-    comp.setProps({ ids: ['bar'] })
+    comp.setProps({ names: ['bar'] })
     t.isNil(registry['foo'], 'Surface "foo" should have been disposed.')
     t.ok(registry['bar'], '.. and surface "bar" should still be there.')
     t.end()
@@ -2558,7 +2558,6 @@ function ComponentTests (debug, memory) {
     t.ok(oldElement === newElement, 'the child rendered var function component should have been retained')
     t.end()
   })
-
 
   test('[JSX][FunctionComponent] Using a function component as child', t => {
     const Foo = (props) => {
