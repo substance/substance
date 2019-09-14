@@ -785,6 +785,18 @@ function _update (state, vel) {
 
         // update virtual component recursively
         if (!state.is(RENDERED, newVel)) {
+          // HACK: fixing wrong parent links
+          // TODO: identify when this happens and find a better solution
+          // Up to now I found out:
+          // - see Component.test@'Elements with different refs have different component instances'
+          // -> in this case I think the elements do not get mapped because there are no (matching) Components
+          // -> which leads to pre-created comps during capture phase
+          if (newVel._comp && newVel._comp.parent !== comp) {
+            if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+              console.warn('Found captured child component with wrong parent link. Fixing up.')
+            }
+            newVel._comp.parent = comp
+          }
           _update(state, newVel)
         }
 
