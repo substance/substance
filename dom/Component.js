@@ -9,6 +9,7 @@ import DOMElement from './DOMElement'
 import DefaultDOMElement from './DefaultDOMElement'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
+import substanceGlobals from '../util/substanceGlobals'
 
 const COMPONENT_FACTORY = {
   createComponent (ComponentClass, parent, props) {
@@ -446,8 +447,13 @@ export default class Component extends EventEmitter {
   */
   triggerDidMount (options = {}) {
     // don't trigger didMount if that has been done already
+    // Note: that this is ATM accepted for the sake of simplicity of
+    // forwarding components implementation
+    // TODO: consider avoiding this, and turn this into a visible warning
     if (this.__isMounted__) {
-      console.warn('Calling triggerDidMount() on an already mounted component.')
+      if (substanceGlobals.VERBOSE) {
+        console.warn('Calling triggerDidMount() on an already mounted component.')
+      }
       return
     }
 
