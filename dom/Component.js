@@ -187,6 +187,10 @@ export default class Component extends EventEmitter {
     return {}
   }
 
+  dir () {
+    console.dirxml(this.getNativeElement())
+  }
+
   /**
     Provides the context which is delivered to every child component. Override
     if you want to provide your own child context. Child context is available to
