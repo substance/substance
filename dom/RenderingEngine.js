@@ -793,6 +793,8 @@ function _update (state, vel) {
         if (newComp === oldComp) {
           continue
         }
+        _assert(newComp, 'Component instance should now be available.')
+
         // update the parent for relocated components
         // ATTENTION: relocating a component does not update its context
         if (state.is(RELOCATED, newComp)) {
