@@ -620,10 +620,6 @@ function _isLinked (state, comp, vc) {
   compatible.
 */
 function _propagateLinking (state, comp, vel, stopIfMapped) {
-  if (!vel) {
-    console.error('DOCUMENT WHY THIS IS NEEDED')
-    return false
-  }
   // NOTE: comp is undefined if there was no corresponding ref in the previous rendering
   // or when bubbling up to the root component
   if (!comp) {
