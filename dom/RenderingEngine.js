@@ -3,6 +3,7 @@ import isString from '../util/isString'
 import uuid from '../util/uuid'
 import flatten from '../util/flatten'
 import substanceGlobals from '../util/substanceGlobals'
+import getClassName from '../util/_getClassName'
 import DefaultDOMElement from './DefaultDOMElement'
 import VirtualElement from './VirtualElement'
 
@@ -234,13 +235,18 @@ export default class RenderingEngine {
   }
 
   _render (comp, oldProps, oldState, options = {}) {
+    let consoleGroup = null
     if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-      console.group('RenderingEngine')
       if (!comp.el) {
-        console.log('Rendering Engine: initial render of %s', comp.constructor.name)
+        consoleGroup = `RenderingEngine: initial render of ${getClassName(comp)}`
       } else {
-        console.log('Rendering Engine: re-render of %s', comp.constructor.name)
+        if (options.adoptElement) {
+          consoleGroup = `RenderingEngine: adopting DOM with ${getClassName(comp)}`
+        } else {
+          consoleGroup = `RenderingEngine: update of ${getClassName(comp)}`
+        }
       }
+      console.group(consoleGroup)
       console.time('rendering (total)')
     }
     let vel = _createWrappingVirtualComponent(comp)
@@ -287,7 +293,7 @@ export default class RenderingEngine {
     } finally {
       if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
         console.timeEnd('rendering (total)')
-        console.groupEnd('RenderingEngine')
+        console.groupEnd(consoleGroup)
       }
       state.dispose()
       this._state = null
@@ -662,7 +668,7 @@ function _propagateLinking (state, comp, vel, stopIfMapped) {
   // more likely to be a problem.
   if (vel._isVirtualComponent && !canLinkParent) {
     if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-      console.info('Component has been relocated: ' + comp.constructor.name)
+      console.info('Component has been relocated: ' + getClassName(comp))
     }
     state.set(RELOCATED, vel)
     state.set(RELOCATED, comp)
