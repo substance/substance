@@ -629,7 +629,6 @@ function _propagateLinking (state, comp, vel, stopIfMapped) {
   if (stopIfMapped && _isMapped(state, comp, vel)) {
     return _isLinked(state, comp, vel)
   }
-
   // try to link VirtualHTMLElements and VirtualTextElements
   // allowing to retain DOM elements
   if (!vel._isVirtualComponent) {
@@ -1252,33 +1251,27 @@ class RenderingState {
   constructor (componentFactory, elementFactory) {
     this.componentFactory = componentFactory
     this.elementFactory = elementFactory
-    this.polluted = []
+    this._states = new Map()
     this.contexts = []
-    this.id = '__' + uuid()
   }
 
   dispose () {
-    let id = this.id
-    this.polluted.forEach(function (obj) {
-      delete obj[id]
-    })
     this.contexts = []
   }
 
   set (key, obj, val = true) {
-    let info = obj[this.id]
+    let info = this._states.get(obj)
     if (!info) {
-      info = {}
-      obj[this.id] = info
-      this.polluted.push(obj)
+      info = new Map()
+      this._states.set(obj, info)
     }
-    info[key] = val
+    info.set(key, val)
   }
 
   get (key, obj) {
-    let info = obj[this.id]
+    let info = this._states.get(obj)
     if (info) {
-      return info[key]
+      return info.get(key)
     }
   }
 
