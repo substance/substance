@@ -2538,6 +2538,28 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[FunctionComponent] retaining a function component', t => {
+    class Parent extends Component {
+      render ($$) {
+        return $$('div', {class: 'parent'},
+          $$(Child)
+        )
+      }
+    }
+    let Child = (props, $$) => {
+      return $$('div', { class: 'child' })
+    }
+    let parent = Parent.mount({}, getMountPoint(t))
+    let child = parent.find('.child')
+    let oldElement = child.getNativeElement()
+    parent.rerender()
+    child = parent.find('.child')
+    let newElement = child.getNativeElement()
+    t.ok(oldElement === newElement, 'the child rendered var function component should have been retained')
+    t.end()
+  })
+
+
   test('[JSX][FunctionComponent] Using a function component as child', t => {
     const Foo = (props) => {
       return $$('div', { className: 'foo' }, $$(Bar, props))

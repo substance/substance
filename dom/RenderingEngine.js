@@ -684,9 +684,17 @@ function _propagateLinking (state, comp, vel, stopIfMapped) {
 function _isOfSameType (comp, vc) {
   return (
     (comp._isElementComponent && vc._isVirtualHTMLElement) ||
-    (comp._isComponent && vc._isVirtualComponent && comp.constructor === vc.ComponentClass) ||
+    (comp._isComponent && vc._isVirtualComponent && comp.constructor === _getComponentClass(vc)) ||
     (comp._isTextNodeComponent && vc._isVirtualTextNode)
   )
+}
+
+function _getComponentClass (vc) {
+  let ComponentClass = vc.ComponentClass
+  if (ComponentClass._isFunctionComponent) {
+    return ComponentClass._ComponentClass
+  }
+  return ComponentClass
 }
 
 // Update a DOM element by applying changes derived from a given virtual element
@@ -1053,13 +1061,12 @@ function _extractInternalRefs (context, root) {
 }
 
 function _getVirtualComponentTrace (vc, root) {
-  let frags = [vc.ComponentClass.name]
-  // TODO: is this
+  let frags = [getClassName(vc.ComponentClass)]
   if (!vc._isForwarded) {
     let parent = vc.getParent()
     while (parent) {
       if (parent === root) break
-      // HACK: incremental render uses a fake parent
+      // ATTENTION: incremental render uses a fake parent
       if (parent._isFake) break
       // ATTENTION if the vc has been appended then its ancestors are all virtual HTML elements
       _assert(parent._isVirtualHTMLElement, 'parent should be VirtualHTMLElement')
