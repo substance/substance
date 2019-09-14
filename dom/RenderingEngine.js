@@ -731,36 +731,7 @@ function _update (state, vel) {
     // structural updates are necessary only for non-forwarding Components and HTML elements without innerHTML
     if ((vel._isVirtualComponent || vel._isVirtualHTMLElement) && !vel.hasInnerHTML()) {
       let newChildren = vel.children
-
-      // remove all elements from the DOM which are not linked to a component
-      // or which we know have been relocated
-      // ATTENTION: removing the elements of relocated components
-      // in advance, then the algorithm later becomes easier only considering
-      // add and remove.
-      let _childNodes = comp.el.getChildNodes()
-      let oldChildren = _childNodes.map(child => {
-        let childComp = child._comp
-        // NOTE: don't know why, but sometimes it happens that there appear elements that are not rendered via Component.js
-        if (!childComp) {
-          comp.el.removeChild(child)
-          return null
-        }
-        // EXPERIMENTAL: trying to get forwarding components right.
-        // the problem is that on the DOMElement level, forwarding components are not
-        // 'visible', as they do not have an own element.
-        // Here we are taking the owner of an element when it isForwarded
-        // bubbling up the parent hierarchy.
-        if (childComp._isForwarded()) {
-          childComp = _findForwardingChildOfComponent(comp, childComp)
-        }
-        // remove orphaned nodes and relocated components
-        if (!childComp || state.is(RELOCATED, childComp)) {
-          comp.el.removeChild(child)
-          return null
-        } else {
-          return childComp
-        }
-      }).filter(Boolean)
+      let oldChildren = _getChildren(state, comp)
 
       // TODO: it might be easier to understand to separate DOM analysis, i.e.
       // what to do with the DOM, from the actual DOM manipulation.
@@ -890,6 +861,39 @@ function _update (state, vel) {
 
   state.set(RENDERED, vel)
   state.set(RENDERED, comp)
+}
+
+// remove all elements from the DOM which are not linked to a component
+// or which we know have been relocated
+// ATTENTION: removing the elements of relocated components
+// in advance, then the algorithm later becomes easier only considering
+// add and remove.
+function _getChildren (state, comp) {
+  let _childNodes = comp.el.getChildNodes()
+  let children = _childNodes.map(child => {
+    let childComp = child._comp
+    // NOTE: don't know why, but sometimes it happens that there appear elements that are not rendered via Component.js
+    if (!childComp) {
+      comp.el.removeChild(child)
+      return null
+    }
+    // EXPERIMENTAL: trying to get forwarding components right.
+    // the problem is that on the DOMElement level, forwarding components are not
+    // 'visible', as they do not have an own element.
+    // Here we are taking the owner of an element when it isForwarded
+    // bubbling up the parent hierarchy.
+    if (childComp._isForwarded()) {
+      childComp = _findForwardingComponent(comp, childComp)
+    }
+    // remove orphaned nodes and relocated components
+    if (!childComp || state.is(RELOCATED, childComp)) {
+      comp.el.removeChild(child)
+      return null
+    } else {
+      return childComp
+    }
+  }).filter(Boolean)
+  return children
 }
 
 function _adopt (state, vel, el) {
@@ -1226,7 +1230,7 @@ function _updateListeners (args) {
   }
 }
 
-function _findForwardingChildOfComponent (comp, forwarded) {
+function _findForwardingComponent (comp, forwarded) {
   let current = forwarded.getParent()
   while (current) {
     let parent = current.getParent()
