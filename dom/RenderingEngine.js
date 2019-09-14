@@ -1,6 +1,5 @@
 import isFunction from '../util/isFunction'
 import isString from '../util/isString'
-import uuid from '../util/uuid'
 import flatten from '../util/flatten'
 import substanceGlobals from '../util/substanceGlobals'
 import getClassName from '../util/_getClassName'
@@ -262,33 +261,44 @@ export default class RenderingEngine {
       if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
         console.time('capturing')
       }
+      let captured = false
       // capture: this calls the render() method of components, creating a virtual DOM
-      _capture(state, vel, TOP_LEVEL_ELEMENT)
-      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-        console.timeEnd('capturing')
+      try {
+        _capture(state, vel, TOP_LEVEL_ELEMENT)
+        captured = true
+      } finally {
+        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          console.timeEnd('capturing')
+        }
       }
-
-      if (options.adoptElement) {
-        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-          console.time('adopting')
+      if (captured) {
+        if (options.adoptElement) {
+          if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+            console.time('adopting')
+          }
+          try {
+            // NOTE: if root is forwarding then use the forwarded child
+            // instead. The DOM element will be propagated upwards.
+            vel = _getForwardedEl(vel)
+            _adopt(state, vel, comp.el)
+          } finally {
+            if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+              console.timeEnd('adopting')
+            }
+          }
+        } else {
+          if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+            console.time('updating')
+          }
+          try {
+            _update(state, vel)
+            _triggerDidUpdate(state, vel)
+          } finally {
+            if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+              console.timeEnd('updating')
+            }
+          }
         }
-        // NOTE: if root is forwarding then use the forwarded child
-        // instead. The DOM element will be propagated upwards.
-        vel = _getForwardedEl(vel)
-        _adopt(state, vel, comp.el)
-        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-          console.timeEnd('adopting')
-        }
-      } else {
-        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-          console.time('updating')
-        }
-        _update(state, vel)
-        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
-          console.timeEnd('updating')
-        }
-
-        _triggerDidUpdate(state, vel)
       }
     } finally {
       if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
