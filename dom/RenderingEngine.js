@@ -370,7 +370,7 @@ function _capture (state, vel, mode) {
     if (mode === TOP_LEVEL_ELEMENT) {
       needRerender = true
       // top-level comp and virtual component are linked per se
-      console.assert(vel._comp === comp, 'top-level element and component should be linked already')
+      _assert(vel._comp === comp, 'top-level element and component should be linked already')
       state.set(MAPPED, vel)
       state.set(MAPPED, comp)
       state.set(LINKED, vel)
@@ -486,7 +486,7 @@ function _capture (state, vel, mode) {
 // from a VirtualElement
 function _create (state, vel) {
   let comp = vel._comp
-  console.assert(!comp, 'Component instance should not exist when this method is used.')
+  _assert(!comp, 'Component instance should not exist when this method is used.')
   let parent = vel.parent._comp
   // making sure the parent components have been instantiated
   if (!parent) {
@@ -494,7 +494,7 @@ function _create (state, vel) {
   }
   // TODO: probably we should do something with forwarded/forwarding components here?
   if (vel._isVirtualComponent) {
-    console.assert(parent, 'A Component should have a parent.')
+    _assert(parent, 'A Component should have a parent.')
     comp = state.componentFactory.createComponent(vel.ComponentClass, parent, vel.props)
     // HACK: making sure that we have the right props
     // TODO: instead of HACK add an assertion, and make otherwise sure that vel.props is set correctly
@@ -528,10 +528,10 @@ function _create (state, vel) {
   can be mapped to corresponding virtual components in the old version.
 */
 function _forEachComponent (state, comp, vc, hook) {
-  console.assert(vc._isVirtualComponent, 'this method is intended for VirtualComponents only')
+  _assert(vc._isVirtualComponent, 'this method is intended for VirtualComponents only')
   if (!vc.__components__) {
     let context = vc._context
-    console.assert(context, 'there should be a capturing context on the VirtualComponent')
+    _assert(context, 'there should be a capturing context on the VirtualComponent')
     // refs are those ref'd using $$().ref()
     let newRefs = context.refs
     // foreignRefs are refs of those components which are passed via props
@@ -712,7 +712,7 @@ function _update (state, vel) {
       _capture(state, vel)
     }
   }
-  console.assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
+  _assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
 
   // special handling of forwarding elements which don't have their own element
   // but are delegating to their child
@@ -724,7 +724,7 @@ function _update (state, vel) {
       comp.el = _createDOMElement(state, vel)
     } else {
       let el = comp.el
-      console.assert(el, "Component's element should exist at this point.")
+      _assert(el, "Component's element should exist at this point.")
       _updateDOMElement(el, vel)
     }
 
@@ -827,7 +827,7 @@ function _update (state, vel) {
         if (state.is(RELOCATED, newComp)) {
           newComp._setParent(comp)
         }
-        console.assert(newComp, 'Component instance should now be available.')
+        _assert(comp === newComp.parent, 'Link to parent component should be correct.')
 
         // append remaining new ones if no old one is left
         if (newVel && !oldComp) {
@@ -1044,7 +1044,7 @@ function _getVirtualComponentTrace (vc, root) {
       // HACK: incremental render uses a fake parent
       if (parent._isFake) break
       // ATTENTION if the vc has been appended then its ancestors are all virtual HTML elements
-      console.assert(parent._isVirtualHTMLElement)
+      _assert(parent._isVirtualHTMLElement, 'parent should be VirtualHTMLElement')
       frags.unshift(parent.tagName)
       parent = parent.parent
     }
@@ -1299,6 +1299,14 @@ class RenderingState {
 
   getCurrentContext () {
     return this.contexts[this.contexts.length - 1]
+  }
+}
+
+function _assert (cond, msg) {
+  if (!cond) {
+    if (substanceGlobals.ASSERTS) {
+      throw new Error('Assertion failed: ' + msg)
+    }
   }
 }
 
