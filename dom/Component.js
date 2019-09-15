@@ -440,31 +440,33 @@ export default class Component extends EventEmitter {
     comp.triggerDidMount()
     ```
   */
-  triggerDidMount () {
+  triggerDidMount (options = {}) {
+    // don't trigger didMount if that has been done already
+    if (this.__isMounted__) {
+      console.warn('Calling triggerDidMount() on an already mounted component.')
+      return
+    }
+
     // Following react's life-cycle, 'didMount' is triggered 'bottom-up'
     // i.e. children first.
+    if (!options.noDescent) {
+      const children = this.getChildren()
+      for (let child of children) {
+        child.triggerDidMount()
+      }
+    }
+
+    // ATTENTION: it is important to have this before calling didMount()
+    // so that in case of a state change or such during didMount()
+    // the children will get triggered.
+    this.__isMounted__ = true
+    this.didMount()
 
     // ATTENTION: forwarding components are 'invisible' with respect to the
     // DOM elements, i.e. not covered by the recursion done here using this.getChildren()
     // so we trigger explicitly
     if (this._isForwarded()) {
-      this.getParent().triggerDidMount()
-    }
-
-    // Trigger didMount for the children first
-    const children = this.getChildren()
-    for (let child of children) {
-      // We pass isMounted=true to save costly calls to Component.isMounted
-      // for each child / grandchild
-      child.triggerDidMount()
-    }
-
-    // To prevent from multiple calls to didMount, which can happen under
-    // specific circumstances we use a guard.
-    // TODO: what are these circumstances exactly?
-    if (!this.__isMounted__) {
-      this.__isMounted__ = true
-      this.didMount()
+      this.getParent().triggerDidMount({ noDescent: true })
     }
   }
 
