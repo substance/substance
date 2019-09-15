@@ -2041,6 +2041,48 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Forwarding Component] rerendering a component with a chain of forwarding components', (t) => {
+    class Parent extends Component {
+      render ($$) {
+        return $$('div').append(
+          $$(A)
+        )
+      }
+    }
+    class A extends TestComponent {
+      render ($$) {
+        return $$(B)
+      }
+    }
+    class B extends TestComponent {
+      render ($$) {
+        return $$(C)
+      }
+    }
+    class C extends TestComponent {
+      render ($$) {
+        return $$('div', { class: 'c' })
+      }
+    }
+    let parent = Parent.mount({}, getMountPoint(t))
+    function _getABC () {
+      let c = parent.find('.c')
+      let b = c.getParent()
+      let a = b.getParent()
+      return [a, b, c]
+    }
+    const comps = _getABC()
+    t.deepEqual(comps.map(c => c.didMount.callCount === 1), [true, true, true], 'all components should have been mounted')
+    // force rerender
+    parent.rerender()
+    const newComps = _getABC()
+    // All components should be still the same
+    t.ok(isArrayEqual(newComps, comps), 'all components should have been retained')
+    t.deepEqual(comps.map(c => c.dispose.callCount === 0), [true, true, true], 'no component should have been disposed')
+
+    t.end()
+  })
+
   // TODO: trying to distill a problem observed in Texture
   // where an Input lost focus when the parent component got rerendered
   // In that use case, Parent corresponds to QueryComponent, Template to InputWithButton, and Child to Input
