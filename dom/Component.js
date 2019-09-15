@@ -473,16 +473,53 @@ export default class Component extends EventEmitter {
   /**
    * Triggers dispose handlers recursively.
    */
-  triggerDispose () {
-    if (this._isForwarding()) {
-      this.el._comp.triggerDispose()
-    } else {
-      this.getChildren().forEach(function (child) {
-        child.triggerDispose()
-      })
+  triggerDispose (options = {}) {
+    // ATTENTION: for forwarding components this is a bit tricky
+    // because forwarding components do not 'exist' in the DOM
+    // and we do not have a link to the forwarded component
+    // TODO: maybe we could try to store a link to the forwarded component
+    // but that would be redundant with the DOM
+
+    // For now we apply the following algorithm:
+    // if this is a forwarded component, bubble up until options.root
+    // passing options.noDescent to cover all forwarding components
+    // otherwise descend into children or the forwarded component
+    const _descend = () => {
+      const children = this.getChildren()
+      for (let child of children) {
+        child.triggerDispose({root: this})
+      }
     }
-    this.dispose()
-    this.__isMounted__ = false
+    const _dispose = () => {
+      this.dispose()
+      this.__isMounted__ = false
+    }
+
+    if (this._isForwarded()) {
+      // Forwarded components call dispose on children first
+      // then dispose and bubble up to the root, without descending again
+      _descend()
+      _dispose()
+      if (options.root) {
+        let parent = this.getParent()
+        while (parent !== options.root) {
+          parent.triggerDispose({noDescent: true, root: options.root})
+          parent = parent.getParent()
+        }
+      }
+    } else if (this._isForwarding()) {
+      // Forwarding components call dispose on the forwarded component
+      // first, unless this is called during a bubble-up
+      if (!options.noDescent) {
+        let forwardedComp = this.el._comp
+        forwardedComp.triggerDispose({root: this})
+      }
+      _dispose()
+    } else {
+      // regular components call dispose on children first
+      _descend()
+      _dispose()
+    }
   }
 
   /**
