@@ -58,7 +58,10 @@ function _matches (l1, l2) {
 
 function _once (listener, handler) {
   return function (event) {
-    handler(event)
-    listener._el.removeEventListener(listener)
+    const el = listener._el
+    if (el) {
+      handler(event)
+      el.removeEventListener(listener)
+    }
   }
 }
