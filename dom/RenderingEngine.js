@@ -201,6 +201,8 @@ export default class RenderingEngine {
                 // TODO: are there more HTML attributes that need to be considered here?
                 case 'id': {
                   _attributes[key] = val
+                  // for legacy reasons (some components used this as prop)
+                  _props[key] = val
                   break
                 }
                 default: {
@@ -400,7 +402,8 @@ function _capture (state, vel, mode) {
       let content
       try {
         _setRenderingContext(context)
-        content = comp.render(context.$$)
+        // NOTE: passing RenderingEngine.createVirtualElement as first argument for old-style components
+        content = comp.render(RenderingEngine.createVirtualElement)
       } finally {
         _setRenderingContext(null)
       }
