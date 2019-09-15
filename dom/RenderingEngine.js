@@ -235,7 +235,7 @@ export default class RenderingEngine {
 
   _render (comp, oldProps, oldState, options = {}) {
     let consoleGroup = null
-    if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+    if (substanceGlobals.VERBOSE_RENDERING) {
       if (!comp.el) {
         consoleGroup = `RenderingEngine: initial render of ${getClassName(comp)}`
       } else {
@@ -258,7 +258,7 @@ export default class RenderingEngine {
     }
     try {
       this._state = state
-      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+      if (substanceGlobals.VERBOSE_RENDERING) {
         console.time('capturing')
       }
       let captured = false
@@ -267,13 +267,13 @@ export default class RenderingEngine {
         _capture(state, vel, TOP_LEVEL_ELEMENT)
         captured = true
       } finally {
-        if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+        if (substanceGlobals.VERBOSE_RENDERING) {
           console.timeEnd('capturing')
         }
       }
       if (captured) {
         if (options.adoptElement) {
-          if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          if (substanceGlobals.VERBOSE_RENDERING) {
             console.time('adopting')
           }
           try {
@@ -282,26 +282,26 @@ export default class RenderingEngine {
             vel = _getForwardedEl(vel)
             _adopt(state, vel, comp.el)
           } finally {
-            if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+            if (substanceGlobals.VERBOSE_RENDERING) {
               console.timeEnd('adopting')
             }
           }
         } else {
-          if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+          if (substanceGlobals.VERBOSE_RENDERING) {
             console.time('updating')
           }
           try {
             _update(state, vel)
             _triggerDidUpdate(state, vel)
           } finally {
-            if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+            if (substanceGlobals.VERBOSE_RENDERING) {
               console.timeEnd('updating')
             }
           }
         }
       }
     } finally {
-      if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+      if (substanceGlobals.VERBOSE_RENDERING) {
         console.timeEnd('rendering (total)')
         console.groupEnd(consoleGroup)
       }
@@ -672,7 +672,7 @@ function _propagateLinking (state, comp, vel, stopIfMapped) {
   // Relocation is an edge case, in most cases not desired, and thus if happened
   // more likely to be a problem.
   if (vel._isVirtualComponent && !canLinkParent) {
-    if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+    if (substanceGlobals.VERBOSE_RENDERING) {
       console.info('Component has been relocated: ' + getClassName(comp))
     }
     state.set(RELOCATED, vel)
@@ -800,7 +800,7 @@ function _update (state, vel) {
           // -> in this case I think the elements do not get mapped because there are no (matching) Components
           // -> which leads to pre-created comps during capture phase
           if (newVel._comp && newVel._comp.parent !== comp) {
-            if (substanceGlobals.VERBOSE_RENDERING_ENGINE) {
+            if (substanceGlobals.VERBOSE_RENDERING) {
               console.warn('Found captured child component with wrong parent link. Fixing up.')
             }
             newVel._comp.parent = comp

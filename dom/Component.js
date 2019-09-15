@@ -451,7 +451,7 @@ export default class Component extends EventEmitter {
     // forwarding components implementation
     // TODO: consider avoiding this, and turn this into a visible warning
     if (this.__isMounted__) {
-      if (substanceGlobals.VERBOSE) {
+      if (substanceGlobals.VERBOSE_RENDERING) {
         console.warn('Calling triggerDidMount() on an already mounted component.')
       }
       return
