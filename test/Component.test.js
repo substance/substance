@@ -1952,6 +1952,95 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  // while this topic is tested by other tests too, this represents
+  // a situation which occurred in the wild
+  test('[Forwarding Component] disposing forwarded and forwarding components', t => {
+    let mounts = []
+    let disposals = []
+    let nextId = _countingIds()
+    function _reset () {
+      mounts = []
+      disposals = []
+    }
+    class BaseComponent extends TestComponent {
+      constructor (...args) {
+        super(...args)
+
+        this.__id__ = nextId(this.constructor.name)
+      }
+      didMount () {
+        mounts.push(this.__id__)
+      }
+      dispose () {
+        disposals.push(this.__id__)
+      }
+    }
+    // because of a pretty static structure, the components should all be reused
+    // only the overlay appears or disappears depending on the props.
+    // The challenge here is that Content is a forwarding component
+    // thus, only on this level the content seems to the same level.
+    // In the DOM, the element of content, belongs to one or the other
+    // forwarded components.
+    class Main extends BaseComponent {
+      render ($$) {
+        return $$('div').append(
+          $$('div', { class: 'header' }),
+          $$('div', { class: 'body' },
+            $$(Content, this.props)
+          ),
+          this.props.overlay
+            ? $$(Overlay)
+            : null
+        )
+      }
+    }
+    // TODO: this should be forwarding two different impls, depending on
+    // props
+    class Content extends BaseComponent {
+      render ($$) {
+        if (this.props.mode === 'a') {
+          return $$(ContentA)
+        } else {
+          return $$(ContentB)
+        }
+      }
+    }
+    class ContentA extends BaseComponent {
+      render () {
+        return $$('div', {class: 'content-a'})
+      }
+    }
+    class ContentB extends BaseComponent {
+      render () {
+        return $$('div', {class: 'content-b'})
+      }
+    }
+    class Overlay extends BaseComponent {
+      render ($$) {
+        return $$('div', {class: 'overlay'},
+          $$(Content, { mode: 'a' })
+        )
+      }
+    }
+    let main = Main.mount({ overlay: false, mode: 'a' }, getMountPoint(t))
+    // important, that the order of didMount calls is correct, i.e. bottom-up
+    t.deepEqual(mounts, ['ContentA-1', 'Content-1', 'Main-1'], 'components should have been mounted in correct order')
+    _reset()
+    main.setProps({ overlay: false, mode: 'b' })
+    t.deepEqual(disposals, ['ContentA-1'], 'ContentA should have been disposed')
+    t.deepEqual(mounts, ['ContentB-1'], 'ContentB should have been mounted')
+    _reset()
+    main.setProps({ overlay: true, mode: 'b' })
+    t.deepEqual(disposals, [], 'nothing should have been disposed')
+    t.deepEqual(mounts, ['ContentA-2', 'Content-2', 'Overlay-1'], 'overlay should have been mounted')
+    _reset()
+    main.setProps({ overlay: false, mode: 'b' })
+    t.deepEqual(disposals, ['ContentA-2', 'Content-2', 'Overlay-1'], 'overlay should have been disposed')
+    t.deepEqual(mounts, [], 'nothing should have been mounted')
+
+    t.end()
+  })
+
   // TODO: trying to distill a problem observed in Texture
   // where an Input lost focus when the parent component got rerendered
   // In that use case, Parent corresponds to QueryComponent, Template to InputWithButton, and Child to Input
@@ -2498,4 +2587,24 @@ function _getElementTypes (el) {
       return el.getNodeType()
     }
   })
+}
+
+function _countingIds () {
+  const COUNTERS = new Map()
+  return function nextId (prefix) {
+    prefix = prefix || ''
+    let counter
+    if (!COUNTERS.has(prefix)) {
+      counter = 0
+    } else {
+      counter = COUNTERS.get(prefix)
+    }
+    counter++
+    COUNTERS.set(prefix, counter)
+    if (prefix) {
+      return `${prefix}-${counter}`
+    } else {
+      return String(counter)
+    }
+  }
 }
