@@ -10,6 +10,7 @@ import DefaultDOMElement from './DefaultDOMElement'
 import RenderingEngine from './RenderingEngine'
 import VirtualElement from './VirtualElement'
 import substanceGlobals from '../util/substanceGlobals'
+import getClassName from '../util/_getClassName'
 
 const COMPONENT_FACTORY = {
   createComponent (ComponentClass, parent, props) {
@@ -501,6 +502,11 @@ export default class Component extends EventEmitter {
       }
     }
     const _dispose = () => {
+      if (substanceGlobals.VERBOSE_RENDERING) {
+        if (!this._isElementComponent && !this._isTextNodeComponent) {
+          console.info('Disposing component of type', getClassName(this))
+        }
+      }
       this.dispose()
       this.__isMounted__ = false
     }
