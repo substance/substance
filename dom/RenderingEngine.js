@@ -866,10 +866,17 @@ function _update (state, vel) {
       // TODO: this will not work with multiple forwarded components
       if (!comp.el) {
         comp.el = forwardedComp.el
-        // forwardedComp.triggerDidMount()
-        // comp.triggerDidMount()
-      } else {
-        // EXPERIMENTAL: the forwarded comp has been replaced
+      }
+
+      // Dealing with situations where the forwarded element/component has been replaced
+      // e.g. switching between editor and reader in the same forwarding component.
+      // Only the actual parent of the forwarded component should do this, not any
+      // other forwarding component in the same forwarding chain.
+      // TODO: this fix-up seems strange. IMO we should change
+      // the way how forwarding components are implemented
+      // leading to a more explicit solution which also should work better together
+      // with the rest of the update implementation
+      if (!vel._forwardedEl._isForwarding) {
         let oldForwardedComp = comp.el._comp
         if (oldForwardedComp !== forwardedComp) {
           oldForwardedComp.triggerDispose()
