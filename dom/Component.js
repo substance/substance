@@ -166,7 +166,8 @@ export default class Component extends EventEmitter {
     this.__foreignRefs__ = {}
 
     // action handlers added via `handleAction()` are stored here
-    this._actionHandlers = this.getActionHandlers()
+    this._actionHandlers = {}
+    this.handleActions(this.getActionHandlers())
 
     // setting props without triggering willReceiveProps
     this.props = props
@@ -626,13 +627,14 @@ export default class Component extends EventEmitter {
     let comp = this
     while (comp) {
       if (comp._actionHandlers && comp._actionHandlers[action]) {
-        comp._actionHandlers[action].apply(comp, Array.prototype.slice.call(arguments, 1))
-        return true
+        const args = Array.prototype.slice.call(arguments, 1)
+        const res = comp._actionHandlers[action](...args)
+        return Promise.resolve(res || true)
       }
       comp = comp.getParent()
     }
     console.warn('Action', action, 'was not handled.')
-    return false
+    return Promise.resolve(false)
   }
 
   /**
@@ -659,9 +661,9 @@ export default class Component extends EventEmitter {
     ```
   */
   handleActions (actionHandlers) {
-    forEach(actionHandlers, function (method, actionName) {
+    forEach(actionHandlers, (method, actionName) => {
       this.handleAction(actionName, method)
-    }.bind(this))
+    })
     return this
   }
 
