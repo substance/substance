@@ -1497,6 +1497,8 @@ function ComponentTests (debug, memory) {
 
   // Note: this test revealed a problem with debug rendering where
   // forwarded children do not get updated correctly
+  // FIXME: in this test case, triggerDidMount() is called on components which have been
+  // mounted already
   test('[Forwarding Component] injected children that are forwarding components', t => {
     class GrandParent extends TestComponent {
       render ($$) {
@@ -1556,6 +1558,8 @@ function ComponentTests (debug, memory) {
 
   // Note: this test revealed a problem with debug rendering where
   // forwarded children do not get updated correctly
+  // FIXME: in this test case, triggerDidMount() is called on components which have been
+  // mounted already
   test("[Forwarding Component] injected children that are forwarding components with ref'd content", t => {
     class GrandParent extends TestComponent {
       render ($$) {
@@ -1768,6 +1772,8 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  // FIXME: in this test case, triggerDidMount() is called on components which have been
+  // mounted already
   test('[Forwarding Component] replacing a forwarded component', t => {
     let mounts = []
     let disposals = []
@@ -1823,6 +1829,8 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  // FIXME: in this test case, triggerDidMount() is called on components which have been
+  // mounted already
   test('[Forwarding Component] replacing an injected, forwarded component', t => {
     let mounts = []
     let disposals = []

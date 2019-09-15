@@ -865,7 +865,7 @@ function _update (state, vel) {
         // forwardedComp.triggerDidMount()
         // comp.triggerDidMount()
       } else {
-        // EXPERIMENTAL: the forwarded comp has been updated
+        // EXPERIMENTAL: the forwarded comp has been replaced
         let oldForwardedComp = comp.el._comp
         if (oldForwardedComp !== forwardedComp) {
           oldForwardedComp.triggerDispose()
