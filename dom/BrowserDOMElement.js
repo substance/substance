@@ -417,6 +417,15 @@ class BrowserDOMElement extends DOMElement {
     return (this.isDocumentNode() ? this.el : this.el.ownerDocument)
   }
 
+  getElementById (id) {
+    let result = this.getOwnerDocument().getElementById(id)
+    if (result) {
+      return BrowserDOMElement.wrap(result)
+    } else {
+      return null
+    }
+  }
+
   find (cssSelector) {
     let result = null
     if (this.el.querySelector) {
