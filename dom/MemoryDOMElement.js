@@ -369,10 +369,11 @@ export default class MemoryDOMElement extends DOMElement {
   // TODO: it would be nice if we could use an index here
   // however,
   getElementById (id) {
-    if (!this._index) {
-      this._createIndex()
+    let doc = this.getOwnerDocument()
+    if (!doc._index) {
+      doc._createIndex()
     }
-    return this._index.get(id)
+    return doc._index.get(id)
   }
 
   find (cssSelector) {

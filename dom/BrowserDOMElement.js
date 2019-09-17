@@ -418,7 +418,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getElementById (id) {
-    let result = this.getOwnerDocument().getElementById(id)
+    let result = this._getNativeOwnerDocument().getElementById(id)
     if (result) {
       return BrowserDOMElement.wrap(result)
     } else {
