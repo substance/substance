@@ -103,6 +103,60 @@ function DOMElementTests (impl) {
     t.end()
   })
 
+  test('getElementById()', function (t) {
+    const html = `
+<html>
+  <head></head>
+  <body>
+    <div>
+      <div id="foo">
+        <div id="bar"></div>
+      </div>
+      <div id="bla">
+        <div id="blupp"></div>
+      </div>
+    </div>
+  </body>
+</html>`
+    const doc = DefaultDOMElement.parseHTML(html)
+    const $$ = doc.createElement.bind(doc)
+    let foo = doc.find('#foo')
+    let bar = doc.find('#bar')
+    let bla = doc.find('#bla')
+    let blupp = doc.find('#blupp')
+    t.ok(foo && doc.getElementById('foo') === foo, '#foo should be found')
+    t.ok(bar && doc.getElementById('bar') === bar, '#bar should be found')
+    t.ok(bla && doc.getElementById('bla') === bla, '#bla should be found')
+    t.ok(blupp && doc.getElementById('blupp') === blupp, '#blupp should be found')
+
+    // removing a child with id
+    // remove element via el.remove()
+    bar.remove()
+    t.nil(doc.getElementById('bar'), '#bar should not be found anymore')
+    // remove element via el.removeChild()
+    bla.removeChild(blupp)
+    t.nil(doc.getElementById('blupp'), '#blupp should not be found anymore')
+
+    // appending a child with id
+    foo.appendChild($$('div').attr('id', 'a'))
+    let a = doc.find('#a')
+    t.ok(a && doc.getElementById('a') === a, '#a should be found')
+
+    // replacing a child with id
+    foo.replaceChild(a, $$('div').attr('id', 'b'))
+    const b = doc.find('#b')
+    t.nil(doc.getElementById('a'), '#a should not be found anymore')
+    t.ok(b && doc.getElementById('b') === b, '#b should be found')
+
+    // changing the id
+    b.attr('id', 'a')
+    a = doc.find('#a')
+    t.ok(a && doc.getElementById('a') === a, '#a should be found')
+    t.nil(doc.getElementById('b'), '#b should not be found anymore')
+
+    t.end()
+  })
+
   test('setTagName', function (t) {
     var el = DefaultDOMElement.parseSnippet('<p class="foo">ABC<b>DEF</b>GHI</p>', 'html')
     var onClick = spy()
