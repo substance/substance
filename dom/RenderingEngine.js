@@ -121,23 +121,13 @@ export default class RenderingEngine {
   }
 
   /**
-   * A React-compatible element factory used for JSX support.
-   *
-   * Use `this.renderingEngine.createElement` as factory for JSX-transpilers (e.g. babel or rollup)
-   *
    * @param {string | Class<Component>} type a HTML element name, or Component class
-   * @param {object} props similar to React props
+   * @param {object} props
    * @param  {...any} children
    */
   static createVirtualElement (type, props, ...children) {
     let renderingContext = _getRenderingContext()
     let createElement = renderingContext.$$
-    // TODO: (React conventions)
-    // 1. map className to classNames
-    // 2. map known event handlers, or simply /^on/
-    //    -> allow for React notation or just use toLowerCase() for event names
-    // 3. map known html props
-    //    - input.value
     let _props = {}
     let _class = null
     let _styles = null
@@ -150,65 +140,49 @@ export default class RenderingEngine {
       for (let key of keys) {
         if (!props.hasOwnProperty(key)) continue
         let val = props[key]
-        switch (key) {
-          case 'class':
-          case 'className': {
-            _class = val
-            break
-          }
-          case 'style': {
-            // ATTENTION: in React the 'style' property is always a hash
-            // this syntax is supported in Substance, too: `el.css({...})`
-            _styles = val
-            break
-          }
-          case 'ref': {
-            _ref = val
-            break
-          }
-          default: {
-            // ATTENTION: assuming that all event handlers start with 'on'
-            let m = /^on([A-Za-z]+)$/.exec(key)
-            if (m) {
-              // ATTENTION: IMO all native events are lower case
-              _eventListeners.push([m[1].toLowerCase(), val])
-            // HTML attributes or properties
-            } else if (isString(type)) {
-              switch (key) {
-                // ATTENTION: this list is utterly incomplete and IMO even incorrect
-                // TODO: Would need a complete list of 'reflected' properties, i.e. properties that are identical to attributes
-                // vs those who are only initialized with the attribute value. This should be solved in Substance generally (DOMElement, VirtualElement, and RenderingEngine)
-                // For now, this just represents 'non-reflected' properties that we have needed so far
-                // - value: needed for all types of input elements
-                // - checked: input fields of type 'checkbox'
-                // - selected: options of input fields of type 'select'
-                case 'value':
-                case 'checked':
-                case 'selected': {
-                  // attribute is used as 'default' value
-                  _attributes[key] = val
-                  // and property as instance value
-                  _htmlProps[key] = val
-                  break
-                }
-                default: {
-                  _attributes[key] = val
-                }
-              }
-            // Component properties
-            } else {
-              switch (key) {
-                // TODO: are there more HTML attributes that need to be considered here?
-                case 'id': {
-                  _attributes[key] = val
-                  break
-                }
-                default: {
-                  _props[key] = val
-                }
-              }
+        // ATTENTION: assuming that all event handlers start with 'on'
+        let m = /^on([A-Za-z]+)$/.exec(key)
+        if (m) {
+          // ATTENTION: IMO all native events are lower case
+          _eventListeners.push([m[1].toLowerCase(), val])
+        } else if (key === 'ref') {
+          _ref = val
+        } else if (isString(type)) {
+          switch (key) {
+            case 'class':
+            case 'className': {
+              _class = val
+              break
+            }
+            case 'style': {
+              // ATTENTION: in React the 'style' property is always a hash
+              // this syntax is supported in Substance, too: `el.css({...})`
+              _styles = val
+              break
+            }
+            // ATTENTION: this list is utterly incomplete and IMO even incorrect
+            // TODO: Would need a complete list of 'reflected' properties, i.e. properties that are identical to attributes
+            // vs those who are only initialized with the attribute value. This should be solved in Substance generally (DOMElement, VirtualElement, and RenderingEngine)
+            // For now, this just represents 'non-reflected' properties that we have needed so far
+            // - value: needed for all types of input elements
+            // - checked: input fields of type 'checkbox'
+            // - selected: options of input fields of type 'select'
+            case 'value':
+            case 'checked':
+            case 'selected': {
+              // attribute is used as 'default' value
+              _attributes[key] = val
+              // and property as instance value
+              _htmlProps[key] = val
+              break
+            }
+            default: {
+              _attributes[key] = val
             }
           }
+        // no maginc HTML attribute mapping for Components, only plain properties
+        } else {
+          _props[key] = val
         }
       }
     }

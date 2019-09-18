@@ -2339,14 +2339,16 @@ function ComponentTests (debug, memory) {
     class ParentComponent extends Component {
       render () {
         return $$('div', {},
-          $$(ChildComponent, { id: 'foo', className: 'first', name: 'max' }, 'bla'),
-          $$(ChildComponent, { id: 'bar', className: 'second', name: 'moritz' }, 'blupp')
+          // ATTENTION: $$(Component) considers all props as props, and not magically mapping
+          // html attributes.
+          $$(ChildComponent, { id: 'foo', class: 'first', name: 'max' }, 'bla'),
+          $$(ChildComponent, { id: 'bar', class: 'second', name: 'moritz' }, 'blupp')
         )
       }
     }
     class ChildComponent extends Component {
       render () {
-        return $$('div', { 'data-name': this.props.name }, ...this.props.children)
+        return $$('div', { id: this.props.id, class: this.props.class, 'data-name': this.props.name }, ...this.props.children)
       }
     }
     let comp = ParentComponent.render()
