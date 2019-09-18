@@ -155,9 +155,10 @@ export default class RenderingEngine {
               break
             }
             case 'style': {
-              // ATTENTION: in React the 'style' property is always a hash
-              // this syntax is supported in Substance, too: `el.css({...})`
-              _styles = val
+              if (!isString(val)) {
+                throw new Error('HTML attribute "style" must be a CSS string.')
+              }
+              _attributes['style'] = val
               break
             }
             // ATTENTION: this list is utterly incomplete and IMO even incorrect

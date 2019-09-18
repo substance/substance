@@ -2221,15 +2221,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  /*
-    Note: for JSX support we only check that the mapping between React notation
-    and Substance notation is working. We do not really apply a JSX transpiler
-    here, instead use the factory method directly.
-    Note, that this is an alternative to using the $$ factory method passed
-    as argument to Component.render($$)
-  */
-
-  test('[JSX] simple HTML element', t => {
+  test('[$$] simple HTML element', t => {
     class MyComponent extends Component {
       render () {
         return $$('h1')
@@ -2240,7 +2232,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] className', t => {
+  test('[$$] className', t => {
     class MyComponent extends Component {
       render () {
         return $$('div', { className: 'foo bar' })
@@ -2251,10 +2243,10 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] inline style', t => {
+  test('[$$] inline style', t => {
     class MyComponent extends Component {
       render () {
-        return $$('div', { style: { width: '100px' } })
+        return $$('div', { style: 'width: 100px' })
       }
     }
     let comp = MyComponent.render()
@@ -2262,7 +2254,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] html properties', t => {
+  test('[$$] html properties', t => {
     class MyComponent extends Component {
       render () {
         return $$(this.props.tagName, this.props)
@@ -2279,7 +2271,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] attributes', t => {
+  test('[$$] attributes', t => {
     class MyComponent extends Component {
       render () {
         return $$('div', { 'id': 'foo', 'data-id': 'bar' })
@@ -2290,7 +2282,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] event handlers', t => {
+  test('[$$] event handlers', t => {
     class MyComponent extends Component {
       constructor (...args) {
         super(...args)
@@ -2316,7 +2308,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] children', t => {
+  test('[$$] children', t => {
     class MyComponent extends Component {
       render () {
         return $$('div', { className: 'parent' },
@@ -2335,7 +2327,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] child components', t => {
+  test('[$$] child components', t => {
     class ParentComponent extends Component {
       render () {
         return $$('div', {},
@@ -2365,7 +2357,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] refs', t => {
+  test('[$$] refs', t => {
     class MyComponent extends Component {
       render () {
         return $$('div', {},
@@ -2381,7 +2373,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX] Creating a detached virtual element', t => {
+  test('[$$] Creating a detached virtual element', t => {
     let vel = $$('h1', { className: 'foo' },
       $$('p', { className: 'bar' })
     )
@@ -2603,7 +2595,7 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
-  test('[JSX][FunctionComponent] Using a function component as child', t => {
+  test('[$$][FunctionComponent] Using a function component as child', t => {
     const Foo = (props) => {
       return $$('div', { className: 'foo' }, $$(Bar, props))
     }
