@@ -626,15 +626,24 @@ export default class Component extends EventEmitter {
     // We start looking for handlers at the parent level
     let comp = this
     while (comp) {
-      if (comp._actionHandlers && comp._actionHandlers[action]) {
+      if (comp._doesHandleAction(action)) {
         const args = Array.prototype.slice.call(arguments, 1)
-        const res = comp._actionHandlers[action](...args)
+        const res = comp._handleAction(action, args)
         return Promise.resolve(res || true)
       }
       comp = comp.getParent()
     }
     console.warn('Action', action, 'was not handled.')
     return Promise.resolve(false)
+  }
+
+  _doesHandleAction (action) {
+    return this._actionHandlers && this._actionHandlers[action]
+  }
+
+  _handleAction (action, args) {
+    const actionHandler = this._actionHandlers[action]
+    return actionHandler(...args)
   }
 
   /**
