@@ -40,39 +40,51 @@ export default class Clipboard {
   }
 
   _setClipboardData (clipboardData, context, snippet) {
-    let plainText = this._createClipboardText(context, snippet)
-    let html = this._createClipboardHtml(context, snippet)
+    let elements = this._createClipboardHtmlElements(context, snippet)
+    let plainText = this._createClipboardText(context, snippet, elements)
+    let html = this._createClipboardHtml(context, snippet, elements)
     clipboardData.setData('text/plain', plainText)
-    clipboardData.setData('text/html', html)
+    if (html) {
+      clipboardData.setData('text/html', html)
+    }
   }
 
-  _createClipboardText (context, snippet) {
+  _createClipboardHtmlElements (context, snippet) {
+    let htmlExporter = context.config.createExporter('html')
+    if (htmlExporter) {
+      return htmlExporter.convertContainer(snippet, snippet.getContainer().getPath())
+    }
+  }
+
+  _createClipboardText (context, snippet, htmlElements) {
     let config = context.config
     let textExporter = config.createExporter('text')
     if (textExporter) {
       return textExporter.exportNode(snippet.getContainer())
+    } else if (htmlElements) {
+      return htmlElements.map(el => el.textContent).join('\n')
     } else {
       return ''
     }
   }
 
-  _createClipboardHtml (context, snippet) {
-    let htmlExporter = context.config.createExporter('html')
-    let elements = htmlExporter.convertContainer(snippet, snippet.getContainer().getPath())
-    // special treatment for a text snippet
-    let snippetHtml
-    if (elements.length === 1 && elements[0].attr('data-id') === documentHelpers.TEXT_SNIPPET_ID) {
-      snippetHtml = elements[0].innerHTML
-    } else {
-      snippetHtml = elements.map(el => {
-        return el.outerHTML
-      }).join('')
+  _createClipboardHtml (context, snippet, elements) {
+    if (elements) {
+      // special treatment for a text snippet
+      let snippetHtml
+      if (elements.length === 1 && elements[0].attr('data-id') === documentHelpers.TEXT_SNIPPET_ID) {
+        snippetHtml = elements[0].innerHTML
+      } else {
+        snippetHtml = elements.map(el => {
+          return el.outerHTML
+        }).join('')
+      }
+      let jsonConverter = new JSONConverter()
+      let jsonStr = JSON.stringify(jsonConverter.exportDocument(snippet))
+      let substanceContent = `<script id="substance-clipboard" type="application/json">${jsonStr}</script>`
+      let html = '<html><head>' + substanceContent + '</head><body>' + snippetHtml + '</body></html>'
+      return html
     }
-    let jsonConverter = new JSONConverter()
-    let jsonStr = JSON.stringify(jsonConverter.exportDocument(snippet))
-    let substanceContent = `<script id="substance-clipboard" type="application/json">${jsonStr}</script>`
-    let html = '<html><head>' + substanceContent + '</head><body>' + snippetHtml + '</body></html>'
-    return html
   }
 
   _pasteHtml (html, context, options = {}) {
