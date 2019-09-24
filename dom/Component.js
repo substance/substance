@@ -462,22 +462,25 @@ export default class Component extends EventEmitter {
     // Following react's life-cycle, 'didMount' is triggered 'bottom-up'
     // i.e. children first.
     if (!options.noDescent) {
-      const children = this.getChildren()
-      for (let child of children) {
-        child.triggerDidMount()
+      if (this._isForwarding()) {
+        this._getForwardedComponent().triggerDidMount({ noAscent: true })
+      } else {
+        const children = this.getChildren()
+        for (let child of children) {
+          child.triggerDidMount()
+        }
       }
     }
 
     // ATTENTION: it is important to have this before calling didMount()
-    // so that in case of a state change or such during didMount()
-    // the children will get triggered.
+    // so that in case of a state change or such during didMount() the children will get triggered.
     this.__isMounted__ = true
     this.didMount()
 
     // ATTENTION: forwarding components are 'invisible' with respect to the
     // DOM elements, i.e. not covered by the recursion done here using this.getChildren()
     // so we trigger explicitly
-    if (this._isForwarded()) {
+    if (this._isForwarded() && !options.noAscent) {
       this.getParent().triggerDidMount({ noDescent: true })
     }
   }
@@ -567,7 +570,7 @@ export default class Component extends EventEmitter {
     @return {boolean} indicating if this component has been mounted
    */
   isMounted () {
-    return this.__isMounted__
+    return Boolean(this.__isMounted__)
   }
 
   /**
