@@ -1404,6 +1404,26 @@ function ComponentTests (debug, memory) {
     t.end()
   })
 
+  test('[Forwarding Component] mounting a forwarding component', (t) => {
+    class Forwarding extends TestComponent {
+      render ($$) {
+        return $$(Child)
+      }
+    }
+    class Child extends TestComponent {
+      render ($$) {
+        return $$('div').addClass('my-component').append('Foo')
+      }
+    }
+    let forwarding = Forwarding.mount({}, getMountPoint(t))
+    let child = forwarding.el._comp
+    t.ok(forwarding.isMounted(), 'The forwarding component should be mounted')
+    t.equal(forwarding.didMount.callCount, 1, '.. didMount() should have been called')
+    t.ok(child.isMounted(), 'The child component should be mounted')
+    t.equal(child.didMount.callCount, 1, '.. didMount() should have been called')
+    t.end()
+  })
+
   test('[Forwarding Component] Using refs in forwarding components', (t) => {
     class MyComponent extends TestComponent {
       render ($$) {
