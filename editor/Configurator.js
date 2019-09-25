@@ -377,11 +377,7 @@ export default class Configurator {
   getToolPanel (name, strict) {
     let toolPanelSpec = this._toolPanelRegistry.get(name)
     if (toolPanelSpec) {
-      // return cache compiled tool-panels
-      if (this._compiledToolPanels.has(name)) return this._compiledToolPanels.get(name)
-      let toolPanel = toolPanelSpec.map(itemSpec => this._compileToolPanelItem(itemSpec))
-      this._compiledToolPanels.set(name, toolPanel)
-      return toolPanel
+      return toolPanelSpec
     } else if (strict) {
       throw new Error(`No toolpanel configured with name ${name}`)
     }
@@ -393,36 +389,6 @@ export default class Configurator {
     }
     let commands = this._commandGroups.get(commandGroupName)
     commands.push(commandName)
-  }
-
-  _compileToolPanelItem (itemSpec) {
-    let item = Object.assign({}, itemSpec)
-    let type = itemSpec.type
-    switch (type) {
-      case 'command': {
-        if (!itemSpec.name) throw new Error("'name' is required for type 'command'")
-        break
-      }
-      case 'command-group':
-        return this.getCommandGroup(itemSpec.name).map(commandName => {
-          return {
-            type: 'command',
-            name: commandName
-          }
-        })
-      case 'prompt':
-      case 'group':
-      case 'dropdown':
-        item.items = flatten(itemSpec.items.map(itemSpec => this._compileToolPanelItem(itemSpec)))
-        break
-      case 'custom':
-      case 'separator':
-      case 'spacer':
-        break
-      default:
-        throw new Error('Unsupported tool panel item type: ' + type)
-    }
-    return item
   }
 }
 
