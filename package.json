@@ -54,6 +54,7 @@
     "test",
     "editor",
     "util",
+    "styles",
     "CHANGELOG.md",
     "index.es.js",
     "LICENSE.md",
