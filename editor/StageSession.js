@@ -1,5 +1,4 @@
 import { flatten } from '../util'
-import { DocumentChange } from '../model'
 import AbstractEditorSession from './AbstractEditorSession'
 
 /**
@@ -21,10 +20,11 @@ export default class StageSession extends AbstractEditorSession {
     // merge all changes into one big change
     let changes = this.getChanges()
     if (changes.length > 0) {
+      const doc = this._get('document')
       let ops = flatten(changes.map(c => c.ops))
       let oldSel = this.parentEditorSession.getSelection()
       let newSel = options.selection || oldSel
-      let mergedChange = new DocumentChange(ops, { selection: oldSel }, { selection: newSel })
+      let mergedChange = doc._createDocumentChange(ops, { selection: oldSel }, { selection: newSel })
       this.parentEditorSession.applyChange(mergedChange)
     }
   }

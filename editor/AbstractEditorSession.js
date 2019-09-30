@@ -2,7 +2,6 @@ import EventEmitter from '../util/EventEmitter'
 import isPlainObject from '../util/isPlainObject'
 import { transformSelection } from '../model/operationHelpers'
 import Selection from '../model/Selection'
-import DocumentChange from '../model/DocumentChange'
 import EditorState from './EditorState'
 import SimpleChangeHistory from './SimpleChangeHistory'
 
@@ -159,7 +158,7 @@ export default class AbstractEditorSession extends EventEmitter {
     if (transformationCaptured) {
       let selAfter = tx.selection
       if (ops.length > 0) {
-        change = new DocumentChange(ops, {
+        change = doc._createDocumentChange(ops, {
           selection: selBefore
         }, {
           selection: selAfter
@@ -204,7 +203,7 @@ export default class AbstractEditorSession extends EventEmitter {
   updateNodeStates (tuples, options = {}) {
     // using a pseudo change to get into the existing updating mechanism
     const doc = this._document
-    let change = new DocumentChange([], {}, {})
+    let change = doc._createDocumentChange([], {}, {})
     let info = { action: 'node-state-update' }
     change._extractInformation()
     change.info = info

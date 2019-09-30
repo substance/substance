@@ -12,7 +12,7 @@ import { fromJSON as selectionFromJSON } from './selectionHelpers'
 import { getContainerPosition } from './documentHelpers'
 
 export default class DocumentChange {
-  constructor (ops, before, after) {
+  constructor (ops, before, after, info = {}) {
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
       let data = arguments[0]
       // a unique id for the change
@@ -26,15 +26,13 @@ export default class DocumentChange {
       this.after = data.after || {}
       // array of operations
       this.ops = data.ops || []
-    } else if (arguments.length === 3) {
+    } else {
       this.sha = uuid()
-      this.info = {}
+      this.info = info
       this.timestamp = Date.now()
       this.before = before || {}
       this.after = after || {}
       this.ops = ops.slice(0)
-    } else {
-      throw new Error('Illegal arguments.')
     }
     // a hash with all updated properties
     this.updated = null
@@ -232,10 +230,10 @@ export default class DocumentChange {
 
   static fromJSON (data) {
     // Don't write to original object on deserialization
-    let change = cloneDeep(data)
-    change.ops = data.ops.map(opData => ObjectOperation.fromJSON(opData))
-    change.before.selection = selectionFromJSON(data.before.selection)
-    change.after.selection = selectionFromJSON(data.after.selection)
-    return new DocumentChange(change)
+    data = cloneDeep(data)
+    data.ops = data.ops.map(opData => ObjectOperation.fromJSON(opData))
+    data.before.selection = selectionFromJSON(data.before.selection)
+    data.after.selection = selectionFromJSON(data.after.selection)
+    return new DocumentChange(data)
   }
 }

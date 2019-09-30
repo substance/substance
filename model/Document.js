@@ -588,8 +588,12 @@ export default class Document extends EventEmitter {
     return this.data.update(path, diff)
   }
 
+  _createDocumentChange (ops, before, after, info) {
+    return new DocumentChange(ops, before, after, info)
+  }
+
   _emitInternalChange (op) {
-    const change = new DocumentChange([op], {}, {})
+    const change = this._createDocumentChange([op], {}, {})
     change._extractInformation(this)
     this.emit('document:changed:internal', change, this)
   }

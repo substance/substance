@@ -1,14 +1,12 @@
 import { getKeyForPath } from '../util'
-import DocumentChange from '../model/DocumentChange'
 import AppState from './AppState'
 import SelectionStateReducer from './SelectionStateReducer'
 import DocumentObserver from './DocumentObserver'
 
 const ANY = '@any'
-const NOP = new DocumentChange({
-  ops: [],
-  info: { action: 'nop' }
-})
+const NOP = function (doc) {
+  return doc._createDocumentChange([], {}, {}, { action: 'nop' })
+}
 
 export default class EditorState extends AppState {
   _initialize (initialState) {
@@ -47,7 +45,7 @@ export default class EditorState extends AppState {
     // In this case, there might be no actual update (change and info)
     // and we provide a NOP change and empty info
     if (!update && name === 'document') {
-      let change = NOP
+      let change = NOP(this._get('document'))
       change._extractInformation()
       update = { change, info: change.info }
     }
