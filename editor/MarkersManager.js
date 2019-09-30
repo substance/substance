@@ -46,7 +46,7 @@ export default class MarkersManager extends EventEmitter {
 
   // updating markers to reflect changes on the text they are bound to
   _onDocumentChange (change) {
-    for (let op of change.ops) {
+    for (const op of change.primitiveOps) {
       if (op.type === 'update' && op.diff._isTextOperation) {
         let markers = this._markers.get(op.path)
         if (!markers || markers.length === 0) continue

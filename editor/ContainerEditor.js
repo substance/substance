@@ -346,8 +346,7 @@ export default class ContainerEditor extends Surface {
     let renderContext = RenderingEngine.createContext(this)
     let $$ = renderContext.$$
     let containerPath = this.getContainerPath()
-    for (let i = 0; i < change.ops.length; i++) {
-      let op = change.ops[i]
+    for (const op of change.primitiveOps) {
       if (isArrayEqual(op.path, containerPath)) {
         if (op.type === 'update') {
           let diff = op.diff

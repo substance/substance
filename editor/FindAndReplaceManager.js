@@ -454,7 +454,7 @@ export default class FindAndReplaceManager {
       change.info.action === 'replace-all' ||
       change.info.action === 'nop'
     ) return
-    for (let op of change.ops) {
+    for (const op of change.primitiveOps) {
       if (op.isUpdate() && op.diff._isTextOperation) {
         this._dirty.add(getKeyForPath(op.path))
       }
