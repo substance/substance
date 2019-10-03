@@ -158,7 +158,8 @@ export default class DocumentChange {
     copy.before = copy.after
     copy.after = tmp
     let inverted = DocumentChange.fromJSON(copy)
-    inverted.ops = this.primitiveOps.map(op => op.invert())
+    // ATTENTION: inverted ops need to be in reverse order
+    inverted.ops = this.primitiveOps.map(op => op.invert()).reverse()
     return inverted
   }
 
