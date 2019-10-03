@@ -130,7 +130,7 @@ export default class ParentNodeHook {
     if (entry) {
       let { parent, property, isChildren } = entry
       this._setParentAndXpath(parent, child, property)
-      if (isChildren) {
+      if (parent && isChildren) {
         child._xpath.pos = parent[property].indexOf(child.id)
       }
       delete this.parents[child.id]
