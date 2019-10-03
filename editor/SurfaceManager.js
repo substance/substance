@@ -136,7 +136,7 @@ export default class SurfaceManager {
     const editorState = this.editorState
     let focusedSurface = editorState.focusedSurface
     if (focusedSurface && !focusedSurface.isDisabled()) {
-      focusedSurface.send('scrollSelectionIntoView')
+      focusedSurface.send('scrollSelectionIntoView', editorState.selection)
     }
   }
 }
