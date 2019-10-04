@@ -626,7 +626,7 @@ function _propagateLinking (state, comp, vel, stopIfMapped) {
     }
   }
 
-  // Now we try to map all ancestors. If not possible, then the
+  // Now we try to map all ancestors. If not possible, then we assume that the component has been relocated
   let canLinkParent = false
   let parent = comp.getParent()
   if (vel.parent) {
@@ -657,15 +657,19 @@ function _propagateLinking (state, comp, vel, stopIfMapped) {
 }
 
 function _isOfSameType (comp, vc) {
-  return (
-    (comp._isElementComponent && vc._isVirtualHTMLElement) ||
-    (comp._isComponent && vc._isVirtualComponent && comp.constructor === _getComponentClass(vc)) ||
-    (comp._isTextNodeComponent && vc._isVirtualTextNode)
-  )
+  if (vc._isVirtualComponent) {
+    const ComponentClass = _getComponentClass(vc)
+    return (comp._isComponent && comp.constructor === ComponentClass)
+  } else {
+    return (
+      (comp._isElementComponent && vc._isVirtualHTMLElement) ||
+      (comp._isTextNodeComponent && vc._isVirtualTextNode)
+    )
+  }
 }
 
 function _getComponentClass (vc) {
-  let ComponentClass = vc.ComponentClass
+  const ComponentClass = vc.ComponentClass
   if (ComponentClass._isFunctionComponent) {
     return ComponentClass._ComponentClass
   }

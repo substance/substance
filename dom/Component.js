@@ -1177,7 +1177,8 @@ export default class Component extends EventEmitter {
    * @param {function} func
    */
   static createFunctionComponent (func) {
-    let ComponentClass = func.ComponentClass
+    // using a cached class so that we can check of equality
+    let ComponentClass = func._ComponentClass
     if (!ComponentClass) {
       // if the given argument is actually a Class Component then just return that
       if (func.prototype && func.prototype._isComponent) {
@@ -1189,6 +1190,7 @@ export default class Component extends EventEmitter {
         }
       }
       ComponentClass.displayName = func.name || uuid('FunctionComponent@')
+      // caching the generated class so we can later check for equality
       func._ComponentClass = ComponentClass
       func._isFunctionComponent = true
     }

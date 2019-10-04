@@ -2611,7 +2611,7 @@ function ComponentTests (debug, memory) {
     parent.rerender()
     child = parent.find('.child')
     let newElement = child.getNativeElement()
-    t.ok(oldElement === newElement, 'the child rendered var function component should have been retained')
+    t.ok(oldElement === newElement, 'the child component should have been retained')
     t.end()
   })
 
