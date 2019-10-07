@@ -20,7 +20,7 @@ export default class StageSession extends AbstractEditorSession {
     // merge all changes into one big change
     let changes = this.getChanges()
     if (changes.length > 0) {
-      const doc = this._get('document')
+      const doc = this._document
       let ops = flatten(changes.map(c => c.ops))
       let oldSel = this.parentEditorSession.getSelection()
       let newSel = options.selection || oldSel
