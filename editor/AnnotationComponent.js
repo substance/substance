@@ -1,4 +1,4 @@
-import Component from '../dom/Component'
+import { Component, $$ } from '../dom'
 
 /**
   Renders an annotation. Used internally by different components (e.g. AnnotatedTextComponent)
@@ -29,7 +29,7 @@ export default class AnnotationComponent extends Component {
     node.off(this)
   }
 
-  render ($$) {
+  render () {
     let el = $$(this.getTagName())
       .attr('data-id', this.props.node.id)
       .addClass(this.getClassNames())

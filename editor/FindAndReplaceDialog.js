@@ -1,5 +1,5 @@
 import { debounce, keys, platform } from '../util'
-import Component from '../dom/Component'
+import { Component, $$ } from '../dom'
 
 const UPDATE_DELAY = 300
 
@@ -22,13 +22,13 @@ export default class FindAndReplaceDialog extends Component {
     this.context.editorState.removeObserver(this)
   }
 
-  render ($$) {
+  render () {
     let state = this._getState()
     let el = $$('div').addClass('sc-find-and-replace-dialog')
     el.append(
-      this._renderHeader($$),
-      this._renderFindSection($$),
-      this._renderReplaceSection($$)
+      this._renderHeader(),
+      this._renderFindSection(),
+      this._renderReplaceSection()
     )
     if (!state.enabled) {
       el.addClass('sm-hidden')
@@ -37,7 +37,7 @@ export default class FindAndReplaceDialog extends Component {
     return el
   }
 
-  _renderTitle ($$) {
+  _renderTitle () {
     const state = this._getState()
     let title = state.showReplace ? this.getLabel(`find-replace-title-${this.props.viewName}`) : this.getLabel(`find-title-${this.props.viewName}`)
     let options = []
@@ -48,11 +48,11 @@ export default class FindAndReplaceDialog extends Component {
     return $$('div').addClass('se-title').append(title)
   }
 
-  _renderHeader ($$) {
+  _renderHeader () {
     const state = this._getState()
     const Button = this.getComponent('button')
     return $$('div').addClass('se-header').append(
-      this._renderTitle($$),
+      this._renderTitle(),
       $$('div').addClass('se-group sm-options').append(
         $$(Button, {
           tooltip: this.getLabel('find-case-sensitive'),
@@ -77,20 +77,20 @@ export default class FindAndReplaceDialog extends Component {
           theme: this.props.theme
         }).addClass('sm-close')
           .append(
-            this.context.iconProvider.renderIcon($$, 'close')
+            this.context.iconProvider.renderIcon('close')
           )
           .on('click', this._close)
       )
     )
   }
 
-  _renderFindSection ($$) {
+  _renderFindSection () {
     const state = this._getState()
     const Button = this.getComponent('button')
     return $$('div').addClass('se-section').addClass('sm-find').append(
       $$('div').addClass('se-group sm-input').append(
-        this._renderPatternInput($$),
-        this._renderStatus($$)
+        this._renderPatternInput(),
+        this._renderStatus()
       ),
       $$('div').addClass('se-group sm-actions').append(
         $$(Button, {
@@ -111,13 +111,13 @@ export default class FindAndReplaceDialog extends Component {
     )
   }
 
-  _renderReplaceSection ($$) {
+  _renderReplaceSection () {
     let state = this._getState()
     if (state.showReplace) {
       const Button = this.getComponent('button')
       return $$('div').addClass('se-section').addClass('sm-replace').append(
         $$('div').addClass('se-group sm-input').append(
-          this._renderReplacePatternInput($$)
+          this._renderReplacePatternInput()
         ),
         $$('div').addClass('se-group sm-actions').append(
           $$(Button, {
@@ -139,7 +139,7 @@ export default class FindAndReplaceDialog extends Component {
     }
   }
 
-  _renderPatternInput ($$) {
+  _renderPatternInput () {
     let state = this._getState()
     return $$('input').ref('pattern').addClass('sm-find')
       .attr({
@@ -153,7 +153,7 @@ export default class FindAndReplaceDialog extends Component {
       .on('focus', this._onFocus)
   }
 
-  _renderReplacePatternInput ($$) {
+  _renderReplacePatternInput () {
     let state = this._getState()
     return $$('input').ref('replacePattern').addClass('sm-replace')
       .attr({
@@ -166,7 +166,7 @@ export default class FindAndReplaceDialog extends Component {
       .on('input', this._updateReplacePattern)
   }
 
-  _renderStatus ($$) {
+  _renderStatus () {
     let state = this._getState()
     let el = $$('span').addClass('se-status')
     if (state.count > 0) {
