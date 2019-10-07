@@ -1,6 +1,6 @@
 import { flatten, isString, isFunction, platform } from '../util'
+import DefaultIconProvider from './DefaultIconProvider'
 import DefaultLabelProvider from './DefaultLabelProvider'
-import FontAwesomeIcon from './FontAwesomeIcon'
 import SwitchTextTypeCommand from './SwitchTextTypeCommand'
 
 export default class Configurator {
@@ -37,9 +37,6 @@ export default class Configurator {
     this._toolPanelRegistry = new HierarchicalRegistry(this, c => c._toolPanels)
     this._keyboardShortcutsByCommandNameRegistry = new HierarchicalRegistry(this, c => c._keyboardShortcutsByCommandName)
     this._commandGroupRegistry = new HierarchicalRegistry(this, c => c._commandGroups)
-
-    // TODO: document why this is necessary, beyond legacy reasons
-    this._compiledToolPanels = new Map()
   }
 
   import (pkg, options) {
@@ -312,7 +309,7 @@ export default class Configurator {
   }
 
   getIconProvider () {
-    return new IconProvider(this)
+    return new DefaultIconProvider(this)
   }
 
   // TODO: the label provider should not be maintained by the configuration
@@ -461,29 +458,5 @@ class LabelProvider extends DefaultLabelProvider {
     } else {
       return rawLabel
     }
-  }
-}
-
-class IconProvider {
-  constructor (config) {
-    this.config = config
-  }
-
-  renderIcon ($$, name) {
-    let spec = this._getIconDef(name)
-    if (!spec) {
-      // throw new Error(`No icon found for name '${name}'`)
-      return null
-    } else {
-      if (spec['fontawesome']) {
-        return $$(FontAwesomeIcon, { icon: spec['fontawesome'] })
-      } else {
-        throw new Error('Unsupported icon spec')
-      }
-    }
-  }
-
-  _getIconDef (name) {
-    return this.config._iconRegistry.get(name)
   }
 }
