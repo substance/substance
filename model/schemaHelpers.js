@@ -5,41 +5,41 @@ export const STRING = { type: 'string', default: '' }
 
 export function TEXT (...targetTypes) {
   targetTypes = flatten(targetTypes)
-  return { type: 'text', targetTypes }
+  return { type: 'text', targetTypes, reflectionType: 'text' }
 }
 
 export const PLAIN_TEXT = Object.freeze(TEXT())
 
-export const STRING_ARRAY = { type: ['array', 'string'], default: [] }
+export const STRING_ARRAY = { type: ['array', 'string'], default: [], reflectionType: 'string-array' }
 
-export const BOOLEAN = { type: 'boolean', default: false }
+export const BOOLEAN = { type: 'boolean', default: false, reflectionType: 'boolean' }
 
 export function ENUM (values, opts = {}) {
-  let def = { type: 'enum', values }
+  let def = { type: 'enum', values, reflectionType: 'enum' }
   Object.assign(def, opts)
   return def
 }
 
 export function MANY (...nodeTypes) {
   nodeTypes = flatten(nodeTypes)
-  return { type: ['array', 'id'], targetTypes: nodeTypes, default: [] }
+  return { type: ['array', 'id'], targetTypes: nodeTypes, default: [], reflectionType: 'many' }
 }
 
 export function ONE (...nodeTypes) {
   nodeTypes = flatten(nodeTypes)
-  return { type: 'id', targetTypes: nodeTypes, default: null }
+  return { type: 'id', targetTypes: nodeTypes, default: null, reflectionType: 'one' }
 }
 
 export function CHILDREN (...nodeTypes) {
   nodeTypes = flatten(nodeTypes)
-  return { type: ['array', 'id'], targetTypes: nodeTypes, default: [], owned: true }
+  return { type: ['array', 'id'], targetTypes: nodeTypes, default: [], owned: true, reflectionType: 'children' }
 }
 
 // EXPERIMENTAL: similar to CHILDREN but only a single id, e.g. figure.content -> graphic
 // for now we make this non-optional
 export function CHILD (...nodeTypes) {
   nodeTypes = flatten(nodeTypes)
-  return { type: 'id', targetTypes: nodeTypes, owned: true }
+  return { type: 'id', targetTypes: nodeTypes, owned: true, reflectionType: 'child' }
 }
 
 export function CONTAINER (spec) {
@@ -56,7 +56,7 @@ export function CONTAINER (spec) {
   if (!defaultTextType) throw new Error('CONTAINER({ defaultTextType: [...] }) is mandatory.')
   let def = CHILDREN(...nodeTypes)
   def.defaultTextType = defaultTextType
-  def._isContainer = true
+  def.reflectionType = 'container'
   return def
 }
 
