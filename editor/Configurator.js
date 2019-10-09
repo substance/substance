@@ -241,6 +241,19 @@ export default class Configurator {
     }
   }
 
+  getServiceSync (serviceId, context) {
+    let entry = this._serviceRegistry.get(serviceId)
+    if (entry) {
+      if (entry && entry.instance) {
+        return entry.instance
+      } else {
+        let service = entry.factory(context)
+        entry.instance = service
+        return service
+      }
+    }
+  }
+
   registerDocumentLoader (docType, LoaderClass, spec = {}, options = {}) {
     if (this._documentLoaders.has(docType) && !options.force) {
       throw new Error(`Loader for docType '${docType}' is already defined`)
