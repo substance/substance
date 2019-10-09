@@ -111,6 +111,7 @@ export default class Surface extends Component {
         } else {
           el.on('keypress', this.onTextInputShim)
         }
+        el.on('copy', this._onCopy)
         el.on('paste', this._onPaste)
         el.on('cut', this._onCut)
       }
@@ -125,7 +126,6 @@ export default class Surface extends Component {
         // prevent click from bubbling up
         el.on('click', this.onClick)
       }
-      el.on('copy', this._onCopy)
     }
 
     return el
