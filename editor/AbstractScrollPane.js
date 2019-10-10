@@ -1,58 +1,23 @@
-import { getSelectionRect } from '../util/windowUtils'
+import { getSelectionRect, getRelativeRect } from '../util/windowUtils'
 import getRelativeMouseBounds from '../util/getRelativeMouseBounds'
 import platform from '../util/platform'
-import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from '../dom/Component'
 
 export default class AbstractScrollPane extends Component {
-  /*
-    Expose scrollPane as a child context
-  */
+  getActionHandlers () {
+    return {
+      'scrollSelectionIntoView': this._scrollSelectionIntoView
+    }
+  }
+
   getChildContext () {
     return {
       scrollPane: this
     }
   }
 
-  didMount () {
-    if (platform.inBrowser) {
-      this.windowEl = DefaultDOMElement.wrapNativeElement(window)
-      this.windowEl.on('resize', this.onSelectionPositioned, this)
-    }
-  }
-
-  dispose () {
-    if (this.windowEl) {
-      this.windowEl.off(this)
-    }
-  }
-
   getName () {
     return this.props.name
-  }
-
-  /*
-    Determine selection rectangle relative to content element
-    and emit a selection:positioned event with positioning hints
-  */
-  onSelectionPositioned () {
-    let contentRect = this._getContentRect()
-    let selectionRect = this._getSelectionRect()
-    if (!selectionRect) return
-    let hints = {
-      contentRect,
-      selectionRect
-    }
-    this._emitSelectionPositioned(hints)
-    this._scrollSelectionIntoView(selectionRect)
-  }
-
-  _emitSelectionPositioned (hints) {
-    // Allows overlays to do positioning relative to the current
-    // selection bounding rectangle.
-    this.emit('selection:positioned', hints)
-    // TODO: Remove legacy support
-    this.emit('dom-selection:rendered', hints)
   }
 
   /*
@@ -67,15 +32,21 @@ export default class AbstractScrollPane extends Component {
     })
   }
 
-  _scrollSelectionIntoView (selectionRect) {
+  _scrollRectIntoView (rect) {
+    if (!rect) return
+    // console.log('AbstractScrollPane._scrollRectIntoView()')
     let upperBound = this.getScrollPosition()
     let lowerBound = upperBound + this.getHeight()
-    let selTop = selectionRect.top
-    let selBottom = selectionRect.top + selectionRect.height
+    let selTop = rect.top
+    let selBottom = rect.top + rect.height
     if ((selTop < upperBound && selBottom < upperBound) ||
         (selTop > lowerBound && selBottom > lowerBound)) {
       this.setScrollPosition(selTop)
     }
+  }
+
+  _scrollSelectionIntoView () {
+    this._scrollRectIntoView(this._getSelectionRect())
   }
 
   /**
@@ -141,7 +112,26 @@ export default class AbstractScrollPane extends Component {
     Get selection rectangle relative to panel content element
   */
   _getSelectionRect () {
-    return getSelectionRect(this._getContentRect())
+    let appState = this.context.editorState
+    let sel = appState.selection
+    let selectionRect
+    if (platform.inBrowser && sel && !sel.isNull()) {
+      let contentEl = this.getContentElement()
+      let contentRect = contentEl.getNativeElement().getBoundingClientRect()
+      if (sel.isNodeSelection()) {
+        let nodeId = sel.nodeId
+        let nodeEl = contentEl.find(`*[data-id="${nodeId}"]`)
+        if (nodeEl) {
+          let nodeRect = nodeEl.getNativeElement().getBoundingClientRect()
+          selectionRect = getRelativeRect(contentRect, nodeRect)
+        } else {
+          console.error(`FIXME: could not find a node with data-id=${nodeId}`)
+        }
+      } else {
+        selectionRect = getSelectionRect(contentRect)
+      }
+    }
+    return selectionRect
   }
 
   _getMouseBounds (e) {
