@@ -1,5 +1,5 @@
 // TODO: rename this module to avoid confusion with lodash-es/merge
-import { merge as _merge, mergeWith as _mergeWith } from 'lodash-es'
+import { merge as _merge, mergeWith as _mergeWith } from '../vendor/lodash-es'
 import isArray from './isArray'
 
 /**

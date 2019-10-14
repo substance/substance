@@ -1,1 +1,1 @@
-export { isMatch as default } from 'lodash-es'
+export { isMatch as default } from '../vendor/lodash-es'

@@ -1,1 +1,1 @@
-export { clone as default } from 'lodash-es'
+export { clone as default } from '../vendor/lodash-es'

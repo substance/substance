@@ -1,1 +1,1 @@
-export { camelCase as default } from 'lodash-es'
+export { camelCase as default } from '../vendor/lodash-es'
