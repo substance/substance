@@ -1,3 +1,4 @@
+export * from './commons/index'
 export * from './dom/index'
 export * from './model/index'
 export * from './editor/index'
