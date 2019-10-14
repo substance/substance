@@ -52,6 +52,7 @@
   },
   "files": [
     "commons",
+    "dar",
     "dom",
     "editor",
     "model",
