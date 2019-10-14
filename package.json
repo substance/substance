@@ -72,5 +72,6 @@
     "package.json"
   ],
   "sideEffects": false,
+  "main": "index.js",
   "esnext": "index.es.js"
 }
