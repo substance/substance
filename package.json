@@ -51,25 +51,24 @@
     "tap-spec": "^5.0.0"
   },
   "files": [
-    "dist",
     "dom",
     "model",
     "test",
     "editor",
     "util",
     "styles",
+    "vendor/css-select.js",
+    "vendor/entities.js",
+    "vendor/htmlparser2.js",
+    "vendor/lodash-es.js",
     "CHANGELOG.md",
     "index.es.js",
     "LICENSE.md",
     "make.js",
     "README.md",
     "package.json",
-    "*.css",
-    "vendor/*.js"
+    "*.css"
   ],
   "sideEffects": false,
-  "main": "./dist/substance.cjs.js",
-  "esnext": "index.es.js",
-  "browser": "./dist/substance.js",
-  "module": "./dist/substance.es.js"
+  "esnext": "index.es.js"
 }
