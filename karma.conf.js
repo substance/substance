@@ -3,8 +3,8 @@ module.exports = function (config) {
     basePath: '.',
     frameworks: ['tap'],
     files: [
-      'tmp/substance.cov.js',
       'node_modules/substance-test/dist/test.browser.js',
+      'tmp/substance.istanbul.js',
       'tmp/tests.js'
     ],
     browsers: ['Firefox', 'Chrome'],
