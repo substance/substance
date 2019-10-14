@@ -11,13 +11,6 @@ b.task('clean', () => {
   b.rm('./coverage')
 })
 
-b.task('default', ['clean'])
-
-// Default dev mode, only browser bundles are made and no ES5 transpilation happens
-b.task('dev', ['clean', 'test:browser'])
-
-b.task('build', ['clean'])
-
 b.task('test', ['test:node', 'cover'])
   .describe('runs the test suite')
 
