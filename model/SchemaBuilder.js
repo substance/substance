@@ -1,4 +1,7 @@
-import { isString, DocumentNode, PropertyAnnotation, TextNode } from 'substance'
+import { isString } from '../util'
+import DocumentNode from './DocumentNode'
+import PropertyAnnotation from './PropertyAnnotation'
+import TextNode from './TextNode'
 import NextDocumentSchema from './NextDocumentSchema'
 import { INCREMENT_VERSION, ADD_NODE, ADD_PROPERTY, ADD_CHILD_TYPE, BUILT_INS } from './_SchemaConstants'
 import SchemaDefinition from './_SchemaDefinition'

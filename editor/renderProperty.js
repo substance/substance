@@ -1,4 +1,7 @@
-import { $$, Component, getKeyForPath, Surface, ContainerEditor, isNil } from 'substance'
+import { $$, Component } from '../dom'
+import { getKeyForPath, isNil } from '../util'
+import Surface from './Surface'
+import ContainerEditor from './ContainerEditor'
 import _renderNode from './_renderNode'
 
 export default function renderProperty (comp, node, propName, props = {}) {
