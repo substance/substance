@@ -8,7 +8,7 @@ export default class ListComponent extends Component {
       editorState.addObserver(['document'], this.rerender, this, {
         stage: 'render',
         document: {
-          path: [this.props.node.id, 'items']
+          path: [this.props.node.id]
         }
       })
     }
