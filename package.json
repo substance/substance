@@ -13,8 +13,9 @@
     "prepack": "npm install && node make build",
     "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"editor/**/*.js\" \"util/**/*.js\" index.es.js",
     "pretest": "npm run lint",
-    "test": "node make test",
-    "test-and-cover": "node make test && node make cover",
+    "test": "node test/_runTests | tap-spec",
+    "cover": "node make cover",
+    "test-and-cover": "npm run test && npm run cover",
     "start": "node make dev -w -s"
   },
   "author": {
@@ -31,6 +32,7 @@
     "nth-check": "1.0.1"
   },
   "devDependencies": {
+    "esm": "^3.2.25",
     "istanbul-lib-instrument": "^3.3.0",
     "karma": "1.x",
     "karma-chrome-launcher": "2.2.0",
@@ -38,14 +40,15 @@
     "karma-firefox-launcher": "1.1.0",
     "karma-tap": "4.1.4",
     "karma-tape-reporter": "1.0.3",
+    "module-alias": "2.2.0",
     "rollup": "^1.20.1",
     "rollup-plugin-commonjs": "^10.0.2",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "standard": "^11.0.1",
-    "substance": "1.0.0-preview.19",
     "substance-bundler": "0.27.1",
-    "substance-test": "0.13.1"
+    "substance-test": "0.15.0",
+    "tap-spec": "^5.0.0"
   },
   "files": [
     "dist",
