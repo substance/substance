@@ -4,7 +4,7 @@ import * as documentHelpers from './documentHelpers'
 
 const ERR_ABSTRACT = 'This method is abstract!'
 
-export default function (DocumentNode) {
+export default function ListMixin (DocumentNode) {
   class AbstractList extends DocumentNode {
     createListItem (text) {
       throw new Error(ERR_ABSTRACT)
