@@ -51,23 +51,25 @@
     "tap-spec": "^5.0.0"
   },
   "files": [
+    "commons",
     "dom",
-    "model",
-    "test",
     "editor",
-    "util",
+    "model",
     "styles",
+    "test",
+    "ui",
+    "util",
     "vendor/css-select.js",
     "vendor/entities.js",
     "vendor/htmlparser2.js",
     "vendor/lodash-es.js",
-    "CHANGELOG.md",
     "index.es.js",
-    "LICENSE.md",
     "make.js",
+    "CHANGELOG.md",
+    "LICENSE.md",
     "README.md",
-    "package.json",
-    "*.css"
+    "*.css",
+    "package.json"
   ],
   "sideEffects": false,
   "esnext": "index.es.js"
