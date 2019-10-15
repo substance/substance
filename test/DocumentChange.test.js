@@ -52,7 +52,7 @@ test('DocumentChange: serialize() and deserialize()', t => {
   let serialized = change.serialize()
   let deserialized = DocumentChange.deserialize(serialized)
 
-  t.deepEqual(deserialized.ops, change.ops, 'ops should be equal after deserialization')
+  t.deepEqual(deserialized.ops.map(o => o.toJSON()), change.ops.map(o => o.toJSON()), 'ops should be equal after deserialization')
   t.ok(selStart.equals(deserialized.before.selection), 'selection (before) should have been deserialized too')
   t.ok(selEnd.equals(deserialized.after.selection), 'selection (after) should have been deserialized too')
   t.end()

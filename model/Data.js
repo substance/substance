@@ -1,6 +1,6 @@
 import isArray from '../util/isArray'
 import isString from '../util/isString'
-import forEach from '../util/forEach'
+import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
 import isPlainObject from '../util/isPlainObject'
 import cloneDeep from '../util/cloneDeep'
@@ -30,8 +30,8 @@ export default class Data extends EventEmitter {
 
     this.schema = schema
     this.nodeFactory = nodeFactory
-    this.nodes = {}
-    this.indexes = {}
+    this.nodes = new Map()
+    this.indexes = new Map()
 
     // Sometimes necessary to resolve issues with updating indexes in presence
     // of cyclic dependencies
@@ -45,7 +45,7 @@ export default class Data extends EventEmitter {
     @returns {bool} `true` if a node with id exists, `false` otherwise.
    */
   contains (id) {
-    return Boolean(this.nodes[id])
+    return Boolean(this.nodes.has(id))
   }
 
   /**
@@ -73,19 +73,19 @@ export default class Data extends EventEmitter {
     let result
     if (isString(path)) {
       let id = path
-      result = this.nodes[id]
+      result = this.nodes.get(id)
     } else if (path.length === 1) {
       let id = path[0]
-      result = this.nodes[id]
+      result = this.nodes.get(id)
     } else if (path.length > 1) {
       let id = path[0]
-      let obj = this.nodes[id]
-      for (let i = 1; i < path.length - 1; i++) {
-        if (!obj) return undefined
-        obj = obj[path[i]]
+      let node = this.nodes.get(id)
+      let val = node.get(path[1])
+      for (let i = 2; i < path.length; i++) {
+        if (!val) return undefined
+        val = val[path[i]]
       }
-      if (!obj) return undefined
-      result = obj[path[path.length - 1]]
+      result = val
     }
     return result
   }
@@ -115,11 +115,11 @@ export default class Data extends EventEmitter {
     if (!node.id || !node.type) {
       throw new Error('Node id and type are mandatory.')
     }
-    this.nodes[node.id] = node
+    this.nodes.set(node.id, node)
 
-    var change = {
+    let change = {
       type: 'create',
-      node: node
+      node
     }
 
     if (this.__QUEUE_INDEXING__) {
@@ -138,12 +138,12 @@ export default class Data extends EventEmitter {
     @returns {Node} The deleted node.
    */
   delete (nodeId) {
-    var node = this.nodes[nodeId]
+    let node = this.nodes.get(nodeId)
     if (!node) return
     node.dispose()
-    delete this.nodes[nodeId]
+    this.nodes.delete(nodeId)
 
-    var change = {
+    let change = {
       type: 'delete',
       node: node
     }
@@ -312,7 +312,7 @@ export default class Data extends EventEmitter {
         }
       }
     } else if (value._isCoordinate) {
-      if (diff.hasOwnProperty('shift')) {
+      if (_isDefined(diff.shift)) {
         console.warn('DEPRECATED: use doc.update(path, {type:"shift", value:2}) instead')
         diff = {
           type: 'shift',
@@ -332,12 +332,12 @@ export default class Data extends EventEmitter {
    */
   toJSON () {
     let nodes = {}
-    forEach(this.nodes, (node) => {
+    for (let node of this.nodes.values()) {
       nodes[node.id] = node.toJSON()
-    })
+    }
     return {
       schema: [this.schema.id, this.schema.version],
-      nodes: nodes
+      nodes
     }
   }
 
@@ -351,8 +351,10 @@ export default class Data extends EventEmitter {
     @internal
    */
   clear () {
-    this.nodes = {}
-    forEach(this.indexes, index => index.clear())
+    this.nodes = new Map()
+    for (let index of this.indexes.values()) {
+      index.clear()
+    }
   }
 
   /**
@@ -366,7 +368,7 @@ export default class Data extends EventEmitter {
       console.error('Index with name %s already exists.', name)
     }
     index.reset(this)
-    this.indexes[name] = index
+    this.indexes.set(name, index)
     return index
   }
 
@@ -377,7 +379,7 @@ export default class Data extends EventEmitter {
     @returns {NodeIndex} The node index.
    */
   getIndex (name) {
-    return this.indexes[name]
+    return this.indexes.get(name)
   }
 
   /**
@@ -387,11 +389,8 @@ export default class Data extends EventEmitter {
    */
   _updateIndexes (change) {
     if (!change || this.__QUEUE_INDEXING__) return
-    forEach(this.indexes, function (index) {
+    for (let index of this.indexes.values()) {
       if (index.select(change.node)) {
-        if (!index[change.type]) {
-          console.error('Contract: every NodeIndex must implement ' + change.type)
-        }
         switch (change.type) {
           case 'create':
             index.create(change.node)
@@ -409,7 +408,7 @@ export default class Data extends EventEmitter {
             throw new Error('Illegal state.')
         }
       }
-    })
+    }
   }
 
   /**
@@ -435,24 +434,33 @@ export default class Data extends EventEmitter {
   }
 }
 
-function _setValue (root, path, newValue) {
+function _setValue (nodes, path, newValue) {
   // HACK: cloning the value so that we get independent copies
   if (isArray(newValue)) newValue = newValue.slice()
   else if (isPlainObject(newValue)) newValue = cloneDeep(newValue)
 
-  let ctx = root
-  let L = path.length
-  for (let i = 0; i < L - 1; i++) {
-    ctx = ctx[path[i]]
-    if (!ctx) throw new Error('Can not set value.')
+  if (!path || path.length < 2) {
+    throw new Error('Illegal value path.')
   }
-  let propName = path[L - 1]
-  let oldValue = ctx[propName]
-  if (ctx._isNode) {
-    ctx._set(propName, newValue)
+  const nodeId = path[0]
+  const propName = path[1]
+  let node = nodes.get(nodeId)
+  if (!node) throw new Error(`Unknown node: ${nodeId}`)
+  let oldValue = node.get(propName)
+  let L = path.length
+  if (L > 2) {
+    if (!oldValue) throw new Error('Can not set value.')
+    let ctx = oldValue
+    for (let i = 2; i < L - 1; i++) {
+      ctx = ctx[path[i]]
+      if (!ctx) throw new Error('Can not set value.')
+    }
+    let valName = path[path.length - 1]
+    oldValue = ctx[valName]
+    ctx[valName] = newValue
   } else {
-    // NOTE: this is used when manipulating object values e.g. node.obj.foo
-    ctx[propName] = newValue
+    // _set() does not trigger an operation
+    node._set(propName, newValue)
   }
   return oldValue
 }

@@ -4,15 +4,15 @@ import forEach from '../util/forEach'
 import getKeyForPath from '../util/getKeyForPath'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
-import map from '../util/map'
+import _isDefined from '../util/_isDefined'
 import uuid from '../util/uuid'
 import OperationSerializer from './OperationSerializer'
 import ObjectOperation from './ObjectOperation'
 import { fromJSON as selectionFromJSON } from './selectionHelpers'
 import { getContainerPosition } from './documentHelpers'
 
-class DocumentChange {
-  constructor (ops, before, after) {
+export default class DocumentChange {
+  constructor (ops, before, after, info = {}) {
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
       let data = arguments[0]
       // a unique id for the change
@@ -21,20 +21,18 @@ class DocumentChange {
       this.timestamp = data.timestamp
       // application state before the change was applied
       this.before = data.before || {}
-      // array of operations
-      this.ops = data.ops
       this.info = data.info // custom change info
       // application state after the change was applied
       this.after = data.after || {}
-    } else if (arguments.length === 3) {
+      // array of operations
+      this.ops = data.ops || []
+    } else {
       this.sha = uuid()
-      this.info = {}
+      this.info = info
       this.timestamp = Date.now()
-      this.ops = ops.slice(0)
       this.before = before || {}
       this.after = after || {}
-    } else {
-      throw new Error('Illegal arguments.')
+      this.ops = ops.slice(0)
     }
     // a hash with all updated properties
     this.updated = null
@@ -42,6 +40,13 @@ class DocumentChange {
     this.created = null
     // a hash with all deleted nodes
     this.deleted = null
+  }
+
+  get primitiveOps () {
+    // TODO: we might want to introduce higher-level ops
+    // using change.primitiveOps instead of change.ops
+    // allows us to do this move seemlessly
+    return this.ops
   }
 
   /*
@@ -53,7 +58,7 @@ class DocumentChange {
     // For now we allow this method to be called multiple times, but only extract the details the first time
     if (this._extracted) return
 
-    let ops = this.ops
+    let primitiveOps = this.primitiveOps
     let created = {}
     let deleted = {}
     let updated = {}
@@ -65,10 +70,10 @@ class DocumentChange {
         case 'create':
         case 'delete': {
           let node = op.val
-          if (node.hasOwnProperty('start') && node.start.path) {
+          if (_isDefined(node.start) && node.start.path) {
             updated[getKeyForPath(node.start.path)] = true
           }
-          if (node.hasOwnProperty('end') && node.end.path) {
+          if (_isDefined(node.end) && node.end.path) {
             updated[getKeyForPath(node.end.path)] = true
           }
           break
@@ -92,8 +97,7 @@ class DocumentChange {
       }
     }
 
-    for (let i = 0; i < ops.length; i++) {
-      let op = ops[i]
+    for (const op of primitiveOps) {
       if (op.type === 'create') {
         created[op.val.id] = op.val
         delete deleted[op.val.id]
@@ -154,11 +158,8 @@ class DocumentChange {
     copy.before = copy.after
     copy.after = tmp
     let inverted = DocumentChange.fromJSON(copy)
-    let ops = []
-    for (let i = this.ops.length - 1; i >= 0; i--) {
-      ops.push(this.ops[i].invert())
-    }
-    inverted.ops = ops
+    // ATTENTION: inverted ops need to be in reverse order
+    inverted.ops = this.primitiveOps.map(op => op.invert()).reverse()
     return inverted
   }
 
@@ -177,14 +178,9 @@ class DocumentChange {
   }
 
   serialize () {
-    // TODO serializers and deserializers should allow
-    // for application data in 'after' and 'before'
-
     let opSerializer = new OperationSerializer()
     let data = this.toJSON()
-    data.ops = this.ops.map(function (op) {
-      return opSerializer.serialize(op)
-    })
+    data.ops = this.ops.map(op => opSerializer.serialize(op))
     return JSON.stringify(data)
   }
 
@@ -198,9 +194,7 @@ class DocumentChange {
       sha: this.sha,
       // before state
       before: clone(this.before),
-      ops: map(this.ops, function (op) {
-        return op.toJSON()
-      }),
+      ops: this.ops.map(op => op.toJSON()),
       info: this.info,
       // after state
       after: clone(this.after)
@@ -221,32 +215,26 @@ class DocumentChange {
     }
     return data
   }
-}
 
-DocumentChange.deserialize = function (str) {
-  let opSerializer = new OperationSerializer()
-  let data = JSON.parse(str)
-  data.ops = data.ops.map(function (opData) {
-    return opSerializer.deserialize(opData)
-  })
-  if (data.before.selection) {
+  static deserialize (str) {
+    let opSerializer = new OperationSerializer()
+    let data = JSON.parse(str)
+    data.ops = data.ops.map(opData => opSerializer.deserialize(opData))
+    if (data.before.selection) {
+      data.before.selection = selectionFromJSON(data.before.selection)
+    }
+    if (data.after.selection) {
+      data.after.selection = selectionFromJSON(data.after.selection)
+    }
+    return new DocumentChange(data)
+  }
+
+  static fromJSON (data) {
+    // Don't write to original object on deserialization
+    data = cloneDeep(data)
+    data.ops = data.ops.map(opData => ObjectOperation.fromJSON(opData))
     data.before.selection = selectionFromJSON(data.before.selection)
-  }
-  if (data.after.selection) {
     data.after.selection = selectionFromJSON(data.after.selection)
+    return new DocumentChange(data)
   }
-  return new DocumentChange(data)
 }
-
-DocumentChange.fromJSON = function (data) {
-  // Don't write to original object on deserialization
-  let change = cloneDeep(data)
-  change.ops = data.ops.map(function (opData) {
-    return ObjectOperation.fromJSON(opData)
-  })
-  change.before.selection = selectionFromJSON(data.before.selection)
-  change.after.selection = selectionFromJSON(data.after.selection)
-  return new DocumentChange(change)
-}
-
-export default DocumentChange

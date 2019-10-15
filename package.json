@@ -1,6 +1,6 @@
 {
   "name": "substance",
-  "version": "1.0.3",
+  "version": "2.0.0-preview.2",
   "description": "",
   "repository": {
     "type": "git",
@@ -9,17 +9,13 @@
   "engines": {
     "node": ">=8"
   },
-  "main": "./dist/substance.cjs.js",
-  "jsnext:main": "./dist/substance.es.js",
-  "browser": "./dist/substance.js",
   "scripts": {
-    "prepack": "npm install && node make publish",
-    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"ui/**/*.js\" \"util/**/*.js\" index.es.js",
-    "dev": "node make test:browser:pure -w -s",
+    "prepack": "npm install && node make build",
+    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"editor/**/*.js\" \"util/**/*.js\" index.es.js",
     "pretest": "npm run lint",
-    "test": "node make test",
-    "test-and-cover": "npm run test && node make cover",
-    "docs": "node make docs -w -s",
+    "test": "node test/_runTests | tap-spec",
+    "cover": "node make cover",
+    "test-and-cover": "npm run test && npm run cover",
     "start": "node make dev -w -s"
   },
   "author": {
@@ -36,35 +32,47 @@
     "nth-check": "1.0.1"
   },
   "devDependencies": {
+    "esm": "^3.2.25",
+    "istanbul-lib-instrument": "^3.3.0",
     "karma": "1.x",
     "karma-chrome-launcher": "2.2.0",
     "karma-coverage": "1.1.2",
     "karma-firefox-launcher": "1.1.0",
     "karma-tap": "4.1.4",
     "karma-tape-reporter": "1.0.3",
+    "module-alias": "2.2.0",
+    "rollup": "^1.20.1",
+    "rollup-plugin-commonjs": "^10.0.2",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "standard": "^11.0.1",
-    "substance": "1.0.0-preview.19",
-    "substance-bundler": "0.25.6",
-    "substance-test": "0.13.1"
+    "substance-bundler": "0.27.1",
+    "substance-test": "0.15.0",
+    "tap-spec": "^5.0.0"
   },
   "files": [
-    "dist",
+    "commons",
+    "dar",
     "dom",
+    "editor",
     "model",
+    "styles",
     "test",
     "ui",
     "util",
-    "CHANGELOG.md",
-    "index.es.js",
-    "LICENSE.md",
-    "make.js",
-    "README.md",
-    "package.json",
-    "*.css",
     "vendor/css-select.js",
-    "vendor/domutils.js",
     "vendor/entities.js",
     "vendor/htmlparser2.js",
-    "vendor/lodash-es.js"
-  ]
+    "vendor/lodash-es.js",
+    "index.es.js",
+    "make.js",
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "README.md",
+    "*.css",
+    "package.json"
+  ],
+  "sideEffects": false,
+  "main": "index.js",
+  "esnext": "index.es.js"
 }

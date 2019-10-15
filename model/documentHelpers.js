@@ -165,7 +165,7 @@ export function deepDeleteNode (doc, node) {
   // 2. delete all annos belonging to text properties
   for (let prop of nodeSchema) {
     if (prop.isOwned()) {
-      let value = node[prop.name]
+      let value = node.get(prop.name)
       if (prop.isArray()) {
         let ids = value
         if (ids.length > 0) {
@@ -197,7 +197,7 @@ export function copyNode (node) {
     // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
     // or it is of type 'file'
     if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-      let val = node[prop.name]
+      let val = node.get(prop.name)
       nodes.push(_copyChildren(val))
     }
   }
@@ -477,7 +477,7 @@ export function getChildren (node) {
       let annos = doc.getAnnotations([id, name])
       forEach(annos, a => result.push(a))
     } else if (p.isReference() && p.isOwned()) {
-      let val = node[name]
+      let val = node.get(name)
       if (val) {
         if (p.isArray()) {
           result = result.concat(val.map(id => doc.get(id)))

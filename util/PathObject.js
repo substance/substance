@@ -1,6 +1,6 @@
 import isString from './isString'
 import isArray from './isArray'
-import { get, setWith, unset } from 'lodash-es'
+import { get, setWith, unset } from '../vendor/lodash-es'
 
 /*
   An object that can be access via path API.

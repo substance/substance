@@ -1,1 +1,1 @@
-export { capitalize as default } from 'lodash-es'
+export { capitalize as default } from '../vendor/lodash-es'

@@ -90,20 +90,29 @@ test('Document: node.find()', t => {
   t.end()
 })
 
-class Parent extends DocumentNode {}
-Parent.schema = {
-  type: 'parent',
-  child: CHILD('child')
+class Parent extends DocumentNode {
+  define () {
+    return {
+      type: 'parent',
+      child: CHILD('child')
+    }
+  }
 }
-class Child extends DocumentNode {}
-Child.schema = {
-  type: 'child',
-  foo: { type: 'string', default: '' }
+class Child extends DocumentNode {
+  define () {
+    return {
+      type: 'child',
+      foo: { type: 'string', default: '' }
+    }
+  }
 }
-class ParentWithChildren extends DocumentNode {}
-ParentWithChildren.schema = {
-  type: 'parent-with-children',
-  children: CHILDREN('child')
+class ParentWithChildren extends DocumentNode {
+  define () {
+    return {
+      type: 'parent-with-children',
+      children: CHILDREN('child')
+    }
+  }
 }
 
 test('Document: resolve() a single id', t => {

@@ -59,7 +59,7 @@ function ClipboardTests (memory) {
   function test (title, fn) {
     _test('Clipboard' + (memory ? ' [memory]' : '') + ': ' + title, fn, {
       before () {
-        if (memory) platform.inBrowser = false
+        if (memory) platform.values.inBrowser = false
       },
       after () {
         platform._reset()
@@ -359,16 +359,18 @@ function ClipboardTests (memory) {
 
 function _fixtureTest (t, html, impl, forceWindows) {
   let { editorSession, clipboard, doc, context } = _setup(t, simple)
-  let _isWindows = platform.isWindows
-  platform.isWindows = Boolean(forceWindows)
+  platform.values.isWindows = Boolean(forceWindows)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
     containerPath: BODY_CONTENT_PATH
   })
-  impl(doc, clipboard, context)
-  platform.isWindows = _isWindows
+  try {
+    impl(doc, clipboard, context)
+  } finally {
+    platform._reset()
+  }
 }
 
 function _emptyFixtureTest (t, html, impl, forceWindows) {
@@ -489,20 +491,20 @@ function _extendedTest (t, html, forceWindows) {
     // Get annotations for range with string, emphasis and superscript annotations
     annos = doc.getIndex('annotations').get(path, 17, 18).sort(compare)
     t.equal(annos.length, 3, 'There should be three annotations within given range.')
-    t.isNotNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
-    t.isNotNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
-    t.isNotNil(find(annos, { type: SUPERSCRIPT_TYPE }), 'Should contain superscript annotation.')
+    t.notNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
+    t.notNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
+    t.notNil(find(annos, { type: SUPERSCRIPT_TYPE }), 'Should contain superscript annotation.')
 
     // Get annotations for range with string, emphasis and subscript annotations
     annos = doc.getIndex('annotations').get(path, 22, 23).sort(compare)
-    t.isNotNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
-    t.isNotNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
-    t.isNotNil(find(annos, { type: SUBSCRIPT_TYPE }), 'Should contain subscript annotation.')
+    t.notNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
+    t.notNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
+    t.notNil(find(annos, { type: SUBSCRIPT_TYPE }), 'Should contain subscript annotation.')
 
     // Get annotations for range with string and emphasis
     annos = doc.getIndex('annotations').get(path, 27, 29).sort(compare)
-    t.isNotNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
-    t.isNotNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
+    t.notNil(find(annos, { type: EMPHASIS_TYPE }), 'Should contain emphasis annotation.')
+    t.notNil(find(annos, { type: STRONG_TYPE }), 'Should contain strong annotation.')
 
     t.end()
   }, forceWindows)

@@ -1,0 +1,7 @@
+export const INCREMENT_VERSION = Symbol('incrementVersion')
+export const ADD_NODE = Symbol('addNode')
+export const ADD_PROPERTY = Symbol('addProperty')
+export const ADD_CHILD_TYPE = Symbol('addChildType')
+export const BUILT_INS = new Set(['@node', '@text', '@annotation'])
+export const ATTRIBUTE_PROPERTY_TYPES = new Set(['integer', 'number', 'boolean', 'string', 'string-array', 'one', 'many'])
+export const CHILDREN_PROPERTY_TYPES = new Set(['child', 'children', 'text', 'container'])

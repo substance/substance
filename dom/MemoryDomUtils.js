@@ -1,7 +1,7 @@
 import ElementType from 'domelementtype'
 
 /*
-  EXPERIMENTAL:
+  ATTENTION:
 
   We found out that using the encoder from `entities` module
   is doing too much
@@ -11,9 +11,8 @@ import ElementType from 'domelementtype'
   - in attributes we only need to escape '"'
   - in textContent we need to escape '<' and '&'
 
-  TODO: this is copy and pasted from the bundled entities vendor file
+  Note: this is copy and pasted from the bundled entities vendor file.
 */
-// import entities from 'entities';
 
 const _encodeXMLContent = ((obj) => {
   let invObj = getInverseObj(obj)

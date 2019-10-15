@@ -1,5 +1,4 @@
 import EditingInterface from './EditingInterface'
-import DocumentChange from './DocumentChange'
 
 export default class ChangeRecorder extends EditingInterface {
   constructor (doc) {
@@ -10,7 +9,7 @@ export default class ChangeRecorder extends EditingInterface {
     const doc = this.getDocument()
     const ops = doc._ops.slice()
     doc._ops.length = 0
-    let change = new DocumentChange(ops, {}, {})
+    let change = doc._createDocumentChange(ops, {}, {})
     change._extractInformation(doc)
     return change
   }

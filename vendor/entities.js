@@ -3,7 +3,7 @@ var apos = "'";
 var gt = ">";
 var lt = "<";
 var quot = "\"";
-var xmlJSON = {
+var xml = {
 	amp: amp,
 	apos: apos,
 	gt: gt,
@@ -11,13 +11,13 @@ var xmlJSON = {
 	quot: quot
 };
 
-var xml = /*#__PURE__*/Object.freeze({
+var xml$1 = /*#__PURE__*/Object.freeze({
 	amp: amp,
 	apos: apos,
 	gt: gt,
 	lt: lt,
 	quot: quot,
-	default: xmlJSON
+	'default': xml
 });
 
 var Aacute = "Á";
@@ -2143,7 +2143,7 @@ var Zscr = "𝒵";
 var zscr = "𝓏";
 var zwj = "‍";
 var zwnj = "‌";
-var entitiesJSON = {
+var entities = {
 	Aacute: Aacute,
 	aacute: aacute,
 	Abreve: Abreve,
@@ -2882,6 +2882,7 @@ var entitiesJSON = {
 	imped: imped,
 	Implies: Implies,
 	incare: incare,
+	"in": "∈",
 	infin: infin,
 	infintie: infintie,
 	inodot: inodot,
@@ -3169,6 +3170,7 @@ var entitiesJSON = {
 	male: male,
 	malt: malt,
 	maltese: maltese,
+	"Map": "⤅",
 	map: map,
 	mapsto: mapsto,
 	mapstodown: mapstodown,
@@ -4266,12 +4268,10 @@ var entitiesJSON = {
 	Zscr: Zscr,
 	zscr: zscr,
 	zwj: zwj,
-	zwnj: zwnj,
-	"in": "∈",
-	"Map": "⤅"
+	zwnj: zwnj
 };
 
-var entities = /*#__PURE__*/Object.freeze({
+var entities$1 = /*#__PURE__*/Object.freeze({
 	Aacute: Aacute,
 	aacute: aacute,
 	Abreve: Abreve,
@@ -6395,12 +6395,16 @@ var entities = /*#__PURE__*/Object.freeze({
 	zscr: zscr,
 	zwj: zwj,
 	zwnj: zwnj,
-	default: entitiesJSON
+	'default': entities
 });
 
-var require$$0 = ( xml && xmlJSON ) || xml;
+function getCjsExportFromNamespace (n) {
+	return n && n['default'] || n;
+}
 
-var require$$1 = ( entities && entitiesJSON ) || entities;
+var require$$0 = getCjsExportFromNamespace(xml$1);
+
+var require$$1 = getCjsExportFromNamespace(entities$1);
 
 var inverseXML = getInverseObj(require$$0),
     xmlReplacer = getInverseReplacer(inverseXML);
@@ -6431,7 +6435,7 @@ function getInverseReplacer(inverse){
 		}
 	});
 
-	
+	//TODO add ranges
 	multiple.unshift("[" + single.join("") + "]");
 
 	return new RegExp(multiple.join("|"), "g");
@@ -6445,7 +6449,7 @@ function singleCharReplacer(c){
 }
 
 function astralReplacer(c){
-	
+	// http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
 	var high = c.charCodeAt(0);
 	var low  = c.charCodeAt(1);
 	var codePoint = (high - 0xD800) * 0x400 + low - 0xDC00 + 0x10000;
@@ -6514,14 +6518,14 @@ var decode = {
 };
 
 var decode$1 = /*#__PURE__*/Object.freeze({
-	default: decode
+	'default': decode
 });
 
-var decodeMap = ( decode$1 && decode ) || decode$1;
+var decodeMap = getCjsExportFromNamespace(decode$1);
 
 var decode_codepoint = decodeCodePoint;
 
-
+// modified version of https://github.com/mathiasbynens/he/blob/master/src/he.js#L94-L119
 function decodeCodePoint(codePoint){
 
 	if((codePoint >= 0xD800 && codePoint <= 0xDFFF) || codePoint > 0x10FFFF){
@@ -6650,7 +6654,7 @@ var Yacute$1 = "Ý";
 var yacute$1 = "ý";
 var yen$1 = "¥";
 var yuml$1 = "ÿ";
-var legacyJSON = {
+var legacy = {
 	Aacute: Aacute$1,
 	aacute: aacute$1,
 	Acirc: Acirc$1,
@@ -6759,12 +6763,6 @@ var legacyJSON = {
 	yuml: yuml$1
 };
 
-var _entities = {
-  encodeXML: encode.XML,
-  decodeCodepoint: decode_codepoint,
-  entitiesJSON,
-  legacyJSON,
-  xmlJSON
-}
+const encodeXML = encode.XML;
 
-export default _entities;
+export { decode_codepoint, encodeXML, entities, legacy, xml };

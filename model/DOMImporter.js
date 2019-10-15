@@ -165,7 +165,7 @@ export default class DOMImporter {
   /**
    * Converts a single HTML element and creates a node in the current document.
    *
-   * @param {ui/DOMElement} el the HTML element
+   * @param {DOMElement} el the HTML element
    * @returns {object} the created node as JSON
    */
   convertElement (el) {
@@ -268,7 +268,7 @@ export default class DOMImporter {
   /**
    * Converts the given element as plain-text.
    *
-   * @param {ui/DOMElement} el
+   * @param {DOMElement} el
    * @returns {String} The plain text
    */
   plainText (el) {
@@ -649,6 +649,10 @@ export default class DOMImporter {
   _trimRight (text) {
     return text.replace(WS_RIGHT, '')
   }
+
+  static get State () { return DOMImporterState }
+
+  static get INVISIBLE_CHARACTER () { return INVISIBLE_CHARACTER }
 }
 
 class DOMImporterState {
@@ -689,7 +693,3 @@ class DOMImporterState {
     return last(this.contexts)
   }
 }
-
-DOMImporter.State = DOMImporterState
-
-DOMImporter.INVISIBLE_CHARACTER = INVISIBLE_CHARACTER

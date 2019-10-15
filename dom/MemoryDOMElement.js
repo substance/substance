@@ -6,7 +6,7 @@ import last from '../util/last'
 import inBrowser from '../util/inBrowser'
 import ElementType from 'domelementtype'
 import cssSelect from '../vendor/css-select'
-import DomUtils from '../vendor/domutils'
+import DomUtils from './domutils'
 import DOMElement from './DOMElement'
 import parseMarkup from './parseMarkup'
 
@@ -69,6 +69,7 @@ export default class MemoryDOMElement extends DOMElement {
         this.format = format
         if (!format) throw new Error("'format' is mandatory.")
         this.childNodes = args.children || args.childNodes || []
+        this._index = null
         switch (format) {
           case 'xml':
             this.contentType = 'application/xml'
@@ -179,6 +180,10 @@ export default class MemoryDOMElement extends DOMElement {
       value = String(value)
       // Note: keeping the Set version of classes and styles in sync
       switch (name) {
+        case 'id': {
+          this._invalidateIndex()
+          break
+        }
         case 'class':
           this.classes = new Set()
           parseClasses(this.classes, value)
@@ -201,6 +206,9 @@ export default class MemoryDOMElement extends DOMElement {
   removeAttribute (name) {
     if (this.attributes) {
       switch (name) {
+        case 'id':
+          this._invalidateIndex()
+          break
         case 'class':
           this.classes = new Set()
           break
@@ -358,6 +366,16 @@ export default class MemoryDOMElement extends DOMElement {
     return cssSelect.is(this, cssSelector, { xmlMode: this._isXML() })
   }
 
+  // TODO: it would be nice if we could use an index here
+  // however,
+  getElementById (id) {
+    let doc = this.getOwnerDocument()
+    if (!doc._index) {
+      doc._createIndex()
+    }
+    return doc._index.get(id)
+  }
+
   find (cssSelector) {
     return cssSelect.selectOne(cssSelector, this, { xmlMode: this._isXML() })
   }
@@ -473,6 +491,7 @@ export default class MemoryDOMElement extends DOMElement {
     if (this.childNodes && !isNil(child)) {
       child = this._normalizeChild(child)
       if (!child) return this
+      if (child.id) this._invalidateIndex()
       DomUtils.appendChild(this, child)
       child.ownerDocument = this.getOwnerDocument()
     }
@@ -481,6 +500,7 @@ export default class MemoryDOMElement extends DOMElement {
 
   removeChild (child) {
     if (child.parentNode === this) {
+      if (child.id) this._invalidateIndex()
       child.remove()
     }
   }
@@ -488,6 +508,7 @@ export default class MemoryDOMElement extends DOMElement {
   insertAt (pos, child) {
     child = this._normalizeChild(child)
     if (!child) return this
+    if (child.id) this._invalidateIndex()
     let childNodes = this.childNodes
     if (childNodes) {
       // NOTE: manipulating htmlparser's internal children array
@@ -502,6 +523,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   insertBefore (newChild, before) {
+    if (newChild.id) this._invalidateIndex()
     if (isNil(before)) {
       return this.appendChild(newChild)
     } else if (this.childNodes) {
@@ -520,12 +542,14 @@ export default class MemoryDOMElement extends DOMElement {
     let childNodes = this.childNodes
     if (childNodes) {
       let child = childNodes[pos]
+      if (child.id) this._invalidateIndex()
       child.remove()
     }
     return this
   }
 
   empty () {
+    this._invalidateIndex()
     let childNodes = this.childNodes
     if (childNodes) {
       childNodes.forEach((child) => {
@@ -533,15 +557,18 @@ export default class MemoryDOMElement extends DOMElement {
       })
       childNodes.length = 0
     }
+    this._invalidateIndex()
     return this
   }
 
   remove () {
+    if (this.id) this._invalidateIndex()
     DomUtils.removeElement(this)
     return this
   }
 
   replaceChild (oldChild, newChild) {
+    if (oldChild.id || newChild.id) this._invalidateIndex()
     if (oldChild.parent === this) {
       oldChild.replaceWith(newChild)
     }
@@ -549,6 +576,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   replaceWith (newEl) {
+    if (this.id || newEl.id) this._invalidateIndex()
     newEl = this._normalizeChild(newEl)
     DomUtils.replaceElement(this, newEl)
     newEl.ownerDocument = this.getOwnerDocument()
@@ -659,6 +687,15 @@ export default class MemoryDOMElement extends DOMElement {
 
   _isXML () {
     return this.getFormat() === 'xml'
+  }
+
+  _invalidateIndex () {
+    this.getOwnerDocument()._index = null
+  }
+
+  _createIndex () {
+    const elementsWithId = this.getOwnerDocument().findAll('[id]')
+    this._index = new Map(elementsWithId.map(el => [el.id, el]))
   }
 
   // TODO: do we really need this?

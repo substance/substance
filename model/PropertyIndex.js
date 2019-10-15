@@ -1,9 +1,8 @@
 import isArray from '../util/isArray'
-import forEach from '../util/forEach'
 import TreeIndex from '../util/TreeIndex'
 import NodeIndex from './NodeIndex'
 
-class PropertyIndex extends NodeIndex {
+export default class PropertyIndex extends NodeIndex {
   constructor (property) {
     super()
 
@@ -56,13 +55,13 @@ class PropertyIndex extends NodeIndex {
     @param {Node} node
    */
   create (node) {
-    var values = node[this._property]
+    let values = node.get(this._property)
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function (value) {
+    values.forEach(value => {
       this.index.set([value, node.id], node)
-    }.bind(this))
+    })
   }
 
   /**
@@ -74,13 +73,13 @@ class PropertyIndex extends NodeIndex {
    * @param {model/data/Node} node
    */
   delete (node) {
-    var values = node[this._property]
+    let values = node.get(this._property)
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function (value) {
+    values.forEach(value => {
       this.index.delete([value, node.id])
-    }.bind(this))
+    })
   }
 
   /**
@@ -93,20 +92,20 @@ class PropertyIndex extends NodeIndex {
    */
   update (node, path, newValue, oldValue) {
     if (!this.select(node) || path[1] !== this._property) return
-    var values = oldValue
+    let values = oldValue
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function (value) {
+    values.forEach(value => {
       this.index.delete([value, node.id])
-    }.bind(this))
+    })
     values = newValue
     if (!isArray(values)) {
       values = [values]
     }
-    forEach(values, function (value) {
+    values.forEach(value => {
       this.index.set([value, node.id], node)
-    }.bind(this))
+    })
   }
 
   set (node, path, newValue, oldValue) {
@@ -114,12 +113,10 @@ class PropertyIndex extends NodeIndex {
   }
 
   _initialize (data) {
-    forEach(data.getNodes(), function (node) {
+    for (let node of data.getNodes().values()) {
       if (this.select(node)) {
         this.create(node)
       }
-    }.bind(this))
+    }
   }
 }
-
-export default PropertyIndex

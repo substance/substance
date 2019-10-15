@@ -8,32 +8,32 @@ import twoParagraphs from './fixture/twoParagraphs'
 
 test('InlineNode: InlineNodes should be not selected when selection is null', t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let nodes = editor.findAll('.sc-inline-node')
+  let comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection(null)
-  nodes.forEach(function (node) {
-    t.ok(node.isNotSelected(), "node '" + node.getId() + "' should not be selected.")
+  comps.forEach(comp => {
+    t.ok(comp.isNotSelected(), "node '" + comp.getId() + "' should not be selected.")
   })
   t.end()
 })
 
 test('InlineNode: InlineNodes should be not selected when selection is somewhere else', t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let nodes = editor.findAll('.sc-inline-node')
+  let comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 5,
     surfaceId: 'body'
   })
-  nodes.forEach(function (node) {
-    t.ok(node.isNotSelected(), "node '" + node.getId() + "' should not be selected.")
+  comps.forEach(comp => {
+    t.ok(comp.isNotSelected(), "node '" + comp.getId() + "' should not be selected.")
   })
   t.end()
 })
 
 test("InlineNode: InlineNode should be 'selected' with when the inline node is selected", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let nodes = editor.findAll('.sc-inline-node')
+  let comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -45,16 +45,16 @@ test("InlineNode: InlineNode should be 'selected' with when the inline node is s
     'body/in1': 'selected',
     'body/in2': undefined
   }
-  nodes.forEach(function (node) {
-    var id = node.getId()
-    t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
+  comps.forEach(comp => {
+    var id = comp.getId()
+    t.equal(comp.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
   })
   t.end()
 })
 
 test("InlineNode: InlineNode should be 'co-selected' when selection is spanning an inline node", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let nodes = editor.findAll('.sc-inline-node')
+  let comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -66,16 +66,16 @@ test("InlineNode: InlineNode should be 'co-selected' when selection is spanning 
     'body/in1': 'co-selected',
     'body/in2': undefined
   }
-  nodes.forEach(function (node) {
-    var id = node.getId()
-    t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
+  comps.forEach(comp => {
+    var id = comp.getId()
+    t.equal(comp.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
   })
   t.end()
 })
 
 test("InlineNode: InlineNode should be 'focused' when having the selection", t => {
   let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let nodes = editor.findAll('.sc-inline-node')
+  let comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['in1', 'content'],
@@ -87,16 +87,16 @@ test("InlineNode: InlineNode should be 'focused' when having the selection", t =
     'body/in1': 'focused',
     'body/in2': undefined
   }
-  nodes.forEach(function (node) {
-    var id = node.getId()
-    t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
+  comps.forEach(comp => {
+    var id = comp.getId()
+    t.equal(comp.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
   })
   t.end()
 })
 
 test("InlineNode: InlineNode should be 'co-focused' when a nested inline node has the selection", t => {
   let { editorSession, editor } = setupEditor(t, nestedInlineNode)
-  let nodes = editor.findAll('.sc-inline-node')
+  let comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['in2', 'content'],
@@ -107,9 +107,9 @@ test("InlineNode: InlineNode should be 'co-focused' when a nested inline node ha
     'body/in1': 'co-focused',
     'body/in1/in1.content/in2': 'focused'
   }
-  nodes.forEach(node => {
-    let id = node.getId()
-    t.equal(node.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
+  comps.forEach(comp => {
+    let id = comp.getId()
+    t.equal(comp.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
   })
   t.end()
 })

@@ -15,11 +15,14 @@ const cssSelectAdapter = new DocumentNodeSelectAdapter()
   The following example shows how a new node type is defined.
 
   ```js
-  class Todo extends DocumentNode {}
-  Todo.schema = {
-    type: 'todo',
-    content: 'text',
-    done: { type: 'bool', default: false }
+  class Todo extends DocumentNode {
+    define () {
+      return {
+        type: 'todo',
+        content: 'text',
+        done: { type: 'bool', default: false }
+      }
+    }
   }
   ```
 
@@ -57,7 +60,7 @@ export default class DocumentNode extends DataNode {
   }
 
   resolve (propName) {
-    let val = this[propName]
+    let val = this.get(propName)
     if (val) {
       let doc = this.getDocument()
       if (isArray(val)) {
@@ -68,15 +71,6 @@ export default class DocumentNode extends DataNode {
     }
   }
 
-  /**
-   * Set the value of a node's property
-   *
-   * > Attention: setting a node's property directly is usually not appropriate, such as `node.content = 'abc'`
-   * > because this does not use the document's manipulation API. This is necessary to recorde an operation, e.g. during a transaction.
-   *
-   * @param {string} propName
-   * @param {any} value
-   */
   set (propName, value) {
     this.getDocument().set([this.id, propName], value)
   }

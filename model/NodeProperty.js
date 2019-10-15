@@ -1,5 +1,6 @@
 import isArray from '../util/isArray'
 import last from '../util/last'
+import _isDefined from '../util/_isDefined'
 import Coordinate from './Coordinate'
 
 /*
@@ -27,7 +28,7 @@ export default class NodeProperty {
   }
 
   isText () {
-    return Boolean(this.definition._isText)
+    return this.definition.reflectionType === 'text'
   }
 
   isContainer () {
@@ -47,7 +48,7 @@ export default class NodeProperty {
   }
 
   hasDefault () {
-    return this.definition.hasOwnProperty('default')
+    return _isDefined(this.definition.default)
   }
 
   getDefault () {
@@ -76,6 +77,10 @@ export default class NodeProperty {
 
   get type () {
     return this.definition.type
+  }
+
+  get reflectionType () {
+    return this.definition.reflectionType || this.definition.type
   }
 
   get targetTypes () {

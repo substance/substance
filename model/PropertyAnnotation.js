@@ -44,11 +44,13 @@ export default class PropertyAnnotation extends AnnotationMixin(DocumentNode) {
   static isPropertyAnnotation () { return true }
 
   static get autoExpandRight () { return true }
-}
 
-PropertyAnnotation.schema = {
-  type: '@annotation',
-  // this is only used when an annotation is used 'stand-alone'
-  // i.e. not attached to a property
-  _content: { type: 'string', optional: true }
+  define () {
+    return {
+      type: '@annotation',
+      // this is only used when an annotation is used 'stand-alone'
+      // i.e. not attached to a property
+      _content: { type: 'string', optional: true }
+    }
+  }
 }

@@ -3,6 +3,8 @@ import isArray from './isArray'
 
 export default function isEqual (a, b) {
   if (a === b) return true
+  if (!a || !b) return false
+  if (!a.constructor || !b.constructor) return false
   if (isArray(a) && isArray(b)) {
     if (a.length !== b.length) return false
     for (let i = 0; i < a.length; i++) {
@@ -20,5 +22,6 @@ export default function isEqual (a, b) {
     }
     return true
   }
-  return false
+  // at last try loose equality check
+  return a == b // eslint-disable-line
 }

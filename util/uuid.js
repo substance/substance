@@ -17,7 +17,7 @@ Dual licensed under the MIT and GPL licenses.
  * @return A generated uuid.
  */
 export default function uuid (prefix, len) {
-  if (substanceGlobals.DETERMINISTIC_UUID) {
+  if (substanceGlobals && substanceGlobals.DETERMINISTIC_UUID) {
     return deterministicId(prefix)
   }
 

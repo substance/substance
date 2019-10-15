@@ -39,7 +39,7 @@ export default class AnnotationIndex extends DocumentIndex {
 
   // TODO: use object interface? so we can combine filters (path and type)
   get (path, start, end, type) {
-    var annotations
+    let annotations
     if (isString(path) || path.length === 1) {
       annotations = this.byPath.getAll(path) || {}
     } else {
@@ -81,17 +81,17 @@ export default class AnnotationIndex extends DocumentIndex {
       this.create(node)
     }
   }
-}
 
-AnnotationIndex.filterByRange = function (start, end) {
-  return function (anno) {
-    var aStart = anno.start.offset
-    var aEnd = anno.end.offset
-    var overlap = (aEnd >= start)
-    // Note: it is allowed to omit the end part
-    if (isNumber(end)) {
-      overlap = overlap && (aStart <= end)
+  static filterByRange (start, end) {
+    return function (anno) {
+      var aStart = anno.start.offset
+      var aEnd = anno.end.offset
+      var overlap = (aEnd >= start)
+      // Note: it is allowed to omit the end part
+      if (isNumber(end)) {
+        overlap = overlap && (aStart <= end)
+      }
+      return overlap
     }
-    return overlap
   }
 }

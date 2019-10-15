@@ -1,1 +1,1 @@
-export { pick as default } from 'lodash-es'
+export { pick as default } from '../vendor/lodash-es'

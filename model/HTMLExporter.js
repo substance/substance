@@ -63,7 +63,7 @@ const defaultBlockConverter = {
       if (name === 'id' || name === 'type') continue
       // using RDFa like attributes
       let propEl = converter.$$('div').attr('property', name)
-      let value = node[name]
+      let value = node.get(name)
       if (prop.isText()) {
         propEl.append(converter.annotatedText([node.id, name]))
       } else if (prop.isReference()) {

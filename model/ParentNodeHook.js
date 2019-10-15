@@ -47,7 +47,7 @@ export default class ParentNodeHook {
         if (hasOwnedProperties) {
           for (let p of nodeSchema.getOwnedProperties()) {
             let isChildren = p.isArray()
-            let refs = node[p.name]
+            let refs = node.get(p.name)
             if (refs) {
               this._setParent(node, refs, p.name, isChildren)
             }
@@ -130,7 +130,7 @@ export default class ParentNodeHook {
     if (entry) {
       let { parent, property, isChildren } = entry
       this._setParentAndXpath(parent, child, property)
-      if (isChildren) {
+      if (parent && isChildren) {
         child._xpath.pos = parent[property].indexOf(child.id)
       }
       delete this.parents[child.id]
@@ -172,8 +172,8 @@ export default class ParentNodeHook {
     let annoParent = doc.get(path[0])
     this._setParent(annoParent, anno.id, path[1])
   }
-}
 
-ParentNodeHook.register = function (doc) {
-  return new ParentNodeHook(doc)
+  static register (doc) {
+    return new ParentNodeHook(doc)
+  }
 }

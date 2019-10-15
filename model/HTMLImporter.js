@@ -32,7 +32,7 @@ export default class HTMLImporter extends DOMImporter {
    * things go to within the document.
    *
    * @abstract
-   * @param {ui/DOMElement} documentEl the document element.
+   * @param {DOMElement} documentEl the document element.
    *
    * @example
    *

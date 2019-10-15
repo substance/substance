@@ -4,10 +4,11 @@ import isPlainObject from '../util/isPlainObject'
 import forEach from '../util/forEach'
 import last from '../util/last'
 import uuid from '../util/uuid'
+import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
-import PropertyIndex from './PropertyIndex'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
+import TypeIndex from './TypeIndex'
 import DocumentChange from './DocumentChange'
 import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
@@ -68,7 +69,7 @@ export default class Document extends EventEmitter {
     this.nodeFactory = new DocumentNodeFactory(this)
     this.data = new IncrementalData(this.schema, this.nodeFactory)
     // all by type
-    this.addIndex('type', new PropertyIndex('type'))
+    this.addIndex('type', new TypeIndex('type'))
     // special index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
     // TODO: these are only necessary if there is a container annotation
@@ -164,41 +165,6 @@ export default class Document extends EventEmitter {
     }
   }
 
-  /**
-    Creates a context like a transaction for importing nodes.
-    This is important in presence of cyclic dependencies.
-    Indexes will not be updated during the import but will afterwards
-    when all nodes have been created.
-
-    @private
-    This is experimental.
-
-    @example
-
-    Consider the following example from our documentation generator:
-    We want to have a member index, which keeps track of members of namespaces, modules, and classes.
-    grouped by type, and in the case of classes, also grouped by 'instance' and 'class'.
-
-    ```
-    ui
-      - class
-        - ui/Component
-    ui/Component
-      - class
-        - method
-          - mount
-      - instance
-        - method
-          - render
-    ```
-
-    To decide which grouping to apply, the parent type of a member needs to be considered.
-    Using an incremental approach, this leads to the problem, that the parent must exist
-    before the child. At the same time, e.g. when deserializing, the parent has already
-    a field with all children ids. This cyclic dependency is best address, by turning
-    off all listeners (such as indexes) until the data is consistent.
-
-  */
   import (importer) {
     try {
       this.data._stopIndexing()
@@ -349,7 +315,7 @@ export default class Document extends EventEmitter {
   updateNode (id, newProps) {
     let node = this.get(id)
     forEach(newProps, (value, key) => {
-      if (!isEqual(node[key], newProps[key])) {
+      if (!isEqual(node.get(key), value)) {
         this.set([id, key], value)
       }
     })
@@ -424,7 +390,7 @@ export default class Document extends EventEmitter {
           if (isNil(data.endOffset)) {
             data.endOffset = data.startOffset
           }
-          if (!data.hasOwnProperty('reverse')) {
+          if (!_isDefined(data.reverse)) {
             if (data.startOffset > data.endOffset) {
               [data.startOffset, data.endOffset] = [data.endOffset, data.startOffset]
               data.reverse = !data.reverse
@@ -447,7 +413,7 @@ export default class Document extends EventEmitter {
           if (!ids) throw new Error('Can not create ContainerSelection: container "' + containerPath + '" does not exist.')
           let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset, containerPath })
           let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset, containerPath })
-          if (!data.hasOwnProperty('reverse')) {
+          if (!_isDefined(data.reverse)) {
             if (compareCoordinates(this, containerPath, start, end) > 0) {
               [start, end] = [end, start]
               data.reverse = true
@@ -520,7 +486,7 @@ export default class Document extends EventEmitter {
     // TODO: we should rethink the exception with annotations here
     // in XML the annotation would be a child of the paragraph
     // and thus should be created before hand. However our annotation indexes need the annotation target to exist.
-    let nodes = Object.values(doc.getNodes())
+    let nodes = Array.from(doc.getNodes().values())
     let levels = {}
     let visited = new Set()
     nodes.forEach(n => {
@@ -622,8 +588,12 @@ export default class Document extends EventEmitter {
     return this.data.update(path, diff)
   }
 
+  _createDocumentChange (ops, before, after, info) {
+    return new DocumentChange(ops, before, after, info)
+  }
+
   _emitInternalChange (op) {
-    const change = new DocumentChange([op], {}, {})
+    const change = this._createDocumentChange([op], {}, {})
     change._extractInformation(this)
     this.emit('document:changed:internal', change, this)
   }

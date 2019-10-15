@@ -2,10 +2,13 @@ import { test } from 'substance-test'
 import { Node, ENUM } from 'substance'
 
 test('NodeSchema: properties of type ["object"] (#1169)', t => {
-  class MyNode extends Node {}
-  MyNode.schema = {
-    type: 'my-node',
-    content: { type: ['object'], default: [] }
+  class MyNode extends Node {
+    define () {
+      return {
+        type: 'my-node',
+        content: { type: ['object'], default: [] }
+      }
+    }
   }
   let property = MyNode.schema.getProperty('content')
   // props with default values are optional
@@ -22,10 +25,13 @@ test('NodeSchema: properties of type ["object"] (#1169)', t => {
 })
 
 test('NodeSchema: reference property with multiple target types', t => {
-  class MyNode extends Node {}
-  MyNode.schema = {
-    type: 'my-node',
-    content: { type: ['foo', 'bar'], default: [] }
+  class MyNode extends Node {
+    define () {
+      return {
+        type: 'my-node',
+        content: { type: ['foo', 'bar'], default: [] }
+      }
+    }
   }
   let property = MyNode.schema.getProperty('content')
   // props with default values are optional
@@ -36,10 +42,13 @@ test('NodeSchema: reference property with multiple target types', t => {
 })
 
 test('NodeSchema: reference property with multiple target types (canonical notation)', t => {
-  class MyNode extends Node {}
-  MyNode.schema = {
-    type: 'my-node',
-    content: { type: ['array', 'id'], targetTypes: ['foo', 'bar'], default: [] }
+  class MyNode extends Node {
+    define () {
+      return {
+        type: 'my-node',
+        content: { type: ['array', 'id'], targetTypes: ['foo', 'bar'], default: [] }
+      }
+    }
   }
   let property = MyNode.schema.getProperty('content')
   // props with default values are optional
@@ -63,10 +72,13 @@ test('NodeSchema: property with invalid multi-type', t => {
 })
 
 test('NodeSchema: property of node type should be considered a reference', t => {
-  class MyNode extends Node {}
-  MyNode.schema = {
-    type: 'my-node',
-    foo: { type: 'foo' }
+  class MyNode extends Node {
+    define () {
+      return {
+        type: 'my-node',
+        foo: { type: 'foo' }
+      }
+    }
   }
   let property = MyNode.schema.getProperty('foo')
   // props with default values are optional
@@ -77,15 +89,21 @@ test('NodeSchema: property of node type should be considered a reference', t => 
 })
 
 test('NodeSchema: Node inheritance', t => {
-  class ParentNode extends Node {}
-  ParentNode.schema = {
-    type: 'parent',
-    foo: 'string'
+  class ParentNode extends Node {
+    define () {
+      return {
+        type: 'parent',
+        foo: 'string'
+      }
+    }
   }
-  class ChildNode extends ParentNode {}
-  ChildNode.schema = {
-    type: 'child',
-    bar: 'number'
+  class ChildNode extends ParentNode {
+    define () {
+      return {
+        type: 'child',
+        bar: 'number'
+      }
+    }
   }
   let schema = ChildNode.schema
   t.ok(Node.isInstanceOf(ChildNode, 'parent'), "'child' should be considered an instance of 'parent'")
@@ -95,10 +113,13 @@ test('NodeSchema: Node inheritance', t => {
 })
 
 test('NodeSchema: enum type', t => {
-  class MyNode extends Node { }
-  MyNode.schema = {
-    type: 'mynode',
-    foo: ENUM(['a', 'b', 'c'])
+  class MyNode extends Node {
+    define () {
+      return {
+        type: 'mynode',
+        foo: ENUM(['a', 'b', 'c'])
+      }
+    }
   }
   let schema = MyNode.schema
   let foo = schema.getProperty('foo')

@@ -39,3 +39,9 @@ import './TreeIndex.test'
 import './utils.test'
 import './XMLExporter.test'
 import './XMLImporter.test'
+
+import { substanceGlobals } from 'substance'
+// throw in failed asserts
+substanceGlobals.ASSERTS = true
+// enable this to see more info from the RenderingEngine
+// substanceGlobals.VERBOSE_RENDERING_ENGINE = true

@@ -54,7 +54,7 @@ Primitive type operations:
     ```
 */
 
-class OperationSerializer {
+export default class OperationSerializer {
   constructor () {
     this.SEPARATOR = '\t'
   }
@@ -258,8 +258,6 @@ class Tokenizer {
     var str = this.getString()
     return str.split('.')
   }
+
+  static get Tokenizer () { return Tokenizer }
 }
-
-OperationSerializer.Tokenizer = Tokenizer
-
-export default OperationSerializer
