@@ -24,18 +24,18 @@ export default function renderMenu (requester, menuNameOrSpec, commandStates) {
   const context = { type: spec.type, size: spec.size, style: spec.style }
   switch (spec.type) {
     case 'toolbar': {
-      return $$(HorizontalStack, {}, spec.items.map(itemSpec => renderItem(requester, config, itemSpec, commandStates, context)))
+      return $$(HorizontalStack, {}, spec.items.map(itemSpec => _renderItem(requester, config, itemSpec, commandStates, context)))
     }
     default:
       if (spec.items) {
-        return $$('div', {}, spec.items.map(itemSpec => renderItem(requester, config, itemSpec, commandStates, context)))
+        return $$('div', {}, spec.items.map(itemSpec => _renderItem(requester, config, itemSpec, commandStates, context)))
       } else {
-        return renderItem(requester, config, spec, commandStates)
+        return _renderItem(requester, config, spec, commandStates)
       }
   }
 }
 
-function renderItem (requester, config, itemSpec, commandStates, context = {}) {
+function _renderItem (requester, config, itemSpec, commandStates = {}, context = {}) {
   // Note: commands we define using a syntax like
   // { command: 'toggle-strong', icon: 'bold' }
   // i.e. no type, but with command given
