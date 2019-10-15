@@ -191,16 +191,9 @@ function _createPropertyChecker (nodeSpec, propName, propSpec) {
     }
     case 'child': {
       return _elementChecker(nodeSpec, propName, (state, el) => {
-        const children = el.getChildren()
         const errors = []
-        if (children.length !== 1) {
-          errors.push(`Expected exactly one child. Found ${children.length}.`)
-        }
-        // Note even if mutliple children are given, we check every one of them
-        // to receive more verbose information
-        for (const child of children) {
-          _checkChildType(child, errors)
-        }
+        _checkChildType(el, errors)
+        state.requestChecks(el)
         return errors
       })
     }
