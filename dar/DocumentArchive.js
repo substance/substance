@@ -18,6 +18,16 @@ export default class DocumentArchive extends EventEmitter {
     this._config = config
   }
 
+  _loadDocument (type, record, documents) {
+    const loader = this._config.getDocumentLoader(type)
+    if (!loader) {
+      const msg = `No loader defined for document type ${type}`
+      console.error(msg, type, record)
+      throw new Error(msg)
+    }
+    return loader.load(record.data, this._config)
+  }
+
   addDocument (type, name, xml) {
     let documentId = uuid()
     let documents = this._documents
@@ -473,7 +483,7 @@ export default class DocumentArchive extends EventEmitter {
       // skipping unchanged resources
       if (!hasChanged) continue
       // We mark a resource dirty when it has changes
-      if (type === 'article') {
+      if (type !== 'manifest') {
         const document = documents[id]
         // TODO: how should we communicate file renamings?
         rawArchive.resources[path] = {
@@ -484,10 +494,6 @@ export default class DocumentArchive extends EventEmitter {
         }
       }
     }
-  }
-
-  _loadDocument (type, record, documents) {
-    throw new Error('This method is abstract')
   }
 
   _exportDocument (type, document, documents) { // eslint-disable-line no-unused-vars
