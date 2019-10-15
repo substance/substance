@@ -7,8 +7,9 @@ import { INCREMENT_VERSION, ADD_NODE, ADD_PROPERTY, ADD_CHILD_TYPE, BUILT_INS } 
 import SchemaDefinition from './_SchemaDefinition'
 
 export default class SchemaBuilder {
-  constructor (rootType) {
+  constructor (rootType, issuer) {
     this.rootType = rootType
+    this.issuer = issuer
     this._actions = []
     this._definition = new SchemaDefinition()
   }
@@ -41,7 +42,7 @@ export default class SchemaBuilder {
     const nodes = this._buildNodes()
     const rootType = this.rootType
     const version = this._definition.version
-    return new NextDocumentSchema(version, rootType, nodes, this._actions)
+    return new NextDocumentSchema(version, rootType, this.issuer, nodes, this._actions)
   }
 
   _record (action) {
@@ -138,8 +139,6 @@ class NodeBuilder {
         return Object.assign({ default: false }, options, { type })
       case 'string':
         return Object.assign({ default: '' }, options, { type })
-      case 'string-array':
-        return Object.assign({ default: [] }, options, { type: ['array', 'string'] })
       case 'text':
         return Object.assign({ default: '' }, options, { type, targetTypes: options.childTypes })
       case 'child':
@@ -152,7 +151,7 @@ class NodeBuilder {
       case 'many':
         return Object.assign({ default: [] }, options, { type: 'id', targetTypes: options.targetTypes })
       default:
-        throw new Error('Unsupported type')
+        throw new Error(`Unsupported type: ${type}`)
     }
   }
 }

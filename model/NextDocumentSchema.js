@@ -1,4 +1,5 @@
 import { DefaultDOMElement as DOM } from '../dom'
+import { camelCase } from '../util'
 import DocumentSchema from './DocumentSchema'
 import NextDocument from './NextDocument'
 import _createValidator from './_createValidator'
@@ -6,10 +7,11 @@ import _createDefinition from './_createDefinition'
 import _createXmlConverterFactory from './_createXmlConverterFactory'
 
 export default class NextDocumentSchema {
-  constructor (version, rootType, nodes, actions) {
-    this.name = rootType[0].toUpperCase() + rootType.slice(1)
+  constructor (version, rootType, issuer, nodes, actions) {
+    this.name = rootType[0].toUpperCase() + camelCase(rootType).slice(1)
     this.rootType = rootType
     this.version = version
+    this.issuer = issuer
     this.nodes = nodes
     this.publicId = this._getPublicId(version)
     this.dtd = this._getDtd(version)
@@ -75,7 +77,8 @@ export default class NextDocumentSchema {
   }
 
   _getPublicId (version) {
-    return `-//SUBSTANCE//DTD ${this.name} v${version}`
+    // TODO: until we introduce minor versions we just use '0' for minor
+    return `-//${this.issuer.toUpperCase()}//DTD ${this.name} v${version}.0//EN`
   }
 
   _getDtd (version) {
