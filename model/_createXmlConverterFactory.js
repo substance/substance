@@ -136,8 +136,7 @@ function _importChildProperty (nodeSpec, propName, el, node, importer) {
   let val
   switch (propSpec.type) {
     case 'child': {
-      const childEl = el.getChildren()[0]
-      const childNode = importer.convertElement(childEl)
+      const childNode = importer.convertElement(el)
       val = childNode.id
       break
     }

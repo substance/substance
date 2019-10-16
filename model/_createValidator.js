@@ -231,11 +231,14 @@ function _attributeChecker (type, propertyName, check) {
 function _elementChecker (nodeSpec, propertyName, check) {
   return (state, el, { nodeSpec }) => {
     const nodeType = nodeSpec.type
+    const propSpec = nodeSpec.properties.get(propertyName)
     // For now, we force property elements for all 'structured' nodes
     if (_requiresPropertyElements(nodeSpec)) {
       const propertyEl = el.children.find(c => c.tagName === propertyName)
       if (!propertyEl) {
-        state.error({ type: nodeType, propertyName, message: `Child element ${propertyName} is missing` })
+        if (!propSpec.options.optional) {
+          state.error({ type: nodeType, propertyName, message: `Child element ${propertyName} is missing` })
+        }
       } else {
         const errors = check(state, propertyEl, { nodeSpec })
         if (errors && errors.length > 0) {
