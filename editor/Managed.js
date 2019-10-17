@@ -50,7 +50,7 @@ export default function Managed (ComponentClass, ...bindings) {
     }
 
     _onUpdate () {
-      this._props = this._deriveManagedProps()
+      this._props = this._deriveManagedProps(this.props)
       this.refs.managed.extendProps(this._props)
     }
 
