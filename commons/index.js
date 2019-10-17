@@ -1,5 +1,7 @@
 import * as HtmlConverters from './HtmlConverters'
 
+export { default as AbstractEditor } from './AbstractEditor'
+export { default as BasicEditorApi } from './BasicEditorApi'
 export { default as DefaultHtmlImporter } from './DefaultHtmlImporter'
 export { default as EditorToolbar } from './EditorToolbar'
 export { default as FigureComponent } from './FigureComponent'
