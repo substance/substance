@@ -134,22 +134,22 @@ class NodeBuilder {
     switch (type) {
       case 'integer':
       case 'number':
-        return Object.assign({ default: 0 }, options, { type })
+        return Object.assign({ default: 0 }, options, { type, reflectionType: type })
       case 'boolean':
-        return Object.assign({ default: false }, options, { type })
+        return Object.assign({ default: false }, options, { type, reflectionType: type })
       case 'string':
-        return Object.assign({ default: '' }, options, { type })
+        return Object.assign({ default: '' }, options, { type, reflectionType: type })
       case 'text':
-        return Object.assign({ default: '' }, options, { type, targetTypes: options.childTypes })
+        return Object.assign({ default: '' }, options, { type, targetTypes: options.childTypes, reflectionType: type })
       case 'child':
-        return Object.assign({ default: null }, options, { type: 'id', owned: true, targetTypes: options.childTypes })
+        return Object.assign({ default: null }, options, { type: 'id', owned: true, targetTypes: options.childTypes, reflectionType: type })
       case 'children':
       case 'container':
-        return Object.assign({ default: [] }, options, { type: ['array', 'id'], owned: true, targetTypes: options.childTypes })
+        return Object.assign({ default: [] }, options, { type: ['array', 'id'], owned: true, targetTypes: options.childTypes, reflectionType: type })
       case 'one':
-        return Object.assign({ default: null }, options, { type: 'id', targetTypes: options.targetTypes })
+        return Object.assign({ default: null }, options, { type: 'id', targetTypes: options.targetTypes, reflectionType: type })
       case 'many':
-        return Object.assign({ default: [] }, options, { type: 'id', targetTypes: options.targetTypes })
+        return Object.assign({ default: [] }, options, { type: 'id', targetTypes: options.targetTypes, reflectionType: type })
       default:
         throw new Error(`Unsupported type: ${type}`)
     }
