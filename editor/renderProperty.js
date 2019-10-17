@@ -4,33 +4,39 @@ import Surface from './Surface'
 import ContainerEditor from './ContainerEditor'
 import _renderNode from './_renderNode'
 
-export default function renderProperty (comp, node, propName, props = {}) {
-  const documentSchema = node.getDocument().getSchema()
-  const nodeSpec = documentSchema.definition.nodes.get(node.type)
-  const propSpec = nodeSpec.properties.get(propName)
+export default function renderProperty (comp, document, path, props = {}) {
+  const propSpec = document.getProperty(path)
+  if (!propSpec) {
+    throw new Error(`Could not find property for path ${path}`)
+  }
 
   props = Object.assign({
-    path: [node.id, propName],
+    document,
+    path,
     disabled: comp.props.disabled,
     placeholder: comp.props.placeholder
   }, props)
 
-  switch (propSpec.type) {
+  switch (propSpec.reflectionType) {
     case 'integer':
     case 'number':
     case 'boolean':
     case 'string-array':
-    case 'child':
     case 'one':
     case 'many':
       throw new Error('NOT IMPLEMENTED YET')
     case 'string':
     case 'text':
       return $$(StringComponent, props)
+    case 'child':
+      return _renderNode(comp, document.resolve(path), props)
     case 'children':
       return $$(CollectionComponent, props)
     case 'container':
-      props.container = true
+      // Note: do not override user props or value settings
+      if (isNil(props.container)) {
+        props.container = true
+      }
       return $$(CollectionComponent, props)
     default:
       throw new Error('Unsupported type')
