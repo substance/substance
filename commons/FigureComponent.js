@@ -14,7 +14,7 @@ export default class FigureComponent extends Component {
       $$('img', { src: url })
     )
     el.append(
-      renderProperty(this, node, 'legend', { placeholder: 'Enter caption' })
+      renderProperty(this, node.getDocument(), [node.id, 'legend'], { placeholder: 'Enter caption' })
         .addClass('se-legend')
     )
     return el

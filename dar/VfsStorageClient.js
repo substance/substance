@@ -4,7 +4,7 @@ export default class VfsStorageClient {
   constructor (vfs, baseUrl, options = {}) {
     this.vfs = vfs
 
-    // an url rom where the assets are served statically
+    // an url from where the assets are served statically
     this.baseUrl = baseUrl
     this.options = options
   }

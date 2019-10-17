@@ -1,7 +1,7 @@
 import { $$ } from '../dom'
 import FontAwesomeIcon from './FontAwesomeIcon'
 
-export default class IconProvider {
+export default class DefaultIconProvider {
   constructor (config) {
     this.config = config
   }
@@ -9,8 +9,7 @@ export default class IconProvider {
   renderIcon (name) {
     let spec = this._getIconDef(name)
     if (!spec) {
-      // throw new Error(`No icon found for name '${name}'`)
-      return null
+      return $$('span')
     } else {
       if (spec['fontawesome']) {
         return $$(FontAwesomeIcon, { icon: spec['fontawesome'] })

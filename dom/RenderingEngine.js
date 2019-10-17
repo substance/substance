@@ -686,18 +686,9 @@ function _update (state, vel) {
   // console.log('... rendering', vel._ref)
 
   let comp = vel._comp
-
-  // HACK: workaround for a problem found in DEBUG_RENDERING mode
-  // situation: a grand-parent injects via props a child component into a parent
-  // component, which does render the children only in certain states (e.g. showChild=true|false)
-  // changing the state from hide to show on the parent component, caused errors here
-  // It would be more consistent to do this during the capturing phase of
-  // vel._preliminaryParent, i.e. the one that has appends injected component.
-  // TODO: decide if this really a HACK
+  // TODO: find out if this is still needed
   if (!comp) {
-    if (vel._ref && vel._preliminaryParent !== vel._owner) {
-      _capture(state, vel)
-    }
+    _capture(state, vel)
   }
   _assert(comp && comp._isComponent, 'A captured VirtualElement must have a component instance attached.')
 
@@ -933,6 +924,9 @@ function _adopt (state, vel, el) {
       if (!child1) {
         while (child2) {
           el.appendChild(_createEl(state, child2))
+          if (child2._isVirtualComponent) {
+            _storeInternalData(child2._comp, child2)
+          }
           pos2++
           child2 = virtualChildNodes[pos2]
         }
@@ -970,6 +964,7 @@ function _createEl (state, vel) {
 
   if ((vel._isVirtualComponent || vel._isVirtualHTMLElement)) {
     vel.children.forEach(vc => {
+      vc = _getForwardedEl(vc)
       el.appendChild(_createEl(state, vc))
     })
   }

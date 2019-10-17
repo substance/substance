@@ -1,12 +1,16 @@
 import * as HtmlConverters from './HtmlConverters'
 
+export { default as AbstractEditor } from './AbstractEditor'
+export { default as BasicEditorApi } from './BasicEditorApi'
 export { default as DefaultHtmlImporter } from './DefaultHtmlImporter'
 export { default as EditorToolbar } from './EditorToolbar'
 export { default as FigureComponent } from './FigureComponent'
 export { default as HeadingComponent } from './HeadingComponent'
 export { HtmlConverters }
+export { default as ImageComponent } from './ImageComponent'
 export { default as ListComponent } from './ListComponent'
 export { default as ListItemComponent } from './ListItemComponent'
 export { default as ListItemMixin } from './ListItemMixin'
 export { default as ListMixin } from './ListMixin'
+export { default as NodeComponent } from './NodeComponent'
 export { default as ParagraphComponent } from './ParagraphComponent'

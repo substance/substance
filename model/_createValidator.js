@@ -191,16 +191,9 @@ function _createPropertyChecker (nodeSpec, propName, propSpec) {
     }
     case 'child': {
       return _elementChecker(nodeSpec, propName, (state, el) => {
-        const children = el.getChildren()
         const errors = []
-        if (children.length !== 1) {
-          errors.push(`Expected exactly one child. Found ${children.length}.`)
-        }
-        // Note even if mutliple children are given, we check every one of them
-        // to receive more verbose information
-        for (const child of children) {
-          _checkChildType(child, errors)
-        }
+        _checkChildType(el, errors)
+        state.requestChecks(el)
         return errors
       })
     }
@@ -238,11 +231,14 @@ function _attributeChecker (type, propertyName, check) {
 function _elementChecker (nodeSpec, propertyName, check) {
   return (state, el, { nodeSpec }) => {
     const nodeType = nodeSpec.type
+    const propSpec = nodeSpec.properties.get(propertyName)
     // For now, we force property elements for all 'structured' nodes
     if (_requiresPropertyElements(nodeSpec)) {
       const propertyEl = el.children.find(c => c.tagName === propertyName)
       if (!propertyEl) {
-        state.error({ type: nodeType, propertyName, message: `Child element ${propertyName} is missing` })
+        if (!propSpec.options.optional) {
+          state.error({ type: nodeType, propertyName, message: `Child element ${propertyName} is missing` })
+        }
       } else {
         const errors = check(state, propertyEl, { nodeSpec })
         if (errors && errors.length > 0) {
