@@ -118,6 +118,15 @@ export default class AbstractEditor extends Component {
     this._scrollRectIntoView(this._getSelectionRect(sel))
   }
 
+  _scrollElementIntoView (el) {
+    const contentEl = this._getScrollableElement()
+    const contentRect = contentEl.getNativeElement().getBoundingClientRect()
+    const elRect = el.getNativeElement().getBoundingClientRect()
+    const rect = getRelativeRect(contentRect, elRect)
+    this._scrollRectIntoView(rect)
+    return rect.top
+  }
+
   _scrollRectIntoView (rect) {
     if (!rect) return
     const scrollable = this._getScrollableElement()
