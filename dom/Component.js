@@ -365,7 +365,7 @@ export default class Component extends EventEmitter {
       throw new Error('Element is required.')
     }
     el = DefaultDOMElement.wrap(el)
-    if (options.adoptElement) {
+    if (options.adopt || options.inplace) {
       this.el = el
     } else {
       // Makes sure a new element is created for the component
@@ -373,7 +373,7 @@ export default class Component extends EventEmitter {
     }
     this.renderingEngine = Component.createRenderingEngine(el.getOwnerDocument())
     this._render(this.props, this.state, options)
-    if (!options.adoptElement) {
+    if (!options.adopt && !options.inplace) {
       el.appendChild(this.el)
     }
     if (el.isInDocument()) {

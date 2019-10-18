@@ -2420,7 +2420,7 @@ function ComponentTests (debug, memory) {
     let doc = DefaultDOMElement.parseHTML('<html><head><title>Test</title></head><body><div id="foo">Foo</div></body></html>')
     let htmlEl = doc.find('html')
     let origEls = _getElements(htmlEl)
-    MyComponent.mount({}, doc.find('#foo'), { adoptElement: true })
+    MyComponent.mount({}, doc.find('#foo'), { adopt: true })
     let newEls = _getElements(htmlEl)
     t.ok(isArrayEqual(newEls, origEls), 'all elements should have been reused')
     t.ok(_didMount, 'didMount() should have been called')
@@ -2439,7 +2439,7 @@ function ComponentTests (debug, memory) {
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"><div id="bar"></div><div id="baz"></div></div></body></html>')
     let htmlEl = doc.find('html')
     let origEls = _getElements(htmlEl)
-    MyComponent.mount({}, doc.find('#foo'), { adoptElement: true })
+    MyComponent.mount({}, doc.find('#foo'), { adopt: true })
     let newEls = _getElements(htmlEl)
     t.ok(isArrayEqual(newEls, origEls), 'all elements should have been reused')
     t.end()
@@ -2456,7 +2456,7 @@ function ComponentTests (debug, memory) {
     }
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
     let fooEl = doc.find('#foo')
-    MyComponent.mount({}, fooEl, { adoptElement: true })
+    MyComponent.mount({}, fooEl, { adopt: true })
     let elTypes = _getElementTypes(fooEl)
     t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been rendered')
     t.end()
@@ -2473,7 +2473,7 @@ function ComponentTests (debug, memory) {
     }
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"><span><span></span></span><span></span><span></span><span></span><span></span></div></body></html>')
     let fooEl = doc.find('#foo')
-    MyComponent.mount({}, fooEl, { adoptElement: true })
+    MyComponent.mount({}, fooEl, { adopt: true })
     let elTypes = _getElementTypes(fooEl)
     t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
     t.end()
@@ -2491,7 +2491,7 @@ function ComponentTests (debug, memory) {
     }
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"><!--comment-->some text<div></div>abcde<div></div></div></body></html>')
     let fooEl = doc.find('#foo')
-    MyComponent.mount({}, fooEl, { adoptElement: true })
+    MyComponent.mount({}, fooEl, { adopt: true })
     let elTypes = _getElementTypes(fooEl)
     t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
     t.end()
@@ -2507,7 +2507,7 @@ function ComponentTests (debug, memory) {
     }
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
     let fooEl = doc.find('#foo')
-    let comp = MyComponent.mount({}, fooEl, { adoptElement: true })
+    let comp = MyComponent.mount({}, fooEl, { adopt: true })
     t.notNil(comp.refs.bar, 'component should have set refs correctly')
     t.end()
   })
@@ -2532,7 +2532,7 @@ function ComponentTests (debug, memory) {
     }
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
     let fooEl = doc.find('#foo')
-    let a = A.mount({}, fooEl, { adoptElement: true })
+    let a = A.mount({}, fooEl, { adopt: true })
     t.notNil(a.refs.b, 'refs should be set correctly')
     t.notNil(a.refs.b.refs.c, 'refs should be set correctly')
     t.notNil(a.refs.b.refs.c.refs.bar, 'refs should be set correctly')
@@ -2560,7 +2560,7 @@ function ComponentTests (debug, memory) {
     }
     let doc = DefaultDOMElement.parseHTML('<html><head></head><body><div id="foo"></div></body></html>')
     let fooEl = doc.find('#foo')
-    A.mount({}, fooEl, { adoptElement: true })
+    A.mount({}, fooEl, { adopt: true })
     let elTypes = _getElementTypes(fooEl)
     t.deepEqual(elTypes, ['div', 'h1', 'p'], 'element tree should have been updated correctly')
     t.end()

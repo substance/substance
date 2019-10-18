@@ -214,7 +214,7 @@ export default class RenderingEngine {
       if (!comp.el) {
         consoleGroup = `RenderingEngine: initial render of ${getClassName(comp)}`
       } else {
-        if (options.adoptElement) {
+        if (options.adopt) {
           consoleGroup = `RenderingEngine: adopting DOM with ${getClassName(comp)}`
         } else {
           consoleGroup = `RenderingEngine: update of ${getClassName(comp)}`
@@ -247,7 +247,7 @@ export default class RenderingEngine {
         }
       }
       if (captured) {
-        if (options.adoptElement) {
+        if (options.adopt) {
           if (substanceGlobals.VERBOSE_RENDERING) {
             console.time('adopting')
           }
