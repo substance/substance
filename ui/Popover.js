@@ -9,7 +9,7 @@ export default class Popover extends Component {
 
   render () {
     const { content, requester } = this.state
-    const el = $$('div', { class: 'sc-menu sm-hidden' })
+    const el = $$('div', { class: 'sc-popover sc-menu sm-hidden' })
     if (requester) {
       // content given as menu items
       if (isArray(content)) {
@@ -73,10 +73,11 @@ export default class Popover extends Component {
   _showContent (content, requester, desiredPos) {
     this.setState({ content, requester, desiredPos })
     const el = this.getElement()
+    const containerEl = this.props.getContainer()
     // TODO: we could do some positioning here to stay within the container bounds
     // TODO: getRelativeMouseBounds() is not the right name for us here
     // but the logic is what we need
-    const bounds = getRelativeMouseBounds({ clientX: desiredPos.x, clientY: desiredPos.y }, this.props.container.getNativeElement())
+    const bounds = getRelativeMouseBounds({ clientX: desiredPos.x, clientY: desiredPos.y }, containerEl.getNativeElement())
     const menuWidth = el.htmlProp('offsetWidth')
     // By default, context menu are aligned left bottom to the mouse coordinate clicked
     let leftPos = bounds.left - menuWidth / 2
