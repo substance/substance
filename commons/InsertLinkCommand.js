@@ -1,9 +1,15 @@
 import { AnnotationCommand } from '../editor'
+import { $$ } from '../dom'
+import LinkModal from './LinkModal'
 
 export default class InsertLinkCommand extends AnnotationCommand {
   executeCreate (params, context) {
-    // Note: link modal specific to Essay Editor,
-    // so we are sending an action directly there
-    context.editorSession.getRootComponent().send('insertLinkModal')
+    context.editorSession.getRootComponent().send('requestModal', () => {
+      return $$(LinkModal, { mode: 'create' })
+    }).then(modal => {
+      if (!modal) return
+      const href = modal.refs.href.val()
+      context.api.insertAnnotation('link', { href })
+    })
   }
 }
