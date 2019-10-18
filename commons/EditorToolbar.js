@@ -1,13 +1,10 @@
 import { Component, $$ } from '../dom'
-import { renderMenu, Limiter } from '../ui'
+import { renderMenu } from '../ui'
 
 export default class EditorToolbar extends Component {
   render () {
-    const { fullscreen } = this.props
-    return $$('div', { class: 'sc-toolbar' }).append(
-      $$(Limiter, { fullscreen },
-        renderMenu(this, 'editor-toolbar')
-      )
+    return $$('div', { class: 'sc-editor-toolbar' }).append(
+      renderMenu(this, 'editor-toolbar')
     )
   }
 }
