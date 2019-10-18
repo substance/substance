@@ -134,3 +134,14 @@ export const SuperscriptConverter = {
       (el.is('span') && el.getStyle('vertical-align') === 'super')
   }
 }
+
+export const LinkConverter = {
+  type: 'link',
+  tagName: 'a',
+  import (el, node) {
+    node.href = el.getAttribute('href')
+  },
+  export (node, el) {
+    el.setAttribute('href', node.href)
+  }
+}
