@@ -8,7 +8,7 @@ export { default as FigureComponent } from './FigureComponent'
 export { default as HeadingComponent } from './HeadingComponent'
 export { HtmlConverters }
 export { default as ImageComponent } from './ImageComponent'
-export { default as InsertLinkCommand } from './InsertLinkCommand'
+export { default as CreateLinkCommand } from './CreateLinkCommand'
 export { default as LinkComponent } from './LinkComponent'
 export { default as LinkModal } from './LinkModal'
 export { default as ListComponent } from './ListComponent'
