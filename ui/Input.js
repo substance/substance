@@ -1,4 +1,5 @@
 import { $$, Component } from '../dom'
+import { platform } from '../util'
 
 export default class Input extends Component {
   didMount () {
@@ -6,6 +7,13 @@ export default class Input extends Component {
     // after the first time. This forces focus if autofocus is set
     if (this.el.getAttribute('autofocus') === 'true') {
       this.el.focus()
+      // put the cursor at the end
+      if (platform.inBrowser) {
+        const val = this.el.val()
+        if (val) {
+          this.el.getNativeElement().setSelectionRange(0, val.length)
+        }
+      }
     }
   }
 
