@@ -16,6 +16,24 @@ export default class BasicEditorApi {
     })
   }
 
+  removeAndDeleteNode (nodeId) {
+    const node = this.editorSession.getDocument().get(nodeId, true)
+    let parent = node.getParent()
+    if (parent) {
+      const { property: propertyName, pos } = node.getXpath()
+      const property = parent.schema.getProperty(propertyName)
+      this.editorSession.transaction(tx => {
+        if (property.isArray()) {
+          documentHelpers.removeAt(tx, [parent.id, propertyName], pos)
+        } else {
+          tx.set([parent.id, propertyName], null)
+        }
+        documentHelpers.deepDeleteNode(tx, nodeId)
+        tx.setSelection(null)
+      })
+    }
+  }
+
   updateNode (id, nodeData) {
     this.editorSession.transaction(tx => {
       const node = tx.get(id)
@@ -26,6 +44,20 @@ export default class BasicEditorApi {
   insertAnnotation (type, nodeData) {
     this.editorSession.transaction(tx => {
       tx.annotate(Object.assign({ type }, nodeData))
+    })
+  }
+
+  moveNode (nodeId, direction) {
+    const doc = this.getDocument()
+    const node = doc.get(nodeId)
+    const parent = node.getParent()
+    if (!parent) throw new Error('Figure does not exist')
+    const propertyName = node.getXpath().property
+    const pos = node.getPosition()
+    const diff = direction === 'up' ? -1 : +1
+    this.editorSession.transaction(tx => {
+      documentHelpers.removeAt(tx, [parent.id, propertyName], pos)
+      documentHelpers.insertAt(tx, [parent.id, propertyName], pos + diff, node.id)
     })
   }
 }
