@@ -112,8 +112,8 @@ export default class AbstractScrollPane extends Component {
     Get selection rectangle relative to panel content element
   */
   _getSelectionRect () {
-    let appState = this.context.editorState
-    let sel = appState.selection
+    let editorState = this.context.editorState
+    let sel = editorState.selection
     let selectionRect
     if (platform.inBrowser && sel && !sel.isNull()) {
       let contentEl = this.getContentElement()

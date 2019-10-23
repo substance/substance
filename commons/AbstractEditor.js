@@ -37,8 +37,8 @@ export default class AbstractEditor extends Component {
     })
     this.editorSession = editorSession
 
-    const appState = editorSession.editorState
-    this.appState = appState
+    const editorState = editorSession.editorState
+    this.editorState = editorState
 
     const api = this._createAPI(archive, editorSession)
     this.api = api
@@ -47,7 +47,7 @@ export default class AbstractEditor extends Component {
       config,
       api,
       editorSession,
-      editorState: appState,
+      editorState,
       archive,
       urlResolver: archive,
       editable: true
@@ -59,7 +59,7 @@ export default class AbstractEditor extends Component {
 
     // HACK: resetting the app state here, because things might get 'dirty' during initialization
     // TODO: find out if there is a better way to do this
-    appState._reset()
+    editorState._reset()
   }
 
   willReceiveProps (props) {
