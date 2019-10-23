@@ -12,7 +12,10 @@ export default class SelectableNodeComponent extends Component {
     const editorState = this.context.editorState
     if (editorState) {
       editorState.addObserver(['selectionState'], this._onSelectionChange, this, { stage: 'update' })
-      editorState.addObserver(['selection'], this._rerenderIfSelectionChanged, this, { stage: 'render' })
+      editorState.addObserver(['selection', 'document'], this._rerenderIfSelectionChanged, this, {
+        document: { path: [this.props.node.id] },
+        stage: 'render'
+      })
     }
   }
 
@@ -40,6 +43,8 @@ export default class SelectableNodeComponent extends Component {
     if (this._newSelectionState) {
       this.extendState(this._newSelectionState)
       this._newSelectionState = null
+    } else if (this.context.editorState.isDirty('document')) {
+      this.rerender()
     }
   }
 }
