@@ -1,5 +1,5 @@
 import { Component, $$ } from '../dom'
-import { keys } from '../util'
+import { keys, parseKeyEvent, platform } from '../util'
 
 export default class ModalCanvas extends Component {
   getActionHandlers () {
@@ -49,8 +49,20 @@ export default class ModalCanvas extends Component {
     event.stopPropagation()
     // TODO: this is only working if the modal content has focus
     // we would need to add a global handler, or add a keytrap
-    if (event.keyCode === keys.ESCAPE) {
-      this.close()
+    switch (event.keyCode) {
+      case keys.ESCAPE: {
+        this.close()
+        break
+      }
+      case keys.ENTER: {
+        const combo = parseKeyEvent(event, true)
+        if (combo === 'META' || combo === 'ALT') {
+          this._confirm()
+        }
+        break
+      }
+      default:
+        //
     }
   }
 }
