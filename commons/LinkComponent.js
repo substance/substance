@@ -82,10 +82,14 @@ export default class LinkComponent extends AnnotationComponent {
   _onSelectionStateChange (selectionState) {
     const oldShowPopup = this._showPopup
     let showPopup = false
-    const { annosByType } = selectionState
-    const links = annosByType.get('link')
-    if (links && links[0] && links[0] === this.props.node) {
-      showPopup = true
+    const { selection, annosByType } = selectionState
+    if (selection && selection.isPropertySelection()) {
+      // show only if there is exactly the one link under the selection
+      // and the selection is completely inside of the link
+      const links = annosByType.get('link')
+      if (links && links.length === 1 && links[0] === this.props.node) {
+        showPopup = selection.isInsideOf(this.props.node.getSelection())
+      }
     }
     this._showPopup = showPopup
     if (!showPopup && oldShowPopup) {
