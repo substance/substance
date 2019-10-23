@@ -165,6 +165,12 @@ function _createPropertyChecker (nodeSpec, propName, propSpec) {
         // nothing special here
       })
     }
+    // string array properties are mapped to a element with comma separated text
+    case 'string-array': {
+      return _attributeChecker(nodeType, propName, str => {
+        // nothing special here
+      })
+    }
     case 'enum': {
       return _attributeChecker(nodeType, propName, str => {
         if (!options.values.has(str)) {

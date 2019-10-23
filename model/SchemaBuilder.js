@@ -139,6 +139,8 @@ class NodeBuilder {
         return Object.assign({ default: false }, options, { type, reflectionType: type })
       case 'string':
         return Object.assign({ default: '' }, options, { type, reflectionType: type })
+      case 'string-array':
+        return Object.assign({ default: [] }, options, { type: ['array', 'string'], reflectionType: type })
       case 'text':
         return Object.assign({ default: '' }, options, { type, targetTypes: options.childTypes, reflectionType: type })
       case 'child':
