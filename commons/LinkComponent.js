@@ -97,7 +97,7 @@ export default class LinkComponent extends AnnotationComponent {
       this.send('requestPopover', {
         requester: this,
         desiredPos: this._getDesiredPopoverPos(),
-        render: () => {
+        content: () => {
           return $$(_LinkPopover, { node })
         }
       })
