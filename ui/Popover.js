@@ -1,5 +1,5 @@
 import { Component, $$, DefaultDOMElement } from '../dom'
-import { getRelativeMouseBounds, isArray, isEqual, isFunction } from '../util'
+import { getRelativeMouseBounds, isEqual, isFunction } from '../util'
 import renderMenu from './renderMenu'
 
 export default class Popover extends Component {
@@ -9,26 +9,40 @@ export default class Popover extends Component {
 
   render () {
     const { content, requester } = this.state
-    const el = $$('div', { class: 'sc-popover sc-menu sm-hidden' })
+    const el = $$('div', { class: 'sc-popover sm-hidden' })
     if (requester) {
-      // content given as menu items
-      if (isArray(content)) {
-        el.append(
-          renderMenu(requester, { type: 'menu', items: content })
-        )
-      } else if (isFunction(content)) {
+      // Note: content can either be given as menu spec or as a render function
+      if (isFunction(content)) {
         const renderContent = content
         el.append(
           renderContent()
+        )
+      // default: content is given as menu spec
+      } else {
+        el.append(
+          renderMenu(requester, content)
         )
       }
     }
     return el
   }
 
+  /**
+   * Request to render a popover, given either a menu specification or a render function,
+   * at the given position.
+   *
+   * To receive actions, the requesting component has to be provided.
+   *
+   * @param {object} params
+   * @param {Function|object} params.content - a render function or a menu specification (see renderMenu)
+   * @param {object} params.desiredPos
+   * @param {number} params.desiredPos.x - the desired x screen coordinate
+   * @param {number} params.desiredPos.y - the desired y screen coordinate
+   * @param {Component} [params.requester] - the component that is requesting the content; this is used to dispatch actions
+   */
   acquire (params) {
-    const { requester, desiredPos } = params
-    if (!requester) throw new Error("'requester' is required")
+    const { content, desiredPos, requester } = params
+    if (!content) throw new Error("'content' is required")
     if (!desiredPos) throw new Error("'desiredPos' is required")
 
     // NOTE: this implements a toggle behavior. I.e. if the same requester
@@ -43,21 +57,6 @@ export default class Popover extends Component {
     this._hideIfNoNewRequest = false
 
     // We started with this implementation
-    let content
-    if (params.items) {
-      let items = params.items
-      // if this is called with a menu spec
-      if (!isArray(items) && items.items) {
-        items = items.items
-      }
-      if (items.length === 0) return
-      content = items
-    // Experimental: rendering popover content using a render hook
-    } else if (params.render) {
-      content = params.render
-    } else {
-      throw new Error('Illegal arguments.')
-    }
     // HACK adding a delay so that other things, e.g. selection related can be done first
     setTimeout(() => {
       this._showContent(content, requester, desiredPos)
@@ -106,7 +105,7 @@ export default class Popover extends Component {
 
   // overriding the default send() mechanism to be able to dispatch actions to the current requester
   _doesHandleAction () {
-    return true
+    return Boolean(this.state.requester)
   }
 
   _handleAction (action, args) {

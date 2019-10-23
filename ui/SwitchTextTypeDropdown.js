@@ -1,6 +1,6 @@
-import Dropdown from './Dropdown'
+import DropdownMenu from './DropdownMenu'
 
-export default class SwitchTextTypeDropdown extends Dropdown {
+export default class SwitchTextTypeDropdown extends DropdownMenu {
   _getToggleButtonProps () {
     const props = super._getToggleButtonProps()
     const activeItem = this._getActiveItem()

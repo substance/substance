@@ -2,12 +2,13 @@ import { $$ } from '../dom'
 import { isString } from '../util'
 import Button from './Button'
 import Icon from './Icon'
+import Menu from './Menu'
 import MenuItem from './MenuItem'
+import DropdownMenu from './DropdownMenu'
 import StackFill from './StackFill'
 import HorizontalStack from './HorizontalStack'
 import Separator from './Separator'
 import HorizontalSpace from './HorizontalSpace'
-import Dropdown from './Dropdown'
 
 // WIP: implementing this step-by-step as we need
 export default function renderMenu (requester, menuNameOrSpec, commandStates) {
@@ -21,17 +22,26 @@ export default function renderMenu (requester, menuNameOrSpec, commandStates) {
   } else {
     spec = menuNameOrSpec
   }
-  const context = { type: spec.type, size: spec.size, style: spec.style }
+  // create a shallow clone of the spec
+  spec = Object.assign({ type: 'menu' }, spec)
+  // NOTE: sometimes we want to pass props of a component to this method
+  // but we need to make sure to omit the children
+  // TODO: we should actually pick only what is a valid menu spec parameter
+  if (spec.children) delete spec.children
+  // context is used to inherit default behavior or style to children items
+  let items
+  if (spec.items) {
+    items = spec.items.map(itemSpec => _renderItem(requester, config, itemSpec, commandStates, spec))
+  }
   switch (spec.type) {
     case 'toolbar': {
-      return $$(HorizontalStack, {}, spec.items.map(itemSpec => _renderItem(requester, config, itemSpec, commandStates, context)))
+      return $$(HorizontalStack, {}, items)
+    }
+    case 'menu': {
+      return $$(Menu, spec, items)
     }
     default:
-      if (spec.items) {
-        return $$('div', {}, spec.items.map(itemSpec => _renderItem(requester, config, itemSpec, commandStates, context)))
-      } else {
-        return _renderItem(requester, config, spec, commandStates)
-      }
+      return _renderItem(requester, config, spec, commandStates)
   }
 }
 
@@ -118,7 +128,7 @@ function _renderNestedMenu (config, itemSpec, commandStates) {
 
 function _renderDropdown (config, itemSpec, commandStates, context) {
   context = Object.assign({}, context, { type: 'menu' })
-  const DropdownClass = itemSpec.ComponentClass || Dropdown
+  const DropdownClass = itemSpec.ComponentClass || DropdownMenu
   return $$(DropdownClass, itemSpec)
 }
 

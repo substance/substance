@@ -4,53 +4,58 @@ import Button from './Button'
 import Icon from './Icon'
 import HorizontalSpace from './HorizontalSpace'
 
-export default class Dropdown extends Component {
+export default class DropdownMenu extends Component {
   render () {
-    const { disabled, children, hideWhenDisabled, noCaret } = this.props
+    const { disabled, children, hideWhenDisabled, noCaret, noIcons } = this.props
 
     const buttonProps = this._getToggleButtonProps()
-    const buttonEl = $$(Button, buttonProps).addClass('sc-dropdown')
+    const el = $$(Button, buttonProps).addClass('sc-dropdown-menu')
+    // Note: want to inherit style from Menu
+    el.addClass('sc-menu')
+    if (noIcons) {
+      el.addClass('sm-no-icons')
+    }
     if (!disabled) {
-      buttonEl.on('click', this._onClick)
+      el.on('click', this._onClick)
     }
 
     function _addHorizontalSpaceIfNecessary () {
-      if (buttonEl.children.length > 0) buttonEl.append($$(HorizontalSpace))
+      if (el.children.length > 0) el.append($$(HorizontalSpace))
     }
     // Either children are given via props
     // or we render content derived from icon, label, etc.
     if (children && children.length > 0) {
-      buttonEl.append(children)
+      el.append(children)
     } else {
       const { icon, label, size, tooltip } = buttonProps
       if (icon) {
-        buttonEl.append(
+        el.append(
           $$(Icon, { icon, size })
         )
       }
       if (label) {
         _addHorizontalSpaceIfNecessary()
-        buttonEl.append(
+        el.append(
           label
         )
       }
       if (tooltip) {
-        buttonEl.attr('title', tooltip)
+        el.attr('title', tooltip)
       }
 
       if (!noCaret) {
         _addHorizontalSpaceIfNecessary()
-        buttonEl.append(
+        el.append(
           $$(Icon, { icon: 'caret-down' })
         )
       }
     }
 
     if (disabled && hideWhenDisabled) {
-      buttonEl.addClass('sm-hidden')
+      el.addClass('sm-hidden')
     }
 
-    return buttonEl
+    return el
   }
 
   _getToggleButtonProps () {
@@ -71,10 +76,11 @@ export default class Dropdown extends Component {
       let { x, y, height, width } = this.getNativeElement().getBoundingClientRect()
       y = y + height + 5
       x = x + width / 2
+      const menuSpec = Object.assign({}, this.props, { type: 'menu' })
       this.send('requestPopover', {
         requester: this,
         desiredPos: { x, y },
-        items: this.props.items
+        content: menuSpec
       })
     }
   }

@@ -1,6 +1,6 @@
 export { default as Button } from './Button'
 export { default as Divider } from './Divider'
-export { default as Dropdown } from './Dropdown'
+export { default as DropdownMenu } from './DropdownMenu'
 export { default as FileSelect } from './FileSelect'
 export { default as Form } from './Form'
 export { default as FormRow } from './FormRow'
