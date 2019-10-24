@@ -1,5 +1,5 @@
 import { Component, $$, DefaultDOMElement } from '../dom'
-import { getRelativeMouseBounds, isEqual, isFunction } from '../util'
+import { isEqual, isFunction, platform } from '../util'
 import renderMenu from './renderMenu'
 
 export default class Popover extends Component {
@@ -50,7 +50,7 @@ export default class Popover extends Component {
     const state = this.state
     if (state.requester === requester && isEqual(desiredPos, state.desiredPos)) {
       this._hide()
-      return
+      return false
     }
 
     // Note: this prevents a potentially triggered hide, if a new popover request has come in
@@ -61,6 +61,8 @@ export default class Popover extends Component {
     setTimeout(() => {
       this._showContent(content, requester, desiredPos)
     }, 0)
+
+    return true
   }
 
   release (requester) {
@@ -72,22 +74,24 @@ export default class Popover extends Component {
   _showContent (content, requester, desiredPos) {
     this.setState({ content, requester, desiredPos })
     const el = this.getElement()
-    const containerEl = this.props.getContainer()
-    // TODO: we could do some positioning here to stay within the container bounds
-    // TODO: getRelativeMouseBounds() is not the right name for us here
-    // but the logic is what we need
-    const bounds = getRelativeMouseBounds({ clientX: desiredPos.x, clientY: desiredPos.y }, containerEl.getNativeElement())
+    const bounds = this._getBounds()
+    // console.log('bounds', bounds, 'desiredPos', desiredPos)
+
+    // TODO: we should do some positioning here to stay within the screen/container bounds
     const menuWidth = el.htmlProp('offsetWidth')
-    // By default, context menu are aligned left bottom to the mouse coordinate clicked
-    let leftPos = bounds.left - menuWidth / 2
+    // By default, context menu are aligned left bottom to the desired coordinate
+    let leftPos = bounds.x + desiredPos.x - menuWidth / 2
     // Must not exceed left bound
     leftPos = Math.max(leftPos, 0)
     // Must not exceed right bound
-    const maxLeftPos = bounds.left + bounds.right - menuWidth
+    const maxLeftPos = bounds.right - menuWidth
     leftPos = Math.min(leftPos, maxLeftPos)
+    const topPos = desiredPos.y - bounds.y
+    const maxHeight = bounds.bottom - topPos
     el.css({
-      top: bounds.top,
-      left: leftPos
+      top: topPos,
+      left: leftPos,
+      'max-height': maxHeight
     })
     el.removeClass('sm-hidden')
     // NOTE: this is a tricky mechanism trying to detect any mousedowns outside of the context menu
@@ -100,6 +104,20 @@ export default class Popover extends Component {
     if (!this._hasGlobalMousedownListener) {
       DefaultDOMElement.getBrowserWindow().on('click', this._onMousedownOutside, this, { once: true, capture: true })
       this._hasGlobalMousedownListener = true
+    }
+  }
+
+  _getBounds () {
+    if (platform.inBrowser) {
+      let containerEl
+      if (this.props.getContainer) {
+        containerEl = this.props.getContainer().getNativeElement()
+      } else {
+        containerEl = window.document
+      }
+      return containerEl.getBoundingClientRect()
+    } else {
+      return { left: 0, top: 0, bottom: 0, right: 0 }
     }
   }
 
@@ -138,6 +156,10 @@ export default class Popover extends Component {
 
   _hide () {
     // console.log('Hiding')
+    const requester = this.state.requester
+    if (requester && requester.onClosePopover) {
+      requester.onClosePopover()
+    }
     this.setState(this.getInitialState())
   }
 }
