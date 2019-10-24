@@ -151,7 +151,7 @@ class NodeBuilder {
       case 'one':
         return Object.assign({ default: null }, options, { type: 'id', targetTypes: options.targetTypes, reflectionType: type })
       case 'many':
-        return Object.assign({ default: [] }, options, { type: 'id', targetTypes: options.targetTypes, reflectionType: type })
+        return Object.assign({ default: [] }, options, { type: ['array', 'id'], owned: false, targetTypes: options.targetTypes, reflectionType: type })
       default:
         throw new Error(`Unsupported type: ${type}`)
     }
