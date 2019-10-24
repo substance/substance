@@ -1,4 +1,5 @@
 import _requiresPropertyElements from './_requiresPropertyElements'
+import { isArray } from '../util'
 
 export default function createValidator (rootType, definition) {
   const nodeChecks = new Map()
@@ -225,9 +226,12 @@ function _attributeChecker (type, propertyName, check) {
     const str = el.getAttribute(propertyName)
     if (str) {
       // checker returns error message
-      const error = check(str, el)
-      if (error) {
-        state.error({ type, propertyName, error })
+      let errors = check(str, el)
+      if (errors) {
+        if (!isArray(errors)) errors = [errors]
+        for (const error of errors) {
+          state.error({ type, propertyName, error })
+        }
       }
     }
     state.attributeChecked(propertyName)
