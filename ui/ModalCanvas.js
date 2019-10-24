@@ -1,4 +1,4 @@
-import { Component, $$ } from '../dom'
+import { Component, $$, domHelpers } from '../dom'
 import { keys, parseKeyEvent } from '../util'
 
 export default class ModalCanvas extends Component {
@@ -18,6 +18,8 @@ export default class ModalCanvas extends Component {
       )
       el.on('keydown', this._onKeydown)
     }
+    // do not let the global context menu handler handle this
+    el.on('contextmenu', domHelpers.stopAndPrevent)
     return el
   }
 
