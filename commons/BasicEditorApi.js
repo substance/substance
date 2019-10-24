@@ -10,6 +10,10 @@ export default class BasicEditorApi {
     return this.editorSession.getDocument()
   }
 
+  getRoot () {
+    return this.getDocument().root
+  }
+
   deleteNode (nodeId) {
     this.editorSession.transaction(tx => {
       documentHelpers.deepDeleteNode(tx, nodeId)
@@ -58,6 +62,26 @@ export default class BasicEditorApi {
     this.editorSession.transaction(tx => {
       documentHelpers.removeAt(tx, [parent.id, propertyName], pos)
       documentHelpers.insertAt(tx, [parent.id, propertyName], pos + diff, node.id)
+    })
+  }
+
+  addNode (collectionPath, nodeData) {
+    this.editorSession.transaction(tx => {
+      const node = tx.create(nodeData)
+      documentHelpers.append(tx, collectionPath, node.id)
+      this._selectItem(tx, node)
+    })
+  }
+
+  selectItem (item) {
+    this._selectItem(this.editorSession, item)
+  }
+
+  _selectItem (tx, node) {
+    tx.setSelection({
+      type: 'custom',
+      nodeId: node.id,
+      customType: node.type
     })
   }
 }

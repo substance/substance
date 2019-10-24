@@ -14,7 +14,8 @@ export default class AddAuthorCommand extends Command {
       if (!modal) return
       const firstName = modal.refs.firstName.val()
       const lastName = modal.refs.lastName.val()
-      context.api.addAuthor({ firstName, lastName })
+      const api = context.api
+      api.addNode([api.getRoot().id, 'authors'], { type: 'author', firstName, lastName })
     })
   }
 }
