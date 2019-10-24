@@ -1,5 +1,5 @@
 import { Component, $$ } from '../dom'
-import { keys, parseKeyEvent, platform } from '../util'
+import { keys, parseKeyEvent } from '../util'
 
 export default class ModalCanvas extends Component {
   getActionHandlers () {
