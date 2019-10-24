@@ -1,9 +1,11 @@
 import * as HtmlConverters from './HtmlConverters'
+import * as nodeHelpers from './nodeHelpers'
 
 export { default as AbstractEditor } from './AbstractEditor'
 export { default as AddAuthorCommand } from './AddAuthorCommand'
 export { default as AddAffiliationCommand } from './AddAffiliationCommand'
 export { default as AuthorsListComponent } from './AuthorsListComponent'
+export { default as AffiliationLabelManager } from './AffiliationLabelManager'
 export { default as AffiliationsListComponent } from './AffiliationsListComponent'
 export { default as BasicEditorApi } from './BasicEditorApi'
 export { default as CreateLinkCommand } from './CreateLinkCommand'
@@ -18,6 +20,7 @@ export { HtmlConverters }
 export { default as ImageComponent } from './ImageComponent'
 export { default as MoveAuthorCommand } from './MoveAuthorCommand'
 export { default as MoveAffiliationCommand } from './MoveAffiliationCommand'
+export { nodeHelpers }
 export { default as LinkComponent } from './LinkComponent'
 export { default as LinkModal } from './LinkModal'
 export { default as ListComponent } from './ListComponent'

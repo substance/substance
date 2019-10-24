@@ -1,6 +1,7 @@
 import { Component, $$, domHelpers } from '../dom'
 import { Blocker } from '../ui'
 import SelectableNodeComponent from './SelectableNodeComponent'
+import { getLabel } from './nodeHelpers'
 
 export default class AffiliationsListComponent extends Component {
   didMount () {
@@ -42,6 +43,7 @@ class _AffiliationComponent extends SelectableNodeComponent {
     if (this.state.selected) el.addClass('sm-selected')
 
     el.append(
+      $$('span', { class: 'se-label' }, getLabel(node)),
       $$('span', { class: 'se-name' }, node.name)
     )
 

@@ -1,6 +1,7 @@
 import { Component, $$, domHelpers } from '../dom'
 import { Blocker } from '../ui'
 import SelectableNodeComponent from './SelectableNodeComponent'
+import { getLabel } from './nodeHelpers'
 
 export default class AuthorsListComponent extends Component {
   didMount () {
@@ -41,12 +42,23 @@ class _AuthorComponent extends SelectableNodeComponent {
     const node = this.props.node
     // Note: using a button so that the browser treats it as UI element, not content (e.g. re selections)
     const el = $$('button', { class: 'sc-author' })
-
     if (this.state.selected) el.addClass('sm-selected')
+
     el.append(
       $$('span', { class: 'se-first-name' }, node.firstName),
       $$('span', { class: 'se-last-name' }, node.lastName)
     )
+
+    if (node.affiliations && node.affiliations.length > 0) {
+      const affiliations = node.resolve('affiliations')
+      const affLabels = affiliations.map(aff => getLabel(aff))
+      affLabels.sort()
+      el.append(
+        $$('span', { class: 'se-affiliations' },
+          ...affLabels.map(label => $$('span', { class: 'se-affiliation' }, label))
+        )
+      )
+    }
 
     // add a blocker so that browser can not interact with the rendered content
     el.append($$(Blocker))
