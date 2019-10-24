@@ -632,7 +632,7 @@ export default class Component extends EventEmitter {
       if (comp._doesHandleAction(action)) {
         const args = Array.prototype.slice.call(arguments, 1)
         const res = comp._handleAction(action, args)
-        return Promise.resolve(res || true)
+        return Promise.resolve(res)
       }
       comp = comp.getParent()
     }
