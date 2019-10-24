@@ -201,24 +201,41 @@ export default class AbstractEditorSession extends EventEmitter {
   // EXPERIMENTAL: for certain cases it is useful to store volatile information on nodes
   // Then the data does not need to be disposed when a node is deleted.
   updateNodeStates (tuples, options = {}) {
-    // using a pseudo change to get into the existing updating mechanism
     const doc = this._document
-    let change = doc._createDocumentChange([], {}, {})
-    let info = { action: 'node-state-update' }
-    change._extractInformation()
-    change.info = info
+    // HACK: using internal EditorState API
+    const editorStateImpl = this.editorState._getImpl()
+    const propagate = options.propagate || !editorStateImpl.isFlowing
+    let change, info
+    const update = editorStateImpl.getUpdate('document')
+    const isPseudoChange = !update
+    if (update) {
+      change = update.change
+      info = update.info
+    } else {
+      // using a pseudo change to get into the existing updating mechanism
+      // TODO: do we really need the pseudo change?
+      change = doc._createDocumentChange([], {}, {})
+      info = { action: 'node-state-update' }
+      change._extractInformation()
+      change.info = info
+    }
+
     for (let [id, state] of tuples) {
       let node = doc.get(id)
       if (!node) continue
       if (!node.state) node.state = {}
       Object.assign(node.state, state)
+      editorStateImpl.documentObserver.setDirty([id])
+      // TODO: do we really need this, or are we good with just updating DocumentObserver
       change.updated[id] = true
     }
-    if (!options.silent) {
+    // emit the pseudo change
+    if (isPseudoChange && !options.silent) {
       doc._notifyChangeListeners(change, info)
       this.emit('change', change, info)
     }
-    if (options.propagate) {
+    // and propagate if that is
+    if (propagate) {
       this.editorState.propagateUpdates()
     }
   }
