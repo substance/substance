@@ -38,7 +38,12 @@ export default class DocumentArchive extends EventEmitter {
     return documentId
   }
 
-  addAsset (file) {
+  addAsset (file, blob) {
+    // sometimes it is desired to override the native
+    // file data e.g. name
+    // in that case, you can provide the file data seperate from the blob
+    // otherwise the file must be a blob
+    if (!blob) blob = file
     let assetId = uuid()
     let [name, ext] = _getNameAndExtension(file.name)
     let filePath = this._getUniqueFileName(name, ext)
@@ -55,7 +60,7 @@ export default class DocumentArchive extends EventEmitter {
     this.buffer.addBlob(assetId, {
       id: assetId,
       path: filePath,
-      blob: file
+      blob
     })
     // ATTENTION: blob urls are not supported in nodejs
     // and I do not see that this is really necessary
@@ -63,12 +68,12 @@ export default class DocumentArchive extends EventEmitter {
     // so that we can see if the rest of the system is working
     if (platform.inBrowser) {
       this._pendingFiles.set(filePath, {
-        blob: file,
-        blobUrl: URL.createObjectURL(file)
+        blob,
+        blobUrl: URL.createObjectURL(blob)
       })
     } else {
       this._pendingFiles.set(filePath, {
-        blob: file,
+        blob,
         blobUrl: `PSEUDO-BLOB-URL:${filePath}`
       })
     }
