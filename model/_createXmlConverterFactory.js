@@ -208,8 +208,10 @@ function _importAttributes (nodeSpec, el, node) {
         break
       }
       case 'string-array':
+        val = str.split(';').map(s => s.trim())
+        break
       case 'many': {
-        val = str.split(',').map(s => s.trim())
+        val = str.split(/\s+/).map(s => s.trim())
         break
       }
       default:
@@ -235,8 +237,10 @@ function _exportAttributes (nodeSpec, node, el) {
         break
       }
       case 'string-array':
+        str = val.join(';')
+        break
       case 'many': {
-        str = val.join(',')
+        str = val.join(' ')
         break
       }
       default:

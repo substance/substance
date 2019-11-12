@@ -189,7 +189,7 @@ function _createPropertyChecker (nodeSpec, propName, propSpec) {
     case 'many': {
       return _attributeChecker(nodeType, propName, (str, el) => {
         const errors = []
-        const ids = str.split(',').map(id => id.trim())
+        const ids = str.split(/\s+/).map(id => id.trim())
         for (const id of ids) {
           _checkTargetType(el, id, errors)
         }
