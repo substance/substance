@@ -24,6 +24,7 @@ export default class Button extends Component {
     const { children, active, disabled } = this.props
     const size = this.props.size || 'default'
     const style = this.props.style || 'default'
+    const inverted = Boolean(this.props.inverted)
 
     const el = $$('button', { class: this._getClass() })
       .addClass('sm-style-' + style)
@@ -33,6 +34,9 @@ export default class Button extends Component {
     }
     if (active) {
       el.addClass('sm-active')
+    }
+    if (inverted) {
+      el.addClass('sm-inverted')
     }
     if (disabled) {
       el.append($$('span', { class: 'se-blocker' }))
