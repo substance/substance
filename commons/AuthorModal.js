@@ -10,7 +10,7 @@ export default function AuthorModal (props) {
   const root = document.root
   const affiliations = root.resolve('affiliations')
 
-  return $$(Modal, { cancelLabel: 'Cancel', confirmLabel, size: 'small' },
+  return $$(Modal, { cancelLabel: 'Cancel', confirmLabel, size: 'medium' },
     $$(Form, {},
       $$(FormRow, { label: 'First Name' },
         $$(Input, { autofocus: true, value: node.firstName || '' }).ref('firstName')
