@@ -1,4 +1,4 @@
-import { $$ } from 'substance'
+import { $$ } from '../dom'
 
 export default function Link (props) {
   const el = $$('a').addClass('sc-link')
@@ -14,7 +14,10 @@ export default function Link (props) {
   }
   const children = props.children
   const attributes = Object.assign({}, props)
+  // TODO: can we do this more elegantly?
   delete attributes.style
+  delete attributes.inverted
+  delete attributes.inlineBlock
   delete attributes.children
   el.attr(attributes)
   el.append(children)
