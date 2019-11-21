@@ -45,7 +45,7 @@
     "rollup-plugin-commonjs": "^10.0.2",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "standard": "^11.0.1",
+    "standard": "^14.1.0",
     "substance-bundler": "0.27.1",
     "substance-test": "0.15.0",
     "tap-spec": "^5.0.0"
