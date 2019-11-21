@@ -1,6 +1,7 @@
 import isString from './isString'
 import isArray from './isArray'
 import { get, setWith, unset } from '../vendor/lodash-es'
+import hasOwnProperty from './hasOwnProperty'
 
 /*
   An object that can be access via path API.
@@ -88,7 +89,7 @@ class PathObject {
   clear () {
     var root = this.getRoot()
     for (var key in root) {
-      if (root.hasOwnProperty(key)) {
+      if (hasOwnProperty(root, key)) {
         delete root[key]
       }
     }

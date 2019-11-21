@@ -48,11 +48,11 @@ export default class InsertInlineNodeCommand extends Command {
     When cursor is not collapsed tool may be displayed in context (e.g. in an
     overlay)
   */
-  showInContext (sel, context) { // eslint-disable-line no-unused
+  showInContext (sel, context) {
     return !sel.isCollapsed()
   }
 
-  isDisabled (params, context) { // eslint-disable-line no-unused
+  isDisabled (params, context) {
     const editorSession = this.getEditorSession(params, context)
     const sel = editorSession.getSelection()
     const selectionState = editorSession.getSelectionState()
@@ -88,7 +88,7 @@ export default class InsertInlineNodeCommand extends Command {
     })
   }
 
-  createNodeData (tx, params, context) { // eslint-disable-line no-unused
+  createNodeData (tx, params, context) {
     throw new Error('This method is abstract')
   }
 }

@@ -24,6 +24,7 @@ import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
 import { SNIPPET_ID, getContainerRoot, compareCoordinates } from './documentHelpers'
 import { transformDocumentChange } from './operationHelpers'
+import hasOwnProperty from '../util/hasOwnProperty'
 
 const converter = new JSONConverter()
 
@@ -515,7 +516,7 @@ export default class Document extends EventEmitter {
       const parent = node.getParent()
       if (parent) {
         let parentLevel
-        if (levels.hasOwnProperty(parent.id)) {
+        if (hasOwnProperty(levels, parent.id)) {
           parentLevel = levels[parent.id]
         } else {
           parentLevel = this._computeDependencyLevel(parent, levels, visited)

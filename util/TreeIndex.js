@@ -2,6 +2,7 @@ import { get, setWith } from '../vendor/lodash-es'
 import isString from './isString'
 import isArray from './isArray'
 import deleteFromArray from './deleteFromArray'
+import hasOwnProperty from './hasOwnProperty'
 
 class TreeNode {}
 
@@ -63,7 +64,7 @@ export default class TreeIndex {
   clear () {
     const root = this
     for (const key in root) {
-      if (root.hasOwnProperty(key)) {
+      if (hasOwnProperty(root, key)) {
         delete root[key]
       }
     }
@@ -80,7 +81,7 @@ export default class TreeIndex {
   _traverse (root, path, fn) {
     let id
     for (id in root) {
-      if (!root.hasOwnProperty(id)) continue
+      if (!hasOwnProperty(root, id)) continue
       const child = root[id]
       const childPath = path.concat([id])
       if (child instanceof TreeNode) {

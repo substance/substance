@@ -174,7 +174,7 @@ export default class AnnotationCommand extends Command {
     @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
   */
-  getCommandState (params, context) { // eslint-disable-line no-unused
+  getCommandState (params, context) {
     const sel = params.selection
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
@@ -216,7 +216,7 @@ export default class AnnotationCommand extends Command {
     @returns {Object} info object with execution details.
   */
   // Execute command and trigger transformations
-  execute (params, context) { // eslint-disable-line no-unused
+  execute (params, context) {
     const commandState = params.commandState
 
     if (commandState.disabled) return false

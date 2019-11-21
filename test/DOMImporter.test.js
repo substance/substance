@@ -24,8 +24,8 @@ test('DOMImporter: creating a DOMImporter', (t) => {
   }, 'should throw if schema is not given')
   // fail if a converter has no associated type
   t.throws(() => {
-    new DOMImporter({
-      schema, // eslint-disable-line no-new
+    new DOMImporter({ // eslint-disable-line no-new
+      schema,
       converters: [{
         matchElement () { return true }
       }]
@@ -33,16 +33,16 @@ test('DOMImporter: creating a DOMImporter', (t) => {
   }, 'should throw if a converter does not have associated type')
   // fail if a converter has no matcher
   t.throws(() => {
-    new DOMImporter({
-      schema, // eslint-disable-line no-new
+    new DOMImporter({ // eslint-disable-line no-new
+      schema,
       converters: [{
         type: 'paragraph'
       }]
     })
   }, 'should throw if a converter does not have a matcher function')
   t.throws(() => {
-    new DOMImporter({
-      schema, // eslint-disable-line no-new
+    new DOMImporter({ // eslint-disable-line no-new
+      schema,
       converters: [{
         type: 'foo', tagName: 'h1'
       }]

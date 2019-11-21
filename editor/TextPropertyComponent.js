@@ -235,7 +235,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
 
   _getCharPos (node, offset) {
     let charPos = offset
-    let parent, childIdx
+    let childIdx
 
     /*
       In the following implementation we are exploiting two facts
@@ -247,7 +247,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
       in just one iteration.
     */
 
-    parent = node.getParent()
+    const parent = node.getParent()
     if (node.isTextNode()) {
       // TextNode is first child
       if (node === parent.firstChild) {

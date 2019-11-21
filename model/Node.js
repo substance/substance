@@ -9,6 +9,7 @@ import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
 import NodeProperty from './NodeProperty'
 import NodeSchema from './NodeSchema'
+import hasOwnProperty from '../util/hasOwnProperty'
 
 const VALUE_TYPES = new Set(['id', 'string', 'number', 'boolean', 'enum', 'object', 'array', 'coordinate'])
 
@@ -197,7 +198,7 @@ export default class Node extends EventEmitter {
   static _ensureSchemaIsCompiled () {
     const NodeClass = this
     // If the schema has not been set explicitly, derive it from the parent schema
-    if (!NodeClass.hasOwnProperty('compiledSchema')) {
+    if (!hasOwnProperty(NodeClass, 'compiledSchema')) {
       NodeClass._compileSchema()
     }
   }

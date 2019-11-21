@@ -3,6 +3,7 @@ import isString from '../util/isString'
 import flatten from '../util/flatten'
 import substanceGlobals from '../util/substanceGlobals'
 import getClassName from '../util/_getClassName'
+import hasOwnProperty from '../util/hasOwnProperty'
 import DefaultDOMElement from './DefaultDOMElement'
 import VirtualElement from './VirtualElement'
 
@@ -138,7 +139,7 @@ export default class RenderingEngine {
     if (props) {
       const keys = Object.keys(props)
       for (const key of keys) {
-        if (!props.hasOwnProperty(key)) continue
+        if (!hasOwnProperty(props, key)) continue
         const val = props[key]
         // ATTENTION: assuming that all event handlers start with 'on'
         const m = /^on([A-Za-z]+)$/.exec(key)
@@ -1213,7 +1214,7 @@ function _updateHash ({ newHash, oldHash, update, remove }) {
     })
   } else {
     for (const key in oldHash) {
-      if (oldHash.hasOwnProperty(key) && !updatedKeys[key]) {
+      if (hasOwnProperty(oldHash, key) && !updatedKeys[key]) {
         remove(key)
       }
     }

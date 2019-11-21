@@ -1,5 +1,6 @@
 import forEach from './forEach'
 import isObject from './isObject'
+import hasOwnProperty from './hasOwnProperty'
 
 // for debugging
 const DEBUG = false
@@ -94,7 +95,7 @@ function _on (event, method, context) {
   /* eslint-disable no-invalid-this */
   var bindings
   validateMethod(method, context)
-  if (this.__events__.hasOwnProperty(event)) {
+  if (hasOwnProperty(this.__events__, event)) {
     bindings = this.__events__[event]
   } else {
     // Auto-initialize bindings list

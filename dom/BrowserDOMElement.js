@@ -11,7 +11,7 @@ const SIGNATURE = uuid('_BrowserDOMElement')
 
 function _attach (nativeEl, browserDOMElement) {
   if (!browserDOMElement._isBrowserDOMElement) throw new Error('Invalid argument')
-  if (nativeEl.hasOwnProperty(SIGNATURE)) throw new Error('Already attached')
+  if (Object.prototype.hasOwnProperty.call(nativeEl, SIGNATURE)) throw new Error('Already attached')
   nativeEl[SIGNATURE] = browserDOMElement
 }
 

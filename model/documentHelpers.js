@@ -11,6 +11,7 @@ import isFunction from '../util/isFunction'
 import {
   isEntirelySelected, getNodeIdsCoveredByContainerSelection
 } from './selectionHelpers'
+import hasOwnProperty from '../util/hasOwnProperty'
 
 /**
   For a given selection get all property annotations
@@ -544,7 +545,7 @@ export function createNodeFromJson (doc, data) {
   }
   for (const p of nodeSchema) {
     const name = p.name
-    if (!data.hasOwnProperty(name)) continue
+    if (!hasOwnProperty(data, name)) continue
     const val = data[name]
     if (p.isReference()) {
       if (p.isArray()) {

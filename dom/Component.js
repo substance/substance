@@ -1135,8 +1135,7 @@ export default class Component extends EventEmitter {
     }
     el = DefaultDOMElement.wrap(el)
     const ComponentClass = this
-    let comp
-    comp = new ComponentClass(null, props, options)
+    const comp = new ComponentClass(null, props, options)
     comp.mount(el, options)
     return comp
   }

@@ -8,6 +8,7 @@ import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
 import _isDefined from '../util/_isDefined'
+import hasOwnProperty from '../util/hasOwnProperty'
 import without from '../util/without'
 import map from '../util/map'
 import DOMElement from './DOMElement'
@@ -655,7 +656,7 @@ VirtualElement.createElement = function () {
   var classNames, ref
   var eventHandlers = []
   for (var key in _second) {
-    if (!_second.hasOwnProperty(key)) continue
+    if (!hasOwnProperty(_second, key)) continue
     var val = _second[key]
     switch (key) {
       case 'class':

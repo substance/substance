@@ -1,4 +1,5 @@
 import forEach from './forEach'
+import hasOwnProperty from './hasOwnProperty'
 
 // just as a reference to detect name collisions
 // with native Object properties
@@ -28,7 +29,7 @@ export default class DeprecatedRegistry {
    * @memberof module:Basics.Registry.prototype
    */
   contains (name) {
-    return this.entries.hasOwnProperty(name)
+    return hasOwnProperty(this.entries, name)
   }
 
   /**
