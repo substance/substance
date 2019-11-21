@@ -25,7 +25,7 @@ export default class HttpStorageClient {
   }
 
   write (archiveId, data, cb) {
-    let form = new FormData()
+    const form = new FormData()
     forEach(data.resources, (record, filePath) => {
       if (record.encoding === 'blob') {
         // removing the blob from the record and submitting it as extra part

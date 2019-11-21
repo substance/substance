@@ -29,7 +29,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
     const disabled = this.props.disabled
 
     // console.log('##### IsolatedNodeComponent.render()', $$.capturing);
-    let el = $$('div')
+    const el = $$('div')
     el.addClass(this.getClassNames())
       .addClass('sc-isolated-node')
       .addClass('sm-' + this.props.node.type)
@@ -59,7 +59,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
         .append(BRACKET)
     )
 
-    let content = this.renderContent($$, node, {
+    const content = this.renderContent($$, node, {
       disabled: this.props.disabled || shouldRenderBlocker
     }).ref('content')
     content.attr('contenteditable', false)
@@ -93,7 +93,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
     // console.log('IsolatedNodeComponent: selecting node.');
     const editorSession = this.getEditorSession()
     const nodeId = this.props.node.id
-    let selData = {
+    const selData = {
       type: 'node',
       nodeId: nodeId
     }
@@ -121,7 +121,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
   }
 
   grabFocus (event) {
-    let content = this.refs.content
+    const content = this.refs.content
     if (content.grabFocus) {
       content.grabFocus(event)
       return true
@@ -145,11 +145,11 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
   _deriveStateFromSelectionState (sel, selState) {
     const surface = this._getSurfaceForSelection(sel, selState)
     const parentSurface = this.getParentSurface()
-    let newState = { mode: null, unblocked: null }
+    const newState = { mode: null, unblocked: null }
     if (!surface) return newState
     // detect cases where this node is selected or co-selected by inspecting the selection
     if (surface === parentSurface) {
-      let nodeId = this.props.node.id
+      const nodeId = this.props.node.id
       if (sel.isNodeSelection() && sel.getNodeId() === nodeId) {
         if (sel.isFull()) {
           newState.mode = 'selected'
@@ -166,10 +166,10 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
         newState.mode = 'co-selected'
       }
     } else {
-      let surfaceId = sel.surfaceId
-      let id = this.getId()
+      const surfaceId = sel.surfaceId
+      const id = this.getId()
       if (id.length < surfaceId.length && surfaceId.startsWith(id) && surfaceId.charCodeAt(id.length) === SLASH) {
-        let tail = surfaceId.slice(id.length + 1)
+        const tail = surfaceId.slice(id.length + 1)
         if (tail.indexOf('/') > 0) {
           newState.mode = 'co-focused'
           newState.unblocked = true
@@ -185,7 +185,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
   get _isIsolatedNodeComponent () { return true }
 
   static getDOMCoordinate (comp, coor) {
-    let { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
+    const { start, end } = IsolatedNodeComponent.getDOMCoordinates(comp)
     if (coor.offset === 0) return start
     else return end
   }
@@ -206,7 +206,7 @@ export default class IsolatedNodeComponent extends AbstractIsolatedNodeComponent
   }
 
   static getCoordinate (nodeEl, options) {
-    let comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
+    const comp = Component.unwrap(nodeEl, 'strict').context.isolatedNodeComponent
     let offset = null
     if (options.direction === 'left' || nodeEl === comp.refs.left.el) {
       offset = 0

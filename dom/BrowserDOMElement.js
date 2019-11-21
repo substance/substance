@@ -66,9 +66,9 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setDoctype (qualifiedNameStr, publicId, systemId) {
-    let ownerDocument = this._getNativeOwnerDocument()
-    let oldDocType = ownerDocument.doctype
-    let newDocType = ownerDocument.implementation.createDocumentType(
+    const ownerDocument = this._getNativeOwnerDocument()
+    const oldDocType = ownerDocument.doctype
+    const newDocType = ownerDocument.implementation.createDocumentType(
       qualifiedNameStr, publicId, systemId
     )
     if (oldDocType) {
@@ -160,12 +160,12 @@ class BrowserDOMElement extends DOMElement {
   }
 
   setTagName (tagName) {
-    let newEl = this.createElement(tagName)
-    let attributes = this.el.attributes
-    let l = attributes.length
+    const newEl = this.createElement(tagName)
+    const attributes = this.el.attributes
+    const l = attributes.length
     let i
     for (i = 0; i < l; i++) {
-      let attr = attributes.item(i)
+      const attr = attributes.item(i)
       newEl.setAttribute(attr.name, attr.value)
     }
     if (this.eventListeners) {
@@ -191,7 +191,7 @@ class BrowserDOMElement extends DOMElement {
   getStyle (name) {
     let val = this.el.style[name]
     if (!val) {
-      let computedStyle = this.getComputedStyle()
+      const computedStyle = this.getComputedStyle()
       val = computedStyle[name]
     }
     return val
@@ -218,8 +218,8 @@ class BrowserDOMElement extends DOMElement {
 
   getInnerHTML () {
     if (this._isXML()) {
-      let xs = new window.XMLSerializer()
-      let result = Array.prototype.map.call(this.el.childNodes, c => xs.serializeToString(c))
+      const xs = new window.XMLSerializer()
+      const result = Array.prototype.map.call(this.el.childNodes, c => xs.serializeToString(c))
       return result.join('')
     } else {
       return this.el.innerHTML
@@ -237,7 +237,7 @@ class BrowserDOMElement extends DOMElement {
     // NOTE: this was necessary in some browsers, which did not provide
     // el.outerHTML for XML elements
     if (this._isXML()) {
-      let xs = new window.XMLSerializer()
+      const xs = new window.XMLSerializer()
       return xs.serializeToString(this.el)
     } else {
       return this.el.outerHTML
@@ -261,7 +261,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getChildNodes () {
-    let childNodes = []
+    const childNodes = []
     for (let node = this.el.firstChild; node; node = node.nextSibling) {
       childNodes.push(BrowserDOMElement.wrap(node))
     }
@@ -279,7 +279,7 @@ class BrowserDOMElement extends DOMElement {
   getChildren () {
     // Some browsers don't filter elements here and also include text nodes,
     // that why we can't use el.children
-    let children = []
+    const children = []
     for (let node = this.el.firstChild; node; node = node.nextSibling) {
       if (node.nodeType === window.Node.ELEMENT_NODE) {
         children.push(BrowserDOMElement.wrap(node))
@@ -305,7 +305,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getFirstChild () {
-    let firstChild = this.el.firstChild
+    const firstChild = this.el.firstChild
     /* istanbul ignore else */
     if (firstChild) {
       return BrowserDOMElement.wrap(firstChild)
@@ -325,7 +325,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getNextSibling () {
-    let next = this.el.nextSibling
+    const next = this.el.nextSibling
     /* istanbul ignore else */
     if (next) {
       return BrowserDOMElement.wrap(next)
@@ -335,7 +335,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getPreviousSibling () {
-    let previous = this.el.previousSibling
+    const previous = this.el.previousSibling
     /* istanbul ignore else */
     if (previous) {
       return BrowserDOMElement.wrap(previous)
@@ -345,7 +345,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   clone (deep) {
-    let clone = this.el.cloneNode(deep)
+    const clone = this.el.cloneNode(deep)
     return BrowserDOMElement.wrap(clone)
   }
 
@@ -354,39 +354,39 @@ class BrowserDOMElement extends DOMElement {
   }
 
   createElement (tagName) {
-    let doc = this._getNativeOwnerDocument()
-    let el = doc.createElement(tagName)
+    const doc = this._getNativeOwnerDocument()
+    const el = doc.createElement(tagName)
     return BrowserDOMElement.wrap(el)
   }
 
   createTextNode (text) {
-    let doc = this._getNativeOwnerDocument()
-    let el = doc.createTextNode(text)
+    const doc = this._getNativeOwnerDocument()
+    const el = doc.createTextNode(text)
     return BrowserDOMElement.wrap(el)
   }
 
   createComment (data) {
-    let doc = this._getNativeOwnerDocument()
-    let el = doc.createComment(data)
+    const doc = this._getNativeOwnerDocument()
+    const el = doc.createComment(data)
     return BrowserDOMElement.wrap(el)
   }
 
   createProcessingInstruction (name, data) {
-    let doc = this._getNativeOwnerDocument()
-    let el = doc.createProcessingInstruction(name, data)
+    const doc = this._getNativeOwnerDocument()
+    const el = doc.createProcessingInstruction(name, data)
     return BrowserDOMElement.wrap(el)
   }
 
   createCDATASection (data) {
-    let doc = this._getNativeOwnerDocument()
-    let el = doc.createCDATASection(data)
+    const doc = this._getNativeOwnerDocument()
+    const el = doc.createCDATASection(data)
     return BrowserDOMElement.wrap(el)
   }
 
   is (cssSelector) {
     // ATTENTION: looking at https://developer.mozilla.org/en/docs/Web/API/Element/matches
     // Element.matches might not be supported by some mobile browsers
-    let el = this.el
+    const el = this.el
     /* istanbul ignore else */
     if (this.isElementNode()) {
       return matches(el, cssSelector)
@@ -396,7 +396,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getParent () {
-    let parent = this.el.parentNode
+    const parent = this.el.parentNode
     /* istanbul ignore else */
     if (parent) {
       return BrowserDOMElement.wrap(parent)
@@ -418,7 +418,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getElementById (id) {
-    let result = this._getNativeOwnerDocument().getElementById(id)
+    const result = this._getNativeOwnerDocument().getElementById(id)
     if (result) {
       return BrowserDOMElement.wrap(result)
     } else {
@@ -470,7 +470,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   appendChild (child) {
-    let nativeChild = this._normalizeChild(child)
+    const nativeChild = this._normalizeChild(child)
     if (nativeChild) {
       this.el.appendChild(nativeChild)
     }
@@ -478,8 +478,8 @@ class BrowserDOMElement extends DOMElement {
   }
 
   insertAt (pos, child) {
-    let nativeChild = this._normalizeChild(child)
-    let childNodes = this.el.childNodes
+    const nativeChild = this._normalizeChild(child)
+    const childNodes = this.el.childNodes
     if (pos >= childNodes.length) {
       this.el.appendChild(nativeChild)
     } else {
@@ -529,7 +529,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   empty () {
-    let el = this.el
+    const el = this.el
     while (el.lastChild) {
       el.removeChild(el.lastChild)
     }
@@ -544,11 +544,11 @@ class BrowserDOMElement extends DOMElement {
   }
 
   serialize () {
-    let outerHTML = this.el.outerHTML
+    const outerHTML = this.el.outerHTML
     if (isString(outerHTML)) {
       return outerHTML
     } else {
-      let xs = new window.XMLSerializer()
+      const xs = new window.XMLSerializer()
       return xs.serializeToString(this.el)
     }
   }
@@ -565,8 +565,8 @@ class BrowserDOMElement extends DOMElement {
 
   _replaceNativeEl (newEl) {
     console.assert(newEl instanceof window.Node, 'Expecting a native element.')
-    let oldEl = this.el
-    let parentNode = oldEl.parentNode
+    const oldEl = this.el
+    const parentNode = oldEl.parentNode
     if (parentNode) {
       parentNode.replaceChild(newEl, oldEl)
     }
@@ -605,7 +605,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getWidth () {
-    let rect = this.el.getClientRects()[0]
+    const rect = this.el.getClientRects()[0]
     if (rect) {
       return rect.width
     } else {
@@ -614,7 +614,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getHeight () {
-    let rect = this.el.getClientRects()[0]
+    const rect = this.el.getClientRects()[0]
     if (rect) {
       return rect.height
     } else {
@@ -623,7 +623,7 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getOffset () {
-    let rect = this.el.getBoundingClientRect()
+    const rect = this.el.getBoundingClientRect()
     return {
       top: rect.top + document.body.scrollTop,
       left: rect.left + document.body.scrollLeft
@@ -631,13 +631,13 @@ class BrowserDOMElement extends DOMElement {
   }
 
   getPosition () {
-    return {left: this.el.offsetLeft, top: this.el.offsetTop}
+    return { left: this.el.offsetLeft, top: this.el.offsetTop }
   }
 
   getOuterHeight (withMargin) {
     let outerHeight = this.el.offsetHeight
     if (withMargin) {
-      let style = this.getComputedStyle()
+      const style = this.getComputedStyle()
       outerHeight += parseInt(style.marginTop, 10) + parseInt(style.marginBottom, 10)
     }
     return outerHeight
@@ -675,7 +675,7 @@ BrowserDOMElement.prototype._isBrowserDOMElement = true
 BrowserDOMElement.createDocument = function (format, opts = {}) {
   let doc
   if (format === 'xml') {
-    let xmlInstruction = []
+    const xmlInstruction = []
     if (opts.version) {
       xmlInstruction.push(`version="${opts.version}"`)
     }
@@ -686,7 +686,7 @@ BrowserDOMElement.createDocument = function (format, opts = {}) {
     if (xmlInstruction.length > 0) {
       xmlStr = `<?xml ${xmlInstruction.join(' ')}?><dummy/>`
     } else {
-      xmlStr = `<dummy/>`
+      xmlStr = '<dummy/>'
     }
     // HACK: didn't find a way to create an empty XML doc without a root element
     doc = (new window.DOMParser()).parseFromString(xmlStr, 'application/xml')
@@ -706,7 +706,7 @@ BrowserDOMElement.parseMarkup = function (str, format, options = {}) {
     str = `<div id='__snippet__'>${str}</div>`
   }
   let doc
-  let parser = new window.DOMParser()
+  const parser = new window.DOMParser()
   if (format === 'html') {
     doc = BrowserDOMElement.wrap(
       _check(
@@ -721,7 +721,7 @@ BrowserDOMElement.parseMarkup = function (str, format, options = {}) {
     )
   }
   if (options.snippet) {
-    let childNodes = doc.find('#__snippet__').childNodes
+    const childNodes = doc.find('#__snippet__').childNodes
     if (childNodes.length === 1) {
       return childNodes[0]
     } else {
@@ -733,7 +733,7 @@ BrowserDOMElement.parseMarkup = function (str, format, options = {}) {
 
   function _check (doc) {
     if (doc) {
-      let parserError = doc.querySelector('parsererror')
+      const parserError = doc.querySelector('parsererror')
       if (parserError) {
         // extracting a more readable message from parserError
         // which is a native DOM element
@@ -747,7 +747,7 @@ BrowserDOMElement.parseMarkup = function (str, format, options = {}) {
 BrowserDOMElement.wrap =
 BrowserDOMElement.wrapNativeElement = function (el) {
   if (el) {
-    let _el = _unwrap(el)
+    const _el = _unwrap(el)
     if (_el) {
       return _el
     } else if (el instanceof window.Node) {
@@ -807,7 +807,7 @@ BrowserDOMElement.isReverse = function (anchorNode, anchorOffset, focusNode, foc
     const _r2 = BrowserDOMElement.isReverse._r2
     _r1.setStart(anchorNode.getNativeElement(), anchorOffset)
     _r2.setStart(focusNode.getNativeElement(), focusOffset)
-    let cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2)
+    const cmp = _r1.compareBoundaryPoints(window.Range.START_TO_START, _r2)
     if (cmp === 1) {
       return true
     }
@@ -816,8 +816,8 @@ BrowserDOMElement.isReverse = function (anchorNode, anchorOffset, focusNode, foc
 }
 
 BrowserDOMElement.getWindowSelection = function () {
-  let nativeSel = window.getSelection()
-  let result = {
+  const nativeSel = window.getSelection()
+  const result = {
     anchorNode: BrowserDOMElement.wrap(nativeSel.anchorNode),
     anchorOffset: nativeSel.anchorOffset,
     focusNode: BrowserDOMElement.wrap(nativeSel.focusNode),
@@ -827,8 +827,8 @@ BrowserDOMElement.getWindowSelection = function () {
 }
 
 function matches (el, selector) {
-  let elProto = window.Element.prototype
-  let _matches = (
+  const elProto = window.Element.prototype
+  const _matches = (
     elProto.matches || elProto.matchesSelector ||
     elProto.msMatchesSelector || elProto.webkitMatchesSelector
   )
@@ -845,7 +845,7 @@ class AttributesMapAdapter {
   }
 
   get (name) {
-    let item = this.attributes.getNamedItem(name)
+    const item = this.attributes.getNamedItem(name)
     if (item) {
       return item.value
     }
@@ -864,7 +864,7 @@ class AttributesMapAdapter {
   }
 
   map (fn) {
-    let result = []
+    const result = []
     this.forEach((val, key) => { result.push(fn(val, key)) })
     return result
   }
@@ -893,7 +893,7 @@ class BrowserChildNodeIterator {
   }
 
   next () {
-    let next = this._next
+    const next = this._next
     this._curr = next
     this._next = next.nextSibling
     return BrowserDOMElement.wrap(next)

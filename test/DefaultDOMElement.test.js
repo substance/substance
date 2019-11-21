@@ -27,10 +27,10 @@ function DOMElementTests (impl) {
     } else {
       doc = MemoryDOMElement.createDocument('html')
     }
-    let nativeEl = doc.createElement('div')
-    let el = DefaultDOMElement.wrap(nativeEl)
+    const nativeEl = doc.createElement('div')
+    const el = DefaultDOMElement.wrap(nativeEl)
     t.ok(el._isDOMElement, 'native element should be wrapped')
-    let el2 = DefaultDOMElement.wrap(nativeEl)
+    const el2 = DefaultDOMElement.wrap(nativeEl)
     t.ok(el === el2, 'wrapping an element twice should give the same DOMElement instance')
     t.throws(() => {
       DefaultDOMElement.wrap(undefined)
@@ -159,8 +159,8 @@ function DOMElementTests (impl) {
   })
 
   test('Parsing an XML document with CDATA', (t) => {
-    let foo = DefaultDOMElement.parseSnippet(`<foo><![CDATA[TEST]]></foo>`, 'xml')
-    let cdata = foo.firstChild
+    const foo = DefaultDOMElement.parseSnippet('<foo><![CDATA[TEST]]></foo>', 'xml')
+    const cdata = foo.firstChild
     t.notNil(cdata, 'there should a child element')
     t.equal(cdata.nodeType, 'cdata', '.. which should be CDATA')
     t.equal(cdata.textContent, 'TEST', '.. with correct content')
@@ -169,14 +169,14 @@ function DOMElementTests (impl) {
 
   test('Parsing void and self-closing elements', (t) => {
     t.throws(() => {
-      DefaultDOMElement.parseSnippet(`<foo>`, 'xml')
+      DefaultDOMElement.parseSnippet('<foo>', 'xml')
     }, 'should not allow void elements in XML')
     t.doesNotThrow(() => {
-      DefaultDOMElement.parseSnippet(`<foo />`, 'xml')
+      DefaultDOMElement.parseSnippet('<foo />', 'xml')
     }, 'should allow self-closing elements in XML')
     t.doesNotThrow(() => {
-      DefaultDOMElement.parseSnippet(`<input>`, 'html')
-      DefaultDOMElement.parseSnippet(`<input />`, 'html')
+      DefaultDOMElement.parseSnippet('<input>', 'html')
+      DefaultDOMElement.parseSnippet('<input />', 'html')
     }, 'in HTML there are some allowed void elements, such as <input>')
     t.end()
   })
@@ -184,14 +184,14 @@ function DOMElementTests (impl) {
   test('Parsing DOCTYPE', t => {
     let doc
     t.doesNotThrow(() => {
-      doc = DefaultDOMElement.parseHTML(`<!DOCTYPE html><html></html>`)
+      doc = DefaultDOMElement.parseHTML('<!DOCTYPE html><html></html>')
     }, 'should parse DOCTYPE html correctly')
     t.equal(doc.getDoctype().name, 'html', 'HTML doctype should be correct')
     t.doesNotThrow(() => {
-      doc = DefaultDOMElement.parseXML(`<!DOCTYPE foo PUBLIC "-//FOO/BAR" "foo.dtd"><foo></foo>`)
+      doc = DefaultDOMElement.parseXML('<!DOCTYPE foo PUBLIC "-//FOO/BAR" "foo.dtd"><foo></foo>')
     }, 'should parse DOCTYPE html correctly')
-    let {name, publicId, systemId} = doc.getDoctype()
-    t.deepEqual({name, publicId, systemId}, {name: 'foo', publicId: '-//FOO/BAR', systemId: 'foo.dtd'}, 'XML doctype should be correct')
+    const { name, publicId, systemId } = doc.getDoctype()
+    t.deepEqual({ name, publicId, systemId }, { name: 'foo', publicId: '-//FOO/BAR', systemId: 'foo.dtd' }, 'XML doctype should be correct')
     t.end()
   })
 }

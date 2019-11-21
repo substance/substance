@@ -19,7 +19,7 @@ function diff (a, b, offset) {
     } else if (a && !b) {
       changes.push({ type: 'delete', start: offset, end: offset + a.length })
     } else {
-      let m = levenshtein(a, b)
+      const m = levenshtein(a, b)
       changes = _diff(a, b, m, offset)
     }
   }
@@ -29,7 +29,7 @@ function diff (a, b, offset) {
 function _diff (a, b, m, offset) {
   let i = b.length
   let j = a.length
-  let changes = []
+  const changes = []
   let current
   while (i > 0 && j > 0) {
     _next()
@@ -38,9 +38,9 @@ function _diff (a, b, m, offset) {
   return changes
 
   function _next () {
-    let d = m[i][j]
-    let ib = i - 1
-    let jb = j - 1
+    const d = m[i][j]
+    const ib = i - 1
+    const jb = j - 1
     // substitute
     if (m[ib][jb] < d) {
       if (current && current.type === 'replace') {

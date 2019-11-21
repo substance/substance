@@ -1,6 +1,6 @@
 export default function setDOMSelection (startNode, startOffset, endNode, endOffset) {
-  let wsel = window.getSelection()
-  let wrange = window.document.createRange()
+  const wsel = window.getSelection()
+  const wrange = window.document.createRange()
   if (startNode._isDOMElement) {
     startNode = startNode.getNativeElement()
   }

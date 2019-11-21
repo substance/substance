@@ -9,7 +9,7 @@ export default function (DocumentNode) {
     }
 
     getContent () {
-      let doc = this.getDocument()
+      const doc = this.getDocument()
       return doc.get(this.getContentPath())
     }
 
@@ -88,7 +88,7 @@ export default function (DocumentNode) {
     }
 
     _getNodeIdAt (idx) {
-      let content = this.getContent()
+      const content = this.getContent()
       if (idx < 0 || idx >= content.length) {
         // throw new Error('Array index out of bounds: ' + idx + ", " + content.length)
         return undefined

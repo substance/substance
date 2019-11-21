@@ -36,9 +36,9 @@ export default class SurfaceManager {
   }
 
   unregisterSurface (surface) {
-    let id = surface.getId()
+    const id = surface.getId()
     if (DEBUG) console.log(`Unregistering surface ${id}.`, surface.__id__)
-    let registeredSurface = this.surfaces.get(id)
+    const registeredSurface = this.surfaces.get(id)
     if (registeredSurface === surface) {
       this.surfaces.delete(id)
     }
@@ -47,11 +47,11 @@ export default class SurfaceManager {
   // TODO: would be good to have an index of surfaces by path
   _getSurfaceForProperty (path) {
     // first try the canonical one
-    let canonicalId = getKeyForPath(path)
+    const canonicalId = getKeyForPath(path)
     if (this.surfaces.has(canonicalId)) {
       return this.surfaces.get(canonicalId)
     }
-    for (let surface of this.surfaces.values()) {
+    for (const surface of this.surfaces.values()) {
       let surfacePath = null
       if (surface._isContainerEditor) {
         surfacePath = surface.getContainerPath()
@@ -74,7 +74,7 @@ export default class SurfaceManager {
         // blur the focused surface to make sure that it does not remain focused
         // e.g. if DOM selection is not set for some reasons.
         // HACK: not all surfaces implement _blur()
-        let focusedSurface = this.editorState.focusedSurface
+        const focusedSurface = this.editorState.focusedSurface
         if (focusedSurface && focusedSurface._blur) {
           focusedSurface._blur()
         }
@@ -114,7 +114,7 @@ export default class SurfaceManager {
     // been blurred, e.g., while some component, such as Find-And-Replace
     // dialog has the focus
     if (editorState.isBlurred) return
-    let focusedSurface = editorState.focusedSurface
+    const focusedSurface = editorState.focusedSurface
     // console.log('focusedSurface', focusedSurface)
     if (focusedSurface && !focusedSurface.isDisabled()) {
       // console.log('Rendering selection on surface', focusedSurface.getId(), this.editorState.selection.toString())
@@ -134,7 +134,7 @@ export default class SurfaceManager {
 
   _scrollSelectionIntoView () {
     const editorState = this.editorState
-    let focusedSurface = editorState.focusedSurface
+    const focusedSurface = editorState.focusedSurface
     if (focusedSurface && !focusedSurface.isDisabled()) {
       focusedSurface.send('scrollSelectionIntoView', editorState.selection)
     }

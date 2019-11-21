@@ -28,7 +28,7 @@ function _defaultParams (params, options) {
     idAttribute: 'id'
   }, params, options)
   if (!params.elementFactory) {
-    let xmlParams = {
+    const xmlParams = {
       version: options.xmlVersion || '1.0',
       encoding: options.xmlEncoding || 'UTF-8'
     }

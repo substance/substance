@@ -10,7 +10,7 @@ export default class JSONConverter {
       throw new Error('Invalid JSON format.')
     }
     // the json should just be an array of nodes
-    let nodeEntries = json.nodes
+    const nodeEntries = json.nodes
     doc.import(tx => {
       nodeEntries.forEach(data => tx.create(data))
     })
@@ -25,15 +25,15 @@ export default class JSONConverter {
       },
       nodes: []
     }
-    let visited = {}
+    const visited = {}
 
     function _export (node) {
       if (!node) return
       if (visited[node.id]) return
       visited[node.id] = true
-      let nodeSchema = node.getSchema()
+      const nodeSchema = node.getSchema()
       nodeSchema.getOwnedProperties().forEach(prop => {
-        let val = node.get(prop.name)
+        const val = node.get(prop.name)
         if (isArray(val)) {
           val.forEach(id => {
             _export(doc.get(id))
@@ -45,7 +45,7 @@ export default class JSONConverter {
       json.nodes.push(node.toJSON())
     }
 
-    for (let node of doc.getNodes().values()) {
+    for (const node of doc.getNodes().values()) {
       _export(node)
     }
 

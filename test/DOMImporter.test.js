@@ -24,23 +24,29 @@ test('DOMImporter: creating a DOMImporter', (t) => {
   }, 'should throw if schema is not given')
   // fail if a converter has no associated type
   t.throws(() => {
-    new DOMImporter({ schema, // eslint-disable-line no-new
+    new DOMImporter({
+      schema, // eslint-disable-line no-new
       converters: [{
         matchElement () { return true }
-      }] })
+      }]
+    })
   }, 'should throw if a converter does not have associated type')
   // fail if a converter has no matcher
   t.throws(() => {
-    new DOMImporter({ schema, // eslint-disable-line no-new
+    new DOMImporter({
+      schema, // eslint-disable-line no-new
       converters: [{
         type: 'paragraph'
-      }] })
+      }]
+    })
   }, 'should throw if a converter does not have a matcher function')
   t.throws(() => {
-    new DOMImporter({ schema, // eslint-disable-line no-new
+    new DOMImporter({
+      schema, // eslint-disable-line no-new
       converters: [{
         type: 'foo', tagName: 'h1'
-      }] })
+      }]
+    })
   }, 'should throw if a converter is associated with an unknown node type')
   t.end()
 })
@@ -137,14 +143,14 @@ test('DOMImporter: plainText()', (t) => {
   const importer = createImporter([testConverter])
   const el = DefaultDOMElement.parseSnippet('<p>abc <b>TEST</b> def</p>', 'html')
   const node = importer.convertElement(el)
-  t.equal(node.content, `abc TEST def`, 'should have converted plain text')
+  t.equal(node.content, 'abc TEST def', 'should have converted plain text')
   t.end()
 })
 
 test('DOMImporter: convertContainer() -- trailing text', (t) => {
   const importer = createImporter()
   const els = DefaultDOMElement.parseSnippet('<p>A paragraph</p> and some trailing text', 'html')
-  let container = importer.convertContainer(els, 'body')
+  const container = importer.convertContainer(els, 'body')
   t.equal(container.getLength(), 2, 'should have two nodes')
   t.deepEqual(container.getNodes().map(n => n.type), ['paragraph', 'paragraph'], 'both should be paragraphs')
   t.end()
@@ -154,7 +160,7 @@ test('DOMImporter: resolving id collisions', (t) => {
   // converter with 'tagName' gets a default matcher
   const importer = createImporter()
   const els = DefaultDOMElement.parseSnippet('<p id="foo">A paragraph</p><p id="foo">and another one with the same id</p>', 'html')
-  let container = importer.convertContainer(els, 'body')
+  const container = importer.convertContainer(els, 'body')
   t.equal(container.getLength(), 2, 'should have two nodes')
   t.equal(container.getNodeAt(0).id, 'foo', 'first should have the original id')
   t.notEqual(container.getNodeAt(1).id, 'foo', 'second should have a new one')
@@ -163,7 +169,7 @@ test('DOMImporter: resolving id collisions', (t) => {
 
 function createImporter (converters) {
   const config = getTestConfig()
-  let doc = createTestArticle()
+  const doc = createTestArticle()
   return new DOMImporter({
     converters: converters || config.getConverters('html')
   }, doc)

@@ -35,8 +35,8 @@ export default class InsertInlineNodeCommand extends Command {
     if selection is a property selection.
   */
   getCommandState (params, context) {
-    let sel = params.selection
-    let newState = {
+    const sel = params.selection
+    const newState = {
       disabled: this.isDisabled(params, context),
       active: false,
       showInContext: this.showInContext(sel, params, context)
@@ -54,8 +54,8 @@ export default class InsertInlineNodeCommand extends Command {
 
   isDisabled (params, context) { // eslint-disable-line no-unused
     const editorSession = this.getEditorSession(params, context)
-    let sel = editorSession.getSelection()
-    let selectionState = editorSession.getSelectionState()
+    const sel = editorSession.getSelection()
+    const selectionState = editorSession.getSelectionState()
     if (!sel.isPropertySelection()) {
       return true
     }
@@ -79,11 +79,11 @@ export default class InsertInlineNodeCommand extends Command {
     Insert new inline node at the current selection
   */
   execute (params, context) {
-    let state = params.commandState
-    let editorSession = params.editorSession
+    const state = params.commandState
+    const editorSession = params.editorSession
     if (state.disabled) return
     editorSession.transaction((tx) => {
-      let nodeData = this.createNodeData(tx, params, context)
+      const nodeData = this.createNodeData(tx, params, context)
       tx.insertInlineNode(nodeData)
     })
   }

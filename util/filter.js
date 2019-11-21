@@ -6,7 +6,7 @@ export default function filter (iteratee, fn) {
   if (iteratee.constructor.prototype.filter && isFunction(iteratee.constructor.prototype.filter)) {
     return iteratee.filter(fn)
   }
-  let result = []
+  const result = []
   forEach(iteratee, (val, key) => {
     if (fn(val, key)) {
       result.push(val)

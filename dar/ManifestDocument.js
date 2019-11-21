@@ -23,14 +23,14 @@ export default class ManifestDocument extends Document {
   }
 
   getDocumentEntry (id) {
-    let entryNode = this.get(id)
+    const entryNode = this.get(id)
     if (entryNode && entryNode.type === 'document') {
       return _getEntryFromDocumentNode(entryNode)
     }
   }
 
   static createEmptyManifest () {
-    let doc = new ManifestDocument()
+    const doc = new ManifestDocument()
     documentHelpers.createNodeFromJson(doc, {
       type: 'dar',
       id: 'dar',
@@ -41,12 +41,12 @@ export default class ManifestDocument extends Document {
   }
 
   static fromXML (xmlStr) {
-    let xmlDom = DefaultDOMElement.parseXML(xmlStr)
+    const xmlDom = DefaultDOMElement.parseXML(xmlStr)
 
-    let manifest = ManifestDocument.createEmptyManifest()
-    let documentEls = xmlDom.findAll('documents > document')
-    for (let el of documentEls) {
-      let documentNode = manifest.create({
+    const manifest = ManifestDocument.createEmptyManifest()
+    const documentEls = xmlDom.findAll('documents > document')
+    for (const el of documentEls) {
+      const documentNode = manifest.create({
         type: 'document',
         id: el.attr('id'),
         documentType: el.attr('type'),
@@ -54,9 +54,9 @@ export default class ManifestDocument extends Document {
       })
       documentHelpers.append(manifest, ['dar', 'documents'], documentNode.id)
     }
-    let assetEls = xmlDom.findAll('assets > asset')
-    for (let el of assetEls) {
-      let assetNode = manifest.create({
+    const assetEls = xmlDom.findAll('assets > asset')
+    for (const el of assetEls) {
+      const assetNode = manifest.create({
         type: 'asset',
         id: el.attr('id'),
         assetType: el.attr('type'),
@@ -70,9 +70,9 @@ export default class ManifestDocument extends Document {
   }
 
   toXML () {
-    let dar = this.get('dar')
-    let xmlDom = DefaultDOMElement.createDocument('xml')
-    let $$ = xmlDom.createElement.bind(xmlDom)
+    const dar = this.get('dar')
+    const xmlDom = DefaultDOMElement.createDocument('xml')
+    const $$ = xmlDom.createElement.bind(xmlDom)
     xmlDom.append(
       $$('dar').append(
         $$('documents').append(

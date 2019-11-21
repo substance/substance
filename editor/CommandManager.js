@@ -87,11 +87,11 @@ export default class CommandManager {
       }
 
       // for InsertCommands the selection must be inside a ContainerEditor
-      let containerPath = selectionState.containerPath
+      const containerPath = selectionState.containerPath
       if (containerPath) {
-        let containerProp = doc.getProperty(containerPath)
+        const containerProp = doc.getProperty(containerPath)
         if (containerProp) {
-          let targetTypes = containerProp.targetTypes
+          const targetTypes = containerProp.targetTypes
           Object.assign(commandStates, _disabledIfDisallowedTargetType(this._insertCommands, targetTypes, params, context))
           Object.assign(commandStates, _disabledIfDisallowedTargetType(this._switchTypeCommands, targetTypes, params, context))
         }
@@ -115,7 +115,7 @@ export default class CommandManager {
     const context = this.editorSession.getContext()
     const allCommands = Array.from(this._allCommands)
     // remove disabled all commands that revoke by inspecting the context
-    let commands = new Map(allCommands.filter(([name, command]) => {
+    const commands = new Map(allCommands.filter(([name, command]) => {
       // for legacy, keep commands enabled which do not proved a `shouldBeEnabled()` method
       return !command.shouldBeEnabled || command.shouldBeEnabled(context)
     }))
@@ -145,8 +145,8 @@ export default class CommandManager {
 
 function _getNodeProp (node, path) {
   if (path.length === 2) {
-    let propName = last(path)
-    let prop = node.getSchema().getProperty(propName)
+    const propName = last(path)
+    const prop = node.getSchema().getProperty(propName)
     if (!prop) console.error('Could not find property for path', path, node)
     return prop
   }

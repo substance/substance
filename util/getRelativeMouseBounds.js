@@ -6,10 +6,10 @@
   @return {object} bound description with left, top, right, bottom
 */
 export default function getRelativeMouseBounds (mouseEvent, containerEl) {
-  let containerElRect = containerEl.getBoundingClientRect()
-  let left = mouseEvent.clientX - containerElRect.left
-  let top = mouseEvent.clientY - containerElRect.top
-  let res = {
+  const containerElRect = containerEl.getBoundingClientRect()
+  const left = mouseEvent.clientX - containerElRect.left
+  const top = mouseEvent.clientY - containerElRect.top
+  const res = {
     left: left,
     right: containerElRect.width - left,
     top: top,

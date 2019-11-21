@@ -507,7 +507,7 @@ export default class DOMElement {
   off (eventName, handler) {
     // el.off(this): disconnect all listeners bound to the given context
     if (arguments.length === 1 && !isString(eventName)) {
-      let context = arguments[0]
+      const context = arguments[0]
       this.getEventListeners().filter(function (l) {
         return l.context === context
       }).forEach(function (l) {
@@ -545,7 +545,7 @@ export default class DOMElement {
     if (!this.eventListeners) return
     // console.log('removing event listener', eventName, handler);
     let listener = null
-    let idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
+    const idx = DOMEventListener.findIndex(this.eventListeners, eventName, handler)
     listener = this.eventListeners[idx]
     if (idx > -1) {
       this.eventListeners.splice(idx, 1)
@@ -561,7 +561,7 @@ export default class DOMElement {
   removeAllEventListeners () {
     if (!this.eventListeners) return
     for (let i = 0; i < this.eventListeners.length; i++) {
-      let listener = this.eventListeners[i]
+      const listener = this.eventListeners[i]
       // console.log('BrowserDOMElement.removeEventListener:', eventName, this.eventListeners.length);
       listener._el = null
       this._removeEventListenerNative(listener)
@@ -796,7 +796,7 @@ export default class DOMElement {
       if (isArray(children)) {
         children = children.slice()
       } else {
-        let child = children
+        const child = children
         return this.appendChild(child)
       }
     } else {

@@ -35,8 +35,8 @@ function _p2 (doc, body) {
 // This test was added to cover issue #82
 uiTest('Surface: Set the selection after creating annotation.', t => {
   window.getSelection().removeAllRanges()
-  let { editorSession, surface } = setupEditor(t, _p1)
-  let sel = editorSession.setSelection({
+  const { editorSession, surface } = setupEditor(t, _p1)
+  const sel = editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 0,
@@ -47,8 +47,8 @@ uiTest('Surface: Set the selection after creating annotation.', t => {
   editorSession.transaction(function (tx) {
     tx.annotate({ type: 'strong' })
   })
-  let wsel = window.getSelection()
-  let newSel = surface.domSelection.getSelection()
+  const wsel = window.getSelection()
+  const newSel = surface.domSelection.getSelection()
   t.equal(wsel.rangeCount, 1, 'There should be a DOM selection.')
   t.ok(newSel.equals(sel), 'New selection should be equal to initial selection.')
   t.end()
@@ -56,7 +56,7 @@ uiTest('Surface: Set the selection after creating annotation.', t => {
 
 uiTest('Surface: Render a reverse selection.', t => {
   window.getSelection().removeAllRanges()
-  let { editorSession } = setupEditor(t, _p1, _p2)
+  const { editorSession } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'container',
     startPath: ['p1', 'content'],
@@ -73,7 +73,7 @@ uiTest('Surface: Render a reverse selection.', t => {
 })
 
 test('Surface: type()', t => {
-  let { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -87,7 +87,7 @@ test('Surface: type()', t => {
 })
 
 test('Surface: input events', t => {
-  let { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -101,7 +101,7 @@ test('Surface: input events', t => {
 })
 
 test('Surface: input events (shim)', t => {
-  let { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -115,7 +115,7 @@ test('Surface: input events (shim)', t => {
 })
 
 test('Surface: space', t => {
-  let { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc, surface } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],

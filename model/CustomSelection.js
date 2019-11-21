@@ -7,7 +7,7 @@ export default class CustomSelection extends Selection {
     super()
 
     if (arguments.length === 1) {
-      let _data = arguments[0]
+      const _data = arguments[0]
       customType = _data.customType
       data = _data.data
       nodeId = _data.nodeId
@@ -44,7 +44,7 @@ export default class CustomSelection extends Selection {
   }
 
   toJSON () {
-    let res = {
+    const res = {
       type: 'custom',
       customType: this.customType,
       nodeId: this.nodeId,

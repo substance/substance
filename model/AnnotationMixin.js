@@ -179,8 +179,8 @@ export default function (DocumentNode) {
     define () {
       return {
         type: '@annotation',
-        start: { type: 'coordinate', default: { 'path': [], 'offset': 0 } },
-        end: { type: 'coordinate', default: { 'path': [], 'offset': 0 } }
+        start: { type: 'coordinate', default: { path: [], offset: 0 } },
+        end: { type: 'coordinate', default: { path: [], offset: 0 } }
       }
     }
   }

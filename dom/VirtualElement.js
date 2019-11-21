@@ -457,7 +457,7 @@ class VirtualHTMLElement extends VirtualElement {
 
   _copy () {
     if (this.classNames || this.attributes || this.eventListeners || this.htmlProps || this.style) {
-      let copy = {}
+      const copy = {}
       if (this.classNames) {
         copy.classNames = this.classNames.slice()
       }
@@ -488,10 +488,10 @@ class VirtualHTMLElement extends VirtualElement {
   _merge (other) {
     if (!other) return
     const ARRAY_TYPE_VALS = ['classNames', 'eventListeners']
-    for (let name of ARRAY_TYPE_VALS) {
-      let otherVal = other[name]
+    for (const name of ARRAY_TYPE_VALS) {
+      const otherVal = other[name]
       if (otherVal) {
-        let thisVal = this[name]
+        const thisVal = this[name]
         if (!thisVal) {
           this[name] = otherVal.slice()
         } else {
@@ -500,10 +500,10 @@ class VirtualHTMLElement extends VirtualElement {
       }
     }
     const MAP_TYPE_VALS = ['attributes', 'htmlProps', 'style']
-    for (let name of MAP_TYPE_VALS) {
-      let otherVal = other[name]
+    for (const name of MAP_TYPE_VALS) {
+      const otherVal = other[name]
       if (otherVal) {
-        let thisVal = this[name]
+        const thisVal = this[name]
         if (!thisVal) {
           this[name] = new Map(otherVal)
         } else {
@@ -722,7 +722,7 @@ VirtualElement.Context = class VirtualElementContext {
   }
 
   _createElement () {
-    let vel = VirtualElement.createElement.apply(this, arguments)
+    const vel = VirtualElement.createElement.apply(this, arguments)
     vel._context = this
     vel._owner = this.owner
     if (vel._isVirtualComponent) {

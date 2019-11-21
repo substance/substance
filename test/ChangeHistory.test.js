@@ -4,9 +4,9 @@ import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 test('ChangeHistory: undoing and redoing changes by a single user', t => {
-  let { doc, editorSession } = _setup()
-  let p1 = doc.get('p1')
-  let originalContent = p1.getText()
+  const { doc, editorSession } = _setup()
+  const p1 = doc.get('p1')
+  const originalContent = p1.getText()
   editorSession.setSelection({
     type: 'property',
     path: p1.getPath(),
@@ -74,8 +74,8 @@ test('ChangeHistory: undoing and redoing changes by a single user', t => {
 })
 
 function _setup () {
-  let doc = createTestArticle(simple)
-  let editorSession = new TestEditorSession('test', doc)
+  const doc = createTestArticle(simple)
+  const editorSession = new TestEditorSession('test', doc)
   return { doc, editorSession }
 }
 
@@ -83,6 +83,7 @@ class TestEditorSession extends AbstractEditorSession {
   _getSelection () {
     return this._selection
   }
+
   _setSelection (sel) {
     this._selection = sel
   }

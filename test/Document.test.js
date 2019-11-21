@@ -6,15 +6,15 @@ import simple from './fixture/simple'
 import createTestArticle from './shared/createTestArticle'
 
 test('Document: Create null selection.', function (t) {
-  let doc = createTestArticle(simple)
-  let sel = doc.createSelection(null)
+  const doc = createTestArticle(simple)
+  const sel = doc.createSelection(null)
   t.ok(sel.isNull(), 'Selection should be null.')
   t.end()
 })
 
 test('Document: Create collapsed property selection.', function (t) {
-  let doc = createTestArticle(simple)
-  let sel = doc.createSelection({
+  const doc = createTestArticle(simple)
+  const sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3
@@ -27,8 +27,8 @@ test('Document: Create collapsed property selection.', function (t) {
 })
 
 test('Document: Create expanded property selection.', function (t) {
-  let doc = createTestArticle(simple)
-  let sel = doc.createSelection({
+  const doc = createTestArticle(simple)
+  const sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
@@ -43,8 +43,8 @@ test('Document: Create expanded property selection.', function (t) {
 })
 
 test('Document: Node.toJSON() should not export undefined optional properties', function (t) {
-  let doc = createTestArticle(simple)
-  let p = doc.create({
+  const doc = createTestArticle(simple)
+  const p = doc.create({
     type: 'paragraph',
     id: 'p',
     content: ''
@@ -54,20 +54,20 @@ test('Document: Node.toJSON() should not export undefined optional properties', 
 })
 
 test('Document: Setting a node property with DocumentNode.set()', t => {
-  let doc = createTestArticle(simple)
-  let p1 = doc.get('p1')
+  const doc = createTestArticle(simple)
+  const p1 = doc.get('p1')
   p1.set('content', 'XXX')
   t.equal(p1.content, 'XXX', 'property should have changed')
   t.end()
 })
 
 test('Document: Assigning multiple properties with DocumentNode.assign()', t => {
-  let doc = createTestArticle()
-  let node = doc.create({
+  const doc = createTestArticle()
+  const node = doc.create({
     type: 'structured-node',
     id: 'sn'
   })
-  let props = {
+  const props = {
     title: 'aaa',
     body: 'bbb',
     caption: 'ccc'
@@ -78,13 +78,13 @@ test('Document: Assigning multiple properties with DocumentNode.assign()', t => 
 })
 
 test('Document: node.find()', t => {
-  let doc = createTestArticle(simple)
-  let body = doc.get('body')
-  let p2 = body.find('#p2')
+  const doc = createTestArticle(simple)
+  const body = doc.get('body')
+  const p2 = body.find('#p2')
   t.notNil(p2, 'body.find(#p2) should find a node')
   t.equal(p2.id, 'p2', '.. with correct id')
   doc.create({ type: 'strong', start: { path: p2.getPath(), offset: 1 }, end: { offset: 3 } })
-  let strong = p2.find('strong')
+  const strong = p2.find('strong')
   t.notNil(strong, 'p2.find(strong) should find a node')
   t.equal(strong.type, 'strong', '.. of correct type')
   t.end()
@@ -116,31 +116,31 @@ class ParentWithChildren extends DocumentNode {
 }
 
 test('Document: resolve() a single id', t => {
-  let doc = new Document(new DocumentSchema({ nodes: [Parent, Child], DocumentClass: Document }))
-  let child = doc.create({ type: 'child', id: 'c1' })
+  const doc = new Document(new DocumentSchema({ nodes: [Parent, Child], DocumentClass: Document }))
+  const child = doc.create({ type: 'child', id: 'c1' })
   doc.create({ type: 'parent', id: 'p1', child: 'c1' })
   t.equal(doc.resolve(['p1', 'child']), child, 'resolve() should provide a referenced node')
   t.end()
 })
 
 test('Document: resolve() multiple ids', t => {
-  let doc = new Document(new DocumentSchema({ nodes: [ParentWithChildren, Child], DocumentClass: Document }))
-  let c1 = doc.create({ type: 'child', id: 'c1' })
-  let c2 = doc.create({ type: 'child', id: 'c2' })
+  const doc = new Document(new DocumentSchema({ nodes: [ParentWithChildren, Child], DocumentClass: Document }))
+  const c1 = doc.create({ type: 'child', id: 'c1' })
+  const c2 = doc.create({ type: 'child', id: 'c2' })
   doc.create({ type: 'parent-with-children', id: 'p1', children: ['c1', 'c2'] })
   t.deepEqual(doc.resolve(['p1', 'children']), [c1, c2], 'resolve() should provide referenced nodes')
   t.end()
 })
 
 test('Document: resolve() provides values like get() for non-reference values', t => {
-  let doc = new Document(new DocumentSchema({ nodes: [Child], DocumentClass: Document }))
+  const doc = new Document(new DocumentSchema({ nodes: [Child], DocumentClass: Document }))
   doc.create({ type: 'child', id: 'c1', foo: 'bar' })
   t.equal(doc.resolve(['c1', 'foo']), 'bar', 'resolve() should provide a primitive values')
   t.end()
 })
 
 test('Document: resolve() throws for non-existing properties in strict mode', t => {
-  let doc = new Document(new DocumentSchema({ nodes: [Child], DocumentClass: Document }))
+  const doc = new Document(new DocumentSchema({ nodes: [Child], DocumentClass: Document }))
   doc.create({ type: 'child', id: 'c1', foo: 'bar' })
   t.equal(doc.resolve(['c1', 'bla']), undefined, 'resolve() should return undefined in not-strict mode')
   t.throws(() => {
@@ -150,10 +150,10 @@ test('Document: resolve() throws for non-existing properties in strict mode', t 
 })
 
 test('Document: setting text', t => {
-  let doc = createTestArticle()
-  let p = doc.create({ type: 'paragraph', content: 'abcdefg' })
+  const doc = createTestArticle()
+  const p = doc.create({ type: 'paragraph', content: 'abcdefg' })
   doc.create({ type: 'strong', start: { path: p.getPath(), offset: 1 }, end: { offset: 3 } })
-  let annos = map(p.getAnnotations())
+  const annos = map(p.getAnnotations())
   t.equal(annos.length, 1, 'initially there should be one annotation on the paragraph')
   p.setText('foo')
   t.equal(p.content, 'foo', 'the text content should have been updated')

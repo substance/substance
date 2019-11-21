@@ -4,26 +4,26 @@ import fixture from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 test('DocumentIndex: index should have been warmed up with existing nodes.', t => {
-  let { doc, index } = _setup()
-  let N = doc.getNodes().size
+  const { doc, index } = _setup()
+  const N = doc.getNodes().size
   t.equal(index.select.callCount, N, 'index.select() should have been called for all nodes')
   t.equal(index.create.callCount, N, 'index.create() should have been called for all nodes')
   t.end()
 })
 
 test('DocumentIndex: index should be updated correctly when creating a node.', t => {
-  let { doc, index } = _setup()
+  const { doc, index } = _setup()
   _reset(index)
-  let p = doc.create({type: 'paragraph', id: 'test'})
+  const p = doc.create({ type: 'paragraph', id: 'test' })
   t.equal(index.create.callCount, 1, 'index.create() should have been called')
   t.deepEqual(index.create.args, [p], '.. with correct arguments')
   t.end()
 })
 
 test('DocumentIndex: index should be updated correctly when deleting a node.', t => {
-  let { doc, index } = _setup()
+  const { doc, index } = _setup()
   _reset(index)
-  let p1 = doc.get('p1')
+  const p1 = doc.get('p1')
   doc.delete('p1')
   t.equal(index.delete.callCount, 1, 'index.delete() should have been called')
   t.deepEqual(index.delete.args, [p1], '.. with correct arguments')
@@ -31,7 +31,7 @@ test('DocumentIndex: index should be updated correctly when deleting a node.', t
 })
 
 test('DocumentIndex: index should be updated correctly when setting a node property.', t => {
-  let { doc, index } = _setup()
+  const { doc, index } = _setup()
   _reset(index)
   doc.set(['body', 'nodes'], ['p1', 'p2', 'p3'])
   t.equal(index.update.callCount, 1, 'index.update() should have been called')
@@ -40,9 +40,9 @@ test('DocumentIndex: index should be updated correctly when setting a node prope
 })
 
 test('DocumentIndex: index should be updated correctly when updating a node property.', t => {
-  let { doc, index } = _setup()
+  const { doc, index } = _setup()
   _reset(index)
-  let body = doc.get('body')
+  const body = doc.get('body')
   body.remove('p4')
   t.equal(index.update.callCount, 1, 'index.update() should have been called')
   t.deepEqual(index.update.args, [doc.get('body'), ['body', 'nodes'], ['p1', 'p2', 'p3'], ['p1', 'p2', 'p3', 'p4']], '.. with correct arguments')
@@ -60,8 +60,8 @@ class TestIndex extends DocumentIndex {
 const methods = ['select', 'create', 'delete', 'update']
 
 function _setup () {
-  let doc = fixture(simple)
-  let index = new TestIndex()
+  const doc = fixture(simple)
+  const index = new TestIndex()
   methods.forEach(m => spy(index, m))
   doc.addIndex('test', index)
   return { doc, index }

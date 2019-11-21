@@ -33,12 +33,12 @@ export function isFirst (doc, containerPath, coor) {
   if (coor.isNodeCoordinate()) {
     return coor.offset === 0
   }
-  let node = getContainerRoot(doc, containerPath, coor.path[0])
+  const node = getContainerRoot(doc, containerPath, coor.path[0])
   if (node.isText()) {
     return coor.offset === 0
   }
   if (node.isList()) {
-    let itemId = coor.path[0]
+    const itemId = coor.path[0]
     return (node.items[0] === itemId && coor.offset === 0)
   }
   return false
@@ -52,20 +52,20 @@ export function isLast (doc, containerPath, coor) {
   if (coor.isNodeCoordinate()) {
     return coor.offset > 0
   }
-  let node = getContainerRoot(doc, containerPath, coor.path[0])
+  const node = getContainerRoot(doc, containerPath, coor.path[0])
   if (node.isText()) {
     return coor.offset >= node.getLength()
   }
   if (node.isList()) {
-    let itemId = coor.path[0]
-    let item = doc.get(itemId)
+    const itemId = coor.path[0]
+    const item = doc.get(itemId)
     return (last(node.items) === itemId && coor.offset === item.getLength())
   }
   return false
 }
 
 export function isEntirelySelected (doc, node, start, end) {
-  let { isEntirelySelected } = _getRangeInfo(doc, node, start, end)
+  const { isEntirelySelected } = _getRangeInfo(doc, node, start, end)
   return isEntirelySelected
 }
 
@@ -76,15 +76,15 @@ function _getRangeInfo (doc, node, start, end) {
     if (start && start.offset !== 0) isFirst = false
     if (end && end.offset < node.getLength()) isLast = false
   }
-  let isEntirelySelected = isFirst && isLast
-  return {isFirst, isLast, isEntirelySelected}
+  const isEntirelySelected = isFirst && isLast
+  return { isFirst, isLast, isEntirelySelected }
 }
 
 export function setCursor (tx, node, containerPath, mode) {
   if (node.isText()) {
     let offset = 0
     if (mode === 'after') {
-      let text = node.getText()
+      const text = node.getText()
       offset = text.length
     }
     tx.setSelection({
@@ -138,8 +138,8 @@ export function createNodeSelection ({ doc, nodeId, containerPath, mode, reverse
       surfaceId
     })
   } else if (node.isList() && node.getLength() > 0) {
-    let first = node.getFirstItem()
-    let last = node.getLastItem()
+    const first = node.getFirstItem()
+    const last = node.getLastItem()
     let start = {
       path: first.getPath(),
       offset: 0
@@ -170,7 +170,7 @@ export function stepIntoIsolatedNode (editorSession, comp) {
   if (comp.grabFocus()) return true
 
   // otherwise we try to find the first surface
-  let surface = comp.find('.sc-surface')
+  const surface = comp.find('.sc-surface')
   if (surface) {
     // TODO: what about CustomSurfaces?
     if (surface._isTextPropertyEditor) {
@@ -185,11 +185,11 @@ export function stepIntoIsolatedNode (editorSession, comp) {
       })
       return true
     } else if (surface._isContainerEditor) {
-      let doc = editorSession.getDocument()
-      let containerPath = surface.getContainerPath()
-      let nodeIds = doc.get()
+      const doc = editorSession.getDocument()
+      const containerPath = surface.getContainerPath()
+      const nodeIds = doc.get()
       if (nodeIds.length > 0) {
-        let first = doc.get(nodeIds[0])
+        const first = doc.get(nodeIds[0])
         setCursor(editorSession, first, containerPath, 'after')
       }
       return true
@@ -213,9 +213,9 @@ export function augmentSelection (selData, oldSel) {
  * @returns {String[]} an getNodeIds of ids
  */
 export function getNodeIdsCoveredByContainerSelection (doc, sel) {
-  let containerPath = sel.containerPath
-  let startPos = getContainerPosition(doc, containerPath, sel.start.path[0])
-  let endPos = getContainerPosition(doc, containerPath, sel.end.path[0])
-  let nodeIds = doc.get(containerPath)
+  const containerPath = sel.containerPath
+  const startPos = getContainerPosition(doc, containerPath, sel.start.path[0])
+  const endPos = getContainerPosition(doc, containerPath, sel.end.path[0])
+  const nodeIds = doc.get(containerPath)
   return nodeIds.slice(startPos, endPos + 1)
 }

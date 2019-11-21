@@ -23,8 +23,8 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   render () {
-    let state = this._getState()
-    let el = $$('div').addClass('sc-find-and-replace-dialog')
+    const state = this._getState()
+    const el = $$('div').addClass('sc-find-and-replace-dialog')
     el.append(
       this._renderHeader(),
       this._renderFindSection(),
@@ -40,7 +40,7 @@ export default class FindAndReplaceDialog extends Component {
   _renderTitle () {
     const state = this._getState()
     let title = state.showReplace ? this.getLabel(`find-replace-title-${this.props.viewName}`) : this.getLabel(`find-title-${this.props.viewName}`)
-    let options = []
+    const options = []
     if (state.caseSensitive) options.push('case-sensitive-title')
     if (state.fullWord) options.push('whole-word-title')
     if (state.regexSearch) options.push('regex-title')
@@ -112,7 +112,7 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _renderReplaceSection () {
-    let state = this._getState()
+    const state = this._getState()
     if (state.showReplace) {
       const Button = this.getComponent('button')
       return $$('div').addClass('se-section').addClass('sm-replace').append(
@@ -140,12 +140,12 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _renderPatternInput () {
-    let state = this._getState()
+    const state = this._getState()
     return $$('input').ref('pattern').addClass('sm-find')
       .attr({
         type: 'text',
         placeholder: this.getLabel('find'),
-        'tabindex': 500
+        tabindex: 500
       })
       .val(state.pattern)
       .on('keydown', this._onPatternKeydown)
@@ -154,12 +154,12 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _renderReplacePatternInput () {
-    let state = this._getState()
+    const state = this._getState()
     return $$('input').ref('replacePattern').addClass('sm-replace')
       .attr({
         type: 'text',
         placeholder: this.getLabel('replace'),
-        'tabindex': 500
+        tabindex: 500
       })
       .val(state.replacePattern)
       .on('keydown', this._onReplacePatternKeydown)
@@ -167,10 +167,10 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _renderStatus () {
-    let state = this._getState()
-    let el = $$('span').addClass('se-status')
+    const state = this._getState()
+    const el = $$('span').addClass('se-status')
     if (state.count > 0) {
-      let current = state.cursor === -1 ? '?' : String(state.cursor + 1)
+      const current = state.cursor === -1 ? '?' : String(state.cursor + 1)
       el.append(`${current} of ${state.count}`)
     } else if (state.pattern) {
       el.append(this.getLabel('no-result'))
@@ -179,8 +179,8 @@ export default class FindAndReplaceDialog extends Component {
   }
 
   _grabFocus () {
-    let state = this._getState()
-    let input = state.showReplace ? this.refs.replacePattern : this.refs.pattern
+    const state = this._getState()
+    const input = state.showReplace ? this.refs.replacePattern : this.refs.pattern
     input.el.focus()
   }
 
@@ -237,9 +237,9 @@ export default class FindAndReplaceDialog extends Component {
   _onUpdate () {
     // if this dialog is made visible, auto-focus the respective pattern input field
     // TODO: maybe we should let the app control this
-    let wasHidden = this.el.hasClass('sm-hidden')
+    const wasHidden = this.el.hasClass('sm-hidden')
     this.rerender()
-    let isHidden = this.el.hasClass('sm-hidden')
+    const isHidden = this.el.hasClass('sm-hidden')
     if (wasHidden && !isHidden) {
       this._grabFocus()
     }

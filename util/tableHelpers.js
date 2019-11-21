@@ -10,7 +10,7 @@ export function getColumnLabel (colIdx) {
   }
   let label = ''
   while(true) { // eslint-disable-line
-    let mod = colIdx % ALPHABET.length
+    const mod = colIdx % ALPHABET.length
     colIdx = Math.floor(colIdx / ALPHABET.length)
     label = ALPHABET[mod] + label
     if (colIdx > 0) colIdx--
@@ -34,7 +34,7 @@ export function getColumnIndex (colStr) {
   let index = 0
   let rank = 0
   for (let i = colStr.length - 1; i >= 0; i--) {
-    let idx = colStr.charCodeAt(i) - A
+    const idx = colStr.charCodeAt(i) - A
     if (idx < 0 || idx >= ALPHABET_LENGTH) throw new Error('Illegal column label: ' + colStr)
     // Note: there is no 'zero' in 'A-Z', we use idx + 1
     index += Math.pow(ALPHABET_LENGTH, rank) * (idx + 1)
@@ -45,8 +45,8 @@ export function getColumnIndex (colStr) {
 }
 
 export function getCellLabel (rowIdx, colIdx) {
-  let colLabel = getColumnLabel(colIdx)
-  let rowLabel = rowIdx + 1
+  const colLabel = getColumnLabel(colIdx)
+  const rowLabel = rowIdx + 1
   return colLabel + rowLabel
 }
 
@@ -66,27 +66,27 @@ export function getIndexesFromRange (start, end) {
 export function getRangeFromMatrix (cells, startRow, startCol, endRow, endCol, force2D) {
   if (!force2D) {
     if (startRow === endRow && startCol === endCol) {
-      let row = cells[startRow]
+      const row = cells[startRow]
       if (row) return row[startCol]
       else return undefined
     }
     if (startRow === endRow) {
-      let row = cells[startRow]
+      const row = cells[startRow]
       if (row) return row.slice(startCol, endCol + 1)
       else return []
     }
     if (startCol === endCol) {
-      let res = []
+      const res = []
       for (let i = startRow; i <= endRow; i++) {
-        let row = cells[i]
+        const row = cells[i]
         if (row) res.push(row[startCol])
       }
       return res
     }
   }
-  let res = []
+  const res = []
   for (var i = startRow; i < endRow + 1; i++) {
-    let row = cells[i]
+    const row = cells[i]
     if (row) res.push(row.slice(startCol, endCol + 1))
   }
   return res

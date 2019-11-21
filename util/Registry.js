@@ -61,7 +61,7 @@ export default class DeprecatedRegistry {
    * @memberof module:Basics.Registry.prototype
    */
   remove (name) {
-    let pos = this.names.indexOf(name)
+    const pos = this.names.indexOf(name)
     if (pos >= 0) {
       this.names.splice(pos, 1)
     }
@@ -86,7 +86,7 @@ export default class DeprecatedRegistry {
    * @memberof module:Basics.Registry.prototype
    */
   get (name, strict) {
-    let result = this.entries[name]
+    const result = this.entries[name]
     if (strict && !result) {
       throw new Error('No entry registered for name ' + name)
     }
@@ -100,8 +100,8 @@ export default class DeprecatedRegistry {
    */
   forEach (callback) {
     for (let i = 0; i < this.names.length; i++) {
-      let name = this.names[i]
-      let _continue = callback(this.entries[name], name)
+      const name = this.names[i]
+      const _continue = callback(this.entries[name], name)
       if (_continue === false) {
         break
       }
@@ -109,7 +109,7 @@ export default class DeprecatedRegistry {
   }
 
   map (callback) {
-    let result = []
+    const result = []
     this.forEach((entry, name) => {
       result.push(callback(entry, name))
     })
@@ -117,7 +117,7 @@ export default class DeprecatedRegistry {
   }
 
   filter (callback) {
-    let result = []
+    const result = []
     this.forEach(function (entry, name) {
       if (callback(entry, name)) {
         result.push(entry)

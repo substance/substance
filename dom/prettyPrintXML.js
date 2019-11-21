@@ -15,9 +15,9 @@ export default function prettyPrintXML (xml) {
   // i.e. the instruction is swallowed and stored in a way that it is created during serialization.
   // Interestingly, this is not the case for the DOCTYPE declaration.
   // ATTENTION: we have assimilated the MemoryDOM implementation, so that we get the same result.
-  let childNodes = dom.getChildNodes()
+  const childNodes = dom.getChildNodes()
   if (dom.isDocumentNode()) {
-    let xml = dom.empty().serialize()
+    const xml = dom.empty().serialize()
     if (/<\?\s*xml/.exec(xml)) {
       result.push(xml)
     }
@@ -29,16 +29,16 @@ export default function prettyPrintXML (xml) {
 }
 
 function _prettyPrint (result, el, level) {
-  let indent = new Array(level * 2).fill(' ').join('')
+  const indent = new Array(level * 2).fill(' ').join('')
   if (el.isElementNode()) {
     const isMixed = _isMixed(el)
     const containsCDATA = _containsCDATA(el)
     if (isMixed || containsCDATA) {
       result.push(indent + el.outerHTML)
     } else {
-      let children = el.children
+      const children = el.children
       const tagName = el.tagName
-      let tagStr = [`<${tagName}`]
+      const tagStr = [`<${tagName}`]
       el.getAttributes().forEach((val, name) => {
         tagStr.push(`${name}="${val}"`)
       })
@@ -62,7 +62,7 @@ function _prettyPrint (result, el, level) {
 function _isMixed (el) {
   const childNodes = el.childNodes
   for (let i = 0; i < childNodes.length; i++) {
-    let child = childNodes[i]
+    const child = childNodes[i]
     if (child.isTextNode() && !_isTextNodeEmpty(child)) {
       return true
     }
@@ -72,7 +72,7 @@ function _isMixed (el) {
 function _containsCDATA (el) {
   const childNodes = el.childNodes
   for (let i = 0; i < childNodes.length; i++) {
-    let child = childNodes[i]
+    const child = childNodes[i]
     if (child.getNodeType() === 'cdata') {
       return true
     }

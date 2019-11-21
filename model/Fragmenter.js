@@ -15,33 +15,33 @@ export default class Fragmenter {
     if (!isString(text)) {
       throw new Error("Illegal argument: 'text' must be a String, but was " + text)
     }
-    let state = this._init(rootContext, text, annotations)
-    let B = state.boundaries
-    let S = state.stack
-    let TOP = () => S[S.length - 1]
+    const state = this._init(rootContext, text, annotations)
+    const B = state.boundaries
+    const S = state.stack
+    const TOP = () => S[S.length - 1]
     let currentPos = 0
     let __runs = 0
-    let MAX_RUNS = B.length * 2
+    const MAX_RUNS = B.length * 2
     while (B.length > 0) {
       __runs++
       if (__runs > MAX_RUNS) throw new Error('FIXME: infinity loop in Fragmenter implementation')
-      let b = B.shift()
-      let topContext = TOP().context
+      const b = B.shift()
+      const topContext = TOP().context
       if (b.offset > currentPos) {
-        let textFragment = text.slice(currentPos, b.offset)
+        const textFragment = text.slice(currentPos, b.offset)
         this.onText(topContext, textFragment)
         currentPos = b.offset
       }
       switch (b.type) {
         case ANCHOR: {
-          let parentContext = topContext
-          let anchorContext = this.onOpen(b, parentContext)
+          const parentContext = topContext
+          const anchorContext = this.onOpen(b, parentContext)
           this._close(b, anchorContext, parentContext)
           break
         }
         case CLOSE: {
           // ATTENTION: we have to make sure that closers are sorted correctly
-          let { context, entry } = TOP()
+          const { context, entry } = TOP()
           if (entry.node !== b.node) {
             B.unshift(b)
             this._fixOrderOfClosers(S, B, 0)
@@ -49,29 +49,29 @@ export default class Fragmenter {
             continue
           }
           S.pop()
-          let parentContext = TOP().context
+          const parentContext = TOP().context
           this._close(b, context, parentContext)
           break
         }
         case OPEN: {
-          let a = TOP().entry
+          const a = TOP().entry
           if (!a || a.endOffset >= b.endOffset) {
             b.stackLevel = S.length
-            let context = this.onOpen(b, topContext)
+            const context = this.onOpen(b, topContext)
             S.push({ context, entry: b })
           } else {
             // splitting annotation b
             if (b.weight <= a.weight) {
               b.stackLevel = S.length
               // new closer at the splitting pos
-              let closer = {
+              const closer = {
                 type: CLOSE,
                 offset: a.endOffset,
                 node: b.node,
                 opener: b
               }
               // and re-opening with fragment counter increased
-              let opener = {
+              const opener = {
                 type: OPEN,
                 offset: a.endOffset,
                 node: b.node,
@@ -88,7 +88,7 @@ export default class Fragmenter {
               b.endOffset = a.endOffset
               this._insertBoundary(B, closer)
               this._insertBoundary(B, opener)
-              let context = this.onOpen(b, topContext)
+              const context = this.onOpen(b, topContext)
               S.push({ context, entry: b })
             // splitting annotation a
             } else {
@@ -96,14 +96,14 @@ export default class Fragmenter {
               // and instead insert boundaries splitting annotation a
               B.unshift(b)
               // new closer at the splitting pos
-              let closer = {
+              const closer = {
                 type: CLOSE,
                 offset: b.offset,
                 node: a.node,
                 opener: a
               }
               // and re-opening with fragment counter increased
-              let opener = {
+              const opener = {
                 type: OPEN,
                 offset: b.offset,
                 node: a.node,
@@ -130,14 +130,14 @@ export default class Fragmenter {
       }
     }
     // Finally append a trailing text node
-    let trailingText = text.substring(currentPos)
+    const trailingText = text.substring(currentPos)
     if (trailingText) {
       this.onText(rootContext, trailingText)
     }
   }
 
   _init (rootContext, text, annotations) {
-    let boundaries = []
+    const boundaries = []
     annotations.forEach(a => {
       if (a.isAnchor() || a.start.offset === a.end.offset) {
         boundaries.push({
@@ -148,7 +148,7 @@ export default class Fragmenter {
           node: a
         })
       } else {
-        let opener = {
+        const opener = {
           type: OPEN,
           offset: a.start.offset,
           node: a,
@@ -156,7 +156,7 @@ export default class Fragmenter {
           endOffset: a.end.offset,
           weight: a._getFragmentWeight()
         }
-        let closer = {
+        const closer = {
           type: CLOSE,
           offset: a.end.offset,
           node: a,
@@ -168,8 +168,8 @@ export default class Fragmenter {
       }
     })
     boundaries.sort(this._compareBoundaries.bind(this))
-    let state = {
-      stack: [{context: rootContext, entry: null}],
+    const state = {
+      stack: [{ context: rootContext, entry: null }],
       boundaries
     }
     return state
@@ -219,21 +219,21 @@ export default class Fragmenter {
   // Note: due to fragmentation of overlapping nodes, the original
   // order of closers might become invalid
   _fixOrderOfClosers (S, B, startIndex) {
-    let activeOpeners = {}
-    let first = B[startIndex]
-    let closers = [first]
+    const activeOpeners = {}
+    const first = B[startIndex]
+    const closers = [first]
     for (let idx = startIndex + 1, l = B.length; idx < l; idx++) {
-      let b = B[startIndex + idx]
+      const b = B[startIndex + idx]
       if (b.type !== CLOSE || b.offset !== first.offset) break
       closers.push(b)
     }
     for (let idx = S.length - 1; idx >= 1; idx--) {
-      let opener = S[idx].entry
+      const opener = S[idx].entry
       activeOpeners[opener.node.id] = opener
     }
     for (let idx = 0, l = closers.length; idx < l; idx++) {
-      let closer = closers[idx]
-      let opener = activeOpeners[closer.node.id]
+      const closer = closers[idx]
+      const opener = activeOpeners[closer.node.id]
       if (!opener) {
         throw new Error('Fragmenter Error: there is no opener for closer')
       }

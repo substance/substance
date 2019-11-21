@@ -1,8 +1,8 @@
 import last from './last'
 
 export default function renderListNode (listNode, $$) {
-  let items = listNode.getItems()
-  let stack = [$$(_getTagName(1))]
+  const items = listNode.getItems()
+  const stack = [$$(_getTagName(1))]
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     // ATTENTION: levels are one-based, i.e. start counting with 1 instead of 0
@@ -13,8 +13,8 @@ export default function renderListNode (listNode, $$) {
       }
     } else if (level > stack.length) {
       for (let j = stack.length; j < level; j++) {
-        let list = stack[j - 1]
-        let childCount = list.getChildCount()
+        const list = stack[j - 1]
+        const childCount = list.getChildCount()
         let item
         if (childCount === 0) {
           item = $$('li')
@@ -22,7 +22,7 @@ export default function renderListNode (listNode, $$) {
         } else {
           item = list.getChildAt(childCount - 1)
         }
-        let sublist = $$(_getTagName(j + 1))
+        const sublist = $$(_getTagName(j + 1))
         item.append(sublist)
         stack.push(sublist)
       }
@@ -40,7 +40,7 @@ export default function renderListNode (listNode, $$) {
   return stack[0]
 
   function _getTagName (level) {
-    let listType = listNode.getListType(level)
+    const listType = listNode.getListType(level)
     return listType === 'order' ? 'ol' : 'ul'
   }
 }

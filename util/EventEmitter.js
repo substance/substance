@@ -156,7 +156,7 @@ function _off (event, method, context) {
     context = null
   }
   // Remove matching handlers
-  let bindings = this.__events__[event]
+  const bindings = this.__events__[event]
   for (let i = bindings.length - 1; i >= 0; i--) {
     const b = bindings[i]
     if (b.method === method && b.context === context) {

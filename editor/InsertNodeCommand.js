@@ -17,8 +17,8 @@ export default class InsertNodeCommand extends Command {
   }
 
   getCommandState (params, context) { // eslint-disable-line no-unused
-    let sel = params.selection
-    let newState = {
+    const sel = params.selection
+    const newState = {
       disabled: true,
       active: false
     }
@@ -31,7 +31,7 @@ export default class InsertNodeCommand extends Command {
 
   showInContext (sel, params, context) { // eslint-disable-line no-unused
     const editorSession = params.editorSession
-    let selectionState = editorSession.getSelectionState()
+    const selectionState = editorSession.getSelectionState()
     return sel.isCollapsed() && selectionState.isFirst && selectionState.isLast
   }
 
@@ -42,10 +42,10 @@ export default class InsertNodeCommand extends Command {
   execute (params, context) {
     var state = params.commandState
     if (state.disabled) return
-    let editorSession = params.editorSession
+    const editorSession = params.editorSession
     editorSession.transaction((tx) => {
-      let nodeData = this.createNodeData(tx, params, context)
-      let node = tx.insertBlockNode(nodeData)
+      const nodeData = this.createNodeData(tx, params, context)
+      const node = tx.insertBlockNode(nodeData)
       this.setSelection(tx, node)
     })
   }
@@ -56,8 +56,8 @@ export default class InsertNodeCommand extends Command {
     const editorSession = params.editorSession
     const doc = editorSession.getDocument()
     const nodeSchema = doc.getSchema().getNodeSchema(type)
-    let nodeData = {type}
-    for (let property of nodeSchema) {
+    const nodeData = { type }
+    for (const property of nodeSchema) {
       nodeData[property.name] = params[property.name]
     }
     return nodeData

@@ -106,7 +106,7 @@ export default class AbstractEditor extends Component {
     if (documentEntry) {
       return archive.getDocument(documentEntry.id)
     } else {
-      throw new Error(`Could not find main document.`)
+      throw new Error('Could not find main document.')
     }
   }
 

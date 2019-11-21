@@ -78,7 +78,7 @@ export default class ObjectOperation {
       var diff = this.diff
       switch (this.propertyType) {
         case 'array': {
-          let arr = adapter.get(this.path)
+          const arr = adapter.get(this.path)
           diff.apply(arr)
           break
         }
@@ -90,7 +90,7 @@ export default class ObjectOperation {
           break
         }
         case 'coordinate': {
-          let coor = adapter.get(this.path)
+          const coor = adapter.get(this.path)
           if (!coor) throw new Error('No coordinate with path ' + this.path)
           diff.apply(coor)
           break
@@ -251,7 +251,7 @@ export default class ObjectOperation {
     } else {
       path = idOrPath
     }
-    return new ObjectOperation({type: CREATE, path: path, val: val})
+    return new ObjectOperation({ type: CREATE, path: path, val: val })
   }
 
   static Delete (idOrPath, val) {
@@ -261,7 +261,7 @@ export default class ObjectOperation {
     } else {
       path = idOrPath
     }
-    return new ObjectOperation({type: DELETE, path: path, val: val})
+    return new ObjectOperation({ type: DELETE, path: path, val: val })
   }
 
   static Update (path, op) {
@@ -286,7 +286,7 @@ export default class ObjectOperation {
     if (data.type === 'update') {
       data.diff = _deserializeDiffOp(data.propertyType, data.diff)
     }
-    let op = new ObjectOperation(data)
+    const op = new ObjectOperation(data)
     return op
   }
 
@@ -338,7 +338,7 @@ function _transformDeleteUpdate (a, b, flipped, options = {}) {
     if (a.type !== DELETE) {
       return _transformDeleteUpdate(b, a, true, options)
     }
-    let op = _deserializeDiffOp(b.propertyType, b.diff)
+    const op = _deserializeDiffOp(b.propertyType, b.diff)
     // (DELETE, UPDATE) is transformed into (DELETE, CREATE)
     if (!flipped) {
       a.type = NOP
@@ -363,8 +363,8 @@ function transformCreateUpdate () {
 
 function transformUpdateUpdate (a, b, options = {}) {
   // Note: this is a conflict the user should know about
-  let opA = _deserializeDiffOp(a.propertyType, a.diff)
-  let opB = _deserializeDiffOp(b.propertyType, b.diff)
+  const opA = _deserializeDiffOp(a.propertyType, a.diff)
+  const opB = _deserializeDiffOp(b.propertyType, b.diff)
   let t
   switch (b.propertyType) {
     case 'string':

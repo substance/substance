@@ -7,14 +7,14 @@ export default class FontAwesomeIconProvider {
     this.faMap = {}
     this.textMap = {}
     forEach(icons, (config, name) => {
-      let faConfig = config['fontawesome']
+      let faConfig = config.fontawesome
       if (faConfig) {
         if (isString(faConfig)) {
           faConfig = { icon: faConfig }
         }
         this.addFAIcon(name, faConfig)
       }
-      let text = config['text']
+      const text = config.text
       if (text) {
         this.addTextIcon(name, text)
       }
@@ -22,8 +22,8 @@ export default class FontAwesomeIconProvider {
   }
 
   renderIcon ($$, name) {
-    let faProps = this.faMap[name]
-    let text = this.textMap[name]
+    const faProps = this.faMap[name]
+    const text = this.textMap[name]
     if (faProps) {
       return $$(FontAwesomeIcon, faProps)
     } else if (text) {

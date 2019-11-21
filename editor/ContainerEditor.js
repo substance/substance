@@ -62,7 +62,7 @@ export default class ContainerEditor extends Surface {
   didMount () {
     super.didMount()
 
-    let editorState = this.context.editorSession.getEditorState()
+    const editorState = this.context.editorSession.getEditorState()
     editorState.addObserver(['selection'], this._onSelectionChanged, this, {
       stage: 'render'
     })
@@ -77,21 +77,21 @@ export default class ContainerEditor extends Surface {
   dispose () {
     super.dispose()
 
-    let editorState = this.context.editorSession.getEditorState()
+    const editorState = this.context.editorSession.getEditorState()
     editorState.removeObserver(this)
   }
 
   render ($$) {
-    let el = super.render($$)
+    const el = super.render($$)
 
-    let doc = this.getDocument()
-    let containerPath = this.getContainerPath()
+    const doc = this.getDocument()
+    const containerPath = this.getContainerPath()
     el.attr('data-id', containerPath.join('.'))
 
     // native spellcheck
     el.attr('spellcheck', this.props.spellcheck === 'native')
 
-    let ids = doc.get(containerPath)
+    const ids = doc.get(containerPath)
     el.append(
       ids.map((id, index) => {
         return this._renderNode($$, doc.get(id), index)
@@ -121,9 +121,9 @@ export default class ContainerEditor extends Surface {
   }
 
   selectFirst () {
-    let doc = this.getDocument()
-    let containerPath = this.getContainerPath()
-    let nodeIds = doc.get()
+    const doc = this.getDocument()
+    const containerPath = this.getContainerPath()
+    const nodeIds = doc.get()
     if (nodeIds.length > 0) {
       const editorSession = this.getEditorSession()
       const first = doc.get(nodeIds[0])
@@ -133,13 +133,13 @@ export default class ContainerEditor extends Surface {
 
   _renderNode ($$, node, nodeIndex) {
     if (!node) throw new Error('Illegal argument')
-    let ComponentClass = this._getNodeComponentClass(node)
-    let props = this._getNodeProps(node)
+    const ComponentClass = this._getNodeComponentClass(node)
+    const props = this._getNodeProps(node)
     return $$(ComponentClass, props).ref(node.id)
   }
 
   _getNodeComponentClass (node) {
-    let ComponentClass = this.getComponent(node.type, 'not-strict')
+    const ComponentClass = this.getComponent(node.type, 'not-strict')
     if (ComponentClass) {
       // text components are used directly
       if (node.isText() || this.props.disabled) {
@@ -164,7 +164,7 @@ export default class ContainerEditor extends Surface {
   }
 
   _deriveInternalState (props) {
-    let _state = this._state
+    const _state = this._state
     if (!_isDefined(props.enabled) || props.enabled) {
       _state.enabled = true
     } else {
@@ -173,9 +173,9 @@ export default class ContainerEditor extends Surface {
   }
 
   _selectNextIsolatedNode (direction) {
-    let selState = this.getEditorSession().getSelectionState()
-    let node = (direction === 'left') ? selState.previousNode : selState.nextNode
-    let isIsolatedNode = !node.isText() && !node.isList()
+    const selState = this.getEditorSession().getSelectionState()
+    const node = (direction === 'left') ? selState.previousNode : selState.nextNode
+    const isIsolatedNode = !node.isText() && !node.isList()
     if (!node || !isIsolatedNode) return false
     if (
       (direction === 'left' && selState.isFirst) ||
@@ -193,8 +193,8 @@ export default class ContainerEditor extends Surface {
   }
 
   _softBreak () {
-    let editorSession = this.getEditorSession()
-    let sel = editorSession.getSelection()
+    const editorSession = this.getEditorSession()
+    const sel = editorSession.getSelection()
     if (sel.isPropertySelection()) {
       editorSession.transaction(tx => {
         tx.insertText('\n')
@@ -226,11 +226,11 @@ export default class ContainerEditor extends Surface {
     const direction = left ? 'left' : 'right'
 
     if (sel && !sel.isNull()) {
-      let containerPath = sel.containerPath
+      const containerPath = sel.containerPath
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
-        let nodeIds = doc.get(containerPath)
-        let nodePos = getContainerPosition(doc, containerPath, sel.getNodeId())
+        const nodeIds = doc.get(containerPath)
+        const nodePos = getContainerPosition(doc, containerPath, sel.getNodeId())
         if ((left && nodePos === 0) || (right && nodePos === nodeIds.length - 1)) {
           event.preventDefault()
           return
@@ -255,29 +255,29 @@ export default class ContainerEditor extends Surface {
     const direction = up ? 'left' : 'right'
 
     if (sel && !sel.isNull()) {
-      let containerPath = sel.containerPath
+      const containerPath = sel.containerPath
       // Don't react if we are at the boundary of the document
       if (sel.isNodeSelection()) {
-        let nodeIds = doc.get(containerPath)
-        let nodePos = getContainerPosition(doc, containerPath, sel.getNodeId())
+        const nodeIds = doc.get(containerPath)
+        const nodePos = getContainerPosition(doc, containerPath, sel.getNodeId())
         if ((up && nodePos === 0) || (down && nodePos === nodeIds.length - 1)) {
           event.preventDefault()
           return
         }
         // Unfortunately we need to navigate out of an isolated node
         // manually, as even Chrome on Win is not able to do it.
-        let editorSession = this.getEditorSession()
+        const editorSession = this.getEditorSession()
         // TODO the following fixes the mentioned problem for
         // regular UP/DOWN (non expanding)
         // For SHIFT+DOWN it happens to work, and only SHIFT-UP when started as NodeSelection needs to be fixed
         if (!event.shiftKey) {
           event.preventDefault()
           if (up) {
-            let prev = doc.get(nodeIds[nodePos - 1])
+            const prev = doc.get(nodeIds[nodePos - 1])
             selectionHelpers.setCursor(editorSession, prev, containerPath, 'after')
             return
           } else {
-            let next = doc.get(nodeIds[nodePos + 1])
+            const next = doc.get(nodeIds[nodePos + 1])
             selectionHelpers.setCursor(editorSession, next, containerPath, 'before')
             return
           }
@@ -331,7 +331,7 @@ export default class ContainerEditor extends Surface {
   }
 
   isEmpty () {
-    let ids = this.getDocument().get(this.containerPath)
+    const ids = this.getDocument().get(this.containerPath)
     return (!ids || ids.length === 0)
   }
 
@@ -341,18 +341,18 @@ export default class ContainerEditor extends Surface {
 
   // called by flow when subscribed resources have been updated
   _onContainerChanged (change) {
-    let doc = this.getDocument()
+    const doc = this.getDocument()
     // first update the container
-    let renderContext = RenderingEngine.createContext(this)
-    let $$ = renderContext.$$
-    let containerPath = this.getContainerPath()
+    const renderContext = RenderingEngine.createContext(this)
+    const $$ = renderContext.$$
+    const containerPath = this.getContainerPath()
     for (const op of change.primitiveOps) {
       if (isArrayEqual(op.path, containerPath)) {
         if (op.type === 'update') {
-          let diff = op.diff
+          const diff = op.diff
           if (diff.type === 'insert') {
-            let nodeId = diff.getValue()
-            let node = doc.get(nodeId)
+            const nodeId = diff.getValue()
+            const node = doc.get(nodeId)
             let nodeEl
             if (node) {
               nodeEl = this._renderNode($$, node)

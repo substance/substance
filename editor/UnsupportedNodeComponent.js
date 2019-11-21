@@ -18,11 +18,11 @@ class UnsupportedContentComponent extends Component {
     } else {
       data = JSON.stringify(node.toJSON())
     }
-    let el = $$('div').addClass('sc-unsupported').append(
+    const el = $$('div').addClass('sc-unsupported').append(
       $$('pre').text(data)
     ).attr({
       'data-id': node.id,
-      'contenteditable': false
+      contenteditable: false
     })
 
     return el

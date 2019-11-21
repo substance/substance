@@ -25,7 +25,7 @@ export function getPropertyAnnotationsForSelection (doc, sel, options) {
   if (!sel.isPropertySelection()) {
     return []
   }
-  let path = sel.getPath()
+  const path = sel.getPath()
   let annotations = doc.getIndex('annotations').get(path, sel.start.offset, sel.end.offset)
   if (options.type) {
     annotations = filter(annotations, DocumentIndex.filterByType(options.type))
@@ -52,7 +52,7 @@ export function getContainerAnnotationsForSelection (doc, sel, containerPath, op
     throw new Error("'containerPath' is required.")
   }
   options = options || {}
-  let index = doc.getIndex('container-annotations')
+  const index = doc.getIndex('container-annotations')
   let annotations = []
   if (index) {
     annotations = index.get(containerPath, options.type)
@@ -69,7 +69,7 @@ export function getContainerAnnotationsForSelection (doc, sel, containerPath, op
   @return {Boolean} `true` if given type is a {@link ContainerAnnotation}
 */
 export function isContainerAnnotation (doc, type) {
-  let schema = doc.getSchema()
+  const schema = doc.getSchema()
   return schema.isInstanceOf(type, '@container-annotation')
 }
 
@@ -84,15 +84,15 @@ export function getTextForSelection (doc, sel) {
   if (!sel || sel.isNull()) {
     return ''
   } else if (sel.isPropertySelection()) {
-    let text = doc.get(sel.start.path)
+    const text = doc.get(sel.start.path)
     return text.substring(sel.start.offset, sel.end.offset)
   } else if (sel.isContainerSelection()) {
-    let result = []
-    let nodeIds = getNodeIdsCoveredByContainerSelection(doc, sel)
-    let L = nodeIds.length
+    const result = []
+    const nodeIds = getNodeIdsCoveredByContainerSelection(doc, sel)
+    const L = nodeIds.length
     for (let i = 0; i < L; i++) {
-      let id = nodeIds[i]
-      let node = doc.get(id)
+      const id = nodeIds[i]
+      const node = doc.get(id)
       if (node.isText()) {
         let text = node.getText()
         if (i === L - 1) {
@@ -113,7 +113,7 @@ export function getMarkersForSelection (doc, sel) {
   if (!sel || !sel.isPropertySelection()) return []
   const path = sel.getPath()
   // markers are stored as one hash for each path, grouped by marker key
-  let markers = doc.getIndex('markers').get(path)
+  const markers = doc.getIndex('markers').get(path)
   const filtered = filter(markers, function (m) {
     return m.containsSelection(sel)
   })
@@ -141,20 +141,20 @@ export function deepDeleteNode (doc, node) {
   // TODO: bring back support for container annotations
   if (node.isText()) {
     // remove all associated annotations
-    let annos = doc.getIndex('annotations').get(node.id)
+    const annos = doc.getIndex('annotations').get(node.id)
     for (let i = 0; i < annos.length; i++) {
       doc.delete(annos[i].id)
     }
   }
-  let nodeSchema = node.getSchema()
+  const nodeSchema = node.getSchema()
   // Note: correct order of deletion is tricky here.
   // 1. annos attached to text properties
   // 2. the node itself
   // 3. nodes that are referenced via owned properties
-  for (let prop of nodeSchema) {
+  for (const prop of nodeSchema) {
     if (prop.isText()) {
-      let annos = doc.getAnnotations([node.id, prop.name])
-      for (let anno of annos) {
+      const annos = doc.getAnnotations([node.id, prop.name])
+      for (const anno of annos) {
         deepDeleteNode(doc, anno)
       }
     }
@@ -163,9 +163,9 @@ export function deepDeleteNode (doc, node) {
   // Recursive deletion of owned nodes
   // 1. delete all 'owned' references to child nodes
   // 2. delete all annos belonging to text properties
-  for (let prop of nodeSchema) {
+  for (const prop of nodeSchema) {
     if (prop.isOwned()) {
-      let value = node.get(prop.name)
+      const value = node.get(prop.name)
       if (prop.isArray()) {
         let ids = value
         if (ids.length > 0) {
@@ -189,25 +189,25 @@ export function deepDeleteNode (doc, node) {
   @param {DocumentNode} node
 */
 export function copyNode (node) {
-  let nodes = []
+  const nodes = []
   // using schema reflection to determine whether to do a 'deep' copy or just shallow
-  let doc = node.getDocument()
-  let nodeSchema = node.getSchema()
-  for (let prop of nodeSchema) {
+  const doc = node.getDocument()
+  const nodeSchema = node.getSchema()
+  for (const prop of nodeSchema) {
     // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
     // or it is of type 'file'
     if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-      let val = node.get(prop.name)
+      const val = node.get(prop.name)
       nodes.push(_copyChildren(val))
     }
   }
   nodes.push(node.toJSON())
-  let annotationIndex = node.getDocument().getIndex('annotations')
-  let annotations = annotationIndex.get([node.id])
+  const annotationIndex = node.getDocument().getIndex('annotations')
+  const annotations = annotationIndex.get([node.id])
   forEach(annotations, function (anno) {
     nodes.push(anno.toJSON())
   })
-  let result = flatten(nodes).filter(Boolean)
+  const result = flatten(nodes).filter(Boolean)
   // console.log('copyNode()', node, result)
   return result
 
@@ -216,9 +216,9 @@ export function copyNode (node) {
     if (isArray(val)) {
       return flatten(val.map(_copyChildren))
     } else {
-      let id = val
+      const id = val
       if (!id) return null
-      let child = doc.get(id)
+      const child = doc.get(id)
       if (!child) return
       return copyNode(child)
     }
@@ -242,8 +242,8 @@ export function deleteTextRange (doc, start, end) {
       offset: 0
     }
   }
-  let path = start.path
-  let text = doc.get(path)
+  const path = start.path
+  const text = doc.get(path)
   if (!end) {
     end = {
       path: start.path,
@@ -254,17 +254,17 @@ export function deleteTextRange (doc, start, end) {
   if (!isArrayEqual(start.path, end.path)) {
     throw new Error('start and end must be on one property')
   }
-  let startOffset = start.offset
+  const startOffset = start.offset
   if (startOffset < 0) throw new Error('start offset must be >= 0')
-  let endOffset = end.offset
+  const endOffset = end.offset
   if (endOffset > text.length) throw new Error('end offset must be smaller than the text length')
 
   doc.update(path, { type: 'delete', start: startOffset, end: endOffset })
   // update annotations
-  let annos = doc.getAnnotations(path)
+  const annos = doc.getAnnotations(path)
   annos.forEach(function (anno) {
-    let annoStart = anno.start.offset
-    let annoEnd = anno.end.offset
+    const annoStart = anno.start.offset
+    const annoEnd = anno.end.offset
     // I anno is before
     if (annoEnd <= startOffset) {
 
@@ -331,8 +331,8 @@ export function deleteListRange (doc, list, start, end, options = {}) {
     [startPos, endPos] = [endPos, startPos];
     [startItem, endItem] = [endItem, startItem]
   }
-  let firstEntirelySelected = isEntirelySelected(doc, startItem, start, null)
-  let lastEntirelySelected = isEntirelySelected(doc, endItem, null, end)
+  const firstEntirelySelected = isEntirelySelected(doc, startItem, start, null)
+  const lastEntirelySelected = isEntirelySelected(doc, endItem, null, end)
 
   // delete or truncate last node
   if (lastEntirelySelected) {
@@ -343,9 +343,9 @@ export function deleteListRange (doc, list, start, end, options = {}) {
   }
 
   // delete inner nodes
-  let items = list.getItems()
+  const items = list.getItems()
   for (let i = endPos - 1; i > startPos; i--) {
-    let item = items[i]
+    const item = items[i]
     list.removeItemAt(i)
     deepDeleteNode(doc, item)
   }
@@ -382,12 +382,12 @@ export function setText (doc, textPath, text) {
 
 export function mergeListItems (doc, listId, itemPos) {
   // HACK: make sure that the list is really from the doc
-  let list = doc.get(listId)
-  let targetItem = list.getItemAt(itemPos)
-  let targetPath = targetItem.getPath()
-  let targetLength = targetItem.getLength()
-  let sourceItem = list.getItemAt(itemPos + 1)
-  let sourcePath = sourceItem.getPath()
+  const list = doc.get(listId)
+  const targetItem = list.getItemAt(itemPos)
+  const targetPath = targetItem.getPath()
+  const targetLength = targetItem.getLength()
+  const sourceItem = list.getItemAt(itemPos + 1)
+  const sourcePath = sourceItem.getPath()
   // hide source
   list.removeItemAt(itemPos + 1)
   // append the text
@@ -418,14 +418,14 @@ export function append (doc, containerPath, id) {
  * @returns the id of the removed child
  */
 export function removeAt (doc, containerPath, pos) {
-  let op = doc.update(containerPath, { type: 'delete', pos })
+  const op = doc.update(containerPath, { type: 'delete', pos })
   if (op && op.diff) {
     return op.diff.val
   }
 }
 
 export function removeFromCollection (doc, containerPath, id) {
-  let index = doc.get(containerPath).indexOf(id)
+  const index = doc.get(containerPath).indexOf(id)
   if (index >= 0) {
     return removeAt(doc, containerPath, index)
   }
@@ -433,7 +433,7 @@ export function removeFromCollection (doc, containerPath, id) {
 }
 
 export function getNodesForPath (doc, containerPath) {
-  let ids = doc.get(containerPath)
+  const ids = doc.get(containerPath)
   return getNodesForIds(doc, ids)
 }
 
@@ -442,7 +442,7 @@ export function getNodesForIds (doc, ids) {
 }
 
 export function getNodeAt (doc, containerPath, nodePos) {
-  let ids = doc.get(containerPath)
+  const ids = doc.get(containerPath)
   return doc.get(ids[nodePos])
 }
 
@@ -471,13 +471,13 @@ export function getChildren (node) {
   const id = node.id
   const schema = node.getSchema()
   let result = []
-  for (let p of schema) {
+  for (const p of schema) {
     const name = p.name
     if (p.isText()) {
-      let annos = doc.getAnnotations([id, name])
+      const annos = doc.getAnnotations([id, name])
       forEach(annos, a => result.push(a))
     } else if (p.isReference() && p.isOwned()) {
-      let val = node.get(name)
+      const val = node.get(name)
       if (val) {
         if (p.isArray()) {
           result = result.concat(val.map(id => doc.get(id)))
@@ -493,8 +493,8 @@ export function getChildren (node) {
 export function getParent (node) {
   // TODO: maybe we should implement ParentNodeHook for annotations
   if (node._isAnnotation) {
-    let anno = node
-    let nodeId = anno.start.path[0]
+    const anno = node
+    const nodeId = anno.start.path[0]
     return anno.getDocument().get(nodeId)
   } else {
     return node.getParent()
@@ -536,21 +536,21 @@ export function createNodeFromJson (doc, data) {
   if (!data) throw new Error("'data' is mandatory")
   if (!data.type) throw new Error("'data.type' is mandatory")
   if (!isFunction(doc.create)) throw new Error('First argument must be document or tx')
-  let type = data.type
-  let nodeSchema = doc.getSchema().getNodeSchema(type)
-  let nodeData = {
+  const type = data.type
+  const nodeSchema = doc.getSchema().getNodeSchema(type)
+  const nodeData = {
     type,
     id: data.id
   }
-  for (let p of nodeSchema) {
+  for (const p of nodeSchema) {
     const name = p.name
     if (!data.hasOwnProperty(name)) continue
-    let val = data[name]
+    const val = data[name]
     if (p.isReference()) {
       if (p.isArray()) {
         nodeData[name] = val.map(childData => createNodeFromJson(doc, childData).id)
       } else {
-        let child = createNodeFromJson(doc, val)
+        const child = createNodeFromJson(doc, val)
         nodeData[name] = child.id
       }
     } else {

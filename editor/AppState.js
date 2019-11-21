@@ -57,7 +57,7 @@ export default class AppState extends AbstractAppState {
   removeObserver (observer) {
     const impl = this._getImpl()
     const ID = impl.id
-    let entries = observer[ID] || []
+    const entries = observer[ID] || []
     entries.forEach(e => {
       e.slot.removeObserver(observer)
     })
@@ -71,7 +71,7 @@ export default class AppState extends AbstractAppState {
     impl.isFlowing = true
     try {
       const schedule = this._getSchedule()
-      for (let slot of schedule) {
+      for (const slot of schedule) {
         if (slot.needsUpdate()) {
           slot.notifyObservers()
         }
@@ -142,16 +142,16 @@ class Slot {
 
   needsUpdate () {
     const state = this.appState
-    for (let dep of this.deps) {
+    for (const dep of this.deps) {
       if (state.isDirty(dep)) return true
     }
     return false
   }
 
   notifyObservers () {
-    let observers = this._getObservers()
-    for (let o of observers) {
-      let entry = this._getEntryForObserver(o)
+    const observers = this._getObservers()
+    for (const o of observers) {
+      const entry = this._getEntryForObserver(o)
       // observer might have been disposed in the meantime
       if (!entry) continue
       this._notifyObserver(entry)
@@ -163,14 +163,14 @@ class Slot {
   }
 
   _getEntryForObserver (observer) {
-    let map = observer[this._id]
+    const map = observer[this._id]
     if (map) {
       return map.get(this.id)
     }
   }
 
   _deleteEntry (observer) {
-    let map = observer[this._id]
+    const map = observer[this._id]
     if (map) {
       map.delete(this.id)
     }

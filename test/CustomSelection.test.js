@@ -23,7 +23,7 @@ test('CustomSelection: Creating a CustomSelection', t => {
 })
 
 test('CustomSelection: toJSON()', t => {
-  let sel = new CustomSelection({
+  const sel = new CustomSelection({
     customType: 'test',
     data: { bar: 'baz' },
     nodeId: 'foo'

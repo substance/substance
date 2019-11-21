@@ -47,7 +47,7 @@ test('tableHelpers: getIndexesFromRange()', t => {
 })
 
 test('tableHelpers: getRangeFromMatrix()', t => {
-  let cells = [
+  const cells = [
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, 9],

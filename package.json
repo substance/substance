@@ -11,7 +11,7 @@
   },
   "scripts": {
     "prepack": "npm install && node make build",
-    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"editor/**/*.js\" \"util/**/*.js\" index.es.js",
+    "lint": "standard \"commons/**/*.js\" \"dar/**/*.js\" \"dom/**/*.js\" \"editor/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"ui/**/*.js\" \"util/**/*.js\" index.es.js",
     "pretest": "npm run lint",
     "test": "node test/_runTests | tap-spec",
     "cover": "node make cover",

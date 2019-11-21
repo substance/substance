@@ -15,7 +15,7 @@ export const STRING_ARRAY = { type: ['array', 'string'], default: [], reflection
 export const BOOLEAN = { type: 'boolean', default: false, reflectionType: 'boolean' }
 
 export function ENUM (values, opts = {}) {
-  let def = { type: 'enum', values, reflectionType: 'enum' }
+  const def = { type: 'enum', values, reflectionType: 'enum' }
   Object.assign(def, opts)
   return def
 }
@@ -54,7 +54,7 @@ export function CONTAINER (spec) {
   }
   if (!nodeTypes) throw new Error('CONTAINER({ nodeTypes: [...] }) is mandatory.')
   if (!defaultTextType) throw new Error('CONTAINER({ defaultTextType: [...] }) is mandatory.')
-  let def = CHILDREN(...nodeTypes)
+  const def = CHILDREN(...nodeTypes)
   def.defaultTextType = defaultTextType
   def.reflectionType = 'container'
   return def

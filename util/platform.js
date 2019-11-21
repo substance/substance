@@ -65,7 +65,7 @@ class Platform {
 }
 
 function detect () {
-  let values = {}
+  const values = {}
   if (typeof window !== 'undefined') {
     values.inBrowser = true
 
@@ -121,7 +121,7 @@ function detect () {
     values.isMac = (window.navigator !== undefined && window.navigator.platform.indexOf('Mac') >= 0)
   }
 
-  let _inNodeJS = (typeof process !== 'undefined' && process.release && process.release.name === 'node')
+  const _inNodeJS = (typeof process !== 'undefined' && process.release && process.release.name === 'node')
   if (_inNodeJS) {
     if (values.inBrowser) {
       values.inElectron = true

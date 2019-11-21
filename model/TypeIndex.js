@@ -21,12 +21,12 @@ export default class TypeIndex extends NodeIndex {
   }
 
   create (node) {
-    let type = node.type
+    const type = node.type
     this.byType.add([type], node)
   }
 
   delete (node) {
-    let type = node.type
+    const type = node.type
     this.byType.delete([type], node)
   }
 
@@ -36,8 +36,8 @@ export default class TypeIndex extends NodeIndex {
   }
 
   _initialize (data) {
-    let nodes = data.getNodes().values()
-    for (let node of nodes) {
+    const nodes = data.getNodes().values()
+    for (const node of nodes) {
       if (this.select(node)) {
         this.create(node)
       }

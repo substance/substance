@@ -5,7 +5,7 @@ export const CHILD = 2
 
 export default function compareDOMElementPosition (a, b) {
   if (a.el._isBrowserDOMElement) {
-    let res = a.getNativeElement().compareDocumentPosition(b.getNativeElement())
+    const res = a.getNativeElement().compareDocumentPosition(b.getNativeElement())
     if (res & window.Node.DOCUMENT_POSITION_CONTAINS) {
       return CHILD
     } else if (res & window.Node.DOCUMENT_POSITION_CONTAINED_BY) {

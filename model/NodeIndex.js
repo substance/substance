@@ -63,13 +63,13 @@ export default class NodeIndex {
     @return A cloned NodeIndex.
    */
   clone () {
-    let NodeIndexClass = this.constructor
-    let clone = new NodeIndexClass()
+    const NodeIndexClass = this.constructor
+    const clone = new NodeIndexClass()
     return clone
   }
 
   _initialize (data) {
-    for (let node of data.getNodes().values()) {
+    for (const node of data.getNodes().values()) {
       if (this.select(node)) {
         this.create(node)
       }
@@ -77,7 +77,7 @@ export default class NodeIndex {
   }
 
   static create (prototype) {
-    let index = Object.assign(new NodeIndex(), prototype)
+    const index = Object.assign(new NodeIndex(), prototype)
     index.clone = function () {
       return NodeIndex.create(prototype)
     }

@@ -9,7 +9,7 @@ import isFunction from '../util/isFunction'
   to window.document.
 */
 
-const EVENTS = new Set([ 'keydown', 'keyup', 'keypress', 'mousedown', 'mouseup', 'copy' ])
+const EVENTS = new Set(['keydown', 'keyup', 'keypress', 'mousedown', 'mouseup', 'copy'])
 
 export default class GlobalEventHandler {
   constructor (editorState) {
@@ -42,7 +42,7 @@ export default class GlobalEventHandler {
     if (!EVENTS.has(eventName)) throw new Error(`Unsupported event global event ${eventName}`)
     if (!isFunction(handleFunction)) throw new Error('Illegal argument')
     if (!owner) throw new Error('"owner" is mandatory')
-    let listeners = this._listeners.get(eventName)
+    const listeners = this._listeners.get(eventName)
     listeners.push({
       handleFunction,
       owner

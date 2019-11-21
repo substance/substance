@@ -8,12 +8,12 @@ import keys from './keys'
  * @param {string} combo a key-combo such as 'CommandOrControl+Enter'
  */
 export default function parseKeyCombo (combo) {
-  let frags = combo.split('+')
-  let keyEvent = {
+  const frags = combo.split('+')
+  const keyEvent = {
     keyCode: -1
   }
   for (var i = 0; i < frags.length; i++) {
-    let frag = frags[i].toUpperCase()
+    const frag = frags[i].toUpperCase()
     switch (frag) {
       case 'ALT': {
         keyEvent.altKey = true

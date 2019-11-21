@@ -31,7 +31,7 @@ export default class TextPropertyEditor extends Surface {
   didMount () {
     super.didMount()
 
-    let editorState = this.context.editorSession.getEditorState()
+    const editorState = this.context.editorSession.getEditorState()
     editorState.addObserver(['selection'], this._onSelectionChanged, this, {
       stage: 'render'
     })
@@ -40,14 +40,14 @@ export default class TextPropertyEditor extends Surface {
   dispose () {
     super.dispose()
 
-    let editorState = this.context.editorSession.getEditorState()
+    const editorState = this.context.editorSession.getEditorState()
     editorState.removeObserver(this)
   }
 
   render ($$) {
     const TextPropertyComponent = this.getComponent('text-property')
 
-    let el = super.render.apply(this, arguments)
+    const el = super.render.apply(this, arguments)
 
     if (!this.props.disabled) {
       el.addClass('sm-enabled')

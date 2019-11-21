@@ -4,7 +4,7 @@ import { ArrayOperation } from 'substance'
 const NOP = ArrayOperation.NOP
 
 function checkArrayOperationTransform (t, a, b, input, expected) {
-  let ops = ArrayOperation.transform(a.clone(), b.clone())
+  const ops = ArrayOperation.transform(a.clone(), b.clone())
   let output = ops[1].apply(a.apply(input.slice(0)))
   t.deepEqual(output, expected, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`)
   output = ops[0].apply(b.apply(input.slice(0)))
@@ -12,27 +12,27 @@ function checkArrayOperationTransform (t, a, b, input, expected) {
 }
 
 test('ArrayOperation: Insert element', (t) => {
-  let arr = [1, 2, 4]
-  let expected = [1, 2, 3, 4]
-  let op = ArrayOperation.Insert(2, 3)
+  const arr = [1, 2, 4]
+  const expected = [1, 2, 3, 4]
+  const op = ArrayOperation.Insert(2, 3)
   op.apply(arr)
   t.deepEqual(arr, expected, 'Should insert element.')
   t.end()
 })
 
 test('ArrayOperation: Insert element after last position', (t) => {
-  let arr = [1, 2, 3]
-  let expected = [1, 2, 3, 4]
-  let op = ArrayOperation.Insert(arr.length, 4)
+  const arr = [1, 2, 3]
+  const expected = [1, 2, 3, 4]
+  const op = ArrayOperation.Insert(arr.length, 4)
   op.apply(arr)
   t.deepEqual(arr, expected, 'Should append element.')
   t.end()
 })
 
 test('ArrayOperation: Delete element', (t) => {
-  let arr = [1, 2, 3]
-  let expected = [1, 3]
-  let op = ArrayOperation.Delete(1, 2)
+  const arr = [1, 2, 3]
+  const expected = [1, 3]
+  const op = ArrayOperation.Delete(1, 2)
   op.apply(arr)
   t.deepEqual(arr, expected, 'Should delete element.')
   t.end()
@@ -55,13 +55,13 @@ test('ArrayOperation: Create operation with invalid data', (t) => {
 })
 
 test('ArrayOperation: Operation can be NOP', (t) => {
-  let op = ArrayOperation.Nop()
+  const op = ArrayOperation.Nop()
   t.ok(op.isNOP(), 'Operation should be NOP')
   t.end()
 })
 
 test('ArrayOperation: Apply operation on too short array.', (t) => {
-  let arr = [1, 2, 3]
+  const arr = [1, 2, 3]
   let op = ArrayOperation.Insert(4, 5)
   t.throws(function () {
     op.apply(arr)
@@ -75,8 +75,8 @@ test('ArrayOperation: Apply operation on too short array.', (t) => {
 
 // Note: it is better to fail in such cases, as this is an indicator for other greater problems.
 test('ArrayOperation: Apply delete operation on wrong array.', (t) => {
-  let arr = [1, 2, 3]
-  let op = ArrayOperation.Delete(2, 4)
+  const arr = [1, 2, 3]
+  const op = ArrayOperation.Delete(2, 4)
   t.throws(function () {
     op.apply(arr)
   }, 'Should throw if applying delete operation with wrong value')
@@ -95,7 +95,7 @@ test('ArrayOperation: JSON de-/serialisation', (t) => {
   t.equal(op.getValue(), 2)
   op = ArrayOperation.Nop()
   out = op.toJSON()
-  t.deepEqual(out, {type: NOP})
+  t.deepEqual(out, { type: NOP })
   t.end()
 })
 
@@ -107,10 +107,10 @@ test('ArrayOperation: JSON de-/serialisation', (t) => {
 //  3. `a == b`:  result depends on preference (first applied)
 
 test('ArrayOperation: Transformation: a=Insert, b=Insert, a < b and b < a', (t) => {
-  let input = [1, 3, 5]
-  let expected = [1, 2, 3, 4, 5]
-  let a = ArrayOperation.Insert(1, 2)
-  let b = ArrayOperation.Insert(2, 4)
+  const input = [1, 3, 5]
+  const expected = [1, 2, 3, 4, 5]
+  const a = ArrayOperation.Insert(1, 2)
+  const b = ArrayOperation.Insert(2, 4)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected)
   t.end()
@@ -121,11 +121,11 @@ test('ArrayOperation: Transformation: a=Insert, b=Insert, a < b and b < a', (t) 
 //     A  - a ->  [1, 2, 4]   - b' ->   [1,2,3,4]     => b'= [+, 2, 3], transform(a, b) = [a, b']
 //     A  - b ->  [1, 3, 4]   - a' ->   [1,3,2,4]     => a'= [+, 2, 2], transform(b, a) = [a', b]
 test('ArrayOperation: Transformation: a=Insert, b=Insert, a == b', (t) => {
-  let input = [1, 4]
-  let expected = [1, 2, 3, 4]
-  let expected2 = [1, 3, 2, 4]
-  let a = ArrayOperation.Insert(1, 2)
-  let b = ArrayOperation.Insert(1, 3)
+  const input = [1, 4]
+  const expected = [1, 2, 3, 4]
+  const expected2 = [1, 3, 2, 4]
+  const a = ArrayOperation.Insert(1, 2)
+  const b = ArrayOperation.Insert(1, 3)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected2)
   t.end()
@@ -140,20 +140,20 @@ test('ArrayOperation: Transformation: a=Insert, b=Insert, a == b', (t) => {
 //                user should be noticed about conflict
 
 test('ArrayOperation: Transformation: a=Delete, b=Delete (1,2), a < b and b < a', (t) => {
-  let input = [1, 2, 3, 4, 5]
-  let expected = [1, 3, 5]
-  let a = ArrayOperation.Delete(1, 2)
-  let b = ArrayOperation.Delete(3, 4)
+  const input = [1, 2, 3, 4, 5]
+  const expected = [1, 3, 5]
+  const a = ArrayOperation.Delete(1, 2)
+  const b = ArrayOperation.Delete(3, 4)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected)
   t.end()
 })
 
 test('ArrayOperation: Transformation: a=Delete, b=Delete (3), a == b', (t) => {
-  let input = [1, 2, 3]
-  let expected = [1, 3]
-  let a = ArrayOperation.Delete(1, 2)
-  let b = ArrayOperation.Delete(1, 2)
+  const input = [1, 2, 3]
+  const expected = [1, 3]
+  const a = ArrayOperation.Delete(1, 2)
+  const b = ArrayOperation.Delete(1, 2)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected)
   t.end()
@@ -170,10 +170,10 @@ test('ArrayOperation: Transformation: a=Delete, b=Delete (3), a == b', (t) => {
 // A  - a ->  [1,2,3,4,5] - b' ->   [1,2,3,5]     => b'= [-, 3, 4]
 // A  - b ->  [1,3,5]     - a' ->   [1,2,3,5]     => a'= [+, 1, 2] = a
 test('ArrayOperation: Transformation: a=Insert, b=Delete (1), a < b', (t) => {
-  let input = [1, 3, 4, 5]
-  let expected = [1, 2, 3, 5]
-  let a = ArrayOperation.Insert(1, 2)
-  let b = ArrayOperation.Delete(2, 4)
+  const input = [1, 3, 4, 5]
+  const expected = [1, 2, 3, 5]
+  const a = ArrayOperation.Insert(1, 2)
+  const b = ArrayOperation.Delete(2, 4)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected)
   t.end()
@@ -183,10 +183,10 @@ test('ArrayOperation: Transformation: a=Insert, b=Delete (1), a < b', (t) => {
 // A  - a ->  [1,2,3,4,5] - b' ->   [1,3,4,5]     => b'= [-,1,2] = b
 // A  - b ->  [1,3,5]     - a' ->   [1,3,4,5]     => a'= [+,2,4]
 test('ArrayOperation: Transformation: a=Insert, b=Delete (2), b < a', (t) => {
-  let input = [1, 2, 3, 5]
-  let expected = [1, 3, 4, 5]
-  let a = ArrayOperation.Insert(3, 4)
-  let b = ArrayOperation.Delete(1, 2)
+  const input = [1, 2, 3, 5]
+  const expected = [1, 3, 4, 5]
+  const a = ArrayOperation.Insert(3, 4)
+  const b = ArrayOperation.Delete(1, 2)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected)
   t.end()
@@ -196,18 +196,18 @@ test('ArrayOperation: Transformation: a=Insert, b=Delete (2), b < a', (t) => {
 // A  - a ->  [1,4,2,3] - b' ->   [1,4,3]     => b'= [-,2,2]
 // A  - b ->  [1,3]     - a' ->   [1,4,3]     => a'= [+,1,4] = a
 test('ArrayOperation: Transformation: a=Insert, b=Delete (3), a == b', (t) => {
-  let input = [1, 2, 3]
-  let expected = [1, 4, 3]
-  let a = ArrayOperation.Insert(1, 4)
-  let b = ArrayOperation.Delete(1, 2)
+  const input = [1, 2, 3]
+  const expected = [1, 4, 3]
+  const a = ArrayOperation.Insert(1, 4)
+  const b = ArrayOperation.Delete(1, 2)
   checkArrayOperationTransform(t, a, b, input, expected)
   checkArrayOperationTransform(t, b, a, input, expected)
   t.end()
 })
 
 test('ArrayOperation: Transformation: a=NOP || b=NOP', (t) => {
-  let a = ArrayOperation.Insert(1, 4)
-  let b = ArrayOperation.Nop()
+  const a = ArrayOperation.Insert(1, 4)
+  const b = ArrayOperation.Nop()
   let tr = ArrayOperation.transform(a, b)
   t.deepEqual(tr[0].toJSON(), a.toJSON())
   t.deepEqual(tr[1].toJSON(), b.toJSON())
@@ -235,16 +235,16 @@ test('ArrayOperation: Inverting operations', (t) => {
 })
 
 test('ArrayOperation: Transformations can be done inplace (optimzation for internal use)', (t) => {
-  let a = ArrayOperation.Insert(2, 3)
-  let b = ArrayOperation.Insert(2, 3)
-  let tr = ArrayOperation.transform(a, b, {inplace: true})
+  const a = ArrayOperation.Insert(2, 3)
+  const b = ArrayOperation.Insert(2, 3)
+  const tr = ArrayOperation.transform(a, b, { inplace: true })
   t.ok(a.getOffset() === tr[0].getOffset() && b.getOffset() === tr[1].getOffset(), 'Transformation should be done inplace.')
   t.end()
 })
 
 test("ArrayOperation: With option 'no-conflict' conflicting operations can not be transformed.", (t) => {
-  let a = ArrayOperation.Insert(2, 2)
-  let b = ArrayOperation.Insert(2, 2)
+  const a = ArrayOperation.Insert(2, 2)
+  const b = ArrayOperation.Insert(2, 2)
   t.throws(function () {
     ArrayOperation.transform(a, b, { 'no-conflict': true })
   }, 'Transforming conflicting ops should throw when option "no-conflict" is enabled.')
@@ -253,38 +253,38 @@ test("ArrayOperation: With option 'no-conflict' conflicting operations can not b
 
 test('ArrayOperation: Conflicts: inserting at the same position', (t) => {
   // this is considered a conflict as a decision is needed to determine which element comes first.
-  let a = ArrayOperation.Insert(2, 'a')
-  let b = ArrayOperation.Insert(2, 'b')
+  const a = ArrayOperation.Insert(2, 'a')
+  const b = ArrayOperation.Insert(2, 'b')
   t.ok(a.hasConflict(b) && b.hasConflict(a), 'Inserts at the same position are considered a conflict.')
   t.end()
 })
 
 test('ArrayOperation: Conflicts: inserting at different positions', (t) => {
-  let a = ArrayOperation.Insert(2, 'a')
-  let b = ArrayOperation.Insert(4, 'b')
+  const a = ArrayOperation.Insert(2, 'a')
+  const b = ArrayOperation.Insert(4, 'b')
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'Inserts at different positions should be fine.')
   t.end()
 })
 
 test('ArrayOperation: Conflicts: deleting at the same position', (t) => {
   // this is *not* considered a conflict as it is clear how the result should look like.
-  let a = ArrayOperation.Delete(2, 'a')
-  let b = ArrayOperation.Delete(2, 'a')
+  const a = ArrayOperation.Delete(2, 'a')
+  const b = ArrayOperation.Delete(2, 'a')
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'Deletes at the same position are not a conflict.')
   t.end()
 })
 
 test('ArrayOperation: Conflicts: inserting and deleting at the same position', (t) => {
   // this is *not* considered a conflict as it is clear how the result should look like.
-  let a = ArrayOperation.Insert(2, 'a')
-  let b = ArrayOperation.Delete(2, 'b')
+  const a = ArrayOperation.Insert(2, 'a')
+  const b = ArrayOperation.Delete(2, 'b')
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'Inserting and deleting at the same position is not a conflict.')
   t.end()
 })
 
 test('ArrayOperation: Conflicts: when NOP involved', (t) => {
-  let a = ArrayOperation.Insert(2, 2)
-  let b = ArrayOperation.Nop()
+  const a = ArrayOperation.Insert(2, 2)
+  const b = ArrayOperation.Nop()
   t.ok(!a.hasConflict(b) && !b.hasConflict(a), 'NOPs should never conflict.')
   t.end()
 })

@@ -33,22 +33,22 @@ export default function copySelection (doc, selection) {
 }
 
 function _copyPropertySelection (doc, selection) {
-  let path = selection.start.path
-  let offset = selection.start.offset
-  let endOffset = selection.end.offset
-  let text = doc.get(path)
-  let snippet = doc.createSnippet()
-  let containerNode = snippet.getContainer()
+  const path = selection.start.path
+  const offset = selection.start.offset
+  const endOffset = selection.end.offset
+  const text = doc.get(path)
+  const snippet = doc.createSnippet()
+  const containerNode = snippet.getContainer()
   snippet.create({
     type: doc.schema.getDefaultTextType(),
     id: TEXT_SNIPPET_ID,
     content: text.substring(offset, endOffset)
   })
   containerNode.append(TEXT_SNIPPET_ID)
-  let annotations = doc.getIndex('annotations').get(path, offset, endOffset)
+  const annotations = doc.getIndex('annotations').get(path, offset, endOffset)
   forEach(annotations, function (anno) {
-    let data = cloneDeep(anno.toJSON())
-    let path = [TEXT_SNIPPET_ID, 'content']
+    const data = cloneDeep(anno.toJSON())
+    const path = [TEXT_SNIPPET_ID, 'content']
     data.start = {
       path: path,
       offset: Math.max(offset, anno.start.offset) - offset
@@ -63,27 +63,27 @@ function _copyPropertySelection (doc, selection) {
 }
 
 function _copyContainerSelection (tx, sel) {
-  let containerPath = sel.containerPath
+  const containerPath = sel.containerPath
 
-  let snippet = tx.createSnippet()
-  let targetContainer = snippet.getContainer()
-  let targetContainerPath = targetContainer.getContentPath()
+  const snippet = tx.createSnippet()
+  const targetContainer = snippet.getContainer()
+  const targetContainerPath = targetContainer.getContentPath()
 
-  let nodeIds = getNodeIdsCoveredByContainerSelection(tx, sel)
-  let L = nodeIds.length
+  const nodeIds = getNodeIdsCoveredByContainerSelection(tx, sel)
+  const L = nodeIds.length
   if (L === 0) return snippet
 
-  let start = sel.start
-  let end = sel.end
+  const start = sel.start
+  const end = sel.end
 
   let skippedFirst = false
   let skippedLast = false
 
   // First copy the whole covered nodes
-  let created = {}
+  const created = {}
   for (let i = 0; i < L; i++) {
-    let id = nodeIds[i]
-    let node = tx.get(id)
+    const id = nodeIds[i]
+    const node = tx.get(id)
     // skip NIL selections, such as cursor at the end of first node or cursor at the start of last node.
     if (i === 0 && isLast(tx, containerPath, start)) {
       skippedFirst = true
@@ -95,7 +95,7 @@ function _copyContainerSelection (tx, sel) {
     }
     if (!created[id]) {
       copyNode(node).forEach((nodeData) => {
-        let copy = snippet.create(nodeData)
+        const copy = snippet.create(nodeData)
         created[copy.id] = true
       })
       append(snippet, targetContainerPath, id)
@@ -103,7 +103,7 @@ function _copyContainerSelection (tx, sel) {
   }
   if (!skippedFirst) {
     // ATTENTION: we need the root node here, e.g. the list, not the list items
-    let startNode = getContainerRoot(snippet, targetContainerPath, start.getNodeId())
+    const startNode = getContainerRoot(snippet, targetContainerPath, start.getNodeId())
     if (startNode.isText()) {
       deleteTextRange(snippet, null, start)
     } else if (startNode.isList()) {
@@ -112,7 +112,7 @@ function _copyContainerSelection (tx, sel) {
   }
   if (!skippedLast) {
     // ATTENTION: we need the root node here, e.g. the list, not the list items
-    let endNode = getContainerRoot(snippet, targetContainerPath, end.getNodeId())
+    const endNode = getContainerRoot(snippet, targetContainerPath, end.getNodeId())
     if (endNode.isText()) {
       deleteTextRange(snippet, end, null)
     } else if (endNode.isList()) {
@@ -123,11 +123,11 @@ function _copyContainerSelection (tx, sel) {
 }
 
 function _copyNodeSelection (doc, selection) {
-  let snippet = doc.createSnippet()
-  let targetNode = snippet.getContainer()
-  let targetPath = targetNode.getContentPath()
-  let nodeId = selection.getNodeId()
-  let node = doc.get(nodeId)
+  const snippet = doc.createSnippet()
+  const targetNode = snippet.getContainer()
+  const targetPath = targetNode.getContentPath()
+  const nodeId = selection.getNodeId()
+  const node = doc.get(nodeId)
   copyNode(node).forEach((nodeData) => {
     snippet.create(nodeData)
   })

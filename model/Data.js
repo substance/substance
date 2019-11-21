@@ -55,7 +55,7 @@ export default class Data extends EventEmitter {
     @returns {Node|Object|Primitive|undefined} a Node instance, a value or undefined if not found.
    */
   get (path, strict) {
-    let result = this._get(path)
+    const result = this._get(path)
     if (strict && result === undefined) {
       if (isString(path)) {
         throw new Error("Could not find node with id '" + path + "'.")
@@ -72,14 +72,14 @@ export default class Data extends EventEmitter {
     if (!path) return undefined
     let result
     if (isString(path)) {
-      let id = path
+      const id = path
       result = this.nodes.get(id)
     } else if (path.length === 1) {
-      let id = path[0]
+      const id = path[0]
       result = this.nodes.get(id)
     } else if (path.length > 1) {
-      let id = path[0]
-      let node = this.nodes.get(id)
+      const id = path[0]
+      const node = this.nodes.get(id)
       let val = node.get(path[1])
       for (let i = 2; i < path.length; i++) {
         if (!val) return undefined
@@ -117,7 +117,7 @@ export default class Data extends EventEmitter {
     }
     this.nodes.set(node.id, node)
 
-    let change = {
+    const change = {
       type: 'create',
       node
     }
@@ -138,12 +138,12 @@ export default class Data extends EventEmitter {
     @returns {Node} The deleted node.
    */
   delete (nodeId) {
-    let node = this.nodes.get(nodeId)
+    const node = this.nodes.get(nodeId)
     if (!node) return
     node.dispose()
     this.nodes.delete(nodeId)
 
-    let change = {
+    const change = {
       type: 'delete',
       node: node
     }
@@ -165,8 +165,8 @@ export default class Data extends EventEmitter {
     @returns {Node} The deleted node.
    */
   set (path, newValue) {
-    let node = this.get(path[0])
-    let oldValue = this._set(path, newValue)
+    const node = this.get(path[0])
+    const oldValue = this._set(path, newValue)
     var change = {
       type: 'set',
       node: node,
@@ -183,7 +183,7 @@ export default class Data extends EventEmitter {
   }
 
   _set (path, newValue) {
-    let oldValue = _setValue(this.nodes, path, newValue)
+    const oldValue = _setValue(this.nodes, path, newValue)
     return oldValue
   }
 
@@ -195,18 +195,18 @@ export default class Data extends EventEmitter {
     @returns {any} The value before applying the update.
   */
   update (path, diff) {
-    let node = this.get(path[0])
+    const node = this.get(path[0])
     let oldValue = this._get(path)
     let newValue
     if (diff._isOperation) {
       // ATTENTION: array operations are done inplace
       if (diff._isArrayOperation) {
-        let tmp = oldValue
+        const tmp = oldValue
         oldValue = Array.from(oldValue)
         newValue = diff.apply(tmp)
       // ATTENTION: coordinate operations are done inplace
       } else if (diff._isCoordinateOperation) {
-        let tmp = oldValue
+        const tmp = oldValue
         oldValue = oldValue.clone()
         newValue = diff.apply(tmp)
       } else {
@@ -280,35 +280,35 @@ export default class Data extends EventEmitter {
   _normalizeDiff (value, diff) {
     if (isString(value)) {
       // legacy
-      if (diff['delete']) {
+      if (diff.delete) {
         console.warn('DEPRECATED: use doc.update(path, {type:"delete", start:s, end: e}) instead')
         diff = {
           type: 'delete',
-          start: diff['delete'].start,
-          end: diff['delete'].end
+          start: diff.delete.start,
+          end: diff.delete.end
         }
-      } else if (diff['insert']) {
+      } else if (diff.insert) {
         console.warn('DEPRECATED: use doc.update(path, {type:"insert", start:s, text: t}) instead')
         diff = {
           type: 'insert',
-          start: diff['insert'].offset,
-          text: diff['insert'].value
+          start: diff.insert.offset,
+          text: diff.insert.value
         }
       }
     } else if (isArray(value)) {
       // legacy
-      if (diff['delete']) {
+      if (diff.delete) {
         console.warn('DEPRECATED: use doc.update(path, {type:"delete", pos:1}) instead')
         diff = {
           type: 'delete',
-          pos: diff['delete'].offset
+          pos: diff.delete.offset
         }
-      } else if (diff['insert']) {
+      } else if (diff.insert) {
         console.warn('DEPRECATED: use doc.update(path, {type:"insert", pos:1, value: "foo"}) instead')
         diff = {
           type: 'insert',
-          pos: diff['insert'].offset,
-          value: diff['insert'].value
+          pos: diff.insert.offset,
+          value: diff.insert.value
         }
       }
     } else if (value._isCoordinate) {
@@ -316,7 +316,7 @@ export default class Data extends EventEmitter {
         console.warn('DEPRECATED: use doc.update(path, {type:"shift", value:2}) instead')
         diff = {
           type: 'shift',
-          value: diff['shift']
+          value: diff.shift
         }
       }
     }
@@ -331,8 +331,8 @@ export default class Data extends EventEmitter {
     @deprecated
    */
   toJSON () {
-    let nodes = {}
-    for (let node of this.nodes.values()) {
+    const nodes = {}
+    for (const node of this.nodes.values()) {
       nodes[node.id] = node.toJSON()
     }
     return {
@@ -352,7 +352,7 @@ export default class Data extends EventEmitter {
    */
   clear () {
     this.nodes = new Map()
-    for (let index of this.indexes.values()) {
+    for (const index of this.indexes.values()) {
       index.clear()
     }
   }
@@ -389,7 +389,7 @@ export default class Data extends EventEmitter {
    */
   _updateIndexes (change) {
     if (!change || this.__QUEUE_INDEXING__) return
-    for (let index of this.indexes.values()) {
+    for (const index of this.indexes.values()) {
       if (index.select(change.node)) {
         switch (change.type) {
           case 'create':
@@ -444,10 +444,10 @@ function _setValue (nodes, path, newValue) {
   }
   const nodeId = path[0]
   const propName = path[1]
-  let node = nodes.get(nodeId)
+  const node = nodes.get(nodeId)
   if (!node) throw new Error(`Unknown node: ${nodeId}`)
   let oldValue = node.get(propName)
-  let L = path.length
+  const L = path.length
   if (L > 2) {
     if (!oldValue) throw new Error('Can not set value.')
     let ctx = oldValue
@@ -455,7 +455,7 @@ function _setValue (nodes, path, newValue) {
       ctx = ctx[path[i]]
       if (!ctx) throw new Error('Can not set value.')
     }
-    let valName = path[path.length - 1]
+    const valName = path[path.length - 1]
     oldValue = ctx[valName]
     ctx[valName] = newValue
   } else {

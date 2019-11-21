@@ -2,7 +2,7 @@ import Command from './Command'
 
 class Undo extends Command {
   getCommandState (params) {
-    let editorSession = params.editorSession
+    const editorSession = params.editorSession
     return {
       disabled: !editorSession.canUndo(),
       active: false
@@ -10,7 +10,7 @@ class Undo extends Command {
   }
 
   execute (params) {
-    let editorSession = params.editorSession
+    const editorSession = params.editorSession
     if (editorSession.canUndo()) {
       editorSession.undo()
     }

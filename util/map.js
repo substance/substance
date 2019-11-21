@@ -5,14 +5,14 @@ export default function map (iteratee, func) {
     return iteratee.map(func)
   }
   if (iteratee instanceof Map) {
-    let result = []
-    for (let [name, val] of iteratee) {
+    const result = []
+    for (const [name, val] of iteratee) {
       result.push(func(val, name))
     }
     return result
   }
   if (iteratee instanceof Set) {
-    let result = []
+    const result = []
     let idx = 0
     iteratee.forEach(item => {
       result.push(func(item, idx++))

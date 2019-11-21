@@ -29,9 +29,9 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   addDocument (type, name, xml) {
-    let documentId = uuid()
-    let documents = this._documents
-    let document = this._loadDocument(type, { data: xml }, documents)
+    const documentId = uuid()
+    const documents = this._documents
+    const document = this._loadDocument(type, { data: xml }, documents)
     documents[documentId] = document
     this._registerForChanges(document, documentId)
     this._addDocumentRecord(documentId, type, name, documentId + '.xml')
@@ -44,12 +44,12 @@ export default class DocumentArchive extends EventEmitter {
     // in that case, you can provide the file data seperate from the blob
     // otherwise the file must be a blob
     if (!blob) blob = file
-    let assetId = uuid()
-    let [name, ext] = _getNameAndExtension(file.name)
-    let filePath = this._getUniqueFileName(name, ext)
+    const assetId = uuid()
+    const [name, ext] = _getNameAndExtension(file.name)
+    const filePath = this._getUniqueFileName(name, ext)
     // TODO: this is not ready for collab
     this._manifestSession.transaction(tx => {
-      let assetNode = tx.create({
+      const assetNode = tx.create({
         type: 'asset',
         id: assetId,
         path: filePath,
@@ -82,8 +82,8 @@ export default class DocumentArchive extends EventEmitter {
 
   replaceAsset (oldFileName, newFile) {
     const asset = this.getAsset(oldFileName)
-    let [name, ext] = _getNameAndExtension(newFile.name)
-    let filePath = this._getUniqueFileName(name, ext)
+    const [name, ext] = _getNameAndExtension(newFile.name)
+    const filePath = this._getUniqueFileName(name, ext)
     // TODO: this is not ready for collab
     this._manifestSession.transaction(tx => {
       const _asset = tx.get(asset.id)
@@ -116,11 +116,11 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   getAsset (fileName) {
-    return this._documents['manifest'].getAssetByPath(fileName)
+    return this._documents.manifest.getAssetByPath(fileName)
   }
 
   getAssetEntries () {
-    return this._documents['manifest'].getAssetNodes().map(node => node.toJSON())
+    return this._documents.manifest.getAssetNodes().map(node => node.toJSON())
   }
 
   getBlob (path) {
@@ -128,11 +128,11 @@ export default class DocumentArchive extends EventEmitter {
     // 1. the asset is on a different server (remote url)
     // 2. the asset is on the local server (local url / relative path)
     // 3. an unsaved is present as a blob in memory
-    let blobEntry = this._pendingFiles.get(path)
+    const blobEntry = this._pendingFiles.get(path)
     if (blobEntry) {
       return Promise.resolve(blobEntry.blob)
     } else {
-      let fileRecord = this._upstreamArchive.resources[path]
+      const fileRecord = this._upstreamArchive.resources[path]
       if (fileRecord) {
         if (fileRecord.encoding === 'url') {
           if (platform.inBrowser) {
@@ -154,7 +154,7 @@ export default class DocumentArchive extends EventEmitter {
             })
           }
         } else {
-          let blob = platform.inBrowser ? new Blob([fileRecord.data]) : fileRecord.data
+          const blob = platform.inBrowser ? new Blob([fileRecord.data]) : fileRecord.data
           return Promise.resolve(blob)
         }
       } else {
@@ -172,8 +172,8 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   getDownloadLink (fileName) {
-    let manifest = this.getDocument('manifest')
-    let asset = manifest.getAssetByPath(fileName)
+    const manifest = this.getDocument('manifest')
+    const asset = manifest.getAssetByPath(fileName)
     if (asset) {
       return this.resolveUrl(fileName)
     }
@@ -204,8 +204,8 @@ export default class DocumentArchive extends EventEmitter {
         // In this case the buffer should be based on the same version
         // as the latest version in the storage.
         if (!buffer.hasPendingChanges()) {
-          let localVersion = buffer.getVersion()
-          let upstreamVersion = upstreamArchive.version
+          const localVersion = buffer.getVersion()
+          const upstreamVersion = upstreamArchive.version
           if (localVersion && upstreamVersion && localVersion !== upstreamVersion) {
             // If the local version is out-of-date, it would be necessary to 'rebase' the
             // local changes.
@@ -216,13 +216,13 @@ export default class DocumentArchive extends EventEmitter {
           }
         }
         // convert raw archive to documents (=ingestion)
-        let documents = this._ingest(upstreamArchive)
+        const documents = this._ingest(upstreamArchive)
         // contract: there must be a manifest
-        if (!documents['manifest']) {
+        if (!documents.manifest) {
           throw new Error('There must be a manifest.')
         }
         // Creating an EditorSession for the manifest
-        this._manifestSession = new AbstractEditorSession('manifest', documents['manifest'])
+        this._manifestSession = new AbstractEditorSession('manifest', documents.manifest)
 
         // apply pending changes
         if (!buffer.hasPendingChanges()) {
@@ -245,11 +245,11 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   removeDocument (documentId) {
-    let document = this._documents[documentId]
+    const document = this._documents[documentId]
     if (document) {
       this._unregisterFromDocument(document)
       // TODO: this is not ready for collab
-      let manifest = this._documents['manifest']
+      const manifest = this._documents.manifest
       documentHelpers.removeFromCollection(manifest, ['dar', 'documents'], documentId)
       documentHelpers.deepDeleteNode(manifest, documentId)
     }
@@ -257,18 +257,18 @@ export default class DocumentArchive extends EventEmitter {
 
   renameDocument (documentId, name) {
     // TODO: this is not ready for collab
-    let manifest = this._documents['manifest']
-    let documentNode = manifest.get(documentId)
+    const manifest = this._documents.manifest
+    const documentNode = manifest.get(documentId)
     documentNode.name = name
   }
 
   resolveUrl (path) {
     // until saved, files have a blob URL
-    let blobEntry = this._pendingFiles.get(path)
+    const blobEntry = this._pendingFiles.get(path)
     if (blobEntry) {
       return blobEntry.blobUrl
     } else {
-      let fileRecord = this._upstreamArchive.resources[path]
+      const fileRecord = this._upstreamArchive.resources[path]
       if (fileRecord && fileRecord.encoding === 'url') {
         return fileRecord.data
       }
@@ -277,7 +277,7 @@ export default class DocumentArchive extends EventEmitter {
 
   save (cb) {
     // FIXME: buffer.hasPendingChanges() is not working
-    this.buffer._isDirty['manuscript'] = true
+    this.buffer._isDirty.manuscript = true
     this._save(this._archiveId, cb)
   }
 
@@ -300,7 +300,7 @@ export default class DocumentArchive extends EventEmitter {
   */
   _addDocumentRecord (documentId, type, name, path) {
     this._manifestSession.transaction(tx => {
-      let documentNode = tx.create({
+      const documentNode = tx.create({
         type: 'document',
         id: documentId,
         documentType: type,
@@ -361,7 +361,7 @@ export default class DocumentArchive extends EventEmitter {
     const buffer = this.buffer
     const storage = this.storage
 
-    let rawArchiveUpdate = this._exportChanges(this._documents, buffer)
+    const rawArchiveUpdate = this._exportChanges(this._documents, buffer)
 
     // CHALLENGE: we either need to lock the buffer, so that
     // new changes are interfering with ongoing sync
@@ -388,7 +388,7 @@ export default class DocumentArchive extends EventEmitter {
       buffer.reset(_res.version)
       // revoking object urls
       if (platform.inBrowser) {
-        for (let blobEntry of this._pendingFiles.values()) {
+        for (const blobEntry of this._pendingFiles.values()) {
           window.URL.revokeObjectURL(blobEntry.blobUrl)
         }
       }
@@ -410,7 +410,7 @@ export default class DocumentArchive extends EventEmitter {
     containing all changed documents
   */
   _exportChanges (documents, buffer) {
-    let rawArchive = {
+    const rawArchive = {
       version: buffer.getVersion(),
       diff: buffer.getChanges(),
       resources: {}
@@ -422,10 +422,10 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   _exportManifest (documents, buffer, rawArchive) {
-    let manifest = documents['manifest']
+    const manifest = documents.manifest
     if (buffer.hasResourceChanged('manifest')) {
-      let manifestDom = manifest.toXML()
-      let manifestXmlStr = prettyPrintXML(manifestDom)
+      const manifestDom = manifest.toXML()
+      const manifestXmlStr = prettyPrintXML(manifestDom)
       rawArchive.resources['manifest.xml'] = {
         id: 'manifest',
         data: manifestXmlStr,
@@ -436,13 +436,13 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   _exportChangedAssets (documents, buffer, rawArchive) {
-    let manifest = documents['manifest']
-    let assetNodes = manifest.getAssetNodes()
+    const manifest = documents.manifest
+    const assetNodes = manifest.getAssetNodes()
     assetNodes.forEach(asset => {
-      let assetId = asset.id
+      const assetId = asset.id
       if (buffer.hasBlobChanged(assetId)) {
-        let path = asset.path || assetId
-        let blobRecord = buffer.getBlob(assetId)
+        const path = asset.path || assetId
+        const blobRecord = buffer.getBlob(assetId)
         rawArchive.resources[path] = {
           assetId,
           data: blobRecord.blob,
@@ -522,7 +522,7 @@ export default class DocumentArchive extends EventEmitter {
 }
 
 function _getNameAndExtension (name) {
-  let frags = name.split('.')
+  const frags = name.split('.')
   let ext = ''
   if (frags.length > 1) {
     ext = last(frags)

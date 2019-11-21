@@ -19,7 +19,7 @@ export default function getRelativeBoundingRect (els, containerEl) {
     nativeCotainerEl = containerEl
   }
   if (!isArray(els)) els = [els]
-  let elRects = els.map((el) => {
+  const elRects = els.map((el) => {
     let nativeEl
     if (el._isDOMElement) {
       nativeEl = el.getNativeElement()
@@ -29,8 +29,8 @@ export default function getRelativeBoundingRect (els, containerEl) {
     return _getBoundingOffsetsRect(nativeEl, nativeCotainerEl)
   })
 
-  let elsRect = _getBoundingRect(elRects)
-  let containerElRect = nativeCotainerEl.getBoundingClientRect()
+  const elsRect = _getBoundingRect(elRects)
+  const containerElRect = nativeCotainerEl.getBoundingClientRect()
   return {
     left: elsRect.left,
     top: elsRect.top,

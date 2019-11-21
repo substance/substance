@@ -2,12 +2,12 @@ import Command from './Command'
 
 export default class IndentListCommand extends Command {
   getCommandState (params) {
-    let editorSession = params.editorSession
-    let doc = editorSession.getDocument()
-    let sel = editorSession.getSelection()
+    const editorSession = params.editorSession
+    const doc = editorSession.getDocument()
+    const sel = editorSession.getSelection()
     if (sel && sel.isPropertySelection()) {
-      let path = sel.path
-      let node = doc.get(path[0])
+      const path = sel.path
+      const node = doc.get(path[0])
       if (node) {
         if (node.isListItem()) {
           return {
@@ -20,13 +20,13 @@ export default class IndentListCommand extends Command {
   }
 
   execute (params) {
-    let commandState = params.commandState
+    const commandState = params.commandState
     const { disabled } = commandState
 
     if (disabled) return
 
-    let editorSession = params.editorSession
-    let action = this.config.spec.action
+    const editorSession = params.editorSession
+    const action = this.config.spec.action
     switch (action) {
       case 'indent': {
         editorSession.transaction((tx) => {

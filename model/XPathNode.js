@@ -10,14 +10,14 @@ export default class XPathNode {
   }
 
   toJSON () {
-    let data = { id: this.id, type: this.type }
+    const data = { id: this.id, type: this.type }
     if (this.property) data.property = this.property
     if (isNumber(this.pos)) data.pos = this.pos
     return data
   }
 
   toArray () {
-    let result = [this.toJSON()]
+    const result = [this.toJSON()]
     let current = this
     while (current.prev) {
       current = current.prev

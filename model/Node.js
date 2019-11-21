@@ -40,9 +40,9 @@ export default class Node extends EventEmitter {
   _initialize (data) {
     const NodeClass = this.constructor
 
-    let schema = NodeClass.schema
-    for (let property of schema) {
-      let name = property.name
+    const schema = NodeClass.schema
+    for (const property of schema) {
+      const name = property.name
       // check integrity of provided data, such as type correctness,
       // and mandatory properties
       const propIsGiven = (data[name] !== undefined)
@@ -93,8 +93,8 @@ export default class Node extends EventEmitter {
     @returns {String[]} An array of type names.
    */
   getTypeNames () {
-    let NodeClass = this.constructor
-    let typeNames = this.schema.getSuperTypes()
+    const NodeClass = this.constructor
+    const typeNames = this.schema.getSuperTypes()
     typeNames.unshift(NodeClass.type)
     return typeNames
   }
@@ -119,7 +119,7 @@ export default class Node extends EventEmitter {
       type: this.type
     }
     const schema = this.getSchema()
-    for (let prop of schema) {
+    for (const prop of schema) {
       let val = this._properties.get(prop.name)
       if (prop.isOptional() && val === undefined) continue
       if (isArray(val) || isObject(val)) {
@@ -166,10 +166,10 @@ export default class Node extends EventEmitter {
     @returns {Boolean}
    */
   static isInstanceOf (NodeClass, typeName) {
-    let schema = NodeClass.schema
+    const schema = NodeClass.schema
     if (!schema) return false
     if (NodeClass.type === typeName) return true
-    for (let superType of schema._superTypes) {
+    for (const superType of schema._superTypes) {
       if (superType === typeName) return true
     }
     return false
@@ -178,14 +178,14 @@ export default class Node extends EventEmitter {
   get _isNode () { return true }
 
   static get type () {
-    let NodeClass = this
+    const NodeClass = this
     return NodeClass.schema.type
   }
 
   static get schema () {
-    let NodeClass = this
+    const NodeClass = this
     NodeClass._ensureSchemaIsCompiled()
-    return NodeClass['compiledSchema']
+    return NodeClass.compiledSchema
   }
 
   static set schema (spec) {
@@ -195,7 +195,7 @@ export default class Node extends EventEmitter {
   }
 
   static _ensureSchemaIsCompiled () {
-    let NodeClass = this
+    const NodeClass = this
     // If the schema has not been set explicitly, derive it from the parent schema
     if (!NodeClass.hasOwnProperty('compiledSchema')) {
       NodeClass._compileSchema()
@@ -203,23 +203,23 @@ export default class Node extends EventEmitter {
   }
 
   static _compileSchema (schema) {
-    let NodeClass = this
+    const NodeClass = this
     if (!schema) {
       // Experimental: I'd like to allow schema definition as prototype method
       // for sake of convenience
-      let define = NodeClass.prototype.define
+      const define = NodeClass.prototype.define
       schema = define()
     }
-    NodeClass['compiledSchema'] = compileSchema(NodeClass, schema)
+    NodeClass.compiledSchema = compileSchema(NodeClass, schema)
   }
 }
 
 // ### Internal implementation
 
 function _assign (maps) {
-  let result = new Map()
-  for (let m of maps) {
-    for (let [key, value] of m) {
+  const result = new Map()
+  for (const m of maps) {
+    for (const [key, value] of m) {
       if (result.has(key)) result.delete(key)
       result.set(key, value)
     }
@@ -232,22 +232,22 @@ function compileSchema (NodeClass, spec) {
   if (!_isDefined(type)) {
     throw new Error('"type" is required')
   }
-  let properties = _compileProperties(spec)
-  let allProperties = [properties]
+  const properties = _compileProperties(spec)
+  const allProperties = [properties]
   let ParentNodeClass = _getParentNodeClass(NodeClass)
   while (ParentNodeClass) {
     // ATTENTION: this will actually lead to a recursive compileSchema() call
     // if the parent class schema has not been compiled yet
-    let parentSchema = ParentNodeClass.schema
+    const parentSchema = ParentNodeClass.schema
     allProperties.unshift(parentSchema._properties)
     ParentNodeClass = _getParentNodeClass(ParentNodeClass)
   }
-  let superTypes = _getSuperTypes(NodeClass)
-  let _schema = new NodeSchema(type, _assign(allProperties), superTypes)
+  const superTypes = _getSuperTypes(NodeClass)
+  const _schema = new NodeSchema(type, _assign(allProperties), superTypes)
 
   // define property getter and setters
-  for (let prop of _schema) {
-    let name = prop.name
+  for (const prop of _schema) {
+    const name = prop.name
     Object.defineProperty(NodeClass.prototype, name, {
       get () {
         return this.get(name)
@@ -264,7 +264,7 @@ function compileSchema (NodeClass, spec) {
 }
 
 function _compileProperties (schema) {
-  let properties = new Map()
+  const properties = new Map()
   forEach(schema, function (definition, name) {
     // skip 'type'
     if (name === 'type') return
@@ -286,17 +286,17 @@ function _isValueType (t) {
 
 function _compileDefintion (definition) {
   let result = Object.assign({}, definition)
-  let type = definition.type
+  const type = definition.type
   if (isArray(type)) {
     // there are different allowed formats:
     // 1. canonical: ['array', 'id'], ['array', 'some-node']
     // 2. implcit: ['object']
     // 3. multi-type: ['p', 'list']
-    let defs = type
-    let lastIdx = defs.length - 1
-    let first = defs[0]
-    let last = defs[lastIdx]
-    let isCanonical = first === 'array'
+    const defs = type
+    const lastIdx = defs.length - 1
+    const first = defs[0]
+    const last = defs[lastIdx]
+    const isCanonical = first === 'array'
     if (isCanonical) {
       result.type = defs.slice()
       // 'semi'-canonical
@@ -311,13 +311,13 @@ function _compileDefintion (definition) {
             throw new Error('Multi-types must consist of node types.')
           }
         })
-        result.type = [ 'array', 'id' ]
+        result.type = ['array', 'id']
         result.targetTypes = defs
       } else {
         if (_isValueType(first)) {
-          result.type = [ 'array', first ]
+          result.type = ['array', first]
         } else {
-          result.type = [ 'array', 'id' ]
+          result.type = ['array', 'id']
           result.targetTypes = defs
         }
       }
@@ -345,7 +345,7 @@ function _compileDefintion (definition) {
 
 function _checked (prop, value) {
   let type
-  let name = prop.name
+  const name = prop.name
   if (prop.isArray()) {
     type = 'array'
   } else {

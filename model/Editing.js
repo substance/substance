@@ -22,14 +22,14 @@ import paste from './paste'
 export default class Editing {
   // create an annotation for the current selection using the given data
   annotate (tx, annotation) {
-    let sel = tx.selection
-    let schema = tx.getSchema()
-    let AnnotationClass = schema.getNodeClass(annotation.type)
+    const sel = tx.selection
+    const schema = tx.getSchema()
+    const AnnotationClass = schema.getNodeClass(annotation.type)
     if (!AnnotationClass) throw new Error('Unknown annotation type', annotation)
-    let start = sel.start
-    let end = sel.end
-    let containerPath = sel.containerPath
-    let nodeData = { start, end, containerPath }
+    const start = sel.start
+    const end = sel.end
+    const containerPath = sel.containerPath
+    const nodeData = { start, end, containerPath }
     // TODO: we need to generalize how node category can be derived statically
     /* istanbul ignore else  */
     if (sel.isPropertySelection()) {
@@ -46,12 +46,12 @@ export default class Editing {
   }
 
   break (tx) {
-    let sel = tx.selection
+    const sel = tx.selection
     if (sel.isNodeSelection()) {
-      let containerPath = sel.containerPath
-      let nodeId = sel.getNodeId()
-      let nodePos = getContainerPosition(tx, containerPath, nodeId)
-      let textNode = this.createTextNode(tx, containerPath)
+      const containerPath = sel.containerPath
+      const nodeId = sel.getNodeId()
+      const nodePos = getContainerPosition(tx, containerPath, nodeId)
+      const textNode = this.createTextNode(tx, containerPath)
       if (sel.isBefore()) {
         insertAt(tx, containerPath, nodePos, textNode.id)
         // leave selection as is
@@ -62,7 +62,7 @@ export default class Editing {
     } else if (sel.isCustomSelection()) {
       // TODO: what to do with custom selections?
     } else if (sel.isCollapsed() || sel.isPropertySelection()) {
-      let containerPath = sel.containerPath
+      const containerPath = sel.containerPath
       if (!sel.isCollapsed()) {
         // delete the selection
         this._deletePropertySelection(tx, sel)
@@ -70,22 +70,22 @@ export default class Editing {
       }
       // then break the node
       if (containerPath) {
-        let nodeId = sel.start.path[0]
-        let node = tx.get(nodeId)
+        const nodeId = sel.start.path[0]
+        const node = tx.get(nodeId)
         this._breakNode(tx, node, sel.start, containerPath)
       }
     } else if (sel.isContainerSelection()) {
-      let start = sel.start
-      let containerPath = sel.containerPath
-      let startNodeId = start.path[0]
-      let nodePos = getContainerPosition(tx, containerPath, startNodeId)
+      const start = sel.start
+      const containerPath = sel.containerPath
+      const startNodeId = start.path[0]
+      const nodePos = getContainerPosition(tx, containerPath, startNodeId)
       this._deleteContainerSelection(tx, sel, { noMerge: true })
       setCursor(tx, getNextNode(tx, containerPath, nodePos), containerPath, 'before')
     }
   }
 
   createTextNode (tx, containerPath, text) { // eslint-disable-line no-unused-vars
-    let prop = tx.getProperty(containerPath)
+    const prop = tx.getProperty(containerPath)
     if (!prop.defaultTextType) {
       throw new Error('Container properties must have a "defaultTextType" defined in the schema')
     }
@@ -102,7 +102,7 @@ export default class Editing {
   }
 
   delete (tx, direction) {
-    let sel = tx.selection
+    const sel = tx.selection
     // special implementation for node selections:
     // either delete the node (replacing with an empty text node)
     // or just move the cursor
@@ -117,12 +117,12 @@ export default class Editing {
       // Deletion of a single character leads to a merge
       // if cursor is at a text boundary (TextNode, ListItem)
       // and direction is towards that boundary
-      let path = sel.start.path
-      let nodeId = path[0]
-      let containerPath = sel.containerPath
-      let text = tx.get(path)
-      let offset = sel.start.offset
-      let needsMerge = (containerPath && (
+      const path = sel.start.path
+      const nodeId = path[0]
+      const containerPath = sel.containerPath
+      const text = tx.get(path)
+      const offset = sel.start.offset
+      const needsMerge = (containerPath && (
         (offset === 0 && direction === 'left') ||
         (offset === text.length && direction === 'right')
       ))
@@ -134,7 +134,7 @@ export default class Editing {
         // inverse of 'break'
         // We will 'toggle' only if the cursor is on the first position
         // of the first item
-        let root = getContainerRoot(tx, containerPath, nodeId)
+        const root = getContainerRoot(tx, containerPath, nodeId)
         if (root.isList() && offset === 0 && direction === 'left') {
           return this.toggleList(tx)
         } else {
@@ -146,10 +146,10 @@ export default class Editing {
           (offset === text.length && direction === 'right')) {
           return
         }
-        let startOffset = (direction === 'left') ? offset - 1 : offset
-        let endOffset = startOffset + 1
-        let start = { path: path, offset: startOffset }
-        let end = { path: path, offset: endOffset }
+        const startOffset = (direction === 'left') ? offset - 1 : offset
+        const endOffset = startOffset + 1
+        const start = { path: path, offset: startOffset }
+        const end = { path: path, offset: endOffset }
         deleteTextRange(tx, start, end)
         tx.setSelection({
           type: 'property',
@@ -171,16 +171,16 @@ export default class Editing {
   }
 
   _deleteNodeSelection (tx, sel, direction) {
-    let nodeId = sel.getNodeId()
-    let containerPath = sel.containerPath
-    let nodePos = getContainerPosition(tx, containerPath, nodeId)
+    const nodeId = sel.getNodeId()
+    const containerPath = sel.containerPath
+    const nodePos = getContainerPosition(tx, containerPath, nodeId)
     if (sel.isFull() ||
         (sel.isBefore() && direction === 'right') ||
         (sel.isAfter() && direction === 'left')) {
       // replace the node with default text node
       removeAt(tx, containerPath, nodePos)
       deepDeleteNode(tx, tx.get(nodeId))
-      let newNode = this.createTextNode(tx, sel.containerPath)
+      const newNode = this.createTextNode(tx, sel.containerPath)
       insertAt(tx, containerPath, nodePos, newNode.id)
       tx.setSelection({
         type: 'property',
@@ -192,7 +192,7 @@ export default class Editing {
       /* istanbul ignore else  */
       if (sel.isBefore() && direction === 'left') {
         if (nodePos > 0) {
-          let previous = getPreviousNode(tx, containerPath, nodePos)
+          const previous = getPreviousNode(tx, containerPath, nodePos)
           if (previous.isText()) {
             tx.setSelection({
               type: 'property',
@@ -211,9 +211,9 @@ export default class Editing {
           // nothing to do
         }
       } else if (sel.isAfter() && direction === 'right') {
-        let nodeIds = tx.get(containerPath)
+        const nodeIds = tx.get(containerPath)
         if (nodePos < nodeIds.length - 1) {
-          let next = getNextNode(tx, containerPath, nodePos)
+          const next = getNextNode(tx, containerPath, nodePos)
           if (next.isText()) {
             tx.setSelection({
               type: 'property',
@@ -238,27 +238,27 @@ export default class Editing {
   }
 
   _deletePropertySelection (tx, sel) {
-    let path = sel.start.path
-    let start = sel.start.offset
-    let end = sel.end.offset
+    const path = sel.start.path
+    const start = sel.start.offset
+    const end = sel.end.offset
     tx.update(path, { type: 'delete', start: start, end: end })
     annotationHelpers.deletedText(tx, path, start, end)
   }
 
   // deletes all inner nodes and 'truncates' start and end node
   _deleteContainerSelection (tx, sel, options = {}) {
-    let containerPath = sel.containerPath
-    let start = sel.start
-    let end = sel.end
-    let startId = start.getNodeId()
-    let endId = end.getNodeId()
-    let startPos = getContainerPosition(tx, containerPath, startId)
-    let endPos = getContainerPosition(tx, containerPath, endId)
+    const containerPath = sel.containerPath
+    const start = sel.start
+    const end = sel.end
+    const startId = start.getNodeId()
+    const endId = end.getNodeId()
+    const startPos = getContainerPosition(tx, containerPath, startId)
+    const endPos = getContainerPosition(tx, containerPath, endId)
     // special case: selection within one node
     if (startPos === endPos) {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
       // OUCH: how we will we do it
-      let node = getContainerRoot(tx, containerPath, startId)
+      const node = getContainerRoot(tx, containerPath, startId)
       /* istanbul ignore else  */
       if (node.isText()) {
         deleteTextRange(tx, start, end)
@@ -273,12 +273,12 @@ export default class Editing {
 
     // TODO: document the algorithm
 
-    let firstNodeId = start.getNodeId()
-    let lastNodeId = end.getNodeId()
-    let firstNode = tx.get(start.getNodeId())
-    let lastNode = tx.get(end.getNodeId())
-    let firstEntirelySelected = isEntirelySelected(tx, firstNode, start, null)
-    let lastEntirelySelected = isEntirelySelected(tx, lastNode, null, end)
+    const firstNodeId = start.getNodeId()
+    const lastNodeId = end.getNodeId()
+    const firstNode = tx.get(start.getNodeId())
+    const lastNode = tx.get(end.getNodeId())
+    const firstEntirelySelected = isEntirelySelected(tx, firstNode, start, null)
+    const lastEntirelySelected = isEntirelySelected(tx, lastNode, null, end)
 
     // delete or truncate last node
     if (lastEntirelySelected) {
@@ -286,7 +286,7 @@ export default class Editing {
       deepDeleteNode(tx, lastNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = getContainerRoot(tx, containerPath, lastNodeId)
+      const node = getContainerRoot(tx, containerPath, lastNodeId)
       /* istanbul ignore else  */
       if (node.isText()) {
         deleteTextRange(tx, null, end)
@@ -299,7 +299,7 @@ export default class Editing {
 
     // delete inner nodes
     for (let i = endPos - 1; i > startPos; i--) {
-      let nodeId = removeAt(tx, containerPath, i)
+      const nodeId = removeAt(tx, containerPath, i)
       deepDeleteNode(tx, tx.get(nodeId))
     }
 
@@ -309,7 +309,7 @@ export default class Editing {
       deepDeleteNode(tx, firstNode)
     } else {
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = getContainerRoot(tx, containerPath, firstNodeId)
+      const node = getContainerRoot(tx, containerPath, firstNodeId)
       /* istanbul ignore else  */
       if (node.isText()) {
         deleteTextRange(tx, start, null)
@@ -323,7 +323,7 @@ export default class Editing {
     // insert a new TextNode if all has been deleted
     if (firstEntirelySelected && lastEntirelySelected) {
       // insert a new paragraph
-      let textNode = this.createTextNode(tx, containerPath)
+      const textNode = this.createTextNode(tx, containerPath)
       insertAt(tx, containerPath, startPos, textNode.id)
       tx.setSelection({
         type: 'property',
@@ -333,7 +333,7 @@ export default class Editing {
       })
     } else if (!firstEntirelySelected && !lastEntirelySelected) {
       if (!options.noMerge) {
-        let firstNodeRoot = getContainerRoot(tx, containerPath, firstNode.id)
+        const firstNodeRoot = getContainerRoot(tx, containerPath, firstNode.id)
         this._merge(tx, firstNodeRoot, sel.start, 'right', containerPath)
       }
       tx.setSelection(sel.collapse('left'))
@@ -346,11 +346,11 @@ export default class Editing {
 
   insertInlineNode (tx, nodeData) {
     let sel = tx.selection
-    let text = '\uFEFF'
+    const text = '\uFEFF'
     this.insertText(tx, text)
     sel = tx.selection
-    let endOffset = tx.selection.end.offset
-    let startOffset = endOffset - text.length
+    const endOffset = tx.selection.end.offset
+    const startOffset = endOffset - text.length
     nodeData = Object.assign({}, nodeData, {
       start: {
         path: sel.path,
@@ -365,8 +365,8 @@ export default class Editing {
   }
 
   insertBlockNode (tx, nodeData) {
-    let sel = tx.selection
-    let containerPath = sel.containerPath
+    const sel = tx.selection
+    const containerPath = sel.containerPath
     // don't create the node if it already exists
     let blockNode
     if (!nodeData._isNode || !tx.get(nodeData.id)) {
@@ -376,8 +376,8 @@ export default class Editing {
     }
     /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
-      let nodeId = sel.getNodeId()
-      let nodePos = getContainerPosition(tx, containerPath, nodeId)
+      const nodeId = sel.getNodeId()
+      const nodePos = getContainerPosition(tx, containerPath, nodeId)
       // insert before
       if (sel.isBefore()) {
         insertAt(tx, containerPath, nodePos, blockNode.id)
@@ -408,13 +408,13 @@ export default class Editing {
         this._deletePropertySelection(tx, sel)
         tx.setSelection(sel.collapse('left'))
       }
-      let node = tx.get(sel.path[0])
+      const node = tx.get(sel.path[0])
       /* istanbul ignore next */
       if (!node) throw new Error('Invalid selection.')
-      let nodePos = getContainerPosition(tx, containerPath, node.id)
+      const nodePos = getContainerPosition(tx, containerPath, node.id)
       /* istanbul ignore else  */
       if (node.isText()) {
-        let text = node.getText()
+        const text = node.getText()
         // replace node
         if (text.length === 0) {
           removeAt(tx, containerPath, nodePos)
@@ -439,7 +439,7 @@ export default class Editing {
       }
     } else if (sel.isContainerSelection()) {
       if (sel.isCollapsed()) {
-        let start = sel.start
+        const start = sel.start
         /* istanbul ignore else  */
         if (start.isPropertyCoordinate()) {
           tx.setSelection({
@@ -468,15 +468,15 @@ export default class Editing {
   }
 
   insertText (tx, text) {
-    let sel = tx.selection
+    const sel = tx.selection
     // type over a selected node or insert a paragraph before
     // or after
     /* istanbul ignore else  */
     if (sel.isNodeSelection()) {
-      let containerPath = sel.containerPath
-      let nodeId = sel.getNodeId()
-      let nodePos = getContainerPosition(tx, containerPath, nodeId)
-      let textNode = this.createTextNode(tx, containerPath, text)
+      const containerPath = sel.containerPath
+      const nodeId = sel.getNodeId()
+      const nodePos = getContainerPosition(tx, containerPath, nodeId)
+      const textNode = this.createTextNode(tx, containerPath, text)
       if (sel.isBefore()) {
         insertAt(tx, containerPath, nodePos, textNode.id)
       } else if (sel.isAfter()) {
@@ -503,9 +503,9 @@ export default class Editing {
     if (!content) return
     /* istanbul ignore else  */
     if (isString(content)) {
-      paste(tx, {text: content})
+      paste(tx, { text: content })
     } else if (content._isDocument) {
-      paste(tx, {doc: content})
+      paste(tx, { doc: content })
     } else {
       throw new Error('Illegal content for paste.')
     }
@@ -531,19 +531,19 @@ export default class Editing {
    * ```
    */
   switchTextType (tx, data) {
-    let sel = tx.selection
+    const sel = tx.selection
     /* istanbul ignore next */
     if (!sel.isPropertySelection()) {
       throw new Error('Selection must be a PropertySelection.')
     }
-    let containerPath = sel.containerPath
+    const containerPath = sel.containerPath
     /* istanbul ignore next */
     if (!containerPath) {
       throw new Error('Selection must be within a container.')
     }
-    let path = sel.path
-    let nodeId = path[0]
-    let node = tx.get(nodeId)
+    const path = sel.path
+    const nodeId = path[0]
+    const node = tx.get(nodeId)
     /* istanbul ignore next */
     if (!(node.isText())) {
       throw new Error('Trying to use switchTextType on a non text node.')
@@ -553,20 +553,20 @@ export default class Editing {
     const oldPath = node.getPath()
     console.assert(oldPath.length === 2, 'Currently we assume that TextNodes store the plain-text on the first level')
     const textProp = oldPath[1]
-    let newPath = [newId, textProp]
+    const newPath = [newId, textProp]
     // create a new node and transfer annotations
-    let newNodeData = Object.assign({
+    const newNodeData = Object.assign({
       id: newId,
       type: data.type,
       direction: node.direction
     }, data)
     newNodeData[textProp] = node.getText()
 
-    let newNode = tx.create(newNodeData)
+    const newNode = tx.create(newNodeData)
     annotationHelpers.transferAnnotations(tx, path, 0, newPath, 0)
 
     // hide and delete the old one, show the new node
-    let pos = getContainerPosition(tx, containerPath, nodeId)
+    const pos = getContainerPosition(tx, containerPath, nodeId)
     removeAt(tx, containerPath, pos)
     deepDeleteNode(tx, node)
     insertAt(tx, containerPath, pos, newNode.id)
@@ -583,22 +583,22 @@ export default class Editing {
   }
 
   toggleList (tx, params) {
-    let sel = tx.selection
-    let containerPath = sel.containerPath
+    const sel = tx.selection
+    const containerPath = sel.containerPath
     /* istanbul ignore next */
     if (!containerPath) {
       throw new Error('Selection must be within a container.')
     }
     if (sel.isPropertySelection()) {
-      let nodeId = sel.start.path[0]
+      const nodeId = sel.start.path[0]
       // ATTENTION: we need the root node here e.g. the list, not the list-item
-      let node = getContainerRoot(tx, containerPath, nodeId)
-      let nodePos = node.getPosition()
+      const node = getContainerRoot(tx, containerPath, nodeId)
+      const nodePos = node.getPosition()
       /* istanbul ignore else  */
       if (node.isText()) {
         removeAt(tx, containerPath, nodePos)
-        let newList = this.createListNode(tx, containerPath, params)
-        let newItem = newList.createListItem(node.getText())
+        const newList = this.createListNode(tx, containerPath, params)
+        const newItem = newList.createListItem(node.getText())
         annotationHelpers.transferAnnotations(tx, node.getPath(), 0, newItem.getPath(), 0)
         newList.appendItem(newItem)
         deepDeleteNode(tx, node)
@@ -610,10 +610,10 @@ export default class Editing {
           containerPath
         })
       } else if (node.isList()) {
-        let itemId = sel.start.path[0]
-        let item = tx.get(itemId)
-        let itemPos = node.getItemPosition(item)
-        let newTextNode = this.createTextNode(tx, containerPath, item.getText())
+        const itemId = sel.start.path[0]
+        const item = tx.get(itemId)
+        const itemPos = node.getItemPosition(item)
+        const newTextNode = this.createTextNode(tx, containerPath, item.getText())
         annotationHelpers.transferAnnotations(tx, item.getPath(), 0, newTextNode.getPath(), 0)
         // take the item out of the list
         node.removeItemAt(itemPos)
@@ -627,14 +627,14 @@ export default class Editing {
           insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
         } else {
           // split the
-          let tail = []
+          const tail = []
           const items = node.getItems()
           const L = items.length
           for (let i = L - 1; i >= itemPos; i--) {
             tail.unshift(items[i])
             node.removeItemAt(i)
           }
-          let newList = this.createListNode(tx, containerPath, node)
+          const newList = this.createListNode(tx, containerPath, node)
           for (let i = 0; i < tail.length; i++) {
             newList.appendItem(tail[i])
           }
@@ -656,16 +656,16 @@ export default class Editing {
   }
 
   indent (tx) {
-    let sel = tx.selection
-    let containerPath = sel.containerPath
+    const sel = tx.selection
+    const containerPath = sel.containerPath
     if (sel.isPropertySelection()) {
-      let nodeId = sel.start.getNodeId()
+      const nodeId = sel.start.getNodeId()
       // ATTENTION: we need the root node here, e.g. the list, not the list items
-      let node = getContainerRoot(tx, containerPath, nodeId)
+      const node = getContainerRoot(tx, containerPath, nodeId)
       if (node.isList()) {
-        let itemId = sel.start.path[0]
-        let item = tx.get(itemId)
-        let level = item.getLevel()
+        const itemId = sel.start.path[0]
+        const item = tx.get(itemId)
+        const level = item.getLevel()
         // Note: allowing only 3 levels
         if (item && level < 3) {
           item.setLevel(item.level + 1)
@@ -679,16 +679,16 @@ export default class Editing {
   }
 
   dedent (tx) {
-    let sel = tx.selection
-    let containerPath = sel.containerPath
+    const sel = tx.selection
+    const containerPath = sel.containerPath
     if (sel.isPropertySelection()) {
-      let nodeId = sel.start.getNodeId()
+      const nodeId = sel.start.getNodeId()
       // ATTENTION: we need the root node here, e.g. the list, not the list items
-      let node = getContainerRoot(tx, containerPath, nodeId)
+      const node = getContainerRoot(tx, containerPath, nodeId)
       if (node.isList()) {
-        let itemId = sel.start.path[0]
-        let item = tx.get(itemId)
-        let level = item.getLevel()
+        const itemId = sel.start.path[0]
+        const item = tx.get(itemId)
+        const level = item.getLevel()
         if (item) {
           if (level > 1) {
             item.setLevel(item.level - 1)
@@ -719,17 +719,17 @@ export default class Editing {
     VII: <-|--|->    :   move end by total span+L
   */
   _insertText (tx, sel, text) {
-    let start = sel.start
-    let end = sel.end
+    const start = sel.start
+    const end = sel.end
     /* istanbul ignore next  */
     if (!isArrayEqual(start.path, end.path)) {
       throw new Error('Unsupported state: range should be on one property')
     }
-    let path = start.path
-    let startOffset = start.offset
-    let endOffset = end.offset
-    let typeover = !sel.isCollapsed()
-    let L = text.length
+    const path = start.path
+    const startOffset = start.offset
+    const endOffset = end.offset
+    const typeover = !sel.isCollapsed()
+    const L = text.length
     // delete selected text
     if (typeover) {
       tx.update(path, { type: 'delete', start: startOffset, end: endOffset })
@@ -737,10 +737,10 @@ export default class Editing {
     // insert new text
     tx.update(path, { type: 'insert', start: startOffset, text: text })
     // update annotations
-    let annos = tx.getAnnotations(path)
+    const annos = tx.getAnnotations(path)
     annos.forEach(function (anno) {
-      let annoStart = anno.start.offset
-      let annoEnd = anno.end.offset
+      const annoStart = anno.start.offset
+      const annoEnd = anno.end.offset
 
       /* istanbul ignore else  */
       // I anno is before
@@ -784,7 +784,7 @@ export default class Editing {
         console.warn('TODO: handle annotation update case.')
       }
     })
-    let offset = startOffset + text.length
+    const offset = startOffset + text.length
     tx.setSelection({
       type: 'property',
       path: start.path,
@@ -808,15 +808,15 @@ export default class Editing {
   }
 
   _breakTextNode (tx, node, coor, containerPath) {
-    let path = coor.path
-    let offset = coor.offset
-    let nodePos = node.getPosition()
-    let text = node.getText()
+    const path = coor.path
+    const offset = coor.offset
+    const nodePos = node.getPosition()
+    const text = node.getText()
 
     // when breaking at the first position, a new node of the same
     // type will be inserted.
     if (offset === 0) {
-      let newNode = tx.create({
+      const newNode = tx.create({
         type: node.type,
         content: ''
       })
@@ -833,14 +833,14 @@ export default class Editing {
       const textPath = node.getPath()
       const textProp = textPath[1]
       const newId = uuid(node.type)
-      let newNodeData = node.toJSON()
+      const newNodeData = node.toJSON()
       newNodeData.id = newId
       newNodeData[textProp] = text.substring(offset)
       // if at the end insert a default text node no matter in which text node we are
       if (offset === text.length) {
         newNodeData.type = tx.getSchema().getDefaultTextType()
       }
-      let newNode = tx.create(newNodeData)
+      const newNode = tx.create(newNodeData)
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
@@ -861,23 +861,23 @@ export default class Editing {
   }
 
   _breakListNode (tx, node, coor, containerPath) {
-    let path = coor.path
-    let offset = coor.offset
-    let listItem = tx.get(path[0])
+    const path = coor.path
+    const offset = coor.offset
+    const listItem = tx.get(path[0])
 
-    let L = node.length
-    let itemPos = node.getItemPosition(listItem)
-    let text = listItem.getText()
-    let textProp = listItem.getPath()[1]
-    let newItemData = listItem.toJSON()
+    const L = node.length
+    const itemPos = node.getItemPosition(listItem)
+    const text = listItem.getText()
+    const textProp = listItem.getPath()[1]
+    const newItemData = listItem.toJSON()
     delete newItemData.id
     if (offset === 0) {
       // if breaking at an empty list item, then the list is split into two
       if (!text) {
         // if it is the first or last item, a default text node is inserted before or after, and the item is removed
         // if the list has only one element, it is removed
-        let nodePos = node.getPosition()
-        let newTextNode = this.createTextNode(tx, containerPath)
+        const nodePos = node.getPosition()
+        const newTextNode = this.createTextNode(tx, containerPath)
         // if the list is empty, replace it with a paragraph
         if (L < 2) {
           removeAt(tx, containerPath, nodePos)
@@ -895,14 +895,14 @@ export default class Editing {
           insertAt(tx, containerPath, nodePos + 1, newTextNode.id)
         // otherwise create a new list
         } else {
-          let tail = []
+          const tail = []
           const items = node.getItems().slice()
           for (let i = L - 1; i > itemPos; i--) {
             tail.unshift(items[i])
             node.removeItem(items[i])
           }
           node.removeItem(items[itemPos])
-          let newList = this.createListNode(tx, containerPath, node)
+          const newList = this.createListNode(tx, containerPath, node)
           for (let i = 0; i < tail.length; i++) {
             newList.appendItem(tail[i])
           }
@@ -917,7 +917,7 @@ export default class Editing {
       // insert a new paragraph above the current one
       } else {
         newItemData[textProp] = ''
-        let newItem = tx.create(newItemData)
+        const newItem = tx.create(newItemData)
         node.insertItemAt(itemPos, newItem)
         tx.setSelection({
           type: 'property',
@@ -928,7 +928,7 @@ export default class Editing {
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
     } else {
       newItemData[textProp] = text.substring(offset)
-      let newItem = tx.create(newItemData)
+      const newItem = tx.create(newItemData)
       // Now we need to transfer annotations
       if (offset < text.length) {
         // transfer annotations which are after offset to the new node
@@ -949,18 +949,18 @@ export default class Editing {
     // detect cases where list items get merged
     // within a single list node
     if (node.isList()) {
-      let list = node
-      let itemId = coor.path[0]
-      let item = tx.get(itemId)
+      const list = node
+      const itemId = coor.path[0]
+      const item = tx.get(itemId)
       let itemPos = list.getItemPosition(item)
-      let withinListNode = (
+      const withinListNode = (
         (direction === 'left' && itemPos > 0) ||
         (direction === 'right' && itemPos < list.items.length - 1)
       )
       if (withinListNode) {
         itemPos = (direction === 'left') ? itemPos - 1 : itemPos
-        let target = list.getItemAt(itemPos)
-        let targetLength = target.getLength()
+        const target = list.getItemAt(itemPos)
+        const targetLength = target.getLength()
         mergeListItems(tx, list.id, itemPos)
         tx.setSelection({
           type: 'property',
@@ -972,8 +972,8 @@ export default class Editing {
       }
     }
     // in all other cases merge is done across node boundaries
-    let nodeIds = tx.get(containerPath)
-    let nodePos = node.getPosition()
+    const nodeIds = tx.get(containerPath)
+    const nodePos = node.getPosition()
     if (direction === 'left' && nodePos > 0) {
       this._mergeNodes(tx, containerPath, nodePos - 1, direction)
     } else if (direction === 'right' && nodePos < nodeIds.length - 1) {
@@ -982,10 +982,10 @@ export default class Editing {
   }
 
   _mergeNodes (tx, containerPath, pos, direction) {
-    let nodeIds = tx.get(containerPath)
-    let first = tx.get(nodeIds[pos])
+    const nodeIds = tx.get(containerPath)
+    const first = tx.get(nodeIds[pos])
     let secondPos = pos + 1
-    let second = tx.get(nodeIds[secondPos])
+    const second = tx.get(nodeIds[secondPos])
     if (first.isText()) {
       // Simplification for empty nodes
       if (first.isEmpty()) {
@@ -997,12 +997,12 @@ export default class Editing {
         setCursor(tx, second, containerPath, 'before')
         return
       }
-      let target = first
-      let targetPath = target.getPath()
-      let targetLength = target.getLength()
+      const target = first
+      const targetPath = target.getPath()
+      const targetLength = target.getLength()
       if (second.isText()) {
-        let source = second
-        let sourcePath = source.getPath()
+        const source = second
+        const sourcePath = source.getPath()
         removeAt(tx, containerPath, secondPos)
         // append the text
         tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
@@ -1016,10 +1016,10 @@ export default class Editing {
           containerPath
         })
       } else if (second.isList()) {
-        let list = second
+        const list = second
         if (!second.isEmpty()) {
-          let source = list.getFirstItem()
-          let sourcePath = source.getPath()
+          const source = list.getFirstItem()
+          const sourcePath = source.getPath()
           // remove merged item from list
           list.removeItemAt(0)
           // append the text
@@ -1044,16 +1044,16 @@ export default class Editing {
       }
     } else if (first.isList()) {
       if (second.isText()) {
-        let target = first.getLastItem()
-        let targetPath = target.getPath()
-        let targetLength = target.getLength()
-        let third = (nodeIds.length > pos + 2) ? tx.get(nodeIds[pos + 2]) : null
+        const target = first.getLastItem()
+        const targetPath = target.getPath()
+        const targetLength = target.getLength()
+        const third = (nodeIds.length > pos + 2) ? tx.get(nodeIds[pos + 2]) : null
         if (second.getLength() === 0) {
           removeAt(tx, containerPath, secondPos)
           deepDeleteNode(tx, second)
         } else {
-          let source = second
-          let sourcePath = source.getPath()
+          const source = second
+          const sourcePath = source.getPath()
           removeAt(tx, containerPath, secondPos)
           tx.update(targetPath, { type: 'insert', start: targetLength, text: source.getText() })
           annotationHelpers.transferAnnotations(tx, sourcePath, 0, targetPath, targetLength)
@@ -1076,7 +1076,7 @@ export default class Editing {
           // as BACKSPACE will first turn the list into a paragraph
           throw new Error('Illegal state')
         }
-        let item = first.getLastItem()
+        const item = first.getLastItem()
         this._mergeTwoLists(tx, containerPath, first, second)
         tx.setSelection({
           type: 'property',
@@ -1099,9 +1099,9 @@ export default class Editing {
   }
 
   _mergeTwoLists (tx, containerPath, first, second) {
-    let secondPos = second.getPosition()
+    const secondPos = second.getPosition()
     removeAt(tx, containerPath, secondPos)
-    let secondItems = second.getItems().slice()
+    const secondItems = second.getItems().slice()
     for (let i = 0; i < secondItems.length; i++) {
       second.removeItemAt(0)
       first.appendItem(secondItems[i])

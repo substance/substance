@@ -22,7 +22,7 @@ export default class BasicEditorApi {
 
   removeAndDeleteNode (nodeId) {
     const node = this.editorSession.getDocument().get(nodeId, true)
-    let parent = node.getParent()
+    const parent = node.getParent()
     if (parent) {
       const { property: propertyName, pos } = node.getXpath()
       const property = parent.schema.getProperty(propertyName)

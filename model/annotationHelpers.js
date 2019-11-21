@@ -20,7 +20,7 @@ function insertedText (doc, coordinate, length) {
   var index = doc.getIndex('annotations')
   var annotations = index.get(coordinate.path)
   for (let i = 0; i < annotations.length; i++) {
-    let anno = annotations[i]
+    const anno = annotations[i]
     var pos = coordinate.offset
     var start = anno.start.offset
     var end = anno.end.offset
@@ -71,7 +71,7 @@ function deletedText (doc, path, startOffset, endOffset) {
   var annotations = index.get(path)
   var length = endOffset - startOffset
   for (let i = 0; i < annotations.length; i++) {
-    let anno = annotations[i]
+    const anno = annotations[i]
     var pos1 = startOffset
     var pos2 = endOffset
     var start = anno.start.offset
@@ -149,7 +149,7 @@ function transferAnnotations (doc, path, offset, newPath, newOffset) {
   var index = doc.getIndex('annotations')
   var annotations = index.get(path, offset)
   for (let i = 0; i < annotations.length; i++) {
-    let a = annotations[i]
+    const a = annotations[i]
     var isInside = (offset > a.start.offset && offset < a.end.offset)
     var start = a.start.offset
     var end = a.end.offset
@@ -157,7 +157,7 @@ function transferAnnotations (doc, path, offset, newPath, newOffset) {
     if (isInside) {
       // create a new annotation if the annotation is splittable
       if (a.canSplit()) {
-        let newAnno = a.toJSON()
+        const newAnno = a.toJSON()
         newAnno.id = uuid(a.type + '_')
         newAnno.start.path = newPath
         newAnno.start.offset = newOffset
@@ -166,8 +166,8 @@ function transferAnnotations (doc, path, offset, newPath, newOffset) {
         doc.create(newAnno)
       }
       // in either cases truncate the first part
-      let newStartOffset = a.start.offset
-      let newEndOffset = offset
+      const newStartOffset = a.start.offset
+      const newEndOffset = offset
       // if after truncate the anno is empty, delete it
       if (newEndOffset === newStartOffset) {
         doc.delete(a.id)
@@ -227,8 +227,8 @@ function transferAnnotations (doc, path, offset, newPath, newOffset) {
 function truncateAnnotation (tx, anno, sel) {
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
   if (!anno || !anno.isAnnotation()) throw new Error('Argument "anno" is required and must be an annotation.')
-  let annoSel = anno.getSelection()
-  let newAnnoSel = annoSel.truncateWith(sel)
+  const annoSel = anno.getSelection()
+  const newAnnoSel = annoSel.truncateWith(sel)
   anno._updateRange(tx, newAnnoSel)
   return anno
 }
@@ -241,8 +241,8 @@ function truncateAnnotation (tx, anno, sel) {
 function expandAnnotation (tx, anno, sel) {
   if (!sel || !sel._isSelection) throw new Error('Argument "selection" is required.')
   if (!anno || !anno.isAnnotation()) throw new Error('Argument "anno" is required and must be an annotation.')
-  let annoSel = anno.getSelection()
-  let newAnnoSel = annoSel.expand(sel)
+  const annoSel = anno.getSelection()
+  const newAnnoSel = annoSel.expand(sel)
   anno._updateRange(tx, newAnnoSel)
   return anno
 }

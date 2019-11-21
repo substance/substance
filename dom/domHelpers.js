@@ -2,7 +2,7 @@ import DefaultDOMElement from './DefaultDOMElement'
 
 export function findParentDOMElement (nativeEl) {
   while (nativeEl) {
-    let el = DefaultDOMElement.unwrap(nativeEl)
+    const el = DefaultDOMElement.unwrap(nativeEl)
     if (el) return el
     nativeEl = nativeEl.parentNode
   }
@@ -25,7 +25,7 @@ export function findChild (el, cssSelector) {
 
 export function findAllChildren (el, cssSelector) {
   const children = el.getChildren()
-  let result = []
+  const result = []
   for (let i = 0; i < children.length; i++) {
     const child = children[i]
     if (child.is(cssSelector)) {
@@ -51,7 +51,7 @@ export function walk (el, cb) {
 function _walk (el, cb, level) {
   cb(el, level)
   if (el.getChildCount() > 0) {
-    let it = el.getChildNodeIterator()
+    const it = el.getChildNodeIterator()
     while (it.hasNext()) {
       _walk(it.next(), cb, level + 1)
     }
@@ -69,7 +69,7 @@ export function isRightButton (event) {
 }
 
 export function getBoundingRect (el) {
-  let _rect = el.getNativeElement().getBoundingClientRect()
+  const _rect = el.getNativeElement().getBoundingClientRect()
   return {
     top: _rect.top,
     left: _rect.left,
@@ -81,13 +81,13 @@ export function getBoundingRect (el) {
 export function getBoundingRectForRects (...rects) {
   let top, left, bottom, right
   if (rects.length > 0) {
-    let first = rects[0]
+    const first = rects[0]
     top = first.top
     left = first.left
     bottom = top + first.height
     right = left + first.width
     for (let i = 1; i < rects.length; i++) {
-      let r = rects[i]
+      const r = rects[i]
       top = Math.min(top, r.top)
       left = Math.min(left, r.left)
       bottom = Math.max(bottom, r.top + r.height)

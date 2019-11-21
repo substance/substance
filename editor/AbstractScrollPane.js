@@ -6,7 +6,7 @@ import Component from '../dom/Component'
 export default class AbstractScrollPane extends Component {
   getActionHandlers () {
     return {
-      'scrollSelectionIntoView': this._scrollSelectionIntoView
+      scrollSelectionIntoView: this._scrollSelectionIntoView
     }
   }
 
@@ -26,7 +26,7 @@ export default class AbstractScrollPane extends Component {
   */
   _onContextMenu (e) {
     e.preventDefault()
-    let mouseBounds = this._getMouseBounds(e)
+    const mouseBounds = this._getMouseBounds(e)
     this.emit('context-menu:opened', {
       mouseBounds: mouseBounds
     })
@@ -35,10 +35,10 @@ export default class AbstractScrollPane extends Component {
   _scrollRectIntoView (rect) {
     if (!rect) return
     // console.log('AbstractScrollPane._scrollRectIntoView()')
-    let upperBound = this.getScrollPosition()
-    let lowerBound = upperBound + this.getHeight()
-    let selTop = rect.top
-    let selBottom = rect.top + rect.height
+    const upperBound = this.getScrollPosition()
+    const lowerBound = upperBound + this.getHeight()
+    const selTop = rect.top
+    const selBottom = rect.top + rect.height
     if ((selTop < upperBound && selBottom < upperBound) ||
         (selTop > lowerBound && selBottom > lowerBound)) {
       this.setScrollPosition(selTop)
@@ -112,17 +112,17 @@ export default class AbstractScrollPane extends Component {
     Get selection rectangle relative to panel content element
   */
   _getSelectionRect () {
-    let editorState = this.context.editorState
-    let sel = editorState.selection
+    const editorState = this.context.editorState
+    const sel = editorState.selection
     let selectionRect
     if (platform.inBrowser && sel && !sel.isNull()) {
-      let contentEl = this.getContentElement()
-      let contentRect = contentEl.getNativeElement().getBoundingClientRect()
+      const contentEl = this.getContentElement()
+      const contentRect = contentEl.getNativeElement().getBoundingClientRect()
       if (sel.isNodeSelection()) {
-        let nodeId = sel.nodeId
-        let nodeEl = contentEl.find(`*[data-id="${nodeId}"]`)
+        const nodeId = sel.nodeId
+        const nodeEl = contentEl.find(`*[data-id="${nodeId}"]`)
         if (nodeEl) {
-          let nodeRect = nodeEl.getNativeElement().getBoundingClientRect()
+          const nodeRect = nodeEl.getNativeElement().getBoundingClientRect()
           selectionRect = getRelativeRect(contentRect, nodeRect)
         } else {
           console.error(`FIXME: could not find a node with data-id=${nodeId}`)

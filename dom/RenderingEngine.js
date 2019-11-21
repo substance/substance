@@ -126,22 +126,22 @@ export default class RenderingEngine {
    * @param  {...any} children
    */
   static createVirtualElement (type, props, ...children) {
-    let renderingContext = _getRenderingContext()
-    let createElement = renderingContext.$$
-    let _props = {}
+    const renderingContext = _getRenderingContext()
+    const createElement = renderingContext.$$
+    const _props = {}
     let _class = null
-    let _styles = null
-    let _attributes = {}
-    let _htmlProps = {}
-    let _eventListeners = []
+    const _styles = null
+    const _attributes = {}
+    const _htmlProps = {}
+    const _eventListeners = []
     let _ref = null
     if (props) {
-      let keys = Object.keys(props)
-      for (let key of keys) {
+      const keys = Object.keys(props)
+      for (const key of keys) {
         if (!props.hasOwnProperty(key)) continue
-        let val = props[key]
+        const val = props[key]
         // ATTENTION: assuming that all event handlers start with 'on'
-        let m = /^on([A-Za-z]+)$/.exec(key)
+        const m = /^on([A-Za-z]+)$/.exec(key)
         if (m) {
           // ATTENTION: IMO all native events are lower case
           _eventListeners.push([m[1].toLowerCase(), val])
@@ -158,7 +158,7 @@ export default class RenderingEngine {
               if (!isString(val)) {
                 throw new Error('HTML attribute "style" must be a CSS string.')
               }
-              _attributes['style'] = val
+              _attributes.style = val
               break
             }
             // ATTENTION: this list is utterly incomplete and IMO even incorrect
@@ -187,7 +187,7 @@ export default class RenderingEngine {
         }
       }
     }
-    let el = createElement(type, _props)
+    const el = createElement(type, _props)
     if (_ref) {
       el.ref(_ref)
     }
@@ -199,7 +199,7 @@ export default class RenderingEngine {
     }
     el.attr(_attributes)
     el.htmlProp(_htmlProps)
-    for (let [eventName, handler] of _eventListeners) {
+    for (const [eventName, handler] of _eventListeners) {
       el.on(eventName, handler)
     }
     if (children.length > 0) {
@@ -224,7 +224,7 @@ export default class RenderingEngine {
       console.time('rendering (total)')
     }
     let vel = _createWrappingVirtualComponent(comp)
-    let state = this._createState()
+    const state = this._createState()
     if (oldProps) {
       state.set(OLDPROPS, vel, oldProps)
     }
@@ -292,7 +292,7 @@ export default class RenderingEngine {
   _renderChild (comp, vel) {
     // HACK: to make this work with the rest of the implementation
     // we ingest a fake parent
-    let state = this._createState()
+    const state = this._createState()
     vel.parent = { _comp: comp, _isFake: true }
     try {
       this._state = state
@@ -309,7 +309,7 @@ export default class RenderingEngine {
   }
 
   static createContext (comp) {
-    let vel = _createWrappingVirtualComponent(comp)
+    const vel = _createWrappingVirtualComponent(comp)
     return new VirtualElement.Context(vel)
   }
 }
@@ -350,7 +350,7 @@ function _capture (state, vel, mode) {
       state.set(MAPPED, comp)
       state.set(LINKED, vel)
       state.set(LINKED, comp)
-      let compData = _getInternalComponentData(comp)
+      const compData = _getInternalComponentData(comp)
       vel.elementProps = compData.elementProps
     } else {
       // NOTE: don't ask shouldRerender if no element is there yet
@@ -371,7 +371,7 @@ function _capture (state, vel, mode) {
       }
     }
     if (needRerender) {
-      let context = new VirtualElement.Context(vel)
+      const context = new VirtualElement.Context(vel)
       let content
       try {
         _setRenderingContext(context)
@@ -438,7 +438,7 @@ function _capture (state, vel, mode) {
       if (vel._forwardedEl) {
         _capture(state, vel._forwardedEl)
       } else {
-        for (let child of vel.children) {
+        for (const child of vel.children) {
           _capture(state, child)
         }
       }
@@ -448,7 +448,7 @@ function _capture (state, vel, mode) {
       state.set(SKIPPED, vel)
     }
   } else if (vel._isVirtualHTMLElement) {
-    for (let child of vel.children) {
+    for (const child of vel.children) {
       _capture(state, child)
     }
   }
@@ -475,8 +475,8 @@ function _create (state, vel) {
     // TODO: instead of HACK add an assertion, and make otherwise sure that vel.props is set correctly
     vel.props = comp.props
     if (vel._forwardedEl) {
-      let forwardedEl = vel._forwardedEl
-      let forwardedComp = state.componentFactory.createComponent(forwardedEl.ComponentClass, comp, forwardedEl.props)
+      const forwardedEl = vel._forwardedEl
+      const forwardedComp = state.componentFactory.createComponent(forwardedEl.ComponentClass, comp, forwardedEl.props)
       // HACK same as before
       forwardedEl.props = forwardedComp.props
       comp._forwardedComp = forwardedComp
@@ -505,26 +505,26 @@ function _create (state, vel) {
 function _forEachComponent (state, comp, vc, hook) {
   _assert(vc._isVirtualComponent, 'this method is intended for VirtualComponents only')
   if (!vc.__components__) {
-    let context = vc._context
+    const context = vc._context
     _assert(context, 'there should be a capturing context on the VirtualComponent')
     // refs are those ref'd using $$().ref()
-    let newRefs = context.refs
+    const newRefs = context.refs
     // foreignRefs are refs of those components which are passed via props
-    let newForeignRefs = context.foreignRefs
+    const newForeignRefs = context.foreignRefs
     // all other components which are not ref'd stored via a derived key based on trace
     if (!context.internalRefs) {
       context.internalRefs = _extractInternalRefs(context, vc)
     }
-    let newInternalRefs = context.internalRefs
-    let entries = []
-    let compData = _getInternalComponentData(comp)
-    let oldRefs = compData.refs
-    let oldForeignRefs = compData.foreignRefs
+    const newInternalRefs = context.internalRefs
+    const entries = []
+    const compData = _getInternalComponentData(comp)
+    const oldRefs = compData.refs
+    const oldForeignRefs = compData.foreignRefs
     // TODO: make sure that this is always initialized properly
-    let oldInternalRefs = compData.internalRefs || new Map()
-    let _addEntries = (_newRefs, _oldRefs) => {
-      for (let [ref, vc] of _newRefs) {
-        let oldVc = _oldRefs.get(ref)
+    const oldInternalRefs = compData.internalRefs || new Map()
+    const _addEntries = (_newRefs, _oldRefs) => {
+      for (const [ref, vc] of _newRefs) {
+        const oldVc = _oldRefs.get(ref)
         let comp
         if (oldVc) {
           comp = oldVc._comp
@@ -538,7 +538,7 @@ function _forEachComponent (state, comp, vc, hook) {
     vc.__components__ = entries
   }
   if (vc.__components__.length > 0) {
-    for (let entry of vc.__components__) {
+    for (const entry of vc.__components__) {
       hook(state, entry.comp, entry.vc)
     }
   }
@@ -583,8 +583,8 @@ function _isMapped (state, comp, vc) {
 }
 
 function _isLinked (state, comp, vc) {
-  let compIsLinked = state.is(LINKED, comp)
-  let vcIsLinked = state.is(LINKED, vc)
+  const compIsLinked = state.is(LINKED, comp)
+  const vcIsLinked = state.is(LINKED, vc)
   if (vc._comp === comp) {
     if (!vcIsLinked) {
       console.error('FIXME: comp is linked, but not virtual component')
@@ -685,7 +685,7 @@ function _update (state, vel) {
   if (state.is(SKIPPED, vel)) return
   // console.log('... rendering', vel._ref)
 
-  let comp = vel._comp
+  const comp = vel._comp
   // TODO: find out if this is still needed
   if (!comp) {
     _capture(state, vel)
@@ -701,15 +701,15 @@ function _update (state, vel) {
     if (!comp.el) {
       comp.el = _createDOMElement(state, vel)
     } else {
-      let el = comp.el
+      const el = comp.el
       _assert(el, "Component's element should exist at this point.")
       _updateDOMElement(el, vel)
     }
 
     // structural updates are necessary only for non-forwarding Components and HTML elements without innerHTML
     if ((vel._isVirtualComponent || vel._isVirtualHTMLElement) && !vel.hasInnerHTML()) {
-      let newChildren = vel.children
-      let oldChildren = _getChildren(state, comp)
+      const newChildren = vel.children
+      const oldChildren = _getChildren(state, comp)
 
       // TODO: it might be easier to understand to separate DOM analysis, i.e.
       // what to do with the DOM, from the actual DOM manipulation.
@@ -727,7 +727,7 @@ function _update (state, vel) {
           oldComp = oldChildren[pos1++]
         } while (oldComp && (state.is(DETACHED, oldComp)))
 
-        let newVel = newChildren[pos2++]
+        const newVel = newChildren[pos2++]
         // remove remaining old ones if no new one is left
         if (oldComp && !newVel) {
           while (oldComp) {
@@ -778,7 +778,7 @@ function _update (state, vel) {
           _update(state, newVel)
         }
 
-        let newComp = newVel._comp
+        const newComp = newVel._comp
         // nothing more to do if components are equal, i.e. component and virtual component have been linked during capturing
         if (newComp === oldComp) {
           continue
@@ -830,7 +830,7 @@ function _update (state, vel) {
 
     // using the element of the forwarded component as element for this component
     if (vel._forwardedEl) {
-      let forwardedComp = vel._forwardedEl._comp
+      const forwardedComp = vel._forwardedEl._comp
       // TODO: is this really the correct time to call didMount? shouldn't this
       // be called when processed by the parent?
       // TODO: this will not work with multiple forwarded components
@@ -847,7 +847,7 @@ function _update (state, vel) {
       // leading to a more explicit solution which also should work better together
       // with the rest of the update implementation
       if (!vel._forwardedEl._isForwarding) {
-        let oldForwardedComp = comp.el._comp
+        const oldForwardedComp = comp.el._comp
         if (oldForwardedComp !== forwardedComp) {
           oldForwardedComp.triggerDispose()
           comp.el.parentNode.replaceChild(comp.el, forwardedComp.el)
@@ -868,8 +868,8 @@ function _update (state, vel) {
 // in advance, then the algorithm later becomes easier only considering
 // add and remove.
 function _getChildren (state, comp) {
-  let _childNodes = comp.el.getChildNodes()
-  let children = _childNodes.map(child => {
+  const _childNodes = comp.el.getChildNodes()
+  const children = _childNodes.map(child => {
     let childComp = child._comp
     // NOTE: don't know why, but sometimes it happens that there appear elements that are not rendered via Component.js
     if (!childComp) {
@@ -896,7 +896,7 @@ function _getChildren (state, comp) {
 }
 
 function _adopt (state, vel, el) {
-  let comp = vel._comp
+  const comp = vel._comp
   if ((vel._isVirtualComponent || vel._isVirtualHTMLElement) && !el.isElementNode()) {
     throw new Error('Provided DOM element is not compatible.')
   }
@@ -906,8 +906,8 @@ function _adopt (state, vel, el) {
   _propagateForwardedEl(vel, el)
 
   if ((vel._isVirtualComponent || vel._isVirtualHTMLElement)) {
-    let existingChildNodes = el.childNodes.slice()
-    let virtualChildNodes = vel.children
+    const existingChildNodes = el.childNodes.slice()
+    const virtualChildNodes = vel.children
     let pos1 = 0; let pos2 = 0
     while (pos1 < existingChildNodes.length || pos2 < virtualChildNodes.length) {
       let child1 = existingChildNodes[pos1]
@@ -957,7 +957,7 @@ function _adopt (state, vel, el) {
 }
 
 function _createEl (state, vel) {
-  let el = _createDOMElement(state, vel)
+  const el = _createDOMElement(state, vel)
   vel._comp.el = el
   el._comp = vel._comp
   _propagateForwardedEl(vel, el)
@@ -1000,8 +1000,8 @@ function _getInternalComponentData (comp) {
 }
 
 function _storeInternalData (comp, vc) {
-  let context = vc._context
-  let compData = _getInternalComponentData(comp)
+  const context = vc._context
+  const compData = _getInternalComponentData(comp)
   compData.elementProps = vc.elementProps
   compData.refs = context.refs
   compData.foreignRefs = context.foreignRefs
@@ -1011,7 +1011,7 @@ function _storeInternalData (comp, vc) {
     // ATTENTION: in case that a referenced component has not been used,
     // i.e. actually appended to an element, the virtual component will not be rendered
     // thus does not have component instance attached
-    let comp = vc._comp
+    const comp = vc._comp
     if (comp) {
       refs[key] = vc._comp
     } else {
@@ -1022,15 +1022,15 @@ function _storeInternalData (comp, vc) {
 }
 
 function _extractInternalRefs (context, root) {
-  let idCounts = new Map()
-  let refs = new Map()
-  for (let vc of context.components) {
+  const idCounts = new Map()
+  const refs = new Map()
+  for (const vc of context.components) {
     // TODO: also skip those components which are not appended to the current comp
     if (vc._ref) continue
     let ref = _getVirtualComponentTrace(vc, root)
     // disambiguate generated refs by appending '@<count>'
     if (idCounts.has(ref)) {
-      let count = idCounts.get(ref) + 1
+      const count = idCounts.get(ref) + 1
       idCounts.set(ref, count)
       ref = ref + '@' + count
     } else {
@@ -1042,7 +1042,7 @@ function _extractInternalRefs (context, root) {
 }
 
 function _getVirtualComponentTrace (vc, root) {
-  let frags = [getClassName(vc.ComponentClass)]
+  const frags = [getClassName(vc.ComponentClass)]
   if (!vc._isForwarded) {
     let parent = vc.getParent()
     while (parent) {
@@ -1125,7 +1125,7 @@ function _updateDOMElement (el, vel) {
     }
     return
   }
-  let tagName = el.getTagName()
+  const tagName = el.getTagName()
   if (vel.tagName.toLowerCase() !== tagName) {
     el.setTagName(vel.tagName)
   }
@@ -1161,8 +1161,8 @@ function _updateDOMElement (el, vel) {
       el.empty()
       el.setInnerHTML(vel.getInnerHTML())
     } else {
-      let oldInnerHTML = el.getInnerHTML()
-      let newInnerHTML = vel.getInnerHTML()
+      const oldInnerHTML = el.getInnerHTML()
+      const newInnerHTML = vel.getInnerHTML()
       if (oldInnerHTML !== newInnerHTML) {
         el.setInnerHTML(newInnerHTML)
       }
@@ -1189,13 +1189,13 @@ function _updateHash ({ newHash, oldHash, update, remove }) {
   if (!oldHash) {
     oldHash = new Map()
   }
-  let updatedKeys = {}
+  const updatedKeys = {}
   // FIXME: this is not working as expected in browser
   // i.e. _hashGet does not take the 'AttrbutesMap' thing into account
   // and provides 'undefined' for the most cases
-  for (let key of newHash.keys()) {
-    let oldVal = _hashGet(oldHash, key)
-    let newVal = _hashGet(newHash, key)
+  for (const key of newHash.keys()) {
+    const oldVal = _hashGet(oldHash, key)
+    const newVal = _hashGet(newHash, key)
     updatedKeys[key] = true
     if (oldVal !== newVal) {
       update(key, newVal)
@@ -1205,14 +1205,14 @@ function _updateHash ({ newHash, oldHash, update, remove }) {
   // we have a horrible mixture of Objects and Maps here
   // want to move to the Map based impl
   if (isFunction(oldHash.keys)) {
-    let keys = Array.from(oldHash.keys())
+    const keys = Array.from(oldHash.keys())
     keys.forEach((key) => {
       if (!updatedKeys[key]) {
         remove(key)
       }
     })
   } else {
-    for (let key in oldHash) {
+    for (const key in oldHash) {
       if (oldHash.hasOwnProperty(key) && !updatedKeys[key]) {
         remove(key)
       }
@@ -1221,11 +1221,11 @@ function _updateHash ({ newHash, oldHash, update, remove }) {
 }
 
 function _updateListeners (args) {
-  let el = args.el
+  const el = args.el
   // NOTE: considering the low number of listeners
   // it is quicker to just remove all
   // and add again instead of computing the minimal update
-  let newListeners = args.newListeners || []
+  const newListeners = args.newListeners || []
   el.removeAllEventListeners()
   for (let i = 0; i < newListeners.length; i++) {
     el.addEventListener(newListeners[i])
@@ -1235,7 +1235,7 @@ function _updateListeners (args) {
 function _findForwardingComponent (comp, forwarded) {
   let current = forwarded.getParent()
   while (current) {
-    let parent = current.getParent()
+    const parent = current.getParent()
     if (parent === comp) {
       return current
     }
@@ -1244,7 +1244,7 @@ function _findForwardingComponent (comp, forwarded) {
 }
 
 function _createWrappingVirtualComponent (comp) {
-  let vel = new VirtualElement.Component(comp.constructor)
+  const vel = new VirtualElement.Component(comp.constructor)
   vel._comp = comp
   return vel
 }
@@ -1285,7 +1285,7 @@ class RenderingState {
   }
 
   get (key, obj) {
-    let info = this._states.get(obj)
+    const info = this._states.get(obj)
     if (info) {
       return info.get(key)
     }

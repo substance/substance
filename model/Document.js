@@ -117,7 +117,7 @@ export default class Document extends EventEmitter {
   }
 
   resolve (path, strict) {
-    let prop = this.getProperty(path)
+    const prop = this.getProperty(path)
     if (!prop) {
       if (strict) {
         throw new Error('Invalid path')
@@ -125,7 +125,7 @@ export default class Document extends EventEmitter {
         return undefined
       }
     }
-    let val = this.get(path, strict)
+    const val = this.get(path, strict)
     if (prop.isReference()) {
       if (prop.isArray()) {
         return val.map(id => this.get(id))
@@ -147,6 +147,7 @@ export default class Document extends EventEmitter {
   getAnnotations (path) {
     return this.getIndex('annotations').get(path)
   }
+
   /**
    * Retrieve the NodeProperty for a given path
    *
@@ -156,8 +157,8 @@ export default class Document extends EventEmitter {
     if (path.length !== 2) {
       throw new Error('path must have length=2')
     }
-    let [nodeId, propName] = path
-    let node = this.get(nodeId)
+    const [nodeId, propName] = path
+    const node = this.get(nodeId)
     if (node) {
       return node.getSchema().getProperty(propName)
     } else {
@@ -313,7 +314,7 @@ export default class Document extends EventEmitter {
     changed property.
   */
   updateNode (id, newProps) {
-    let node = this.get(id)
+    const node = this.get(id)
     forEach(newProps, (value, key) => {
       if (!isEqual(node.get(key), value)) {
         this.set([id, key], value)
@@ -397,7 +398,7 @@ export default class Document extends EventEmitter {
             }
           }
           // integrity checks:
-          let text = this.get(data.path, 'strict')
+          const text = this.get(data.path, 'strict')
           if (data.startOffset < 0 || data.startOffset > text.length) {
             throw new Error('Invalid startOffset: target property has length ' + text.length + ', given startOffset is ' + data.startOffset)
           }
@@ -408,8 +409,8 @@ export default class Document extends EventEmitter {
           break
         }
         case 'container': {
-          let containerPath = data.containerPath
-          let ids = this.get(containerPath)
+          const containerPath = data.containerPath
+          const ids = this.get(containerPath)
           if (!ids) throw new Error('Can not create ContainerSelection: container "' + containerPath + '" does not exist.')
           let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset, containerPath })
           let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset, containerPath })
@@ -486,9 +487,9 @@ export default class Document extends EventEmitter {
     // TODO: we should rethink the exception with annotations here
     // in XML the annotation would be a child of the paragraph
     // and thus should be created before hand. However our annotation indexes need the annotation target to exist.
-    let nodes = Array.from(doc.getNodes().values())
-    let levels = {}
-    let visited = new Set()
+    const nodes = Array.from(doc.getNodes().values())
+    const levels = {}
+    const visited = new Set()
     nodes.forEach(n => {
       if (!visited.has(n)) this._computeDependencyLevel(n, levels, visited)
     })
@@ -511,7 +512,7 @@ export default class Document extends EventEmitter {
     if (node.isAnnotation() || node.isInlineNode()) {
       level = -1
     } else {
-      let parent = node.getParent()
+      const parent = node.getParent()
       if (parent) {
         let parentLevel
         if (levels.hasOwnProperty(parent.id)) {
@@ -536,7 +537,7 @@ export default class Document extends EventEmitter {
   }
 
   clone () {
-    let copy = this.newInstance()
+    const copy = this.newInstance()
     copy.createFromDocument(this)
     return copy
   }
@@ -559,8 +560,8 @@ export default class Document extends EventEmitter {
   }
 
   _apply (documentChange) {
-    let ops = documentChange.ops
-    for (let op of ops) {
+    const ops = documentChange.ops
+    for (const op of ops) {
       this._applyOp(op)
     }
     // extract aggregated information, such as which property has been affected etc.
@@ -605,7 +606,7 @@ export default class Document extends EventEmitter {
   // NOTE: this is still here because DOMSelection is using it
   _createSelectionFromRange (range) {
     if (!range) return Selection.nullSelection
-    let inOneNode = isEqual(range.start.path, range.end.path)
+    const inOneNode = isEqual(range.start.path, range.end.path)
     if (inOneNode) {
       if (range.start.isNodeCoordinate()) {
         // ATTENTION: we only create full NodeSelections
@@ -641,17 +642,17 @@ export default class Document extends EventEmitter {
     if (path.length === 1) {
       // FIXME: originally getContainerRoot was called here
       // however in this case
-      let node = getContainerRoot(this, containerPath, path[0])
+      const node = getContainerRoot(this, containerPath, path[0])
       if (node.isText()) {
         // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         return new Coordinate(node.getPath(), offset === 0 ? 0 : node.getLength())
       } else if (node.isList()) {
         // console.warn("DEPRECATED: don't use node coordinates for ListNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
         if (offset === 0) {
-          let item = node.getItemAt(0)
+          const item = node.getItemAt(0)
           return new Coordinate(item.getPath(), 0)
         } else {
-          let item = this.get(last(node.items))
+          const item = this.get(last(node.items))
           return new Coordinate(item.getPath(), item.getLength())
         }
       }

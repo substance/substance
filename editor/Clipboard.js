@@ -11,38 +11,38 @@ const INLINENODES = ['a', 'b', 'big', 'i', 'small', 'tt', 'abbr', 'acronym', 'ci
 export default class Clipboard {
   copy (clipboardData, context) {
     // content specific manipulation API
-    let editorSession = context.editorSession
-    let snippet = editorSession.copy()
+    const editorSession = context.editorSession
+    const snippet = editorSession.copy()
     this._setClipboardData(clipboardData, context, snippet)
   }
 
   cut (clipboardData, context) {
-    let editorSession = context.editorSession
-    let snippet = editorSession.cut()
+    const editorSession = context.editorSession
+    const snippet = editorSession.cut()
     this._setClipboardData(clipboardData, context, snippet)
   }
 
   paste (clipboardData, context, options = {}) {
-    let types = {}
+    const types = {}
     for (let i = 0; i < clipboardData.types.length; i++) {
       types[clipboardData.types[i]] = true
     }
-    let html = types['text/html'] ? clipboardData.getData('text/html') : ''
+    const html = types['text/html'] ? clipboardData.getData('text/html') : ''
     let success = false
     if (html && !options.plainTextOnly) {
       success = this._pasteHtml(html, context, options)
     }
     if (!success) {
       // in all other cases we fall back to plain-text
-      let plainText = types['text/plain'] ? clipboardData.getData('text/plain') : ''
+      const plainText = types['text/plain'] ? clipboardData.getData('text/plain') : ''
       this._pasteText(plainText, context, options)
     }
   }
 
   _setClipboardData (clipboardData, context, snippet) {
-    let elements = this._createClipboardHtmlElements(context, snippet)
-    let plainText = this._createClipboardText(context, snippet, elements)
-    let html = this._createClipboardHtml(context, snippet, elements)
+    const elements = this._createClipboardHtmlElements(context, snippet)
+    const plainText = this._createClipboardText(context, snippet, elements)
+    const html = this._createClipboardHtml(context, snippet, elements)
     clipboardData.setData('text/plain', plainText)
     if (html) {
       clipboardData.setData('text/html', html)
@@ -50,15 +50,15 @@ export default class Clipboard {
   }
 
   _createClipboardHtmlElements (context, snippet) {
-    let htmlExporter = context.config.createExporter('html')
+    const htmlExporter = context.config.createExporter('html')
     if (htmlExporter) {
       return htmlExporter.convertContainer(snippet, snippet.getContainer().getPath())
     }
   }
 
   _createClipboardText (context, snippet, htmlElements) {
-    let config = context.config
-    let textExporter = config.createExporter('text')
+    const config = context.config
+    const textExporter = config.createExporter('text')
     if (textExporter) {
       return textExporter.exportNode(snippet.getContainer())
     } else if (htmlElements) {
@@ -79,10 +79,10 @@ export default class Clipboard {
           return el.outerHTML
         }).join('')
       }
-      let jsonConverter = new JSONConverter()
-      let jsonStr = JSON.stringify(jsonConverter.exportDocument(snippet))
-      let substanceContent = `<script id="substance-clipboard" type="application/json">${jsonStr}</script>`
-      let html = '<html><head>' + substanceContent + '</head><body>' + snippetHtml + '</body></html>'
+      const jsonConverter = new JSONConverter()
+      const jsonStr = JSON.stringify(jsonConverter.exportDocument(snippet))
+      const substanceContent = `<script id="substance-clipboard" type="application/json">${jsonStr}</script>`
+      const html = '<html><head>' + substanceContent + '</head><body>' + snippetHtml + '</body></html>'
       return html
     }
   }
@@ -101,9 +101,9 @@ export default class Clipboard {
     // we fall back to plain HTML import
     let snippet
     if (html.search(/script id=.substance-clipboard./) >= 0) {
-      let substanceData = htmlDoc.find('#substance-clipboard')
+      const substanceData = htmlDoc.find('#substance-clipboard')
       if (substanceData) {
-        let jsonStr = substanceData.textContent
+        const jsonStr = substanceData.textContent
         try {
           snippet = this._importFromJSON(context, jsonStr)
         } finally {
@@ -114,7 +114,7 @@ export default class Clipboard {
       }
     }
     if (!snippet) {
-      let state = {}
+      const state = {}
       Object.assign(state, this._detectApplicationType(html, htmlDoc))
       // Under windows and in Microsoft Word we can exploit the fact
       // that the paste content is wrapped inside <!--StartFragment--> and <!--EndFragment-->
@@ -124,10 +124,10 @@ export default class Clipboard {
         // ... but still this
         const START_FRAGMENT = '<!--StartFragment-->'
         const END_FRAGMENT = '<!--EndFragment-->'
-        let mStart = html.indexOf(START_FRAGMENT)
+        const mStart = html.indexOf(START_FRAGMENT)
         if (mStart >= 0) {
-          let mEnd = html.indexOf(END_FRAGMENT)
-          let fragment = html.slice(mStart + START_FRAGMENT.length, mEnd)
+          const mEnd = html.indexOf(END_FRAGMENT)
+          const fragment = html.slice(mStart + START_FRAGMENT.length, mEnd)
           htmlDoc = DefaultDOMElement.parseHTML(fragment)
         }
       }
@@ -144,10 +144,10 @@ export default class Clipboard {
       }
       bodyEl = this._wrapIntoParagraph(bodyEl)
       snippet = context.editorSession.getDocument().createSnippet()
-      let htmlImporter = context.config.createImporter('html', snippet)
-      let container = snippet.get(documentHelpers.SNIPPET_ID)
+      const htmlImporter = context.config.createImporter('html', snippet)
+      const container = snippet.get(documentHelpers.SNIPPET_ID)
       bodyEl.getChildren().forEach(el => {
-        let node = htmlImporter.convertElement(el)
+        const node = htmlImporter.convertElement(el)
         if (node) {
           container.append(node.id)
         }
@@ -161,19 +161,19 @@ export default class Clipboard {
   }
 
   _importFromJSON (context, jsonStr) {
-    let snippet = context.editorSession.getDocument().newInstance()
-    let jsonData = JSON.parse(jsonStr)
-    let converter = new JSONConverter()
+    const snippet = context.editorSession.getDocument().newInstance()
+    const jsonData = JSON.parse(jsonStr)
+    const converter = new JSONConverter()
     converter.importDocument(snippet, jsonData)
     return snippet
   }
 
   _detectApplicationType (html, htmlDoc) {
-    let state = {}
-    let generatorMeta = htmlDoc.find('meta[name="generator"]')
-    let xmnlsw = htmlDoc.find('html').getAttribute('xmlns:w')
+    const state = {}
+    const generatorMeta = htmlDoc.find('meta[name="generator"]')
+    const xmnlsw = htmlDoc.find('html').getAttribute('xmlns:w')
     if (generatorMeta) {
-      let generator = generatorMeta.getAttribute('content')
+      const generator = generatorMeta.getAttribute('content')
       if (generator.indexOf('LibreOffice') > -1) {
         state.isLibreOffice = true
       }
@@ -193,7 +193,7 @@ export default class Clipboard {
     // Some word processors are exporting new lines instead of spaces
     // for these editors we will replace all new lines with space
     if (state.isLibreOffice || state.isMicrosoftWord) {
-      let bodyHtml = body.getInnerHTML()
+      const bodyHtml = body.getInnerHTML()
       body.setInnerHTML(bodyHtml.replace(/\r\n|\r|\n/g, ' '))
     }
     if (state.isGoogleDoc) {
@@ -208,7 +208,7 @@ export default class Clipboard {
     // container for the copied elements
     // HACK: we exploit the fact that this element has an id with a
     // specific format, e.g., id="docs-internal-guid-5bea85da-43dc-fb06-e327-00c1c6576cf7"
-    let bold = body.find('b')
+    const bold = body.find('b')
     if (bold && /^docs-internal/.exec(bold.id)) {
       body = bold
     }
@@ -223,7 +223,7 @@ export default class Clipboard {
       // vertical-align: super -> <sup>
       // vertical-align: sub -> <sub>
       // TODO: improve the result for other editors by fusing adjacent annotations of the same type
-      let nodeTypes = []
+      const nodeTypes = []
       if (span.getStyle('font-weight') === '700') nodeTypes.push('b')
       if (span.getStyle('font-style') === 'italic') nodeTypes.push('i')
       if (span.getStyle('vertical-align') === 'super') nodeTypes.push('sup')
@@ -234,7 +234,7 @@ export default class Clipboard {
 
       function createInlineNodes (parentEl, isRoot) {
         if (nodeTypes.length > 0) {
-          let el = parentEl.createElement(nodeTypes[0])
+          const el = parentEl.createElement(nodeTypes[0])
           if (nodeTypes.length === 1) el.append(span.textContent)
           if (isRoot) {
             parentEl.replaceChild(span, el)
@@ -249,13 +249,13 @@ export default class Clipboard {
 
     // Union siblings with the same tags, e.g. we are turning
     // <b>str</b><b><i>ong</i></b> to <b>str<i>ong</i></b>
-    let tags = ['b', 'i', 'sup', 'sub']
+    const tags = ['b', 'i', 'sup', 'sub']
     tags.forEach(tag => {
       body.findAll(tag).forEach(el => {
-        let previousSiblingEl = el.getPreviousSibling()
+        const previousSiblingEl = el.getPreviousSibling()
         if (previousSiblingEl && el.tagName === previousSiblingEl.tagName) {
-          let parentEl = el.getParent()
-          let newEl = parentEl.createElement(tag)
+          const parentEl = el.getParent()
+          const newEl = parentEl.createElement(tag)
           newEl.setInnerHTML(previousSiblingEl.getInnerHTML() + el.getInnerHTML())
           parentEl.replaceChild(el, newEl)
           parentEl.removeChild(previousSiblingEl)
@@ -266,10 +266,10 @@ export default class Clipboard {
         // Note that at this state children always have the same text content
         // e.g. there can't be cases like <b><i>emph</i> asis</b> so we don't treat them
         if (previousSiblingEl && previousSiblingEl.tagName && el.getChildCount() > 0 && el.getChildAt(0).tagName === previousSiblingEl.tagName) {
-          let parentEl = el.getParent()
-          let childEl = el.getChildAt(0)
-          let newEl = parentEl.createElement(previousSiblingEl.tagName)
-          let newChildEl = newEl.createElement(tag)
+          const parentEl = el.getParent()
+          const childEl = el.getChildAt(0)
+          const newEl = parentEl.createElement(previousSiblingEl.tagName)
+          const newChildEl = newEl.createElement(tag)
           newChildEl.setTextContent(childEl.textContent)
           newEl.appendChild(newChildEl)
           parentEl.replaceChild(el, newEl)
@@ -282,7 +282,7 @@ export default class Clipboard {
 
   // if the content only
   _wrapIntoParagraph (bodyEl) {
-    let childNodes = bodyEl.getChildNodes()
+    const childNodes = bodyEl.getChildNodes()
     let shouldWrap = false
     for (let i = 0; i < childNodes.length; i++) {
       const c = childNodes[i]
@@ -297,7 +297,7 @@ export default class Clipboard {
       }
     }
     if (shouldWrap) {
-      let p = bodyEl.createElement('p')
+      const p = bodyEl.createElement('p')
       p.append(childNodes)
       bodyEl.append(p)
     }

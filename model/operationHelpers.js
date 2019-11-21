@@ -16,8 +16,8 @@ export function transformDocumentChange (A, B, options = {}) {
 }
 
 export function transformSelection (sel, a, options) {
-  let newSel = sel.clone()
-  let hasChanged = _transformSelectionInplace(newSel, a, options)
+  const newSel = sel.clone()
+  const hasChanged = _transformSelectionInplace(newSel, a, options)
   if (hasChanged) {
     return newSel
   } else {
@@ -28,8 +28,8 @@ export function transformSelection (sel, a, options) {
 function _transformSingle (a, b, options = {}) {
   // For OT no options needed
   // For doc.rebase() we use immutableLeft = true
-  let immutableLeft = options.immutableLeft
-  let immutableRight = options.immutableRight
+  const immutableLeft = options.immutableLeft
+  const immutableRight = options.immutableRight
   for (let i = 0; i < a.ops.length; i++) {
     for (let j = 0; j < b.ops.length; j++) {
       let opA = a.ops[i]
@@ -71,9 +71,9 @@ function _transformBatch (A, B, options = {}) {
     B = [B]
   }
   for (let i = 0; i < A.length; i++) {
-    let a = A[i]
+    const a = A[i]
     for (let j = 0; j < B.length; j++) {
-      let b = B[j]
+      const b = B[j]
       _transformSingle(a, b, options)
     }
   }
@@ -83,11 +83,11 @@ function _transformSelectionInplace (sel, a, options = {}) {
   if (!sel || (!sel.isPropertySelection() && !sel.isContainerSelection())) {
     return false
   }
-  let ops = a.ops
+  const ops = a.ops
   let hasChanged = false
-  let isCollapsed = sel.isCollapsed()
+  const isCollapsed = sel.isCollapsed()
   for (let i = 0; i < ops.length; i++) {
-    let op = ops[i]
+    const op = ops[i]
     hasChanged |= _transformCoordinateInplace(sel.start, op, options)
     if (!isCollapsed) {
       hasChanged |= _transformCoordinateInplace(sel.end, op, options)
@@ -105,7 +105,7 @@ function _transformCoordinateInplace (coor, op, options) {
   if (!isEqual(op.path, coor.path)) return false
   let hasChanged = false
   if (op.type === 'update' && op.propertyType === 'string') {
-    let diff = op.diff
+    const diff = op.diff
     let newOffset
     if (diff.isInsert() && diff.pos <= coor.offset) {
       newOffset = coor.offset + diff.str.length

@@ -11,7 +11,7 @@ const ATTRIBUTE_BLACK_LIST = new Set(['form', 'formaction', 'autofocus', 'dirnam
 */
 
 export default function sanitizeHTML (html, options = {}) {
-  let doc = parseMarkup(html, {
+  const doc = parseMarkup(html, {
     format: 'html',
     xmlMode: true,
     elementFactory: (type, data) => {
@@ -20,7 +20,7 @@ export default function sanitizeHTML (html, options = {}) {
   })
   _noFormsWithId(doc)
 
-  let sanitized = DomUtils.getOuterHTML(doc, {
+  const sanitized = DomUtils.getOuterHTML(doc, {
     decodeEntities: true,
     disallowedTags: ELEMENT_BLACK_LIST,
     disallowHandlers: true,

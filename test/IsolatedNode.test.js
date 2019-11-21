@@ -3,16 +3,16 @@ import setupEditor from './shared/setupEditor'
 import nestedContainers from './fixture/nestedContainers'
 
 test("IsolatedNode: IsolatedNodes should be 'not-selected' when selection is null", t => {
-  let { editorSession, editor } = setupEditor(t, nestedContainers)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, nestedContainers)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection(null)
   isolatedNodes.forEach(n => _notSelected(t, n))
   t.end()
 })
 
 test("IsolatedNode: IsolatedNodes should be 'not-selected' when selection is somewhere else", t => {
-  let { editorSession, editor } = setupEditor(t, nestedContainers)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, nestedContainers)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -26,15 +26,15 @@ test("IsolatedNode: IsolatedNodes should be 'not-selected' when selection is som
 })
 
 test("IsolatedNode: IsolatedNode should be 'selected' with node selection", t => {
-  let { editorSession, editor } = setupEditor(t, nestedContainers)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, nestedContainers)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'node',
     nodeId: 'c1',
     containerPath: ['body', 'nodes'],
     surfaceId: 'body'
   })
-  let expected = {
+  const expected = {
     'body/c1': 'selected',
     // TODO: we need to find a more intuitive way to surfaceIds
     'body/c1/c1/c2': undefined
@@ -44,8 +44,8 @@ test("IsolatedNode: IsolatedNode should be 'selected' with node selection", t =>
 })
 
 test("IsolatedNode: IsolatedNode should be 'co-selected' with spanning container selection", t => {
-  let { editorSession, editor } = setupEditor(t, nestedContainers)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, nestedContainers)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'container',
     containerPath: ['body', 'nodes'],
@@ -55,7 +55,7 @@ test("IsolatedNode: IsolatedNode should be 'co-selected' with spanning container
     endOffset: 2,
     surfaceId: 'body'
   })
-  let expected = {
+  const expected = {
     'body/c1': 'co-selected',
     // Note: 'co-selection' does not propagate down
     // it is a state related to the parent container
@@ -66,8 +66,8 @@ test("IsolatedNode: IsolatedNode should be 'co-selected' with spanning container
 })
 
 test("IsolatedNode: IsolatedNode should be 'focused' when having the selection", t => {
-  let { editorSession, editor } = setupEditor(t, nestedContainers)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, nestedContainers)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'property',
     path: ['c1_p1', 'content'],
@@ -75,7 +75,7 @@ test("IsolatedNode: IsolatedNode should be 'focused' when having the selection",
     // TODO: we need to find a more intuitive way to surfaceIds
     surfaceId: 'body/c1/c1'
   })
-  let expected = {
+  const expected = {
     'body/c1': 'focused',
     // TODO: we need to find a more intuitive way to surfaceIds
     'body/c1/c1/c2': undefined
@@ -85,8 +85,8 @@ test("IsolatedNode: IsolatedNode should be 'focused' when having the selection",
 })
 
 test("IsolatedNode: IsolatedNode should be 'co-focused' when child is having the selection", t => {
-  let { editorSession, editor } = setupEditor(t, nestedContainers)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, nestedContainers)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'property',
     path: ['c2_p1', 'content'],
@@ -94,7 +94,7 @@ test("IsolatedNode: IsolatedNode should be 'co-focused' when child is having the
     // TODO: we need to find a more intuitive way to surfaceIds
     surfaceId: 'body/c1/c1/c2/c2'
   })
-  let expected = {
+  const expected = {
     'body/c1': 'co-focused',
     // TODO: we need to find a more intuitive way to surfaceIds
     'body/c1/c1/c2': 'focused'
@@ -108,15 +108,15 @@ test("IsolatedNode: Issue #696: IsolatedNode should detect 'co-focused' robustly
   // by using startsWith on the surface path. This was leading to wrong
   // co-focused states when e.g. two isolated nodes `body/entity` and `body/entity-1`
   // exist. I.e. one surfaceId was a prefix of another one.
-  let { editorSession, editor } = setupEditor(t, TWO_STRUCTURED_NODES)
-  let isolatedNodes = editor.findAll('.sc-isolated-node')
+  const { editorSession, editor } = setupEditor(t, TWO_STRUCTURED_NODES)
+  const isolatedNodes = editor.findAll('.sc-isolated-node')
   editorSession.setSelection({
     type: 'property',
     path: ['sn2', 'title'],
     startOffset: 0,
     surfaceId: 'body/sn2/sn2.title'
   })
-  let expected = {
+  const expected = {
     'body/sn': null,
     'body/sn2': 'focused'
   }
@@ -125,13 +125,13 @@ test("IsolatedNode: Issue #696: IsolatedNode should detect 'co-focused' robustly
 })
 
 test('IsolatedNode: Click on an IsolatedNode should select the node', t => {
-  let { editor, editorSession } = setupEditor(t, TWO_STRUCTURED_NODES)
-  let isolatedNode = editor.find('.sc-isolated-node[data-id="sn"]')
+  const { editor, editorSession } = setupEditor(t, TWO_STRUCTURED_NODES)
+  const isolatedNode = editor.find('.sc-isolated-node[data-id="sn"]')
   // make sure there is no selection in the beginning
   editorSession.setSelection(null)
   // click on the isolatedNode
   _clickOnIsolatedNode(isolatedNode)
-  let sel = editorSession.getSelection()
+  const sel = editorSession.getSelection()
   t.deepEqual({
     type: sel.type,
     nodeId: sel.nodeId
@@ -147,7 +147,7 @@ function _notSelected (t, isolated) {
 }
 
 function _modeOk (t, isolated, expected) {
-  let id = isolated.getId()
+  const id = isolated.getId()
   t.looseEqual(isolated.getMode(), expected[id], "mode of isolated node '" + id + "' should be correct")
 }
 
@@ -158,7 +158,7 @@ function _clickOnIsolatedNode (comp) {
 }
 
 function TWO_STRUCTURED_NODES (doc) {
-  let body = doc.get('body')
+  const body = doc.get('body')
   body.append(doc.create({
     type: 'structured-node',
     id: 'sn',

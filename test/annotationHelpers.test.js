@@ -3,20 +3,20 @@ import { annotationHelpers, EditingInterface } from 'substance'
 import createTestArticle from './shared/createTestArticle'
 import simple from './fixture/simple'
 
-let truncateAnnotation = annotationHelpers.truncateAnnotation
-let expandAnnotation = annotationHelpers.expandAnnotation
-let fuseAnnotation = annotationHelpers.fuseAnnotation
+const truncateAnnotation = annotationHelpers.truncateAnnotation
+const expandAnnotation = annotationHelpers.expandAnnotation
+const fuseAnnotation = annotationHelpers.fuseAnnotation
 
 test('annotationHelpers: truncate property annotation with a given property selection', function (t) {
-  let doc = fixture(A1)
+  const doc = fixture(A1)
   // Put cursor inside an the existing annotation
-  let sel = doc.createSelection({
+  const sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
     endOffset: 2
   })
-  let anno = doc.get('a1')
+  const anno = doc.get('a1')
   truncateAnnotation(doc, anno, sel)
   t.equal(anno.start.offset, 0, 'startOffset should be 0')
   t.equal(anno.end.offset, 1, 'endOffset should have changed from 2 to 1')
@@ -24,22 +24,22 @@ test('annotationHelpers: truncate property annotation with a given property sele
 })
 
 test('annotationHelpers: truncate container annotation with a given property selection', function (t) {
-  let doc = fixture(CA1)
-  let sel = doc.createSelection({
+  const doc = fixture(CA1)
+  const sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 1,
     endOffset: 4
   })
-  let anno = doc.get('ca1')
+  const anno = doc.get('ca1')
   truncateAnnotation(doc, anno, sel)
   t.equal(anno.end.offset, 1, 'endOffset should be 1')
   t.end()
 })
 
 test('annotationHelpers: truncate container annotation with a given container selection', function (t) {
-  let doc = fixture(CA1)
-  let sel = doc.createSelection({
+  const doc = fixture(CA1)
+  const sel = doc.createSelection({
     type: 'container',
     containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
@@ -47,7 +47,7 @@ test('annotationHelpers: truncate container annotation with a given container se
     endPath: ['p3', 'content'],
     endOffset: 4
   })
-  let anno = doc.get('ca1')
+  const anno = doc.get('ca1')
   truncateAnnotation(doc, anno, sel)
   t.deepEqual(anno.end.path, ['p2', 'content'], 'endPath should be p2.content')
   t.equal(anno.end.offset, 1, 'endOffset should be 1')
@@ -55,14 +55,14 @@ test('annotationHelpers: truncate container annotation with a given container se
 })
 
 test('annotationHelpers: expand-right of property annotation for a given property selection', function (t) {
-  let doc = fixture(A1)
-  let sel = doc.createSelection({
+  const doc = fixture(A1)
+  const sel = doc.createSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 1,
     endOffset: 6
   })
-  let anno = doc.get('a1')
+  const anno = doc.get('a1')
   expandAnnotation(doc, anno, sel)
   t.equal(anno.start.offset, 0, 'startOffset should be 0')
   t.equal(anno.end.offset, 6, 'endOffset should have changed from 2 to 1')
@@ -70,22 +70,22 @@ test('annotationHelpers: expand-right of property annotation for a given propert
 })
 
 test('annotationHelpers: expand container annotation for a given property selection (right expansion)', function (t) {
-  let doc = fixture(CA1)
-  let sel = doc.createSelection({
+  const doc = fixture(CA1)
+  const sel = doc.createSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 1,
     endOffset: 6
   })
-  let anno = doc.get('ca1')
+  const anno = doc.get('ca1')
   expandAnnotation(doc, anno, sel)
   t.equal(anno.end.offset, 6, 'endOffset should be 6')
   t.end()
 })
 
 test('annotationHelpers: expand container annotation for a given container selection (expand right)', function (t) {
-  let doc = fixture(CA1)
-  let sel = doc.createSelection({
+  const doc = fixture(CA1)
+  const sel = doc.createSelection({
     type: 'container',
     containerPath: ['body', 'nodes'],
     startPath: ['p2', 'content'],
@@ -93,7 +93,7 @@ test('annotationHelpers: expand container annotation for a given container selec
     endPath: ['p3', 'content'],
     endOffset: 6
   })
-  let anno = doc.get('ca1')
+  const anno = doc.get('ca1')
   expandAnnotation(doc, anno, sel)
   t.deepEqual(anno.end.path, ['p3', 'content'], 'endPath should be p2.content')
   t.equal(anno.end.offset, 6, 'endOffset should be 6')
@@ -101,7 +101,7 @@ test('annotationHelpers: expand container annotation for a given container selec
 })
 
 test('annotationHelpers: fuse two property annotations for a given property selection', function (t) {
-  let tx = new EditingInterface(fixture(A1, A2))
+  const tx = new EditingInterface(fixture(A1, A2))
   // Put selection so that it touches both strong annotations
   tx.setSelection({
     type: 'property',
@@ -109,8 +109,8 @@ test('annotationHelpers: fuse two property annotations for a given property sele
     startOffset: 1,
     endOffset: 6
   })
-  let a1 = tx.get('a1')
-  let a2 = tx.get('a2')
+  const a1 = tx.get('a1')
+  const a2 = tx.get('a2')
   fuseAnnotation(tx, [a1, a2])
   t.isNil(tx.get('a2'), 'a2 should be gone.')
   t.equal(a1.start.offset, 0, 'startOffset should be 0')
@@ -119,15 +119,15 @@ test('annotationHelpers: fuse two property annotations for a given property sele
 })
 
 test('annotationHelpers: fuse two conatiner annotations for a given property selection', function (t) {
-  let tx = new EditingInterface(fixture(CA1, CA2))
+  const tx = new EditingInterface(fixture(CA1, CA2))
   tx.setSelection({
     type: 'property',
     path: ['p3', 'content'],
     startOffset: 3,
     endOffset: 8
   })
-  let ca1 = tx.get('ca1')
-  let ca2 = tx.get('ca2')
+  const ca1 = tx.get('ca1')
+  const ca2 = tx.get('ca2')
   fuseAnnotation(tx, [ca1, ca2])
   t.isNil(tx.get('ca2'), 'ca2 should be gone.')
   t.deepEqual(ca1.start.path, ['p1', 'content'], 'start pPath should be p1.content')
@@ -138,7 +138,7 @@ test('annotationHelpers: fuse two conatiner annotations for a given property sel
 })
 
 function fixture (...fns) {
-  let doc = createTestArticle(simple)
+  const doc = createTestArticle(simple)
   fns.forEach((fn) => {
     fn(doc)
   })

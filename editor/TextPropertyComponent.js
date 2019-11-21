@@ -27,9 +27,9 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   render ($$) {
-    let path = this.getPath()
+    const path = this.getPath()
 
-    let el = this._renderContent($$)
+    const el = this._renderContent($$)
       .addClass('sc-text-property')
       .attr({
         'data-path': getKeyForPath(path)
@@ -53,9 +53,9 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   getAnnotations () {
-    let path = this.getPath()
+    const path = this.getPath()
     let annos = this.getDocument().getAnnotations(path) || []
-    let markersManager = this.context.markersManager
+    const markersManager = this.context.markersManager
     if (markersManager) {
       annos = annos.concat(markersManager.getMarkers(path))
     }
@@ -63,8 +63,8 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   _renderFragment ($$, fragment) {
-    let node = fragment.node
-    let id = node.id
+    const node = fragment.node
+    const id = node.id
     let el
     if (node.type === 'selection-fragment') {
       el = $$(SelectionFragmentComponent, { collaborator: node.collaborator })
@@ -83,12 +83,12 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   getSurfaceId () {
-    let surface = this.getSurface()
+    const surface = this.getSurface()
     return surface ? surface.id : null
   }
 
   getContainerPath () {
-    let surface = this.getSurface()
+    const surface = this.getSurface()
     return surface ? surface.getContainerPath() : null
   }
 
@@ -132,13 +132,13 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
           charPos -= l
         }
       } else if (child.isElementNode()) {
-        let length = child.getAttribute('data-length')
+        const length = child.getAttribute('data-length')
         if (length) {
           l = parseInt(length, 10)
           if (l >= charPos) {
             // special handling for InlineNodes
             if (child.attr('data-inline')) {
-              let nextSibling = child.getNextSibling()
+              const nextSibling = child.getNextSibling()
               if (nextSibling && nextSibling.isTextNode()) {
                 return {
                   container: nextSibling.getNativeElement(),
@@ -183,16 +183,16 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     rendered by the TextPropertyComponent
   */
   static getCoordinate (root, el, offset) {
-    let context = this._getPropertyContext(root, el, offset)
+    const context = this._getPropertyContext(root, el, offset)
     if (!context) {
       return null
     }
-    let textPropertyComp = context.comp
+    const textPropertyComp = context.comp
     // in some cases we need to normalize the DOM coordinate
     // before we can use it for retrieving charPos (e.g., observed in #273)
-    let charPos = textPropertyComp._getCharPos(context.node, context.offset)
+    const charPos = textPropertyComp._getCharPos(context.node, context.offset)
     if (isNumber(charPos)) {
-      let coor = new Coordinate(context.path, charPos)
+      const coor = new Coordinate(context.path, charPos)
       // TODO: what is this used for?
       coor._comp = textPropertyComp
       return coor
@@ -202,7 +202,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
   }
 
   static _getPropertyContext (root, node, offset) {
-    let result = {
+    const result = {
       comp: null,
       el: null,
       path: null,
@@ -211,7 +211,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     }
     while (node && node !== root) {
       if (node.isElementNode()) {
-        let comp = Component.unwrap(node)
+        const comp = Component.unwrap(node)
         if (comp && comp._isTextPropertyComponent) {
           result.comp = comp
           result.el = node
@@ -252,8 +252,8 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
       // TextNode is first child
       if (node === parent.firstChild) {
         // ... we can stop if parent is text property
-        let parentPath = parent.getAttribute('data-path')
-        let parentOffset = parent.getAttribute('data-offset')
+        const parentPath = parent.getAttribute('data-path')
+        const parentOffset = parent.getAttribute('data-offset')
         if (parentPath) {
           charPos = offset
         // ... and we can stop if parent has an offset hint
@@ -269,8 +269,8 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
         charPos = this._getCharPos(parent, childIdx) + offset
       }
     } else if (node.isElementNode()) {
-      let pathStr = node.getAttribute('data-path')
-      let offsetStr = node.getAttribute('data-offset')
+      const pathStr = node.getAttribute('data-path')
+      const offsetStr = node.getAttribute('data-offset')
       // if node is the element of a text property, then offset is a child index
       // up to which we need to sum up all lengths
       if (pathStr) {
@@ -299,7 +299,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     if (el.getAttribute('data-inline')) {
       return maxIdx === 0 ? 0 : 1
     }
-    let l = el.getChildCount()
+    const l = el.getChildCount()
     if (arguments.length === 1) {
       maxIdx = l
     }
@@ -308,7 +308,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
       if (child.isTextNode()) {
         charPos += child.getTextContent().length
       } else if (child.isElementNode()) {
-        let length = child.getAttribute('data-length')
+        const length = child.getAttribute('data-length')
         if (child.getAttribute('data-inline')) {
           charPos += 1
         } else if (length) {

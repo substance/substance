@@ -9,19 +9,19 @@ import setupEditor from './shared/setupEditor'
 // nor have I added tests covering these branches.
 
 test('TextPropertyComponent: Get coordinate of empty property', t => {
-  let { editorSession, doc } = setupEditor(t, (doc, body) => {
+  const { editorSession, doc } = setupEditor(t, (doc, body) => {
     doc.create({
       type: 'paragraph',
       id: 'empty',
       content: ''
     })
   })
-  let comp = TextPropertyComponent.mount({
+  const comp = TextPropertyComponent.mount({
     doc: doc,
     path: ['empty', 'content']
   }, getMountPoint(t), { context: editorSession.getContext() })
 
-  let coor = comp.getDOMCoordinate(0)
+  const coor = comp.getDOMCoordinate(0)
 
   t.notNil(coor, 'Coordinate should be not null.')
   t.equal(coor.container, comp.el.getNativeElement(), 'element should be property element')
@@ -30,8 +30,8 @@ test('TextPropertyComponent: Get coordinate of empty property', t => {
 })
 
 test('TextPropertyComponent: Get coordinate if cursor is inside inline-node', t => {
-  let { surface, doc } = setupEditor(t, (doc, body) => {
-    let p1 = doc.create({
+  const { surface, doc } = setupEditor(t, (doc, body) => {
+    const p1 = doc.create({
       type: 'paragraph',
       id: 'p1',
       content: 'ab x cd'
@@ -50,9 +50,9 @@ test('TextPropertyComponent: Get coordinate if cursor is inside inline-node', t 
     })
     body.append(p1)
   })
-  let rootEl = surface.getElement()
-  let p1 = doc.get('p1')
-  let in1Comp = surface.find('[data-id=in1]')
+  const rootEl = surface.getElement()
+  const p1 = doc.get('p1')
+  const in1Comp = surface.find('[data-id=in1]')
   let el, coor
   // Note: the inline-node case has the most exceptions re cursor mapping
   el = in1Comp.getElement()

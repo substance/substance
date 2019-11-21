@@ -17,18 +17,18 @@ export default function EditorSessionMixin (AbstractEditorSession) {
       this.config = config
       const editorState = this.editorState
 
-      let surfaceManager = new SurfaceManager(editorState)
-      let markersManager = new MarkersManager(editorState)
-      let keyboardManager = new KeyboardManager(config.getKeyboardShortcuts(options), (commandName, params) => {
+      const surfaceManager = new SurfaceManager(editorState)
+      const markersManager = new MarkersManager(editorState)
+      const keyboardManager = new KeyboardManager(config.getKeyboardShortcuts(options), (commandName, params) => {
         return this.executeCommand(commandName, params)
       }, this)
-      let commandManager = new CommandManager(this,
+      const commandManager = new CommandManager(this,
         // update commands when document or selection have changed
         // TODO: is this really sufficient?
         ['document', 'selection'],
         config.getCommands(options)
       )
-      let findAndReplaceManager = new FindAndReplaceManager(this)
+      const findAndReplaceManager = new FindAndReplaceManager(this)
       this.surfaceManager = surfaceManager
       this.markersManager = markersManager
       this.keyboardManager = keyboardManager
@@ -84,7 +84,7 @@ export default function EditorSessionMixin (AbstractEditorSession) {
     cut () {
       const sel = this.getSelection()
       if (sel && !sel.isNull() && !sel.isCollapsed()) {
-        let snippet = this.copy()
+        const snippet = this.copy()
         this.deleteSelection()
         return snippet
       }
@@ -160,9 +160,9 @@ export default function EditorSessionMixin (AbstractEditorSession) {
       // overlayId === getKeyForPath(path) => if selection is value &&
       // Overlays of value components (ManyRelationshipComponent, SingleRelationship)
       // need to remain open if the selection is a value selection
-      let sel = this.getSelection()
+      const sel = this.getSelection()
       if (sel && sel.customType === 'value') {
-        let valueId = getKeyForPath(sel.data.path)
+        const valueId = getKeyForPath(sel.data.path)
         if (overlayId !== valueId) {
           this.editorState.overlayId = valueId
         }

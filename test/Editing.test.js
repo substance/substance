@@ -23,7 +23,7 @@ import {
 // tested on all platforms
 
 test('Editing: IT1: Inserting text with cursor in the middle of a TextProperty', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -33,15 +33,15 @@ test('Editing: IT1: Inserting text with cursor in the middle of a TextProperty',
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + 'xxx' + P1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
   t.end()
 })
 
 test('Editing: IT2: Inserting text with cursor within TextProperty inside annotation', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -51,9 +51,9 @@ test('Editing: IT2: Inserting text with cursor within TextProperty inside annota
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let s1 = doc.get('s1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const s1 = doc.get('s1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 4) + 'xxx' + P1_TEXT.slice(4), 'Text should have been inserted correctly.')
   t.equal(s1.end.offset, 8, 'Annotation should have been expanded.')
   t.equal(sel.start.offset, 7, 'Cursor should be after inserted text')
@@ -61,7 +61,7 @@ test('Editing: IT2: Inserting text with cursor within TextProperty inside annota
 })
 
 test('Editing: IT3: Inserting text with cursor within TextProperty at the start of an annotation', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -71,9 +71,9 @@ test('Editing: IT3: Inserting text with cursor within TextProperty at the start 
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let s1 = doc.get('s1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const s1 = doc.get('s1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + 'xxx' + P1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 6, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 8, 'Annotation should have been moved.')
@@ -82,7 +82,7 @@ test('Editing: IT3: Inserting text with cursor within TextProperty at the start 
 })
 
 test('Editing: IT4: Inserting text with cursor within TextProperty at the end of an annotation', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -92,9 +92,9 @@ test('Editing: IT4: Inserting text with cursor within TextProperty at the end of
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let s1 = doc.get('s1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const s1 = doc.get('s1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 5) + 'xxx' + P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 8, 'Annotation should have been moved.')
@@ -103,7 +103,7 @@ test('Editing: IT4: Inserting text with cursor within TextProperty at the end of
 })
 
 test('Editing: IT5: Inserting text with range within TextProperty', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -114,8 +114,8 @@ test('Editing: IT5: Inserting text with range within TextProperty', (t) => {
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 2) + 'xxx' + P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(sel.start.offset, 5, 'Cursor should be after inserted text')
   t.ok(sel.isCollapsed(), '... collapsed')
@@ -123,7 +123,7 @@ test('Editing: IT5: Inserting text with range within TextProperty', (t) => {
 })
 
 test('Editing: IT6: Inserting text with range within TextProperty overlapping an annotion aligned at the left side', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
   editorSession.setSelection({
     type: 'property',
@@ -135,9 +135,9 @@ test('Editing: IT6: Inserting text with range within TextProperty overlapping an
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let s1 = doc.get('s1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const s1 = doc.get('s1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + 'xxx' + P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 7, 'Annotation should have been moved.')
@@ -147,7 +147,7 @@ test('Editing: IT6: Inserting text with range within TextProperty overlapping an
 })
 
 test('Editing: IT7: Inserting text with range within TextProperty inside an annotion', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -158,9 +158,9 @@ test('Editing: IT7: Inserting text with range within TextProperty inside an anno
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let s1 = doc.get('s1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const s1 = doc.get('s1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + 'xxx' + P1_TEXT.slice(5), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 6, 'Annotation should have been moved.')
@@ -170,7 +170,7 @@ test('Editing: IT7: Inserting text with range within TextProperty inside an anno
 })
 
 test('Editing: IT8: Inserting text with range within TextProperty starting inside an annotion', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   doc.set(['s1', 'end', 'offset'], 6)
   editorSession.setSelection({
     type: 'property',
@@ -182,9 +182,9 @@ test('Editing: IT8: Inserting text with range within TextProperty starting insid
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let s1 = doc.get('s1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const s1 = doc.get('s1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 4) + 'xxx' + P1_TEXT.slice(6), 'Text should have been inserted correctly.')
   t.equal(s1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(s1.end.offset, 7, 'Annotation should have been moved.')
@@ -194,7 +194,7 @@ test('Editing: IT8: Inserting text with range within TextProperty starting insid
 })
 
 test('Editing: IT9: Inserting text after an InlineNode node', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _il1)
+  const { editorSession, doc } = setupEditor(t, _p1, _il1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -204,9 +204,9 @@ test('Editing: IT9: Inserting text after an InlineNode node', (t) => {
   editorSession.transaction((tx) => {
     tx.insertText('Y')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let il1 = doc.get('il1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const il1 = doc.get('il1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + '\uFEFF' + 'Y' + P1_TEXT.slice(3), 'Text should have been inserted correctly.') // eslint-disable-line no-useless-concat
   t.equal(sel.start.offset, 5, 'Cursor should be after inserted character')
   t.deepEqual([il1.start.offset, il1.end.offset], [3, 4], 'InlineNode should have correct dimensions')
@@ -214,7 +214,7 @@ test('Editing: IT9: Inserting text after an InlineNode node', (t) => {
 })
 
 test('Editing: IT10: Typing over an InlineNode node', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _il1)
+  const { editorSession, doc } = setupEditor(t, _p1, _il1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -225,15 +225,15 @@ test('Editing: IT10: Typing over an InlineNode node', (t) => {
   editorSession.transaction((tx) => {
     tx.insertText('Y')
   }, { action: 'type' })
-  let p1 = doc.get('p1')
-  let il1 = doc.get('il1')
+  const p1 = doc.get('p1')
+  const il1 = doc.get('il1')
   t.nil(il1, 'InlineNode should have been deleted.')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + 'Y' + P1_TEXT.slice(3), 'Text should have been inserted correctly.') // eslint-disable-line no-useless-concat
   t.end()
 })
 
 test('Editing: IT11: Typing over a selected IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _in1)
+  const { editorSession, doc } = setupEditor(t, _in1)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -242,7 +242,7 @@ test('Editing: IT11: Typing over a selected IsolatedNode', (t) => {
   editorSession.transaction((tx) => {
     tx.insertText('Y')
   }, { action: 'type' })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.isNil(doc.get('in1'), 'IsolatedNode should have been deleted.')
   t.equal(body.getLength(), 1, 'There should be one node.')
   t.equal(body.getNodeAt(0).getText(), 'Y', '.. containing the typed text.')
@@ -250,7 +250,7 @@ test('Editing: IT11: Typing over a selected IsolatedNode', (t) => {
 })
 
 test('Editing: IT12: Typing before an IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _in1)
+  const { editorSession, doc } = setupEditor(t, _in1)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -261,14 +261,14 @@ test('Editing: IT12: Typing before an IsolatedNode', (t) => {
     tx.insertText('Y')
   }, { action: 'type' })
 
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should be two nodes.')
   t.equal(body.getNodeAt(0).getText(), 'Y', '.. first one containing the typed text.')
   t.end()
 })
 
 test('Editing: IT13: Typing after an IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _in1)
+  const { editorSession, doc } = setupEditor(t, _in1)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -279,16 +279,16 @@ test('Editing: IT13: Typing after an IsolatedNode', (t) => {
     tx.insertText('Y')
   }, { action: 'type' })
 
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should be two nodes.')
   t.equal(body.getNodeAt(1).getText(), 'Y', '.. second one containing the typed text.')
   t.end()
 })
 
 test('Editing: IT14: Typing over a ContainerSelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
-  let p1 = doc.get('p1')
-  let p2 = doc.get('p2')
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const p1 = doc.get('p1')
+  const p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -301,14 +301,14 @@ test('Editing: IT14: Typing over a ContainerSelection', (t) => {
     tx.insertText('Y')
   }, { action: 'type' })
 
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.nodes, ['p1'], 'Only the first paragraph should be left.')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + 'Y' + P2_TEXT.slice(4), 'The content should have been merged correctly')
   t.end()
 })
 
 test('Editing: IT15: Inserting text into a ListItem', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -318,15 +318,15 @@ test('Editing: IT15: Inserting text into a ListItem', (t) => {
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   }, { action: 'type' })
-  let sel = editorSession.getSelection()
-  let li = doc.get('l1-1')
+  const sel = editorSession.getSelection()
+  const li = doc.get('l1-1')
   t.equal(li.getText(), LI1_TEXT.slice(0, 3) + 'xxx' + LI1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(sel.start.offset, 6, 'Cursor should be after inserted text')
   t.end()
 })
 
 test('Editing: IT16: Inserting text in an IsolatedNode', (t) => {
-  let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
+  const { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['in1', 'title'],
@@ -336,13 +336,13 @@ test('Editing: IT16: Inserting text in an IsolatedNode', (t) => {
   editorSession.transaction((tx) => {
     tx.insertText('xxx')
   })
-  let in1 = doc.get('in1')
+  const in1 = doc.get('in1')
   t.equal(in1.title, IN1_TITLE.slice(0, 3) + 'xxx' + IN1_TITLE.slice(3), 'Text should be inserted into field')
   t.end()
 })
 
 test('Editing: II1: Inserting InlineNode node into a TextProperty', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -356,9 +356,9 @@ test('Editing: II1: Inserting InlineNode node into a TextProperty', (t) => {
       content: 'X'
     })
   })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
-  let il1 = doc.get('il1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
+  const il1 = doc.get('il1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + '\uFEFF' + P1_TEXT.slice(3), 'Text should have been inserted correctly.')
   t.equal(il1.start.offset, 3, 'Annotation should have been moved.')
   t.equal(il1.end.offset, 4, 'Annotation should have been moved.')
@@ -367,7 +367,7 @@ test('Editing: II1: Inserting InlineNode node into a TextProperty', (t) => {
 })
 
 test('Editing: IB2: Inserting BlockNode using cursor at start of a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -380,9 +380,9 @@ test('Editing: IB2: Inserting BlockNode using cursor at start of a TextNode', (t
       id: 'ib1'
     })
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
+  const p1 = doc.get('p1')
   t.equal(body.nodes[0], 'ib1', 'First node should be inserted block node.')
   t.equal(body.nodes[1], 'p1', 'Second node should be inserted block node.')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -392,7 +392,7 @@ test('Editing: IB2: Inserting BlockNode using cursor at start of a TextNode', (t
 })
 
 test('Editing: IB3: Inserting an existing BlockNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -409,13 +409,13 @@ test('Editing: IB3: Inserting an existing BlockNode', (t) => {
   editorSession.transaction((tx) => {
     tx.insertBlockNode(ib1)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.ok(body.getNodeAt(0) === ib1, 'First node should be the very block node instance created before.')
   t.end()
 })
 
 test('Editing: IB4: Inserting a BlockNode when an IsolatedNode is selected', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -427,7 +427,7 @@ test('Editing: IB4: Inserting a BlockNode when an IsolatedNode is selected', (t)
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.length, 3, 'There should be three nodes.')
   t.equal(body.nodes[1], 'ib1', 'The second one should be the inserted block node.')
   t.isNil(doc.get('in1'), 'The IsolatedNode should have been deleted.')
@@ -435,7 +435,7 @@ test('Editing: IB4: Inserting a BlockNode when an IsolatedNode is selected', (t)
 })
 
 test('Editing: IB5: Inserting a BlockNode before an IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -448,13 +448,13 @@ test('Editing: IB5: Inserting a BlockNode before an IsolatedNode', (t) => {
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.nodes, ['p1', 'ib1', 'in1', 'p2'], 'The body nodes should be in proper order.')
   t.end()
 })
 
 test('Editing: IB6: Inserting a BlockNode after an IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -467,14 +467,14 @@ test('Editing: IB6: Inserting a BlockNode after an IsolatedNode', (t) => {
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.nodes, ['p1', 'in1', 'ib1', 'p2'], 'The body nodes should be in proper order.')
   t.end()
 })
 
 test('Editing: IB7: Inserting a BlockNode with an expanded PropertySelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'property',
     path: p1.getPath(),
@@ -488,7 +488,7 @@ test('Editing: IB7: Inserting a BlockNode with an expanded PropertySelection', (
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 3, 'There should be 3 nodes.')
   t.equal(body.nodes[1], 'ib1', 'The second should be the inserted block node.')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3), 'The paragraph should have been truncated.')
@@ -497,8 +497,8 @@ test('Editing: IB7: Inserting a BlockNode with an expanded PropertySelection', (
 })
 
 test('Editing: IB8: Inserting a BlockNode into an empty paragraph', (t) => {
-  let { editorSession, doc } = setupEditor(t, _empty)
-  let empty = doc.get('empty')
+  const { editorSession, doc } = setupEditor(t, _empty)
+  const empty = doc.get('empty')
   editorSession.setSelection({
     type: 'property',
     path: empty.getPath(),
@@ -511,15 +511,15 @@ test('Editing: IB8: Inserting a BlockNode into an empty paragraph', (t) => {
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.nodes, ['ib1'], 'There should only be the inserted block node.')
   t.nil(doc.get('empty'), 'The empty paragraph should have been deleted.')
   t.end()
 })
 
 test('Editing: IB9: Inserting a BlockNode after a text node', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'property',
     path: p1.getPath(),
@@ -532,14 +532,14 @@ test('Editing: IB9: Inserting a BlockNode after a text node', (t) => {
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.nodes, ['p1', 'ib1'], 'The block node should have been inserted after the paragraph.')
   t.end()
 })
 
 test('Editing: IB10: Inserting a BlockNode with a collapsed ContainerSelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -554,16 +554,16 @@ test('Editing: IB10: Inserting a BlockNode with a collapsed ContainerSelection',
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 3, 'There should be three nodes.')
   t.equal(body.nodes[1], 'ib1', '.. the second one being the inserted block node.')
   t.end()
 })
 
 test('Editing: IB11: Inserting a BlockNode with a ContainerSelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
-  let p1 = doc.get('p1')
-  let p2 = doc.get('p2')
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const p1 = doc.get('p1')
+  const p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -578,7 +578,7 @@ test('Editing: IB11: Inserting a BlockNode with a ContainerSelection', (t) => {
       id: 'ib1'
     })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.nodes, ['p1', 'ib1', 'p2'], 'There should be three nodes.')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3), 'The first paragraph should have been truncated correctly')
   t.equal(p2.getText(), P2_TEXT.slice(4), 'The second paragraph should have been truncated correctly')
@@ -586,7 +586,7 @@ test('Editing: IB11: Inserting a BlockNode with a ContainerSelection', (t) => {
 })
 
 test('Editing: DEL0: Deleting without selection', (t) => {
-  let { editorSession } = setupEditor(t, _p1, _p2)
+  const { editorSession } = setupEditor(t, _p1, _p2)
   editorSession.setSelection(null)
   t.doesNotThrow(() => {
     editorSession.transaction((tx) => {
@@ -597,8 +597,8 @@ test('Editing: DEL0: Deleting without selection', (t) => {
 })
 
 test('Editing: DEL1: Deleting a property selection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'property',
     path: p1.getPath(),
@@ -613,7 +613,7 @@ test('Editing: DEL1: Deleting a property selection', (t) => {
 })
 
 test('Editing: DEL2: Deleting using DELETE with cursor at the end of a TextNode at the end of a Container', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p2', 'content'],
@@ -624,17 +624,17 @@ test('Editing: DEL2: Deleting using DELETE with cursor at the end of a TextNode 
     tx.deleteCharacter('right')
   })
   // nothing should have happened
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should still be 2 nodes in body')
-  let p2 = doc.get('p2')
+  const p2 = doc.get('p2')
   t.equal(p2.getText(), P2_TEXT, 'p2 should still have same content.')
   t.equal(sel.start.offset, P2_TEXT.length, 'Cursor should still be at the same position')
   t.end()
 })
 
 test('Editing: DEL3: Deleting using DELETE with cursor in the middle of a TextProperty', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'property',
@@ -643,15 +643,15 @@ test('Editing: DEL3: Deleting using DELETE with cursor in the middle of a TextPr
     })
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + P1_TEXT.slice(4), 'One character should have been deleted')
   t.equal(sel.start.offset, 3, 'Cursor should be at the same position')
   t.end()
 })
 
 test('Editing: DEL4: Deleting using DELETE with cursor inside an empty TextNode and TextNode as successor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['empty', 'content'],
@@ -661,9 +661,9 @@ test('Editing: DEL4: Deleting using DELETE with cursor inside an empty TextNode 
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
-  let p2 = doc.get('p2')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
+  const p2 = doc.get('p2')
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
   t.equal(p2.getText(), P2_TEXT, 'p2 should not be affected')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -673,7 +673,7 @@ test('Editing: DEL4: Deleting using DELETE with cursor inside an empty TextNode 
 })
 
 test('Editing: DEL5: Deleting using DELETE with cursor inside an empty TextNode and IsolatedNode as successor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _empty, _block1)
+  const { editorSession, doc } = setupEditor(t, _p1, _empty, _block1)
   editorSession.setSelection({
     type: 'property',
     path: ['empty', 'content'],
@@ -683,8 +683,8 @@ test('Editing: DEL5: Deleting using DELETE with cursor inside an empty TextNode 
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
   t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
   t.equal(sel.getNodeId(), 'block1', '... block1')
@@ -692,7 +692,7 @@ test('Editing: DEL5: Deleting using DELETE with cursor inside an empty TextNode 
 })
 
 test('Editing: DEL6: Deleting using DELETE with cursor inside an empty TextNode and List as successor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _empty, _l1, _l11, _l12)
+  const { editorSession, doc } = setupEditor(t, _p1, _empty, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['empty', 'content'],
@@ -702,8 +702,8 @@ test('Editing: DEL6: Deleting using DELETE with cursor inside an empty TextNode 
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should be only 2 nodes left.')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, ['l1-1', 'content'], '... on first list item')
@@ -712,7 +712,7 @@ test('Editing: DEL6: Deleting using DELETE with cursor inside an empty TextNode 
 })
 
 test('Editing: DEL7: Deleting using DELETE with cursor at the end of a non-empty TextNode and TextNode as successor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -722,9 +722,9 @@ test('Editing: DEL7: Deleting using DELETE with cursor at the end of a non-empty
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
+  const p1 = doc.get('p1')
   t.equal(body.nodes.length, 1, 'There should be only one node left.')
   t.ok(sel.isCollapsed(), 'Selection should be a collapsed')
   t.deepEqual(sel.start.path, p1.getPath(), '... on p1')
@@ -733,7 +733,7 @@ test('Editing: DEL7: Deleting using DELETE with cursor at the end of a non-empty
 })
 
 test('Editing: DEL8: Deleting using DELETE with cursor at the end of a non-empty TextNode and IsolatedNode as successor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1)
+  const { editorSession, doc } = setupEditor(t, _p1, _block1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -745,8 +745,8 @@ test('Editing: DEL8: Deleting using DELETE with cursor at the end of a non-empty
   })
   // NOTE: if there is no merge possible, nothing should happen
   // only the selection should be updated
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should still be 2 nodes left.')
   t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
   t.equal(sel.getNodeId(), 'block1', '... in block1')
@@ -755,7 +755,7 @@ test('Editing: DEL8: Deleting using DELETE with cursor at the end of a non-empty
 })
 
 test('Editing: DEL9: Deleting using DELETE with cursor after an IsolatedNode and a TextNode as successor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _block1, _p1)
+  const { editorSession, doc } = setupEditor(t, _block1, _p1)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'block1',
@@ -765,7 +765,7 @@ test('Editing: DEL9: Deleting using DELETE with cursor after an IsolatedNode and
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let p1 = doc.get('p1')
+  const p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(1), 'First character of paragraph should have been deleted.')
   _checkSelection(t, editorSession.getSelection(), {
     type: 'property',
@@ -776,7 +776,7 @@ test('Editing: DEL9: Deleting using DELETE with cursor after an IsolatedNode and
 })
 
 test('Editing: DEL10: Deleting using DELETE with cursor after an IsolatedNode and an IsolatedNode as successor', (t) => {
-  let { editorSession } = setupEditor(t, _block1, _block2)
+  const { editorSession } = setupEditor(t, _block1, _block2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'block1',
@@ -795,7 +795,7 @@ test('Editing: DEL10: Deleting using DELETE with cursor after an IsolatedNode an
 })
 
 test('Editing: DEL11: Deleting using BACKSPACE with cursor in the middle of a TextProperty', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -805,15 +805,15 @@ test('Editing: DEL11: Deleting using BACKSPACE with cursor in the middle of a Te
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + P1_TEXT.slice(4), 'one character should have been deleted')
   t.equal(sel.start.offset, 3, 'Cursor should have shifted by one character')
   t.end()
 })
 
 test('Editing: DEL12: Deleting using BACKSPACE with cursor inside an empty TextNode and TextNode as predecessor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['empty', 'content'],
@@ -823,8 +823,8 @@ test('Editing: DEL12: Deleting using BACKSPACE with cursor inside an empty TextN
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
   t.isNil(doc.get('empty'), 'empty node should have been deleted')
   t.equal(p1.getText(), P1_TEXT, 'p1 should be untouched')
   t.deepEqual(sel.start.path, p1.getPath(), 'Cursor should be in p1')
@@ -833,7 +833,7 @@ test('Editing: DEL12: Deleting using BACKSPACE with cursor inside an empty TextN
 })
 
 test('Editing: DEL13: Deleting using BACKSPACE with cursor inside an empty TextNode and IsolatedNode as predecessor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _block1, _empty, _p2)
+  const { editorSession, doc } = setupEditor(t, _block1, _empty, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['empty', 'content'],
@@ -843,7 +843,7 @@ test('Editing: DEL13: Deleting using BACKSPACE with cursor inside an empty TextN
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
+  const sel = editorSession.getSelection()
   t.isNil(doc.get('empty'), 'empty node should have been deleted')
   t.ok(sel.isNodeSelection(), 'Selection should be a node selection')
   t.equal(sel.getNodeId(), 'block1', '... on block1')
@@ -851,7 +851,7 @@ test('Editing: DEL13: Deleting using BACKSPACE with cursor inside an empty TextN
 })
 
 test('Editing: DEL14: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and TextNode as predecessor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p2', 'content'],
@@ -861,8 +861,8 @@ test('Editing: DEL14: Deleting using BACKSPACE with cursor at the start of a non
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const p1 = doc.get('p1')
   t.isNil(doc.get('p2'), 'p2 should have been deleted')
   t.equal(p1.getText(), P1_TEXT + P2_TEXT, 'Text should have been merged')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -872,7 +872,7 @@ test('Editing: DEL14: Deleting using BACKSPACE with cursor at the start of a non
 })
 
 test('Editing: DEL15: Deleting using BACKSPACE with cursor at the start of a non-empty TextNode and IsolatedNode as predecessor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _block1, _p2)
+  const { editorSession, doc } = setupEditor(t, _block1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p2', 'content'],
@@ -882,8 +882,8 @@ test('Editing: DEL15: Deleting using BACKSPACE with cursor at the start of a non
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should still be two nodes')
   t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
   t.equal(sel.getNodeId(), 'block1', '... on block1')
@@ -892,7 +892,7 @@ test('Editing: DEL15: Deleting using BACKSPACE with cursor at the start of a non
 })
 
 test('Editing: DEL16: Deleting using BACKSPACE with cursor after IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _block1, _p2)
+  const { editorSession, doc } = setupEditor(t, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
     mode: 'after',
@@ -902,11 +902,11 @@ test('Editing: DEL16: Deleting using BACKSPACE with cursor after IsolatedNode', 
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.isNil(doc.get('block1'), 'IsolatedNode should have been deleted')
   t.equal(body.getLength(), 2, 'There should still be two nodes')
-  let pnew = body.getNodeAt(0)
+  const pnew = body.getNodeAt(0)
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, pnew.getPath(), '... on new paragraph')
   t.equal(sel.start.offset, 0, '... at first position')
@@ -914,7 +914,7 @@ test('Editing: DEL16: Deleting using BACKSPACE with cursor after IsolatedNode', 
 })
 
 test('Editing: DEL17: Deleting using BACKSPACE with cursor before IsolatedNode with TextNode as predecessor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block2)
+  const { editorSession, doc } = setupEditor(t, _p1, _block2)
   editorSession.setSelection({
     type: 'node',
     mode: 'before',
@@ -924,9 +924,9 @@ test('Editing: DEL17: Deleting using BACKSPACE with cursor before IsolatedNode w
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
-  let p1 = doc.get('p1')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
+  const p1 = doc.get('p1')
   t.equal(body.getLength(), 2, 'There should still be two nodes')
   t.equal(p1.getText(), P1_TEXT.slice(0, -1), 'Last character of p1 should have been deleted')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -936,7 +936,7 @@ test('Editing: DEL17: Deleting using BACKSPACE with cursor before IsolatedNode w
 })
 
 test('Editing: DEL18: Deleting using BACKSPACE with cursor before IsolatedNode and IsolatedNode as predecessor', (t) => {
-  let { editorSession, doc } = setupEditor(t, _block1, _block2)
+  const { editorSession, doc } = setupEditor(t, _block1, _block2)
   editorSession.setSelection({
     type: 'node',
     mode: 'before',
@@ -946,8 +946,8 @@ test('Editing: DEL18: Deleting using BACKSPACE with cursor before IsolatedNode a
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should still be two nodes')
   t.ok(sel.isNodeSelection(), 'Selection should be a NodeSelection')
   t.equal(sel.getNodeId(), 'block1', '... on block1')
@@ -956,7 +956,7 @@ test('Editing: DEL18: Deleting using BACKSPACE with cursor before IsolatedNode a
 })
 
 test('Editing: DEL19: Deleting an entirely selected IsolatedNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _block1, _p2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'block1',
@@ -965,10 +965,10 @@ test('Editing: DEL19: Deleting an entirely selected IsolatedNode', (t) => {
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.isNil(doc.get('block1'), 'IsolatedNode should have been deleted')
-  let pnew = body.getNodeAt(1)
+  const pnew = body.getNodeAt(1)
   t.equal(body.getLength(), 3, 'There should be 3 nodes')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, pnew.getPath(), '... on new paragraph')
@@ -977,9 +977,9 @@ test('Editing: DEL19: Deleting an entirely selected IsolatedNode', (t) => {
 })
 
 test('Editing: DEL20: Deleting a range starting before a TextNode and ending after a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
-  let p1 = doc.get('p1')
-  let p2 = doc.get('p2')
+  const { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  const p1 = doc.get('p1')
+  const p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -991,10 +991,10 @@ test('Editing: DEL20: Deleting a range starting before a TextNode and ending aft
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 1, 'There should be only one node left')
-  let first = body.getNodeAt(0)
+  const first = body.getNodeAt(0)
   t.ok(first.isText(), '... which is a TextNode')
   t.ok(first.isEmpty(), '... which is empty')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -1004,9 +1004,9 @@ test('Editing: DEL20: Deleting a range starting before a TextNode and ending aft
 })
 
 test('Editing: DEL21: Deleting a range starting in the middle of a TextNode and ending after a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
-  let p1 = doc.get('p1')
-  let p2 = doc.get('p2')
+  const { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  const p1 = doc.get('p1')
+  const p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -1018,10 +1018,10 @@ test('Editing: DEL21: Deleting a range starting in the middle of a TextNode and 
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 1, 'There should be only one node left')
-  let first = body.getNodeAt(0)
+  const first = body.getNodeAt(0)
   t.ok(first.isText(), '... which is a TextNode')
   t.equal(first.getText(), P1_TEXT.slice(0, 3), '... with truncated content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -1031,9 +1031,9 @@ test('Editing: DEL21: Deleting a range starting in the middle of a TextNode and 
 })
 
 test('Editing: DEL22: Deleting a range starting before a TextNode and ending in the middle of a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
-  let p1 = doc.get('p1')
-  let p2 = doc.get('p2')
+  const { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  const p1 = doc.get('p1')
+  const p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -1045,10 +1045,10 @@ test('Editing: DEL22: Deleting a range starting before a TextNode and ending in 
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 1, 'There should be only one node left')
-  let first = body.getNodeAt(0)
+  const first = body.getNodeAt(0)
   t.ok(first.isText(), '... which is a TextNode')
   t.equal(first.getText(), P2_TEXT.slice(3), '... with sliced content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -1058,9 +1058,9 @@ test('Editing: DEL22: Deleting a range starting before a TextNode and ending in 
 })
 
 test('Editing: DEL23: Deleting a range starting in the middle of a TextNode and ending in the middle of a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
-  let p1 = doc.get('p1')
-  let p2 = doc.get('p2')
+  const { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _p2)
+  const p1 = doc.get('p1')
+  const p2 = doc.get('p2')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -1072,10 +1072,10 @@ test('Editing: DEL23: Deleting a range starting in the middle of a TextNode and 
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 1, 'There should be only one node left')
-  let first = body.getNodeAt(0)
+  const first = body.getNodeAt(0)
   t.ok(first.isText(), '... which is a TextNode')
   t.equal(first.getText(), P1_TEXT.slice(0, 3) + P2_TEXT.slice(3), '... with merged content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
@@ -1085,9 +1085,9 @@ test('Editing: DEL23: Deleting a range starting in the middle of a TextNode and 
 })
 
 test('Editing: DEL24: Deleting a range starting in the middle of a TextNode and ending in the middle of a ListItem', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _l1, _l11, _l12)
-  let p1 = doc.get('p1')
-  let l1 = doc.get('l1')
+  const { editorSession, doc } = setupEditor(t, _p1, _block1, _block2, _l1, _l11, _l12)
+  const p1 = doc.get('p1')
+  const l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -1099,8 +1099,8 @@ test('Editing: DEL24: Deleting a range starting in the middle of a TextNode and 
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should be 2 nodes left')
   t.equal(p1.getText(), P1_TEXT.slice(0, 3) + LI1_TEXT.slice(3), '... with merged content')
   t.equal(l1.items.length, 1, 'The list should have only 1 item left')
@@ -1111,9 +1111,9 @@ test('Editing: DEL24: Deleting a range starting in the middle of a TextNode and 
 })
 
 test('Editing: DEL25: Deleting a range starting in the middle of a ListItem and ending in the middle of a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _block1, _block2, _p1)
-  let p1 = doc.get('p1')
-  let l1 = doc.get('l1')
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _block1, _block2, _p1)
+  const p1 = doc.get('p1')
+  const l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
     startPath: ['l1-2', 'content'],
@@ -1125,11 +1125,11 @@ test('Editing: DEL25: Deleting a range starting in the middle of a ListItem and 
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 1, 'There should be 1 node left')
   t.equal(l1.items.length, 2, 'The list should have 2 items')
-  let li2 = l1.getItemAt(1)
+  const li2 = l1.getItemAt(1)
   t.equal(li2.getText(), LI2_TEXT.slice(0, 3) + P1_TEXT.slice(3), 'The second item should container merged content')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, li2.getPath(), '... on second list item')
@@ -1138,8 +1138,8 @@ test('Editing: DEL25: Deleting a range starting in the middle of a ListItem and 
 })
 
 test('Editing: DEL26: Deleting a range within a ListItem', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
-  let l1 = doc.get('l1')
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
     startPath: ['l1-2', 'content'],
@@ -1151,9 +1151,9 @@ test('Editing: DEL26: Deleting a range within a ListItem', (t) => {
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
+  const sel = editorSession.getSelection()
   t.equal(l1.items.length, 2, 'The list should have 2 items')
-  let li2 = l1.getItemAt(1)
+  const li2 = l1.getItemAt(1)
   t.equal(li2.getText(), LI2_TEXT.slice(0, 3) + LI2_TEXT.slice(6), 'The second item should be changed')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, li2.getPath(), '... on second list item')
@@ -1162,8 +1162,8 @@ test('Editing: DEL26: Deleting a range within a ListItem', (t) => {
 })
 
 test('Editing: DEL27: Deleting a range across two ListItems within the same List', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
-  let l1 = doc.get('l1')
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const l1 = doc.get('l1')
   editorSession.setSelection({
     type: 'container',
     startPath: ['l1-1', 'content'],
@@ -1175,9 +1175,9 @@ test('Editing: DEL27: Deleting a range across two ListItems within the same List
   editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let sel = editorSession.getSelection()
+  const sel = editorSession.getSelection()
   t.equal(l1.items.length, 1, 'The list should have 1 item')
-  let li1 = l1.getItemAt(0)
+  const li1 = l1.getItemAt(0)
   t.equal(li1.getText(), LI1_TEXT.slice(0, 3) + LI2_TEXT.slice(3), 'The items should be merged')
   t.ok(sel.isCollapsed(), 'Selection should be collapsed')
   t.deepEqual(sel.start.path, li1.getPath(), '... on the list item')
@@ -1186,8 +1186,8 @@ test('Editing: DEL27: Deleting a range across two ListItems within the same List
 })
 
 test('Editing: DEL28: Deleting a ContainerSelection within a single TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'container',
     startPath: p1.getPath(),
@@ -1209,7 +1209,7 @@ test('Editing: DEL28: Deleting a ContainerSelection within a single TextNode', (
 })
 
 test('Editing: DEL29: Deleting a character inside an IsolatedNode', (t) => {
-  let { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
+  const { doc, editorSession } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['in1', 'title'],
@@ -1218,13 +1218,13 @@ test('Editing: DEL29: Deleting a character inside an IsolatedNode', (t) => {
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let in1 = doc.get('in1')
+  const in1 = doc.get('in1')
   t.equal(in1.title, IN1_TITLE.slice(0, 3) + IN1_TITLE.slice(4), 'Text should be inserted into field')
   t.end()
 })
 
 test('Editing: DEL30: Merging two ListItems using DELETE', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1234,10 +1234,10 @@ test('Editing: DEL30: Merging two ListItems using DELETE', (t) => {
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let l = doc.get('l1')
+  const sel = editorSession.getSelection()
+  const l = doc.get('l1')
   t.equal(l.items.length, 1, 'Only one list item should be left')
-  let li = l.getItemAt(0)
+  const li = l.getItemAt(0)
   t.equal(li.getText(), LI1_TEXT + LI2_TEXT, 'The list item should have the merged text')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
   t.deepEqual(sel.start.path, li.getPath(), '... on the list item')
@@ -1246,7 +1246,7 @@ test('Editing: DEL30: Merging two ListItems using DELETE', (t) => {
 })
 
 test('Editing: DEL31: Merging a List into previous List using DELETE', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-2', 'content'],
@@ -1256,8 +1256,8 @@ test('Editing: DEL31: Merging a List into previous List using DELETE', (t) => {
   editorSession.transaction((tx) => {
     tx.deleteCharacter('right')
   })
-  let sel = editorSession.getSelection()
-  let l1 = doc.get('l1')
+  const sel = editorSession.getSelection()
+  const l1 = doc.get('l1')
   t.equal(l1.items.length, 4, 'First list should have 4 items')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
   t.deepEqual(sel.start.path, ['l1-2', 'content'], '... on the same item')
@@ -1266,7 +1266,7 @@ test('Editing: DEL31: Merging a List into previous List using DELETE', (t) => {
 })
 
 test('Editing: DEL31-2: Merging a List into previous List using DELETE on an empty paragraph in between', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _empty, _l2, _l21, _l22)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _empty, _l2, _l21, _l22)
   editorSession.setSelection({
     type: 'property',
     path: ['empty', 'content'],
@@ -1276,9 +1276,9 @@ test('Editing: DEL31-2: Merging a List into previous List using DELETE on an emp
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
-  let l1 = doc.get('l1')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
+  const l1 = doc.get('l1')
   t.equal(body.length, 1, 'There should only be one node on the top level')
   t.equal(l1.items.length, 4, 'First list should have 4 items')
   t.ok(sel.isCollapsed(), 'The selection should be collapsed')
@@ -1288,8 +1288,8 @@ test('Editing: DEL31-2: Merging a List into previous List using DELETE on an emp
 })
 
 test('Editing: DEL32: Merging an empty List into previous TextNode using DELETE', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _l1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1, _l1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'property',
     path: p1.getPath(),
@@ -1304,8 +1304,8 @@ test('Editing: DEL32: Merging an empty List into previous TextNode using DELETE'
 })
 
 test('Editing: DEL33: Deleting using BACKSPACE at the start of a text property editor', (t) => {
-  let { editorSession, doc } = setupEditor(t)
-  let p = doc.create({
+  const { editorSession, doc } = setupEditor(t)
+  const p = doc.create({
     id: 'p',
     type: 'paragraph',
     content: 'foo'
@@ -1326,8 +1326,8 @@ test('Editing: DEL33: Deleting using BACKSPACE at the start of a text property e
 })
 
 test('Editing: DEL34: Deleting using DEL at the end of a text property editor', (t) => {
-  let { editorSession, doc } = setupEditor(t)
-  let p = doc.create({
+  const { editorSession, doc } = setupEditor(t)
+  const p = doc.create({
     id: 'p',
     type: 'paragraph',
     content: 'foo'
@@ -1348,7 +1348,7 @@ test('Editing: DEL34: Deleting using DEL at the end of a text property editor', 
 })
 
 test('Editing: DEL35: Deleting a NodeSelection', (t) => {
-  let { editorSession } = setupEditor(t, _in1, doc => {
+  const { editorSession } = setupEditor(t, _in1, doc => {
     doc.create({
       type: 'strong',
       id: 'in1-body-p1-s1',
@@ -1366,18 +1366,18 @@ test('Editing: DEL35: Deleting a NodeSelection', (t) => {
     nodeId: 'in1',
     containerPath: ['body', 'nodes']
   })
-  let change = editorSession.transaction((tx) => {
+  const change = editorSession.transaction((tx) => {
     tx.deleteSelection()
   })
-  let deleteOps = change.ops.filter(op => op.isDelete())
-  let deletedIds = deleteOps.map(op => op.path[0])
-  let expected = ['in1', 'in1-body-p1-s1', 'in1-body-p1']
+  const deleteOps = change.ops.filter(op => op.isDelete())
+  const deletedIds = deleteOps.map(op => op.path[0])
+  const expected = ['in1', 'in1-body-p1-s1', 'in1-body-p1']
   t.deepEqual(deletedIds, expected, 'The nodes should have been deleted hierarchically and in correct order.')
   t.end()
 })
 
 test('Editing: BR1: Breaking without selection', (t) => {
-  let { editorSession } = setupEditor(t, _p1)
+  const { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection(null)
   t.doesNotThrow(() => {
     editorSession.transaction((tx) => {
@@ -1388,7 +1388,7 @@ test('Editing: BR1: Breaking without selection', (t) => {
 })
 
 test('Editing: BR2: Breaking a TextNode', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1)
+  const { editorSession, doc } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1398,10 +1398,10 @@ test('Editing: BR2: Breaking a TextNode', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.length, 2, 'There should be 2 nodes')
-  let first = body.getNodeAt(0)
-  let second = body.getNodeAt(1)
+  const first = body.getNodeAt(0)
+  const second = body.getNodeAt(1)
   t.equal(second.type, 'paragraph', 'Second should be a paragraph')
   t.equal(first.getText(), P1_TEXT.slice(0, 3), 'First should be truncated')
   t.equal(second.getText(), P1_TEXT.slice(3), '.. and second should contain the tail')
@@ -1409,7 +1409,7 @@ test('Editing: BR2: Breaking a TextNode', (t) => {
 })
 
 test('Editing: BR3: Breaking annotated text with cursor before the annotation', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1419,9 +1419,9 @@ test('Editing: BR3: Breaking annotated text with cursor before the annotation', 
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
-  let second = body.getNodeAt(1)
-  let anno = doc.get('s1')
+  const body = doc.get('body')
+  const second = body.getNodeAt(1)
+  const anno = doc.get('s1')
   t.deepEqual(anno.start.path, second.getPath(), 'Annotation should now be on the second paragraph')
   t.equal(anno.start.offset, 2, '.. starting at character 2')
   t.equal(anno.end.offset, 4, '.. ending at character 4')
@@ -1429,7 +1429,7 @@ test('Editing: BR3: Breaking annotated text with cursor before the annotation', 
 })
 
 test('Editing: BR4: Breaking annotated text with cursor inside the annotation', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1439,20 +1439,20 @@ test('Editing: BR4: Breaking annotated text with cursor inside the annotation', 
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
-  let secondPara = body.getNodeAt(1)
-  let anno = doc.get('s1')
+  const body = doc.get('body')
+  const secondPara = body.getNodeAt(1)
+  const anno = doc.get('s1')
   t.equal(anno.start.offset, 3, '.. starting at character 3')
   t.equal(anno.end.offset, 4, '.. ending at character 4')
-  let secondAnno = doc.getIndex('annotations').get([secondPara.id, 'content'])[0]
+  const secondAnno = doc.getIndex('annotations').get([secondPara.id, 'content'])[0]
   t.equal(secondAnno.start.offset, 0, '.. starting at character 0')
   t.equal(secondAnno.end.offset, 1, '.. ending at character 1')
   t.end()
 })
 
 test('Editing: BR5: Breaking a TextNode at the first position', (t) => {
-  let { editorSession, doc } = setupEditor(t, _h1)
-  let h1 = doc.get('h1')
+  const { editorSession, doc } = setupEditor(t, _h1)
+  const h1 = doc.get('h1')
   editorSession.setSelection({
     type: 'property',
     path: h1.getPath(),
@@ -1462,10 +1462,10 @@ test('Editing: BR5: Breaking a TextNode at the first position', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.length, 2, 'There should be 2 nodes')
-  let first = body.getNodeAt(0)
-  let second = body.getNodeAt(1)
+  const first = body.getNodeAt(0)
+  const second = body.getNodeAt(1)
   t.equal(second, h1, 'Second should be the original node')
   t.equal(first.type, h1.type, 'First should be of the same type')
   t.equal(first.getText(), '', '.. but empty')
@@ -1478,8 +1478,8 @@ test('Editing: BR5: Breaking a TextNode at the first position', (t) => {
 })
 
 test('Editing: BR5: Breaking a TextNode at the last position', (t) => {
-  let { editorSession, doc } = setupEditor(t, _h1)
-  let h1 = doc.get('h1')
+  const { editorSession, doc } = setupEditor(t, _h1)
+  const h1 = doc.get('h1')
   editorSession.setSelection({
     type: 'property',
     path: h1.getPath(),
@@ -1489,10 +1489,10 @@ test('Editing: BR5: Breaking a TextNode at the last position', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.length, 2, 'There should be 2 nodes')
-  let first = body.getNodeAt(0)
-  let second = body.getNodeAt(1)
+  const first = body.getNodeAt(0)
+  const second = body.getNodeAt(1)
   t.equal(first, h1, 'First should be the original node')
   t.equal(second.type, 'paragraph', 'Second should be a paragraph.')
   t.equal(second.getText(), '', '.. without content')
@@ -1505,7 +1505,7 @@ test('Editing: BR5: Breaking a TextNode at the last position', (t) => {
 })
 
 test('Editing: BR6: Breaking a ContainerSelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'container',
     startPath: ['p1', 'content'],
@@ -1517,7 +1517,7 @@ test('Editing: BR6: Breaking a ContainerSelection', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   })
-  let p2 = doc.get('p2')
+  const p2 = doc.get('p2')
   t.equal(p2.getText(), P2_TEXT.slice(4))
   _checkSelection(t, editorSession.getSelection(), {
     type: 'property',
@@ -1529,7 +1529,7 @@ test('Editing: BR6: Breaking a ContainerSelection', (t) => {
 })
 
 test('Editing: BR7: Breaking a NodeSelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -1538,9 +1538,9 @@ test('Editing: BR7: Breaking a NodeSelection', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 4, 'There should be one more node')
-  let newP = body.getNodeAt(2)
+  const newP = body.getNodeAt(2)
   _checkSelection(t, editorSession.getSelection(), {
     type: 'property',
     path: newP.getPath(),
@@ -1551,7 +1551,7 @@ test('Editing: BR7: Breaking a NodeSelection', (t) => {
 })
 
 test('Editing: BR8: Breaking a NodeSelection (before)', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _in1, _p2)
   editorSession.setSelection({
     type: 'node',
     nodeId: 'in1',
@@ -1561,7 +1561,7 @@ test('Editing: BR8: Breaking a NodeSelection (before)', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 4, 'There should be one more node')
   _checkSelection(t, editorSession.getSelection(), {
     type: 'node',
@@ -1573,7 +1573,7 @@ test('Editing: BR8: Breaking a NodeSelection (before)', (t) => {
 })
 
 test('Editing: BR9: Breaking with an expanded PropertySelection', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _p2)
+  const { editorSession, doc } = setupEditor(t, _p1, _p2)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1584,9 +1584,9 @@ test('Editing: BR9: Breaking with an expanded PropertySelection', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   })
-  let body = doc.get('body')
-  let first = body.getNodeAt(0)
-  let second = body.getNodeAt(1)
+  const body = doc.get('body')
+  const first = body.getNodeAt(0)
+  const second = body.getNodeAt(1)
   t.equal(first.getText(), P1_TEXT.slice(0, 3), 'First paragraph should be truncated')
   t.equal(second.getText(), P1_TEXT.slice(5), '.. and tail should be moved to second paragraph')
   _checkSelection(t, editorSession.getSelection(), {
@@ -1598,7 +1598,7 @@ test('Editing: BR9: Breaking with an expanded PropertySelection', (t) => {
 })
 
 test('Editing: BR10: Breaking a ListItem with cursor in the middle of text', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1608,11 +1608,11 @@ test('Editing: BR10: Breaking a ListItem with cursor in the middle of text', (t)
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let sel = editorSession.getSelection()
-  let l = doc.get('l1')
+  const sel = editorSession.getSelection()
+  const l = doc.get('l1')
   t.equal(l.items.length, 3, 'List should have 3 items')
-  let li1 = doc.get(l.items[0])
-  let li2 = doc.get(l.items[1])
+  const li1 = doc.get(l.items[0])
+  const li2 = doc.get(l.items[1])
   t.equal(li1.getText(), LI1_TEXT.slice(0, 3), 'First item should have been truncated.')
   t.equal(li2.getText(), LI1_TEXT.slice(3), 'remaining line should have been inserted into new list item.')
   t.deepEqual(sel.start.path, li2.getPath(), 'Cursor should in second item')
@@ -1621,7 +1621,7 @@ test('Editing: BR10: Breaking a ListItem with cursor in the middle of text', (t)
 })
 
 test('Editing: BR11: Breaking a ListItem with cursor at begin of text', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1631,11 +1631,11 @@ test('Editing: BR11: Breaking a ListItem with cursor at begin of text', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let sel = editorSession.getSelection()
-  let l = doc.get('l1')
+  const sel = editorSession.getSelection()
+  const l = doc.get('l1')
   t.equal(l.items.length, 3, 'List should have 3 items')
-  let li1 = doc.get(l.items[0])
-  let li2 = doc.get(l.items[1])
+  const li1 = doc.get(l.items[0])
+  const li2 = doc.get(l.items[1])
   t.equal(li1.getText(), '', 'First item should be empty.')
   t.equal(li2.getText(), LI1_TEXT, 'Text should have moved to next item.')
   t.deepEqual(sel.start.path, li2.getPath(), 'Cursor should be in second item')
@@ -1644,7 +1644,7 @@ test('Editing: BR11: Breaking a ListItem with cursor at begin of text', (t) => {
 })
 
 test('Editing: BR12: Splitting a List by breaking an empty ListItem', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l1Empty, _l12)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l1Empty, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1654,12 +1654,12 @@ test('Editing: BR12: Splitting a List by breaking an empty ListItem', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 3, 'There should be three nodes')
-  let l1 = body.getNodeAt(0)
-  let p = body.getNodeAt(1)
-  let l2 = body.getNodeAt(2)
+  const l1 = body.getNodeAt(0)
+  const p = body.getNodeAt(1)
+  const l2 = body.getNodeAt(2)
   t.ok(l1.isList() && p.isText() && l2.isList(), '... list, paragraph, and list')
   t.equal(l1.items.length, 1, 'The first list should now have only one item')
   t.equal(l1.items[0], 'l1-1', '... with id "li-1"')
@@ -1673,7 +1673,7 @@ test('Editing: BR12: Splitting a List by breaking an empty ListItem', (t) => {
 })
 
 test('Editing: BR13: Breaking the last empty list item', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _l1Empty)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12, _l1Empty)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1683,11 +1683,11 @@ test('Editing: BR13: Breaking the last empty list item', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should be two nodes')
-  let l1 = body.getNodeAt(0)
-  let p = body.getNodeAt(1)
+  const l1 = body.getNodeAt(0)
+  const p = body.getNodeAt(1)
   t.ok(l1.isList() && p.isText(), '... list, and paragraph')
   t.equal(l1.items.length, 2, 'The list should now have only two items')
   t.equal(p.getText(), '', 'The paragraph should be empty')
@@ -1698,7 +1698,7 @@ test('Editing: BR13: Breaking the last empty list item', (t) => {
 })
 
 test('Editing: BR14: Breaking a list with only one empty item', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l1Empty)
+  const { editorSession, doc } = setupEditor(t, _l1, _l1Empty)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1708,9 +1708,9 @@ test('Editing: BR14: Breaking a list with only one empty item', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.nodes.length, 1, 'There should be only one node left')
-  let p = body.getNodeAt(0)
+  const p = body.getNodeAt(0)
   t.equal(p.type, 'paragraph', '... of type paragraph')
   t.isNil(doc.get('l1'), 'The list should have been removed')
   _checkSelection(t, editorSession.getSelection(), {
@@ -1722,7 +1722,7 @@ test('Editing: BR14: Breaking a list with only one empty item', (t) => {
 })
 
 test('Editing: BR15: Breaking a list with a first empty item', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l1Empty, _l11)
+  const { editorSession, doc } = setupEditor(t, _l1, _l1Empty, _l11)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-empty', 'content'],
@@ -1732,10 +1732,10 @@ test('Editing: BR15: Breaking a list with a first empty item', (t) => {
   editorSession.transaction((tx) => {
     tx.break()
   }, { action: 'break' })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.nodes.length, 2, 'There should be two nodes now')
-  let p = body.getNodeAt(0)
-  let l1 = body.getNodeAt(1)
+  const p = body.getNodeAt(0)
+  const l1 = body.getNodeAt(1)
   t.equal(p.type, 'paragraph', 'First should be a paragraph')
   t.equal(p.getText(), '', '.. without content')
   t.equal(l1.type, 'list', 'Second should be a list')
@@ -1749,7 +1749,7 @@ test('Editing: BR15: Breaking a list with a first empty item', (t) => {
 })
 
 test('Editing: L5-1: Toggling the first item of a List using BACKSPACE', (t) => {
-  let { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
+  const { editorSession, doc } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1759,11 +1759,11 @@ test('Editing: L5-1: Toggling the first item of a List using BACKSPACE', (t) => 
   editorSession.transaction((tx) => {
     tx.deleteCharacter('left')
   })
-  let sel = editorSession.getSelection()
-  let body = doc.get('body')
+  const sel = editorSession.getSelection()
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should be two nodes now')
-  let p = body.getNodeAt(0)
-  let l = doc.get('l1')
+  const p = body.getNodeAt(0)
+  const l = doc.get('l1')
   t.equal(l.items.length, 1, 'Only one list item should be left')
   t.equal(p.type, 'paragraph', 'The second one should be a paragraph')
   t.equal(p.getText(), LI1_TEXT, '.. with the text of the second item')
@@ -1774,7 +1774,7 @@ test('Editing: L5-1: Toggling the first item of a List using BACKSPACE', (t) => 
 })
 
 test('Editing: L8-1: Toggling a paragraph into a List', (t) => {
-  let { doc, editorSession } = setupEditor(t, _p1)
+  const { doc, editorSession } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1784,18 +1784,18 @@ test('Editing: L8-1: Toggling a paragraph into a List', (t) => {
   editorSession.transaction((tx) => {
     tx.toggleList({ ordered: false })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 1, 'There should be 1 node')
-  let l = body.getNodeAt(0)
+  const l = body.getNodeAt(0)
   t.equal(l.type, 'list', '.. a list')
   t.equal(l.getLength(), 1, '.. with one item')
-  let li = l.getItemAt(0)
+  const li = l.getItemAt(0)
   t.equal(li.getText(), P1_TEXT, '.. with text of p1')
   t.end()
 })
 
 test('Editing: L8-2: Toggling first list-item into a paragraph', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1805,10 +1805,10 @@ test('Editing: L8-2: Toggling first list-item into a paragraph', (t) => {
   editorSession.transaction((tx) => {
     tx.toggleList()
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should be 2 nodes')
-  let p = body.getNodeAt(0)
-  let l = body.getNodeAt(1)
+  const p = body.getNodeAt(0)
+  const l = body.getNodeAt(1)
   t.equal(p.type, 'paragraph', '.. first should be paragraph')
   t.equal(p.getText(), LI1_TEXT, '.. with text of first list item')
   t.equal(l.type, 'list', '.. second should be alist')
@@ -1817,7 +1817,7 @@ test('Editing: L8-2: Toggling first list-item into a paragraph', (t) => {
 })
 
 test('Editing: L8-3: Toggling last list-item into a paragraph', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-2', 'content'],
@@ -1827,10 +1827,10 @@ test('Editing: L8-3: Toggling last list-item into a paragraph', (t) => {
   editorSession.transaction((tx) => {
     tx.toggleList()
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 2, 'There should be 2 nodes')
-  let l = body.getNodeAt(0)
-  let p = body.getNodeAt(1)
+  const l = body.getNodeAt(0)
+  const p = body.getNodeAt(1)
   t.equal(l.type, 'list', '.. first should be alist')
   t.equal(l.getLength(), 1, '.. with one item')
   t.equal(p.type, 'paragraph', '.. second should be paragraph')
@@ -1839,7 +1839,7 @@ test('Editing: L8-3: Toggling last list-item into a paragraph', (t) => {
 })
 
 test('Editing: L8-4: Toggling a middle list-item into a paragraph splitting the list', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l13, _l12)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l13, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-3', 'content'],
@@ -1849,11 +1849,11 @@ test('Editing: L8-4: Toggling a middle list-item into a paragraph splitting the 
   editorSession.transaction((tx) => {
     tx.toggleList()
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 3, 'There should be 3 nodes')
-  let l = body.getNodeAt(0)
-  let p = body.getNodeAt(1)
-  let l2 = body.getNodeAt(2)
+  const l = body.getNodeAt(0)
+  const p = body.getNodeAt(1)
+  const l2 = body.getNodeAt(2)
   t.equal(l.type, 'list', '.. first should be alist')
   t.equal(l.getLength(), 1, '.. with one item')
   t.equal(p.type, 'paragraph', '.. second should be paragraph')
@@ -1864,7 +1864,7 @@ test('Editing: L8-4: Toggling a middle list-item into a paragraph splitting the 
 })
 
 test('Editing: L8-5: Toggling the only list-item of a list into a paragraph', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1874,33 +1874,33 @@ test('Editing: L8-5: Toggling the only list-item of a list into a paragraph', (t
   editorSession.transaction((tx) => {
     tx.toggleList()
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 1, 'There should be one node left')
-  let p = body.getNodeAt(0)
+  const p = body.getNodeAt(0)
   t.equal(p.type, 'paragraph', '.. which should be paragraph')
   t.equal(p.getText(), LI1_TEXT, '.. with text of first list item')
   t.end()
 })
 
 test('Editing: L9: Changing the list type', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11)
   editorSession.transaction((tx) => {
-    let list = tx.get('l1')
+    const list = tx.get('l1')
     list.setListType(1, 'order')
   })
-  let list = doc.get('l1')
+  const list = doc.get('l1')
   t.equal(list.getListType(1), 'order', 'level type should have been updated')
   t.equal(list.getListTypeString(), 'order', 'serialized level type string should have been updated')
   t.end()
 })
 
 test('Editing: L9-2: Changing nested list types', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _li2plus)
-  let list = doc.get('l1')
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _li2plus)
+  const list = doc.get('l1')
   t.equal(list.getListType(1), 'bullet', 'first level should have correct list type')
   t.equal(list.getListType(2), 'bullet', 'second level should have correct list type')
   editorSession.transaction((tx) => {
-    let list = tx.get('l1')
+    const list = tx.get('l1')
     list.setListType(2, 'order')
   })
   t.equal(list.getListType(1), 'bullet', 'first level should have correct list type')
@@ -1909,7 +1909,7 @@ test('Editing: L9-2: Changing nested list types', (t) => {
 })
 
 test('Editing: IND1: Indenting a ListItem', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1919,13 +1919,13 @@ test('Editing: IND1: Indenting a ListItem', (t) => {
   editorSession.transaction((tx) => {
     tx.indent()
   })
-  let li1 = doc.get('l1-1')
+  const li1 = doc.get('l1-1')
   t.equal(li1.level, 2, 'Indentation level should have increased')
   t.end()
 })
 
 test('Editing: IND2: Dedenting a ListItem', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _li1plus)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _li1plus)
   editorSession.setSelection({
     type: 'property',
     path: ['l1-1', 'content'],
@@ -1935,14 +1935,14 @@ test('Editing: IND2: Dedenting a ListItem', (t) => {
   editorSession.transaction((tx) => {
     tx.dedent()
   })
-  let li1 = doc.get('l1-1')
+  const li1 = doc.get('l1-1')
   t.equal(li1.level, 1, 'Indentation level should have decreased')
   t.end()
 })
 
 test('Editing: CP1: Copying a property selection', (t) => {
-  let { doc } = setupEditor(t, headersAndParagraphs)
-  let editor = new EditingInterface(doc)
+  const { doc } = setupEditor(t, headersAndParagraphs)
+  const editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -1950,16 +1950,16 @@ test('Editing: CP1: Copying a property selection', (t) => {
     endOffset: 9,
     containerPath: ['body', 'nodes']
   })
-  let copy = editor.copySelection()
-  let textNode = copy.get(documentHelpers.TEXT_SNIPPET_ID)
+  const copy = editor.copySelection()
+  const textNode = copy.get(documentHelpers.TEXT_SNIPPET_ID)
   t.notNil(textNode, 'There should be a text node for the property fragment.')
   t.equal(textNode.content, 'graph', 'Selected text should be copied.')
   t.end()
 })
 
 test('Editing: CP2: Copying a property selection with annotated text', (t) => {
-  let { doc } = setupEditor(t, headersAndParagraphs)
-  let editor = new EditingInterface(doc)
+  const { doc } = setupEditor(t, headersAndParagraphs)
+  const editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'property',
     path: ['p2', 'content'],
@@ -1967,19 +1967,19 @@ test('Editing: CP2: Copying a property selection with annotated text', (t) => {
     endOffset: 19,
     containerPath: ['body', 'nodes']
   })
-  let copy = editor.copySelection()
+  const copy = editor.copySelection()
   t.equal(copy.get([documentHelpers.TEXT_SNIPPET_ID, 'content']), 'with anno', 'Selected text should be copied.')
-  let annos = copy.getIndex('annotations').get([documentHelpers.TEXT_SNIPPET_ID, 'content'])
+  const annos = copy.getIndex('annotations').get([documentHelpers.TEXT_SNIPPET_ID, 'content'])
   t.equal(annos.length, 1, 'There should be one annotation on copied text.')
-  let anno = annos[0]
+  const anno = annos[0]
   t.equal(anno.type, 'emphasis', "The annotation should be 'emphasis'.")
   t.deepEqual([anno.start.offset, anno.end.offset], [5, 9], 'The annotation should be over the text "anno".')
   t.end()
 })
 
 test('Editing: CP3: Copying a container selection', (t) => {
-  let { doc } = setupEditor(t, headersAndParagraphs)
-  let editor = new EditingInterface(doc)
+  const { doc } = setupEditor(t, headersAndParagraphs)
+  const editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
     containerPath: ['body', 'nodes'],
@@ -1988,23 +1988,23 @@ test('Editing: CP3: Copying a container selection', (t) => {
     endPath: ['p2', 'content'],
     endOffset: 9
   })
-  let copy = editor.copySelection()
-  let content = copy.get(documentHelpers.SNIPPET_ID)
+  const copy = editor.copySelection()
+  const content = copy.get(documentHelpers.SNIPPET_ID)
   t.notNil(content, 'There should be a container node with id "content".')
   // 4 nodes? 'body', 'snippets', 'p1', 'p2'
   t.equal(content.nodes.length, 4, 'There should be 4 nodes in the copied document.')
-  let first = copy.get(content.nodes[0])
+  const first = copy.get(content.nodes[0])
   t.equal(first.type, 'heading', 'The first node should be a heading.')
   t.equal(first.content, 'ion 1', "Its content should be truncated to 'ion 1'.")
-  let last = copy.get(content.nodes[3])
+  const last = copy.get(content.nodes[3])
   t.equal(last.type, 'paragraph', 'The last node should be a paragraph.')
   t.equal(last.content, 'Paragraph', "Its content should be truncated to 'Paragraph'.")
   t.end()
 })
 
 test('Editing: CP4: Copying a paragraph', (t) => {
-  let { doc } = setupEditor(t, _p1, _p2)
-  let editor = new EditingInterface(doc)
+  const { doc } = setupEditor(t, _p1, _p2)
+  const editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
     containerPath: ['body', 'nodes'],
@@ -2013,15 +2013,15 @@ test('Editing: CP4: Copying a paragraph', (t) => {
     endPath: ['p2'],
     endOffset: 1
   })
-  let copy = editor.copySelection()
-  let p2 = copy.get('p2')
+  const copy = editor.copySelection()
+  const p2 = copy.get('p2')
   t.equal(p2.content, doc.get('p2').content, 'The whole paragraph should be copied.')
   t.end()
 })
 
 test('Editing: CP5: Copying two ListItems', (t) => {
-  let { doc } = setupEditor(t, _l1, _l11, _l12)
-  let editor = new EditingInterface(doc)
+  const { doc } = setupEditor(t, _l1, _l11, _l12)
+  const editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
     startPath: ['l1-1', 'content'],
@@ -2030,22 +2030,22 @@ test('Editing: CP5: Copying two ListItems', (t) => {
     endOffset: 3,
     containerPath: ['body', 'nodes']
   })
-  let copy = editor.copySelection()
-  let content = copy.getContainer()
+  const copy = editor.copySelection()
+  const content = copy.getContainer()
   t.equal(content.getLength(), 1, 'There should be one node')
-  let l1 = copy.get('l1')
+  const l1 = copy.get('l1')
   t.notNil(l1, 'l1 should exist')
   t.equal(l1.getLength(), 2, '.. having 2 items')
-  let li1 = l1.getItemAt(0)
-  let li2 = l1.getItemAt(1)
+  const li1 = l1.getItemAt(0)
+  const li2 = l1.getItemAt(1)
   t.equal(li1.getText(), LI1_TEXT.slice(3), 'The first item should have correct content')
   t.equal(li2.getText(), LI2_TEXT.slice(0, 3), 'The second item should have correct content')
   t.end()
 })
 
 test('Editing: CP6: Copying a paragraph and a ListItem', (t) => {
-  let { doc } = setupEditor(t, _p1, _l1, _l11, _l12)
-  let editor = new EditingInterface(doc)
+  const { doc } = setupEditor(t, _p1, _l1, _l11, _l12)
+  const editor = new EditingInterface(doc)
   editor.setSelection({
     type: 'container',
     startPath: ['p1', 'content'],
@@ -2054,13 +2054,13 @@ test('Editing: CP6: Copying a paragraph and a ListItem', (t) => {
     endOffset: 3,
     containerPath: ['body', 'nodes']
   })
-  let copy = editor.copySelection()
-  let content = copy.getContainer()
+  const copy = editor.copySelection()
+  const content = copy.getContainer()
   t.equal(content.getLength(), 2, 'There should be 2 nodes')
-  let l1 = copy.get('l1')
+  const l1 = copy.get('l1')
   t.notNil(l1, 'l1 should exist')
   t.equal(l1.getLength(), 1, '.. having 1 item')
-  let li1 = l1.getItemAt(0)
+  const li1 = l1.getItemAt(0)
   t.equal(li1.getText(), LI1_TEXT.slice(0, 3), 'The first item should have correct content')
   t.end()
 })
@@ -2117,7 +2117,7 @@ test('Editing: CP6: Copying a paragraph and a ListItem', (t) => {
 // e.g., not that inadvertantly the copy references one of the original children
 
 test('Editing: CP9: Copy and Pasting a List', (t) => {
-  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1, _l11, _l12)
+  const { doc, editorSession } = setupEditor(t, _p1, _empty, _l1, _l11, _l12)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2127,7 +2127,7 @@ test('Editing: CP9: Copy and Pasting a List', (t) => {
       endOffset: LI2_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['empty', 'content'],
@@ -2136,12 +2136,12 @@ test('Editing: CP9: Copy and Pasting a List', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
-  let nodes = body.getNodes()
+  const body = doc.get('body')
+  const nodes = body.getNodes()
   t.equal(body.length, 3, 'There should be 3 nodes')
   t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
-  let li1 = body.getNodeAt(1)
-  let li2 = body.getNodeAt(2)
+  const li1 = body.getNodeAt(1)
+  const li2 = body.getNodeAt(2)
   t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
   t.equal(li1.getItemAt(0).getText(), li2.getItemAt(0).getText(), 'First list item should have same content')
   t.equal(li1.getItemAt(1).getText(), li2.getItemAt(1).getText(), 'Second list item should have same content')
@@ -2149,7 +2149,7 @@ test('Editing: CP9: Copy and Pasting a List', (t) => {
 })
 
 test('Editing: CP10: Copy and Pasting a List partially', (t) => {
-  let { doc, editorSession } = setupEditor(t, _p1, _empty, _l1, _l11, _l12)
+  const { doc, editorSession } = setupEditor(t, _p1, _empty, _l1, _l11, _l12)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2159,7 +2159,7 @@ test('Editing: CP10: Copy and Pasting a List partially', (t) => {
       endOffset: 3,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['empty', 'content'],
@@ -2168,12 +2168,12 @@ test('Editing: CP10: Copy and Pasting a List partially', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
-  let nodes = body.getNodes()
+  const body = doc.get('body')
+  const nodes = body.getNodes()
   t.equal(body.length, 3, 'There should be 3 nodes')
   t.deepEqual(['paragraph', 'list', 'list'], nodes.map(n => n.type), '.. a paragraph and 2 lists')
-  let li1 = body.getNodeAt(1)
-  let li2 = body.getNodeAt(2)
+  const li1 = body.getNodeAt(1)
+  const li2 = body.getNodeAt(2)
   t.notDeepEqual(li1.items, li2.items, 'List items should not be the same.')
   t.equal(li1.getItemAt(0).getText(), LI1_TEXT.slice(3), 'First list item should be truncated')
   t.equal(li1.getItemAt(1).getText(), LI2_TEXT.slice(0, 3), 'Second list item should be truncated')
@@ -2181,7 +2181,7 @@ test('Editing: CP10: Copy and Pasting a List partially', (t) => {
 })
 
 test('Editing: CP11: Copy and Pasting ListItems', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l1Empty)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l1Empty)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2191,7 +2191,7 @@ test('Editing: CP11: Copy and Pasting ListItems', (t) => {
       endOffset: LI2_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-empty', 'content'],
@@ -2200,17 +2200,17 @@ test('Editing: CP11: Copy and Pasting ListItems', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
-  let nodes = body.getNodes()
+  const body = doc.get('body')
+  const nodes = body.getNodes()
   t.deepEqual(nodes.map(n => n.type), ['list'], 'there should be one list node')
-  let list = body.getNodeAt(0)
+  const list = body.getNodeAt(0)
   t.equal(list.getLength(), 4, 'there should be four list items')
   t.deepEqual(list.resolve('items').map(item => item.getText()), [LI1_TEXT, LI2_TEXT, LI1_TEXT, LI2_TEXT], '.. with correct text content')
   t.end()
 })
 
 test('Editing: CP12: Pasting ListItems into an empty list', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l1Empty, _l2, _l21, _l22)
+  const { doc, editorSession } = setupEditor(t, _l1, _l1Empty, _l2, _l21, _l22)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2220,7 +2220,7 @@ test('Editing: CP12: Pasting ListItems into an empty list', (t) => {
       endOffset: LI22_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-empty', 'content'],
@@ -2229,14 +2229,14 @@ test('Editing: CP12: Pasting ListItems into an empty list', (t) => {
     })
     tx.paste(copy)
   })
-  let l1 = doc.get('l1')
+  const l1 = doc.get('l1')
   t.equal(l1.getLength(), 2, 'there should be two list items')
   t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI21_TEXT, LI22_TEXT], '.. with correct text content')
   t.end()
 })
 
 test('Editing: CP13: Pasting ListItems before a list item', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2246,7 +2246,7 @@ test('Editing: CP13: Pasting ListItems before a list item', (t) => {
       endOffset: LI22_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2255,14 +2255,14 @@ test('Editing: CP13: Pasting ListItems before a list item', (t) => {
     })
     tx.paste(copy)
   })
-  let l1 = doc.get('l1')
+  const l1 = doc.get('l1')
   t.equal(l1.getLength(), 4, 'there should be four list items')
   t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI21_TEXT, LI22_TEXT, LI1_TEXT, LI2_TEXT], '.. with correct text content')
   t.end()
 })
 
 test('Editing: CP14: Pasting ListItems after a list item', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2272,7 +2272,7 @@ test('Editing: CP14: Pasting ListItems after a list item', (t) => {
       endOffset: LI22_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2281,14 +2281,14 @@ test('Editing: CP14: Pasting ListItems after a list item', (t) => {
     })
     tx.paste(copy)
   })
-  let l1 = doc.get('l1')
+  const l1 = doc.get('l1')
   t.equal(l1.getLength(), 4, 'there should be four list items')
   t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT, LI21_TEXT, LI22_TEXT, LI2_TEXT], '.. with correct text content')
   t.end()
 })
 
 test('Editing: CP15: Pasting ListItems inside a list item', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2298,7 +2298,7 @@ test('Editing: CP15: Pasting ListItems inside a list item', (t) => {
       endOffset: LI22_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2307,14 +2307,14 @@ test('Editing: CP15: Pasting ListItems inside a list item', (t) => {
     })
     tx.paste(copy)
   })
-  let l1 = doc.get('l1')
+  const l1 = doc.get('l1')
   t.equal(l1.getLength(), 5, 'there should be five list items')
   t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT.slice(0, 3), LI21_TEXT, LI22_TEXT, LI1_TEXT.slice(3), LI2_TEXT], '.. with correct text content')
   t.end()
 })
 
 test('Editing: CP15: Pasting a List and a paragraph into a List', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22, _p1)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _l2, _l21, _l22, _p1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2324,7 +2324,7 @@ test('Editing: CP15: Pasting a List and a paragraph into a List', (t) => {
       endOffset: P1_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-2', 'content'],
@@ -2333,9 +2333,9 @@ test('Editing: CP15: Pasting a List and a paragraph into a List', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'list', 'list', 'paragraph'], 'list should have been split by paste')
-  let l1 = doc.get('l1')
+  const l1 = doc.get('l1')
   t.equal(l1.getLength(), 3, 'first list should have four items')
   t.equal(body.getNodeAt(1).getText(), P1_TEXT, 'pasted paragraph should have correct content')
   t.end()
@@ -2343,7 +2343,7 @@ test('Editing: CP15: Pasting a List and a paragraph into a List', (t) => {
 
 // Note: the first paragarph is pasted into the list-item, and the second one splits the lists
 test('Editing: CP16: Pasting two paragraphs before a List', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2353,7 +2353,7 @@ test('Editing: CP16: Pasting two paragraphs before a List', (t) => {
       endOffset: P2_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2362,14 +2362,14 @@ test('Editing: CP16: Pasting two paragraphs before a List', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'list', 'paragraph', 'paragraph'], 'nodes should have been pasted at the correct location')
   t.end()
 })
 
 // Note: the first paragarph is pasted into the list-item, and the second inserted after the list
 test('Editing: CP17: Pasting two paragraphs after a List', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2379,7 +2379,7 @@ test('Editing: CP17: Pasting two paragraphs after a List', (t) => {
       endOffset: P2_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-2', 'content'],
@@ -2388,8 +2388,8 @@ test('Editing: CP17: Pasting two paragraphs after a List', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
-  let l1 = doc.get('l1')
+  const body = doc.get('body')
+  const l1 = doc.get('l1')
   t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'paragraph', 'paragraph'], 'nodes should have been pasted at the correct location')
   t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT, LI2_TEXT + P1_TEXT], 'list items should have correct content')
   t.end()
@@ -2397,7 +2397,7 @@ test('Editing: CP17: Pasting two paragraphs after a List', (t) => {
 
 // Note: the first paragarph is pasted into the list-item, and the second one splits the lists
 test('Editing: CP18: Pasting two paragraphs into a List', (t) => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _p1, _p2)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'container',
@@ -2407,7 +2407,7 @@ test('Editing: CP18: Pasting two paragraphs into a List', (t) => {
       endOffset: P2_TEXT.length,
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2416,22 +2416,22 @@ test('Editing: CP18: Pasting two paragraphs into a List', (t) => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
-  let l1 = doc.get('l1')
+  const body = doc.get('body')
+  const l1 = doc.get('l1')
   t.deepEqual(body.getNodes().map(n => n.type), ['list', 'paragraph', 'list', 'paragraph', 'paragraph'], 'the list should have been split apart')
   t.deepEqual(l1.resolve('items').map(item => item.getText()), [LI1_TEXT + P1_TEXT], 'list items should have correct content')
   t.end()
 })
 
 test('Editing: CP19: Pasting a structured node before a List', t => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'node',
       nodeId: 'in1',
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2440,20 +2440,20 @@ test('Editing: CP19: Pasting a structured node before a List', t => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.getNodes().map(n => n.type), ['structured-node', 'list', 'structured-node'], 'content should have been pasted at the correct location')
   t.end()
 })
 
 test('Editing: CP20: Pasting a structured node after a List', t => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'node',
       nodeId: 'in1',
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-2', 'content'],
@@ -2462,20 +2462,20 @@ test('Editing: CP20: Pasting a structured node after a List', t => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.getNodes().map(n => n.type), ['list', 'structured-node', 'structured-node'], 'content should have been pasted at the correct location')
   t.end()
 })
 
 test('Editing: CP21: Pasting a structured node inside a List', t => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
+  const { doc, editorSession } = setupEditor(t, _l1, _l11, _l12, _in1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'node',
       nodeId: 'in1',
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-1', 'content'],
@@ -2484,20 +2484,20 @@ test('Editing: CP21: Pasting a structured node inside a List', t => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.getNodes().map(n => n.type), ['list', 'structured-node', 'list', 'structured-node'], 'content should have been pasted at the correct location')
   t.end()
 })
 
 test('Editing: CP22: Pasting a structured node into an empty List', t => {
-  let { doc, editorSession } = setupEditor(t, _l1, _l1Empty, _in1)
+  const { doc, editorSession } = setupEditor(t, _l1, _l1Empty, _in1)
   editorSession.transaction((tx) => {
     tx.setSelection({
       type: 'node',
       nodeId: 'in1',
       containerPath: ['body', 'nodes']
     })
-    let copy = tx.copySelection()
+    const copy = tx.copySelection()
     tx.setSelection({
       type: 'property',
       path: ['l1-empty', 'content'],
@@ -2506,13 +2506,13 @@ test('Editing: CP22: Pasting a structured node into an empty List', t => {
     })
     tx.paste(copy)
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.deepEqual(body.getNodes().map(n => n.type), ['structured-node', 'structured-node'], 'content should have been pasted at the correct location')
   t.end()
 })
 
 test('Editing: AN1: Annotating without unknown annotation type', (t) => {
-  let { editorSession } = setupEditor(t, _p1)
+  const { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -2521,14 +2521,14 @@ test('Editing: AN1: Annotating without unknown annotation type', (t) => {
   })
   t.throws(() => {
     editorSession.transaction((tx) => {
-      tx.annotate({type: 'unknown-annotation'})
+      tx.annotate({ type: 'unknown-annotation' })
     })
   }, 'Should throw an exception')
   t.end()
 })
 
 test('Editing: AN2: Tying to annotate using a non-annotation type', (t) => {
-  let { editorSession } = setupEditor(t, _p1)
+  const { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -2537,15 +2537,15 @@ test('Editing: AN2: Tying to annotate using a non-annotation type', (t) => {
   })
   t.throws(() => {
     editorSession.transaction((tx) => {
-      tx.annotate({type: 'paragraph'})
+      tx.annotate({ type: 'paragraph' })
     })
   }, 'Should throw an exception')
   t.end()
 })
 
 test('Editing: ST1: Switching text type', (t) => {
-  let { editorSession, doc } = setupEditor(t, _p1, _s1)
-  let p1 = doc.get('p1')
+  const { editorSession, doc } = setupEditor(t, _p1, _s1)
+  const p1 = doc.get('p1')
   editorSession.setSelection({
     type: 'property',
     path: p1.getPath(),
@@ -2554,21 +2554,21 @@ test('Editing: ST1: Switching text type', (t) => {
     containerPath: ['body', 'nodes']
   })
   editorSession.transaction((tx) => {
-    tx.switchTextType({type: 'heading', level: 1})
+    tx.switchTextType({ type: 'heading', level: 1 })
   })
-  let body = doc.get('body')
+  const body = doc.get('body')
   t.equal(body.getLength(), 1, 'There should be one node.')
-  let first = body.getNodeAt(0)
+  const first = body.getNodeAt(0)
   t.equal(first.type, 'heading', '.. of type heading')
   t.equal(first.getText(), P1_TEXT, '.. with correct content')
-  let annos = doc.getAnnotations(first.getPath())
+  const annos = doc.getAnnotations(first.getPath())
   t.equal(annos.length, 1, '.. and with one annotation')
   t.end()
 })
 
 function _checkSelection (t, actual, exp) {
-  let _data = actual.toJSON()
-  let data = {}
+  const _data = actual.toJSON()
+  const data = {}
   forEach(exp, (value, key) => {
     data[key] = _data[key]
   })
