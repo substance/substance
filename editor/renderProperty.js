@@ -88,6 +88,7 @@ class TextInput extends Surface {
 class StringComponent extends Component {
   render () {
     const { placeholder, path, readOnly, document } = this.props
+    const tagName = this.props.tagName || 'div'
     const parentSurface = this.context.surface
     const name = getKeyForPath(path)
     // Note: readOnly and within a ContainerEditor a text property is
@@ -96,7 +97,7 @@ class StringComponent extends Component {
       const TextPropertyComponent = this.getComponent('text-property')
       return $$(TextPropertyComponent, {
         doc: document,
-        tagName: 'div',
+        tagName,
         placeholder,
         path
       })
