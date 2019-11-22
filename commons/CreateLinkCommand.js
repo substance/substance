@@ -1,8 +1,8 @@
-import { Command, AnnotationCommand } from '../editor'
+import { AnnotationCommand } from '../editor'
 import { $$ } from '../dom'
 import LinkModal from './LinkModal'
 
-export default class CreateLinkCommand extends Command {
+export default class CreateLinkCommand extends AnnotationCommand {
   // TODO: GDocs enables the tool even if over a link
   // but not creating a new link, but opening the editor for the existing link
   getCommandState (params, context) {
@@ -10,7 +10,7 @@ export default class CreateLinkCommand extends Command {
     const selectionState = params.selectionState
     if (sel && !sel.isNull() && sel.isPropertySelection()) {
       const links = selectionState.annosByType.get('link') || []
-      if (AnnotationCommand.prototype.canCreate.call(this, links, sel, context)) {
+      if (super.canCreate(links, sel, context)) {
         return { disabled: false }
       }
     }
