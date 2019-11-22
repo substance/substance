@@ -10,10 +10,13 @@ export default function renderProperty (comp, document, path, props = {}) {
     throw new Error(`Could not find property for path ${path}`)
   }
 
+  // TODO: rethink the meaning of 'disabled' vs 'readOnly'
+  let disabled = comp.props.disabled || props.readOnly
+
   props = Object.assign({
     document,
     path,
-    disabled: comp.props.disabled,
+    disabled,
     placeholder: comp.props.placeholder
   }, props)
 
@@ -138,11 +141,11 @@ class CollectionComponent extends Component {
 class ReadOnlyCollection extends Component {
   // NOTE: this is less efficient than ContainerEditor as it will always render the whole collection
   render () {
-    const { document, path, disabled } = this.props
+    const { document, path, disabled, readOnly } = this.props
     const el = $$('div').addClass('sc-collection').attr('data-id', getKeyForPath(path))
     const items = document.resolve(path)
     el.append(
-      items.map(item => _renderNode(this, item, { disabled }).ref(item.id))
+      items.map(item => _renderNode(this, item, { disabled, readOnly }).ref(item.id))
     )
     return el
   }
