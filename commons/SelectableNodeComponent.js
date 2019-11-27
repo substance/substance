@@ -27,19 +27,26 @@ export default class SelectableNodeComponent extends Component {
   }
 
   _onSelectionChange (selectionState) {
-    const sel = selectionState.selection
-    // NOTE: selectionState.node is also set for property selections
-    // but we are only interested in custom selections
-    const selectedNode = (sel && sel.isCustomSelection()) ? selectionState.node : null
+    const isSelected = this._isSelected(selectionState)
     if (this.state.selected) {
-      if (!selectedNode || selectedNode !== this.props.node) {
+      if (!isSelected) {
         this._newSelectionState = { selected: false }
       }
     } else {
-      if (selectedNode === this.props.node) {
+      if (isSelected) {
         this._newSelectionState = { selected: true }
       }
     }
+  }
+
+  _isSelected (selectionState) {
+    const sel = selectionState.selection
+    return (
+      sel &&
+      sel.isCustomSelection() &&
+      sel.customType === 'node' &&
+      sel.nodeId === this.props.node.id
+    )
   }
 
   _rerenderIfSelectionChanged () {

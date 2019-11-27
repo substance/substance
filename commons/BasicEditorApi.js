@@ -80,8 +80,11 @@ export default class BasicEditorApi {
   _selectItem (tx, node) {
     tx.setSelection({
       type: 'custom',
+      customType: 'node',
       nodeId: node.id,
-      customType: node.type
+      data: {
+        nodeType: node.type
+      }
     })
   }
 }
