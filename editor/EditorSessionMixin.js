@@ -1,4 +1,4 @@
-import { getKeyForPath } from '../util'
+// import { getKeyForPath } from '../util'
 import { copySelection } from '../model'
 import SurfaceManager from './SurfaceManager'
 import MarkersManager from './MarkersManager'
@@ -50,8 +50,9 @@ export default function EditorSessionMixin (AbstractEditorSession) {
     initialize () {
       super.initialize()
 
+      // NOTE: in newer implementation, overlayId has been replaced by OverlayCanvas, which is implemented without appState.overlayId
       // EXPERIMENTAL: registering a 'reducer' that resets overlayId whenever the selection changes
-      this.editorState.addObserver(['selection'], this._resetOverlayId, this, { stage: 'update' })
+      // this.editorState.addObserver(['selection'], this._resetOverlayId, this, { stage: 'update' })
       this.commandManager.initialize()
     }
 
@@ -156,19 +157,20 @@ export default function EditorSessionMixin (AbstractEditorSession) {
     }
 
     _resetOverlayId () {
-      const overlayId = this.editorState.overlayId
-      // overlayId === getKeyForPath(path) => if selection is value &&
-      // Overlays of value components (ManyRelationshipComponent, SingleRelationship)
-      // need to remain open if the selection is a value selection
-      const sel = this.getSelection()
-      if (sel && sel.customType === 'value') {
-        const valueId = getKeyForPath(sel.data.path)
-        if (overlayId !== valueId) {
-          this.editorState.overlayId = valueId
-        }
-      } else {
-        this.editorState.overlayId = null
-      }
+      // TODO: in newer implementation, overlayId has been replaced by OverlayCanvas, which is implemented without appState.overlayId
+      // const overlayId = this.editorState.overlayId
+      // // overlayId === getKeyForPath(path) => if selection is value &&
+      // // Overlays of value components (ManyRelationshipComponent, SingleRelationship)
+      // // need to remain open if the selection is a value selection
+      // const sel = this.getSelection()
+      // if (sel && sel.customType === 'value') {
+      //   const valueId = getKeyForPath(sel.data.path)
+      //   if (overlayId !== valueId) {
+      //     this.editorState.overlayId = valueId
+      //   }
+      // } else {
+      //   this.editorState.overlayId = null
+      // }
     }
   }
   return BaseEditorSession
