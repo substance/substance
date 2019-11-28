@@ -11,7 +11,7 @@ export default function renderProperty (comp, document, path, props = {}) {
   }
 
   // TODO: rethink the meaning of 'disabled' vs 'readOnly'
-  let disabled = comp.props.disabled || props.readOnly
+  const disabled = comp.props.disabled || props.readOnly
 
   props = Object.assign({
     document,
