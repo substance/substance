@@ -7,6 +7,20 @@ export default class Popover extends Component {
     return { content: null, requester: null, desiredPos: null }
   }
 
+  didMount () {
+    if (platform.inBrowser && this.props.getScrollable) {
+      const scrollable = this.props.getScrollable()
+      scrollable.on('scroll', this._onScroll, this)
+    }
+  }
+
+  dispose () {
+    if (platform.inBrowser && this.props.getScrollable) {
+      const scrollable = this.props.getScrollable()
+      scrollable.off(this)
+    }
+  }
+
   render () {
     const { content, requester } = this.state
     const el = $$('div', { class: 'sc-popover sm-hidden' })
@@ -41,7 +55,7 @@ export default class Popover extends Component {
    * @param {Component} [params.requester] - the component that is requesting the content; this is used to dispatch actions
    */
   acquire (params) {
-    const { content, desiredPos, requester } = params
+    const { content, desiredPos, requester, position } = params
     if (!content) throw new Error("'content' is required")
     if (!desiredPos) throw new Error("'desiredPos' is required")
 
@@ -59,7 +73,7 @@ export default class Popover extends Component {
     // We started with this implementation
     // HACK adding a delay so that other things, e.g. selection related can be done first
     setTimeout(() => {
-      this._showContent(content, requester, desiredPos)
+      this._showContent(content, requester, desiredPos, position)
     }, 0)
 
     return true
@@ -71,8 +85,8 @@ export default class Popover extends Component {
     }
   }
 
-  _showContent (content, requester, desiredPos) {
-    this.setState({ content, requester, desiredPos })
+  _showContent (content, requester, desiredPos, position) {
+    this.setState({ content, requester, desiredPos, position })
     const el = this.getElement()
     const bounds = this._getBounds()
     // console.log('bounds', bounds, 'desiredPos', desiredPos)
@@ -88,6 +102,16 @@ export default class Popover extends Component {
     leftPos = Math.min(leftPos, maxLeftPos)
     const topPos = desiredPos.y - bounds.y
     const maxHeight = bounds.bottom - topPos
+
+    // store topPos and leftPos so that we can do repositioning on scroll
+    if (this.props.getScrollable) {
+      const scrollable = this.props.getScrollable()
+      this._topPos = topPos
+      this._leftPos = leftPos
+      this._initialScrollTop = scrollable.getProperty('scrollTop')
+      this._initialScrollLeft = scrollable.getProperty('scrollLeft')
+    }
+
     el.css({
       top: topPos,
       left: leftPos,
@@ -161,5 +185,19 @@ export default class Popover extends Component {
       requester.onClosePopover()
     }
     this.setState(this.getInitialState())
+  }
+
+  _onScroll (event) {
+    // Note: we use this for different kinds of popovers
+    // typically, only context menus, or alike, require a 'relative' positioning
+    if (this.state.position === 'relative') {
+      const scrollable = this.props.getScrollable()
+      const dtop = scrollable.getProperty('scrollTop') - this._initialScrollTop
+      const dleft = scrollable.getProperty('scrollLeft') - this._initialScrollLeft
+      this.el.css({
+        top: this._topPos - dtop,
+        left: this._leftPos + dleft
+      })
+    }
   }
 }
