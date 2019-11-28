@@ -8,7 +8,7 @@ export default class NodeSelection extends Selection {
     super()
 
     if (arguments.length === 1) {
-      let data = arguments[0]
+      const data = arguments[0]
       containerPath = data.containerPath
       nodeId = data.nodeId
       mode = data.mode

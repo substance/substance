@@ -6,7 +6,7 @@ export default class Range {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
-      let data = arguments[0]
+      const data = arguments[0]
       this.start = data.start
       this.end = data.end
       this.reverse = Boolean(data.reverse)
@@ -41,7 +41,7 @@ export default class Range {
   }
 
   toString () {
-    let str = [this.start.toString(), '->', this.end.toString()]
+    const str = [this.start.toString(), '->', this.end.toString()]
     if (this.isReverse()) {
       str.push('[reverse]')
     }

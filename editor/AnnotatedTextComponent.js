@@ -8,7 +8,7 @@ import Component from '../dom/Component'
 */
 export default class AnnotatedTextComponent extends Component {
   render ($$) {
-    let el = this._renderContent($$)
+    const el = this._renderContent($$)
       .addClass('sc-annotated-text')
       .css({ whiteSpace: 'pre-wrap' })
     return el
@@ -39,11 +39,11 @@ export default class AnnotatedTextComponent extends Component {
   }
 
   _renderContent ($$) {
-    let text = this.getText()
-    let annotations = this.getAnnotations()
-    let el = $$(this._getTagName() || 'span')
+    const text = this.getText()
+    const annotations = this.getAnnotations()
+    const el = $$(this._getTagName() || 'span')
     if (annotations && annotations.length > 0) {
-      let fragmenter = new Fragmenter()
+      const fragmenter = new Fragmenter()
       fragmenter.onText = this._renderTextNode.bind(this)
       fragmenter.onOpen = this._renderFragment.bind(this, $$)
       fragmenter.onClose = this._finishFragment.bind(this)
@@ -61,7 +61,7 @@ export default class AnnotatedTextComponent extends Component {
   }
 
   _renderFragment ($$, fragment) {
-    let node = fragment.node
+    const node = fragment.node
 
     // TODO: fix support for container annotations
     // if (node.type === 'container-annotation-fragment') {
@@ -77,9 +77,9 @@ export default class AnnotatedTextComponent extends Component {
     //   ...
     // }
 
-    let ComponentClass = this._getFragmentComponentClass(node)
-    let props = this._getFragmentProps(node)
-    let el = $$(ComponentClass, props)
+    const ComponentClass = this._getFragmentComponentClass(node)
+    const props = this._getFragmentProps(node)
+    const el = $$(ComponentClass, props)
     return el
   }
 

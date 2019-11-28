@@ -38,7 +38,7 @@ export default function sendRequest (params, cb) {
         resolve(response)
       } else {
         console.error(xmlhttp.statusText)
-        let err = new Error(xmlhttp.statusText)
+        const err = new Error(xmlhttp.statusText)
         if (cb) cb(err)
         reject(err)
       }

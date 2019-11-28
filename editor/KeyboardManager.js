@@ -10,7 +10,7 @@ export default class KeyboardManager extends AbstractKeyboardManager {
 
     bindings.forEach(({ key, spec }) => {
       if (!spec.command) throw new Error("'spec.command' is required")
-      let hook = () => {
+      const hook = () => {
         return commandCallback(spec.command)
       }
       const type = spec.type || 'keydown'
@@ -25,7 +25,7 @@ export default class KeyboardManager extends AbstractKeyboardManager {
   }
 
   _getBindings (type, key) {
-    let bindingsByType = this.bindings[type]
+    const bindingsByType = this.bindings[type]
     if (bindingsByType) {
       return bindingsByType[key]
     }

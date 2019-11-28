@@ -42,7 +42,7 @@ export default class DocumentObserver {
     if (!change._extracted) change._extractInformation(this.doc)
 
     // console.log('DocumentObserver._onDocumentChanged()', this.editorState.getId(), change, change.updated)
-    let dirty = this.dirty
+    const dirty = this.dirty
     Object.keys(change.updated).forEach(id => {
       dirty.add(id)
     })
@@ -74,9 +74,9 @@ class RelationshipIndex extends NodeIndex {
   }
 
   create (node) { // eslint-disable-line no-unused-vars
-    let relations = this._getRelations(node)
+    const relations = this._getRelations(node)
     if (!relations) return
-    for (let [name, type] of relations) {
+    for (const [name, type] of relations) {
       const val = node.get(name)
       if (!val) continue
       if (type === ONE) {
@@ -88,9 +88,9 @@ class RelationshipIndex extends NodeIndex {
   }
 
   delete (node) {
-    let relations = this._getRelations(node)
+    const relations = this._getRelations(node)
     if (!relations) return
-    for (let [name, type] of relations) {
+    for (const [name, type] of relations) {
       const val = node.get(name)
       if (!val) continue
       if (type === ONE) {
@@ -102,9 +102,9 @@ class RelationshipIndex extends NodeIndex {
   }
 
   update (node, path, newValue, oldValue) {
-    let relations = this._getRelations(node)
+    const relations = this._getRelations(node)
     if (!relations) return
-    let type = relations.get(path[1])
+    const type = relations.get(path[1])
     if (!type) return
     if (type === ONE) {
       this._remove(oldValue, node.id)
@@ -135,9 +135,9 @@ class RelationshipIndex extends NodeIndex {
 }
 
 function getRelations (node) {
-  let relations = new Map()
-  let nodeSchema = node.getSchema()
-  for (let property of nodeSchema) {
+  const relations = new Map()
+  const nodeSchema = node.getSchema()
+  for (const property of nodeSchema) {
     if (property.isReference()) {
       const name = property.name
       const type = property.isArray() ? MANY : ONE
@@ -151,9 +151,11 @@ class ValuesById {
   constructor () {
     this._index = new Map()
   }
+
   get (key) {
     return this._index.get(key)
   }
+
   add (key, val) {
     let vals = this._index.get(key)
     if (!vals) {
@@ -162,8 +164,9 @@ class ValuesById {
     }
     vals.add(val)
   }
+
   remove (key, val) {
-    let vals = this._index.get(key)
+    const vals = this._index.get(key)
     if (vals) {
       vals.delete(val)
       if (vals.size === 0) {
@@ -171,6 +174,7 @@ class ValuesById {
       }
     }
   }
+
   clear () {
     this._index = new Map()
   }

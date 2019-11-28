@@ -13,7 +13,7 @@ import _transferWithDisambiguatedIds from './_transferWithDisambiguatedIds'
   @return {Object} with updated `selection`
 */
 export default function paste (tx, args) {
-  let sel = tx.selection
+  const sel = tx.selection
   if (!sel || sel.isNull()) {
     throw new Error('Can not paste without selection.')
   }
@@ -24,7 +24,7 @@ export default function paste (tx, args) {
   args.text = args.text || ''
   let pasteDoc = args.doc
   // TODO: is there a better way to detect that this paste is happening within a container?
-  let inContainer = Boolean(sel.containerPath)
+  const inContainer = Boolean(sel.containerPath)
   // first delete the current selection
   if (!sel.isCollapsed()) {
     tx.deleteSelection()
@@ -42,10 +42,10 @@ export default function paste (tx, args) {
     }
   }
   // pasting into a TextProperty
-  let snippet = pasteDoc.get(SNIPPET_ID)
+  const snippet = pasteDoc.get(SNIPPET_ID)
   let L = snippet.getLength()
   if (L === 0) return
-  let first = snippet.getNodeAt(0)
+  const first = snippet.getNodeAt(0)
   // paste into a TextProperty
   if (!inContainer) {
     // if there is only one node it better be a text node
@@ -79,10 +79,10 @@ export default function paste (tx, args) {
   Splits plain text by lines and puts them into paragraphs.
 */
 function _convertPlainTextToDocument (tx, args) {
-  let lines = args.text.split(/\s*\n\s*\n/)
-  let pasteDoc = tx.getDocument().newInstance()
-  let defaultTextType = pasteDoc.getSchema().getDefaultTextType()
-  let container = pasteDoc.create({
+  const lines = args.text.split(/\s*\n\s*\n/)
+  const pasteDoc = tx.getDocument().newInstance()
+  const defaultTextType = pasteDoc.getSchema().getDefaultTextType()
+  const container = pasteDoc.create({
     type: '@container',
     id: SNIPPET_ID,
     nodes: []
@@ -109,29 +109,29 @@ function _convertPlainTextToDocument (tx, args) {
 }
 
 function _convertIntoAnnotatedText (tx, copy) {
-  let sel = tx.selection
-  let path = sel.start.path
-  let snippet = tx.createSnippet()
-  let defaultTextType = snippet.getSchema().getDefaultTextType()
+  const sel = tx.selection
+  const path = sel.start.path
+  const snippet = tx.createSnippet()
+  const defaultTextType = snippet.getSchema().getDefaultTextType()
 
   // walk through all nodes
-  let container = copy.get('snippet')
-  let nodeIds = container.getContent()
+  const container = copy.get('snippet')
+  const nodeIds = container.getContent()
   // collect all transformed annotations
-  let fragments = []
+  const fragments = []
   let offset = 0
   let annos = []
-  for (let nodeId of nodeIds) {
-    let node = copy.get(nodeId)
+  for (const nodeId of nodeIds) {
+    const node = copy.get(nodeId)
     if (node.isText()) {
-      let text = node.getText()
+      const text = node.getText()
       if (fragments.length > 0) {
         fragments.push(' ')
         offset += 1
       }
       // tranform annos
-      let _annos = map(node.getAnnotations(), anno => {
-        let data = anno.toJSON()
+      const _annos = map(node.getAnnotations(), anno => {
+        const data = anno.toJSON()
         data.start.path = path.slice(0)
         data.start.offset += offset
         data.end.offset += offset
@@ -153,7 +153,7 @@ function _convertIntoAnnotatedText (tx, copy) {
 }
 
 function _pasteAnnotatedText (tx, copy) {
-  let sel = tx.selection
+  const sel = tx.selection
   const nodes = copy.get(SNIPPET_ID).nodes
   const firstId = nodes[0]
   const first = copy.get(firstId)
@@ -161,20 +161,20 @@ function _pasteAnnotatedText (tx, copy) {
   const text = copy.get(textPath)
   const annotations = copy.getIndex('annotations').get(textPath)
   // insert plain text
-  let path = sel.start.path
-  let offset = sel.start.offset
+  const path = sel.start.path
+  const offset = sel.start.offset
   tx.insertText(text)
-  let targetProp = tx.getProperty(path)
+  const targetProp = tx.getProperty(path)
   if (targetProp.isText()) {
     // copy annotations (only for TEXT properties)
     let annos = map(annotations)
     // NOTE: filtering annotations which are not explicitly white-listed via property.targetTypes
-    let allowedTypes = targetProp.targetTypes
+    const allowedTypes = targetProp.targetTypes
     if (allowedTypes && allowedTypes.size > 0) {
       annos = annos.filter(anno => allowedTypes.has(anno.type))
     }
-    for (let anno of annos) {
-      let data = anno.toJSON()
+    for (const anno of annos) {
+      const data = anno.toJSON()
       data.start.path = path.slice(0)
       data.start.offset += offset
       data.end.offset += offset
@@ -186,25 +186,25 @@ function _pasteAnnotatedText (tx, copy) {
 }
 
 function _pasteDocument (tx, pasteDoc) {
-  let snippet = pasteDoc.get(SNIPPET_ID)
+  const snippet = pasteDoc.get(SNIPPET_ID)
   if (snippet.getLength() === 0) return
 
-  let sel = tx.selection
-  let containerPath = sel.containerPath
+  const sel = tx.selection
+  const containerPath = sel.containerPath
   let insertPos
   // FIXME: this does not work for lists
   // IMO we need to add a special implementation for lists
   // i.e. check if the cursor is inside a list-item, then either break the list if first node is not a list
   // otherwise merge the list into the current, and if there are more nodes then break the list and proceed on container level
   if (sel.isPropertySelection()) {
-    let startPath = sel.start.path
-    let node = getContainerRoot(tx, containerPath, sel.start.getNodeId())
+    const startPath = sel.start.path
+    const node = getContainerRoot(tx, containerPath, sel.start.getNodeId())
     // if cursor is in a text node then break the text node
     // unless it is empty, then we remove the node
     // and if cursor is at the end we paste the content after the node
     if (node.isText()) {
-      let startPos = node.getPosition()
-      let text = tx.get(startPath)
+      const startPos = node.getPosition()
+      const text = tx.get(startPath)
       if (text.length === 0) {
         insertPos = startPos
         removeAt(tx, containerPath, insertPos)
@@ -221,12 +221,12 @@ function _pasteDocument (tx, pasteDoc) {
     // unless the list is empty, then we remove it
     // TODO: try to reuse code for breaking lists from Editing.js
     } else if (node.isList()) {
-      let list = node
-      let listItem = tx.get(sel.start.getNodeId())
-      let first = snippet.getNodeAt(0)
+      const list = node
+      const listItem = tx.get(sel.start.getNodeId())
+      const first = snippet.getNodeAt(0)
       if (first.isList()) {
         if (first.getLength() > 0) {
-          let itemPos = listItem.getPosition()
+          const itemPos = listItem.getPosition()
           if (listItem.getLength() === 0) {
             // replace the list item with the items from the pasted list
             removeAt(tx, list.getItemsPath(), itemPos)
@@ -271,7 +271,7 @@ function _pasteDocument (tx, pasteDoc) {
       }
     }
   } else if (sel.isNodeSelection()) {
-    let nodePos = getContainerPosition(tx, containerPath, sel.getNodeId())
+    const nodePos = getContainerPosition(tx, containerPath, sel.getNodeId())
     if (sel.isBefore()) {
       insertPos = nodePos
     } else if (sel.isAfter()) {
@@ -286,14 +286,14 @@ function _pasteDocument (tx, pasteDoc) {
 
 function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
   // transfer nodes from content document
-  let nodeIds = pasteDoc.get(SNIPPET_ID).nodes
-  let insertedNodes = []
-  let visited = {}
+  const nodeIds = pasteDoc.get(SNIPPET_ID).nodes
+  const insertedNodes = []
+  const visited = {}
   let nodes = nodeIds.map(id => pasteDoc.get(id))
 
   // now filter nodes w.r.t. allowed types for the given container
-  let containerProperty = tx.getProperty(containerPath)
-  let targetTypes = containerProperty.targetTypes
+  const containerProperty = tx.getProperty(containerPath)
+  const targetTypes = containerProperty.targetTypes
   // TODO: instead of dropping all invalid ones we could try to convert text nodes to the default text node
   if (targetTypes && targetTypes.size > 0) {
     nodes = nodes.filter(node => targetTypes.has(node.type))
@@ -303,7 +303,7 @@ function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
     // to avoid collisions in the target doc
     // Plus, it uses reflection to create owned nodes recursively,
     // and to transfer attached annotations.
-    let newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
+    const newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
     // get the node in the targetDocument
     node = tx.get(newId)
     insertAt(tx, containerPath, insertPos++, newId)
@@ -311,18 +311,18 @@ function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
   }
 
   if (insertedNodes.length > 0) {
-    let lastNode = last(insertedNodes)
+    const lastNode = last(insertedNodes)
     setCursor(tx, lastNode, containerPath, 'after')
   }
 }
 
 function _pasteListItems (tx, list, otherList, insertPos) {
-  let sel = tx.getSelection()
-  let items = otherList.resolve('items')
-  let visited = {}
+  const sel = tx.getSelection()
+  const items = otherList.resolve('items')
+  const visited = {}
   let lastItem
-  for (let item of items) {
-    let newId = _transferWithDisambiguatedIds(item.getDocument(), tx, item.id, visited)
+  for (const item of items) {
+    const newId = _transferWithDisambiguatedIds(item.getDocument(), tx, item.id, visited)
     insertAt(tx, list.getItemsPath(), insertPos++, newId)
     lastItem = tx.get(newId)
   }
@@ -337,11 +337,11 @@ function _pasteListItems (tx, list, otherList, insertPos) {
 
 function _breakListApart (tx, containerPath, list) {
   // HACK: using tx.break() to break the list
-  let nodePos = list.getPosition()
+  const nodePos = list.getPosition()
   // first split the current item with a break
-  let oldSel = tx.selection
+  const oldSel = tx.selection
   tx.break()
-  let listItem = tx.get(tx.selection.start.getNodeId())
+  const listItem = tx.get(tx.selection.start.getNodeId())
   // if the list item is empty, another tx.break() splits the list
   // otherwise doing the same again
   if (listItem.getLength() > 0) {
@@ -353,6 +353,6 @@ function _breakListApart (tx, containerPath, list) {
   // but this creates an empty paragraph which we need to removed
   // TODO: maybe we should add an option to tx.break() that allows break without insert of empty text node
   tx.break()
-  let p = removeAt(tx, containerPath, nodePos + 1)
+  const p = removeAt(tx, containerPath, nodePos + 1)
   deepDeleteNode(tx, p)
 }

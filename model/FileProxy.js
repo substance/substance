@@ -18,7 +18,7 @@ class FileProxy {
     Fires a property update on the file node
   */
   triggerUpdate () {
-    let fileId = this.fileNode.id
+    const fileId = this.fileNode.id
     this.context.editorSession.transaction((tx) => {
       tx.set([fileId, '__changed__'], '')
     }, { history: false })

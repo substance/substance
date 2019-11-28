@@ -8,6 +8,7 @@ import isNil from '../util/isNil'
 import isPlainObject from '../util/isPlainObject'
 import isString from '../util/isString'
 import _isDefined from '../util/_isDefined'
+import hasOwnProperty from '../util/hasOwnProperty'
 import without from '../util/without'
 import map from '../util/map'
 import DOMElement from './DOMElement'
@@ -457,7 +458,7 @@ class VirtualHTMLElement extends VirtualElement {
 
   _copy () {
     if (this.classNames || this.attributes || this.eventListeners || this.htmlProps || this.style) {
-      let copy = {}
+      const copy = {}
       if (this.classNames) {
         copy.classNames = this.classNames.slice()
       }
@@ -488,10 +489,10 @@ class VirtualHTMLElement extends VirtualElement {
   _merge (other) {
     if (!other) return
     const ARRAY_TYPE_VALS = ['classNames', 'eventListeners']
-    for (let name of ARRAY_TYPE_VALS) {
-      let otherVal = other[name]
+    for (const name of ARRAY_TYPE_VALS) {
+      const otherVal = other[name]
       if (otherVal) {
-        let thisVal = this[name]
+        const thisVal = this[name]
         if (!thisVal) {
           this[name] = otherVal.slice()
         } else {
@@ -500,10 +501,10 @@ class VirtualHTMLElement extends VirtualElement {
       }
     }
     const MAP_TYPE_VALS = ['attributes', 'htmlProps', 'style']
-    for (let name of MAP_TYPE_VALS) {
-      let otherVal = other[name]
+    for (const name of MAP_TYPE_VALS) {
+      const otherVal = other[name]
       if (otherVal) {
-        let thisVal = this[name]
+        const thisVal = this[name]
         if (!thisVal) {
           this[name] = new Map(otherVal)
         } else {
@@ -655,7 +656,7 @@ VirtualElement.createElement = function () {
   var classNames, ref
   var eventHandlers = []
   for (var key in _second) {
-    if (!_second.hasOwnProperty(key)) continue
+    if (!hasOwnProperty(_second, key)) continue
     var val = _second[key]
     switch (key) {
       case 'class':
@@ -722,7 +723,7 @@ VirtualElement.Context = class VirtualElementContext {
   }
 
   _createElement () {
-    let vel = VirtualElement.createElement.apply(this, arguments)
+    const vel = VirtualElement.createElement.apply(this, arguments)
     vel._context = this
     vel._owner = this.owner
     if (vel._isVirtualComponent) {

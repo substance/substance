@@ -1,4 +1,4 @@
-import { getKeyForPath } from '../util'
+// import { getKeyForPath } from '../util'
 import { copySelection } from '../model'
 import SurfaceManager from './SurfaceManager'
 import MarkersManager from './MarkersManager'
@@ -17,18 +17,18 @@ export default function EditorSessionMixin (AbstractEditorSession) {
       this.config = config
       const editorState = this.editorState
 
-      let surfaceManager = new SurfaceManager(editorState)
-      let markersManager = new MarkersManager(editorState)
-      let keyboardManager = new KeyboardManager(config.getKeyboardShortcuts(options), (commandName, params) => {
+      const surfaceManager = new SurfaceManager(editorState)
+      const markersManager = new MarkersManager(editorState)
+      const keyboardManager = new KeyboardManager(config.getKeyboardShortcuts(options), (commandName, params) => {
         return this.executeCommand(commandName, params)
       }, this)
-      let commandManager = new CommandManager(this,
+      const commandManager = new CommandManager(this,
         // update commands when document or selection have changed
         // TODO: is this really sufficient?
         ['document', 'selection'],
         config.getCommands(options)
       )
-      let findAndReplaceManager = new FindAndReplaceManager(this)
+      const findAndReplaceManager = new FindAndReplaceManager(this)
       this.surfaceManager = surfaceManager
       this.markersManager = markersManager
       this.keyboardManager = keyboardManager
@@ -50,8 +50,9 @@ export default function EditorSessionMixin (AbstractEditorSession) {
     initialize () {
       super.initialize()
 
+      // NOTE: in newer implementation, overlayId has been replaced by OverlayCanvas, which is implemented without appState.overlayId
       // EXPERIMENTAL: registering a 'reducer' that resets overlayId whenever the selection changes
-      this.editorState.addObserver(['selection'], this._resetOverlayId, this, { stage: 'update' })
+      // this.editorState.addObserver(['selection'], this._resetOverlayId, this, { stage: 'update' })
       this.commandManager.initialize()
     }
 
@@ -84,7 +85,7 @@ export default function EditorSessionMixin (AbstractEditorSession) {
     cut () {
       const sel = this.getSelection()
       if (sel && !sel.isNull() && !sel.isCollapsed()) {
-        let snippet = this.copy()
+        const snippet = this.copy()
         this.deleteSelection()
         return snippet
       }
@@ -156,19 +157,20 @@ export default function EditorSessionMixin (AbstractEditorSession) {
     }
 
     _resetOverlayId () {
-      const overlayId = this.editorState.overlayId
-      // overlayId === getKeyForPath(path) => if selection is value &&
-      // Overlays of value components (ManyRelationshipComponent, SingleRelationship)
-      // need to remain open if the selection is a value selection
-      let sel = this.getSelection()
-      if (sel && sel.customType === 'value') {
-        let valueId = getKeyForPath(sel.data.path)
-        if (overlayId !== valueId) {
-          this.editorState.overlayId = valueId
-        }
-      } else {
-        this.editorState.overlayId = null
-      }
+      // TODO: in newer implementation, overlayId has been replaced by OverlayCanvas, which is implemented without appState.overlayId
+      // const overlayId = this.editorState.overlayId
+      // // overlayId === getKeyForPath(path) => if selection is value &&
+      // // Overlays of value components (ManyRelationshipComponent, SingleRelationship)
+      // // need to remain open if the selection is a value selection
+      // const sel = this.getSelection()
+      // if (sel && sel.customType === 'value') {
+      //   const valueId = getKeyForPath(sel.data.path)
+      //   if (overlayId !== valueId) {
+      //     this.editorState.overlayId = valueId
+      //   }
+      // } else {
+      //   this.editorState.overlayId = null
+      // }
     }
   }
   return BaseEditorSession

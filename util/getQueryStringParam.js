@@ -6,8 +6,8 @@
  */
 export default function getQueryStringParam (param, url) {
   if (typeof window === 'undefined') return null
-  let href = url || window.location.href
-  let reg = new RegExp('[?&]' + param + '=([^&#]*)', 'i')
-  let string = reg.exec(href)
+  const href = url || window.location.href
+  const reg = new RegExp('[?&]' + param + '=([^&#]*)', 'i')
+  const string = reg.exec(href)
   return string ? decodeURIComponent(string[1]) : null
 }

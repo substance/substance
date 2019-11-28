@@ -15,13 +15,13 @@ export default class MarkersManager extends EventEmitter {
   }
 
   addMarker (marker) {
-    let path = marker.getPath()
+    const path = marker.getPath()
     this._markers.add(path, marker)
     this._setDirty(path)
   }
 
   removeMarker (marker) {
-    let path = marker.getPath()
+    const path = marker.getPath()
     this._markers.remove(path, marker)
     this._setDirty(path)
   }
@@ -48,9 +48,9 @@ export default class MarkersManager extends EventEmitter {
   _onDocumentChange (change) {
     for (const op of change.primitiveOps) {
       if (op.type === 'update' && op.diff._isTextOperation) {
-        let markers = this._markers.get(op.path)
+        const markers = this._markers.get(op.path)
         if (!markers || markers.length === 0) continue
-        let diff = op.diff
+        const diff = op.diff
         switch (diff.type) {
           case 'insert':
             markers.forEach(m => this._transformInsert(m, diff))
@@ -70,8 +70,8 @@ export default class MarkersManager extends EventEmitter {
     const length = op.str.length
     if (length === 0) return
     // console.log('Transforming marker after insert')
-    let start = marker.start.offset
-    let end = marker.end.offset
+    const start = marker.start.offset
+    const end = marker.end.offset
     let newStart = start
     let newEnd = end
     if (pos >= end) return
@@ -139,25 +139,28 @@ export default class MarkersManager extends EventEmitter {
 
 class MarkersIndex {
   add (path, val) {
-    let key = getKeyForPath(path)
+    const key = getKeyForPath(path)
     if (!this[key]) {
       this[key] = []
     }
     this[key].push(val)
   }
+
   remove (path, val) {
-    let key = getKeyForPath(path)
+    const key = getKeyForPath(path)
     if (this[key]) {
       deleteFromArray(this[key], val)
     }
   }
+
   get (path) {
-    let key = getKeyForPath(path)
+    const key = getKeyForPath(path)
     return this[key] || []
   }
+
   clearMarkers (path, filter) {
-    let key = getKeyForPath(path)
-    let arr = this[key]
+    const key = getKeyForPath(path)
+    const arr = this[key]
     if (arr) {
       for (let i = arr.length - 1; i >= 0; i--) {
         if (filter(arr[i])) {

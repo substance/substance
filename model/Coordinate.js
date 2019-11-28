@@ -14,7 +14,7 @@ export default class Coordinate {
     // HACK: to allow this class be inherited but without calling this ctor
     if (arguments[0] === 'SKIP') return
     if (arguments.length === 1) {
-      let data = arguments[0]
+      const data = arguments[0]
       this.path = data.path
       this.offset = data.offset
     } else {

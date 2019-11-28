@@ -68,34 +68,34 @@ function ClipboardTests (memory) {
   }
 
   test('Copying HTML, and plain text', t => {
-    let { editorSession, clipboard, context } = _setup(t, simple)
+    const { editorSession, clipboard, context } = _setup(t, simple)
     editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboard.copy(clipboardData, context)
     t.notNil(clipboardData.data['text/plain'], 'Clipboard should contain plain text data.')
     t.notNil(clipboardData.data['text/html'], 'Clipboard should contain HTML data.')
-    let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
-    let body = htmlDoc.find('body')
+    const htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
+    const body = htmlDoc.find('body')
     t.notNil(body, 'The copied HTML should always be a full HTML document string, containing a body element.')
     t.end()
   })
 
   test('Copying a property selection', t => {
-    let { editorSession, clipboard, context } = _setup(t, simple)
+    const { editorSession, clipboard, context } = _setup(t, simple)
     editorSession.setSelection({ type: 'property', path: ['p1', 'content'], startOffset: 0, endOffset: 5 })
-    let TEXT = '01234'
-    let clipboardData = _createClipboardData()
+    const TEXT = '01234'
+    const clipboardData = _createClipboardData()
     clipboard.copy(clipboardData, context)
     t.equal(clipboardData.data['text/plain'], TEXT, 'Plain text should be correct.')
 
-    let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
-    let body = htmlDoc.find('body')
+    const htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
+    const body = htmlDoc.find('body')
     t.equal(body.text(), TEXT, 'HTML text should be correct.')
     t.end()
   })
 
   test('Copying a container selection', t => {
-    let { editorSession, clipboard, context } = _setup(t, simple)
+    const { editorSession, clipboard, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'container',
       containerPath: BODY_CONTENT_PATH,
@@ -104,41 +104,41 @@ function ClipboardTests (memory) {
       endPath: ['p3', 'content'],
       endOffset: 5
     })
-    let TEXT = [
+    const TEXT = [
       '123456789',
       '0123456789',
       '01234'
     ]
-    let LINE_SEP = '\n\n'
+    const LINE_SEP = '\n\n'
 
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboard.copy(clipboardData, context)
     t.equal(clipboardData.data['text/plain'], TEXT.join(LINE_SEP), 'Plain text should be correct.')
 
-    let htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
-    let elements = htmlDoc.find('body').getChildren()
+    const htmlDoc = DefaultDOMElement.parseHTML(clipboardData.data['text/html'])
+    const elements = htmlDoc.find('body').getChildren()
     t.equal(elements.length, 3, 'HTML should consist of three elements.')
-    let p1 = elements[0]
+    const p1 = elements[0]
     t.equal(p1.attr('data-id'), 'p1', 'First element should have correct data-id.')
     t.equal(p1.text(), TEXT[0], 'First element should have correct text content.')
-    let p2 = elements[1]
+    const p2 = elements[1]
     t.equal(p2.attr('data-id'), 'p2', 'Second element should have correct data-id.')
     t.equal(p2.text(), TEXT[1], 'Second element should have correct text content.')
-    let p3 = elements[2]
+    const p3 = elements[2]
     t.equal(p3.attr('data-id'), 'p3', 'Third element should have correct data-id.')
     t.equal(p3.text(), TEXT[2], 'Third element should have correct text content.')
     t.end()
   })
 
   test("Pasting text into ContainerEditor using 'text/plain'.", t => {
-    let { editorSession, clipboard, doc, context } = _setup(t, simple)
+    const { editorSession, clipboard, doc, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
       containerPath: BODY_CONTENT_PATH
     })
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboardData.setData('text/plain', 'XXX')
     clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0XXX123456789', 'Plain text should be correct.')
@@ -146,29 +146,29 @@ function ClipboardTests (memory) {
   })
 
   test('Pasting without any data given.', t => {
-    let { editorSession, clipboard, doc, context } = _setup(t, simple)
+    const { editorSession, clipboard, doc, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
       containerPath: BODY_CONTENT_PATH
     })
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0123456789', 'Text should be still the same.')
     t.end()
   })
 
   test("Pasting text into ContainerEditor using 'text/html'.", t => {
-    let { editorSession, clipboard, doc, context } = _setup(t, simple)
+    const { editorSession, clipboard, doc, context } = _setup(t, simple)
     editorSession.setSelection({
       type: 'property',
       path: ['p1', 'content'],
       startOffset: 1,
       containerPath: BODY_CONTENT_PATH
     })
-    let TEXT = 'XXX'
-    let clipboardData = _createClipboardData()
+    const TEXT = 'XXX'
+    const clipboardData = _createClipboardData()
     clipboardData.setData('text/plain', TEXT)
     clipboardData.setData('text/html', TEXT)
     clipboard.paste(clipboardData, context)
@@ -179,8 +179,8 @@ function ClipboardTests (memory) {
   // this test revealed #700: the problem was that in source code there where
   // `"` and `'` characters which did not survive the way through HTML correctly
   test('Copy and Pasting source code.', t => {
-    let { editorSession, clipboard, doc, context } = _setup(t, simple)
-    let cb = doc.create({
+    const { editorSession, clipboard, doc, context } = _setup(t, simple)
+    const cb = doc.create({
       type: CODEBLOCK_TYPE,
       id: 'cb1',
       content: [
@@ -198,7 +198,7 @@ function ClipboardTests (memory) {
       endOffset: 1,
       containerPath: BODY_CONTENT_PATH
     }))
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboard.cut(clipboardData, context)
     let cb1 = doc.get('cb1')
     t.isNil(cb1, 'Codeblock should have been cutted.')
@@ -247,9 +247,9 @@ function ClipboardTests (memory) {
 
   // TODO: bring back an fall-back converter for unsupported content
   test('Browser - Firefox (Linux) - Whole Page', t => {
-    let html = BrowserLinuxFirefoxWholePageFixture
+    const html = BrowserLinuxFirefoxWholePageFixture
     _fixtureTest(t, html, (doc, clipboard, context) => {
-      let clipboardData = _createClipboardData()
+      const clipboardData = _createClipboardData()
       clipboardData.setData('text/plain', 'XXX')
       clipboardData.setData('text/html', html)
       clipboard.paste(clipboardData, context)
@@ -358,7 +358,7 @@ function ClipboardTests (memory) {
 }
 
 function _fixtureTest (t, html, impl, forceWindows) {
-  let { editorSession, clipboard, doc, context } = _setup(t, simple)
+  const { editorSession, clipboard, doc, context } = _setup(t, simple)
   platform.values.isWindows = Boolean(forceWindows)
   editorSession.setSelection({
     type: 'property',
@@ -374,7 +374,7 @@ function _fixtureTest (t, html, impl, forceWindows) {
 }
 
 function _emptyFixtureTest (t, html, impl, forceWindows) {
-  let { context, editorSession, clipboard, doc } = _setup(t, _emptyParagraphSeed)
+  const { context, editorSession, clipboard, doc } = _setup(t, _emptyParagraphSeed)
   if (forceWindows) {
     // NOTE: faking 'Windows' mode in importer so that
     // the correct implementation will be used
@@ -391,7 +391,7 @@ function _emptyFixtureTest (t, html, impl, forceWindows) {
 
 function _plainTextTest (t, html, forceWindows) {
   _fixtureTest(t, html, (doc, clipboard, context) => {
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboardData.setData('text/plain', '')
     clipboardData.setData('text/html', html)
     clipboard.paste(clipboardData, context)
@@ -402,14 +402,14 @@ function _plainTextTest (t, html, forceWindows) {
 
 function _annotatedTextTest (t, html, forceWindows) {
   _fixtureTest(t, html, (doc, clipboard, context) => {
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboardData.setData('text/plain', '')
     clipboardData.setData('text/html', html)
     clipboard.paste(clipboardData, context)
     t.equal(doc.get(['p1', 'content']), '0XXX123456789', 'Content should have been pasted correctly.')
-    let annotations = doc.getIndex('annotations').get(['p1', 'content'])
+    const annotations = doc.getIndex('annotations').get(['p1', 'content'])
     t.equal(annotations.length, 1, 'There should be one annotation on the property now.')
-    let anno = annotations[0]
+    const anno = annotations[0]
     t.equal(anno.type, LINK_TYPE, 'The annotation should be a link.')
     t.end()
   }, forceWindows)
@@ -417,12 +417,12 @@ function _annotatedTextTest (t, html, forceWindows) {
 
 function _twoParagraphsTest (t, html, forceWindows) {
   _fixtureTest(t, html, (doc, clipboard, context) => {
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboardData.setData('text/plain', '')
     clipboardData.setData('text/html', html)
     clipboard.paste(clipboardData, context)
-    let body = doc.get('body')
-    let [p1, p2, p3] = body.getNodes()
+    const body = doc.get('body')
+    const [p1, p2, p3] = body.getNodes()
     t.equal(p1.content, '0AAA', 'First paragraph should be truncated.')
     t.equal(p2.content, 'BBB', "Second paragraph should contain 'BBB'.")
     t.equal(p3.content, '123456789', 'Remainder of original p1 should go into forth paragraph.')
@@ -432,32 +432,32 @@ function _twoParagraphsTest (t, html, forceWindows) {
 
 function _extendedTest (t, html, forceWindows) {
   _emptyFixtureTest(t, html, (doc, clipboard, context) => {
-    let clipboardData = _createClipboardData()
+    const clipboardData = _createClipboardData()
     clipboardData.setData('text/plain', '')
     clipboardData.setData('text/html', html)
     clipboard.paste(clipboardData, context)
     // First node is a paragraph with strong, emphasis, superscript and subscript annos
-    let body = doc.get('body')
-    let [node1, node2, node3] = body.getNodes()
+    const body = doc.get('body')
+    const [node1, node2, node3] = body.getNodes()
     t.equal(node1.type, PARAGRAPH_TYPE, 'First node should be a paragraph.')
     t.equal(node1.content.length, 121, 'First paragraph should contain 121 symbols.')
-    let annotationsNode1 = doc.getIndex('annotations').get([node1.id, 'content']).sort((a, b) => {
+    const annotationsNode1 = doc.getIndex('annotations').get([node1.id, 'content']).sort((a, b) => {
       return a.start.offset - b.start.offset
     })
     t.equal(annotationsNode1.length, 4, 'There should be four annotations inside a first paragraph.')
-    let annoFirstNode1 = annotationsNode1[0] || {}
+    const annoFirstNode1 = annotationsNode1[0] || {}
     t.equal(annoFirstNode1.type, EMPHASIS_TYPE, 'The annotation should be an emphasis.')
     t.equal(annoFirstNode1.start.offset, 4, 'Emphasis annotation should start from 5th symbol.')
     t.equal(annoFirstNode1.end.offset, 11, 'Emphasis annotation should end at 12th symbol.')
-    let annoSecondNode1 = annotationsNode1[1] || {}
+    const annoSecondNode1 = annotationsNode1[1] || {}
     t.equal(annoSecondNode1.type, STRONG_TYPE, 'The annotation should be a strong.')
     t.equal(annoSecondNode1.start.offset, 18, 'Strong annotation should start from 19th symbol.')
     t.equal(annoSecondNode1.end.offset, 30, 'Strong annotation should end at 31th symbol.')
-    let annoThirdNode1 = annotationsNode1[2] || {}
+    const annoThirdNode1 = annotationsNode1[2] || {}
     t.equal(annoThirdNode1.type, SUPERSCRIPT_TYPE, 'The annotation should be a superscript.')
     t.equal(annoThirdNode1.start.offset, 41, 'Superscript annotation should start from 42th symbol.')
     t.equal(annoThirdNode1.end.offset, 49, 'Superscript annotation should end at 50th symbol.')
-    let annoFourthNode1 = annotationsNode1[3] || {}
+    const annoFourthNode1 = annotationsNode1[3] || {}
     t.equal(annoFourthNode1.type, SUBSCRIPT_TYPE, 'The annotation should be a subscript.')
     t.equal(annoFourthNode1.start.offset, 50, 'Subscript annotation should start from 51th symbol.')
     t.equal(annoFourthNode1.end.offset, 56, 'Subscript annotation should end at 57th symbol.')
@@ -466,7 +466,7 @@ function _extendedTest (t, html, forceWindows) {
     t.equal(node2.type, HEADING_TYPE, 'Second node should be a heading.')
     t.equal(node2.level, 1, 'Second node should be a first level heading.')
     t.equal(node2.content.length, 12, 'Heading should contain 12 symbols.')
-    let annotationsNode2 = doc.getIndex('annotations').get([node2.id, 'content'])
+    const annotationsNode2 = doc.getIndex('annotations').get([node2.id, 'content'])
     t.equal(annotationsNode2.length, 0, 'There should be no annotations inside a heading.')
 
     // Third node is a paragraph with overlapping annos
@@ -479,8 +479,8 @@ function _extendedTest (t, html, forceWindows) {
     // we will run selective tests for selections to ensure that annotations are exist
 
     // Get annotations for range without annotations
-    let path = [node3.id, 'content']
-    let compare = function (a, b) {
+    const path = [node3.id, 'content']
+    const compare = function (a, b) {
       if (a.id < b.id) return -1
       if (a.id > b.id) return 1
       return 0
@@ -515,8 +515,8 @@ function _createClipboardData () {
 }
 
 function _setup (t, seed) {
-  let { context, editorSession, doc } = setupEditor(t, seed)
-  let clipboard = new Clipboard()
+  const { context, editorSession, doc } = setupEditor(t, seed)
+  const clipboard = new Clipboard()
   return { context, editorSession, doc, clipboard }
 }
 

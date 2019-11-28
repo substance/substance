@@ -74,9 +74,9 @@ export default class CustomSurface extends Component {
   }
 
   _createSurfaceId () {
-    let isolatedNodeComponent = this.context.isolatedNodeComponent
+    const isolatedNodeComponent = this.context.isolatedNodeComponent
     if (isolatedNodeComponent) {
-      let parentSurface = isolatedNodeComponent.context.surface
+      const parentSurface = isolatedNodeComponent.context.surface
       return parentSurface.id + '/' + isolatedNodeComponent.props.node.id + '/' + this._name
     } else {
       return this._name

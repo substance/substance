@@ -9,7 +9,7 @@ export default class TextNodeComponent extends Component {
   didMount () {}
 
   render ($$) {
-    let parentSurface = this.context.surface
+    const parentSurface = this.context.surface
     let TextPropertyComponent
     // render the TextNode as Surface if the parent is not a ContainerEditor
     if (parentSurface && parentSurface.isContainerEditor()) {
@@ -21,7 +21,7 @@ export default class TextNodeComponent extends Component {
     const node = this.props.node
     const tagName = this.getTagName()
     const path = node.getPath()
-    let el = $$(tagName)
+    const el = $$(tagName)
       .addClass(this.getClassNames())
       .attr('data-id', node.id)
     el.append(

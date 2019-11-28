@@ -63,7 +63,7 @@ export default class MultiSelect extends Component {
   }
 
   _requestPopover () {
-    let rect = this.getNativeElement().getBoundingClientRect()
+    const rect = this.getNativeElement().getBoundingClientRect()
     const y = rect.bottom + 5
     const x = rect.x + 0.5 * rect.width
     return this.send('requestPopover', {

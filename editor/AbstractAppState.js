@@ -27,7 +27,7 @@ export default class AbstractAppState {
 
   _set (name, value) {
     const impl = this._getImpl()
-    let oldVal = impl.get(name)
+    const oldVal = impl.get(name)
     let hasChanged
     if (isObject(value)) {
       hasChanged = true

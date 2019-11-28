@@ -65,7 +65,7 @@ export default class MemoryDOMElement extends DOMElement {
         break
       }
       case 'document': {
-        let format = args.format
+        const format = args.format
         this.format = format
         if (!format) throw new Error("'format' is mandatory.")
         this.childNodes = args.children || args.childNodes || []
@@ -129,7 +129,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   clone (deep) {
-    let clone = new MemoryDOMElement(this.type, this)
+    const clone = new MemoryDOMElement(this.type, this)
     if (this.childNodes) {
       clone.childNodes.length = 0
       if (deep) {
@@ -279,9 +279,9 @@ export default class MemoryDOMElement extends DOMElement {
 
   setDoctype (qualifiedNameStr, publicId, systemId) {
     // NOTE: there must be only one <!DOCTYPE> before the first content element
-    let doc = this.getOwnerDocument()
-    let oldDocType = _findDocTypeElement(doc)
-    let newDocType = this.createDocumentType(qualifiedNameStr, publicId, systemId)
+    const doc = this.getOwnerDocument()
+    const oldDocType = _findDocTypeElement(doc)
+    const newDocType = this.createDocumentType(qualifiedNameStr, publicId, systemId)
     if (oldDocType) {
       doc.replaceChild(oldDocType, newDocType)
     } else {
@@ -292,7 +292,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   getInnerHTML () {
-    let isXML = this._isXML()
+    const isXML = this._isXML()
     return DomUtils.getInnerHTML(this, { xmlMode: isXML, decodeEntities: !isXML })
   }
 
@@ -300,8 +300,8 @@ export default class MemoryDOMElement extends DOMElement {
   // clear old childNodes and append new childNodes
   setInnerHTML (html) {
     if (this.childNodes) {
-      let isXML = this._isXML()
-      let _doc = parseMarkup(html, {
+      const isXML = this._isXML()
+      const _doc = parseMarkup(html, {
         ownerDocument: this.getOwnerDocument(),
         format: isXML ? 'xml' : 'html',
         decodeEntities: !isXML,
@@ -318,7 +318,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   getOuterHTML () {
-    let isXML = this._isXML()
+    const isXML = this._isXML()
     return DomUtils.getOuterHTML(this, { xmlMode: isXML, decodeEntities: !isXML })
   }
 
@@ -336,7 +336,7 @@ export default class MemoryDOMElement extends DOMElement {
       }
       default: {
         if (this.childNodes) {
-          let child = this.createTextNode(text)
+          const child = this.createTextNode(text)
           this.empty()
           this.appendChild(child)
         }
@@ -369,7 +369,7 @@ export default class MemoryDOMElement extends DOMElement {
   // TODO: it would be nice if we could use an index here
   // however,
   getElementById (id) {
-    let doc = this.getOwnerDocument()
+    const doc = this.getOwnerDocument()
     if (!doc._index) {
       doc._createIndex()
     }
@@ -509,7 +509,7 @@ export default class MemoryDOMElement extends DOMElement {
     child = this._normalizeChild(child)
     if (!child) return this
     if (child.id) this._invalidateIndex()
-    let childNodes = this.childNodes
+    const childNodes = this.childNodes
     if (childNodes) {
       // NOTE: manipulating htmlparser's internal children array
       if (pos >= childNodes.length) {
@@ -539,9 +539,9 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   removeAt (pos) {
-    let childNodes = this.childNodes
+    const childNodes = this.childNodes
     if (childNodes) {
-      let child = childNodes[pos]
+      const child = childNodes[pos]
       if (child.id) this._invalidateIndex()
       child.remove()
     }
@@ -550,7 +550,7 @@ export default class MemoryDOMElement extends DOMElement {
 
   empty () {
     this._invalidateIndex()
-    let childNodes = this.childNodes
+    const childNodes = this.childNodes
     if (childNodes) {
       childNodes.forEach((child) => {
         child.next = child.prev = child.parent = null
@@ -605,7 +605,7 @@ export default class MemoryDOMElement extends DOMElement {
   }
 
   _propagateEvent (event) {
-    let listeners = this.eventListeners
+    const listeners = this.eventListeners
     if (listeners) {
       listeners.forEach(l => {
         if (l.eventName === event.type) {
@@ -613,7 +613,7 @@ export default class MemoryDOMElement extends DOMElement {
         }
       })
       if (event.stopped) return
-      let p = this.parentNode
+      const p = this.parentNode
       if (p) p._propagateEvent(event)
     }
   }
@@ -637,7 +637,7 @@ export default class MemoryDOMElement extends DOMElement {
     }
     // TODO: while it is 'smart' to deal with 'style' and 'class'
     // implicitly, it introduces some confusion here
-    let otherAttributes = other.attributes || other.attribs
+    const otherAttributes = other.attributes || other.attribs
     if (this.attributes && otherAttributes) {
       forEach(otherAttributes, (val, name) => {
         switch (name) {
@@ -703,8 +703,8 @@ export default class MemoryDOMElement extends DOMElement {
 
   static createDocument (format, opts = {}) {
     if (format === 'xml') {
-      let doc = new MemoryDOMElement('document', { format: format })
-      let xmlInstruction = []
+      const doc = new MemoryDOMElement('document', { format: format })
+      const xmlInstruction = []
       if (opts.version) {
         xmlInstruction.push(`version="${opts.version}"`)
       }
@@ -725,8 +725,8 @@ export default class MemoryDOMElement extends DOMElement {
       return MemoryDOMElement.createDocument(format)
     }
     // decodeEntities by default only in HTML mode
-    let decodeEntities = format === 'html'
-    let parserOpts = Object.assign({
+    const decodeEntities = format === 'html'
+    const parserOpts = Object.assign({
       format,
       decodeEntities,
       elementFactory: MemoryDOMElementFactory
@@ -746,7 +746,7 @@ export default class MemoryDOMElement extends DOMElement {
       doc = parseMarkup(str, parserOpts)
     }
     if (options.snippet) {
-      let childNodes = doc.find('__snippet__').childNodes
+      const childNodes = doc.find('__snippet__').childNodes
       if (childNodes.length === 1) {
         return childNodes[0]
       } else {
@@ -829,11 +829,11 @@ function parseStyles (styles, styleStr) {
   styleStr = (styleStr || '').trim()
   if (!styleStr) return
   styleStr.split(';').forEach((style) => {
-    let n = style.indexOf(':')
+    const n = style.indexOf(':')
     // skip if there is no :, or if it is the first/last character
     if (n < 1 || n === style.length - 1) return
-    let name = style.slice(0, n).trim()
-    let val = style.slice(n + 1).trim()
+    const name = style.slice(0, n).trim()
+    const val = style.slice(n + 1).trim()
     styles.set(name, val)
   })
 }
@@ -888,20 +888,20 @@ class MemoryWindowStub extends MemoryDOMElement {
   constructor () {
     super('window', { ownerDocument: MemoryDOMElement.createDocument('html') })
 
-    let location = {
+    const location = {
       href: '',
       hash: ''
     }
 
     function _updateLocation (url) {
-      let hashIdx = url.indexOf('#')
+      const hashIdx = url.indexOf('#')
       location.href = url
       if (hashIdx >= 0) {
         location.hash = url.slice(hashIdx)
       }
     }
 
-    let history = {
+    const history = {
       replaceState (stateObj, title, url) {
         _updateLocation(url)
       },
@@ -927,9 +927,9 @@ function nameWithoutNS (name) {
 // Note: some attributes are used to initialize an
 // element property
 const ATTR_TO_PROPS = {
-  'input': {
-    'value': true,
-    'checked': (el, name, value) => {
+  input: {
+    value: true,
+    checked: (el, name, value) => {
       const checked = (value !== 'off')
       el.setProperty('checked', checked)
     }
@@ -939,7 +939,7 @@ const ATTR_TO_PROPS = {
 function deriveHTMLPropertyFromAttribute (el, name, value) {
   const mappings = ATTR_TO_PROPS[el.tagName]
   if (mappings) {
-    let mapper = mappings[name]
+    const mapper = mappings[name]
     if (mapper === true) {
       el.setProperty(name, value)
     } else if (mapper) {
@@ -949,8 +949,8 @@ function deriveHTMLPropertyFromAttribute (el, name, value) {
 }
 
 const PROPERTY_TRANSFORMATIONS = {
-  'input': {
-    'checked': (el, name, value) => {
+  input: {
+    checked: (el, name, value) => {
       if (value === true) {
         el.properties.set(name, true)
         el.properties.set('value', 'on')
@@ -959,8 +959,8 @@ const PROPERTY_TRANSFORMATIONS = {
         el.properties.set('value', 'off')
       }
     },
-    'value': (el, name, value) => {
-      let type = el.getAttribute('type')
+    value: (el, name, value) => {
+      const type = el.getAttribute('type')
       switch (type) {
         case 'checkbox':
           if (value === 'on') {
@@ -989,7 +989,7 @@ function _setProperty (el, name, value) {
 function _setHTMLPropertyValue (el, name, value) {
   const trafos = PROPERTY_TRANSFORMATIONS[el.tagName]
   if (trafos) {
-    let mapper = trafos[name]
+    const mapper = trafos[name]
     if (mapper) {
       mapper(el, name, value)
       return
@@ -1008,8 +1008,8 @@ function _sanitizeHTMLStructure (doc) {
     // remove head and nodes which must go into the head
     // so they do not go into the body
     let headEl = doc.find('head')
-    let titleEl = doc.find('title')
-    let metaEls = doc.findAll('meta')
+    const titleEl = doc.find('title')
+    const metaEls = doc.findAll('meta')
     let bodyEl = doc.find('body')
     if (headEl) headEl.remove()
     if (titleEl) titleEl.remove()
@@ -1018,7 +1018,7 @@ function _sanitizeHTMLStructure (doc) {
 
     // keep the remaining content nodes,
     // we will add them to the body
-    let contentNodes = doc.childNodes.slice()
+    const contentNodes = doc.childNodes.slice()
     contentNodes.forEach((c) => { c.parent = null })
     doc.childNodes.length = 0
 
@@ -1047,7 +1047,7 @@ function _findDocTypeElement (doc) {
   if (doc.doctype) return doc.doctype
   const childNodes = doc.childNodes
   for (let i = 0; i < childNodes.length; i++) {
-    let child = childNodes[i]
+    const child = childNodes[i]
     if (child.type === ElementType.Doctype) {
       doc.doctype = child
       return child

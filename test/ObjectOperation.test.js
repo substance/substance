@@ -2,7 +2,7 @@ import { test } from 'substance-test'
 import { ObjectOperation, ArrayOperation, TextOperation, PathObject, cloneDeep } from 'substance'
 
 function checkObjectOperationTransform (test, a, b, input, expected) {
-  let ops = ObjectOperation.transform(a.clone(), b.clone())
+  const ops = ObjectOperation.transform(a.clone(), b.clone())
   let output = ops[1].apply(a.apply(cloneDeep(input)))
   test.deepEqual(output, expected, `(b' o a)('${JSON.stringify(input)}') == '${JSON.stringify(expected)}' with a=${a.toString()}, b'=${ops[1].toString()}`)
   output = ops[0].apply(b.apply(cloneDeep(input)))
@@ -10,55 +10,55 @@ function checkObjectOperationTransform (test, a, b, input, expected) {
 }
 
 test('ObjectOperation: Creating values.', t => {
-  let path = ['a']
-  let val = { bla: 'blupp' }
-  let expected = { a: { bla: 'blupp' } }
-  let op = ObjectOperation.Create(path, val)
-  let obj = {}
+  const path = ['a']
+  const val = { bla: 'blupp' }
+  const expected = { a: { bla: 'blupp' } }
+  const op = ObjectOperation.Create(path, val)
+  const obj = {}
   op.apply(obj)
   t.deepEqual(obj, expected, 'Should create value.')
   t.end()
 })
 
 test('ObjectOperation: Creating nested values.', t => {
-  let path = ['a', 'b']
-  let val = { bla: 'blupp' }
-  let expected = { a: { b: { bla: 'blupp' } } }
-  let op = ObjectOperation.Create(path, val)
-  let obj = {'a': {}}
+  const path = ['a', 'b']
+  const val = { bla: 'blupp' }
+  const expected = { a: { b: { bla: 'blupp' } } }
+  const op = ObjectOperation.Create(path, val)
+  const obj = { a: {} }
   op.apply(obj)
   t.deepEqual(obj, expected, 'Should create nested value.')
   t.end()
 })
 
 test('ObjectOperation: Deleting values.', t => {
-  let path = ['a']
-  let val = 'bla'
-  let op = ObjectOperation.Delete(path, val)
-  let expected = {}
-  let obj = {'a': 'bla'}
+  const path = ['a']
+  const val = 'bla'
+  const op = ObjectOperation.Delete(path, val)
+  const expected = {}
+  const obj = { a: 'bla' }
   op.apply(obj)
   t.deepEqual(obj, expected, 'Should delete value.')
   t.end()
 })
 
 test('ObjectOperation: Deleting nested values.', t => {
-  let path = ['a', 'b']
-  let val = 'bla'
-  let op = ObjectOperation.Delete(path, val)
-  let expected = { a: {} }
-  let obj = { a: { b: 'bla' } }
+  const path = ['a', 'b']
+  const val = 'bla'
+  const op = ObjectOperation.Delete(path, val)
+  const expected = { a: {} }
+  const obj = { a: { b: 'bla' } }
   op.apply(obj)
   t.deepEqual(obj, expected, 'Should delete nested value.')
   t.end()
 })
 
 test('ObjectOperation: Updating a text property.', t => {
-  let obj = {a: 'bla'}
-  let path = ['a']
-  let op1 = ObjectOperation.Update(path, TextOperation.Delete(2, 'a'))
-  let op2 = ObjectOperation.Update(path, TextOperation.Insert(2, 'upp'))
-  let expected = {a: 'blupp'}
+  const obj = { a: 'bla' }
+  const path = ['a']
+  const op1 = ObjectOperation.Update(path, TextOperation.Delete(2, 'a'))
+  const op2 = ObjectOperation.Update(path, TextOperation.Insert(2, 'upp'))
+  const expected = { a: 'blupp' }
   op1.apply(obj)
   op2.apply(obj)
   t.deepEqual(obj, expected)
@@ -66,11 +66,11 @@ test('ObjectOperation: Updating a text property.', t => {
 })
 
 test('ObjectOperation: Updating an array property.', t => {
-  let obj = {a: [1, 2, 3, 4, 5]}
-  let path = ['a']
-  let op1 = ObjectOperation.Update(path, ArrayOperation.Delete(2, 3))
-  let op2 = ObjectOperation.Update(path, ArrayOperation.Insert(4, 6))
-  let expected = {a: [1, 2, 4, 5, 6]}
+  const obj = { a: [1, 2, 3, 4, 5] }
+  const path = ['a']
+  const op1 = ObjectOperation.Update(path, ArrayOperation.Delete(2, 3))
+  const op2 = ObjectOperation.Update(path, ArrayOperation.Insert(4, 6))
+  const expected = { a: [1, 2, 4, 5, 6] }
   op1.apply(obj)
   op2.apply(obj)
   t.deepEqual(obj, expected)
@@ -85,28 +85,28 @@ test('ObjectOperation: Creating an update operation with invalid diff.', t => {
 })
 
 test('ObjectOperation: Creating a top-level property using id.', t => {
-  let obj = {}
-  let id = 'foo'
-  let op = ObjectOperation.Create(id, 'bar')
-  let expected = { 'foo': 'bar' }
+  const obj = {}
+  const id = 'foo'
+  const op = ObjectOperation.Create(id, 'bar')
+  const expected = { foo: 'bar' }
   op.apply(obj)
   t.deepEqual(obj, expected)
   t.end()
 })
 
 test('ObjectOperation: Deleting a top-level property using id.', t => {
-  let obj = { foo: 'bar' }
-  let id = 'foo'
-  let op = ObjectOperation.Delete(id, 'bar')
-  let expected = {}
+  const obj = { foo: 'bar' }
+  const id = 'foo'
+  const op = ObjectOperation.Delete(id, 'bar')
+  const expected = {}
   op.apply(obj)
   t.deepEqual(obj, expected)
   t.end()
 })
 
 test('ObjectOperation: Apply operation on PathObject.', t => {
-  let myObj = new PathObject()
-  let op = ObjectOperation.Set(['foo', 'bar'], null, 'bla')
+  const myObj = new PathObject()
+  const op = ObjectOperation.Set(['foo', 'bar'], null, 'bla')
   op.apply(myObj)
   t.equal(myObj.get(['foo', 'bar']), 'bla')
   t.end()
@@ -164,14 +164,14 @@ test('ObjectOperation: Creating operation with invalid data.', t => {
 })
 
 test('ObjectOperation: Inverse of NOP is NOP', t => {
-  let op = new ObjectOperation({type: ObjectOperation.NOP})
-  let inverse = op.invert()
+  const op = new ObjectOperation({ type: ObjectOperation.NOP })
+  const inverse = op.invert()
   t.ok(inverse.isNOP())
   t.end()
 })
 
 test('ObjectOperation: Inverse of Create is Delete and vice versa', t => {
-  let op = ObjectOperation.Create('test', 'foo')
+  const op = ObjectOperation.Create('test', 'foo')
   let inverse = op.invert()
   t.ok(inverse.isDelete())
   t.equal(inverse.getValue(), 'foo')
@@ -197,8 +197,8 @@ test('ObjectOperation: Inverse of Update is Update', t => {
 })
 
 test('ObjectOperation: Inverse of Set is Set', t => {
-  let op = ObjectOperation.Set(['test', 'foo'], 'foo', 'bar')
-  let inverse = op.invert()
+  const op = ObjectOperation.Set(['test', 'foo'], 'foo', 'bar')
+  const inverse = op.invert()
   t.ok(inverse.isSet())
   t.deepEqual(inverse.getPath(), ['test', 'foo'])
   t.equal(inverse.getValue(), 'foo')
@@ -207,35 +207,35 @@ test('ObjectOperation: Inverse of Set is Set', t => {
 })
 
 test('ObjectOperation: Transformation: everything easy when not the same property', t => {
-  let path1 = ['a']
-  let path2 = ['b']
-  let val1 = 'bla'
-  let val2 = 'blupp'
-  let a = ObjectOperation.Create(path1, val1)
-  let b = ObjectOperation.Create(path2, val2)
-  let ops = ObjectOperation.transform(a, b)
+  const path1 = ['a']
+  const path2 = ['b']
+  const val1 = 'bla'
+  const val2 = 'blupp'
+  const a = ObjectOperation.Create(path1, val1)
+  const b = ObjectOperation.Create(path2, val2)
+  const ops = ObjectOperation.transform(a, b)
   t.deepEqual(ops[0].toJSON(), a.toJSON())
   t.deepEqual(ops[1].toJSON(), b.toJSON())
   t.end()
 })
 
 test('ObjectOperation: Transformation: everything easy when NOP involved', t => {
-  let path1 = ['a']
-  let val1 = 'bla'
-  let a = ObjectOperation.Create(path1, val1)
-  let b = new ObjectOperation({type: ObjectOperation.NOP})
-  let ops = ObjectOperation.transform(a, b)
+  const path1 = ['a']
+  const val1 = 'bla'
+  const a = ObjectOperation.Create(path1, val1)
+  const b = new ObjectOperation({ type: ObjectOperation.NOP })
+  const ops = ObjectOperation.transform(a, b)
   t.deepEqual(ops[0].toJSON(), a.toJSON())
   t.deepEqual(ops[1].toJSON(), b.toJSON())
   t.end()
 })
 
 test('ObjectOperation: Transformation: creating the same value (unresolvable conflict)', t => {
-  let path = ['a']
-  let val1 = 'bla'
-  let val2 = 'blupp'
-  let a = ObjectOperation.Create(path, val1)
-  let b = ObjectOperation.Create(path, val2)
+  const path = ['a']
+  const val1 = 'bla'
+  const val2 = 'blupp'
+  const a = ObjectOperation.Create(path, val1)
+  const b = ObjectOperation.Create(path, val2)
   t.throws(function () {
     ObjectOperation.transform(a, b)
   })
@@ -243,10 +243,10 @@ test('ObjectOperation: Transformation: creating the same value (unresolvable con
 })
 
 test('ObjectOperation: Transformation: creating and updating the same value (unresolvable conflict)', t => {
-  let path = ['a']
-  let val1 = 'bla'
-  let a = ObjectOperation.Create(path, val1)
-  let b = ObjectOperation.Update(path, TextOperation.Insert(1, 'b'))
+  const path = ['a']
+  const val1 = 'bla'
+  const a = ObjectOperation.Create(path, val1)
+  const b = ObjectOperation.Update(path, TextOperation.Insert(1, 'b'))
   t.throws(function () {
     ObjectOperation.transform(a, b)
   })
@@ -254,11 +254,11 @@ test('ObjectOperation: Transformation: creating and updating the same value (unr
 })
 
 test('ObjectOperation: Transformation: creating and setting the same value (unresolvable conflict)', t => {
-  let path = ['a']
-  let val1 = 'bla'
-  let val2 = 'blupp'
-  let a = ObjectOperation.Create(path, val1)
-  let b = ObjectOperation.Set(path, val1, val2)
+  const path = ['a']
+  const val1 = 'bla'
+  const val2 = 'blupp'
+  const a = ObjectOperation.Create(path, val1)
+  const b = ObjectOperation.Set(path, val1, val2)
   t.throws(function () {
     ObjectOperation.transform(a, b)
   })
@@ -266,10 +266,10 @@ test('ObjectOperation: Transformation: creating and setting the same value (unre
 })
 
 test('ObjectOperation: Transformation: creating and deleting the same value (unresolvable conflict)', t => {
-  let path = ['a']
-  let val1 = 'bla'
-  let a = ObjectOperation.Create(path, val1)
-  let b = ObjectOperation.Delete(path, val1)
+  const path = ['a']
+  const val1 = 'bla'
+  const a = ObjectOperation.Create(path, val1)
+  const b = ObjectOperation.Delete(path, val1)
   t.throws(function () {
     ObjectOperation.transform(a, b)
   })
@@ -277,31 +277,31 @@ test('ObjectOperation: Transformation: creating and deleting the same value (unr
 })
 
 test('ObjectOperation: Transformation: deleting the same value', t => {
-  let path = ['a']
-  let val = 'bla'
-  let input = {'a': val}
-  let expected = {}
-  let a = ObjectOperation.Delete(path, val)
-  let b = ObjectOperation.Delete(path, val)
+  const path = ['a']
+  const val = 'bla'
+  const input = { a: val }
+  const expected = {}
+  const a = ObjectOperation.Delete(path, val)
+  const b = ObjectOperation.Delete(path, val)
   checkObjectOperationTransform(t, a, b, input, expected)
   checkObjectOperationTransform(t, b, a, input, expected)
   t.end()
 })
 
 test('ObjectOperation: Transformation: deleting and updating the same value', t => {
-  let path = ['a']
+  const path = ['a']
   let a = ObjectOperation.Delete(path, 'bla')
   let b = ObjectOperation.Update(path, TextOperation.Insert(3, 'pp'))
-  let input = {a: 'bla'}
-  let expected1 = {a: 'blapp'}
+  let input = { a: 'bla' }
+  let expected1 = { a: 'blapp' }
   let expected2 = {}
   checkObjectOperationTransform(t, a, b, input, expected1)
   checkObjectOperationTransform(t, b, a, input, expected2)
   // same with an array operation
   a = ObjectOperation.Delete(path, [1, 2, 3])
   b = ObjectOperation.Update(path, ArrayOperation.Insert(3, 4))
-  input = {a: [1, 2, 3]}
-  expected1 = {a: [1, 2, 3, 4]}
+  input = { a: [1, 2, 3] }
+  expected1 = { a: [1, 2, 3, 4] }
   expected2 = {}
   checkObjectOperationTransform(t, a, b, input, expected1)
   checkObjectOperationTransform(t, b, a, input, expected2)
@@ -309,41 +309,41 @@ test('ObjectOperation: Transformation: deleting and updating the same value', t 
 })
 
 test('ObjectOperation: Transformation: deleting and setting the same value', t => {
-  let path = ['a']
-  let a = ObjectOperation.Delete(path, 'bla')
-  let b = ObjectOperation.Set(path, 'bla', 'blupp')
-  let input = {a: 'bla'}
-  let expected1 = {a: 'blupp'}
-  let expected2 = {}
+  const path = ['a']
+  const a = ObjectOperation.Delete(path, 'bla')
+  const b = ObjectOperation.Set(path, 'bla', 'blupp')
+  const input = { a: 'bla' }
+  const expected1 = { a: 'blupp' }
+  const expected2 = {}
   checkObjectOperationTransform(t, a, b, input, expected1)
   checkObjectOperationTransform(t, b, a, input, expected2)
   t.end()
 })
 
 test('ObjectOperation: Transformation: updating the same value', t => {
-  let path = ['a']
+  const path = ['a']
   let a = ObjectOperation.Update(path, TextOperation.Insert(3, 'pp'))
   let b = ObjectOperation.Update(path, TextOperation.Insert(3, 'ff'))
-  let input = {a: 'bla'}
-  let expected1 = {a: 'blappff'}
-  let expected2 = {a: 'blaffpp'}
+  let input = { a: 'bla' }
+  let expected1 = { a: 'blappff' }
+  let expected2 = { a: 'blaffpp' }
   checkObjectOperationTransform(t, a, b, input, expected1)
   checkObjectOperationTransform(t, b, a, input, expected2)
   // same with array updates
   a = ObjectOperation.Update(path, ArrayOperation.Insert(2, 3))
   b = ObjectOperation.Update(path, ArrayOperation.Insert(2, 4))
-  input = {a: [1, 2, 5]}
-  expected1 = {a: [1, 2, 3, 4, 5]}
-  expected2 = {a: [1, 2, 4, 3, 5]}
+  input = { a: [1, 2, 5] }
+  expected1 = { a: [1, 2, 3, 4, 5] }
+  expected2 = { a: [1, 2, 4, 3, 5] }
   checkObjectOperationTransform(t, a, b, input, expected1)
   checkObjectOperationTransform(t, b, a, input, expected2)
   t.end()
 })
 
 test('ObjectOperation: Transformation: updating and setting the same value (unresolvable conflict)', t => {
-  let path = ['a']
-  let a = ObjectOperation.Update(path, TextOperation.Insert(3, 'ff'))
-  let b = ObjectOperation.Set(path, 'bla', 'blupp')
+  const path = ['a']
+  const a = ObjectOperation.Update(path, TextOperation.Insert(3, 'ff'))
+  const b = ObjectOperation.Set(path, 'bla', 'blupp')
   t.throws(function () {
     ObjectOperation.transform(a, b)
   })
@@ -351,34 +351,34 @@ test('ObjectOperation: Transformation: updating and setting the same value (unre
 })
 
 test('ObjectOperation: Transformation: setting the same value', t => {
-  let path = ['a']
-  let a = ObjectOperation.Set(path, 'bla', 'blapp')
-  let b = ObjectOperation.Set(path, 'bla', 'blupp')
-  let input = {a: 'bla'}
-  let expected1 = {a: 'blupp'}
-  let expected2 = {a: 'blapp'}
+  const path = ['a']
+  const a = ObjectOperation.Set(path, 'bla', 'blapp')
+  const b = ObjectOperation.Set(path, 'bla', 'blupp')
+  const input = { a: 'bla' }
+  const expected1 = { a: 'blupp' }
+  const expected2 = { a: 'blapp' }
   checkObjectOperationTransform(t, a, b, input, expected1)
   checkObjectOperationTransform(t, b, a, input, expected2)
   t.end()
 })
 
 test('ObjectOperation: ObjectOperation with the same path are conflicts.', t => {
-  let a = ObjectOperation.Set(['bla', 'blupp'], null, 'foo')
-  let b = ObjectOperation.Set(['bla', 'blupp'], null, 'bar')
+  const a = ObjectOperation.Set(['bla', 'blupp'], null, 'foo')
+  const b = ObjectOperation.Set(['bla', 'blupp'], null, 'bar')
   t.ok(a.hasConflict(b) && b.hasConflict(a))
   t.end()
 })
 
 test('ObjectOperation: NOPs have never conflicts.', t => {
-  let a = ObjectOperation.Set(['bla', 'blupp'], null, 'foo')
-  let b = new ObjectOperation({type: ObjectOperation.NOP})
+  const a = ObjectOperation.Set(['bla', 'blupp'], null, 'foo')
+  const b = new ObjectOperation({ type: ObjectOperation.NOP })
   t.ok(!a.hasConflict(b) && !b.hasConflict(a))
   t.end()
 })
 
 test("ObjectOperation: With option 'no-conflict' conflicting operations can not be transformed.", t => {
-  let a = ObjectOperation.Create('bla', 'blupp')
-  let b = ObjectOperation.Create('bla', 'blupp')
+  const a = ObjectOperation.Create('bla', 'blupp')
+  const b = ObjectOperation.Create('bla', 'blupp')
   t.throws(function () {
     ObjectOperation.transform(a, b, { 'no-conflict': true })
   }, 'Transforming conflicting ops should throw when option "no-conflict" is enabled.')
@@ -386,7 +386,7 @@ test("ObjectOperation: With option 'no-conflict' conflicting operations can not 
 })
 
 test('ObjectOperation: JSON deserialisation', t => {
-  let path = ['test', 'foo']
+  const path = ['test', 'foo']
 
   let op = ObjectOperation.fromJSON({
     type: ObjectOperation.SET,

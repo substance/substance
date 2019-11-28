@@ -3,7 +3,7 @@ import setupEditor from './shared/setupEditor'
 import simple from './fixture/simple'
 
 test('EditorSession: Keeping TransactionDocument up-to-date.', function (t) {
-  let { editorSession, doc } = setupEditor(t, simple)
+  const { editorSession, doc } = setupEditor(t, simple)
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo' })
   editorSession.transaction((tx) => {
     const p = tx.get('foo')
@@ -14,7 +14,7 @@ test('EditorSession: Keeping TransactionDocument up-to-date.', function (t) {
 })
 
 test('EditorSession: Undoing and redoing a change.', function (t) {
-  let { editorSession, doc } = setupEditor(t, simple)
+  const { editorSession, doc } = setupEditor(t, simple)
   editorSession.transaction(function (tx) {
     tx.update(['p1', 'content'], { type: 'insert', start: 3, text: 'XXX' })
   })
@@ -30,7 +30,7 @@ test('EditorSession: Undoing and redoing a change.', function (t) {
 })
 
 test('EditorSession: Selections after undo/redo.', function (t) {
-  let { editorSession, doc } = setupEditor(t, simple)
+  const { editorSession, doc } = setupEditor(t, simple)
   var path = ['p1', 'content']
   editorSession.setSelection({
     type: 'property',

@@ -1,5 +1,6 @@
 import DomUtils from '../dom/domutils'
 import { getChildren, getParent } from './documentHelpers'
+import hasOwnProperty from '../util/hasOwnProperty'
 
 export default class DocumentNodeSelectAdapter extends DomUtils.DomUtils {
   // we only have nodes which correspond to DOM elements
@@ -29,7 +30,7 @@ export default class DocumentNodeSelectAdapter extends DomUtils.DomUtils {
     if (name === 'id') {
       return true
     } else {
-      return node.hasOwnProperty(name)
+      return hasOwnProperty(node, name)
     }
   }
 

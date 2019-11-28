@@ -8,14 +8,14 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     const ContentClass = this.ContentClass
     const state = this.state
 
-    let el = $$('span')
+    const el = $$('span')
     el.addClass(this.getClassNames())
       .addClass('sc-inline-node')
       .addClass('sm-' + node.type)
       .attr('data-id', node.id)
       .attr('data-inline', '1')
 
-    let disabled = this.isDisabled()
+    const disabled = this.isDisabled()
 
     if (state.mode) {
       el.addClass('sm-' + state.mode)
@@ -79,7 +79,7 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
     // console.log('IsolatedNodeComponent: selecting node.');
     const editorSession = this.getEditorSession()
     const node = this.props.node
-    let selData = {
+    const selData = {
       type: 'property',
       path: node.start.path,
       startOffset: node.start.offset,
@@ -134,12 +134,12 @@ export default class IsolatedInlineNodeComponent extends AbstractIsolatedNodeCom
         }
       }
     }
-    let isolatedNodeComponent = surface.context.isolatedNodeComponent
+    const isolatedNodeComponent = surface.context.isolatedNodeComponent
     if (!isolatedNodeComponent) return null
     if (isolatedNodeComponent === this) {
       return { mode: 'focused' }
     }
-    let isolatedNodes = this._getIsolatedNodes(sel, selState)
+    const isolatedNodes = this._getIsolatedNodes(sel, selState)
     if (isolatedNodes.indexOf(this) > -1) {
       return { mode: 'co-focused' }
     }

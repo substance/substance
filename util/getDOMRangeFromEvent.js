@@ -2,8 +2,8 @@ import isNil from './isNil'
 
 export default function getDOMRangeFromEvent (evt) {
   let range
-  let x = evt.clientX
-  let y = evt.clientY
+  const x = evt.clientX
+  const y = evt.clientY
   // Try the simple IE way first
   if (document.body.createTextRange) {
     range = document.body.createTextRange()
@@ -17,7 +17,7 @@ export default function getDOMRangeFromEvent (evt) {
       range.collapse(true)
     // Try the standards-based way next
     } else if (document.caretPositionFromPoint) {
-      let pos = document.caretPositionFromPoint(x, y)
+      const pos = document.caretPositionFromPoint(x, y)
       range = document.createRange()
       range.setStart(pos.offsetNode, pos.offset)
       range.collapse(true)

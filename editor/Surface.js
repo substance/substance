@@ -1,7 +1,6 @@
 import keys from '../util/keys'
 import platform from '../util/platform'
 import startsWith from '../util/startsWith'
-import parseKeyEvent from '../util/parseKeyEvent'
 import { getDOMRangeFromEvent } from '../util/windowUtils'
 import DefaultDOMElement from '../dom/DefaultDOMElement'
 import Component from '../dom/Component'
@@ -66,20 +65,12 @@ export default class Surface extends Component {
     if (surfaceManager && this.isEditable()) {
       surfaceManager.registerSurface(this)
     }
-    const globalEventHandler = this.getGlobalEventHandler()
-    if (globalEventHandler) {
-      globalEventHandler.addEventListener('keydown', this._muteNativeHandlers, this)
-    }
   }
 
   dispose () {
     const surfaceManager = this.getSurfaceManager()
     // ATTENTION: no matter if registered or not, we always try to unregister
     surfaceManager.unregisterSurface(this)
-    const globalEventHandler = this.getGlobalEventHandler()
-    if (globalEventHandler) {
-      globalEventHandler.removeEventListener('keydown', this._muteNativeHandlers)
-    }
   }
 
   didUpdate () {
@@ -87,8 +78,8 @@ export default class Surface extends Component {
   }
 
   render ($$) {
-    let tagName = this.props.tagName || 'div'
-    let el = $$(tagName)
+    const tagName = this.props.tagName || 'div'
+    const el = $$(tagName)
       .addClass(this._getClassNames())
       .attr('tabindex', 2)
       .attr('data-surface-id', this.id)
@@ -243,7 +234,7 @@ export default class Surface extends Component {
     if (this.isDisabled()) return
     if (platform.inBrowser) {
       // console.log('Surface.rerenderDOMSelection', this.__id__);
-      let sel = this.getEditorSession().getSelection()
+      const sel = this.getEditorSession().getSelection()
       if (sel.surfaceId === this.getId()) {
         this.domSelection.setSelection(sel)
         // TODO: remove this HACK
@@ -314,7 +305,7 @@ export default class Surface extends Component {
     event.preventDefault()
     event.stopPropagation()
     if (!event.data) return
-    let ch = event.data
+    const ch = event.data
     const keyboardManager = this.getKeyboardManager()
     if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
       this.type(ch)
@@ -333,11 +324,11 @@ export default class Surface extends Component {
     // In that case, the first inserted character must be removed again
     if (event.data) {
       const editorSession = this.getEditorSession()
-      let l = event.data.length
-      let sel = editorSession.getSelection()
+      const l = event.data.length
+      const sel = editorSession.getSelection()
       if (sel.isPropertySelection() && sel.isCollapsed()) {
         // console.log("Overwriting composed character")
-        let offset = sel.start.offset
+        const offset = sel.start.offset
         editorSession.setSelection(sel.createWithNewRange(offset - l, offset))
       }
     }
@@ -353,7 +344,7 @@ export default class Surface extends Component {
       event.stopPropagation()
       if (!event.data) return
       this._delayed(() => {
-        let ch = event.data
+        const ch = event.data
         const keyboardManager = this.getKeyboardManager()
         if (!keyboardManager || !keyboardManager.onTextInput(ch)) {
           this.type(ch)
@@ -440,7 +431,7 @@ export default class Surface extends Component {
 
     // special treatment for triple clicks
     if (!(platform.isIE && platform.version < 12) && event.detail >= 3) {
-      let sel = this.getEditorSession().getSelection()
+      const sel = this.getEditorSession().getSelection()
       if (sel.isPropertySelection()) {
         this._selectProperty(sel.path)
         event.preventDefault()
@@ -464,7 +455,7 @@ export default class Surface extends Component {
     // NOTE: additionally we need to listen to mousup on document to catch events outside the surface
     // TODO: it could still be possible not to receive this event, if mouseup is triggered on a component that consumes the event
     if (platform.inBrowser) {
-      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
+      const documentEl = DefaultDOMElement.wrapNativeElement(window.document)
       documentEl.on('mouseup', this.onMouseUp, this)
     }
   }
@@ -473,7 +464,7 @@ export default class Surface extends Component {
     // console.log('Surface.onMouseUp', this.id)
     this.el.off('mouseup', this.onMouseUp, this)
     if (platform.inBrowser) {
-      let documentEl = DefaultDOMElement.wrapNativeElement(window.document)
+      const documentEl = DefaultDOMElement.wrapNativeElement(window.document)
       documentEl.off('mouseup', this.onMouseUp, this)
     }
     // console.log('Surface.onMouseup', this.id);
@@ -487,7 +478,7 @@ export default class Surface extends Component {
     // holds the old value, and is set to the correct selection after this
     // being called.
     this._delayed(() => {
-      let sel = this.domSelection.getSelection()
+      const sel = this.domSelection.getSelection()
       this._setSelection(sel)
     })
   }
@@ -497,40 +488,40 @@ export default class Surface extends Component {
   // our model selection.
   onContextMenu (event) {
     if (!this._shouldConsumeEvent(event)) return
-    let sel = this.domSelection.getSelection()
+    const sel = this.domSelection.getSelection()
     this._setSelection(sel)
   }
 
   onNativeBlur () {
     // console.log('Native blur on surface', this.getId());
-    let _state = this._state
+    const _state = this._state
     _state.hasNativeFocus = false
   }
 
   onNativeFocus () {
     // console.log('Native focus on surface', this.getId());
-    let _state = this._state
+    const _state = this._state
     _state.hasNativeFocus = true
   }
 
   _onCopy (e) {
     e.preventDefault()
     e.stopPropagation()
-    let clipboardData = e.clipboardData
+    const clipboardData = e.clipboardData
     this.clipboard.copy(clipboardData, this.context)
   }
 
   _onCut (e) {
     e.preventDefault()
     e.stopPropagation()
-    let clipboardData = e.clipboardData
+    const clipboardData = e.clipboardData
     this.clipboard.cut(clipboardData, this.context)
   }
 
   _onPaste (e) {
     e.preventDefault()
     e.stopPropagation()
-    let clipboardData = e.clipboardData
+    const clipboardData = e.clipboardData
     // TODO: allow to force plain-text paste
     this.clipboard.paste(clipboardData, this.context)
   }
@@ -538,7 +529,7 @@ export default class Surface extends Component {
   // Internal implementations
 
   _onSelectionChanged (selection) {
-    let newMode = this._deriveModeFromSelection(selection)
+    const newMode = this._deriveModeFromSelection(selection)
     if (this.state.mode !== newMode) {
       this.extendState({
         mode: newMode
@@ -549,8 +540,8 @@ export default class Surface extends Component {
   // helper to manage surface mode which is derived from the current selection
   _deriveModeFromSelection (sel) {
     if (!sel) return null
-    let surfaceId = sel.surfaceId
-    let id = this.getId()
+    const surfaceId = sel.surfaceId
+    const id = this.getId()
     let mode
     if (startsWith(surfaceId, id)) {
       if (surfaceId.length === id.length) {
@@ -571,10 +562,10 @@ export default class Surface extends Component {
     // otherwise the cursor can leave the isolated area..
     function isInsideOpenIsolatedNode (editorSession, surfaceManager) {
       if (surfaceManager) {
-        let sel = editorSession.getSelection()
-        let surface = surfaceManager.getSurface(sel.surfaceId)
+        const sel = editorSession.getSelection()
+        const surface = surfaceManager.getSurface(sel.surfaceId)
         if (surface) {
-          let isolatedNodeComponent = surface.context.isolatedNodeComponent
+          const isolatedNodeComponent = surface.context.isolatedNodeComponent
           if (isolatedNodeComponent) {
             return isolatedNodeComponent.isOpen()
           }
@@ -630,11 +621,11 @@ export default class Surface extends Component {
 
   _handleLeftOrRightArrowKey (event) {
     event.stopPropagation()
-    let direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
+    const direction = (event.keyCode === keys.LEFT) ? 'left' : 'right'
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     this._delayed(() => {
-      this._updateModelSelection({direction})
+      this._updateModelSelection({ direction })
     })
   }
 
@@ -643,7 +634,7 @@ export default class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     this._delayed(() => {
-      let options = {
+      const options = {
         direction: (event.keyCode === keys.UP) ? 'left' : 'right'
       }
       this._updateModelSelection(options)
@@ -655,7 +646,7 @@ export default class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     this._delayed(() => {
-      let options = {
+      const options = {
         direction: (event.keyCode === keys.HOME) ? 'left' : 'right'
       }
       this._updateModelSelection(options)
@@ -667,7 +658,7 @@ export default class Surface extends Component {
     // Note: we need this timeout so that CE updates the DOM selection first
     // before we map it to the model
     this._delayed(() => {
-      let options = {
+      const options = {
         direction: (event.keyCode === keys.PAGEUP) ? 'left' : 'right'
       }
       this._updateModelSelection(options)
@@ -721,7 +712,7 @@ export default class Surface extends Component {
   _handleDeleteKey (event) {
     event.preventDefault()
     event.stopPropagation()
-    let direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right'
+    const direction = (event.keyCode === keys.BACKSPACE) ? 'left' : 'right'
     this.getEditorSession().transaction((tx) => {
       tx.deleteCharacter(direction)
     }, { action: 'delete' })
@@ -747,7 +738,7 @@ export default class Surface extends Component {
   }
 
   _updateModelSelection (options) {
-    let sel = this.domSelection.getSelection(options)
+    const sel = this.domSelection.getSelection(options)
     // console.log('Surface: updating model selection', sel.toString());
     // NOTE: this will also lead to a rerendering of the selection
     // via session.on('update')
@@ -755,8 +746,8 @@ export default class Surface extends Component {
   }
 
   _selectProperty (path) {
-    let doc = this.getDocument()
-    let text = doc.get(path)
+    const doc = this.getDocument()
+    const text = doc.get(path)
     this._setSelection(doc.createSelection({
       type: 'property',
       path: path,
@@ -766,8 +757,8 @@ export default class Surface extends Component {
   }
 
   _renderNode ($$, nodeId) {
-    let doc = this.getDocument()
-    let node = doc.get(nodeId)
+    const doc = this.getDocument()
+    const node = doc.get(nodeId)
     let ComponentClass = this.getComponent(node.type, true)
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
@@ -787,20 +778,20 @@ export default class Surface extends Component {
   // only take care of events which are emitted on targets which belong to this surface
   _shouldConsumeEvent (event) {
     // console.log('should consume?', event.target, this.id)
-    let comp = Component.unwrap(event.target)
+    const comp = Component.unwrap(event.target)
     return (comp && (comp === this || comp.context.surface === this))
   }
 
   // Used by DragManager
   getSelectionFromEvent (event) {
-    let domRange = getDOMRangeFromEvent(event)
-    let sel = this.domSelection.getSelectionForDOMRange(domRange)
+    const domRange = getDOMRangeFromEvent(event)
+    const sel = this.domSelection.getSelectionForDOMRange(domRange)
     sel.surfaceId = this.getId()
     return sel
   }
 
   setSelectionFromEvent (event) {
-    let sel = this.getSelectionFromEvent(event)
+    const sel = this.getSelectionFromEvent(event)
     if (sel) {
       this._state.skipNextFocusEvent = true
       this._setSelection(sel)
@@ -816,30 +807,6 @@ export default class Surface extends Component {
   _delayed (fn) {
     if (platform.inBrowser) {
       window.setTimeout(fn, BROWSER_DELAY)
-    }
-  }
-
-  // prevent the native behavior of contenteditable key shorcuts
-  _muteNativeHandlers (event) {
-    let contentEditableShortcuts
-
-    if (platform.isMac) {
-      contentEditableShortcuts = [
-        'META+66', // Cmd+Bold
-        'META+73', // Cmd+Italic
-        'META+85' // Cmd+Underline
-      ]
-    } else {
-      contentEditableShortcuts = [
-        'CTRL+66', // Ctrl+Bold
-        'CTRL+73', // Ctrl+Italic
-        'CTRL+85' // Ctrl+Underline
-      ]
-    }
-
-    const key = parseKeyEvent(event)
-    if (contentEditableShortcuts.indexOf(key) > -1) {
-      event.preventDefault()
     }
   }
 }
@@ -860,7 +827,7 @@ Surface.prototype._isSurface = true
   - nested containers: 'body/section1'
 */
 Surface.createSurfaceId = function (surface) {
-  let parentSurfaceId = surface.context.parentSurfaceId
+  const parentSurfaceId = surface.context.parentSurfaceId
   if (parentSurfaceId) {
     return parentSurfaceId + '/' + surface.name
   } else {

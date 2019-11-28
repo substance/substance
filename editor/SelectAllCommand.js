@@ -11,10 +11,10 @@ import Command from './Command'
 */
 export default class SelectAllCommand extends Command {
   getCommandState (params) {
-    let editorSession = params.editorSession
-    let isBlurred = editorSession.isBlurred()
-    let sel = editorSession.getSelection()
-    let disabled = (
+    const editorSession = params.editorSession
+    const isBlurred = editorSession.isBlurred()
+    const sel = editorSession.getSelection()
+    const disabled = (
       isBlurred ||
       !sel || sel.isNull()
     )
@@ -22,19 +22,19 @@ export default class SelectAllCommand extends Command {
   }
 
   execute (params, context) {
-    let editorSession = context.editorSession
-    let doc = editorSession.getDocument()
-    let editorState = editorSession.getEditorState()
-    let focusedSurface = editorState.focusedSurface
+    const editorSession = context.editorSession
+    const doc = editorSession.getDocument()
+    const editorState = editorSession.getEditorState()
+    const focusedSurface = editorState.focusedSurface
     if (focusedSurface) {
       let sel = null
-      let surfaceId = focusedSurface.id
+      const surfaceId = focusedSurface.id
       if (focusedSurface._isContainerEditor) {
-        let containerPath = focusedSurface.getContainerPath()
-        let nodeIds = doc.get(containerPath)
+        const containerPath = focusedSurface.getContainerPath()
+        const nodeIds = doc.get(containerPath)
         if (nodeIds.length === 0) return false
-        let firstNodeId = nodeIds[0]
-        let lastNodeId = last(nodeIds)
+        const firstNodeId = nodeIds[0]
+        const lastNodeId = last(nodeIds)
         sel = {
           type: 'container',
           startPath: [firstNodeId],
@@ -45,8 +45,8 @@ export default class SelectAllCommand extends Command {
           surfaceId
         }
       } else if (focusedSurface._isTextPropertyEditor) {
-        let path = focusedSurface.getPath()
-        let text = doc.get(path)
+        const path = focusedSurface.getPath()
+        const text = doc.get(path)
         sel = {
           type: 'property',
           path: path,

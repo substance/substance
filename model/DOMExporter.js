@@ -15,7 +15,7 @@ export default class DOMExporter {
     }
     this.converters = new Registry()
     params.converters.forEach(Converter => {
-      let converter = isFunction(Converter) ? new Converter() : Converter
+      const converter = isFunction(Converter) ? new Converter() : Converter
       if (!converter.type) {
         console.error('Converter must provide the type of the associated node.', converter)
         return
@@ -64,9 +64,9 @@ export default class DOMExporter {
       throw new Error('Illegal arguments: containerPath is mandatory.')
     }
     this.state.doc = doc
-    let ids = doc.get(containerPath)
-    let elements = ids.map(id => {
-      let node = doc.get(id)
+    const ids = doc.get(containerPath)
+    const elements = ids.map(id => {
+      const node = doc.get(id)
       return this.convertNode(node)
     })
     return elements
@@ -101,15 +101,15 @@ export default class DOMExporter {
   convertProperty (doc, path, options) {
     this.state.doc = doc
     this.initialize(doc, options)
-    let wrapper = this.$$('div')
+    const wrapper = this.$$('div')
       .append(this.annotatedText(path))
     return wrapper.innerHTML
   }
 
   annotatedText (path, doc) {
     doc = doc || this.state.doc
-    let text = doc.get(path)
-    let annotations = doc.getIndex('annotations').get(path)
+    const text = doc.get(path)
+    const annotations = doc.getIndex('annotations').get(path)
     return this._annotatedText(text, annotations)
   }
 
@@ -134,7 +134,7 @@ export default class DOMExporter {
   }
 
   _annotatedText (text, annotations) {
-    let annotator = new Fragmenter()
+    const annotator = new Fragmenter()
     annotator.onText = (context, text) => {
       if (text) {
         // ATTENTION: only encode if this is desired, e.g. '"' would be encoded as '&quot;' but as Clipboard HTML this is not understood by
@@ -151,7 +151,7 @@ export default class DOMExporter {
       }
     }
     annotator.onClose = (fragment, context, parentContext) => {
-      let anno = fragment.node
+      const anno = fragment.node
       let converter = this.getNodeConverter(anno)
       if (!converter) {
         converter = this.getDefaultPropertyAnnotationConverter()
@@ -189,7 +189,7 @@ export default class DOMExporter {
       }
       parentContext.children.push(el)
     }
-    let wrapper = { children: [] }
+    const wrapper = { children: [] }
     annotator.start(wrapper, text, annotations)
     return wrapper.children
   }
@@ -202,8 +202,8 @@ export default class DOMExporter {
   */
   _convertPropertyAnnotation (anno) {
     // take only the annotations within the range of the anno
-    let wrapper = this.$$('div').append(this.annotatedText(anno.path))
-    let el = wrapper.find('[' + this.idAttribute + '="' + anno.id + '"]')
+    const wrapper = this.$$('div').append(this.annotatedText(anno.path))
+    const el = wrapper.find('[' + this.idAttribute + '="' + anno.id + '"]')
     return el
   }
 }

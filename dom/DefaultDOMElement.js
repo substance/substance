@@ -5,7 +5,7 @@ import MemoryDOMElement from './MemoryDOMElement'
 /**
   A Bridge to the default DOMElement implementation, either BrowserDOMElement, or MemoryDOMElement.
 */
-let DefaultDOMElement = {}
+const DefaultDOMElement = {}
 
 DefaultDOMElement.createDocument = function (format, opts) {
   return _getDefaultImpl().createDocument(format, opts)
@@ -14,14 +14,14 @@ DefaultDOMElement.createDocument = function (format, opts) {
 /* istanbul ignore next */
 DefaultDOMElement.createElement = function (tagName) {
   console.error('DEPRECATED: every element should have an ownerDocument. Use DefaultDOMElement.createDocument() to create a document first')
-  let doc = DefaultDOMElement.createDocument('html')
+  const doc = DefaultDOMElement.createDocument('html')
   return doc.createElement(tagName)
 }
 
 /* istanbul ignore next */
 DefaultDOMElement.createTextNode = function (text) {
   console.error('DEPRECATED: every element should have a ownerDocument. Use DefaultDOMElement.createDocument() to create a document first')
-  let doc = DefaultDOMElement.createDocument('html')
+  const doc = DefaultDOMElement.createDocument('html')
   return doc.createTextNode(text)
 }
 
@@ -50,7 +50,7 @@ DefaultDOMElement.parseXML = function (xml, options) {
 }
 
 DefaultDOMElement.parseSnippet = function (str, format) {
-  return _getDefaultImpl().parseMarkup(str, format, {snippet: true})
+  return _getDefaultImpl().parseMarkup(str, format, { snippet: true })
 }
 
 DefaultDOMElement.wrap =

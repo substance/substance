@@ -10,7 +10,7 @@ export default class VfsStorageClient {
   }
 
   read (archiveId, cb) {
-    let rawArchive = _readRawArchive(this.vfs, archiveId, this.baseUrl)
+    const rawArchive = _readRawArchive(this.vfs, archiveId, this.baseUrl)
     if (cb) {
       cb(null, rawArchive)
     } else {
@@ -27,11 +27,11 @@ export default class VfsStorageClient {
 }
 
 function _readRawArchive (fs, archiveId, baseUrl = '') {
-  let manifestXML = fs.readFileSync(`${archiveId}/manifest.xml`)
-  let manifest = ManifestLoader.load(manifestXML)
-  let docs = manifest.getDocumentNodes()
-  let assets = manifest.getAssetNodes()
-  let rawArchive = {
+  const manifestXML = fs.readFileSync(`${archiveId}/manifest.xml`)
+  const manifest = ManifestLoader.load(manifestXML)
+  const docs = manifest.getDocumentNodes()
+  const assets = manifest.getAssetNodes()
+  const rawArchive = {
     version: '0',
     resources: {
       'manifest.xml': {
@@ -42,9 +42,9 @@ function _readRawArchive (fs, archiveId, baseUrl = '') {
   }
 
   docs.forEach(entry => {
-    let path = entry.path
+    const path = entry.path
     if (fs.existsSync(`${archiveId}/${entry.path}`)) {
-      let content = fs.readFileSync(`${archiveId}/${entry.path}`)
+      const content = fs.readFileSync(`${archiveId}/${entry.path}`)
       rawArchive.resources[path] = {
         encoding: 'utf8',
         data: content
@@ -54,7 +54,7 @@ function _readRawArchive (fs, archiveId, baseUrl = '') {
     }
   })
   assets.forEach(asset => {
-    let path = asset.path
+    const path = asset.path
     // TODO: we could store other stats and maybe mime-types in VFS
     rawArchive.resources[path] = {
       encoding: 'url',
@@ -65,10 +65,10 @@ function _readRawArchive (fs, archiveId, baseUrl = '') {
 }
 
 function _updateRawArchive (fs, archiveId, rawArchive, baseUrl = '') {
-  let paths = Object.keys(rawArchive.resources)
-  for (let path of paths) {
-    let resource = rawArchive.resources[path]
-    let data = resource.data
+  const paths = Object.keys(rawArchive.resources)
+  for (const path of paths) {
+    const resource = rawArchive.resources[path]
+    const data = resource.data
     fs.writeFileSync(`${archiveId}/${path}`, data)
   }
 }

@@ -23,7 +23,7 @@ class IncrementalData extends Data {
     if (nodeData._isNode) {
       nodeData = nodeData.toJSON()
     }
-    let op = ObjectOperation.Create([nodeData.id], nodeData)
+    const op = ObjectOperation.Create([nodeData.id], nodeData)
     this.apply(op)
     return op
   }
@@ -94,7 +94,7 @@ class IncrementalData extends Data {
     } else if (op.type === ObjectOperation.DELETE) {
       super.delete(op.val.id)
     } else if (op.type === ObjectOperation.UPDATE) {
-      let diff = op.diff
+      const diff = op.diff
       super.update(op.path, diff)
     } else if (op.type === ObjectOperation.SET) {
       super.set(op.path, op.val)

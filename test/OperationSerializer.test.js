@@ -1,6 +1,8 @@
 import { test } from 'substance-test'
-import { OperationSerializer, ObjectOperation, TextOperation,
-  ArrayOperation } from 'substance'
+import {
+  OperationSerializer, ObjectOperation, TextOperation,
+  ArrayOperation
+} from 'substance'
 
 test('OperationSerializer: Serializing create', t => {
   var p = { id: 'p1', type: 'paragraph', content: 'foo' }

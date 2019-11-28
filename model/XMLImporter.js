@@ -8,13 +8,13 @@ export default class XMLImporter extends DOMImporter {
 
   importDocument (xml) {
     this.reset()
-    let dom = DefaultDOMElement.parseXML(xml)
+    const dom = DefaultDOMElement.parseXML(xml)
     this.convertDocument(dom)
     return this.state.doc
   }
 
   convertDocument (xmlDocument) {
-    let rootNode = xmlDocument.children[0]
+    const rootNode = xmlDocument.children[0]
     if (!rootNode) throw new Error('XML Root node could not be found.')
     this.convertElement(rootNode)
   }

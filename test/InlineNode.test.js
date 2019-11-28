@@ -7,8 +7,8 @@ import twoParagraphs from './fixture/twoParagraphs'
 // body/in1 means parent surface of in1 is body -- while in1 is actually on p1.content, which is not a surface on its own
 
 test('InlineNode: InlineNodes should be not selected when selection is null', t => {
-  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let comps = editor.findAll('.sc-inline-node')
+  const { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  const comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection(null)
   comps.forEach(comp => {
     t.ok(comp.isNotSelected(), "node '" + comp.getId() + "' should not be selected.")
@@ -17,8 +17,8 @@ test('InlineNode: InlineNodes should be not selected when selection is null', t 
 })
 
 test('InlineNode: InlineNodes should be not selected when selection is somewhere else', t => {
-  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let comps = editor.findAll('.sc-inline-node')
+  const { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  const comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -32,8 +32,8 @@ test('InlineNode: InlineNodes should be not selected when selection is somewhere
 })
 
 test("InlineNode: InlineNode should be 'selected' with when the inline node is selected", t => {
-  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let comps = editor.findAll('.sc-inline-node')
+  const { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  const comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -53,8 +53,8 @@ test("InlineNode: InlineNode should be 'selected' with when the inline node is s
 })
 
 test("InlineNode: InlineNode should be 'co-selected' when selection is spanning an inline node", t => {
-  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let comps = editor.findAll('.sc-inline-node')
+  const { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  const comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['p1', 'content'],
@@ -74,8 +74,8 @@ test("InlineNode: InlineNode should be 'co-selected' when selection is spanning 
 })
 
 test("InlineNode: InlineNode should be 'focused' when having the selection", t => {
-  let { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
-  let comps = editor.findAll('.sc-inline-node')
+  const { editorSession, editor } = setupEditor(t, paragraphsWithInlineNodes)
+  const comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['in1', 'content'],
@@ -95,8 +95,8 @@ test("InlineNode: InlineNode should be 'focused' when having the selection", t =
 })
 
 test("InlineNode: InlineNode should be 'co-focused' when a nested inline node has the selection", t => {
-  let { editorSession, editor } = setupEditor(t, nestedInlineNode)
-  let comps = editor.findAll('.sc-inline-node')
+  const { editorSession, editor } = setupEditor(t, nestedInlineNode)
+  const comps = editor.findAll('.sc-inline-node')
   editorSession.setSelection({
     type: 'property',
     path: ['in2', 'content'],
@@ -108,17 +108,17 @@ test("InlineNode: InlineNode should be 'co-focused' when a nested inline node ha
     'body/in1/in1.content/in2': 'focused'
   }
   comps.forEach(comp => {
-    let id = comp.getId()
+    const id = comp.getId()
     t.equal(comp.getMode(), expected[id], "node '" + id + "' should be " + (expected[id] || 'not selected'))
   })
   t.end()
 })
 
 test('InlineNode: Click on InlineNode inside IsolatedNode should select InlineNode', t => {
-  let { editor, editorSession } = setupEditor(t, inlineNodeInsideIsolatedNode)
-  let comp = editor.find('*[data-id="in"]')
+  const { editor, editorSession } = setupEditor(t, inlineNodeInsideIsolatedNode)
+  const comp = editor.find('*[data-id="in"]')
   comp.click()
-  let sel = editorSession.getSelection()
+  const sel = editorSession.getSelection()
   t.deepEqual({
     path: sel.path,
     startOffset: sel.start.offset,
@@ -164,7 +164,7 @@ function paragraphsWithInlineNodes (doc) {
 // co-focusing an inline node is only possible, if the inline node itself contains
 // content with an inline node (or isolated node)
 function nestedInlineNode (doc) {
-  let tx = new EditingInterface(doc)
+  const tx = new EditingInterface(doc)
   twoParagraphs(tx)
   tx.setSelection({
     type: 'property',
@@ -189,8 +189,8 @@ function nestedInlineNode (doc) {
 }
 
 function inlineNodeInsideIsolatedNode (doc) {
-  let tx = new EditingInterface(doc)
-  let body = tx.get('body')
+  const tx = new EditingInterface(doc)
+  const body = tx.get('body')
   documentHelpers.createNodeFromJson(tx, {
     type: 'structured-node',
     id: 'sn',

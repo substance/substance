@@ -8,14 +8,14 @@ export default class SelectionStateReducer {
 
   update () {
     const editorState = this.editorState
-    let doc = editorState.document
-    let sel = editorState.selection
-    let newState = this.deriveState(doc, sel)
+    const doc = editorState.document
+    const sel = editorState.selection
+    const newState = this.deriveState(doc, sel)
     editorState.selectionState = newState
   }
 
   deriveState (doc, sel) {
-    let state = this.createState(sel)
+    const state = this.createState(sel)
     this.deriveContext(state, doc, sel)
     this.deriveContainerSelectionState(state, doc, sel)
     this.deriveAnnoState(state, doc, sel)
@@ -30,8 +30,8 @@ export default class SelectionStateReducer {
   deriveContext (state, doc, sel) {
     if (!sel || sel.isNull()) return
     if (sel.isPropertySelection() || sel.isNodeSelection() || sel.isCustomSelection()) {
-      let nodeId = sel.getNodeId()
-      let node = doc.get(nodeId)
+      const nodeId = sel.getNodeId()
+      const node = doc.get(nodeId)
       if (node) {
         state.xpath = node.getXpath().toArray()
         state.node = node
@@ -43,20 +43,20 @@ export default class SelectionStateReducer {
   }
 
   deriveContainerSelectionState (state, doc, sel) {
-    let containerPath = sel.containerPath
+    const containerPath = sel.containerPath
     if (containerPath) {
       state.containerPath = containerPath
-      let nodeIds = doc.get(containerPath)
-      let startId = sel.start.getNodeId()
-      let endId = sel.end.getNodeId()
-      let startNode = documentHelpers.getContainerRoot(doc, containerPath, startId)
+      const nodeIds = doc.get(containerPath)
+      const startId = sel.start.getNodeId()
+      const endId = sel.end.getNodeId()
+      const startNode = documentHelpers.getContainerRoot(doc, containerPath, startId)
       // FIXME: it happened that we have set the containerPath incorrectly
       // e.g. body.content for a selection in abstract
       if (!startNode) {
         console.error('FIXME: invalid ContainerSelection')
         return
       }
-      let startPos = startNode.getPosition()
+      const startPos = startNode.getPosition()
       if (startPos > 0) {
         state.previousNode = documentHelpers.getPreviousNode(doc, containerPath, startPos)
       }
@@ -65,7 +65,7 @@ export default class SelectionStateReducer {
       if (endId === startId) {
         endPos = startPos
       } else {
-        let endNode = documentHelpers.getContainerRoot(doc, containerPath, endId)
+        const endNode = documentHelpers.getContainerRoot(doc, containerPath, endId)
         endPos = endNode.getPosition()
       }
       if (endPos < nodeIds.length - 1) {
@@ -77,7 +77,7 @@ export default class SelectionStateReducer {
 
   deriveAnnoState (state, doc, sel) {
     // create a mapping by type for the currently selected annotations
-    let annosByType = new Map()
+    const annosByType = new Map()
     function _add (anno) {
       let annos = annosByType.get(anno.type)
       if (!annos) {
@@ -89,7 +89,7 @@ export default class SelectionStateReducer {
     const propAnnos = documentHelpers.getPropertyAnnotationsForSelection(doc, sel)
     propAnnos.forEach(_add)
     if (propAnnos.length === 1) {
-      let firstAnno = propAnnos[0]
+      const firstAnno = propAnnos[0]
       if (firstAnno.isInlineNode()) {
         state.isInlineNodeSelection = firstAnno.getSelection().equals(sel)
         state.node = firstAnno
@@ -106,7 +106,7 @@ export default class SelectionStateReducer {
   }
 
   deriveMarkerState (state, doc, sel) {
-    let markers = documentHelpers.getMarkersForSelection(doc, sel)
+    const markers = documentHelpers.getMarkersForSelection(doc, sel)
     state.markers = markers
   }
 

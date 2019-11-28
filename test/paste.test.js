@@ -4,23 +4,23 @@ import fixture from './shared/createTestArticle'
 import simple from './fixture/simple'
 
 test('paste: Pasting plain text', t => {
-  let { tx } = _fixture(simple)
+  const { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3
   })
   tx.paste('XXX')
-  let p1 = tx.get('p1')
+  const p1 = tx.get('p1')
   t.equal(p1.content, '012XXX3456789')
   t.end()
 })
 
 test('paste: Pasting a single paragraph', t => {
-  let { tx } = _fixture(simple)
-  let snippet = tx.createSnippet()
-  let container = snippet.getContainer()
-  let p = snippet.create({
+  const { tx } = _fixture(simple)
+  const snippet = tx.createSnippet()
+  const container = snippet.getContainer()
+  const p = snippet.create({
     type: 'paragraph',
     id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
@@ -33,22 +33,22 @@ test('paste: Pasting a single paragraph', t => {
     containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
-  let p1 = tx.get('p1')
+  const p1 = tx.get('p1')
   t.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.')
   t.end()
 })
 
 test('paste: Pasting annotated text', t => {
-  let { tx } = _fixture(simple)
+  const { tx } = _fixture(simple)
   tx.setSelection({
     type: 'property',
     path: ['p1', 'content'],
     startOffset: 3,
     containerPath: ['body', 'nodes']
   })
-  let snippet = tx.createSnippet()
-  let container = snippet.getContainer()
-  let p = snippet.create({
+  const snippet = tx.createSnippet()
+  const container = snippet.getContainer()
+  const p = snippet.create({
     type: 'paragraph',
     id: documentHelpers.TEXT_SNIPPET_ID,
     content: 'AABBCC'
@@ -66,25 +66,25 @@ test('paste: Pasting annotated text', t => {
     }
   })
   tx.paste(snippet)
-  let p1 = tx.get('p1')
+  const p1 = tx.get('p1')
   t.equal(p1.content, '012AABBCC3456789', 'Plain text should be inserted.')
-  let s1 = tx.get('s1')
+  const s1 = tx.get('s1')
   t.deepEqual(s1.start.path, [p1.id, 'content'], 'Annotation is bound to the correct path.')
   t.deepEqual([s1.start.offset, s1.end.offset], [5, 7], 'Annotation has correct range.')
   t.end()
 })
 
 test('paste: Pasting two paragraphs', t => {
-  let { tx } = _fixture(simple)
-  let snippet = tx.createSnippet()
-  let container = snippet.getContainer()
-  let test1 = snippet.create({
+  const { tx } = _fixture(simple)
+  const snippet = tx.createSnippet()
+  const container = snippet.getContainer()
+  const test1 = snippet.create({
     type: 'paragraph',
     id: 'test1',
     content: 'AA'
   })
   container.append(test1.id)
-  let test2 = snippet.create({
+  const test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
@@ -97,8 +97,8 @@ test('paste: Pasting two paragraphs', t => {
     containerPath: ['body', 'nodes']
   })
   tx.paste(snippet)
-  let body = tx.get('body')
-  let p1 = tx.get('p1')
+  const body = tx.get('body')
+  const p1 = tx.get('p1')
   t.equal(p1.content, '012AA', 'First part should be inserted into first paragraph.')
   t.equal(body.nodes[1], test2.id, 'Second part should go into a single paragraph.')
   t.equal(tx.get(body.nodes[2]).content, '3456789', 'Remaining part of first paragraph should be in a new paragraph.')
@@ -107,21 +107,21 @@ test('paste: Pasting two paragraphs', t => {
 })
 
 test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
-  let { tx } = _fixture(simple)
-  let detached = tx.create({
+  const { tx } = _fixture(simple)
+  const detached = tx.create({
     id: 'detached',
     type: 'paragraph',
     content: '012345'
   })
-  let snippet = tx.createSnippet()
-  let container = snippet.getContainer()
-  let test1 = snippet.create({
+  const snippet = tx.createSnippet()
+  const container = snippet.getContainer()
+  const test1 = snippet.create({
     type: 'paragraph',
     id: 'test1',
     content: 'AA'
   })
   container.append(test1.id)
-  let test2 = snippet.create({
+  const test2 = snippet.create({
     type: 'paragraph',
     id: 'test2',
     content: 'BB'
@@ -135,13 +135,13 @@ test('paste: Pasting two structured content into TextProperty (#1111)', (t) => {
     containerPath: null
   })
   tx.paste(snippet)
-  let actual = toUnixLineEndings(detached.content)
+  const actual = toUnixLineEndings(detached.content)
   t.equal(actual, '012AA BB345', 'Plain text should have been inserted.')
   t.end()
 })
 
 function _fixture (seed) {
-  let doc = fixture(seed)
-  let tx = new EditingInterface(doc)
+  const doc = fixture(seed)
+  const tx = new EditingInterface(doc)
   return { doc: doc, tx: tx }
 }

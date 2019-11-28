@@ -1,6 +1,7 @@
 import isString from './isString'
 import isArray from './isArray'
 import { get, setWith, unset } from '../vendor/lodash-es'
+import hasOwnProperty from './hasOwnProperty'
 
 /*
   An object that can be access via path API.
@@ -47,7 +48,7 @@ class PathObject {
       return undefined
     }
     if (isString(path)) {
-      let id = path
+      const id = path
       return this.getRoot()[id]
     }
     if (arguments.length > 1) {
@@ -64,7 +65,7 @@ class PathObject {
       throw new Error('Illegal argument: PathObject.set(>path<, value) - path is mandatory.')
     }
     if (isString(path)) {
-      let id = path
+      const id = path
       this.getRoot()[id] = value
     } else {
       setWith(this.getRoot(), path, value)
@@ -73,7 +74,7 @@ class PathObject {
 
   delete (path) {
     if (isString(path)) {
-      let id = path
+      const id = path
       delete this.getRoot()[id]
     } else if (path.length === 1) {
       delete this.getRoot()[path[0]]
@@ -88,7 +89,7 @@ class PathObject {
   clear () {
     var root = this.getRoot()
     for (var key in root) {
-      if (root.hasOwnProperty(key)) {
+      if (hasOwnProperty(root, key)) {
         delete root[key]
       }
     }

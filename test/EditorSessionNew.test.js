@@ -8,7 +8,7 @@ import simple from './fixture/simple'
 // This test uses the new API to have the new code test-covered.
 
 test('EditorSessionNew: dispose()', t => {
-  let { editorSession } = _setup(simple)
+  const { editorSession } = _setup(simple)
   t.doesNotThrow(() => {
     editorSession.dispose()
   })
@@ -16,7 +16,7 @@ test('EditorSessionNew: dispose()', t => {
 })
 
 test('EditorSessionNew: keeping document stage in-sync', t => {
-  let { doc, editorSession } = _setup(simple)
+  const { doc, editorSession } = _setup(simple)
   doc.create({ type: 'paragraph', id: 'foo', content: 'foo' })
   editorSession.transaction(tx => {
     const p = tx.get('foo')
@@ -27,7 +27,7 @@ test('EditorSessionNew: keeping document stage in-sync', t => {
 })
 
 test('EditorSessionNew: undoing and redoing a change', t => {
-  let { doc, editorSession } = _setup(simple)
+  const { doc, editorSession } = _setup(simple)
   editorSession.transaction(tx => {
     tx.update(['p1', 'content'], { type: 'insert', start: 3, text: 'XXX' })
   })
@@ -43,7 +43,7 @@ test('EditorSessionNew: undoing and redoing a change', t => {
 })
 
 test('EditorSessionNew: selections after undo/redo', t => {
-  let { doc, editorSession } = _setup(simple)
+  const { doc, editorSession } = _setup(simple)
   var path = ['p1', 'content']
   editorSession.setSelection({
     type: 'property',
@@ -76,8 +76,8 @@ test('EditorSessionNew: selections after undo/redo', t => {
 })
 
 function _setup (seed) {
-  let doc = createTestArticle(seed)
-  let editorSession = new TestEditorSession('test', doc)
+  const doc = createTestArticle(seed)
+  const editorSession = new TestEditorSession('test', doc)
   return { doc, editorSession }
 }
 
@@ -85,6 +85,7 @@ class TestEditorSession extends AbstractEditorSession {
   _getSelection () {
     return this._selection
   }
+
   _setSelection (sel) {
     this._selection = sel
   }

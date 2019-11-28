@@ -1,38 +1,31 @@
 import { ARABIC_NUMBERS } from './counters'
+import CollectionItemLabelManager from './CollectionItemLabelManager'
 
-export default class AffiliationLabelManager {
-  constructor (editorSession) {
-    this.editorSession = editorSession
-
+export default class AffiliationLabelManager extends CollectionItemLabelManager {
+  getPath () {
     const doc = this.editorSession.getDocument()
-    this.editorSession.getEditorState().addObserver(['document'], this._onAffiliationsChange, this, {
-      stage: 'update',
-      document: {
-        path: [doc.root.id, 'affiliations']
-      }
+    return [doc.root.id, 'affiliations']
+  }
+
+  getItemLabel (item) {
+    return ARABIC_NUMBERS[item.getPosition()]
+  }
+
+  update () {
+    const doc = this.editorSession.getDocument()
+    const path = this.getPath()
+    const items = doc.resolve(path, true)
+    const stateUpdates = items.map(item => {
+      const label = this.getItemLabel(item)
+      return [item.id, { label }]
     })
-  }
 
-  dispose () {
-    this.editorSession.getEditorState().removeObserver(this)
-  }
-
-  _onAffiliationsChange () {
-    const doc = this.editorSession.getDocument()
-    const panels = doc.root.resolve('affiliations')
-    const stateUpdates = []
-    for (let idx = 0; idx < panels.length; idx++) {
-      const panel = panels[idx]
-      const label = String(ARABIC_NUMBERS[idx])
-      stateUpdates.push([panel.id, { label }])
-    }
     // HACK: also triggering an update of authors
     const authorIds = doc.root.authors || []
     for (const authorId of authorIds) {
       stateUpdates.push([authorId, {}])
     }
 
-    // Note: do not propagatea here because we are already in a flow
-    this.editorSession.updateNodeStates(stateUpdates, { silent: true, propagate: false })
+    this.editorSession.updateNodeStates(stateUpdates, { silent: true })
   }
 }

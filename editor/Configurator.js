@@ -45,8 +45,8 @@ export default class Configurator {
   }
 
   createSubConfiguration (name, options = {}) {
-    let ConfiguratorClass = options.ConfiguratorClass || this.constructor
-    let subConfig = new ConfiguratorClass(this, name)
+    const ConfiguratorClass = options.ConfiguratorClass || this.constructor
+    const subConfig = new ConfiguratorClass(this, name)
     this._subConfigurations.set(name, subConfig)
     return subConfig
   }
@@ -56,7 +56,7 @@ export default class Configurator {
     if (isString(path)) {
       path = path.split('.')
     }
-    let subConfig = this._subConfigurations.get(path[0])
+    const subConfig = this._subConfigurations.get(path[0])
     if (path.length === 1) {
       return subConfig
     } else {
@@ -97,7 +97,7 @@ export default class Configurator {
       this._converters.set(format, converters)
     }
     if (isFunction(converter)) {
-      let ConverterClass = converter
+      const ConverterClass = converter
       converter = new ConverterClass()
     }
     if (!converter.type) {
@@ -122,7 +122,7 @@ export default class Configurator {
     if (!this._icons.has(iconName)) {
       this._icons.set(iconName, {})
     }
-    let iconConfig = this._icons.get(iconName)
+    const iconConfig = this._icons.get(iconName)
     for (const type of Object.keys(spec)) {
       if (iconConfig[type]) {
         if (!options.force) {
@@ -153,7 +153,7 @@ export default class Configurator {
   }
 
   addNode (NodeClass, options = {}) {
-    let type = NodeClass.type
+    const type = NodeClass.type
     if (this._nodes.has(type) && !options.force) {
       throw new Error(`Node class for type '${type}' already registered`)
     }
@@ -172,7 +172,7 @@ export default class Configurator {
     } else {
       label = label.replace(/CommandOrControl/i, 'Ctrl')
     }
-    let entry = {
+    const entry = {
       key: combo,
       label,
       spec
@@ -189,7 +189,7 @@ export default class Configurator {
       spec: spec.nodeSpec,
       commandGroup: 'text-types'
     })
-    this.addIcon(spec.name, { 'fontawesome': spec.icon })
+    this.addIcon(spec.name, { fontawesome: spec.icon })
     this.addLabel(spec.name, spec.label)
     if (spec.accelerator) {
       this.addKeyboardShortcut(spec.accelerator, { command: spec.name })
@@ -220,12 +220,12 @@ export default class Configurator {
   }
 
   getService (serviceId, context) {
-    let entry = this._serviceRegistry.get(serviceId)
+    const entry = this._serviceRegistry.get(serviceId)
     if (entry) {
       if (entry.instance) {
         return Promise.resolve(entry.instance)
       } else {
-        let res = entry.factory(context)
+        const res = entry.factory(context)
         if (res instanceof Promise) {
           return res.then(service => {
             entry.instance = service
@@ -242,12 +242,12 @@ export default class Configurator {
   }
 
   getServiceSync (serviceId, context) {
-    let entry = this._serviceRegistry.get(serviceId)
+    const entry = this._serviceRegistry.get(serviceId)
     if (entry) {
       if (entry && entry.instance) {
         return entry.instance
       } else {
-        let service = entry.factory(context)
+        const service = entry.factory(context)
         entry.instance = service
         return service
       }
@@ -285,9 +285,9 @@ export default class Configurator {
   getCommandGroup (name) {
     // Note: as commands are registered hierarchically
     // we need to collect commands from all levels
-    let records = this._commandGroupRegistry.getRecords(name)
-    let flattened = flatten(records)
-    let set = new Set(flattened)
+    const records = this._commandGroupRegistry.getRecords(name)
+    const flattened = flatten(records)
+    const set = new Set(flattened)
     return Array.from(set)
   }
 
@@ -309,14 +309,14 @@ export default class Configurator {
 
   getDocumentLoader (type) {
     if (this._documentLoaders.has(type)) {
-      let { LoaderClass, spec } = this._documentLoaders.get(type)
+      const { LoaderClass, spec } = this._documentLoaders.get(type)
       return new LoaderClass(spec)
     }
   }
 
   getDocumentSerializer (type) {
     if (this._documentSerializers.has(type)) {
-      let { SerializerClass, spec } = this._documentSerializers.get(type)
+      const { SerializerClass, spec } = this._documentSerializers.get(type)
       return new SerializerClass(spec)
     }
   }
@@ -333,10 +333,10 @@ export default class Configurator {
 
   createImporter (type, doc, options = {}) {
     if (this._importers.has(type)) {
-      let { ImporterClass, spec } = this._importers.get(type)
+      const { ImporterClass, spec } = this._importers.get(type)
       let converters = []
       if (spec.converterGroups) {
-        for (let key of spec.converterGroups) {
+        for (const key of spec.converterGroups) {
           converters = converters.concat(this.getConverters(key))
         }
       } else {
@@ -350,10 +350,10 @@ export default class Configurator {
 
   createExporter (type, doc, options = {}) {
     if (this._exporters.has(type)) {
-      let { ExporterClass, spec } = this._exporters.get(type)
+      const { ExporterClass, spec } = this._exporters.get(type)
       let converters = []
       if (spec.converterGroups) {
-        for (let key of spec.converterGroups) {
+        for (const key of spec.converterGroups) {
           converters = converters.concat(this.getConverters(key))
         }
       } else {
@@ -385,7 +385,7 @@ export default class Configurator {
   }
 
   getToolPanel (name, strict) {
-    let toolPanelSpec = this._toolPanelRegistry.get(name)
+    const toolPanelSpec = this._toolPanelRegistry.get(name)
     if (toolPanelSpec) {
       return toolPanelSpec
     } else if (strict) {
@@ -397,7 +397,7 @@ export default class Configurator {
     if (!this._commandGroups.has(commandGroupName)) {
       this._commandGroups.set(commandGroupName, [])
     }
-    let commands = this._commandGroups.get(commandGroupName)
+    const commands = this._commandGroups.get(commandGroupName)
     commands.push(commandName)
   }
 }
@@ -412,7 +412,7 @@ class HierarchicalRegistry {
     let config = this._config
     const getter = this._getter
     while (config) {
-      let registry = getter(config)
+      const registry = getter(config)
       if (registry.has(name)) {
         return registry.get(name)
       } else {
@@ -424,10 +424,10 @@ class HierarchicalRegistry {
 
   getAll () {
     let config = this._config
-    let registries = []
+    const registries = []
     const getter = this._getter
     while (config) {
-      let registry = getter(config)
+      const registry = getter(config)
       if (registry) {
         registries.unshift(registry)
       }
@@ -438,12 +438,12 @@ class HierarchicalRegistry {
 
   getRecords (name) {
     let config = this._config
-    let records = []
+    const records = []
     const getter = this._getter
     while (config) {
-      let registry = getter(config)
+      const registry = getter(config)
       if (registry) {
-        let record = registry.get(name)
+        const record = registry.get(name)
         if (record) {
           records.unshift(record)
         }
@@ -462,9 +462,9 @@ class LabelProvider extends DefaultLabelProvider {
 
   getLabel (name, params) {
     const lang = this.lang
-    let spec = this.config._labelRegistry.get(name)
+    const spec = this.config._labelRegistry.get(name)
     if (!spec) return name
-    let rawLabel = spec[lang] || name
+    const rawLabel = spec[lang] || name
     // If context is provided, resolve templates
     if (params) {
       return this._evalTemplate(rawLabel, params)

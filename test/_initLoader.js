@@ -1,7 +1,7 @@
 module.exports = function (_module) {
   const path = require('path')
   // create the ESM loader first
-  let _require = require('esm')(_module)
+  const _require = require('esm')(_module)
   // and let 'module-alias' register on top of the ESM loaded
   const moduleAlias = _require('module-alias')
   const substanceEntryPoint = path.join(__dirname, '..', 'index.es.js')

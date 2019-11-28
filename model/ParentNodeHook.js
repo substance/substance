@@ -33,7 +33,7 @@ export default class ParentNodeHook {
 
   _onOperationApplied (op) {
     const doc = this.doc
-    let node = doc.get(op.path[0])
+    const node = doc.get(op.path[0])
     let hasOwnedProperties = false
     let isAnnotation = false
     let nodeSchema
@@ -45,9 +45,9 @@ export default class ParentNodeHook {
     switch (op.type) {
       case 'create': {
         if (hasOwnedProperties) {
-          for (let p of nodeSchema.getOwnedProperties()) {
-            let isChildren = p.isArray()
-            let refs = node.get(p.name)
+          for (const p of nodeSchema.getOwnedProperties()) {
+            const isChildren = p.isArray()
+            const refs = node.get(p.name)
             if (refs) {
               this._setParent(node, refs, p.name, isChildren)
             }
@@ -62,10 +62,10 @@ export default class ParentNodeHook {
       }
       case 'update': {
         if (hasOwnedProperties) {
-          let propName = op.path[1]
+          const propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
-            let update = op.diff
-            let isChildren = update._isArrayOperation
+            const update = op.diff
+            const isChildren = update._isArrayOperation
             if (update.isDelete()) {
               this._setParent(null, update.getValue(), propName, isChildren)
             } else {
@@ -78,12 +78,12 @@ export default class ParentNodeHook {
       }
       case 'set': {
         if (hasOwnedProperties) {
-          let propName = op.path[1]
+          const propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
-            let prop = nodeSchema.getProperty(propName)
-            let isChildren = prop.isArray()
-            let oldValue = op.getOldValue()
-            let newValue = op.getValue()
+            const prop = nodeSchema.getProperty(propName)
+            const isChildren = prop.isArray()
+            const oldValue = op.getOldValue()
+            const newValue = op.getValue()
             // Note: _setParent takes either an array or a single id
             this._setParent(null, oldValue, propName, isChildren)
             this._setParent(node, newValue, propName, isChildren)
@@ -111,7 +111,7 @@ export default class ParentNodeHook {
   }
 
   __setParent (parent, id, property, isChildren) {
-    let child = this.doc.get(id)
+    const child = this.doc.get(id)
     if (child) {
       this._setParentAndXpath(parent, child, property)
     } else {
@@ -126,9 +126,9 @@ export default class ParentNodeHook {
   }
 
   _setRegisteredParent (child) {
-    let entry = this.parents[child.id]
+    const entry = this.parents[child.id]
     if (entry) {
-      let { parent, property, isChildren } = entry
+      const { parent, property, isChildren } = entry
       this._setParentAndXpath(parent, child, property)
       if (parent && isChildren) {
         child._xpath.pos = parent[property].indexOf(child.id)
@@ -139,7 +139,7 @@ export default class ParentNodeHook {
 
   _setParentAndXpath (parent, child, property) {
     child.setParent(parent)
-    let xpath = child._xpath
+    const xpath = child._xpath
     if (parent) {
       xpath.prev = parent._xpath
       xpath.property = property
@@ -153,12 +153,12 @@ export default class ParentNodeHook {
   }
 
   _updateContainerPositions (containerPath) {
-    let doc = this.doc
-    let ids = doc.get(containerPath)
+    const doc = this.doc
+    const ids = doc.get(containerPath)
     if (ids) {
       for (let pos = 0; pos < ids.length; pos++) {
-        let id = ids[pos]
-        let child = doc.get(id)
+        const id = ids[pos]
+        const child = doc.get(id)
         if (child) {
           child._xpath.pos = pos
         }
@@ -167,9 +167,9 @@ export default class ParentNodeHook {
   }
 
   _setAnnotationParent (anno) {
-    let doc = anno.getDocument()
-    let path = anno.start.path
-    let annoParent = doc.get(path[0])
+    const doc = anno.getDocument()
+    const path = anno.start.path
+    const annoParent = doc.get(path[0])
     this._setParent(annoParent, anno.id, path[1])
   }
 

@@ -9,7 +9,7 @@ export default class ChangeRecorder extends EditingInterface {
     const doc = this.getDocument()
     const ops = doc._ops.slice()
     doc._ops.length = 0
-    let change = doc._createDocumentChange(ops, {}, {})
+    const change = doc._createDocumentChange(ops, {}, {})
     change._extractInformation(doc)
     return change
   }

@@ -19,7 +19,7 @@ export default class HTMLImporter extends DOMImporter {
 
   importDocument (html) {
     this.reset()
-    let parsed = DefaultDOMElement.parseHTML(html)
+    const parsed = DefaultDOMElement.parseHTML(html)
     this.convertDocument(parsed)
     return this.state.doc
   }

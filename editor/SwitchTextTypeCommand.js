@@ -21,12 +21,12 @@ export default class SwitchTextTypeCommand extends Command {
     const doc = editorSession.getDocument()
     const sel = params.selection
     const isBlurred = editorSession.isBlurred()
-    let commandState = {
+    const commandState = {
       disabled: false
     }
     if (sel.isPropertySelection() && !isBlurred) {
-      let path = sel.getPath()
-      let node = doc.get(path[0])
+      const path = sel.getPath()
+      const node = doc.get(path[0])
       if (node && node.isText()) {
         commandState.active = isMatch(node, this.config.spec)
       } else {

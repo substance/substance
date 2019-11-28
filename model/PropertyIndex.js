@@ -113,7 +113,7 @@ export default class PropertyIndex extends NodeIndex {
   }
 
   _initialize (data) {
-    for (let node of data.getNodes().values()) {
+    for (const node of data.getNodes().values()) {
       if (this.select(node)) {
         this.create(node)
       }

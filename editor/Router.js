@@ -13,7 +13,7 @@ export default class Router extends EventEmitter {
     Starts listening for hash-changes
   */
   start () {
-    let window = DefaultDOMElement.getBrowserWindow()
+    const window = DefaultDOMElement.getBrowserWindow()
     window.on('hashchange', this._onHashChange, this)
     this.__isStarted__ = true
   }
@@ -30,7 +30,7 @@ export default class Router extends EventEmitter {
     Writes out a given route as a string url
   */
   writeRoute (route, opts = {}) {
-    let routeString = this.stringifyRoute(route)
+    const routeString = this.stringifyRoute(route)
     if (!routeString) {
       this.clearRoute(opts)
     } else {
@@ -39,7 +39,7 @@ export default class Router extends EventEmitter {
   }
 
   dispose () {
-    let window = DefaultDOMElement.getBrowserWindow()
+    const window = DefaultDOMElement.getBrowserWindow()
     window.off(this)
   }
 
@@ -65,12 +65,12 @@ export default class Router extends EventEmitter {
   }
 
   getRouteString () {
-    let window = DefaultDOMElement.getBrowserWindow().getNativeElement()
+    const window = DefaultDOMElement.getBrowserWindow().getNativeElement()
     return window.location.hash.slice(1)
   }
 
   _writeRoute (route, opts) {
-    let window = DefaultDOMElement.getBrowserWindow().getNativeElement()
+    const window = DefaultDOMElement.getBrowserWindow().getNativeElement()
     this.__isSaving__ = true
     try {
       if (opts.replace) {
@@ -98,8 +98,8 @@ export default class Router extends EventEmitter {
     }
     this.__isLoading__ = true
     try {
-      let routeString = this.getRouteString()
-      let route = this.parseRoute(routeString)
+      const routeString = this.getRouteString()
+      const route = this.parseRoute(routeString)
       this.emit('route:changed', route)
     } finally {
       this.__isLoading__ = false
@@ -107,7 +107,7 @@ export default class Router extends EventEmitter {
   }
 
   static objectToRouteString (obj) {
-    let frags = []
+    const frags = []
     forEach(obj, (val, key) => {
       if (!isNil(val)) {
         frags.push(`${key}=${val}`)
@@ -117,13 +117,13 @@ export default class Router extends EventEmitter {
   }
 
   static routeStringToObject (routeStr) {
-    let obj = {}
+    const obj = {}
     // Empty route maps to empty route object
     if (!routeStr) return obj
-    let params = routeStr.split(',')
-    for (let param of params) {
+    const params = routeStr.split(',')
+    for (const param of params) {
       if (param.indexOf('=') >= 0) {
-        let tuple = param.split('=')
+        const tuple = param.split('=')
         if (tuple.length !== 2) {
           throw new Error('Illegal route.')
         }

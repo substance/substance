@@ -60,8 +60,8 @@ export default class AnnotationCommand extends Command {
     @returns {Boolean} Whether or not command could be executed.
    */
   isDisabled (sel, params) {
-    let selectionState = params.selectionState
-    let isBlurred = params.editorSession.isBlurred()
+    const selectionState = params.selectionState
+    const isBlurred = params.editorSession.isBlurred()
     // TODO: Container selections should be valid if the annotation type
     // is a container annotation. Currently we only allow property selections.
     if (isBlurred || !sel || sel.isNull() || !sel.isAttached() || sel.isCustomSelection() ||
@@ -96,7 +96,7 @@ export default class AnnotationCommand extends Command {
     // fine if there is no other anno of this type yet
     if (annos.length === 0) return true
     // otherwise these annos are only allowed to 'touch' the current selection, not overlap.
-    for (let anno of annos) {
+    for (const anno of annos) {
       if (sel.overlaps(anno.getSelection(), 'strict')) return false
     }
     return true
@@ -128,7 +128,7 @@ export default class AnnotationCommand extends Command {
   canDelete (annos, sel) {
     // When the cursor or selection is inside an existing annotation
     if (annos.length !== 1) return false
-    let annoSel = annos[0].getSelection()
+    const annoSel = annos[0].getSelection()
     return sel.isInsideOf(annoSel)
   }
 
@@ -145,7 +145,7 @@ export default class AnnotationCommand extends Command {
   canExpand (annos, sel) {
     // When there's some overlap with only a single annotation we do an expand
     if (annos.length !== 1) return false
-    let annoSel = annos[0].getSelection()
+    const annoSel = annos[0].getSelection()
     return sel.overlaps(annoSel, 'strict') && !sel.isInsideOf(annoSel)
   }
 
@@ -161,7 +161,7 @@ export default class AnnotationCommand extends Command {
    */
   canTruncate (annos, sel) {
     if (annos.length !== 1) return false
-    let annoSel = annos[0].getSelection()
+    const annoSel = annos[0].getSelection()
 
     return (sel.isLeftAlignedWith(annoSel) || sel.isRightAlignedWith(annoSel)) &&
            !sel.contains(annoSel) &&
@@ -174,7 +174,7 @@ export default class AnnotationCommand extends Command {
     @param {Object} state.selection the current selection
     @returns {Object} info object with command details.
   */
-  getCommandState (params, context) { // eslint-disable-line no-unused
+  getCommandState (params, context) {
     const sel = params.selection
     // We can skip all checking if a disabled condition is met
     // E.g. we don't allow toggling of property annotations when current
@@ -184,8 +184,8 @@ export default class AnnotationCommand extends Command {
         disabled: true
       }
     }
-    let annos = this._getAnnotationsForSelection(params)
-    let newState = {
+    const annos = this._getAnnotationsForSelection(params)
+    const newState = {
       disabled: false,
       active: false,
       mode: null
@@ -216,8 +216,8 @@ export default class AnnotationCommand extends Command {
     @returns {Object} info object with execution details.
   */
   // Execute command and trigger transformations
-  execute (params, context) { // eslint-disable-line no-unused
-    let commandState = params.commandState
+  execute (params, context) {
+    const commandState = params.commandState
 
     if (commandState.disabled) return false
     switch (commandState.mode) {
@@ -241,7 +241,7 @@ export default class AnnotationCommand extends Command {
     const editorSession = params.editorSession
     const annos = this._getAnnotationsForSelection(params, context)
     this._checkPrecondition(params, context, annos, this.canCreate)
-    let annoData = this.getAnnotationData()
+    const annoData = this.getAnnotationData()
     annoData.type = this.getAnnotationType()
     let anno
     editorSession.transaction(tx => {
@@ -254,7 +254,7 @@ export default class AnnotationCommand extends Command {
   }
 
   executeFuse (params, context) {
-    let annos = this._getAnnotationsForSelection(params)
+    const annos = this._getAnnotationsForSelection(params)
     this._checkPrecondition(params, context, annos, this.canFuse)
     this._applyTransform(params, tx => {
       annotationHelpers.fuseAnnotation(tx, annos)
@@ -266,8 +266,8 @@ export default class AnnotationCommand extends Command {
   }
 
   executeTruncate (params, context) {
-    let annos = this._getAnnotationsForSelection(params)
-    let anno = annos[0]
+    const annos = this._getAnnotationsForSelection(params)
+    const anno = annos[0]
     this._checkPrecondition(params, context, annos, this.canTruncate)
     this._applyTransform(params, tx => {
       annotationHelpers.truncateAnnotation(tx, anno, params.selection)
@@ -279,8 +279,8 @@ export default class AnnotationCommand extends Command {
   }
 
   executeExpand (params, context) {
-    let annos = this._getAnnotationsForSelection(params)
-    let anno = annos[0]
+    const annos = this._getAnnotationsForSelection(params)
+    const anno = annos[0]
     this._checkPrecondition(params, context, annos, this.canExpand)
     this._applyTransform(params, tx => {
       annotationHelpers.expandAnnotation(tx, anno, params.selection)
@@ -292,8 +292,8 @@ export default class AnnotationCommand extends Command {
   }
 
   executeDelete (params, context) {
-    let annos = this._getAnnotationsForSelection(params)
-    let anno = annos[0]
+    const annos = this._getAnnotationsForSelection(params)
+    const anno = annos[0]
     this._checkPrecondition(params, context, annos, this.canDelete)
     this._applyTransform(params, tx => {
       return tx.delete(anno.id)
@@ -307,7 +307,7 @@ export default class AnnotationCommand extends Command {
   isAnnotationCommand () { return true }
 
   _checkPrecondition (params, context, annos, checker) {
-    let sel = params.selection
+    const sel = params.selection
     if (!checker.call(this, annos, sel, context)) {
       throw new Error("AnnotationCommand: can't execute command for selection " + sel.toString())
     }
@@ -330,7 +330,7 @@ export default class AnnotationCommand extends Command {
     let result // to store transform result
     editorSession.setSelection(sel)
     editorSession.transaction(function (tx) {
-      let out = transformFn(tx, params)
+      const out = transformFn(tx, params)
       if (out) result = out.result
     })
     return result

@@ -10,7 +10,7 @@ export default class NodeSchema {
     // this has an effect on cascaded deletions, or the order of cloning, for example.
     this._ownedPropNames = new Set()
     this._ownedProps = []
-    for (let prop of properties.values()) {
+    for (const prop of properties.values()) {
       if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
         this._ownedPropNames.add(prop.name)
         this._ownedProps.push(prop)

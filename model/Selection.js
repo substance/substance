@@ -129,8 +129,8 @@ export default class Selection {
   }
 
   createWith (update) {
-    let SelectionClass = this.constructor
-    let data = this.toJSON()
+    const SelectionClass = this.constructor
+    const data = this.toJSON()
     Object.assign(data, update)
     return SelectionClass.fromJSON(data)
   }

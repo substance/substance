@@ -16,7 +16,7 @@ export default class HTMLExporter extends DOMExporter {
   }
 
   exportDocument (doc) {
-    let htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
+    const htmlEl = DefaultDOMElement.parseHTML('<html><head></head><body></body></html>')
     return this.convertDocument(doc, htmlEl)
   }
 
@@ -58,11 +58,11 @@ const defaultBlockConverter = {
   export: function (node, el, converter) {
     el.attr('data-type', node.type)
     const nodeSchema = node.getSchema()
-    for (let prop of nodeSchema) {
+    for (const prop of nodeSchema) {
       const name = prop.name
       if (name === 'id' || name === 'type') continue
       // using RDFa like attributes
-      let propEl = converter.$$('div').attr('property', name)
+      const propEl = converter.$$('div').attr('property', name)
       let value = node.get(name)
       if (prop.isText()) {
         propEl.append(converter.annotatedText([node.id, name]))

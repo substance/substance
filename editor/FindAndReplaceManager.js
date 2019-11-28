@@ -13,7 +13,7 @@ export default class FindAndReplaceManager {
     // Only for testing search updates are done synchronously
     this._updateSearchDebounced = debounce(this._updateSearch.bind(this, true), UPDATE_DELAY)
 
-    let editorState = this._editorSession.getEditorState()
+    const editorState = this._editorSession.getEditorState()
     // during update stage we watch for changes on properties with matches
     // to keep the internal state up2date
     editorState.addObserver(['document'], this._onUpdate, this, { stage: 'update' })
@@ -28,7 +28,7 @@ export default class FindAndReplaceManager {
 
   openDialog (enableReplace) {
     enableReplace = Boolean(enableReplace)
-    let state = this._getState()
+    const state = this._getState()
     if (state.enabled) {
       // update state if 'showReplace' has changed
       if (state.showReplace !== enableReplace) {
@@ -46,7 +46,7 @@ export default class FindAndReplaceManager {
   }
 
   closeDialog () {
-    let state = this._getState()
+    const state = this._getState()
     if (!state.enabled) return
     state.enabled = false
     this._clearHighlights()
@@ -61,14 +61,14 @@ export default class FindAndReplaceManager {
   }
 
   previous () {
-    let state = this._getState()
+    const state = this._getState()
     this._nav('back')
     this._updateState(state)
     this._propgateUpdates()
   }
 
   setSearchPattern (pattern) {
-    let state = this._getState()
+    const state = this._getState()
     if (state.pattern !== pattern) {
       state.pattern = pattern
       this._performSearch()
@@ -77,7 +77,7 @@ export default class FindAndReplaceManager {
   }
 
   setReplacePattern (replacePattern) {
-    let state = this._getState()
+    const state = this._getState()
     if (state.replacePattern !== replacePattern) {
       state.replacePattern = replacePattern
       this._updateState(state)
@@ -86,7 +86,7 @@ export default class FindAndReplaceManager {
   }
 
   replaceNext () {
-    let state = this._getState()
+    const state = this._getState()
     // ATTENTION: special handling after manual changes, while search dialog is open
     // in this case we do a forced 'next()' when using 'replaceNext()'
     if (state._forceNav) {
@@ -97,7 +97,7 @@ export default class FindAndReplaceManager {
     if (state.replacePattern) {
       let hasReplaced = false
       if (state.cursor >= 0) {
-        let m = this._getMatchAt(state.cursor)
+        const m = this._getMatchAt(state.cursor)
         if (m) {
           this._editorSession.transaction(tx => {
             this._replace(tx, m, state)
@@ -124,7 +124,7 @@ export default class FindAndReplaceManager {
   }
 
   replaceAll () {
-    let state = this._getState()
+    const state = this._getState()
     if (!state.matches) return
     let allMatches = []
     state.matches.forEach(_matches => {
@@ -167,13 +167,13 @@ export default class FindAndReplaceManager {
   }
 
   _toggleOption (optionName) {
-    let state = this._getState()
+    const state = this._getState()
     state[optionName] = !state[optionName]
     this._performSearch()
   }
 
   _performSearch () {
-    let state = this._getState()
+    const state = this._getState()
     if (state.pattern) {
       this._searchAndHighlight()
     } else {
@@ -190,7 +190,7 @@ export default class FindAndReplaceManager {
   }
 
   _next () {
-    let state = this._getState()
+    const state = this._getState()
     this._nav('forward')
     this._updateState(state)
   }
@@ -225,16 +225,16 @@ export default class FindAndReplaceManager {
   }
 
   _search () {
-    let state = this._getState()
-    let matches = new Map()
+    const state = this._getState()
+    const matches = new Map()
     let count = 0
-    let pattern = state.pattern
-    let opts = state
+    const pattern = state.pattern
+    const opts = state
     if (pattern) {
-      let tps = this._getTextProperties()
-      for (let tp of tps) {
+      const tps = this._getTextProperties()
+      for (const tp of tps) {
         // console.log('... searching for matches in ', tp.getPath())
-        let _matches = this._searchInProperty(tp, pattern, opts)
+        const _matches = this._searchInProperty(tp, pattern, opts)
         // if (_matches.length > 0) console.log('found %s matches', _matches.length)
         count += _matches.length
         if (_matches.length > 0) {
@@ -247,10 +247,10 @@ export default class FindAndReplaceManager {
   }
 
   _updateSearch (propagate) {
-    let state = this._getState()
+    const state = this._getState()
     if (!state.enabled || !state.pattern || this._dirty.size === 0) return
 
-    for (let key of this._dirty) {
+    for (const key of this._dirty) {
       // ATTENTION: this updates state.count
       this._updateSearchForProperty(key)
     }
@@ -263,17 +263,17 @@ export default class FindAndReplaceManager {
   }
 
   _updateSearchForProperty (key) {
-    let markersManager = this._getMarkersManager()
-    let state = this._getState()
-    let matches = state.matches
+    const markersManager = this._getMarkersManager()
+    const state = this._getState()
+    const matches = state.matches
     let count = state.count
     let _matches = matches.get(key)
     if (_matches) {
       count -= _matches.length
     }
-    let path = key.split('.')
+    const path = key.split('.')
     markersManager.clearMarkers(path, m => m.type === 'find-marker')
-    let tp = this._getTextProperty(key)
+    const tp = this._getTextProperty(key)
     if (tp) {
       _matches = this._searchInProperty(tp, state.pattern, state)
       count += _matches.length
@@ -286,7 +286,7 @@ export default class FindAndReplaceManager {
   }
 
   _searchInProperty (tp, pattern, opts) {
-    let path = tp.getPath()
+    const path = tp.getPath()
     return _findInText(tp.getText(), pattern, opts).map(m => {
       // add an id so that we can find it later, e.g. for scroll-to
       m.id = uuid()
@@ -316,8 +316,8 @@ export default class FindAndReplaceManager {
     // for that we would take the string from the match
     // and apply native String replace to g
     if (options.regexSearch) {
-      let text = documentHelpers.getTextForSelection(tx, tx.selection)
-      let findRe = new RegExp(options.pattern)
+      const text = documentHelpers.getTextForSelection(tx, tx.selection)
+      const findRe = new RegExp(options.pattern)
       newText = text.replace(findRe, options.replacePattern)
     } else {
       newText = options.replacePattern
@@ -326,7 +326,7 @@ export default class FindAndReplaceManager {
   }
 
   _clear () {
-    let state = this._getState()
+    const state = this._getState()
     this._clearHighlights()
     state.matches = new Map()
     state.count = 0
@@ -337,7 +337,7 @@ export default class FindAndReplaceManager {
     const state = this._getState()
     if (state.matches) {
       state.matches.forEach((_, key) => {
-        let path = key.split('.')
+        const path = key.split('.')
         markersManager.clearMarkers(path, m => m.type === 'find-marker')
       })
     }
@@ -347,7 +347,7 @@ export default class FindAndReplaceManager {
     const state = this._getState()
     if (state.matches) {
       state.matches.forEach((matches, key) => {
-        let path = key.split('.')
+        const path = key.split('.')
         this._addHighlightsForProperty(path, matches)
       })
     }
@@ -355,7 +355,7 @@ export default class FindAndReplaceManager {
 
   // TODO: don't know yet how we want to update Markers incrementally
   _addHighlightsForProperty (path, matches) {
-    let markersManager = this._getMarkersManager()
+    const markersManager = this._getMarkersManager()
     matches.forEach(m => {
       markersManager.addMarker(new Marker(this._doc, {
         type: 'find-marker',
@@ -373,7 +373,7 @@ export default class FindAndReplaceManager {
   }
 
   _getTextProperties () {
-    let rootComponent = this._editorSession.getRootComponent()
+    const rootComponent = this._editorSession.getRootComponent()
     if (rootComponent) {
       // EXPERIMENTAL: we need to retrieve all *editable* text properties in the correct order
       // which is not possible just from the model (without further knowledge)
@@ -385,7 +385,7 @@ export default class FindAndReplaceManager {
   }
 
   _getTextProperty (id) {
-    let rootComponent = this._editorSession.getRootComponent()
+    const rootComponent = this._editorSession.getRootComponent()
     if (rootComponent) {
       // EXPERIMENTAL: same as _getTextProperties()
       return rootComponent.find(`.sc-text-property[data-path="${id}"]`)
@@ -395,8 +395,8 @@ export default class FindAndReplaceManager {
   }
 
   _nav (direction) {
-    let state = this._getState()
-    let [cursor, match] = this._getNext(direction)
+    const state = this._getState()
+    const [cursor, match] = this._getNext(direction)
     if (match) {
       state.cursor = cursor
       this._scrollToMatch(match)
@@ -406,22 +406,22 @@ export default class FindAndReplaceManager {
   _getNext (direction) {
     // TODO: support a selection relative navigation
     // as a first iteration we will do this independently from the selection
-    let state = this._getState()
+    const state = this._getState()
     let idx
     if (direction === 'forward') {
       idx = Math.min(state.count - 1, state.cursor + 1)
     } else {
       idx = Math.max(0, state.cursor - 1)
     }
-    return [ idx, this._getMatchAt(idx) ]
+    return [idx, this._getMatchAt(idx)]
   }
 
   _getMatchAt (idx) {
     // Note: because we are storing matching grouped by properties
     // this is a but nasty
-    let state = this._getState()
+    const state = this._getState()
     if (state.matches) {
-      for (let [, matches] of state.matches) {
+      for (const [, matches] of state.matches) {
         if (idx >= matches.length) {
           idx -= matches.length
         } else {
@@ -432,12 +432,12 @@ export default class FindAndReplaceManager {
   }
 
   _scrollToMatch (match) {
-    let state = this._getState()
+    const state = this._getState()
     // HACKIDHACK: instead of relying on rerendering, we toggle the hightlight here
     // which is also much faster, and still pretty safe, because we throw markers on every change
     if (state.marker) state.marker.el.removeClass('sm-active')
-    let tp = match.textProperty
-    let marker = tp.find(`.sm-find-marker[data-id="${match.id}"]`)
+    const tp = match.textProperty
+    const marker = tp.find(`.sm-find-marker[data-id="${match.id}"]`)
     // FIXME: when doing replace it seems that we are not good yet with navigating through the matches
     // this guard should not be necessary if everything is working
     if (marker) {
@@ -459,7 +459,7 @@ export default class FindAndReplaceManager {
         this._dirty.add(getKeyForPath(op.path))
       }
     }
-    let state = this._getState()
+    const state = this._getState()
     if (!state.enabled) return
 
     // HACK: this is a bit hacky but should work. When the user has changed the text we leave a mark in the state
@@ -508,9 +508,9 @@ function _findInText (text, pattern, opts = {}) {
   if (opts.fullWord) {
     pattern = '\\b' + pattern + '\\b'
   }
-  let matches = []
+  const matches = []
   try {
-    let matcher = new RegExp(pattern, opts.caseSensitive ? 'g' : 'gi')
+    const matcher = new RegExp(pattern, opts.caseSensitive ? 'g' : 'gi')
     let match
     while ((match = matcher.exec(text))) {
       matches.push({

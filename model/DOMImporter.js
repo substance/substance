@@ -137,7 +137,7 @@ export default class DOMImporter {
         let nodeData = this._createNodeData(el, blockTypeConverter.type)
         nodeData = blockTypeConverter.import(el, nodeData, this) || nodeData
         node = this._createNode(nodeData)
-        let context = state.popContext()
+        const context = state.popContext()
         context.annos.forEach((a) => {
           this._createNode(a)
         })
@@ -171,7 +171,7 @@ export default class DOMImporter {
   convertElement (el) {
     const schema = this._getSchema()
     if (!this.state.doc) this.reset()
-    let isTopLevel = !this.state.isConverting
+    const isTopLevel = !this.state.isConverting
     if (isTopLevel) {
       this.state.isConverting = true
     }
@@ -194,7 +194,7 @@ export default class DOMImporter {
       } else {
         nodeData = converter.import(el, nodeData, this) || nodeData
       }
-      let context = this.state.popContext()
+      const context = this.state.popContext()
       annos = context.annos
     } else {
       throw new Error('No converter found for ' + el.tagName)
@@ -325,7 +325,7 @@ export default class DOMImporter {
   }
 
   _getIdForElement (el, type) {
-    let id = el.getAttribute(this.idAttribute)
+    const id = el.getAttribute(this.idAttribute)
     if (id && !this.state.ids[id]) return id
     return this._getNextId(el.getOwnerDocument(), type)
   }
@@ -364,7 +364,7 @@ export default class DOMImporter {
     if (!type) {
       throw new Error('type is mandatory.')
     }
-    let nodeData = {
+    const nodeData = {
       type,
       id: this._getIdForElement(el, type)
     }
@@ -373,11 +373,11 @@ export default class DOMImporter {
   }
 
   _createNode (nodeData) {
-    let doc = this.state.doc
+    const doc = this.state.doc
     // NOTE: if your Document implementation adds default nodes in the constructor
     // and you have exported the node, we need to remove the default version first
     // TODO: alternatively we could just update the existing one. For now we remove the old one.
-    let node = doc.get(nodeData.id)
+    const node = doc.get(nodeData.id)
     if (node) {
       // console.warn('Node with same it already exists.', node)
       doc.delete(node.id)
@@ -445,7 +445,7 @@ export default class DOMImporter {
         }
         let annoData = this._createNodeData(el, annoType)
         // push a new context so we can deal with reentrant calls
-        let stackFrame = {
+        const stackFrame = {
           path: context.path,
           offset: startOffset,
           text: '',
@@ -489,7 +489,7 @@ export default class DOMImporter {
           offset: endOffset
         }
         // merge annos into parent stack frame
-        let parentFrame = last(state.stack)
+        const parentFrame = last(state.stack)
         parentFrame.annos = parentFrame.annos.concat(stackFrame.annos, annoData)
       } else {
         console.warn('Unknown element type. Taking plain text.', el.outerHTML)
@@ -555,8 +555,8 @@ export default class DOMImporter {
       throw new Error('Wrapping inline elements automatically is not supported in this schema.')
     }
 
-    let dom = childIterator.peek().getOwnerDocument()
-    let wrapper = dom.createElement('wrapper')
+    const dom = childIterator.peek().getOwnerDocument()
+    const wrapper = dom.createElement('wrapper')
     while (childIterator.hasNext()) {
       const el = childIterator.next()
       // if there is a block node we finish this wrapper
@@ -572,8 +572,8 @@ export default class DOMImporter {
     let nodeData = { type, id }
     this.state.pushContext('wrapper', converter)
     nodeData = converter.import(wrapper, nodeData, this) || nodeData
-    let context = this.state.popContext()
-    let annos = context.annos
+    const context = this.state.popContext()
+    const annos = context.annos
     // create the node
     const node = this._createNode(nodeData)
     // and all annos which have been created during this call

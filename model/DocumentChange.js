@@ -14,7 +14,7 @@ import { getContainerPosition } from './documentHelpers'
 export default class DocumentChange {
   constructor (ops, before, after, info = {}) {
     if (arguments.length === 1 && isPlainObject(arguments[0])) {
-      let data = arguments[0]
+      const data = arguments[0]
       // a unique id for the change
       this.sha = data.sha
       // when the change has been applied
@@ -58,18 +58,18 @@ export default class DocumentChange {
     // For now we allow this method to be called multiple times, but only extract the details the first time
     if (this._extracted) return
 
-    let primitiveOps = this.primitiveOps
-    let created = {}
-    let deleted = {}
-    let updated = {}
-    let affectedContainerAnnos = []
+    const primitiveOps = this.primitiveOps
+    const created = {}
+    const deleted = {}
+    const updated = {}
+    const affectedContainerAnnos = []
 
     // TODO: we will introduce a special operation type for coordinates
     function _checkAnnotation (op) {
       switch (op.type) {
         case 'create':
         case 'delete': {
-          let node = op.val
+          const node = op.val
           if (_isDefined(node.start) && node.start.path) {
             updated[getKeyForPath(node.start.path)] = true
           }
@@ -81,7 +81,7 @@ export default class DocumentChange {
         case 'update':
         case 'set': {
           // HACK: detecting annotation changes in an opportunistic way
-          let node = doc.get(op.path[0])
+          const node = doc.get(op.path[0])
           if (node) {
             if (node.isPropertyAnnotation()) {
               updated[getKeyForPath(node.start.path)] = true
@@ -115,11 +115,11 @@ export default class DocumentChange {
     }
 
     affectedContainerAnnos.forEach(anno => {
-      let startPos = getContainerPosition(doc, anno.containerPath, anno.start.path[0])
-      let endPos = getContainerPosition(doc, anno.containerPath, anno.end.path[0])
-      let nodeIds = doc.get(anno.containerPath)
+      const startPos = getContainerPosition(doc, anno.containerPath, anno.start.path[0])
+      const endPos = getContainerPosition(doc, anno.containerPath, anno.end.path[0])
+      const nodeIds = doc.get(anno.containerPath)
       for (let pos = startPos; pos <= endPos; pos++) {
-        let node = doc.get(nodeIds[pos])
+        const node = doc.get(nodeIds[pos])
         let path
         if (node.isText()) {
           path = node.getPath()
@@ -135,7 +135,7 @@ export default class DocumentChange {
     // remove all deleted nodes from updated
     if (Object.keys(deleted).length > 0) {
       forEach(updated, function (_, key) {
-        let nodeId = key.split('.')[0]
+        const nodeId = key.split('.')[0]
         if (deleted[nodeId]) {
           delete updated[key]
         }
@@ -151,13 +151,13 @@ export default class DocumentChange {
 
   invert () {
     // shallow cloning this
-    let copy = this.toJSON()
+    const copy = this.toJSON()
     copy.ops = []
     // swapping before and after
-    let tmp = copy.before
+    const tmp = copy.before
     copy.before = copy.after
     copy.after = tmp
-    let inverted = DocumentChange.fromJSON(copy)
+    const inverted = DocumentChange.fromJSON(copy)
     // ATTENTION: inverted ops need to be in reverse order
     inverted.ops = this.primitiveOps.map(op => op.invert()).reverse()
     return inverted
@@ -178,8 +178,8 @@ export default class DocumentChange {
   }
 
   serialize () {
-    let opSerializer = new OperationSerializer()
-    let data = this.toJSON()
+    const opSerializer = new OperationSerializer()
+    const data = this.toJSON()
     data.ops = this.ops.map(op => opSerializer.serialize(op))
     return JSON.stringify(data)
   }
@@ -189,7 +189,7 @@ export default class DocumentChange {
   }
 
   toJSON () {
-    let data = {
+    const data = {
       // to identify this change
       sha: this.sha,
       // before state
@@ -217,8 +217,8 @@ export default class DocumentChange {
   }
 
   static deserialize (str) {
-    let opSerializer = new OperationSerializer()
-    let data = JSON.parse(str)
+    const opSerializer = new OperationSerializer()
+    const data = JSON.parse(str)
     data.ops = data.ops.map(opData => opSerializer.deserialize(opData))
     if (data.before.selection) {
       data.before.selection = selectionFromJSON(data.before.selection)

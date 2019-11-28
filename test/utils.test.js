@@ -2,15 +2,15 @@ import { test } from 'substance-test'
 import { flattenOften, isEqual } from 'substance'
 
 test('utils: flattenOften should flatten multiple rounds', (t) => {
-  let arr = [1, [2, 3, [4, 5]]]
-  let result = flattenOften(arr, 2)
+  const arr = [1, [2, 3, [4, 5]]]
+  const result = flattenOften(arr, 2)
   t.deepEqual([1, 2, 3, 4, 5], result, 'array should be flattened.')
   t.end()
 })
 
 test('utils: flattenOften should stop at max', (t) => {
-  let arr = [1, [2, 3, [4, 5]]]
-  let result = flattenOften(arr, 1)
+  const arr = [1, [2, 3, [4, 5]]]
+  const result = flattenOften(arr, 1)
   t.deepEqual([1, 2, 3, [4, 5]], result, 'array should be flattened only once.')
   t.end()
 })

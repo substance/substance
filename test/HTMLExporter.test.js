@@ -21,18 +21,18 @@ function htmlExporterTests (memory) {
   })
 
   test('Exporting paragraph', function (t) {
-    let { doc, exporter } = setup(t)
-    let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
-    let el = exporter.convertNode(p1)
-    let actual = el.outerHTML
-    let expected = '<p data-id="p1">' + CONTENT + '</p>'
+    const { doc, exporter } = setup(t)
+    const p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
+    const el = exporter.convertNode(p1)
+    const actual = el.outerHTML
+    const expected = '<p data-id="p1">' + CONTENT + '</p>'
     t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
   test('Exporting paragraph with strong', function (t) {
-    let { doc, exporter } = setup(t)
-    let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
+    const { doc, exporter } = setup(t)
+    const p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     doc.create({
       type: 'strong',
       id: 's1',
@@ -44,38 +44,38 @@ function htmlExporterTests (memory) {
         offset: 7
       }
     })
-    let el = exporter.convertNode(p1)
-    let actual = el.outerHTML
-    let expected = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
+    const el = exporter.convertNode(p1)
+    const actual = el.outerHTML
+    const expected = '<p data-id="p1">0123<strong data-id="s1">456</strong>789</p>'
     t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
   test('Exporting h1', function (t) {
-    let { doc, exporter } = setup(t)
-    let h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT })
-    let el = exporter.convertNode(h1)
-    let actual = el.outerHTML
-    let expected = '<h1 data-id="h1">' + CONTENT + '</h1>'
+    const { doc, exporter } = setup(t)
+    const h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT })
+    const el = exporter.convertNode(h1)
+    const actual = el.outerHTML
+    const expected = '<h1 data-id="h1">' + CONTENT + '</h1>'
     t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
   test('Exporting h2', function (t) {
-    let { doc, exporter } = setup(t)
-    let h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT })
-    let el = exporter.convertNode(h2)
-    let actual = el.outerHTML
-    let expected = '<h2 data-id="h2">' + CONTENT + '</h2>'
+    const { doc, exporter } = setup(t)
+    const h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT })
+    const el = exporter.convertNode(h2)
+    const actual = el.outerHTML
+    const expected = '<h2 data-id="h2">' + CONTENT + '</h2>'
     t.equal(actual, expected, 'Exported HTML should be correct')
     t.end()
   })
 
   test('Exporting simple document', function (t) {
-    let { doc, exporter } = setup(t, simple)
-    let el = exporter.exportDocument(doc)
-    let actual = el.html()
-    let expected = [
+    const { doc, exporter } = setup(t, simple)
+    const el = exporter.exportDocument(doc)
+    const actual = el.html()
+    const expected = [
       '<p data-id="p1">' + CONTENT + '</p>',
       '<p data-id="p2">' + CONTENT + '</p>',
       '<p data-id="p3">' + CONTENT + '</p>',
@@ -86,8 +86,8 @@ function htmlExporterTests (memory) {
   })
 
   test('Exporting a link', function (t) {
-    let { doc, exporter } = setup(t)
-    let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
+    const { doc, exporter } = setup(t)
+    const p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     doc.create({
       type: 'link',
       id: 'l1',
@@ -100,23 +100,23 @@ function htmlExporterTests (memory) {
       },
       href: 'foo'
     })
-    let el = exporter.convertNode(p1)
-    let childNodes = el.getChildNodes()
+    const el = exporter.convertNode(p1)
+    const childNodes = el.getChildNodes()
     t.equal(childNodes.length, 3, 'Exported paragraph should have 3 child nodes')
     t.equal(childNodes[0].textContent, '0123', '.. 1. should have correct text')
     t.equal(childNodes[1].textContent, '456', '.. 2. should have correct text')
     t.equal(childNodes[2].textContent, '789', '.. 3. should have correct text')
-    let a = childNodes[1]
+    const a = childNodes[1]
     t.equal(a.attr('data-id'), 'l1', '.. <a> should have data-id set')
     t.equal(a.attr('href'), 'foo', '.. and correct href attribute')
     t.end()
   })
 
   test('Exporting an unordered list', function (t) {
-    let { doc, exporter } = setup(t)
-    let l1 = _l1(doc)
-    let el = exporter.convertNode(l1)
-    let childNodes = el.getChildNodes()
+    const { doc, exporter } = setup(t)
+    const l1 = _l1(doc)
+    const el = exporter.convertNode(l1)
+    const childNodes = el.getChildNodes()
     t.equal(el.tagName, 'ul', 'Exported element should be a <ul>')
     t.equal(el.attr('data-id'), 'l1', '.. with correct id')
     t.equal(childNodes.length, 2, '.. and two child nodes')
@@ -128,23 +128,23 @@ function htmlExporterTests (memory) {
   })
 
   test('Exporting an ordered list', function (t) {
-    let { doc, exporter } = setup(t)
-    let ol = doc.create({
+    const { doc, exporter } = setup(t)
+    const ol = doc.create({
       type: 'list',
       id: 'ol1',
       listType: 'order'
     })
-    let el = exporter.convertNode(ol)
+    const el = exporter.convertNode(ol)
     t.equal(el.tagName, 'ol', 'Exported element should be a <ol>')
     t.end()
   })
 
   test('Exporting a nested list', function (t) {
-    let { doc, exporter } = setup(t)
-    let l = _l2(doc)
-    let el = exporter.convertNode(l)
-    let items = el.findAll('li')
-    let nestedList = el.find('ul')
+    const { doc, exporter } = setup(t)
+    const l = _l2(doc)
+    const el = exporter.convertNode(l)
+    const items = el.findAll('li')
+    const nestedList = el.find('ul')
     t.equal(items.length, 4, 'Exported should contain 4 list items')
     t.notNil(nestedList, '.. and a nested list')
     t.equal(nestedList.childNodes.length, 2, '.. which has 2 child nodes')
@@ -152,9 +152,9 @@ function htmlExporterTests (memory) {
   })
 
   function setup (t, fixture) {
-    let config = getTestConfig()
-    let exporter = config.createExporter('html', {}, { elementFactory: t.elementFactory })
-    let doc = createTestArticle(fixture)
+    const config = getTestConfig()
+    const exporter = config.createExporter('html', {}, { elementFactory: t.elementFactory })
+    const doc = createTestArticle(fixture)
     return { exporter, doc }
   }
 }

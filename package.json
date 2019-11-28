@@ -11,7 +11,7 @@
   },
   "scripts": {
     "prepack": "npm install && node make build",
-    "lint": "standard \"dom/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"editor/**/*.js\" \"util/**/*.js\" index.es.js",
+    "lint": "standard \"commons/**/*.js\" \"dar/**/*.js\" \"dom/**/*.js\" \"editor/**/*.js\" \"model/**/*.js\" \"test/*.js\" \"ui/**/*.js\" \"util/**/*.js\" index.es.js",
     "pretest": "npm run lint",
     "test": "node test/_runTests | tap-spec",
     "cover": "node make cover",
@@ -45,7 +45,7 @@
     "rollup-plugin-commonjs": "^10.0.2",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "standard": "^11.0.1",
+    "standard": "^14.1.0",
     "substance-bundler": "0.27.1",
     "substance-test": "0.15.0",
     "tap-spec": "^5.0.0"

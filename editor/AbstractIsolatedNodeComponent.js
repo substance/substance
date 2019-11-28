@@ -13,13 +13,13 @@ export default class AbstractIsolatedNodeComponent extends Component {
     this.ContentClass = this._getContentClass()
 
     // NOTE: FF does not allow to navigate contenteditable isles
-    let useBlocker = platform.isFF || !this.ContentClass.noBlocker
+    const useBlocker = platform.isFF || !this.ContentClass.noBlocker
     this.blockingMode = useBlocker ? 'closed' : 'open'
   }
 
   getInitialState () {
-    let sel = this.getEditorSession().getSelection()
-    let selState = this.getEditorSession().getSelectionState()
+    const sel = this.getEditorSession().getSelection()
+    const selState = this.getEditorSession().getSelectionState()
     return this._deriveStateFromSelectionState(sel, selState)
   }
 
@@ -34,22 +34,22 @@ export default class AbstractIsolatedNodeComponent extends Component {
   }
 
   didMount () {
-    let editorState = this.context.editorSession.getEditorState()
+    const editorState = this.context.editorSession.getEditorState()
     editorState.addObserver(['selection'], this._onSelectionChanged, this, { stage: 'render' })
   }
 
   dispose () {
-    let editorState = this.context.editorSession.getEditorState()
+    const editorState = this.context.editorSession.getEditorState()
     editorState.removeObserver(this)
   }
 
   renderContent ($$, node, options = {}) {
-    let ComponentClass = this.ContentClass
+    const ComponentClass = this.ContentClass
     if (!ComponentClass) {
       console.error('Could not resolve a component for type: ' + node.type)
       return $$(this.__elementTag)
     } else {
-      let props = Object.assign(this._getContentProps(), options)
+      const props = Object.assign(this._getContentProps(), options)
       return $$(ComponentClass, props)
     }
   }
@@ -185,8 +185,8 @@ export default class AbstractIsolatedNodeComponent extends Component {
     if (!isolatedNodes) {
       isolatedNodes = []
       if (sel && sel.surfaceId) {
-        let surfaceManager = this.getSurfaceManager()
-        let surface = surfaceManager.getSurface(sel.surfaceId)
+        const surfaceManager = this.getSurfaceManager()
+        const surface = surfaceManager.getSurface(sel.surfaceId)
         if (surface) {
           isolatedNodes = surface.getComponentPath().filter(comp => comp._isAbstractIsolatedNodeComponent)
         }
@@ -197,8 +197,8 @@ export default class AbstractIsolatedNodeComponent extends Component {
   }
 
   _shouldConsumeEvent (event) {
-    let comp = Component.unwrap(event.currentTarget)
-    let isolatedNodeComponent = this._getIsolatedNode(comp)
+    const comp = Component.unwrap(event.currentTarget)
+    const isolatedNodeComponent = this._getIsolatedNode(comp)
     return (isolatedNodeComponent === this)
   }
 

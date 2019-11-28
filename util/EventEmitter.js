@@ -1,5 +1,6 @@
 import forEach from './forEach'
 import isObject from './isObject'
+import hasOwnProperty from './hasOwnProperty'
 
 // for debugging
 const DEBUG = false
@@ -94,7 +95,7 @@ function _on (event, method, context) {
   /* eslint-disable no-invalid-this */
   var bindings
   validateMethod(method, context)
-  if (this.__events__.hasOwnProperty(event)) {
+  if (hasOwnProperty(this.__events__, event)) {
     bindings = this.__events__[event]
   } else {
     // Auto-initialize bindings list
@@ -156,7 +157,7 @@ function _off (event, method, context) {
     context = null
   }
   // Remove matching handlers
-  let bindings = this.__events__[event]
+  const bindings = this.__events__[event]
   for (let i = bindings.length - 1; i >= 0; i--) {
     const b = bindings[i]
     if (b.method === method && b.context === context) {

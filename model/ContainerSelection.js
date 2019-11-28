@@ -28,7 +28,7 @@ export default class ContainerSelection extends Selection {
     super()
 
     if (arguments.length === 1) {
-      let data = arguments[0]
+      const data = arguments[0]
       containerPath = data.containerPath
       startPath = data.startPath
       startOffset = data.startOffset
@@ -152,11 +152,11 @@ export default class ContainerSelection extends Selection {
   }
 
   containsNode (nodeId) {
-    let containerPath = this.containerPath
-    let doc = this.getDocument()
-    let nodeCoor = new Coordinate([nodeId], 0)
-    let cmpStart = compareCoordinates(doc, containerPath, nodeCoor, this.start)
-    let cmpEnd = compareCoordinates(doc, containerPath, nodeCoor, this.end)
+    const containerPath = this.containerPath
+    const doc = this.getDocument()
+    const nodeCoor = new Coordinate([nodeId], 0)
+    const cmpStart = compareCoordinates(doc, containerPath, nodeCoor, this.start)
+    const cmpEnd = compareCoordinates(doc, containerPath, nodeCoor, this.end)
     // HACK: trying to get this working
     // the coor created is always ([nodeId], 0)
     // The node is considered inside the selection if this coor >= start and coor < end
@@ -262,7 +262,7 @@ export default class ContainerSelection extends Selection {
    * @returns {PropertySelection[]}
    */
   splitIntoPropertySelections () {
-    let fragments = this.getFragments()
+    const fragments = this.getFragments()
     return fragments.filter(f => f instanceof Selection.Fragment).map(f => {
       return new PropertySelection(f.path, f.startOffset,
         f.endOffset, false, this.containerPath, this.surfaceId)
@@ -281,7 +281,7 @@ export default class ContainerSelection extends Selection {
   }
 
   _isCoordinateBefore (coor1, coor2, strict) {
-    let doc = this.getDocument()
+    const doc = this.getDocument()
     return isCoordinateBefore(doc, this.containerPath, coor1, coor2, strict)
   }
 
@@ -292,7 +292,7 @@ export default class ContainerSelection extends Selection {
   get _isContainerSelection () { return true }
 
   static fromJSON (properties) {
-    let sel = new ContainerSelection(properties)
+    const sel = new ContainerSelection(properties)
     return sel
   }
 }

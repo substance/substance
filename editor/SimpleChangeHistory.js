@@ -28,9 +28,9 @@ export default class SimpleChangeHistory {
   }
 
   undo () {
-    let change = last(this._done)
+    const change = last(this._done)
     if (change) {
-      let inverted = this._editorSession.getDocument().invert(change)
+      const inverted = this._editorSession.getDocument().invert(change)
       this._editorSession.applyChange(inverted, { replay: true })
       this._done.pop()
       this._undone.push(change)
@@ -39,7 +39,7 @@ export default class SimpleChangeHistory {
   }
 
   redo () {
-    let change = last(this._undone)
+    const change = last(this._undone)
     if (change) {
       this._editorSession.applyChange(change, { replay: true })
       this._undone.pop()

@@ -10,10 +10,13 @@ export default function renderProperty (comp, document, path, props = {}) {
     throw new Error(`Could not find property for path ${path}`)
   }
 
+  // TODO: rethink the meaning of 'disabled' vs 'readOnly'
+  const disabled = comp.props.disabled || props.readOnly
+
   props = Object.assign({
     document,
     path,
-    disabled: comp.props.disabled,
+    disabled,
     placeholder: comp.props.placeholder
   }, props)
 
@@ -87,7 +90,13 @@ class TextInput extends Surface {
 
 class StringComponent extends Component {
   render () {
-    const { placeholder, path, readOnly, document } = this.props
+    const { placeholder, path, readOnly, document, inline } = this.props
+    let tagName = 'div'
+    let withoutBreak = false
+    if (inline) {
+      tagName = 'span'
+      withoutBreak = true
+    }
     const parentSurface = this.context.surface
     const name = getKeyForPath(path)
     // Note: readOnly and within a ContainerEditor a text property is
@@ -96,9 +105,10 @@ class StringComponent extends Component {
       const TextPropertyComponent = this.getComponent('text-property')
       return $$(TextPropertyComponent, {
         doc: document,
-        tagName: 'div',
+        tagName,
         placeholder,
-        path
+        path,
+        withoutBreak
       })
     } else {
       return $$(TextInput, {
@@ -131,11 +141,11 @@ class CollectionComponent extends Component {
 class ReadOnlyCollection extends Component {
   // NOTE: this is less efficient than ContainerEditor as it will always render the whole collection
   render () {
-    const { node, propName, disabled } = this.props
-    const el = $$('div').addClass('sc-collection').attr('data-id', getKeyForPath([node.id, propName]))
-    const items = node.resolve(propName)
+    const { document, path, disabled, readOnly } = this.props
+    const el = $$('div').addClass('sc-collection').attr('data-id', getKeyForPath(path))
+    const items = document.resolve(path)
     el.append(
-      items.map(item => _renderNode($$, this, item, { disabled }).ref(item.id))
+      items.map(item => _renderNode(this, item, { disabled, readOnly }).ref(item.id))
     )
     return el
   }

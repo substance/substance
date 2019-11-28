@@ -1,5 +1,6 @@
 import platform from './platform'
 import keys from './keys'
+import hasOwnProperty from './hasOwnProperty'
 
 /**
  * Parses a key-combo such as 'CommandOrControl+Enter' and turns it into a
@@ -8,12 +9,12 @@ import keys from './keys'
  * @param {string} combo a key-combo such as 'CommandOrControl+Enter'
  */
 export default function parseKeyCombo (combo) {
-  let frags = combo.split('+')
-  let keyEvent = {
+  const frags = combo.split('+')
+  const keyEvent = {
     keyCode: -1
   }
   for (var i = 0; i < frags.length; i++) {
-    let frag = frags[i].toUpperCase()
+    const frag = frags[i].toUpperCase()
     switch (frag) {
       case 'ALT': {
         keyEvent.altKey = true
@@ -67,7 +68,7 @@ export default function parseKeyCombo (combo) {
       default:
         if (frag.length === 1) {
           keyEvent.keyCode = frag.charCodeAt(0)
-        } else if (keys.hasOwnProperty(frag)) {
+        } else if (hasOwnProperty(keys, frag)) {
           keyEvent.keyCode = keys[frag]
         } else {
           throw new Error('Unsupported keyboard command: ' + combo)

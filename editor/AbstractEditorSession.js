@@ -23,7 +23,7 @@ export default class AbstractEditorSession extends EventEmitter {
     this._tx = document.createEditingInterface()
     this._txOps = []
 
-    let editorState = new EditorState(this._createEditorState(document, initialEditorState))
+    const editorState = new EditorState(this._createEditorState(document, initialEditorState))
     this.editorState = editorState
   }
 
@@ -49,7 +49,7 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   dispose () {
-    let editorState = this.editorState
+    const editorState = this.editorState
     editorState.document.off(this)
     editorState.off(this)
     editorState.dispose()
@@ -109,7 +109,7 @@ export default class AbstractEditorSession extends EventEmitter {
     }
     if (sel && !sel.isNull()) {
       if (!sel.surfaceId) {
-        let fs = this.getFocusedSurface()
+        const fs = this.getFocusedSurface()
         if (fs) {
           sel.surfaceId = fs.id
         }
@@ -139,10 +139,10 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   transaction (transformation, info = {}) {
-    let doc = this._document
-    let selBefore = this._getSelection()
-    let tx = this._tx
-    let ops = doc._ops
+    const doc = this._document
+    const selBefore = this._getSelection()
+    const tx = this._tx
+    const ops = doc._ops
     ops.length = 0
     tx.selection = selBefore
     let transformationCaptured = false
@@ -156,7 +156,7 @@ export default class AbstractEditorSession extends EventEmitter {
     }
     let change = null
     if (transformationCaptured) {
-      let selAfter = tx.selection
+      const selAfter = tx.selection
       if (ops.length > 0) {
         change = doc._createDocumentChange(ops, {
           selection: selBefore
@@ -190,8 +190,8 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   _commit (change, info = {}) {
-    let after = change.after
-    let selAfter = after.selection
+    const after = change.after
+    const selAfter = after.selection
     this._setSelection(this._normalizeSelection(selAfter))
     this._document._notifyChangeListeners(change, info)
     this.emit('change', change, info)
@@ -220,11 +220,12 @@ export default class AbstractEditorSession extends EventEmitter {
       change.info = info
     }
 
-    for (let [id, state] of tuples) {
-      let node = doc.get(id)
+    for (const [id, state] of tuples) {
+      const node = doc.get(id)
       if (!node) continue
       if (!node.state) node.state = {}
       Object.assign(node.state, state)
+      editorStateImpl.setDirty('document')
       editorStateImpl.documentObserver.setDirty([id])
       // TODO: do we really need this, or are we good with just updating DocumentObserver
       change.updated[id] = true
@@ -241,7 +242,7 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   undo () {
-    let change = this._history.undo()
+    const change = this._history.undo()
     if (change) {
       this._setSelection(this._normalizeSelection(change.after.selection))
       this.editorState.propagateUpdates()
@@ -249,7 +250,7 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   redo () {
-    let change = this._history.redo()
+    const change = this._history.redo()
     if (change) {
       this._setSelection(this._normalizeSelection(change.after.selection))
       this.editorState.propagateUpdates()
@@ -305,7 +306,7 @@ export default class AbstractEditorSession extends EventEmitter {
     // updates the node state during a flow.
     // HACK: In that case we 'merge' the state update into the already propagated document change
     if (editorState.isDirty('document') && info.action === 'node-state-update') {
-      let propagatedChange = editorState.getUpdate('document').change
+      const propagatedChange = editorState.getUpdate('document').change
       Object.assign(propagatedChange.updated, change.updated)
     } else {
       this.editorState._setUpdate('document', { change, info })
@@ -318,10 +319,10 @@ export default class AbstractEditorSession extends EventEmitter {
   }
 
   _revert () {
-    let doc = this._document
+    const doc = this._document
     for (let idx = this._txOps.length - 1; idx--; idx > 0) {
-      let op = this._txOps[idx]
-      let inverted = op.invert()
+      const op = this._txOps[idx]
+      const inverted = op.invert()
       doc._applyOp(inverted)
     }
   }
@@ -336,7 +337,7 @@ export default class AbstractEditorSession extends EventEmitter {
 function _addSurfaceId (sel, editorSession) {
   if (sel && !sel.isNull() && !sel.surfaceId) {
     // TODO: We could check if the selection is valid within the given surface
-    let surface = editorSession.getFocusedSurface()
+    const surface = editorSession.getFocusedSurface()
     if (surface) {
       sel.surfaceId = surface.id
     }
@@ -345,9 +346,9 @@ function _addSurfaceId (sel, editorSession) {
 
 function _addContainerPath (sel, editorSession) {
   if (sel && !sel.isNull() && sel.surfaceId && !sel.containerPath) {
-    let surface = editorSession.getSurface(sel.surfaceId)
+    const surface = editorSession.getSurface(sel.surfaceId)
     if (surface) {
-      let containerPath = surface.getContainerPath()
+      const containerPath = surface.getContainerPath()
       if (containerPath) {
         // console.log('Adding containerPath', containerPath)
         sel.containerPath = containerPath

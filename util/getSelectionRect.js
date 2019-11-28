@@ -9,11 +9,11 @@ export default function getSelectionRect (parentRect) {
     const wsel = window.getSelection()
     if (wsel.rangeCount === 0) return
     const wrange = wsel.getRangeAt(0)
-    let contentRect = parentRect
+    const contentRect = parentRect
     let selectionRect = wrange.getBoundingClientRect()
 
     if (selectionRect.top === 0 && selectionRect.bottom === 0) {
-      let fixed = _fixCorruptDOMSelection(wsel, wrange)
+      const fixed = _fixCorruptDOMSelection(wsel, wrange)
       if (fixed) selectionRect = fixed
     }
     return getRelativeRect(contentRect, selectionRect)
@@ -28,9 +28,9 @@ export default function getSelectionRect (parentRect) {
   use the DOM selection, e.g. for positioning an overlay.
 */
 function _fixCorruptDOMSelection (wsel, wrange) {
-  let anchorNode = wsel.anchorNode
+  const anchorNode = wsel.anchorNode
   if (!anchorNode || !anchorNode.getBoundingClientRect) return
-  let rect = anchorNode.getBoundingClientRect()
+  const rect = anchorNode.getBoundingClientRect()
   return {
     left: rect.left,
     top: rect.top,

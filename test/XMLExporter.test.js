@@ -21,18 +21,18 @@ function XMLExporterTests (memory) {
   })
 
   test('Exporting paragraph', function (t) {
-    let { doc, exporter } = setup(t)
-    let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
-    let el = exporter.convertNode(p1)
-    let actual = el.serialize()
-    let expected = '<p id="p1">' + CONTENT + '</p>'
+    const { doc, exporter } = setup(t)
+    const p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
+    const el = exporter.convertNode(p1)
+    const actual = el.serialize()
+    const expected = '<p id="p1">' + CONTENT + '</p>'
     t.equal(actual, expected)
     t.end()
   })
 
   test('Exporting paragraph with strong', function (t) {
-    let { doc, exporter } = setup(t)
-    let p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
+    const { doc, exporter } = setup(t)
+    const p1 = doc.create({ type: 'paragraph', id: 'p1', content: CONTENT })
     doc.create({
       type: 'strong',
       id: 's1',
@@ -44,38 +44,38 @@ function XMLExporterTests (memory) {
         offset: 7
       }
     })
-    let el = exporter.convertNode(p1)
-    let actual = el.serialize()
-    let expected = '<p id="p1">0123<strong id="s1">456</strong>789</p>'
+    const el = exporter.convertNode(p1)
+    const actual = el.serialize()
+    const expected = '<p id="p1">0123<strong id="s1">456</strong>789</p>'
     t.equal(actual, expected)
     t.end()
   })
 
   test('Exporting h1', function (t) {
-    let { doc, exporter } = setup(t)
-    let h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT })
-    let el = exporter.convertNode(h1)
-    let actual = el.serialize()
-    let expected = '<h1 id="h1">' + CONTENT + '</h1>'
+    const { doc, exporter } = setup(t)
+    const h1 = doc.create({ type: 'heading', id: 'h1', level: 1, content: CONTENT })
+    const el = exporter.convertNode(h1)
+    const actual = el.serialize()
+    const expected = '<h1 id="h1">' + CONTENT + '</h1>'
     t.equal(actual, expected)
     t.end()
   })
 
   test('Exporting h2', function (t) {
-    let { doc, exporter } = setup(t)
-    let h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT })
-    let el = exporter.convertNode(h2)
-    let actual = el.serialize()
-    let expected = '<h2 id="h2">' + CONTENT + '</h2>'
+    const { doc, exporter } = setup(t)
+    const h2 = doc.create({ type: 'heading', id: 'h2', level: 2, content: CONTENT })
+    const el = exporter.convertNode(h2)
+    const actual = el.serialize()
+    const expected = '<h2 id="h2">' + CONTENT + '</h2>'
     t.equal(actual, expected)
     t.end()
   })
 
   test('Exporting simple document', function (t) {
-    let { doc, exporter } = setup(t, simple)
-    let rootEl = exporter.exportDocument(doc)
-    let actual = rootEl.serialize()
-    let expected = [
+    const { doc, exporter } = setup(t, simple)
+    const rootEl = exporter.exportDocument(doc)
+    const actual = rootEl.serialize()
+    const expected = [
       '<article>',
       '<p id="p1">' + CONTENT + '</p>',
       '<p id="p2">' + CONTENT + '</p>',
@@ -88,15 +88,15 @@ function XMLExporterTests (memory) {
   })
 
   test('Exporting meta', function (t) {
-    let { doc, exporter } = setup(t)
-    let meta = doc.create({
+    const { doc, exporter } = setup(t)
+    const meta = doc.create({
       type: 'meta',
       id: 'meta',
       title: 'Untitled'
     })
-    let el = exporter.convertNode(meta)
-    let actual = el.serialize()
-    let expected = '<meta id="meta"><title>Untitled</title></meta>'
+    const el = exporter.convertNode(meta)
+    const actual = el.serialize()
+    const expected = '<meta id="meta"><title>Untitled</title></meta>'
     t.equal(actual, expected)
     t.ok(true)
     t.end()
@@ -114,9 +114,9 @@ function XMLExporterTests (memory) {
   // })
 
   function setup (t, fixture) {
-    let config = getTestConfig()
-    let doc = createTestArticle(fixture)
-    let exporter = config.createExporter('xml', doc, { elementFactory: t.elementFactory })
+    const config = getTestConfig()
+    const doc = createTestArticle(fixture)
+    const exporter = config.createExporter('xml', doc, { elementFactory: t.elementFactory })
     return { exporter, doc }
   }
 }

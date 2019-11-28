@@ -3,11 +3,11 @@ import HandlerParams from './HandlerParams'
 
 export default class AbstractKeyboardManager {
   onKeydown (event, context) {
-    let key = parseKeyEvent(event)
-    let hooks = this._getBindings('keydown', key)
+    const key = parseKeyEvent(event)
+    const hooks = this._getBindings('keydown', key)
     if (hooks) {
       context = context || this._getContext()
-      let params = this._getParams(context)
+      const params = this._getParams(context)
       let hasExecuted = false
       for (let i = 0; i < hooks.length && !hasExecuted; i++) {
         const hook = hooks[i]
@@ -22,10 +22,10 @@ export default class AbstractKeyboardManager {
   }
 
   onTextInput (text, context) {
-    let hooks = this._getBindings('textinput', text)
+    const hooks = this._getBindings('textinput', text)
     if (hooks) {
       context = context || this._getContext()
-      let params = this._getParams(context)
+      const params = this._getParams(context)
       let hasExecuted = false
       for (let i = 0; i < hooks.length && !hasExecuted; i++) {
         const hook = hooks[i]

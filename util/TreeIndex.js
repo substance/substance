@@ -2,6 +2,7 @@ import { get, setWith } from '../vendor/lodash-es'
 import isString from './isString'
 import isArray from './isArray'
 import deleteFromArray from './deleteFromArray'
+import hasOwnProperty from './hasOwnProperty'
 
 class TreeNode {}
 
@@ -35,7 +36,7 @@ export default class TreeIndex {
     if (!isArray(path)) {
       throw new Error('Illegal argument for TreeIndex.get()')
     }
-    let node = get(this, path)
+    const node = get(this, path)
     return this._collectValues(node)
   }
 
@@ -51,9 +52,9 @@ export default class TreeIndex {
     if (path.length === 1) {
       delete this[path[0]]
     } else {
-      let key = path[path.length - 1]
+      const key = path[path.length - 1]
       path = path.slice(0, -1)
-      let parent = get(this, path)
+      const parent = get(this, path)
       if (parent) {
         delete parent[key]
       }
@@ -61,9 +62,9 @@ export default class TreeIndex {
   }
 
   clear () {
-    let root = this
-    for (let key in root) {
-      if (root.hasOwnProperty(key)) {
+    const root = this
+    for (const key in root) {
+      if (hasOwnProperty(root, key)) {
         delete root[key]
       }
     }
@@ -80,9 +81,9 @@ export default class TreeIndex {
   _traverse (root, path, fn) {
     let id
     for (id in root) {
-      if (!root.hasOwnProperty(id)) continue
-      let child = root[id]
-      let childPath = path.concat([id])
+      if (!hasOwnProperty(root, id)) continue
+      const child = root[id]
+      const childPath = path.concat([id])
       if (child instanceof TreeNode) {
         this._traverse(child, childPath, fn)
       } else {
@@ -94,9 +95,9 @@ export default class TreeIndex {
   _collectValues (root) {
     // TODO: don't know if this is the best solution
     // We use this only for indexes, e.g., to get all annotation on one node
-    let vals = {}
+    const vals = {}
     this._traverse(root, [], function (val, path) {
-      let key = path[path.length - 1]
+      const key = path[path.length - 1]
       vals[key] = val
     })
     return vals
@@ -113,7 +114,7 @@ function _pathify (path) {
 
 class TreeIndexArrays extends TreeIndex {
   contains (path) {
-    let val = super.get(path)
+    const val = super.get(path)
     return Boolean(val)
   }
 
@@ -126,7 +127,7 @@ class TreeIndexArrays extends TreeIndex {
   }
 
   set (path, arr) {
-    let val = super.get(path)
+    const val = super.get(path)
     val.__values__ = arr
   }
 
@@ -157,7 +158,7 @@ class TreeIndexArrays extends TreeIndex {
   }
 
   remove (path, value) {
-    let arr = get(this, path)
+    const arr = get(this, path)
     if (arr instanceof TreeNode) {
       if (arguments.length === 1) {
         delete arr.__values__

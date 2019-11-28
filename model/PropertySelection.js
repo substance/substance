@@ -29,7 +29,7 @@ export default class PropertySelection extends Selection {
     super()
 
     if (arguments.length === 1) {
-      let data = arguments[0]
+      const data = arguments[0]
       path = data.path
       startOffset = data.startOffset
       endOffset = data.endOffset

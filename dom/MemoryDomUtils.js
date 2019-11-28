@@ -15,8 +15,8 @@ import ElementType from 'domelementtype'
 */
 
 const _encodeXMLContent = ((obj) => {
-  let invObj = getInverseObj(obj)
-  let replacer = getInverseReplacer(invObj)
+  const invObj = getInverseObj(obj)
+  const replacer = getInverseReplacer(invObj)
   return getInverse(invObj, replacer)
 })({
   amp: '&',
@@ -25,8 +25,8 @@ const _encodeXMLContent = ((obj) => {
 })
 
 const _encodeXMLAttr = ((obj) => {
-  let invObj = getInverseObj(obj)
-  let replacer = getInverseReplacer(invObj)
+  const invObj = getInverseObj(obj)
+  const replacer = getInverseReplacer(invObj)
   return getInverse(invObj, replacer)
 })({
   quot: '"'
@@ -40,8 +40,8 @@ function getInverseObj (obj) {
 }
 
 function getInverseReplacer (inverse) {
-  let single = []
-  let multiple = []
+  const single = []
+  const multiple = []
 
   Object.keys(inverse).forEach(function (k) {
     if (k.length === 1) {
@@ -153,7 +153,7 @@ export default class DomUtils {
     if (elem.next) elem.next.prev = elem.prev
     if (elem.parent) {
       var childs = elem.parent.childNodes
-      let pos = childs.lastIndexOf(elem)
+      const pos = childs.lastIndexOf(elem)
       if (pos < 0) throw new Error('Invalid state')
       childs.splice(pos, 1)
       elem.parent = null
@@ -175,7 +175,7 @@ export default class DomUtils {
     var parent = replacement.parent = elem.parent
     if (parent) {
       var childs = parent.childNodes
-      let pos = childs.lastIndexOf(elem)
+      const pos = childs.lastIndexOf(elem)
       if (pos < 0) throw new Error('Invalid state')
       childs[pos] = replacement
     }
@@ -195,8 +195,8 @@ export default class DomUtils {
 
   append (elem, next) {
     if (next.parent) this.removeElement(next)
-    let parent = elem.parent
-    let currNext = elem.next
+    const parent = elem.parent
+    const currNext = elem.next
 
     next.next = currNext
     next.prev = elem
@@ -207,7 +207,7 @@ export default class DomUtils {
       currNext.prev = next
       if (parent) {
         var childs = parent.childNodes
-        let pos = childs.lastIndexOf(currNext)
+        const pos = childs.lastIndexOf(currNext)
         if (pos < 0) throw new Error('Invalid state')
         childs.splice(pos, 0, next)
       }
@@ -221,7 +221,7 @@ export default class DomUtils {
     var parent = elem.parent
     if (parent) {
       var childs = parent.childNodes
-      let pos = childs.lastIndexOf(elem)
+      const pos = childs.lastIndexOf(elem)
       if (pos < 0) throw new Error('Invalid state')
       childs.splice(pos, 0, prev)
     }
@@ -324,13 +324,13 @@ export default class DomUtils {
   }
 
   getAttributes (el) {
-    let attribs = el.getAttributes()
+    const attribs = el.getAttributes()
     // HACK: this is a bit confusing, because MemoryDOMElement and BrowserDOMElement are
     // not 100% compatible yet regarding getAttributes()
     if (attribs instanceof Map) {
       return Array.from(attribs)
     } else if (attribs && attribs.forEach) {
-      let res = []
+      const res = []
       attribs.forEach((val, key) => {
         res.push([key, val])
       })
@@ -341,7 +341,7 @@ export default class DomUtils {
   }
 
   formatAttribs (el, opts = {}) {
-    let output = []
+    const output = []
     const attributes = this.getAttributes(el)
     attributes.forEach(([key, value]) => {
       if (opts.disallowHandlers && /^\s*on/.exec(key)) return
@@ -359,9 +359,9 @@ export default class DomUtils {
   render (dom, opts) {
     if (!Array.isArray(dom)) dom = [dom]
     opts = opts || {}
-    let output = []
+    const output = []
     for (var i = 0; i < dom.length; i++) {
-      let elem = dom[i]
+      const elem = dom[i]
       switch (elem.type) {
         case 'root':
         case 'document': {
@@ -416,9 +416,9 @@ export default class DomUtils {
     if (opts.disallowedTags) {
       if (opts.disallowedTags.has(this.getNameWithoutNS(elem))) return
     }
-    if (name === 'svg') opts = Object.assign({}, opts, {decodeEntities: opts.decodeEntities, xmlMode: true})
+    if (name === 'svg') opts = Object.assign({}, opts, { decodeEntities: opts.decodeEntities, xmlMode: true })
     let tag = '<' + name
-    let attribs = this.formatAttribs(elem, opts)
+    const attribs = this.formatAttribs(elem, opts)
     if (attribs) {
       tag += ' ' + attribs
     }
@@ -443,7 +443,7 @@ export default class DomUtils {
 
   renderDoctype (elem) {
     const { name, publicId, systemId } = this.getData(elem)
-    let frags = ['DOCTYPE', name]
+    const frags = ['DOCTYPE', name]
     if (publicId) {
       frags.push('PUBLIC')
       frags.push('"' + publicId + '"')

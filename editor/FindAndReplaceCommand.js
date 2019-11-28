@@ -4,7 +4,7 @@ const ENABLED = Object.freeze({ disabled: false })
 
 export default class FindAndReplaceCommand extends Command {
   getCommandState (params, context) {
-    let fnr = context.findAndReplaceManager
+    const fnr = context.findAndReplaceManager
     if (!fnr) return { disabled: true }
 
     switch (this.config.action) {
@@ -16,7 +16,7 @@ export default class FindAndReplaceCommand extends Command {
   }
 
   execute (params, context) {
-    let fnr = context.findAndReplaceManager
+    const fnr = context.findAndReplaceManager
     switch (this.config.action) {
       case 'open-find': {
         fnr.openDialog()

@@ -1,5 +1,5 @@
 import { Component, domHelpers } from '../dom'
-import { platform, getRelativeRect, getSelectionRect } from '../util'
+import { platform, getRelativeRect, getSelectionRect, parseKeyEvent } from '../util'
 import { EditorSession, createEditorContext } from '../editor'
 
 export default class AbstractEditor extends Component {
@@ -106,7 +106,7 @@ export default class AbstractEditor extends Component {
     if (documentEntry) {
       return archive.getDocument(documentEntry.id)
     } else {
-      throw new Error(`Could not find main document.`)
+      throw new Error('Could not find main document.')
     }
   }
 
@@ -163,5 +163,27 @@ export default class AbstractEditor extends Component {
       }
     }
     return selectionRect
+  }
+
+  // TODO: make sure to add all of the native ones here
+  _preventNativeKeydownHandlers (event) {
+    let contentEditableShortcuts
+    if (platform.isMac) {
+      contentEditableShortcuts = new Set([
+        'META+66', // Cmd+Bold
+        'META+73', // Cmd+Italic
+        'META+85' // Cmd+Underline
+      ])
+    } else {
+      contentEditableShortcuts = new Set([
+        'CTRL+66', // Ctrl+Bold
+        'CTRL+73', // Ctrl+Italic
+        'CTRL+85' // Ctrl+Underline
+      ])
+    }
+    const key = parseKeyEvent(event)
+    if (contentEditableShortcuts.has(key)) {
+      event.preventDefault()
+    }
   }
 }

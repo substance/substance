@@ -15,15 +15,15 @@ export default class EditorState extends AppState {
     if (!initialState.document) {
       throw new Error("'document' is required")
     }
-    let doc = initialState.document
-    let impl = this._getImpl()
+    const doc = initialState.document
+    const impl = this._getImpl()
     // EXPERIMENTAL:
     // one observer for all slots that watches for document changes and marks paths as dirty
     // this is also used to broadcast other node based changes such as node state updates
-    let documentObserver = new DocumentObserver(doc, this)
+    const documentObserver = new DocumentObserver(doc, this)
     impl.documentObserver = documentObserver
 
-    let selectionStateReducer = new SelectionStateReducer(this)
+    const selectionStateReducer = new SelectionStateReducer(this)
     selectionStateReducer.update()
     impl._selectionStateReducer = selectionStateReducer
   }
@@ -45,7 +45,7 @@ export default class EditorState extends AppState {
     // In this case, there might be no actual update (change and info)
     // and we provide a NOP change and empty info
     if (!update && name === 'document') {
-      let change = NOP(this._get('document'))
+      const change = NOP(this._get('document'))
       change._extractInformation()
       update = { change, info: change.info }
     }
@@ -98,17 +98,17 @@ class Slot {
 
   needsUpdate () {
     const state = this.editorState
-    for (let dep of this.deps) {
+    for (const dep of this.deps) {
       if (state.isDirty(dep)) return true
     }
     return false
   }
 
   notifyObservers () {
-    let observers = this._getObservers()
+    const observers = this._getObservers()
     // console.log('Slot.notifyObservers()', observers, this.deps)
-    for (let o of observers) {
-      let entry = this._getEntryForObserver(o)
+    for (const o of observers) {
+      const entry = this._getEntryForObserver(o)
       // observer might have been disposed in the meantime
       if (!entry) continue
       this._notifyObserver(entry)
@@ -120,36 +120,36 @@ class Slot {
   }
 
   _getEntryForObserver (observer) {
-    let entries = observer[this._id]
+    const entries = observer[this._id]
     if (entries) {
       return entries.get(this.id)
     }
   }
 
   _deleteEntry (observer) {
-    let entries = observer[this._id]
+    const entries = observer[this._id]
     if (entries) {
       entries.delete(this.id)
     }
   }
 
   _getDocumentChange () {
-    let { change, info } = this._updates['document']
+    const { change, info } = this._updates.document
     change.info = info
     return change
   }
 
   _notifyObserver (entry) {
     const state = this.editorState
-    let spec = entry.spec
+    const spec = entry.spec
     // TODO: we want to drop this auto-arguments completely
     // after having switched to a pure AppState based implementation
     // i.e. without using observers via EditorSession
     if (spec.deps.length === 1) {
-      let name = spec.deps[0]
+      const name = spec.deps[0]
       switch (name) {
         case 'document': {
-          let update = state.getUpdate('document') || {}
+          const update = state.getUpdate('document') || {}
           spec.handler(update.change, update.info)
           break
         }
@@ -174,9 +174,9 @@ class DocumentSlot extends Slot {
     super.addObserver(observer, spec)
 
     const index = this.byPath
-    let docSpec = spec.options.document
+    const docSpec = spec.options.document
     if (docSpec && docSpec.path) {
-      let key = getKeyForPath(docSpec.path)
+      const key = getKeyForPath(docSpec.path)
       let records = index[key]
       if (!records) {
         records = index[key] = new Set()
@@ -193,10 +193,10 @@ class DocumentSlot extends Slot {
       const entry = entries.get(this.id)
       const index = this.byPath
       super.removeObserver(observer)
-      let docSpec = entry.spec.options.document
+      const docSpec = entry.spec.options.document
       if (docSpec && docSpec.path) {
-        let key = getKeyForPath(docSpec.path)
-        let records = index[key]
+        const key = getKeyForPath(docSpec.path)
+        const records = index[key]
         records.delete(observer)
       } else {
         index[ANY].delete(observer)
@@ -210,22 +210,22 @@ class DocumentSlot extends Slot {
 
     // notify all observers that are affected by the change
     const index = this.byPath
-    let { change } = state.getUpdate('document')
+    const { change } = state.getUpdate('document')
 
     if (!change) {
       console.error('FIXME: expected to find a document change as update for document')
       return index[ANY]
     }
 
-    let updated = this.documentObserver.dirty
-    let sets = []
+    const updated = this.documentObserver.dirty
+    const sets = []
     // observers without a path spec are registered with path=undefined
     sets.push(index[ANY])
     updated.forEach(id => {
-      let set = index[id]
+      const set = index[id]
       if (set) sets.push(set)
     })
-    let observers = new Set()
+    const observers = new Set()
     sets.forEach(s => {
       s.forEach(o => observers.add(o))
     })

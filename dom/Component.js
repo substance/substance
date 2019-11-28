@@ -286,7 +286,7 @@ export default class Component extends EventEmitter {
     ```
   */
   getLabel (name, ...args) {
-    let labelProvider = this.getLabelProvider()
+    const labelProvider = this.getLabelProvider()
     if (!labelProvider) throw new Error('Missing labelProvider.')
     return labelProvider.getLabel(name, ...args)
   }
@@ -319,7 +319,7 @@ export default class Component extends EventEmitter {
     @return {Class}                The ComponentClass
   */
   getComponent (componentName, maybe) {
-    let componentRegistry = this.getComponentRegistry()
+    const componentRegistry = this.getComponentRegistry()
     if (!componentRegistry) throw new Error('Missing componentRegistry.')
     const ComponentClass = componentRegistry.get(componentName)
     if (!maybe && !ComponentClass) {
@@ -466,7 +466,7 @@ export default class Component extends EventEmitter {
         this._getForwardedComponent().triggerDidMount({ noAscent: true })
       } else {
         const children = this.getChildren()
-        for (let child of children) {
+        for (const child of children) {
           child.triggerDidMount()
         }
       }
@@ -501,8 +501,8 @@ export default class Component extends EventEmitter {
     // otherwise descend into children or the forwarded component
     const _descend = () => {
       const children = this.getChildren()
-      for (let child of children) {
-        child.triggerDispose({root: this})
+      for (const child of children) {
+        child.triggerDispose({ root: this })
       }
     }
     const _dispose = () => {
@@ -523,7 +523,7 @@ export default class Component extends EventEmitter {
       if (options.root) {
         let parent = this.getParent()
         while (parent !== options.root) {
-          parent.triggerDispose({noDescent: true, root: options.root})
+          parent.triggerDispose({ noDescent: true, root: options.root })
           parent = parent.getParent()
         }
       }
@@ -531,8 +531,8 @@ export default class Component extends EventEmitter {
       // Forwarding components call dispose on the forwarded component
       // first, unless this is called during a bubble-up
       if (!options.noDescent) {
-        let forwardedComp = this.el._comp
-        forwardedComp.triggerDispose({root: this})
+        const forwardedComp = this.el._comp
+        forwardedComp.triggerDispose({ root: this })
       }
       _dispose()
     } else {
@@ -596,7 +596,7 @@ export default class Component extends EventEmitter {
   }
 
   _isForwarded () {
-    let parent = this.getParent()
+    const parent = this.getParent()
     return (parent && parent._isForwarding())
   }
 
@@ -717,11 +717,11 @@ export default class Component extends EventEmitter {
     @param {object} newState an object with a partial update.
   */
   setState (newState) {
-    let oldProps = this.props
-    let oldState = this.state
+    const oldProps = this.props
+    const oldState = this.state
     // Note: while setting props it is allowed to call this.setState()
     // which will not lead to an extra rerender
-    let needRerender = !this.__isSettingProps__ &&
+    const needRerender = !this.__isSettingProps__ &&
       this.shouldRerender(this.getProps(), newState)
     // triggering this to provide a possibility to look at old before it is changed
     this.willUpdateState(newState)
@@ -766,9 +766,9 @@ export default class Component extends EventEmitter {
     @param {object} an object with properties
   */
   setProps (newProps) {
-    let oldProps = this.props
-    let oldState = this.state
-    let needRerender = this.shouldRerender(newProps, this.state)
+    const oldProps = this.props
+    const oldState = this.state
+    const needRerender = this.shouldRerender(newProps, this.state)
     this._setProps(newProps)
     if (needRerender) {
       this._rerender(oldProps, oldState)
@@ -797,7 +797,7 @@ export default class Component extends EventEmitter {
     @param {object} an object with properties
   */
   extendProps (updatedProps) {
-    let newProps = extend({}, this.props, updatedProps)
+    const newProps = extend({}, this.props, updatedProps)
     this.setProps(newProps)
   }
 
@@ -942,19 +942,19 @@ export default class Component extends EventEmitter {
   }
 
   getChildAt (pos) {
-    let child = this.el.getChildAt(pos)
+    const child = this.el.getChildAt(pos)
     if (child) {
       return _unwrapCompStrict(child)
     }
   }
 
   find (cssSelector) {
-    let el = this.el.find(cssSelector)
+    const el = this.el.find(cssSelector)
     return _unwrapComp(el)
   }
 
   findAll (cssSelector) {
-    let els = this.el.findAll(cssSelector)
+    const els = this.el.findAll(cssSelector)
     return els.map(_unwrapComp).filter(Boolean)
   }
 
@@ -969,15 +969,15 @@ export default class Component extends EventEmitter {
     if (!childEl._isVirtualElement) {
       throw new Error('Invalid argument: "child" must be a VirtualElement.')
     }
-    let child = this.renderingEngine._renderChild(this, childEl)
+    const child = this.renderingEngine._renderChild(this, childEl)
     this.el.insertAt(pos, child.el)
     _mountChild(this, child)
   }
 
   removeAt (pos) {
-    let childEl = this.el.getChildAt(pos)
+    const childEl = this.el.getChildAt(pos)
     if (childEl) {
-      let child = _unwrapCompStrict(childEl)
+      const child = _unwrapCompStrict(childEl)
       _disposeChild(child)
       this.el.removeAt(pos)
     }
@@ -999,7 +999,7 @@ export default class Component extends EventEmitter {
     if (!newVirtualChild || !newVirtualChild._isVirtualElement || newVirtualChild._owner._comp !== this) {
       throw new Error('replaceChild(): newVirtualChild must be a VirtualElement instance created with a rendering context for this component.')
     }
-    let newChild = this.renderingEngine._renderChild(this, newVirtualChild)
+    const newChild = this.renderingEngine._renderChild(this, newVirtualChild)
     // Attention: Node.replaceChild has weird semantics
     _disposeChild(oldChild)
     this.el.replaceChild(oldChild.el, newChild.el)
@@ -1020,7 +1020,7 @@ export default class Component extends EventEmitter {
   }
 
   _clear () {
-    let el = this.el
+    const el = this.el
     if (el) {
       this.getChildNodes().forEach(function (child) {
         _disposeChild(child)
@@ -1058,7 +1058,7 @@ export default class Component extends EventEmitter {
   }
 
   getComponentPath () {
-    let path = []
+    const path = []
     let comp = this
     while (comp) {
       path.unshift(comp)
@@ -1069,7 +1069,7 @@ export default class Component extends EventEmitter {
 
   _getContext () {
     let context = {}
-    let parent = this.getParent()
+    const parent = this.getParent()
     if (parent) {
       context = extend(context, parent.context)
       if (parent.getChildContext) {
@@ -1113,8 +1113,8 @@ export default class Component extends EventEmitter {
 
   static render (props) {
     props = props || {}
-    let ComponentClass = this
-    let comp = new ComponentClass(null, props)
+    const ComponentClass = this
+    const comp = new ComponentClass(null, props)
     comp._render()
     return comp
   }
@@ -1126,7 +1126,7 @@ export default class Component extends EventEmitter {
     }
     if (!el) throw new Error("'el' is required.")
     if (isString(el)) {
-      let selector = el
+      const selector = el
       if (platform.inBrowser) {
         el = window.document.querySelector(selector)
       } else {
@@ -1135,8 +1135,7 @@ export default class Component extends EventEmitter {
     }
     el = DefaultDOMElement.wrap(el)
     const ComponentClass = this
-    let comp
-    comp = new ComponentClass(null, props, options)
+    const comp = new ComponentClass(null, props, options)
     comp.mount(el, options)
     return comp
   }
@@ -1230,7 +1229,7 @@ function _unwrapComp (el) {
 }
 
 function _unwrapCompStrict (el) {
-  let comp = _unwrapComp(el)
+  const comp = _unwrapComp(el)
   if (!comp) throw new Error('Expecting a back-link to the component instance.')
   return comp
 }

@@ -3,9 +3,9 @@ import Component from '../dom/Component'
 export default class SelectionFragmentComponent extends Component {
   render ($$) {
     // TODO: we should rename se-cursor to sc-cursor
-    let el = $$('span').addClass('se-selection-fragment')
+    const el = $$('span').addClass('se-selection-fragment')
     if (this.props.collaborator) {
-      let collaboratorIndex = this.props.collaborator.colorIndex
+      const collaboratorIndex = this.props.collaborator.colorIndex
       el.addClass('sm-collaborator-' + collaboratorIndex)
     } else {
       el.addClass('sm-local-user')

@@ -10,7 +10,7 @@ test('NodeSchema: properties of type ["object"] (#1169)', t => {
       }
     }
   }
-  let property = MyNode.schema.getProperty('content')
+  const property = MyNode.schema.getProperty('content')
   // props with default values are optional
   t.ok(property.isOptional(), 'property should be optional')
   t.ok(property.isArray(), 'property should be an array type')
@@ -33,7 +33,7 @@ test('NodeSchema: reference property with multiple target types', t => {
       }
     }
   }
-  let property = MyNode.schema.getProperty('content')
+  const property = MyNode.schema.getProperty('content')
   // props with default values are optional
   t.ok(property.isArray(), 'property should be an array type')
   t.deepEqual(property.type, ['array', 'id'], 'property should have correct type')
@@ -50,7 +50,7 @@ test('NodeSchema: reference property with multiple target types (canonical notat
       }
     }
   }
-  let property = MyNode.schema.getProperty('content')
+  const property = MyNode.schema.getProperty('content')
   // props with default values are optional
   t.ok(property.isArray(), 'property should be an array type')
   t.ok(property.isReference(), 'property should be a reference type')
@@ -80,7 +80,7 @@ test('NodeSchema: property of node type should be considered a reference', t => 
       }
     }
   }
-  let property = MyNode.schema.getProperty('foo')
+  const property = MyNode.schema.getProperty('foo')
   // props with default values are optional
   t.ok(property.isReference(), 'property should be a reference type')
   t.deepEqual(property.type, 'id', 'property should have id type')
@@ -105,7 +105,7 @@ test('NodeSchema: Node inheritance', t => {
       }
     }
   }
-  let schema = ChildNode.schema
+  const schema = ChildNode.schema
   t.ok(Node.isInstanceOf(ChildNode, 'parent'), "'child' should be considered an instance of 'parent'")
   t.equal(schema.getProperty('foo').type, 'string', "'child' should have a string property 'foo'")
   t.equal(schema.getProperty('bar').type, 'number', "'child' should have a number property 'bar'")
@@ -121,8 +121,8 @@ test('NodeSchema: enum type', t => {
       }
     }
   }
-  let schema = MyNode.schema
-  let foo = schema.getProperty('foo')
+  const schema = MyNode.schema
+  const foo = schema.getProperty('foo')
   t.equal(foo.type, 'enum', "node should have an enum type property 'foo'")
   t.deepEqual(foo.values, ['a', 'b', 'c'], 'with defined values')
   t.end()

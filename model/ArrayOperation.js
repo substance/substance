@@ -121,7 +121,7 @@ export default class ArrayOperation {
 
   // Factories
   static Insert (pos, val) {
-    return new ArrayOperation({type: INSERT, pos: pos, val: val})
+    return new ArrayOperation({ type: INSERT, pos: pos, val: val })
   }
 
   static Delete (pos, val) {
@@ -129,7 +129,7 @@ export default class ArrayOperation {
   }
 
   static Nop () {
-    return new ArrayOperation({type: NOP})
+    return new ArrayOperation({ type: NOP })
   }
 
   static fromJSON (data) {

@@ -1,5 +1,5 @@
 /* eslint-disable strict */
-let keys = {
+const keys = {
   UNDEFINED: 0,
   BACKSPACE: 8,
   DELETE: 46,
