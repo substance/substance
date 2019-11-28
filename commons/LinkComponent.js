@@ -103,7 +103,8 @@ export default class LinkComponent extends AnnotationComponent {
         desiredPos: this._getDesiredPopoverPos(),
         content: () => {
           return $$(_LinkPopover, { node })
-        }
+        },
+        position: 'relative'
       })
     }
   }
