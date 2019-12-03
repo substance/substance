@@ -9,6 +9,7 @@ import EventEmitter from '../util/EventEmitter'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
 import TypeIndex from './TypeIndex'
+import RelationshipIndex from './RelationshipIndex'
 import DocumentChange from './DocumentChange'
 import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
@@ -71,14 +72,15 @@ export default class Document extends EventEmitter {
     this.data = new IncrementalData(this.schema, this.nodeFactory)
     // all by type
     this.addIndex('type', new TypeIndex('type'))
-    // special index for (property-scoped) annotations
+    // index for (property-scoped) annotations
     this.addIndex('annotations', new AnnotationIndex())
-    // TODO: these are only necessary if there is a container annotation
-    // in the schema
-    // special index for (container-scoped) annotations
+    // index for (container-scoped) annotations
+    // TODO: enable this only if there is a container annotation in the schema
     this.addIndex('container-annotations', new ContainerAnnotationIndex())
+    // a reverse-index for relationship type properties ('one' or 'many')
+    // TODO: enable this only if there is a node with relationship property in the schema
+    this.addIndex('relationships', new RelationshipIndex())
     // TODO: maybe we want to have a generalized concept for such low-level hooks
-    // e.g. indexes are similar
     ParentNodeHook.register(this)
   }
 

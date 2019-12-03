@@ -3,17 +3,17 @@ export default class NodeSchema {
     this.type = type
     this._properties = properties
     this._superTypes = superTypes
-    // Analysing ownership:
-    // This is for hierarchal aspects in the model
-    // I.e. a node can have a reference or a list of references to other nodes.
-    // If the property 'owned' is set in the schema spec,
-    // this has an effect on cascaded deletions, or the order of cloning, for example.
-    this._ownedPropNames = new Set()
-    this._ownedProps = []
+    // Note: owned props are properties of type 'child' or 'chidren'
+    // whereas properties of type 'one' or 'many' are not owned.
+    this._childProps = new Map()
+    this._relationshipProps = new Map()
     for (const prop of properties.values()) {
-      if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
-        this._ownedPropNames.add(prop.name)
-        this._ownedProps.push(prop)
+      if (prop.isReference()) {
+        if (prop.isOwned()) {
+          this._childProps.set(prop.name, prop)
+        } else {
+          this._relationshipProps.set(prop.name, prop)
+        }
       }
     }
   }
@@ -22,16 +22,28 @@ export default class NodeSchema {
     return this._properties.get(name)
   }
 
-  hasOwnedProperties () {
-    return this._ownedPropNames.size > 0
+  hasChildProperties () {
+    return this._childProps.size > 0
   }
 
-  getOwnedProperties () {
-    return this._ownedProps.slice()
+  getChildProperties () {
+    return this._childProps.values()
+  }
+
+  hasRelationshipProperties () {
+    return this._relationshipProps.size > 0
+  }
+
+  getRelationshipProperties () {
+    return this._relationshipProps.values()
   }
 
   isOwned (name) {
-    return this._ownedPropNames.has(name)
+    return this._childProps.has(name)
+  }
+
+  isRelationship (name) {
+    return this._relationshipProps.has(name)
   }
 
   getSuperType () {

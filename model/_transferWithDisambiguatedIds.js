@@ -29,7 +29,7 @@ export default function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id,
     const name = prop.name
     if (name === 'id' || name === 'type') continue
     // Look for references to owned children and create recursively
-    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+    if (prop.isReference() && prop.isOwned()) {
       // NOTE: we need to recurse directly here, so that we can
       // update renamed references
       if (prop.isArray()) {

@@ -27,6 +27,7 @@ export default class BasicEditorApi {
       const { property: propertyName, pos } = node.getXpath()
       const property = parent.schema.getProperty(propertyName)
       this.editorSession.transaction(tx => {
+        // remove the item from its parent
         if (property.isArray()) {
           documentHelpers.removeAt(tx, [parent.id, propertyName], pos)
         } else {
