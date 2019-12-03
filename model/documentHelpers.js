@@ -202,9 +202,9 @@ export function removeReferences (doc, node) {
       const propName = prop.name
       if (prop.isArray()) {
         const ids = referer.get(propName)
-        const offset = ids.indexOf(nodeId)
-        if (offset >= 0) {
-          doc.update([referer.id, propName], { type: 'delete', offset })
+        const pos = ids.indexOf(nodeId)
+        if (pos >= 0) {
+          doc.update([referer.id, propName], { type: 'delete', pos })
         }
       } else {
         const id = referer.get(propName)
