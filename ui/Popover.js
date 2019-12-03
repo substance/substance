@@ -85,6 +85,10 @@ export default class Popover extends Component {
     }
   }
 
+  close () {
+    this._hide()
+  }
+
   _showContent (content, requester, desiredPos, position) {
     this.setState({ content, requester, desiredPos, position })
     const el = this.getElement()
