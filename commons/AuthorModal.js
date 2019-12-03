@@ -1,5 +1,5 @@
 import { $$, Component, domHelpers } from '../dom'
-import { Form, FormRow, Input, Modal, MultiSelect, Button } from '../ui'
+import { Form, FormRow, Input, Modal, MultiSelect, Button, Icon, HorizontalStack } from '../ui'
 import { cloneDeep } from '../util'
 
 export default class AuthorModal extends Component {
@@ -42,42 +42,57 @@ export default class AuthorModal extends Component {
     const root = document.root
     const allAffiliations = root.resolve('affiliations')
 
-    const el = $$(Modal, { title, cancelLabel: 'Cancel', confirmLabel, size: 'medium' })
+    const el = $$(Modal, { class: 'sc-author-modal', title, cancelLabel: 'Cancel', confirmLabel, size: 'large' })
     const form = $$(Form)
-
-    // prefix (optional)
-    if (showOptionalFields || data.prefix) {
-      form.append(
-        $$(FormRow, { label: 'Prefix' },
-          $$(Input, { value: data.prefix }).ref('prefix')
-        )
-      )
-    }
 
     // first name (required)
     form.append(
       $$(FormRow, { label: 'First Name' },
-        $$(Input, { autofocus: true, value: data.firstName }).ref('firstName')
+        $$(Input, { autofocus: true, value: data.firstName, oninput: this._updateFirstName }).ref('firstName')
+      )
+    )
+
+    // last name (required)
+    form.append(
+      $$(FormRow, { label: 'Last Name' },
+        $$(Input, { value: data.lastName || '', oninput: this._updateLastName }).ref('lastName')
       )
     )
 
     if (showOptionalFields || data.middleNames.length > 0) {
       form.append(
-        $$(FormRow, { label: 'Middle Names' },
+        $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
           ...data.middleNames.map((middleName, idx) => {
-            $$(Input, { value: middleName }).ref('middleName' + idx)
+            return $$(HorizontalStack, {},
+              $$(Input, { value: middleName, oninput: this._updateMiddleName.bind(this, idx) }).ref('middleName' + idx),
+              $$(Button, {}, $$(Icon, { icon: 'times' })).on('click', this._removeMiddleName.bind(this, idx))
+            )
           }),
-          $$(Button, { icon: 'plus', onclick: this._onClickAddMiddleName })
+          $$(HorizontalStack, {},
+            $$('div'),
+            $$(Button, {}, $$(Icon, { icon: 'plus' })).on('click', this._onClickAddMiddleName)
+          )
         )
       )
     }
 
-    // last name (required)
-    form.append(
-      $$(FormRow, { label: 'Last Name' },
-        $$(Input, { value: data.lastName || '' }).ref('lastName')
+    // prefix (optional)
+    if (showOptionalFields || data.prefix) {
+      form.append(
+        $$(FormRow, { label: 'Prefix' },
+          $$(Input, { value: data.prefix, oninput: this._updatePrefix }).ref('prefix')
+        )
       )
-    )
+    }
+
+    // suffix (optional)
+    if (showOptionalFields || data.suffix) {
+      form.append(
+        $$(FormRow, { label: 'Suffix' },
+          $$(Input, { value: data.suffix, oninput: this._updateSuffix }).ref('suffix')
+        )
+      )
+    }
 
     // only show this if there are any affiliations available
     if (allAffiliations.length > 0) {
@@ -88,7 +103,8 @@ export default class AuthorModal extends Component {
               return { value: aff.id, label: aff.name }
             }),
             selected: data.affiliations,
-            placeholder: 'Select an Affiliation'
+            placeholder: 'Select an Affiliation',
+            onchange: this._updateAffiliations
           }).ref('affiliations')
         )
       )
@@ -96,10 +112,7 @@ export default class AuthorModal extends Component {
 
     form.append(
       $$(FormRow, {},
-        $$(Button, {
-          label: showOptionalFields ? 'Show less' : 'Show more',
-          onclick: this._onClickShowMore
-        })
+        $$(Button, { onclick: this._onClickShowMore }, showOptionalFields ? 'Show less' : 'Show more')
       )
     )
 
@@ -122,5 +135,34 @@ export default class AuthorModal extends Component {
     this.extendState({
       data
     })
+  }
+
+  _updatePrefix () {
+    this.state.data.prefix = this.refs.prefix.val()
+  }
+
+  _updateFirstName () {
+    this.state.data.firstName = this.refs.firstName.val()
+  }
+
+  _updateMiddleName (idx) {
+    this.state.data.middleNames[idx] = this.refs['middleName' + idx].val()
+  }
+
+  _removeMiddleName (idx) {
+    this.state.data.middleNames.splice(idx, 1)
+    this.rerender()
+  }
+
+  _updateLastName () {
+    this.state.data.lastName = this.refs.lastName.val()
+  }
+
+  _updateSuffix () {
+    this.state.data.suffix = this.refs.suffix.val()
+  }
+
+  _updateAffiliations () {
+    this.state.affiliations = this.refs.affiliations.getSelectedValues()
   }
 }
