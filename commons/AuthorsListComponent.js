@@ -65,23 +65,31 @@ class _AuthorComponent extends SelectableNodeComponent {
   }
 
   renderName (node) {
-    let frags = []
+    const el = $$('span', { class: 'se-name' })
     if (node.prefix) {
-      frags.push($$('span', { class: 'se-prefix' }, node.prefix))
+      el.append(
+        $$('span', { class: 'se-prefix' }, node.prefix)
+      )
     }
     if (node.firstName) {
-      frags.push($$('span', { class: 'se-first-name' }, node.firstName))
+      el.append(
+        $$('span', { class: 'se-first-name' }, node.firstName)
+      )
       if (node.middleNames && node.middleNames.length > 0) {
-        frags = frags.concat(node.middleNames.map(mn => {
-          frags.push($$('span', { class: 'se-middle-names' }, this._abbreviateName(mn)))
-        }))
+        for (const mn of node.middleNames) {
+          el.append(
+            $$('span', { class: 'se-middle-name' }, this._abbreviateName(mn))
+          )
+        }
       }
     }
-    frags.push(
-      $$('span', { class: 'se-last-name' })
+    el.append(
+      $$('span', { class: 'se-last-name' }, node.lastName)
     )
-    frags.push($$('span', { class: 'se-suffux' }, node.suffix))
-    return frags
+    if (node.suffix) {
+      el.append($$('span', { class: 'se-suffix' }, node.suffix))
+    }
+    return el
   }
 
   _abbreviateName (name) {
