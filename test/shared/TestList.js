@@ -2,7 +2,7 @@ import { ListMixin, DocumentNode, CHILDREN, STRING } from 'substance'
 
 export default class TestList extends ListMixin(DocumentNode) {
   createListItem (text) {
-    let item = this.getDocument().create({ type: 'list-item', content: text, level: 1 })
+    const item = this.getDocument().create({ type: 'list-item', content: text, level: 1 })
     return item
   }
 

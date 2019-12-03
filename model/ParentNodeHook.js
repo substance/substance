@@ -34,18 +34,18 @@ export default class ParentNodeHook {
   _onOperationApplied (op) {
     const doc = this.doc
     const node = doc.get(op.path[0])
-    let hasOwnedProperties = false
+    let hasChildProperties = false
     let isAnnotation = false
     let nodeSchema
     if (node) {
       nodeSchema = node.getSchema()
-      hasOwnedProperties = nodeSchema.hasOwnedProperties()
+      hasChildProperties = nodeSchema.hasChildProperties()
       isAnnotation = node.isAnnotation()
     }
     switch (op.type) {
       case 'create': {
-        if (hasOwnedProperties) {
-          for (const p of nodeSchema.getOwnedProperties()) {
+        if (hasChildProperties) {
+          for (const p of nodeSchema.getChildProperties()) {
             const isChildren = p.isArray()
             const refs = node.get(p.name)
             if (refs) {
@@ -61,7 +61,7 @@ export default class ParentNodeHook {
         break
       }
       case 'update': {
-        if (hasOwnedProperties) {
+        if (hasChildProperties) {
           const propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
             const update = op.diff
@@ -77,7 +77,7 @@ export default class ParentNodeHook {
         break
       }
       case 'set': {
-        if (hasOwnedProperties) {
+        if (hasChildProperties) {
           const propName = op.path[1]
           if (nodeSchema.isOwned(propName)) {
             const prop = nodeSchema.getProperty(propName)

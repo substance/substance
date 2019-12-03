@@ -32,7 +32,7 @@ export default class JSONConverter {
       if (visited[node.id]) return
       visited[node.id] = true
       const nodeSchema = node.getSchema()
-      nodeSchema.getOwnedProperties().forEach(prop => {
+      nodeSchema.getChildProperties().forEach(prop => {
         const val = node.get(prop.name)
         if (isArray(val)) {
           val.forEach(id => {
