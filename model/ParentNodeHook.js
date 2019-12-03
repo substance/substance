@@ -45,13 +45,14 @@ export default class ParentNodeHook {
     switch (op.type) {
       case 'create': {
         if (hasChildProperties) {
-          for (const p of nodeSchema.getChildProperties()) {
-            const isChildren = p.isArray()
-            const refs = node.get(p.name)
+          const childProps = nodeSchema.getChildProperties()
+          for (const prop of childProps) {
+            const isChildren = prop.isArray()
+            const refs = node.get(prop.name)
             if (refs) {
-              this._setParent(node, refs, p.name, isChildren)
+              this._setParent(node, refs, prop.name, isChildren)
             }
-            if (isChildren) this._updateContainerPositions([node.id, p.name])
+            if (isChildren) this._updateContainerPositions([node.id, prop.name])
           }
         }
         if (isAnnotation) {

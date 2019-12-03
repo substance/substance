@@ -32,7 +32,8 @@ export default class JSONConverter {
       if (visited[node.id]) return
       visited[node.id] = true
       const nodeSchema = node.getSchema()
-      nodeSchema.getChildProperties().forEach(prop => {
+      const childProps = nodeSchema.getChildProperties()
+      for (const prop of childProps) {
         const val = node.get(prop.name)
         if (isArray(val)) {
           val.forEach(id => {
@@ -41,7 +42,7 @@ export default class JSONConverter {
         } else {
           _export(doc.get(val))
         }
-      })
+      }
       json.nodes.push(node.toJSON())
     }
 
