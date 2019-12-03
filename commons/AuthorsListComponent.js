@@ -44,10 +44,7 @@ class _AuthorComponent extends SelectableNodeComponent {
     const el = $$('button', { class: 'sc-author' })
     if (this.state.selected) el.addClass('sm-selected')
 
-    el.append(
-      $$('span', { class: 'se-first-name' }, node.firstName),
-      $$('span', { class: 'se-last-name' }, node.lastName)
-    )
+    el.append(this.renderName(node))
 
     if (node.affiliations && node.affiliations.length > 0) {
       const affiliations = node.resolve('affiliations')
@@ -65,6 +62,33 @@ class _AuthorComponent extends SelectableNodeComponent {
 
     el.on('mousedown', this._onMousedown)
     return el
+  }
+
+  renderName (node) {
+    let frags = []
+    if (node.prefix) {
+      frags.push($$('span', { class: 'se-prefix' }, node.prefix))
+    }
+    if (node.firstName) {
+      frags.push($$('span', { class: 'se-first-name' }, node.firstName))
+      if (node.middleNames && node.middleNames.length > 0) {
+        frags = frags.concat(node.middleNames.map(mn => {
+          frags.push($$('span', { class: 'se-middle-names' }, this._abbreviateName(mn)))
+        }))
+      }
+    }
+    frags.push(
+      $$('span', { class: 'se-last-name' })
+    )
+    frags.push($$('span', { class: 'se-suffux' }, node.suffix))
+    return frags
+  }
+
+  _abbreviateName (name) {
+    const frags = name.split('-')
+    return frags.map(frag => {
+      return frag.charAt(0).toUpperCase() + '.'
+    }).join('-')
   }
 
   _onMousedown (e) {
