@@ -148,6 +148,10 @@ export function deepDeleteNode (doc, node) {
     }
   }
   const nodeSchema = node.getSchema()
+  // remove all references to this node
+  removeReferences(doc, node)
+
+  // remove all children
   // Note: correct order of deletion is tricky here.
   // 1. annos attached to text properties
   // 2. the node itself
@@ -178,6 +182,35 @@ export function deepDeleteNode (doc, node) {
         }
       } else {
         deepDeleteNode(doc, doc.get(value))
+      }
+    }
+  }
+}
+
+export function removeReferences (doc, node) {
+  const relIndex = doc.getIndex('relationships')
+  if (!relIndex) {
+    console.warning('Can not remove references without out relationships index')
+    return
+  }
+  const nodeId = node.id
+  const refererIds = relIndex.get(nodeId)
+  for (const id of refererIds) {
+    const referer = doc.get(id)
+    const relProps = referer.getSchema().getRelationshipProperties()
+    for (const prop of relProps) {
+      const propName = prop.name
+      if (prop.isArray()) {
+        const ids = referer.get(propName)
+        const offset = ids.indexOf(nodeId)
+        if (offset >= 0) {
+          doc.update([referer.id, propName], { type: 'delete', offset })
+        }
+      } else {
+        const id = referer.get(propName)
+        if (id === nodeId) {
+          doc.set([referer.id, propName], null)
+        }
       }
     }
   }
