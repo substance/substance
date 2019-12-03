@@ -196,8 +196,7 @@ export function copyNode (node) {
   const nodeSchema = node.getSchema()
   for (const prop of nodeSchema) {
     // ATM we do a cascaded copy if the property has type 'id', ['array', 'id'] and is owned by the node,
-    // or it is of type 'file'
-    if ((prop.isReference() && prop.isOwned()) || (prop.type === 'file')) {
+    if (prop.isReference() && prop.isOwned()) {
       const val = node.get(prop.name)
       nodes.push(_copyChildren(val))
     }
