@@ -72,6 +72,7 @@ export default class AbstractEditor extends Component {
 
   didMount () {
     this.editorSession.setRootComponent(this)
+    this.editorState.addObserver(['selection', 'document'], this._onChangeScrollSelectionIntoView, this, { stage: 'finalize' })
   }
 
   dispose () {
@@ -114,6 +115,11 @@ export default class AbstractEditor extends Component {
     return this.editorSession.commandManager.executeCommand(...args)
   }
 
+  _onChangeScrollSelectionIntoView () {
+    const sel = this.editorState.selection
+    this._scrollSelectionIntoView(sel)
+  }
+
   _scrollSelectionIntoView (sel) {
     this._scrollRectIntoView(this._getSelectionRect(sel))
   }
@@ -138,7 +144,7 @@ export default class AbstractEditor extends Component {
     const selBottom = selTop + rect.height
     // console.log('upperBound', upperBound, 'lowerBound', lowerBound, 'height', height, 'selTop', selTop, 'selBottom', selBottom)
     // TODO: the naming is very confusing cause of the Y-flip of values
-    if (selTop < upperBound || selBottom > lowerBound) {
+    if (selBottom < upperBound || selTop > lowerBound) {
       scrollable.setProperty('scrollTop', selTop)
     }
   }
@@ -157,6 +163,18 @@ export default class AbstractEditor extends Component {
           selectionRect = getRelativeRect(contentRect, nodeRect)
         } else {
           console.error(`FIXME: could not find a node with data-id=${nodeId}`)
+        }
+      } else if (sel.isCustomSelection()) {
+        let el
+        if (sel.customType === 'value') {
+          el = contentEl.find(`*[data-id="${sel.nodeId}.${sel.data.property}"]`)
+        } else {
+          el = contentEl.find(`*[data-id="${sel.nodeId}"]`)
+        }
+        if (el) {
+          selectionRect = getRelativeRect(contentRect, el.getNativeElement().getBoundingClientRect())
+        } else {
+          console.error(`FIXME: could not find node for custom selection: ${JSON.stringify(sel.toJSON())}`)
         }
       } else {
         selectionRect = getSelectionRect(contentRect)
