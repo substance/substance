@@ -18,12 +18,24 @@ export default class Input extends Component {
   }
 
   render () {
-    const attributes = Object.assign({ class: 'sc-input' }, this.props)
-    delete attributes.label
-    return $$('input', attributes)
+    return $$(this._getTagname(), this._getProps())
   }
 
   focus () {
     this.getElement().focus()
+  }
+
+  _getTagname () {
+    return 'input'
+  }
+
+  _getClass () {
+    return 'sc-input'
+  }
+
+  _getProps () {
+    const attributes = Object.assign({ class: this._getClass() }, this.props)
+    delete attributes.label
+    return attributes
   }
 }
