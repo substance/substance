@@ -1,6 +1,7 @@
 import { Component, domHelpers } from '../dom'
 import { platform, getRelativeRect, getSelectionRect, parseKeyEvent } from '../util'
 import { EditorSession, createEditorContext } from '../editor'
+import SelectableManager from './SelectableManager'
 
 export default class AbstractEditor extends Component {
   constructor (...args) {
@@ -43,6 +44,9 @@ export default class AbstractEditor extends Component {
     const api = this._createAPI(archive, editorSession)
     this.api = api
 
+    const selectableManager = new SelectableManager(editorState)
+    this.selectableManager = selectableManager
+
     const context = Object.assign(this.context, createEditorContext(config, editorSession), {
       config,
       api,
@@ -50,7 +54,8 @@ export default class AbstractEditor extends Component {
       editorState,
       archive,
       urlResolver: archive,
-      editable: true
+      editable: true,
+      selectableManager
     })
     this.context = context
 
@@ -167,7 +172,7 @@ export default class AbstractEditor extends Component {
       } else if (sel.isCustomSelection()) {
         let el
         if (sel.customType === 'value') {
-          el = contentEl.find(`*[data-id="${sel.nodeId}.${sel.data.property}"]`)
+          el = contentEl.find(`*[data-id="${sel.nodeId}.${sel.data.property}#${sel.data.valueId}"]`)
         } else {
           el = contentEl.find(`*[data-id="${sel.nodeId}"]`)
         }
