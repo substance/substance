@@ -3,8 +3,17 @@ import ApiExtension from './ApiExtension'
 
 export default class AuthorApi extends ApiExtension {
   /**
+   * @param {object} data from AuthorModal state
+   */
+  addAuthor (data) {
+    const nodeData = Object.assign({}, data, { type: 'author' })
+    const root = this.api.getRoot()
+    this.api.addNode([root.id, 'authors'], nodeData)
+  }
+
+  /**
    * @param {string} authorId
-   * @param {object} data from AuthorModal.state.data
+   * @param {object} data from AuthorModal state
    */
   updateAuthor (authorId, data) {
     this.api.getEditorSession().transaction(tx => {

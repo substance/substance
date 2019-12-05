@@ -14,14 +14,8 @@ export default class AddAuthorCommand extends Command {
       return $$(AuthorModal, { mode: 'create', document })
     }).then(modal => {
       if (!modal) return
-      const firstName = modal.refs.firstName.val()
-      const lastName = modal.refs.lastName.val()
-      let affiliations
-      if (modal.refs.affiliations) {
-        affiliations = modal.refs.affiliations.getSelectedValues()
-      }
-      const api = context.api
-      api.addNode([api.getRoot().id, 'authors'], { type: 'author', firstName, lastName, affiliations })
+      const data = modal.state.data
+      context.api.addAuthor(data)
     })
   }
 }

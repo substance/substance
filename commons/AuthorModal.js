@@ -1,6 +1,7 @@
 import { $$, Component, domHelpers } from '../dom'
 import { Form, FormRow, Input, Modal, MultiSelect, Button, Icon, HorizontalStack } from '../ui'
 import { cloneDeep } from '../util'
+import OptionalFieldsToggle from './OptionalFieldsToggle'
 
 export default class AuthorModal extends Component {
   getInitialState () {
@@ -38,7 +39,6 @@ export default class AuthorModal extends Component {
     const title = mode === 'create' ? 'Create Author' : 'Edit Author'
     const confirmLabel = mode === 'edit' ? 'Update Author' : 'Create Author'
 
-    // see if there are affiliations available
     const root = document.root
     const allAffiliations = root.resolve('affiliations')
 
@@ -95,7 +95,7 @@ export default class AuthorModal extends Component {
     }
 
     // only show this if there are any affiliations available
-    if (allAffiliations.length > 0) {
+    if (allAffiliations.length > 0 && (showOptionalFields || data.affiliations.length > 0)) {
       form.append(
         $$(FormRow, { label: 'Affiliations' },
           $$(MultiSelect, {
@@ -112,7 +112,7 @@ export default class AuthorModal extends Component {
 
     form.append(
       $$(FormRow, {},
-        $$(Button, { onclick: this._onClickShowMore }, showOptionalFields ? 'Show less' : 'Show more')
+        $$(OptionalFieldsToggle, { showOptionalFields }).on('click', this._toggleOptionalFields)
       )
     )
 
@@ -121,7 +121,7 @@ export default class AuthorModal extends Component {
     return el
   }
 
-  _onClickShowMore (event) {
+  _toggleOptionalFields (event) {
     domHelpers.stopAndPrevent(event)
     this.extendState({
       showOptionalFields: !this.state.showOptionalFields
@@ -163,6 +163,6 @@ export default class AuthorModal extends Component {
   }
 
   _updateAffiliations () {
-    this.state.affiliations = this.refs.affiliations.getSelectedValues()
+    this.state.data.affiliations = this.refs.affiliations.getSelectedValues()
   }
 }
