@@ -12,9 +12,7 @@ export default class AddAffiliationCommand extends Command {
       return $$(AffiliationModal, { mode: 'create' })
     }).then(modal => {
       if (!modal) return
-      const name = modal.refs.name.val()
-      const api = context.api
-      api.addNode([api.getRoot().id, 'affiliations'], { type: 'affiliation', name })
+      context.api.addAffiliation(modal.state.data)
     })
   }
 }

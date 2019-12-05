@@ -14,10 +14,7 @@ export default class EditAffiliationCommand extends ItemCommand {
       return $$(AffiliationModal, { mode: 'edit', node })
     }).then(modal => {
       if (!modal) return
-      // TODO: considering collab we should do a more minimal update
-      // i.e. using incremental changes
-      const name = modal.refs.name.val()
-      context.api.updateNode(node.id, { name })
+      context.api.updateAffiliation(node.id, modal.state.data)
     })
   }
 }
