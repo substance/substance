@@ -104,5 +104,6 @@ export default class MultiSelect extends Component {
     // TODO: we would need a way to let the popover know
     // that we want to renew the popover
     this._requestPopover()
+    this.el.emit('change')
   }
 }

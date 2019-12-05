@@ -37,11 +37,13 @@ export default class ModalCanvas extends Component {
     this._resolve(null)
     this._resolve = null
     this.setState({})
+    this.send('closePopover')
   }
 
   _confirm () {
     this._resolve(this.refs.renderedModal)
     this._resolve = null
     this.setState({})
+    this.send('closePopover')
   }
 }

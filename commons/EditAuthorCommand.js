@@ -16,15 +16,8 @@ export default class EditAuthorCommand extends ItemCommand {
       return $$(AuthorModal, { mode: 'edit', document, node })
     }).then(modal => {
       if (!modal) return
-      // TODO: considering collab we should do a more minimal update
-      // i.e. using incremental changes
-      const firstName = modal.refs.firstName.val()
-      const lastName = modal.refs.lastName.val()
-      let affiliations
-      if (modal.refs.affiliations) {
-        affiliations = modal.refs.affiliations.getSelectedValues()
-      }
-      context.api.updateNode(node.id, { firstName, lastName, affiliations })
+      const data = modal.state.data
+      context.api.updateAuthor(node.id, data)
     })
   }
 }

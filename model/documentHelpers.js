@@ -202,9 +202,9 @@ export function removeReferences (doc, node) {
       const propName = prop.name
       if (prop.isArray()) {
         const ids = referer.get(propName)
-        const offset = ids.indexOf(nodeId)
-        if (offset >= 0) {
-          doc.update([referer.id, propName], { type: 'delete', offset })
+        const pos = ids.indexOf(nodeId)
+        if (pos >= 0) {
+          doc.update([referer.id, propName], { type: 'delete', pos })
         }
       } else {
         const id = referer.get(propName)
@@ -591,4 +591,47 @@ export function createNodeFromJson (doc, data) {
     }
   }
   return doc.create(nodeData)
+}
+
+export function updateProperty (doc, path, newValue) {
+  const prop = doc.getProperty(path)
+  const reflectionType = prop.reflectionType
+  const value = doc.get(path)
+  switch (reflectionType) {
+    // primitives and types that can not be changed incrementally
+    case 'integer':
+    case 'number':
+    case 'boolean':
+    case 'one': {
+      if (value !== newValue) {
+        doc.set(path, newValue)
+      }
+      break
+    }
+    // TODO: we should try to derive an incremental update if possible
+    case 'string': {
+      if (value !== newValue) {
+        doc.set(path, newValue)
+      }
+      break
+    }
+    // array types
+    case 'string-array':
+    case 'many': {
+      if (!isArrayEqual(value, newValue)) {
+        doc.set(path, newValue)
+      }
+      break
+    }
+    // TODO: how should we approach this? I.e. the hierarchical aspect is making this a little unclear
+    // data for new children would need to be provided, maybe even updates for children
+    case 'text':
+    case 'child':
+    case 'children':
+    case 'container': {
+      throw new Error('Not implemented yet.')
+    }
+    default:
+      throw new Error('Unsupported property type: ' + reflectionType)
+  }
 }
