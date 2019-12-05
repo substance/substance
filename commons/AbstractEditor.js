@@ -120,20 +120,20 @@ export default class AbstractEditor extends Component {
     this._scrollSelectionIntoView(sel)
   }
 
-  _scrollSelectionIntoView (sel) {
-    this._scrollRectIntoView(this._getSelectionRect(sel))
+  _scrollSelectionIntoView (sel, options = {}) {
+    this._scrollRectIntoView(this._getSelectionRect(sel), options)
   }
 
-  _scrollElementIntoView (el) {
+  _scrollElementIntoView (el, options = {}) {
     const contentEl = this._getScrollableElement()
     const contentRect = contentEl.getNativeElement().getBoundingClientRect()
     const elRect = el.getNativeElement().getBoundingClientRect()
     const rect = getRelativeRect(contentRect, elRect)
-    this._scrollRectIntoView(rect)
+    this._scrollRectIntoView(rect, options)
     return rect.top
   }
 
-  _scrollRectIntoView (rect) {
+  _scrollRectIntoView (rect, { force }) {
     if (!rect) return
     const scrollable = this._getScrollableElement()
     const height = scrollable.getHeight()
@@ -144,7 +144,7 @@ export default class AbstractEditor extends Component {
     const selBottom = selTop + rect.height
     // console.log('upperBound', upperBound, 'lowerBound', lowerBound, 'height', height, 'selTop', selTop, 'selBottom', selBottom)
     // TODO: the naming is very confusing cause of the Y-flip of values
-    if (selBottom < upperBound || selTop > lowerBound) {
+    if (force || selBottom < upperBound || selTop > lowerBound) {
       scrollable.setProperty('scrollTop', selTop)
     }
   }
