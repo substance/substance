@@ -4,7 +4,7 @@ export default class SelectableNodeComponent extends Component {
   getInitialState () {
     const editorState = this.context.editorState
     const selectionState = editorState.selectionState
-    const selected = (selectionState.node && selectionState.node.id === this.props.node.id)
+    const selected = this._isSelected(selectionState)
     return { selected }
   }
 

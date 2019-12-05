@@ -6,7 +6,8 @@ export default class AuthorComponent extends SelectableNodeComponent {
   render () {
     const node = this.props.node
     // Note: using a button so that the browser treats it as UI element, not content (e.g. re selections)
-    const el = $$('button', { class: 'sc-author' })
+    const el = $$('button', { class: 'sc-author', 'data-id': node.id })
+
     if (this.state.selected) el.addClass('sm-selected')
 
     el.append(this.renderName(node))
