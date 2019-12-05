@@ -6,9 +6,19 @@ export default class AffiliationApi extends ApiExtension {
    * @param {object} data from AffiliationModal state
    */
   addAffiliation (data) {
-    const root = this.api.getRoot()
+    this.insertAffiliation(data)
+  }
+
+  insertAffiliation (data, currentAffiliation) {
+    const editorSession = this.api.getEditorSession()
+    const doc = editorSession.getDocument()
+    const root = doc.root
+    let insertPos = root.affiliations.length
+    if (currentAffiliation) {
+      insertPos = currentAffiliation.getPosition() + 1
+    }
     const nodeData = Object.assign({}, data, { type: 'affiliation' })
-    this.api.addNode([root.id, 'affiliations'], nodeData)
+    this.api.insertNode([root.id, 'affiliations'], insertPos, nodeData)
   }
 
   /**

@@ -6,9 +6,19 @@ export default class AuthorApi extends ApiExtension {
    * @param {object} data from AuthorModal state
    */
   addAuthor (data) {
+    this.insertAuthor(data)
+  }
+
+  insertAuthor (data, currentAuthor) {
+    const editorSession = this.api.getEditorSession()
+    const doc = editorSession.getDocument()
+    const root = doc.root
+    let insertPos = root.authors.length
+    if (currentAuthor) {
+      insertPos = currentAuthor.getPosition() + 1
+    }
     const nodeData = Object.assign({}, data, { type: 'author' })
-    const root = this.api.getRoot()
-    this.api.addNode([root.id, 'authors'], nodeData)
+    this.api.insertNode([root.id, 'authors'], insertPos, nodeData)
   }
 
   /**
