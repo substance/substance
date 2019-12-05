@@ -45,21 +45,23 @@ export default class DocumentArchive extends EventEmitter {
     // otherwise the file must be a blob
     if (!blob) blob = file
     const assetId = uuid()
-    const [name, ext] = _getNameAndExtension(file.name)
-    const filePath = this._getUniqueFileName(name, ext)
+    const fileName = file.name
+    if (this.hasAsset(fileName)) {
+      throw new Error('A file with this name already exists: ' + fileName)
+    }
     // TODO: this is not ready for collab
     this._manifestSession.transaction(tx => {
       const assetNode = tx.create({
         type: 'asset',
         id: assetId,
-        path: filePath,
+        path: fileName,
         assetType: file.type
       })
       documentHelpers.append(tx, ['dar', 'assets'], assetNode.id)
     })
     this.buffer.addBlob(assetId, {
       id: assetId,
-      path: filePath,
+      path: fileName,
       blob
     })
     // ATTENTION: blob urls are not supported in nodejs
@@ -67,52 +69,54 @@ export default class DocumentArchive extends EventEmitter {
     // For sake of testing we use `PSEUDO-BLOB-URL:${filePath}`
     // so that we can see if the rest of the system is working
     if (platform.inBrowser) {
-      this._pendingFiles.set(filePath, {
+      this._pendingFiles.set(fileName, {
         blob,
         blobUrl: URL.createObjectURL(blob)
       })
     } else {
-      this._pendingFiles.set(filePath, {
+      this._pendingFiles.set(fileName, {
         blob,
-        blobUrl: `PSEUDO-BLOB-URL:${filePath}`
+        blobUrl: `PSEUDO-BLOB-URL:${fileName}`
       })
     }
-    return filePath
+    return fileName
   }
 
   replaceAsset (oldFileName, newFile) {
     const asset = this.getAsset(oldFileName)
-    const [name, ext] = _getNameAndExtension(newFile.name)
-    const filePath = this._getUniqueFileName(name, ext)
+    const fileName = newFile.name
+    if (this.hasAsset(fileName)) {
+      throw new Error('A file with this name already exists: ' + fileName)
+    }
     // TODO: this is not ready for collab
     this._manifestSession.transaction(tx => {
       const _asset = tx.get(asset.id)
       _asset.assign({
-        path: filePath,
+        path: fileName,
         assetType: newFile.type
       })
     })
     this.buffer.addBlob(asset.id, {
       id: asset.id,
-      path: filePath,
+      path: fileName,
       blob: newFile
     })
     // ATTENTION: blob urls are not supported in nodejs
     // and I do not see that this is really necessary
-    // For sake of testing we use `PSEUDO-BLOB-URL:${filePath}`
+    // For sake of testing we use `PSEUDO-BLOB-URL:${fileName}`
     // so that we can see if the rest of the system is working
     if (platform.inBrowser) {
-      this._pendingFiles.set(filePath, {
+      this._pendingFiles.set(fileName, {
         blob: newFile,
         blobUrl: URL.createObjectURL(newFile)
       })
     } else {
-      this._pendingFiles.set(filePath, {
+      this._pendingFiles.set(fileName, {
         blob: newFile,
-        blobUrl: `PSEUDO-BLOB-URL:${filePath}`
+        blobUrl: `PSEUDO-BLOB-URL:${fileName}`
       })
     }
-    return filePath
+    return fileName
   }
 
   getAsset (fileName) {
@@ -311,7 +315,8 @@ export default class DocumentArchive extends EventEmitter {
     })
   }
 
-  _getUniqueFileName (name, ext) {
+  getUniqueFileName (fileName) {
+    const [name, ext] = _getNameAndExtension(fileName)
     let candidate
     // first try the canonical one
     candidate = `${name}.${ext}`
