@@ -6,6 +6,14 @@ export default class BasicEditorApi {
     this.editorSession = editorSession
   }
 
+  extendWith (apiExtension) {
+    apiExtension._register(this)
+  }
+
+  getEditorSession () {
+    return this.editorSession
+  }
+
   getDocument () {
     return this.editorSession.getDocument()
   }
