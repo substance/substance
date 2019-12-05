@@ -1,5 +1,5 @@
 import { $$, Component, domHelpers } from '../dom'
-import { Modal, Form, FormRow, Input, TextArea } from '../ui'
+import { Modal, Form, FormRow, Input } from '../ui'
 import OptionalFieldsToggle from './OptionalFieldsToggle'
 
 export default class AffiliationModal extends Component {
@@ -9,14 +9,12 @@ export default class AffiliationModal extends Component {
     if (node) {
       data = {
         name: node.name || '',
-        address: node.address || '',
         city: node.city || '',
         country: node.country || ''
       }
     } else {
       data = {
         name: '',
-        address: '',
         city: '',
         country: ''
       }
@@ -44,15 +42,6 @@ export default class AffiliationModal extends Component {
         $$(Input, { autofocus: true, value: data.name, oninput: this._updateName }).ref('name')
       )
     )
-
-    // address (optional)
-    if (showOptionalFields || data.address) {
-      form.append(
-        $$(FormRow, { label: 'Address', class: 'se-address' },
-          $$(TextArea, { value: data.address, rows: 3, oninput: this._updateAddress }).ref('address')
-        )
-      )
-    }
 
     // city (optional)
     if (showOptionalFields || data.city) {
@@ -92,10 +81,6 @@ export default class AffiliationModal extends Component {
 
   _updateName () {
     this.state.data.name = this.refs.name.val()
-  }
-
-  _updateAddress () {
-    this.state.data.address = this.refs.address.val()
   }
 
   _updateCity () {

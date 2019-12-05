@@ -18,7 +18,6 @@ export default class AffiliationApi extends ApiExtension {
   updateAffiliation (affId, data) {
     this.api.getEditorSession().transaction(tx => {
       documentHelpers.updateProperty(tx, [affId, 'name'], data.name)
-      documentHelpers.updateProperty(tx, [affId, 'address'], data.address)
       documentHelpers.updateProperty(tx, [affId, 'city'], data.city)
       documentHelpers.updateProperty(tx, [affId, 'country'], data.country)
       this.api._selectItem(tx, tx.get(affId))
