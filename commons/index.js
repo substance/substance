@@ -26,6 +26,7 @@ export { HtmlConverters }
 export { default as ImageComponent } from './ImageComponent'
 export { default as InsertAffiliationCommand } from './InsertAffiliationCommand'
 export { default as InsertAuthorCommand } from './InsertAuthorCommand'
+export { default as ItemCommand } from './_ItemCommand'
 export { default as MoveAuthorCommand } from './MoveAuthorCommand'
 export { default as MoveAffiliationCommand } from './MoveAffiliationCommand'
 export { default as MoveItemCommand } from './_MoveItemCommand'
