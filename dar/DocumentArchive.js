@@ -127,6 +127,19 @@ export default class DocumentArchive extends EventEmitter {
     return this._documents.manifest.getAssetNodes().map(node => node.toJSON())
   }
 
+  renameAsset (oldFileName, newFileName) {
+    if (this.hasAsset(newFileName)) {
+      throw new Error('A file with this name already exists: ' + newFileName)
+    }
+    const asset = this.getAsset(oldFileName)
+    this._manifestSession.transaction(tx => {
+      const _asset = tx.get(asset.id)
+      _asset.assign({
+        path: newFileName
+      })
+    })
+  }
+
   getBlob (path) {
     // There are the following cases
     // 1. the asset is on a different server (remote url)
