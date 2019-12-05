@@ -1,7 +1,5 @@
-import { Component, $$, domHelpers } from '../dom'
-import { Blocker } from '../ui'
-import SelectableNodeComponent from './SelectableNodeComponent'
-import { getLabel } from './nodeHelpers'
+import { Component, $$ } from '../dom'
+import AffiliationComponent from './AffiliationComponent'
 
 export default class AffiliationsListComponent extends Component {
   didMount () {
@@ -25,37 +23,12 @@ export default class AffiliationsListComponent extends Component {
     const affiliations = node.resolve('affiliations')
     if (affiliations && affiliations.length > 0) {
       el.append(
-        ...affiliations.map(affiliation => $$(_AffiliationComponent, { node: affiliation }).ref(affiliation.id))
+        ...affiliations.map(affiliation => $$(AffiliationComponent, { node: affiliation }).ref(affiliation.id))
       )
     } else {
       el.addClass('sm-empty')
     }
 
     return el
-  }
-}
-
-class _AffiliationComponent extends SelectableNodeComponent {
-  render () {
-    const node = this.props.node
-    // Note: using a button so that the browser treats it as UI element, not content (e.g. re selections)
-    const el = $$('button', { class: 'sc-affiliation' })
-    if (this.state.selected) el.addClass('sm-selected')
-
-    el.append(
-      $$('span', { class: 'se-label' }, getLabel(node)),
-      $$('span', { class: 'se-name' }, node.name)
-    )
-
-    // add a blocker so that browser can not interact with the rendered content
-    el.append($$(Blocker))
-
-    el.on('mousedown', this._onMousedown)
-    return el
-  }
-
-  _onMousedown (e) {
-    domHelpers.stopAndPrevent(e)
-    this.send('selectItem', this.props.node)
   }
 }
