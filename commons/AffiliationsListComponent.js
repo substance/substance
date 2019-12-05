@@ -1,26 +1,16 @@
-import { Component, $$ } from '../dom'
+import { $$ } from '../dom'
 import AffiliationComponent from './AffiliationComponent'
+import PropertyComponent from './PropertyComponent'
 
-export default class AffiliationsListComponent extends Component {
-  didMount () {
-    const node = this.props.node
-    this.context.editorState.addObserver(['document'], this.rerender, this, {
-      document: {
-        path: [node.id, 'affiliations']
-      },
-      stage: 'render'
-    })
-  }
-
-  dispose () {
-    this.context.editorState.off(this)
+export default class AffiliationsListComponent extends PropertyComponent {
+  getPath () {
+    return [this.props.node.id, 'affiliations']
   }
 
   render () {
     const node = this.props.node
-    const el = $$('div', { class: 'sc-affiliations-list' })
-
     const affiliations = node.resolve('affiliations')
+    const el = $$('div', { class: 'sc-affiliations-list' })
     if (affiliations && affiliations.length > 0) {
       el.append(
         ...affiliations.map(affiliation => $$(AffiliationComponent, { node: affiliation }).ref(affiliation.id))
@@ -28,7 +18,6 @@ export default class AffiliationsListComponent extends Component {
     } else {
       el.addClass('sm-empty')
     }
-
     return el
   }
 }

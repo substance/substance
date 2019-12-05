@@ -82,6 +82,14 @@ export default class BasicEditorApi {
     })
   }
 
+  insertNode (collectionPath, pos, nodeData) {
+    this.editorSession.transaction(tx => {
+      const node = tx.create(nodeData)
+      documentHelpers.insertAt(tx, collectionPath, pos, node.id)
+      this._selectItem(tx, node)
+    })
+  }
+
   selectItem (item) {
     this._selectItem(this.editorSession, item)
   }

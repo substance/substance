@@ -8,7 +8,7 @@ export default class SurfaceManager {
     this.surfaces = new Map()
 
     editorState.addObserver(['selection', 'document'], this._onSelectionOrDocumentChange, this, { stage: 'pre-position' })
-    editorState.addObserver(['selection', 'document'], this._scrollSelectionIntoView, this, { stage: 'finalize' })
+    // editorState.addObserver(['selection', 'document'], this._scrollSelectionIntoView, this, { stage: 'finalize' })
   }
 
   dispose () {

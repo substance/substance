@@ -4,14 +4,14 @@ import { getLabel } from './nodeHelpers'
 
 export default class AffiliationComponent extends SelectableNodeComponent {
   render () {
+    const node = this.props.node
     // Note: using a button so that the browser treats it as UI element, not content (e.g. re selections)
-    const el = $$('button', { class: 'sc-affiliation' })
+    const el = $$('button', { class: 'sc-affiliation', 'data-id': node.id })
     if (this.state.selected) el.addClass('sm-selected')
-
     el.append(
+      this.renderLabel(),
       this.renderContent()
     )
-
     el.on('mousedown', this._onMousedown)
     return el
   }

@@ -1,60 +1,34 @@
-import { Component } from '../dom'
+import NodeComponent from './NodeComponent'
 
-export default class SelectableNodeComponent extends Component {
-  getInitialState () {
-    const editorState = this.context.editorState
-    const selectionState = editorState.selectionState
-    const selected = (selectionState.node && selectionState.node.id === this.props.node.id)
-    return { selected }
-  }
-
+export default class SelectableNodeComponent extends NodeComponent {
   didMount () {
-    const editorState = this.context.editorState
-    if (editorState) {
-      editorState.addObserver(['selectionState'], this._onSelectionChange, this, { stage: 'update' })
-      editorState.addObserver(['selection', 'document'], this._rerenderIfSelectionChanged, this, {
-        document: { path: [this.props.node.id] },
-        stage: 'render'
-      })
+    super.didMount()
+
+    const selectableManager = this.context.selectableManager
+    if (selectableManager) {
+      selectableManager.registerSelectable(this._getSelectableId(), this)
     }
   }
 
   dispose () {
-    const editorState = this.context.editorState
-    if (editorState) {
-      editorState.removeObserver(this)
+    super.dispose()
+
+    const selectableManager = this.context.selectableManager
+    if (selectableManager) {
+      selectableManager.unregisterSelectable(this._getSelectableId(), this)
     }
   }
 
-  _onSelectionChange (selectionState) {
-    const isSelected = this._isSelected(selectionState)
-    if (this.state.selected) {
-      if (!isSelected) {
-        this._newSelectionState = { selected: false }
-      }
+  setSelected (selected) {
+    this.state.selected = selected
+    if (selected) {
+      this.el.addClass('sm-selected')
     } else {
-      if (isSelected) {
-        this._newSelectionState = { selected: true }
-      }
+      this.el.removeClass('sm-selected')
     }
   }
 
-  _isSelected (selectionState) {
-    const sel = selectionState.selection
-    return (
-      sel &&
-      sel.isCustomSelection() &&
-      sel.customType === 'node' &&
-      sel.nodeId === this.props.node.id
-    )
-  }
-
-  _rerenderIfSelectionChanged () {
-    if (this._newSelectionState) {
-      this.extendState(this._newSelectionState)
-      this._newSelectionState = null
-    } else if (this.context.editorState.isDirty('document')) {
-      this.rerender()
-    }
+  _getSelectableId () {
+    return this.props.node.id
   }
 }

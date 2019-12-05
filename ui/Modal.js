@@ -61,7 +61,9 @@ export default class Modal extends Component {
       case keys.ENTER: {
         const combo = parseKeyEvent(event, true)
         if (combo === 'META' || combo === 'ALT') {
-          this.send('confirm')
+          if (!this.props.disableConfirm) {
+            this.send('confirm')
+          }
         }
         break
       }
