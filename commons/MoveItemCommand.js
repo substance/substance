@@ -1,4 +1,4 @@
-import ItemCommand from './_ItemCommand'
+import ItemCommand from './ItemCommand'
 
 export default class MoveItemCommand extends ItemCommand {
   getCommandState (params, context) {

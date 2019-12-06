@@ -51,6 +51,7 @@ export default class BasicEditorApi {
   removeItem (collectionPath, itemId) {
     this.editorSession.transaction(tx => {
       documentHelpers.removeFromCollection(tx, collectionPath, itemId)
+      tx.setSelection(null)
     })
   }
 

@@ -1,6 +1,6 @@
 import { $$ } from '../dom'
 import AuthorModal from './AuthorModal'
-import ItemCommand from './_ItemCommand'
+import ItemCommand from './ItemCommand'
 
 export default class InsertAuthorCommand extends ItemCommand {
   getType () {
