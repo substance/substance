@@ -1,4 +1,5 @@
 import { documentHelpers } from '../model'
+import { isString } from '../util'
 
 export default class BasicEditorApi {
   constructor (archive, editorSession) {
@@ -107,6 +108,9 @@ export default class BasicEditorApi {
   }
 
   selectItem (item) {
+    if (isString(item)) {
+      item = this.getDocument().get(item)
+    }
     this._selectItem(this.editorSession, item)
   }
 
