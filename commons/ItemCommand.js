@@ -2,7 +2,12 @@ import { Command } from '../editor'
 
 export default class ItemCommand extends Command {
   getType () {
-    throw new Error('This method is abstract')
+    const type = this.config.type
+    if (!type) {
+      // or override
+      throw new Error('type is required')
+    }
+    return type
   }
 
   getCommandState (params) {

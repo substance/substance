@@ -1,6 +1,6 @@
 import { $$ } from '../dom'
 import AffiliationModal from './AffiliationModal'
-import ItemCommand from './_ItemCommand'
+import ItemCommand from './ItemCommand'
 
 export default class InsertAffiliationCommand extends ItemCommand {
   getType () {
