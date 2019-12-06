@@ -128,6 +128,9 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   renameAsset (oldFileName, newFileName) {
+    if (!this.hasAsset(oldFileName)) {
+      throw new Error(`No asset is registered with name ${oldFileName}`)
+    }
     if (this.hasAsset(newFileName)) {
       throw new Error('A file with this name already exists: ' + newFileName)
     }

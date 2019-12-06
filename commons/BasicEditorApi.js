@@ -1,4 +1,5 @@
 import { documentHelpers } from '../model'
+import { isString } from '../util'
 
 export default class BasicEditorApi {
   constructor (archive, editorSession) {
@@ -47,6 +48,12 @@ export default class BasicEditorApi {
     }
   }
 
+  removeItem (collectionPath, itemId) {
+    this.editorSession.transaction(tx => {
+      documentHelpers.removeFromCollection(tx, collectionPath, itemId)
+    })
+  }
+
   updateNode (id, nodeData) {
     this.editorSession.transaction(tx => {
       const node = tx.get(id)
@@ -64,14 +71,24 @@ export default class BasicEditorApi {
     const doc = this.getDocument()
     const node = doc.get(nodeId)
     const parent = node.getParent()
-    if (!parent) throw new Error('Figure does not exist')
+    if (!parent) throw new Error('Node does not have parent')
     const propertyName = node.getXpath().property
-    const pos = node.getPosition()
+    this.moveItem([parent.id, propertyName], nodeId, direction)
+  }
+
+  moveItem (collectionPath, itemId, direction) {
+    const doc = this.getDocument()
+    const collection = doc.get(collectionPath)
+    if (!collection) throw new Error('Collection does not exist')
+    const pos = collection.indexOf(itemId)
     const diff = direction === 'up' ? -1 : +1
-    this.editorSession.transaction(tx => {
-      documentHelpers.removeAt(tx, [parent.id, propertyName], pos)
-      documentHelpers.insertAt(tx, [parent.id, propertyName], pos + diff, node.id)
-    })
+    const insertPos = Math.min(collection.length, Math.max(0, pos + diff))
+    if (insertPos !== pos) {
+      this.editorSession.transaction(tx => {
+        documentHelpers.removeAt(tx, collectionPath, pos)
+        documentHelpers.insertAt(tx, collectionPath, insertPos, itemId)
+      })
+    }
   }
 
   addNode (collectionPath, nodeData) {
@@ -91,6 +108,9 @@ export default class BasicEditorApi {
   }
 
   selectItem (item) {
+    if (isString(item)) {
+      item = this.getDocument().get(item)
+    }
     this._selectItem(this.editorSession, item)
   }
 
