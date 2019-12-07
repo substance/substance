@@ -83,7 +83,7 @@ export default class BasicEditorApi {
     if (!collection) throw new Error('Collection does not exist')
     const pos = collection.indexOf(itemId)
     const diff = direction === 'up' ? -1 : +1
-    const insertPos = Math.min(collection.length, Math.max(0, pos + diff))
+    const insertPos = Math.min(collection.length - 1, Math.max(0, pos + diff))
     if (insertPos !== pos) {
       this.editorSession.transaction(tx => {
         documentHelpers.removeAt(tx, collectionPath, pos)
