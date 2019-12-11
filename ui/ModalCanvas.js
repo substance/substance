@@ -17,6 +17,8 @@ export default class ModalCanvas extends Component {
       el.append(
         renderModal().ref('renderedModal')
       )
+    } else {
+      el.addClass('sm-hidden')
     }
     // do not let the global context menu handler handle this
     el.on('contextmenu', domHelpers.stopAndPrevent)
