@@ -10,7 +10,7 @@ export default class AuthorModal extends Component {
     if (node) {
       data = {
         firstName: node.firstName || '',
-        middleNames: node.middleNames ? node.middleNames.slice() : [],
+        middleNames: node.middleNames ? node.middleNames.slice() : [''],
         lastName: node.lastName || '',
         prefix: node.prefix || '',
         suffix: node.suffix || '',
@@ -19,7 +19,7 @@ export default class AuthorModal extends Component {
     } else {
       data = {
         firstName: '',
-        middleNames: [],
+        middleNames: [''],
         lastName: '',
         prefix: '',
         suffix: '',
@@ -65,12 +65,11 @@ export default class AuthorModal extends Component {
           ...data.middleNames.map((middleName, idx) => {
             return $$(HorizontalStack, {},
               $$(Input, { value: middleName, oninput: this._updateMiddleName.bind(this, idx) }).ref('middleName' + idx),
-              $$(Button, {}, $$(Icon, { icon: 'times' })).on('click', this._removeMiddleName.bind(this, idx))
+              $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._removeMiddleName.bind(this, idx))
             )
           }),
           $$(HorizontalStack, {},
-            $$('div'),
-            $$(Button, {}, $$(Icon, { icon: 'plus' })).on('click', this._onClickAddMiddleName)
+            $$('a', { class: 'se-add-item' }, 'Add Middle Name').on('click', this._onClickAddMiddleName)
           )
         )
       )
