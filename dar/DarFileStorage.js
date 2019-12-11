@@ -44,8 +44,8 @@ export default class DarFileStorage {
       - unpack `dar` file as it is into the corresponding folder replacing an existing one
       - only bare-metal fs
     */
-    let id = this._path2Id(darpath)
-    let wcDir = this._getWorkingCopyPath(id)
+    const id = this._path2Id(darpath)
+    const wcDir = this._getWorkingCopyPath(id)
     fsExtra.removeSync(wcDir)
     fsExtra.mkdirpSync(wcDir)
     this._unpack(darpath, wcDir, err => {
@@ -55,8 +55,8 @@ export default class DarFileStorage {
   }
 
   write (darpath, rawArchive, cb) { // eslint-disble-line
-    let id = this._path2Id(darpath)
-    let wcDir = this._getWorkingCopyPath(id)
+    const id = this._path2Id(darpath)
+    const wcDir = this._getWorkingCopyPath(id)
     this._internalStorage.write(wcDir, rawArchive, err => {
       if (err) return cb(err)
       this._pack(wcDir, darpath, cb)
@@ -64,10 +64,10 @@ export default class DarFileStorage {
   }
 
   clone (darpath, newDarpath, cb) { // eslint-disble-line
-    let id = this._path2Id(darpath)
-    let wcDir = this._getWorkingCopyPath(id)
-    let newId = this._path2Id(newDarpath)
-    let newWcDir = this._getWorkingCopyPath(newId)
+    const id = this._path2Id(darpath)
+    const wcDir = this._getWorkingCopyPath(id)
+    const newId = this._path2Id(newDarpath)
+    const newWcDir = this._getWorkingCopyPath(newId)
     this._internalStorage.clone(wcDir, newWcDir, err => {
       if (err) return cb(err)
       this._pack(newWcDir, newDarpath, cb)
@@ -113,7 +113,7 @@ export default class DarFileStorage {
             readStream.on('end', () => {
               zipfile.readEntry()
             })
-            let absPath = path.join(wcDir, entry.fileName)
+            const absPath = path.join(wcDir, entry.fileName)
             fsExtra.ensureDirSync(path.dirname(absPath))
             readStream.pipe(fs.createWriteStream(absPath))
           })
@@ -130,10 +130,10 @@ export default class DarFileStorage {
 
   _pack (wcDir, darpath, cb) {
     // console.log('DarFileStorage::_pack')
-    let zipfile = new yazl.ZipFile()
+    const zipfile = new yazl.ZipFile()
     listDir(wcDir).then(entries => {
-      for (let entry of entries) {
-        let relPath = path.relative(wcDir, entry.path)
+      for (const entry of entries) {
+        const relPath = path.relative(wcDir, entry.path)
         // console.log('... adding "%s" as %s', entry.path, relPath)
         zipfile.addFile(entry.path, relPath)
       }
@@ -147,8 +147,8 @@ export default class DarFileStorage {
 
   // used by tests
   _getRawArchive (darpath, cb) {
-    let id = this._path2Id(darpath)
-    let wcDir = this._getWorkingCopyPath(id)
+    const id = this._path2Id(darpath)
+    const wcDir = this._getWorkingCopyPath(id)
     this._internalStorage.read(wcDir, cb)
   }
 }
