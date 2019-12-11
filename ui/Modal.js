@@ -37,15 +37,13 @@ export default class Modal extends Component {
     )
 
     return $$('div', { class: `sc-modal sm-size-${size}` },
-      $$('div', { class: 'se-modal-dialog' },
-        title ? headerEl : null,
-        $$('div', { class: 'se-modal-body' }, children),
-        $$(Divider),
-        $$('div', { class: 'se-modal-footer' },
-          $$(HorizontalStack, {},
-            $$(Button, { size: 'default', style: 'secondary', action: 'cancel' }, cancelLabel),
-            $$(Button, { size: 'default', style: 'primary', action: 'confirm', disabled: disableConfirm }, confirmLabel)
-          )
+      title ? headerEl : null,
+      $$('div', { class: 'se-modal-body' }, children),
+      $$(Divider),
+      $$('div', { class: 'se-modal-footer' },
+        $$(HorizontalStack, {},
+          $$(Button, { size: 'default', style: 'secondary', action: 'cancel' }, cancelLabel),
+          $$(Button, { size: 'default', style: 'primary', action: 'confirm', disabled: disableConfirm }, confirmLabel)
         )
       )
     )

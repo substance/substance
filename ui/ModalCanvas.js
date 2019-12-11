@@ -10,11 +10,21 @@ export default class ModalCanvas extends Component {
 
   render () {
     const { renderModal } = this.state
-    const el = $$('div', { class: 'sc-modal-canvas' })
+    const { isMobile } = this.props
+    const className = 'sc-modal-canvas'
+    const el = $$('div', { class: className })
+    if (isMobile) el.addClass('sm-modal-mobile')
     if (renderModal) {
       el.append(
         renderModal().ref('renderedModal')
-      )
+      ).on('click', e => {
+        // Close the modal in case of click outside of modal
+        if (e.target.className === className) {
+          this.close()
+        }
+      })
+    } else {
+      el.addClass('sm-hidden')
     }
     // do not let the global context menu handler handle this
     el.on('contextmenu', domHelpers.stopAndPrevent)
