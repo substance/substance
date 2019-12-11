@@ -7,10 +7,12 @@ export default class FileSelect extends Component {
       .on('click', domHelpers.stop)
       .on('dblclick', domHelpers.stop)
       .on('change', this._onChange)
-    el.attr({
-      accept: fileType,
-      multiple
-    })
+    if (fileType) {
+      el.setAttribute('accept', fileType)
+    }
+    if (multiple) {
+      el.setAttribute('multiple', true)
+    }
     return el
   }
 
