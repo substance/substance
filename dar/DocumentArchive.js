@@ -84,6 +84,9 @@ export default class DocumentArchive extends EventEmitter {
 
   replaceAsset (oldFileName, newFile) {
     const asset = this.getAsset(oldFileName)
+    if (!asset) {
+      throw new Error(`No asset found with name ${oldFileName}`)
+    }
     const fileName = newFile.name
     if (this.hasAsset(fileName)) {
       throw new Error('A file with this name already exists: ' + fileName)

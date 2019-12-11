@@ -86,7 +86,10 @@ export default class SurfaceManager {
       // instead of bubbling up to GlobalEventManager
       if (selection && selection.isCustomSelection() && platform.inBrowser) {
         window.getSelection().removeAllRanges()
-        window.document.activeElement.blur()
+        const activeElement = window.document.activeElement
+        if (activeElement) {
+          activeElement.blur()
+        }
       }
     }
 

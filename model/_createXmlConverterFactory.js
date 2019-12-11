@@ -120,8 +120,8 @@ function _createNodeConverter (nodeSpec) {
       if (usePropertyEl) {
         for (const propName of nodeSpec.childPropertyNames) {
           const propEl = el.createElement(propName)
-          _exportChildProperty(nodeSpec, propName, node, propEl, exporter)
-          el.append(propEl)
+          const childEl = _exportChildProperty(nodeSpec, propName, node, propEl, exporter)
+          el.append(childEl)
         }
       } else {
         _exportChildProperty(nodeSpec, nodeSpec.childPropertyNames[0], node, el, exporter)
@@ -164,7 +164,18 @@ function _exportChildProperty (nodeSpec, propName, node, el, exporter) {
     case 'child': {
       const childNode = node.resolve(propName)
       if (childNode) {
-        el.append(exporter.convertNode(childNode))
+        const childXml = exporter.convertNode(childNode)
+        // HACK: we need to find a clear approach to this
+        // we have seen this edge case, where the property was called the same as the child node
+        // having only that specific allowed child type
+        // In this case it is desired to omit the property element
+        if (childNode.type === propName) {
+          const propSpec = nodeSpec.properties.get(propName)
+          if (propSpec.options && propSpec.options.childTypes.length === 1) {
+            return childXml
+          }
+        }
+        el.append(childXml)
       }
       break
     }
@@ -181,6 +192,7 @@ function _exportChildProperty (nodeSpec, propName, node, el, exporter) {
     default:
       throw new Error('Illegal state')
   }
+  return el
 }
 
 function _importAttributes (nodeSpec, el, node) {

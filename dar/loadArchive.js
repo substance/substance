@@ -7,6 +7,9 @@ export default function loadArchive (rawArchive, config) {
     {
       read (_, cb) {
         cb(null, rawArchive)
+      },
+      write (_, __, cb) {
+        cb()
       }
     },
     new InMemoryDarBuffer(),
