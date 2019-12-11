@@ -10,7 +10,9 @@ export default class ModalCanvas extends Component {
 
   render () {
     const { renderModal } = this.state
+    const { isMobile } = this.props
     const el = $$('div', { class: 'sc-modal-canvas' })
+    if (isMobile) el.addClass('sm-modal-mobile')
     if (renderModal) {
       el.append(
         renderModal().ref('renderedModal')
