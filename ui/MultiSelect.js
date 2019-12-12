@@ -1,4 +1,5 @@
 import { $$, Component, domHelpers } from '../dom'
+import { Button, HorizontalStack } from '../ui'
 import Icon from './Icon'
 
 export default class MultiSelect extends Component {
@@ -15,29 +16,26 @@ export default class MultiSelect extends Component {
   }
 
   render () {
-    const { options, selected, showOptions } = this.state
+    const { options, selected } = this.state
     const selectedOptions = options.filter(option => selected.has(option.value))
 
-    const el = $$('button', { class: 'sc-multi-select' })
-    if (showOptions) {
-      el.addClass('sm-active')
-    }
+    const el = $$('div', { class: 'sc-multi-select' }).append(
+      selectedOptions.map(option => {
+        return $$(HorizontalStack, {},
+          $$('div', { class: 'se-item' }, option.label),
+          $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
+        )
+      })
+    )
 
-    if (selectedOptions.length > 0) {
+    if (selectedOptions.length < options.length) {
       el.append(
-        $$('div', { class: 'se-preview' },
-          selectedOptions.map(option => {
-            return $$('div', { class: 'se-value' }, option.label)
-          })
+        $$(HorizontalStack, {},
+          $$('a', { class: 'se-add-item' }, this.props.placeholder).on('click', this._onClickShowOptions)
         )
       )
-    } else {
-      el.append(
-        $$('div', { class: 'se-placeholder' }, this.props.placeholder)
-      )
     }
 
-    el.on('click', this._onClick)
     return el
   }
 
@@ -51,11 +49,17 @@ export default class MultiSelect extends Component {
     }
   }
 
-  _onClick (e) {
+  _onClickShowOptions (e) {
     domHelpers.stopAndPrevent(e)
     this._requestPopover().then(show => {
       this.extendState({ showOptions: show })
     })
+  }
+
+  _onClickRemoveOption (option, e) {
+    const selected = this.state.selected
+    selected.delete(option.value)
+    this.extendState({ selected })
   }
 
   onClosePopover () {
@@ -77,29 +81,19 @@ export default class MultiSelect extends Component {
 
   _renderOptions () {
     const { options, selected } = this.state
+    const notSelectedOptions = options.filter(option => !selected.has(option.value))
     return $$('div', { class: 'sc-multi-select-options' },
-      options.map(option => {
+      notSelectedOptions.map(option => {
         const { value, label } = option
-        const isSelected = selected.has(value)
-        return $$('button', { class: `se-option ${isSelected ? 'sm-selected' : ''}` },
-          $$(Icon, { style: 'regular', icon: isSelected ? 'check-square' : 'square' }),
-          // $$('span', { class: 'se-option-checkbox' }, isSelected ? '\u2611' : '\uf0c8'),
-          $$('span', { class: 'se-option-label' },
-            label
-          )
-        ).on('click', this._onToggleItem.bind(this, value))
+        return $$('button', { class: 'se-option' }, label).on('click', this._onAddItem.bind(this, value))
       })
     )
   }
 
-  _onToggleItem (value, e) {
+  _onAddItem (value, e) {
     domHelpers.stopAndPrevent(e)
-    const selected = this.state.selected
-    if (selected.has(value)) {
-      selected.delete(value)
-    } else {
-      selected.add(value)
-    }
+    const { selected } = this.state
+    selected.add(value)
     this.extendState({ selected })
     // TODO: we would need a way to let the popover know
     // that we want to renew the popover
