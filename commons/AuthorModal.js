@@ -1,16 +1,24 @@
 import { $$, Component, domHelpers } from '../dom'
-import { Form, FormRow, Input, Modal, MultiSelect, Button, Icon, HorizontalStack } from '../ui'
+import { Form, FormRow, Input, Modal, MultiInput, MultiSelect } from '../ui'
 import { cloneDeep } from '../util'
 import OptionalFieldsToggle from './OptionalFieldsToggle'
 
 export default class AuthorModal extends Component {
+  getActionHandlers () {
+    return {
+      addMultiInputItem: this._addMultiInputItem,
+      updateMultiInputItem: this._updateMultiInputItem,
+      removeMultiInputItem: this._removeMultiInputItem
+    }
+  }
+
   getInitialState () {
     const { node } = this.props
     let data
     if (node) {
       data = {
         firstName: node.firstName || '',
-        middleNames: node.middleNames ? node.middleNames.slice() : [''],
+        middleNames: node.middleNames ? node.middleNames.slice() : [],
         lastName: node.lastName || '',
         prefix: node.prefix || '',
         suffix: node.suffix || '',
@@ -19,7 +27,7 @@ export default class AuthorModal extends Component {
     } else {
       data = {
         firstName: '',
-        middleNames: [''],
+        middleNames: [],
         lastName: '',
         prefix: '',
         suffix: '',
@@ -59,18 +67,10 @@ export default class AuthorModal extends Component {
       )
     )
 
-    if (showOptionalFields || data.middleNames.length > 0) {
+    if (showOptionalFields) {
       form.append(
         $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
-          ...data.middleNames.map((middleName, idx) => {
-            return $$(HorizontalStack, {},
-              $$(Input, { value: middleName, oninput: this._updateMiddleName.bind(this, idx) }).ref('middleName' + idx),
-              $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._removeMiddleName.bind(this, idx))
-            )
-          }),
-          $$(HorizontalStack, {},
-            $$('a', { class: 'se-add-item' }, 'Add Middle Name').on('click', this._onClickAddMiddleName)
-          )
+          $$(MultiInput, { name: 'middleNames', value: data.middleNames, addLabel: 'Add Middlename' })
         )
       )
     }
@@ -127,13 +127,21 @@ export default class AuthorModal extends Component {
     })
   }
 
-  _onClickAddMiddleName (event) {
-    domHelpers.stopAndPrevent(event)
+  _addMultiInputItem (name) {
     const data = cloneDeep(this.state.data)
-    data.middleNames.push('')
+    data[name].push('')
     this.extendState({
       data
     })
+  }
+
+  _updateMultiInputItem (name, idx, value) {
+    this.state.data[name][idx] = value
+  }
+
+  _removeMultiInputItem (name, idx) {
+    this.state.data[name].splice(idx, 1)
+    this.rerender()
   }
 
   _updatePrefix () {
@@ -142,15 +150,6 @@ export default class AuthorModal extends Component {
 
   _updateFirstName () {
     this.state.data.firstName = this.refs.firstName.val()
-  }
-
-  _updateMiddleName (idx) {
-    this.state.data.middleNames[idx] = this.refs['middleName' + idx].val()
-  }
-
-  _removeMiddleName (idx) {
-    this.state.data.middleNames.splice(idx, 1)
-    this.rerender()
   }
 
   _updateLastName () {
