@@ -39,7 +39,7 @@ export default class AffiliationModal extends Component {
       ),
       // city (optional)
       $$(FormRow, { label: 'City', class: 'se-city' },
-        $$(Input, { value: data.city, oninput: this._updateCountry }).ref('city')
+        $$(Input, { value: data.city, oninput: this._updateCity }).ref('city')
       ),
       // country (optional)
       $$(FormRow, { label: 'Country', class: 'se-country' },
