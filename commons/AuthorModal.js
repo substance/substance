@@ -1,7 +1,6 @@
-import { $$, Component, domHelpers } from '../dom'
+import { $$, Component } from '../dom'
 import { Form, FormRow, Input, Modal, MultiInput, MultiSelect } from '../ui'
 import { cloneDeep } from '../util'
-import OptionalFieldsToggle from './OptionalFieldsToggle'
 
 export default class AuthorModal extends Component {
   getActionHandlers () {
@@ -36,14 +35,13 @@ export default class AuthorModal extends Component {
     }
 
     return {
-      data,
-      showOptionalFields: false
+      data
     }
   }
 
   render () {
     const { document, mode } = this.props
-    const { showOptionalFields, data } = this.state
+    const { data } = this.state
     const title = mode === 'create' ? 'Create Author' : 'Edit Author'
     const confirmLabel = mode === 'edit' ? 'Update Author' : 'Create Author'
 
@@ -51,50 +49,30 @@ export default class AuthorModal extends Component {
     const allAffiliations = root.resolve('affiliations')
 
     const el = $$(Modal, { class: 'sc-author-modal', title, cancelLabel: 'Cancel', confirmLabel, size: 'large' })
-    const form = $$(Form)
-
-    // first name (required)
-    form.append(
+    const form = $$(Form).append(
+      // first name (required)
       $$(FormRow, { label: 'First Name' },
         $$(Input, { autofocus: true, value: data.firstName, oninput: this._updateFirstName }).ref('firstName')
-      )
-    )
-
-    // last name (required)
-    form.append(
+      ),
+      // last name (required)
       $$(FormRow, { label: 'Last Name' },
         $$(Input, { value: data.lastName || '', oninput: this._updateLastName }).ref('lastName')
+      ),
+      $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
+        $$(MultiInput, { name: 'middleNames', value: data.middleNames, addLabel: 'Add Middlename' })
+      ),
+      // prefix (optional)
+      $$(FormRow, { label: 'Prefix' },
+        $$(Input, { value: data.prefix, oninput: this._updatePrefix }).ref('prefix')
+      ),
+      // suffix (optional)
+      $$(FormRow, { label: 'Suffix' },
+        $$(Input, { value: data.suffix, oninput: this._updateSuffix }).ref('suffix')
       )
     )
 
-    if (showOptionalFields) {
-      form.append(
-        $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
-          $$(MultiInput, { name: 'middleNames', value: data.middleNames, addLabel: 'Add Middlename' })
-        )
-      )
-    }
-
-    // prefix (optional)
-    if (showOptionalFields || data.prefix) {
-      form.append(
-        $$(FormRow, { label: 'Prefix' },
-          $$(Input, { value: data.prefix, oninput: this._updatePrefix }).ref('prefix')
-        )
-      )
-    }
-
-    // suffix (optional)
-    if (showOptionalFields || data.suffix) {
-      form.append(
-        $$(FormRow, { label: 'Suffix' },
-          $$(Input, { value: data.suffix, oninput: this._updateSuffix }).ref('suffix')
-        )
-      )
-    }
-
     // only show this if there are any affiliations available
-    if (allAffiliations.length > 0 && (showOptionalFields || data.affiliations.length > 0)) {
+    if (allAffiliations.length > 0) {
       form.append(
         $$(FormRow, { label: 'Affiliations' },
           $$(MultiSelect, {
@@ -109,22 +87,9 @@ export default class AuthorModal extends Component {
       )
     }
 
-    form.append(
-      $$(FormRow, {},
-        $$(OptionalFieldsToggle, { showOptionalFields }).on('click', this._toggleOptionalFields)
-      )
-    )
-
     el.append(form)
 
     return el
-  }
-
-  _toggleOptionalFields (event) {
-    domHelpers.stopAndPrevent(event)
-    this.extendState({
-      showOptionalFields: !this.state.showOptionalFields
-    })
   }
 
   _addMultiInputItem (name) {
