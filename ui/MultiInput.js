@@ -10,7 +10,9 @@ export default class MultiInput extends Component {
       ...items.map((item, idx) => {
         return $$(HorizontalStack, {},
           $$(Input, { value: item, oninput: this._updateItem.bind(this, idx) }).ref('item' + idx),
-          $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._removeItem.bind(this, idx))
+          items.length > 1
+            ? $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._removeItem.bind(this, idx))
+            : ''
         )
       }),
       $$(HorizontalStack, {},
