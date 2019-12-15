@@ -1,9 +1,16 @@
-import { $$, Component, domHelpers } from '../dom'
-import { Form, FormRow, Input, Modal, MultiSelect, Button, Icon, HorizontalStack } from '../ui'
+import { $$, Component } from '../dom'
+import { Form, FormRow, Input, Modal, MultiInput, MultiSelect } from '../ui'
 import { cloneDeep } from '../util'
-import OptionalFieldsToggle from './OptionalFieldsToggle'
 
 export default class AuthorModal extends Component {
+  getActionHandlers () {
+    return {
+      addMultiInputItem: this._addMultiInputItem,
+      updateMultiInputItem: this._updateMultiInputItem,
+      removeMultiInputItem: this._removeMultiInputItem
+    }
+  }
+
   getInitialState () {
     const { node } = this.props
     let data
@@ -28,14 +35,13 @@ export default class AuthorModal extends Component {
     }
 
     return {
-      data,
-      showOptionalFields: false
+      data
     }
   }
 
   render () {
     const { document, mode } = this.props
-    const { showOptionalFields, data } = this.state
+    const { data } = this.state
     const title = mode === 'create' ? 'Create Author' : 'Edit Author'
     const confirmLabel = mode === 'edit' ? 'Update Author' : 'Create Author'
 
@@ -43,59 +49,30 @@ export default class AuthorModal extends Component {
     const allAffiliations = root.resolve('affiliations')
 
     const el = $$(Modal, { class: 'sc-author-modal', title, cancelLabel: 'Cancel', confirmLabel, size: 'large' })
-    const form = $$(Form)
-
-    // first name (required)
-    form.append(
+    const form = $$(Form).append(
+      // first name (required)
       $$(FormRow, { label: 'First Name' },
         $$(Input, { autofocus: true, value: data.firstName, oninput: this._updateFirstName }).ref('firstName')
-      )
-    )
-
-    // last name (required)
-    form.append(
+      ),
+      // last name (required)
       $$(FormRow, { label: 'Last Name' },
         $$(Input, { value: data.lastName || '', oninput: this._updateLastName }).ref('lastName')
+      ),
+      $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
+        $$(MultiInput, { name: 'middleNames', value: data.middleNames, addLabel: 'Add Middlename' })
+      ),
+      // prefix (optional)
+      $$(FormRow, { label: 'Prefix' },
+        $$(Input, { value: data.prefix, oninput: this._updatePrefix }).ref('prefix')
+      ),
+      // suffix (optional)
+      $$(FormRow, { label: 'Suffix' },
+        $$(Input, { value: data.suffix, oninput: this._updateSuffix }).ref('suffix')
       )
     )
 
-    if (showOptionalFields || data.middleNames.length > 0) {
-      form.append(
-        $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
-          ...data.middleNames.map((middleName, idx) => {
-            return $$(HorizontalStack, {},
-              $$(Input, { value: middleName, oninput: this._updateMiddleName.bind(this, idx) }).ref('middleName' + idx),
-              $$(Button, {}, $$(Icon, { icon: 'times' })).on('click', this._removeMiddleName.bind(this, idx))
-            )
-          }),
-          $$(HorizontalStack, {},
-            $$('div'),
-            $$(Button, {}, $$(Icon, { icon: 'plus' })).on('click', this._onClickAddMiddleName)
-          )
-        )
-      )
-    }
-
-    // prefix (optional)
-    if (showOptionalFields || data.prefix) {
-      form.append(
-        $$(FormRow, { label: 'Prefix' },
-          $$(Input, { value: data.prefix, oninput: this._updatePrefix }).ref('prefix')
-        )
-      )
-    }
-
-    // suffix (optional)
-    if (showOptionalFields || data.suffix) {
-      form.append(
-        $$(FormRow, { label: 'Suffix' },
-          $$(Input, { value: data.suffix, oninput: this._updateSuffix }).ref('suffix')
-        )
-      )
-    }
-
     // only show this if there are any affiliations available
-    if (allAffiliations.length > 0 && (showOptionalFields || data.affiliations.length > 0)) {
+    if (allAffiliations.length > 0) {
       form.append(
         $$(FormRow, { label: 'Affiliations' },
           $$(MultiSelect, {
@@ -110,31 +87,26 @@ export default class AuthorModal extends Component {
       )
     }
 
-    form.append(
-      $$(FormRow, {},
-        $$(OptionalFieldsToggle, { showOptionalFields }).on('click', this._toggleOptionalFields)
-      )
-    )
-
     el.append(form)
 
     return el
   }
 
-  _toggleOptionalFields (event) {
-    domHelpers.stopAndPrevent(event)
-    this.extendState({
-      showOptionalFields: !this.state.showOptionalFields
-    })
-  }
-
-  _onClickAddMiddleName (event) {
-    domHelpers.stopAndPrevent(event)
+  _addMultiInputItem (name) {
     const data = cloneDeep(this.state.data)
-    data.middleNames.push('')
+    data[name].push('')
     this.extendState({
       data
     })
+  }
+
+  _updateMultiInputItem (name, idx, value) {
+    this.state.data[name][idx] = value
+  }
+
+  _removeMultiInputItem (name, idx) {
+    this.state.data[name].splice(idx, 1)
+    this.rerender()
   }
 
   _updatePrefix () {
@@ -143,15 +115,6 @@ export default class AuthorModal extends Component {
 
   _updateFirstName () {
     this.state.data.firstName = this.refs.firstName.val()
-  }
-
-  _updateMiddleName (idx) {
-    this.state.data.middleNames[idx] = this.refs['middleName' + idx].val()
-  }
-
-  _removeMiddleName (idx) {
-    this.state.data.middleNames.splice(idx, 1)
-    this.rerender()
   }
 
   _updateLastName () {
