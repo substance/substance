@@ -16,8 +16,9 @@ export default class MultiSelect extends Component {
   }
 
   render () {
-    const { options, selected } = this.state
+    const { options, selected, showOptions } = this.state
     const selectedOptions = options.filter(option => selected.has(option.value))
+    const allOptionsSelected = selectedOptions.length === options.length
 
     const el = $$('div', { class: 'sc-multi-select' }).append(
       selectedOptions.map(option => {
@@ -28,10 +29,16 @@ export default class MultiSelect extends Component {
       })
     )
 
-    if (selectedOptions.length < options.length) {
+    if (!allOptionsSelected && !showOptions) {
       el.append(
         $$(HorizontalStack, {},
           $$('a', { class: 'se-add-item' }, this.props.placeholder).on('click', this._onClickShowOptions)
+        )
+      )
+    } else if (!allOptionsSelected && showOptions) {
+      el.append(
+        $$(HorizontalStack, {},
+          this._renderOptions().ref('optionSelector').on('input', this._onAddItem)
         )
       )
     }
@@ -49,11 +56,8 @@ export default class MultiSelect extends Component {
     }
   }
 
-  _onClickShowOptions (e) {
-    domHelpers.stopAndPrevent(e)
-    this._requestPopover().then(show => {
-      this.extendState({ showOptions: show })
-    })
+  _onClickShowOptions () {
+    this.extendState({ showOptions: true })
   }
 
   _onClickRemoveOption (option, e) {
@@ -62,42 +66,22 @@ export default class MultiSelect extends Component {
     this.extendState({ selected })
   }
 
-  onClosePopover () {
-    this.extendState({ showOptions: false })
-  }
-
-  _requestPopover () {
-    const rect = this.getNativeElement().getBoundingClientRect()
-    const y = rect.bottom + 5
-    const x = rect.x + 0.5 * rect.width
-    return this.send('requestPopover', {
-      requester: this,
-      desiredPos: { x, y },
-      content: () => {
-        return this._renderOptions()
-      }
-    })
-  }
-
   _renderOptions () {
     const { options, selected } = this.state
     const notSelectedOptions = options.filter(option => !selected.has(option.value))
-    return $$('div', { class: 'sc-multi-select-options' },
-      notSelectedOptions.map(option => {
+    return $$('select', { class: 'se-options' },
+      $$('option', { selected: true }, this.props.placeholder),
+      ...notSelectedOptions.map(option => {
         const { value, label } = option
-        return $$('button', { class: 'se-option' }, label).on('click', this._onAddItem.bind(this, value))
+        return $$('option', { value }, label)
       })
     )
   }
 
-  _onAddItem (value, e) {
-    domHelpers.stopAndPrevent(e)
+  _onAddItem () {
+    const value = this.refs.optionSelector.val()
     const { selected } = this.state
     selected.add(value)
     this.extendState({ selected })
-    // TODO: we would need a way to let the popover know
-    // that we want to renew the popover
-    this._requestPopover()
-    this.el.emit('change')
   }
 }
