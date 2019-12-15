@@ -1,5 +1,5 @@
-import { $$, Component, domHelpers } from '../dom'
-import { Button, HorizontalStack } from '../ui'
+import { $$, Component } from '../dom'
+import { Button, HorizontalStack, Select } from '../ui'
 import Icon from './Icon'
 
 export default class MultiSelect extends Component {
@@ -18,6 +18,7 @@ export default class MultiSelect extends Component {
   render () {
     const { options, selected, showOptions } = this.state
     const selectedOptions = options.filter(option => selected.has(option.value))
+    const notSelectedOptions = options.filter(option => !selected.has(option.value))
     const allOptionsSelected = selectedOptions.length === options.length
 
     const el = $$('div', { class: 'sc-multi-select' }).append(
@@ -38,7 +39,8 @@ export default class MultiSelect extends Component {
     } else if (!allOptionsSelected && showOptions) {
       el.append(
         $$(HorizontalStack, {},
-          this._renderOptions().ref('optionSelector').on('input', this._onAddItem)
+          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: this.props.placeholder })
+            .ref('optionSelector').on('input', this._onAddItem)
         )
       )
     }
@@ -69,13 +71,7 @@ export default class MultiSelect extends Component {
   _renderOptions () {
     const { options, selected } = this.state
     const notSelectedOptions = options.filter(option => !selected.has(option.value))
-    return $$('select', { class: 'se-options' },
-      $$('option', { selected: true }, this.props.placeholder),
-      ...notSelectedOptions.map(option => {
-        const { value, label } = option
-        return $$('option', { value }, label)
-      })
-    )
+    return $$(Select, { class: 'se-options', options: notSelectedOptions })
   }
 
   _onAddItem () {
