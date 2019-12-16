@@ -80,7 +80,7 @@ export default class AuthorModal extends Component {
               return { value: aff.id, label: aff.name }
             }),
             selected: data.affiliations,
-            placeholder: 'Add affiliation',
+            placeholder: 'Add Affiliation',
             onchange: this._updateAffiliations
           }).ref('affiliations')
         )
