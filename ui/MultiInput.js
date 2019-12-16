@@ -16,7 +16,7 @@ export default class MultiInput extends Component {
         )
       }),
       $$(HorizontalStack, {},
-        $$(Button, { style: 'plain', class: 'se-add-item' }, addLabel).on('click', this._addItem)
+        $$(Button, { style: 'plain', size: 'small', class: 'se-add-item' }, addLabel).on('click', this._addItem)
       )
     )
   }
