@@ -1,4 +1,5 @@
-import { $$, Component, domHelpers } from '../dom'
+import { $$, Component } from '../dom'
+import { Button, HorizontalStack, Select } from '../ui'
 import Icon from './Icon'
 
 export default class MultiSelect extends Component {
@@ -15,29 +16,29 @@ export default class MultiSelect extends Component {
   }
 
   render () {
-    const { options, selected, showOptions } = this.state
+    const { options, selected } = this.state
     const selectedOptions = options.filter(option => selected.has(option.value))
+    const notSelectedOptions = options.filter(option => !selected.has(option.value))
+    const allOptionsSelected = selectedOptions.length === options.length
 
-    const el = $$('button', { class: 'sc-multi-select' })
-    if (showOptions) {
-      el.addClass('sm-active')
-    }
+    const el = $$('div', { class: 'sc-multi-select' }).append(
+      selectedOptions.map(option => {
+        return $$(HorizontalStack, {},
+          $$('div', { class: 'se-item' }, option.label),
+          $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
+        )
+      })
+    )
 
-    if (selectedOptions.length > 0) {
+    if (!allOptionsSelected) {
       el.append(
-        $$('div', { class: 'se-preview' },
-          selectedOptions.map(option => {
-            return $$('div', { class: 'se-value' }, option.label)
-          })
+        $$(HorizontalStack, {},
+          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: this.props.placeholder })
+            .ref('optionSelector').on('input', this._onAddItem)
         )
       )
-    } else {
-      el.append(
-        $$('div', { class: 'se-placeholder' }, this.props.placeholder)
-      )
     }
 
-    el.on('click', this._onClick)
     return el
   }
 
@@ -46,64 +47,26 @@ export default class MultiSelect extends Component {
     const selected = new Set(this.props.selected || [])
     return {
       options,
-      selected,
-      showOptions: false
+      selected
     }
   }
 
-  _onClick (e) {
-    domHelpers.stopAndPrevent(e)
-    this._requestPopover().then(show => {
-      this.extendState({ showOptions: show })
-    })
-  }
-
-  onClosePopover () {
-    this.extendState({ showOptions: false })
-  }
-
-  _requestPopover () {
-    const rect = this.getNativeElement().getBoundingClientRect()
-    const y = rect.bottom + 5
-    const x = rect.x + 0.5 * rect.width
-    return this.send('requestPopover', {
-      requester: this,
-      desiredPos: { x, y },
-      content: () => {
-        return this._renderOptions()
-      }
-    })
+  _onClickRemoveOption (option, e) {
+    const selected = this.state.selected
+    selected.delete(option.value)
+    this.extendState({ selected })
   }
 
   _renderOptions () {
     const { options, selected } = this.state
-    return $$('div', { class: 'sc-multi-select-options' },
-      options.map(option => {
-        const { value, label } = option
-        const isSelected = selected.has(value)
-        return $$('button', { class: `se-option ${isSelected ? 'sm-selected' : ''}` },
-          $$(Icon, { style: 'regular', icon: isSelected ? 'check-square' : 'square' }),
-          // $$('span', { class: 'se-option-checkbox' }, isSelected ? '\u2611' : '\uf0c8'),
-          $$('span', { class: 'se-option-label' },
-            label
-          )
-        ).on('click', this._onToggleItem.bind(this, value))
-      })
-    )
+    const notSelectedOptions = options.filter(option => !selected.has(option.value))
+    return $$(Select, { class: 'se-options', options: notSelectedOptions })
   }
 
-  _onToggleItem (value, e) {
-    domHelpers.stopAndPrevent(e)
-    const selected = this.state.selected
-    if (selected.has(value)) {
-      selected.delete(value)
-    } else {
-      selected.add(value)
-    }
+  _onAddItem () {
+    const value = this.refs.optionSelector.val()
+    const { selected } = this.state
+    selected.add(value)
     this.extendState({ selected })
-    // TODO: we would need a way to let the popover know
-    // that we want to renew the popover
-    this._requestPopover()
-    this.el.emit('change')
   }
 }
