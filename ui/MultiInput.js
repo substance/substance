@@ -1,5 +1,8 @@
 import { $$, Component } from '../dom'
-import { Button, Icon, Input, HorizontalStack } from './'
+import Button from './Button'
+import Icon from './Icon'
+import Input from './Input'
+import HorizontalStack from './HorizontalStack'
 
 export default class MultiInput extends Component {
   render () {
