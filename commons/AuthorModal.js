@@ -17,7 +17,7 @@ export default class AuthorModal extends Component {
     if (node) {
       data = {
         firstName: node.firstName || '',
-        middleNames: node.middleNames ? node.middleNames.slice() : [],
+        middleNames: node.middleNames && node.middleNames.length > 0 ? node.middleNames.slice() : [''],
         lastName: node.lastName || '',
         prefix: node.prefix || '',
         suffix: node.suffix || '',
@@ -26,7 +26,7 @@ export default class AuthorModal extends Component {
     } else {
       data = {
         firstName: '',
-        middleNames: [],
+        middleNames: [''],
         lastName: '',
         prefix: '',
         suffix: '',
