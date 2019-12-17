@@ -2,6 +2,15 @@ import { $$, Component } from '../dom'
 import { Button, Icon, Input, HorizontalStack } from './'
 
 export default class MultiInput extends Component {
+  didUpdate (oldProps) {
+    const { value } = this.props
+    const newInputAdded = value.length - oldProps.value.length === 1
+    if (newInputAdded) {
+      const newInput = this.refs['item' + (value.length - 1)]
+      newInput.focus()
+    }
+  }
+
   render () {
     const { addLabel, value } = this.props
     const items = value.length > 0 ? value : ['']
