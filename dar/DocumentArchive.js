@@ -439,8 +439,7 @@ export default class DocumentArchive extends EventEmitter {
   _exportManifest (documents, buffer, rawArchive) {
     const manifest = documents.manifest
     if (buffer.hasResourceChanged('manifest')) {
-      const manifestDom = manifest.toXML(this._assetRefs)
-      const manifestXmlStr = prettyPrintXML(manifestDom)
+      const manifestXmlStr = manifest.toXml({ assetRefIndex: this._assetRefs, prettyPrint: true })
       return {
         id: 'manifest',
         filename: 'manifest.xml',

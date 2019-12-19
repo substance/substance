@@ -1,4 +1,4 @@
-import { DefaultDOMElement } from '../dom'
+import { DefaultDOMElement, prettyPrintXML } from '../dom'
 import { Document, DocumentNode, DocumentSchema, documentHelpers, CHILDREN, STRING } from '../model'
 
 export default class ManifestDocument extends Document {
@@ -72,7 +72,8 @@ export default class ManifestDocument extends Document {
     return manifest
   }
 
-  toXML (assetRefIndex) {
+  toXml (options = {}) {
+    const { assetRefIndex, prettyPrint } = options
     const dar = this.get('dar')
     const xmlDom = DefaultDOMElement.createDocument('xml')
     const $$ = xmlDom.createElement.bind(xmlDom)
@@ -112,7 +113,12 @@ export default class ManifestDocument extends Document {
         )
       )
     )
-    return xmlDom
+    const xmlStr = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<!DOCTYPE dar PUBLIC "-//SUBSTANCE//DTD DocumentArchive v1.0//EN" "DocumentArchive-1.0.dtd">',
+      prettyPrint ? prettyPrintXML(xmlDom) : xmlDom.serialize()
+    ].join('\n')
+    return xmlStr
   }
 }
 
