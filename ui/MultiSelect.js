@@ -1,5 +1,7 @@
 import { $$, Component } from '../dom'
-import { Button, HorizontalStack, Select } from '../ui'
+import Button from './Button'
+import HorizontalStack from './HorizontalStack'
+import Select from './Select'
 import Icon from './Icon'
 
 export default class MultiSelect extends Component {
