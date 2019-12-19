@@ -169,6 +169,10 @@ export default class DocumentArchive extends EventEmitter {
     return this._documents[docId]
   }
 
+  getDocuments () {
+    return this.getDocumentEntries().map(entry => this._documents[entry.id]).filter(Boolean)
+  }
+
   getManifestSession () {
     return this._manifestSession
   }
