@@ -7,20 +7,6 @@ export default class Popover extends Component {
     return { content: null, requester: null, desiredPos: null }
   }
 
-  didMount () {
-    if (platform.inBrowser && this.props.getScrollable) {
-      const scrollable = this.props.getScrollable()
-      scrollable.on('scroll', this._onScroll, this)
-    }
-  }
-
-  dispose () {
-    if (platform.inBrowser && this.props.getScrollable) {
-      const scrollable = this.props.getScrollable()
-      scrollable.off(this)
-    }
-  }
-
   render () {
     const { content, requester } = this.state
     const el = $$('div', { class: 'sc-popover sm-hidden' })
@@ -195,9 +181,13 @@ export default class Popover extends Component {
     this.setState(this.getInitialState())
   }
 
-  _onScroll (event) {
+  /**
+   * ATTENTION: this method has to be called by the owner whenever the scrollable
+   * has been scrolled.
+   */
+  reposition () {
     // Note: we use this for different kinds of popovers
-    // typically, only context menus, or alike, require a 'relative' positioning
+    // typically, only context menus or alike require a 'relative' positioning
     if (this.state.position === 'relative') {
       const scrollable = this.props.getScrollable()
       const dtop = scrollable.getProperty('scrollTop') - this._initialScrollTop
