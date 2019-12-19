@@ -50,11 +50,7 @@ export default class AuthorModal extends Component {
         $$(Input, { value: data.lastName || '', oninput: this._updateLastName }).ref('lastName')
       ),
       $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
-        $$(MultiInput, {
-          value: data.middleNames,
-          addLabel: 'Add Middlename',
-          onchange: this._updateMiddleNames.bind(this)
-        })
+        $$(MultiInput, { value: data.middleNames, addLabel: 'Add Middlename', onchange: this._updateMiddleNames })
       ),
       // prefix (optional)
       $$(FormRow, { label: 'Prefix' },
