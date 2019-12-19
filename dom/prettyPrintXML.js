@@ -15,16 +15,18 @@ export default function prettyPrintXML (xml) {
   // i.e. the instruction is swallowed and stored in a way that it is created during serialization.
   // Interestingly, this is not the case for the DOCTYPE declaration.
   // ATTENTION: we have assimilated the MemoryDOM implementation, so that we get the same result.
-  const childNodes = dom.getChildNodes()
   if (dom.isDocumentNode()) {
+    const childNodes = dom.getChildNodes()
     const xml = dom.empty().serialize()
     if (/<\?\s*xml/.exec(xml)) {
       result.push(xml)
     }
+    childNodes.forEach(el => {
+      _prettyPrint(result, el, 0)
+    })
+  } else {
+    _prettyPrint(result, dom, 0)
   }
-  childNodes.forEach(el => {
-    _prettyPrint(result, el, 0)
-  })
   return result.join('\n')
 }
 
