@@ -77,19 +77,19 @@ export default class DocumentArchive extends EventEmitter {
     return assetId
   }
 
+  getFilename (resourceId) {
+    const resource = this._documents.manifest.get(resourceId)
+    if (resource) {
+      return resource.filename
+    }
+  }
+
   getAssetById (assetId) {
     return this._documents.manifest.get(assetId)
   }
 
   getAssetForFilename (filename) {
     return this._documents.manifest.getAssetByFilename(filename)
-  }
-
-  // DEPRECATED: On the long run this approach does not hold. I.e. when assets are used
-  // within documents, e.g. images, or supplementary files, then the must be referenced
-  // via id, and not via filename.
-  getAsset (filename) {
-    return this.getAssetForFilename(filename)
   }
 
   getAssetEntries () {
@@ -167,6 +167,10 @@ export default class DocumentArchive extends EventEmitter {
 
   getDocument (docId) {
     return this._documents[docId]
+  }
+
+  getManifestSession () {
+    return this._manifestSession
   }
 
   isFilenameUsed (filename) {
