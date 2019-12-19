@@ -18,6 +18,8 @@ export default class AuthorApi extends ApiExtension {
       insertPos = currentAuthor.getPosition() + 1
     }
     const nodeData = Object.assign({}, data, { type: 'author' })
+    // prune empty middlenames
+    nodeData.middleNames = nodeData.middleNames.filter(Boolean)
     this.api.insertNode([root.id, 'authors'], insertPos, nodeData)
   }
 
@@ -26,6 +28,8 @@ export default class AuthorApi extends ApiExtension {
    * @param {object} data from AuthorModal state
    */
   updateAuthor (authorId, data) {
+    // prune empty middlenames
+    data.middleNames = data.middleNames.filter(Boolean)
     this.api.getEditorSession().transaction(tx => {
       documentHelpers.updateProperty(tx, [authorId, 'firstName'], data.firstName)
       documentHelpers.updateProperty(tx, [authorId, 'middleNames'], data.middleNames)

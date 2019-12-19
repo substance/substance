@@ -1,23 +1,14 @@
 import { $$, Component } from '../dom'
 import { Form, FormRow, Input, Modal, MultiInput, MultiSelect } from '../ui'
-import { cloneDeep } from '../util'
 
 export default class AuthorModal extends Component {
-  getActionHandlers () {
-    return {
-      addMultiInputItem: this._addMultiInputItem,
-      updateMultiInputItem: this._updateMultiInputItem,
-      removeMultiInputItem: this._removeMultiInputItem
-    }
-  }
-
   getInitialState () {
     const { node } = this.props
     let data
     if (node) {
       data = {
         firstName: node.firstName || '',
-        middleNames: node.middleNames ? node.middleNames.slice() : [],
+        middleNames: node.middleNames && node.middleNames.length > 0 ? node.middleNames.slice() : [''],
         lastName: node.lastName || '',
         prefix: node.prefix || '',
         suffix: node.suffix || '',
@@ -26,7 +17,7 @@ export default class AuthorModal extends Component {
     } else {
       data = {
         firstName: '',
-        middleNames: [],
+        middleNames: [''],
         lastName: '',
         prefix: '',
         suffix: '',
@@ -59,7 +50,7 @@ export default class AuthorModal extends Component {
         $$(Input, { value: data.lastName || '', oninput: this._updateLastName }).ref('lastName')
       ),
       $$(FormRow, { label: 'Middle Names', class: 'se-middle-names' },
-        $$(MultiInput, { name: 'middleNames', value: data.middleNames, addLabel: 'Add Middlename' })
+        $$(MultiInput, { value: data.middleNames, addLabel: 'Add Middlename', onchange: this._updateMiddleNames })
       ),
       // prefix (optional)
       $$(FormRow, { label: 'Prefix' },
@@ -92,21 +83,9 @@ export default class AuthorModal extends Component {
     return el
   }
 
-  _addMultiInputItem (name) {
-    const data = cloneDeep(this.state.data)
-    data[name].push('')
-    this.extendState({
-      data
-    })
-  }
-
-  _updateMultiInputItem (name, idx, value) {
-    this.state.data[name][idx] = value
-  }
-
-  _removeMultiInputItem (name, idx) {
-    this.state.data[name].splice(idx, 1)
-    this.rerender()
+  _updateMiddleNames (event) {
+    const { value } = event.detail
+    this.state.data.middleNames = value
   }
 
   _updatePrefix () {
