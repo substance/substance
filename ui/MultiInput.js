@@ -1,18 +1,29 @@
-import { $$, Component } from '../dom'
+import { $$, Component, domHelpers } from '../dom'
 import Button from './Button'
 import Icon from './Icon'
 import Input from './Input'
 import HorizontalStack from './HorizontalStack'
 
 export default class MultiInput extends Component {
+  getInitialState () {
+    return {
+      items: this.props.value ? this.props.value.slice() : ['']
+    }
+  }
+
   render () {
-    const { addLabel, value } = this.props
-    const items = value.length > 0 ? value : ['']
+    const { addLabel } = this.props
+    const { items } = this.state
 
     return $$('div', { class: 'sc-multi-input' }).append(
       ...items.map((item, idx) => {
         return $$(HorizontalStack, {},
-          $$(Input, { value: item, oninput: this._updateItem.bind(this, idx) }).ref('item' + idx),
+          $$(Input, {
+            value: item,
+            oninput: this._updateItem.bind(this, idx),
+            // Note: don't let the change event bubble up
+            onchange: domHelpers.stop
+          }).ref('item' + idx),
           items.length > 1
             ? $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._removeItem.bind(this, idx))
             : ''
@@ -24,19 +35,30 @@ export default class MultiInput extends Component {
     )
   }
 
+  val () {
+    return this.state.items.slice()
+  }
+
+  _emitChange () {
+    this.el.emit('change', { value: this.val() })
+  }
+
   _addItem () {
-    const { name } = this.props
-    this.send('addMultiInputItem', name)
+    const { items } = this.state
+    items.push('')
+    this.rerender()
+    this._emitChange()
   }
 
   _updateItem (idx) {
-    const { name } = this.props
-    const value = this.refs['item' + idx].val()
-    this.send('updateMultiInputItem', name, idx, value)
+    const itemValue = this.refs['item' + idx].val()
+    this.state.items[idx] = itemValue
+    this._emitChange()
   }
 
   _removeItem (idx) {
-    const { name } = this.props
-    this.send('removeMultiInputItem', name, idx)
+    this.state.items.splice(idx, 1)
+    this.rerender()
+    this._emitChange()
   }
 }
