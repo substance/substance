@@ -115,6 +115,14 @@ export default class BasicEditorApi {
     this._selectItem(this.editorSession, item)
   }
 
+  renameAsset (assetId, newFilename) {
+    const archive = this.archive
+    const asset = archive.getAssetById(assetId)
+    if (asset.filename !== newFilename) {
+      this.archive.renameAsset(assetId, newFilename)
+    }
+  }
+
   _selectItem (tx, node) {
     tx.setSelection({
       type: 'custom',
