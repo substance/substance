@@ -299,6 +299,10 @@ function _createNodeConverter (nodeSpec) {
         case 'children':
         case 'container': {
           const childNodes = node.resolve(propName)
+          // skip empty containers if they are optional
+          if (childNodes.length === 0 && propSpec.options.optional) {
+            return null
+          }
           propEl.append(childNodes.map(childNode => exporter.convertNode(childNode)))
           break
         }

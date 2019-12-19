@@ -1,7 +1,6 @@
 /* globals Blob */
 import { forEach, last, uuid, EventEmitter, platform, isString, sendRequest } from '../util'
 import { documentHelpers, DocumentIndex } from '../model'
-import { prettyPrintXML } from '../dom'
 import { AbstractEditorSession } from '../editor'
 import ManifestLoader from './ManifestLoader'
 
@@ -77,19 +76,19 @@ export default class DocumentArchive extends EventEmitter {
     return assetId
   }
 
+  getFilename (resourceId) {
+    const resource = this._documents.manifest.get(resourceId)
+    if (resource) {
+      return resource.filename
+    }
+  }
+
   getAssetById (assetId) {
     return this._documents.manifest.get(assetId)
   }
 
   getAssetForFilename (filename) {
     return this._documents.manifest.getAssetByFilename(filename)
-  }
-
-  // DEPRECATED: On the long run this approach does not hold. I.e. when assets are used
-  // within documents, e.g. images, or supplementary files, then the must be referenced
-  // via id, and not via filename.
-  getAsset (filename) {
-    return this.getAssetForFilename(filename)
   }
 
   getAssetEntries () {
@@ -167,6 +166,14 @@ export default class DocumentArchive extends EventEmitter {
 
   getDocument (docId) {
     return this._documents[docId]
+  }
+
+  getDocuments () {
+    return this.getDocumentEntries().map(entry => this._documents[entry.id]).filter(Boolean)
+  }
+
+  getManifestSession () {
+    return this._manifestSession
   }
 
   isFilenameUsed (filename) {
@@ -431,8 +438,7 @@ export default class DocumentArchive extends EventEmitter {
   _exportManifest (documents, buffer, rawArchive) {
     const manifest = documents.manifest
     if (buffer.hasResourceChanged('manifest')) {
-      const manifestDom = manifest.toXML(this._assetRefs)
-      const manifestXmlStr = prettyPrintXML(manifestDom)
+      const manifestXmlStr = manifest.toXml({ assetRefIndex: this._assetRefs, prettyPrint: true })
       return {
         id: 'manifest',
         filename: 'manifest.xml',

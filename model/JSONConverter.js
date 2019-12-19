@@ -6,14 +6,7 @@ import { isArray } from '../util'
 */
 export default class JSONConverter {
   importDocument (doc, json) {
-    if (!json.nodes) {
-      throw new Error('Invalid JSON format.')
-    }
-    // the json should just be an array of nodes
-    const nodeEntries = json.nodes
-    doc.import(tx => {
-      nodeEntries.forEach(data => tx.create(data))
-    })
+    doc.fromJson(json)
     return doc
   }
 

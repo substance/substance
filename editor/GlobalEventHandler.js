@@ -59,11 +59,17 @@ export default class GlobalEventHandler {
 
   _dispatch (eventName, event) {
     const listeners = this._listeners.get(eventName)
+    // ATTENTION: iterating reverse is a preliminary solution
+    // to the 'modal' problem. I.e. a modal also needs to register
+    // a global event handler. In that time, the other event handlers
+    // should not react.
+    // Reverse iteration let's the modal handle events first, and stop bubbling
     for (let idx = listeners.length - 1; idx >= 0; idx--) {
       const { handleFunction, owner } = listeners[idx]
-      handleFunction.call(owner, event)
-      // NOTE: calling only the latest listener
-      break
+      // TODO: not sure if event.cancelBubble works cross browser
+      // Alternatively, we can use return true logic to stop bubbling
+      const res = handleFunction.call(owner, event)
+      if (event.cancelBubble || res === true) break
     }
   }
 }
