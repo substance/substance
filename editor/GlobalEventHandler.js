@@ -59,11 +59,12 @@ export default class GlobalEventHandler {
 
   _dispatch (eventName, event) {
     const listeners = this._listeners.get(eventName)
-    for (let idx = listeners.length - 1; idx >= 0; idx--) {
+    for (let idx = 0; idx < listeners.length; idx++) {
       const { handleFunction, owner } = listeners[idx]
-      handleFunction.call(owner, event)
-      // NOTE: calling only the latest listener
-      break
+      // TODO: not sure if event.cancelBubble works cross browser
+      // Alternatively, we can use return true logic to stop bubbling
+      const res = handleFunction.call(owner, event)
+      if (event.cancelBubble || res === true) break
     }
   }
 }
