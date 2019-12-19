@@ -8,6 +8,7 @@ export default class NextDocument extends Document {
     const rootType = nextSchema.rootType
     // for the root node id is always === type
     this.root = this.create({ type: rootType, id: rootType })
+    this.type = rootType
   }
 
   find (cssSelector) {
