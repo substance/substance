@@ -1,7 +1,6 @@
 /* globals Blob */
 import { forEach, last, uuid, EventEmitter, platform, isString, sendRequest } from '../util'
 import { documentHelpers, DocumentIndex } from '../model'
-import { prettyPrintXML } from '../dom'
 import { AbstractEditorSession } from '../editor'
 import ManifestLoader from './ManifestLoader'
 
