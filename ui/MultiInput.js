@@ -45,9 +45,11 @@ export default class MultiInput extends Component {
 
   _addItem () {
     const { items } = this.state
+    const newIdx = items.length
     items.push('')
     this.rerender()
     this._emitChange()
+    this.refs['item' + newIdx].focus()
   }
 
   _updateItem (idx) {
