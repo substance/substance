@@ -39,7 +39,8 @@ export default class AuthorComponent extends SelectableNodeComponent {
         $$('span', { class: 'se-first-name' }, node.firstName)
       )
       if (node.middleNames && node.middleNames.length > 0) {
-        for (const mn of node.middleNames) {
+        const middleNames = node.middleNames.filter(Boolean)
+        for (const mn of middleNames) {
           el.append(
             $$('span', { class: 'se-middle-name' }, this._abbreviateName(mn))
           )
