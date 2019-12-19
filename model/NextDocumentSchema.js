@@ -1,4 +1,4 @@
-import { DefaultDOMElement as DOM } from '../dom'
+import { DefaultDOMElement as DOM, prettyPrintXML } from '../dom'
 import { camelCase } from '../util'
 import DocumentSchema from './DocumentSchema'
 import NextDocument from './NextDocument'
@@ -41,7 +41,7 @@ export default class NextDocumentSchema {
     return new NextDocument(this._documentSchema, this)
   }
 
-  importDocumentFromXml (doc, xmlStr) {
+  importDocumentFromXml (doc, xmlStr, context) {
     const xmlDom = DOM.parseXML(xmlStr)
     const xmlSchemaId = xmlDom.getDoctype().publicId
     // identify version
@@ -62,13 +62,19 @@ export default class NextDocumentSchema {
     if (version !== this.version) {
       console.error('TODO: implement migrations')
     }
-    const importer = this._xmlConverterFactory.createImporter(doc)
+    const importer = this._xmlConverterFactory.createImporter(doc, context)
     importer.importIntoDocument(xmlDom)
   }
 
-  exportDocumentToXml (doc) {
-    const exporter = this._xmlConverterFactory.createExporter()
-    const xmlStr = exporter.convertNode(doc.root).serialize()
+  exportDocumentToXml (doc, context = {}, options = {}) {
+    const exporter = this._xmlConverterFactory.createExporter(context)
+    const dom = exporter.convertNode(doc.root)
+    let xmlStr
+    if (options.prettyPrint) {
+      xmlStr = prettyPrintXML(dom)
+    } else {
+      xmlStr = dom.serialize()
+    }
     return [
       '<?xml version="1.0" encoding="UTF-8"?>',
       `<!DOCTYPE ${this.rootType} PUBLIC "${this.publicId}" "${this.dtd}">`,

@@ -1,6 +1,6 @@
 /* globals Blob */
 import { forEach, last, uuid, EventEmitter, platform, isString, sendRequest } from '../util'
-import { documentHelpers } from '../model'
+import { documentHelpers, DocumentIndex } from '../model'
 import { prettyPrintXML } from '../dom'
 import { AbstractEditorSession } from '../editor'
 import ManifestLoader from './ManifestLoader'
@@ -11,11 +11,12 @@ export default class DocumentArchive extends EventEmitter {
     this.storage = storage
     this.buffer = buffer
 
+    this._config = config
     this._archiveId = null
     this._upstreamArchive = null
     this._documents = null
     this._pendingFiles = new Map()
-    this._config = config
+    this._assetRefs = new AssetRefCountIndex()
   }
 
   _loadDocument (type, record, documents) {
@@ -25,7 +26,8 @@ export default class DocumentArchive extends EventEmitter {
       console.error(msg, type, record)
       throw new Error(msg)
     }
-    return loader.load(record.data, this._config)
+    const doc = loader.load(record.data, { archive: this, config: this._config })
+    return doc
   }
 
   addDocument (type, name, xml) {
@@ -39,123 +41,84 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   addAsset (file, blob) {
-    // sometimes it is desired to override the native
-    // file data e.g. name
+    // sometimes it is desired to override the native file data e.g. file.name
     // in that case, you can provide the file data seperate from the blob
-    // otherwise the file must be a blob
     if (!blob) blob = file
-    const assetId = uuid()
-    const fileName = file.name
-    if (this.hasAsset(fileName)) {
-      throw new Error('A file with this name already exists: ' + fileName)
+    const filename = file.name
+    if (this.isFilenameUsed(filename)) {
+      throw new Error('A file with this name already exists: ' + filename)
     }
-    // TODO: this is not ready for collab
+    let assetId
     this._manifestSession.transaction(tx => {
       const assetNode = tx.create({
         type: 'asset',
         id: assetId,
-        path: fileName,
-        assetType: file.type
+        filename,
+        mimetype: file.type
       })
-      documentHelpers.append(tx, ['dar', 'assets'], assetNode.id)
+      assetId = assetNode.id
+      documentHelpers.append(tx, ['dar', 'assets'], assetId)
     })
     this.buffer.addBlob(assetId, {
       id: assetId,
-      path: fileName,
+      filename,
       blob
     })
-    // ATTENTION: blob urls are not supported in nodejs
-    // and I do not see that this is really necessary
+    // NOTE: blob urls are not supported in nodejs and I do not see that this is really necessary
     // For sake of testing we use `PSEUDO-BLOB-URL:${filePath}`
     // so that we can see if the rest of the system is working
-    if (platform.inBrowser) {
-      this._pendingFiles.set(fileName, {
-        blob,
-        blobUrl: URL.createObjectURL(blob)
-      })
-    } else {
-      this._pendingFiles.set(fileName, {
-        blob,
-        blobUrl: `PSEUDO-BLOB-URL:${fileName}`
-      })
-    }
-    return fileName
+    const blobUrl = platform.inBrowser ? URL.createObjectURL(blob) : `PSEUDO-BLOB-URL:${filename}`
+    this._pendingFiles.set(assetId, {
+      id: assetId,
+      filename,
+      blob,
+      blobUrl
+    })
+    return assetId
   }
 
-  replaceAsset (oldFileName, newFile) {
-    const asset = this.getAsset(oldFileName)
-    if (!asset) {
-      throw new Error(`No asset found with name ${oldFileName}`)
-    }
-    const fileName = newFile.name
-    if (this.hasAsset(fileName)) {
-      throw new Error('A file with this name already exists: ' + fileName)
-    }
-    // TODO: this is not ready for collab
-    this._manifestSession.transaction(tx => {
-      const _asset = tx.get(asset.id)
-      _asset.assign({
-        path: fileName,
-        assetType: newFile.type
-      })
-    })
-    this.buffer.addBlob(asset.id, {
-      id: asset.id,
-      path: fileName,
-      blob: newFile
-    })
-    // ATTENTION: blob urls are not supported in nodejs
-    // and I do not see that this is really necessary
-    // For sake of testing we use `PSEUDO-BLOB-URL:${fileName}`
-    // so that we can see if the rest of the system is working
-    if (platform.inBrowser) {
-      this._pendingFiles.set(fileName, {
-        blob: newFile,
-        blobUrl: URL.createObjectURL(newFile)
-      })
-    } else {
-      this._pendingFiles.set(fileName, {
-        blob: newFile,
-        blobUrl: `PSEUDO-BLOB-URL:${fileName}`
-      })
-    }
-    return fileName
+  getAssetById (assetId) {
+    return this._documents.manifest.get(assetId)
   }
 
-  getAsset (fileName) {
-    return this._documents.manifest.getAssetByPath(fileName)
+  getAssetForFilename (filename) {
+    return this._documents.manifest.getAssetByFilename(filename)
+  }
+
+  // DEPRECATED: On the long run this approach does not hold. I.e. when assets are used
+  // within documents, e.g. images, or supplementary files, then the must be referenced
+  // via id, and not via filename.
+  getAsset (filename) {
+    return this.getAssetForFilename(filename)
   }
 
   getAssetEntries () {
     return this._documents.manifest.getAssetNodes().map(node => node.toJSON())
   }
 
-  renameAsset (oldFileName, newFileName) {
-    if (!this.hasAsset(oldFileName)) {
-      throw new Error(`No asset is registered with name ${oldFileName}`)
+  renameAsset (assetId, newFilename) {
+    const asset = this.getAssetById(assetId)
+    if (!asset) {
+      throw new Error(`No asset is registered with id ${assetId}`)
     }
-    if (this.hasAsset(newFileName)) {
-      throw new Error('A file with this name already exists: ' + newFileName)
+    if (this.isFilenameUsed(newFilename)) {
+      throw new Error('A file with this name already exists: ' + newFilename)
     }
-    const asset = this.getAsset(oldFileName)
     this._manifestSession.transaction(tx => {
-      const _asset = tx.get(asset.id)
-      _asset.assign({
-        path: newFileName
-      })
+      tx.set([asset.id, 'filename'], newFilename)
     })
   }
 
-  getBlob (path) {
+  getBlob (assetId) {
     // There are the following cases
     // 1. the asset is on a different server (remote url)
     // 2. the asset is on the local server (local url / relative path)
     // 3. an unsaved is present as a blob in memory
-    const blobEntry = this._pendingFiles.get(path)
+    const blobEntry = this._pendingFiles.get(assetId)
     if (blobEntry) {
       return Promise.resolve(blobEntry.blob)
     } else {
-      const fileRecord = this._upstreamArchive.resources[path]
+      const fileRecord = this._upstreamArchive.resources[assetId]
       if (fileRecord) {
         if (fileRecord.encoding === 'url') {
           if (platform.inBrowser) {
@@ -181,7 +144,7 @@ export default class DocumentArchive extends EventEmitter {
           return Promise.resolve(blob)
         }
       } else {
-        return Promise.reject(new Error('File not found: ' + path))
+        return Promise.reject(new Error('File not found: ' + assetId))
       }
     }
   }
@@ -194,11 +157,11 @@ export default class DocumentArchive extends EventEmitter {
     return this.getDocument('manifest').getDocumentEntries()
   }
 
-  getDownloadLink (fileName) {
+  getDownloadLink (filename) {
     const manifest = this.getDocument('manifest')
-    const asset = manifest.getAssetByPath(fileName)
+    const asset = manifest.getAssetByFilename(filename)
     if (asset) {
-      return this.resolveUrl(fileName)
+      return this.resolveUrl(filename)
     }
   }
 
@@ -206,9 +169,19 @@ export default class DocumentArchive extends EventEmitter {
     return this._documents[docId]
   }
 
-  hasAsset (fileName) {
-    // TODO: at some point I want to introduce an index for files by fileName/path
-    return Boolean(this.getAsset(fileName))
+  isFilenameUsed (filename) {
+    // check all document entries and referenced assets if the filename
+    // TODO: this could be optimized by keeping a set of used filenames up-to-date
+    for (const entry of this.getDocumentEntries()) {
+      if (entry.filename === filename) return true
+    }
+    const assetIds = this._assetRefs.getReferencedAssetIds()
+    for (const assetId of assetIds) {
+      const asset = this.getAssetById(assetId)
+      if (asset) {
+        if (asset.filename === filename) return true
+      }
+    }
   }
 
   hasPendingChanges () {
@@ -285,15 +258,18 @@ export default class DocumentArchive extends EventEmitter {
     documentNode.name = name
   }
 
-  resolveUrl (path) {
-    // until saved, files have a blob URL
-    const blobEntry = this._pendingFiles.get(path)
-    if (blobEntry) {
-      return blobEntry.blobUrl
-    } else {
-      const fileRecord = this._upstreamArchive.resources[path]
-      if (fileRecord && fileRecord.encoding === 'url') {
-        return fileRecord.data
+  resolveUrl (idOrFilename) {
+    const asset = this.getAssetById(idOrFilename) || this.getAssetForFilename(idOrFilename)
+    if (asset) {
+      // until saved, files have a blob URL
+      const blobEntry = this._pendingFiles.get(asset.id)
+      if (blobEntry) {
+        return blobEntry.blobUrl
+      } else {
+        const fileRecord = this._upstreamArchive.resources[asset.id]
+        if (fileRecord && fileRecord.encoding === 'url') {
+          return fileRecord.data
+        }
       }
     }
   }
@@ -319,32 +295,32 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   /*
-    Adds a document record to the manifest file
+    Adds a document record to the manifest
   */
-  _addDocumentRecord (documentId, type, name, path) {
+  _addDocumentRecord (documentId, type, name, filename) {
     this._manifestSession.transaction(tx => {
       const documentNode = tx.create({
         type: 'document',
         id: documentId,
         documentType: type,
         name,
-        path
+        filename
       })
       documentHelpers.append(tx, ['dar', 'documents', documentNode.id])
     })
   }
 
-  getUniqueFileName (fileName) {
-    const [name, ext] = _getNameAndExtension(fileName)
+  getUniqueFileName (filename) {
+    const [name, ext] = _getNameAndExtension(filename)
     let candidate
     // first try the canonical one
     candidate = `${name}.${ext}`
-    if (this.hasAsset(candidate)) {
+    if (this.isFilenameUsed(candidate)) {
       let count = 2
       // now use a suffix counting up
       while (true) {
         candidate = `${name}_${count++}.${ext}`
-        if (!this.hasAsset(candidate)) break
+        if (!this.isFilenameUsed(candidate)) break
       }
     }
 
@@ -352,9 +328,6 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   _loadManifest (record) {
-    if (!record) {
-      throw new Error('manifest.xml is missing')
-    }
     return ManifestLoader.load(record.data)
   }
 
@@ -364,14 +337,17 @@ export default class DocumentArchive extends EventEmitter {
     })
   }
 
-  _registerForChanges (document, docId) {
-    document.on('document:changed', change => {
+  _registerForChanges (doc, docId) {
+    // record any change to allow for incremental synchronisation, or storage of incremental data
+    doc.on('document:changed', change => {
       this.buffer.addChange(docId, change)
       setTimeout(() => {
         // Apps can subscribe to this (e.g. to show there's pending changes)
         this.emit('archive:changed')
       }, 0)
     }, this)
+    // add an index for counting refs to assets
+    doc.addIndex('_assetRefs', this._assetRefs)
   }
 
   _repair () {
@@ -385,44 +361,46 @@ export default class DocumentArchive extends EventEmitter {
     const buffer = this.buffer
     const storage = this.storage
 
-    const rawArchiveUpdate = this._exportChanges(this._documents, buffer)
+    this._exportChanges(this._documents, buffer)
+      .then(rawArchiveUpdate => {
+        // CHALLENGE: we either need to lock the buffer, so that
+        // new changes are interfering with ongoing sync
+        // or we need something pretty smart caching changes until the
+        // sync has succeeded or failed, e.g. we could use a second buffer in the meantime
+        // probably a fast first-level buffer (in-mem) is necessary anyways, even in conjunction with
+        // a slower persisted buffer
+        storage.write(archiveId, rawArchiveUpdate, (err, res) => {
+          // TODO: this need to implemented in a more robust fashion
+          // i.e. we should only reset the buffer if storage.write was successful
+          if (err) return cb(err)
 
-    // CHALLENGE: we either need to lock the buffer, so that
-    // new changes are interfering with ongoing sync
-    // or we need something pretty smart caching changes until the
-    // sync has succeeded or failed, e.g. we could use a second buffer in the meantime
-    // probably a fast first-level buffer (in-mem) is necessary anyways, even in conjunction with
-    // a slower persisted buffer
-    storage.write(archiveId, rawArchiveUpdate, (err, res) => {
-      // TODO: this need to implemented in a more robust fashion
-      // i.e. we should only reset the buffer if storage.write was successful
-      if (err) return cb(err)
+          // TODO: if successful we should receive the new version as response
+          // and then we can reset the buffer
+          let _res = { version: '0' }
+          if (isString(res)) {
+            try {
+              _res = JSON.parse(res)
+            } catch (err) {
+              console.error('Invalid response from storage.write()')
+            }
+          }
+          // console.log('Saved. New version:', res.version)
+          buffer.reset(_res.version)
+          // revoking object urls
+          if (platform.inBrowser) {
+            for (const blobEntry of this._pendingFiles.values()) {
+              window.URL.revokeObjectURL(blobEntry.blobUrl)
+            }
+          }
+          this._pendingFiles.clear()
 
-      // TODO: if successful we should receive the new version as response
-      // and then we can reset the buffer
-      let _res = { version: '0' }
-      if (isString(res)) {
-        try {
-          _res = JSON.parse(res)
-        } catch (err) {
-          console.error('Invalid response from storage.write()')
-        }
-      }
-      // console.log('Saved. New version:', res.version)
-      buffer.reset(_res.version)
-      // revoking object urls
-      if (platform.inBrowser) {
-        for (const blobEntry of this._pendingFiles.values()) {
-          window.URL.revokeObjectURL(blobEntry.blobUrl)
-        }
-      }
-      this._pendingFiles.clear()
-
-      // After successful save the archiveId may have changed (save as use case)
-      this._archiveId = archiveId
-      this.emit('archive:saved')
-      cb(null, rawArchiveUpdate)
-    })
+          // After successful save the archiveId may have changed (save as use case)
+          this._archiveId = archiveId
+          this.emit('archive:saved')
+          cb(null, rawArchiveUpdate)
+        })
+      })
+      .catch(cb)
   }
 
   _unregisterFromDocument (document) {
@@ -433,25 +411,31 @@ export default class DocumentArchive extends EventEmitter {
     Uses the current state of the buffer to generate a rawArchive object
     containing all changed documents
   */
-  _exportChanges (documents, buffer) {
-    const rawArchive = {
-      version: buffer.getVersion(),
-      diff: buffer.getChanges(),
-      resources: {}
+  async _exportChanges (documents, buffer) {
+    const resources = {}
+    const manifestUpdate = this._exportManifest(documents, buffer)
+    if (manifestUpdate) {
+      resources.manifest = manifestUpdate
     }
-    this._exportManifest(documents, buffer, rawArchive)
-    this._exportChangedDocuments(documents, buffer, rawArchive)
-    this._exportChangedAssets(documents, buffer, rawArchive)
+    Object.assign(resources, this._exportChangedDocuments(documents, buffer))
+    const assetUpdates = await this._exportChangedAssets(documents, buffer)
+    Object.assign(resources, assetUpdates)
+    const rawArchive = {
+      resources,
+      version: buffer.getVersion(),
+      diff: buffer.getChanges()
+    }
     return rawArchive
   }
 
   _exportManifest (documents, buffer, rawArchive) {
     const manifest = documents.manifest
     if (buffer.hasResourceChanged('manifest')) {
-      const manifestDom = manifest.toXML()
+      const manifestDom = manifest.toXML(this._assetRefs)
       const manifestXmlStr = prettyPrintXML(manifestDom)
-      rawArchive.resources['manifest.xml'] = {
+      return {
         id: 'manifest',
+        filename: 'manifest.xml',
         data: manifestXmlStr,
         encoding: 'utf8',
         updatedAt: Date.now()
@@ -459,23 +443,66 @@ export default class DocumentArchive extends EventEmitter {
     }
   }
 
-  _exportChangedAssets (documents, buffer, rawArchive) {
+  async _exportChangedAssets (documents, buffer) {
     const manifest = documents.manifest
     const assetNodes = manifest.getAssetNodes()
-    assetNodes.forEach(asset => {
+    const resources = {}
+    for (const asset of assetNodes) {
       const assetId = asset.id
       if (buffer.hasBlobChanged(assetId)) {
-        const path = asset.path || assetId
+        const filename = asset.filename || assetId
         const blobRecord = buffer.getBlob(assetId)
-        rawArchive.resources[path] = {
-          assetId,
-          data: blobRecord.blob,
+        // convert the blob into an array buffer
+        // so that it can be serialized correctly
+        const data = await blobRecord.blob.arrayBuffer()
+        resources[assetId] = {
+          id: assetId,
+          filename,
+          data,
           encoding: 'blob',
           createdAt: Date.now(),
           updatedAt: Date.now()
         }
       }
-    })
+    }
+    return resources
+  }
+
+  _exportChangedDocuments (documents, buffer, rawArchive) {
+    // Note: we are only adding resources that have changed
+    // and only those which are registered in the manifest
+    const entries = this.getDocumentEntries()
+    const resources = {}
+    for (const entry of entries) {
+      const { id, type, filename } = entry
+      const hasChanged = buffer.hasResourceChanged(id)
+      // skipping unchanged resources
+      if (!hasChanged) continue
+      // We mark a resource dirty when it has changes
+      if (type !== 'manifest') {
+        const document = documents[id]
+        // TODO: how should we communicate file renamings?
+        resources[id] = {
+          id,
+          filename,
+          data: this._exportDocument(type, document, documents),
+          encoding: 'utf8',
+          updatedAt: Date.now()
+        }
+      }
+    }
+    return resources
+  }
+
+  _exportDocument (type, document, documents) { // eslint-disable-line no-unused-vars
+    // TODO: we need better concept for handling errors
+    const context = { archive: this, config: this._config }
+    const options = { prettyPrint: true }
+    return document.toXml(context, options)
+  }
+
+  _getManifestXML (rawArchive) {
+    return rawArchive.resources.manifest.data
   }
 
   /*
@@ -488,60 +515,23 @@ export default class DocumentArchive extends EventEmitter {
     const manifest = this._loadManifest({ data: manifestXML })
     documents.manifest = manifest
 
+    // HACK: assigning loaded documents here already, so that loaders can
+    // access other documents, e.g. the manifest
+    this._documents = documents
+
     const entries = manifest.getDocumentEntries()
     entries.forEach(entry => {
-      const record = rawArchive.resources[entry.path]
+      const id = entry.id
+      const record = rawArchive.resources[id]
       // Note: this happens when a resource is referenced in the manifest
       // but is not there actually
       // we skip loading here and will fix the manuscript later on
       if (!record) return
       // TODO: we need better concept for handling errors
       const document = this._loadDocument(entry.type, record, documents)
-      documents[entry.id] = document
+      documents[id] = document
     })
     return documents
-  }
-
-  _exportChangedDocuments (documents, buffer, rawArchive) {
-    // Note: we are only adding resources that have changed
-    // and only those which are registered in the manifest
-    const entries = this.getDocumentEntries()
-    for (const entry of entries) {
-      const { id, type, path } = entry
-      const hasChanged = buffer.hasResourceChanged(id)
-      // skipping unchanged resources
-      if (!hasChanged) continue
-      // We mark a resource dirty when it has changes
-      if (type !== 'manifest') {
-        const document = documents[id]
-        // TODO: how should we communicate file renamings?
-        rawArchive.resources[path] = {
-          id,
-          data: this._exportDocument(type, document, documents),
-          encoding: 'utf8',
-          updatedAt: Date.now()
-        }
-      }
-    }
-  }
-
-  _exportDocument (type, document, documents) { // eslint-disable-line no-unused-vars
-    // TODO: same as with loader
-    return document.toXml()
-  }
-
-  getTitle () {
-    // TODO: the name of the 'main' document should not be hard-coded
-    const manuscript = this.getDocument('manuscript')
-    let title = 'Untitled'
-    if (manuscript) {
-      title = manuscript.getTitle() || title
-    }
-    return title
-  }
-
-  _getManifestXML (rawArchive) {
-    return rawArchive.resources['manifest.xml'].data
   }
 }
 
@@ -553,4 +543,67 @@ function _getNameAndExtension (name) {
     name = frags.slice(0, frags.length - 1).join('.')
   }
   return [name, ext]
+}
+
+class AssetRefCountIndex extends DocumentIndex {
+  constructor () {
+    super()
+
+    this._refCounts = new Map()
+  }
+
+  select (node) {
+    return node.isInstanceOf('@asset')
+  }
+
+  clear () {
+    this._refCounts = new Map()
+  }
+
+  create (node) {
+    this._incRef(node.src)
+  }
+
+  delete (node) {
+    this._decRef(node.src)
+  }
+
+  update (node, path, newValue, oldValue) {
+    if (path[1] === 'src') {
+      this._decRef(oldValue)
+      this._incRef(newValue)
+    }
+  }
+
+  getReferencedAssetIds () {
+    const ids = []
+    for (const [id, count] of this._refCounts.entries()) {
+      if (count > 0) {
+        ids.push(id)
+      }
+    }
+    return ids
+  }
+
+  hasRef (assetId) {
+    return this._refCounts.has(assetId) && this._refCounts.get(assetId) > 0
+  }
+
+  _incRef (assetId) {
+    if (!assetId) return
+    let refCount = 0
+    if (this._refCounts.has(assetId)) {
+      refCount = this._refCounts.get(assetId)
+    }
+    refCount = Math.max(0, refCount + 1)
+    this._refCounts.set(assetId, refCount)
+  }
+
+  _decRef (assetId) {
+    if (!assetId) return
+    if (this._refCounts.has(assetId)) {
+      const refCount = Math.max(0, this._refCounts.get(assetId) - 1)
+      this._refCounts.set(assetId, refCount)
+    }
+  }
 }

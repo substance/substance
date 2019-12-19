@@ -1,5 +1,5 @@
 import forEach from '../util/forEach'
-import ElementType from 'domelementtype'
+import ElementType from '../vendor/domelementtype'
 import Parser from '../vendor/htmlparser2'
 
 /*

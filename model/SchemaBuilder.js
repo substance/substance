@@ -5,6 +5,7 @@ import TextNode from './TextNode'
 import NextDocumentSchema from './NextDocumentSchema'
 import { INCREMENT_VERSION, ADD_NODE, ADD_PROPERTY, ADD_CHILD_TYPE, BUILT_INS } from './_SchemaConstants'
 import SchemaDefinition from './_SchemaDefinition'
+import AssetNode from './AssetNode'
 
 export default class SchemaBuilder {
   constructor (rootType, issuer) {
@@ -87,6 +88,10 @@ class NodeBuilder {
       }
       case '@text': {
         ParentNodeClass = TextNode
+        break
+      }
+      case '@asset': {
+        ParentNodeClass = AssetNode
         break
       }
       default:

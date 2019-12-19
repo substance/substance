@@ -12,6 +12,7 @@ var xml = {
 };
 
 var xml$1 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
 	amp: amp,
 	apos: apos,
 	gt: gt,
@@ -4272,6 +4273,7 @@ var entities = {
 };
 
 var entities$1 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
 	Aacute: Aacute,
 	aacute: aacute,
 	Abreve: Abreve,
@@ -6518,6 +6520,7 @@ var decode = {
 };
 
 var decode$1 = /*#__PURE__*/Object.freeze({
+	__proto__: null,
 	'default': decode
 });
 

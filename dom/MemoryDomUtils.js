@@ -1,4 +1,4 @@
-import ElementType from 'domelementtype'
+import ElementType from '../vendor/domelementtype'
 
 /*
   ATTENTION:

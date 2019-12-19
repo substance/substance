@@ -1,7 +1,7 @@
 import domutils from '../dom/domutils';
-import boolbase from 'boolbase';
-import cssWhat from 'css-what';
-import nthCheck from 'nth-check';
+import boolbase from './boolbase';
+import cssWhat from './css-what';
+import nthCheck from './nth-check';
 
 var procedure = new Map([
   ["universal", 50],
