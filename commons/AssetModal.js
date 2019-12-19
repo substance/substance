@@ -7,17 +7,16 @@ export default class AssetModal extends Component {
     const archive = this.context.api.archive
     const { mode, node, file } = this.props
 
-    let asset
-    if (node.isInstanceOf('asset')) {
-      asset = node
-    } else if (node.isInstanceOf('@asset')) {
-      asset = archive.getAssetById(node.src)
-    } else {
-      throw new Error('Incompatible node')
-    }
-
     let data
     if (mode === 'edit') {
+      let asset
+      if (node.isInstanceOf('asset')) {
+        asset = node
+      } else if (node.isInstanceOf('@asset')) {
+        asset = archive.getAssetById(node.src)
+      } else {
+        throw new Error('Incompatible node')
+      }
       data = {
         filename: asset.filename || '',
         mimetype: asset.mimetype,
