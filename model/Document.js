@@ -169,15 +169,28 @@ export default class Document extends EventEmitter {
     }
   }
 
-  import (importer) {
+  fromJson (json) {
     try {
+      // Node: json data may come in inappropriate order
+      // where indexes could be choking
       this.data._stopIndexing()
-      importer(this)
+      if (!json.nodes) {
+        throw new Error('Invalid JSON format.')
+      }
+      // the json should just be an array of nodes
+      const nodeEntries = json.nodes
+      nodeEntries.forEach(nodeData => {
+        if (this.data.contains(nodeData.id)) {
+          this.delete(nodeData.id)
+        }
+        this.create(nodeData)
+      })
       this.data._startIndexing()
     } finally {
       this.data.queue = []
       this.data._startIndexing()
     }
+    return this
   }
 
   /**

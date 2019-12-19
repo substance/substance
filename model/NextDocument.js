@@ -31,6 +31,13 @@ export default class NextDocument extends Document {
     return this
   }
 
+  fromJson (json) {
+    super.fromJson(json)
+    // making sure that root points to the correct node, in case the root node has been overwritten
+    this.root = this.get(this.root.id)
+    return this
+  }
+
   toXml (context, options) {
     return this._nextSchema.exportDocumentToXml(this, context, options)
   }
