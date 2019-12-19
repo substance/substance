@@ -26,12 +26,12 @@ export default class NextDocument extends Document {
     return new NextDocument(this.schema, this._nextSchema)
   }
 
-  fromXml (xmlStr) {
-    this._nextSchema.importDocumentFromXml(this, xmlStr)
+  fromXml (xmlStr, context) {
+    this._nextSchema.importDocumentFromXml(this, xmlStr, context)
     return this
   }
 
-  toXml () {
-    return this._nextSchema.exportDocumentToXml(this)
+  toXml (context, options) {
+    return this._nextSchema.exportDocumentToXml(this, context, options)
   }
 }
