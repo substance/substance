@@ -14,8 +14,8 @@ export default class ManifestDocument extends Document {
     return this.get('dar').resolve('assets')
   }
 
-  getAssetByPath (path) {
-    return this.getAssetNodes().find(asset => asset.path === path)
+  getAssetByFilename (filename) {
+    return this.getAssetNodes().find(asset => asset.filename === filename)
   }
 
   getDocumentEntries () {
@@ -50,7 +50,9 @@ export default class ManifestDocument extends Document {
         type: 'document',
         id: el.attr('id'),
         documentType: el.attr('type'),
-        path: el.attr('path')
+        name: el.attr('name'),
+        // TODO: I would prefer 'filename' in the DAR XML
+        filename: el.attr('path')
       })
       documentHelpers.append(manifest, ['dar', 'documents'], documentNode.id)
     }
@@ -59,9 +61,10 @@ export default class ManifestDocument extends Document {
       const assetNode = manifest.create({
         type: 'asset',
         id: el.attr('id'),
-        assetType: el.attr('type'),
-        path: el.attr('path'),
-        sync: el.attr('sync') === 'true'
+        // TODO: I would prefer 'filename' in the DAR XML
+        filename: el.attr('path'),
+        // TODO: I would prefer 'mimetype' in the DAR XML
+        mimetype: el.attr('type')
       })
       documentHelpers.append(manifest, ['dar', 'assets'], assetNode.id)
     }
@@ -69,7 +72,7 @@ export default class ManifestDocument extends Document {
     return manifest
   }
 
-  toXML () {
+  toXML (assetRefIndex) {
     const dar = this.get('dar')
     const xmlDom = DefaultDOMElement.createDocument('xml')
     const $$ = xmlDom.createElement.bind(xmlDom)
@@ -77,22 +80,34 @@ export default class ManifestDocument extends Document {
       $$('dar').append(
         $$('documents').append(
           dar.resolve('documents').map(node => {
-            return $$('document').attr({
+            const docEl = $$('document').attr({
               id: node.id,
               type: node.documentType,
-              name: node.name,
-              path: node.path
+              path: node.filename
             })
+            if (node.name) {
+              docEl.setAttribute('name', node.name)
+            }
+            return docEl
           })
         ),
         $$('assets').append(
           dar.resolve('assets').map(node => {
-            return $$('asset').attr({
+            const assetEl = $$('asset').attr({
               id: node.id,
-              type: node.assetType,
-              path: node.path,
-              sync: node.sync ? 'true' : undefined
+              // TODO: I would prefer to use filename instead of 'path' in the DAR XML
+              type: node.mimetype,
+              path: node.filename
             })
+            // EXPERIMENTAL: storing 'unused' to allow for keeping assets around, e.g. when replacing an asset.
+            // Similar to the problem in versioning, for undo/redo during a session, all assets need to be retained.
+            // Note that this is only used internally, e.g. in RawArchiveFSStorage.
+            // TODO: rethink. Maybe we could instead analyse the content of the DAR,
+            // But that would either mean to load the documents, or doing a poor man's detection via XML.
+            if (assetRefIndex && !assetRefIndex.hasRef(node.id)) {
+              assetEl.setAttribute('unused', true)
+            }
+            return assetEl
           })
         )
       )
@@ -104,9 +119,9 @@ export default class ManifestDocument extends Document {
 function _getEntryFromDocumentNode (documentNode) {
   return {
     id: documentNode.id,
-    path: documentNode.path,
     type: documentNode.documentType,
-    name: documentNode.name
+    name: documentNode.name,
+    filename: documentNode.filename
   }
 }
 
@@ -122,15 +137,15 @@ DARDocument.schema = {
   type: 'document',
   name: STRING,
   documentType: STRING,
-  path: STRING
+  filename: STRING
 }
 
 class DARAsset extends DocumentNode {}
 DARAsset.schema = {
   type: 'asset',
   name: STRING,
-  assetType: STRING,
-  path: STRING
+  filename: STRING,
+  mimetype: STRING
 }
 
 const DARSchema = new DocumentSchema({

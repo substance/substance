@@ -34,7 +34,9 @@ function _readRawArchive (fs, archiveId, baseUrl = '') {
   const rawArchive = {
     version: '0',
     resources: {
-      'manifest.xml': {
+      manifest: {
+        id: 'manifest',
+        filename: 'manifest.xml',
         encoding: 'utf8',
         data: manifestXML
       }
@@ -42,33 +44,37 @@ function _readRawArchive (fs, archiveId, baseUrl = '') {
   }
 
   docs.forEach(entry => {
-    const path = entry.path
-    if (fs.existsSync(`${archiveId}/${entry.path}`)) {
-      const content = fs.readFileSync(`${archiveId}/${entry.path}`)
-      rawArchive.resources[path] = {
+    const { id, filename } = entry
+    if (fs.existsSync(`${archiveId}/${filename}`)) {
+      const content = fs.readFileSync(`${archiveId}/${filename}`)
+      rawArchive.resources[id] = {
+        id,
+        filename,
         encoding: 'utf8',
         data: content
       }
     } else {
-      console.warn(`${archiveId}/${entry.path} not found in vfs`)
+      console.warn(`${archiveId}/${filename} not found in vfs`)
     }
   })
   assets.forEach(asset => {
-    const path = asset.path
+    const { id, filename } = asset
     // TODO: we could store other stats and maybe mime-types in VFS
-    rawArchive.resources[path] = {
+    rawArchive.resources[id] = {
+      id,
+      filename,
       encoding: 'url',
-      data: baseUrl + archiveId + '/' + path
+      data: baseUrl + archiveId + '/' + filename
     }
   })
   return rawArchive
 }
 
 function _updateRawArchive (fs, archiveId, rawArchive, baseUrl = '') {
-  const paths = Object.keys(rawArchive.resources)
-  for (const path of paths) {
-    const resource = rawArchive.resources[path]
+  const ids = Object.keys(rawArchive.resources)
+  for (const id of ids) {
+    const resource = rawArchive.resources[id]
     const data = resource.data
-    fs.writeFileSync(`${archiveId}/${path}`, data)
+    fs.writeFileSync(`${archiveId}/${resource.filename}`, data)
   }
 }
