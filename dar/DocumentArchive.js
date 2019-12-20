@@ -1,5 +1,5 @@
 /* globals Blob */
-import { forEach, last, uuid, EventEmitter, platform, isString, sendRequest } from '../util'
+import { forEach, last, uuid, EventEmitter, platform, isString } from '../util'
 import { documentHelpers, DocumentIndex } from '../model'
 import { AbstractEditorSession } from '../editor'
 import ManifestLoader from './ManifestLoader'
@@ -12,7 +12,6 @@ export default class DocumentArchive extends EventEmitter {
 
     this._config = config
     this._archiveId = null
-    this._upstreamArchive = null
     this._documents = null
     this._pendingFiles = new Map()
     this._assetRefs = new AssetRefCountIndex()
@@ -117,34 +116,7 @@ export default class DocumentArchive extends EventEmitter {
     if (blobEntry) {
       return Promise.resolve(blobEntry.blob)
     } else {
-      const fileRecord = this._upstreamArchive.resources[assetId]
-      if (fileRecord) {
-        if (fileRecord.encoding === 'url') {
-          if (platform.inBrowser) {
-            return sendRequest({
-              method: 'GET',
-              url: fileRecord.data,
-              responseType: 'blob'
-            })
-          } else {
-            // TODO: find a better way to provide platform specific implementations
-            // This is problematic for webpack because it will try to bundle
-            // 'fs' even if this code is never used in the browser
-            const fs = require('fs')
-            return new Promise((resolve, reject) => {
-              fs.readFile(fileRecord.data, (err, data) => {
-                if (err) reject(err)
-                else resolve(data)
-              })
-            })
-          }
-        } else {
-          const blob = platform.inBrowser ? new Blob([fileRecord.data]) : fileRecord.data
-          return Promise.resolve(blob)
-        }
-      } else {
-        return Promise.reject(new Error('File not found: ' + assetId))
-      }
+      return this.storage.getBlob(assetId)
     }
   }
 
@@ -239,7 +211,6 @@ export default class DocumentArchive extends EventEmitter {
         this._registerForAllChanges(documents)
 
         this._archiveId = archiveId
-        this._upstreamArchive = upstreamArchive
         this._documents = documents
 
         cb(null, this)
@@ -266,19 +237,21 @@ export default class DocumentArchive extends EventEmitter {
   }
 
   resolveUrl (idOrFilename) {
+    // console.log('Resolving url for', idOrFilename)
+    let url = null
     const asset = this.getAssetById(idOrFilename) || this.getAssetForFilename(idOrFilename)
     if (asset) {
       // until saved, files have a blob URL
       const blobEntry = this._pendingFiles.get(asset.id)
       if (blobEntry) {
-        return blobEntry.blobUrl
+        url = blobEntry.blobUrl
       } else {
-        const fileRecord = this._upstreamArchive.resources[asset.id]
-        if (fileRecord && fileRecord.encoding === 'url') {
-          return fileRecord.data
-        }
+        // Note: arguments for getAssetUrl() must be serializable as this is an RPC
+        url = this.storage.getAssetUrl(this._archiveId, { id: asset.id, filename: asset.filename })
       }
     }
+    // console.log('... url =', url)
+    return url
   }
 
   save (cb) {

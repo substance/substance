@@ -13,7 +13,8 @@ const yauzl = require('yauzl')
  */
 export default class DarFileStorage {
   constructor (rootDir, baseUrl) {
-    this.rootDir = rootDir
+    this._rootDir = rootDir
+    this._baseUrl = baseUrl
 
     this._internalStorage = new RawArchiveFSStorage(rootDir, baseUrl)
   }
@@ -62,6 +63,11 @@ export default class DarFileStorage {
     })
   }
 
+  getAssetUrl (darpath, asset) {
+    const archiveId = this._path2Id(darpath)
+    return `${this._baseUrl}${archiveId}/${asset.id}`
+  }
+
   _path2Id (darpath) {
     darpath = String(darpath)
     darpath = path.normalize(darpath)
@@ -81,7 +87,7 @@ export default class DarFileStorage {
   }
 
   _getWorkingCopyPath (id) {
-    return path.join(this.rootDir, id)
+    return path.join(this._rootDir, id)
   }
 
   async _unpack (darpath, wcDir) {
@@ -168,17 +174,12 @@ export default class DarFileStorage {
     const zipfile = new yazl.ZipFile()
     const manifest = await this._internalStorage._getManifest(wcDir)
     zipfile.addFile(path.join(wcDir, 'manifest'), 'manifest.xml')
-    for (const docEl of manifest.findAll('document')) {
-      const id = docEl.id
-      const relPath = docEl.getAttribute('path')
-      zipfile.addFile(path.join(wcDir, id), relPath)
-    }
-    for (const assetEl of manifest.findAll('asset')) {
-      const unused = Boolean(assetEl.getAttribute('unused'))
+    for (const resourceEl of manifest.findAll('document, asset')) {
+      const unused = Boolean(resourceEl.getAttribute('unused'))
       // skip unused assets
       if (unused) continue
-      const id = assetEl.id
-      const relPath = assetEl.getAttribute('path')
+      const id = resourceEl.id
+      const relPath = resourceEl.getAttribute('path')
       zipfile.addFile(path.join(wcDir, id), relPath)
     }
     return new Promise((resolve, reject) => {
