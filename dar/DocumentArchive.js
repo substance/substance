@@ -454,20 +454,14 @@ export default class DocumentArchive extends EventEmitter {
     const resources = {}
     for (const entry of entries) {
       const { id, type, filename } = entry
-      const hasChanged = buffer.hasResourceChanged(id)
-      // skipping unchanged resources
-      if (!hasChanged) continue
-      // We mark a resource dirty when it has changes
-      if (type !== 'manifest') {
-        const document = documents[id]
-        // TODO: how should we communicate file renamings?
-        resources[id] = {
-          id,
-          filename,
-          data: this._exportDocument(type, document, documents),
-          encoding: 'utf8',
-          updatedAt: Date.now()
-        }
+      const document = documents[id]
+      // TODO: how should we communicate file renamings?
+      resources[id] = {
+        id,
+        filename,
+        data: this._exportDocument(type, document, documents),
+        encoding: 'utf8',
+        updatedAt: Date.now()
       }
     }
     return resources
