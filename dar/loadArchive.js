@@ -10,6 +10,12 @@ export default function loadArchive (rawArchive, config) {
       },
       write (_, __, cb) {
         cb()
+      },
+      getAssetUrl (_, asset) {
+        const resource = rawArchive.resources[asset.id]
+        if (resource.encoding === 'url') {
+          return resource.data
+        }
       }
     },
     new InMemoryDarBuffer(),

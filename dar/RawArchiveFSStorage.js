@@ -27,6 +27,10 @@ export default class RawArchiveFSStorage {
       .catch(cb)
   }
 
+  getAssetUrl (archiveDir, asset) {
+    return `${this._baseUrl}${path.basename(archiveDir)}/${asset.id}`
+  }
+
   clone (archiveDir, newArchiveDir, cb) {
     // TODO: we should prune the cloned archive
     fsExtra.copy(archiveDir, newArchiveDir)
@@ -108,7 +112,7 @@ export default class RawArchiveFSStorage {
     const resources = rawArchive.resources
     for (const resourceId of Object.keys(resources)) {
       const resource = resources[resourceId]
-      this._writeResource(archiveDir, resourceId, resource)
+      await this._writeResource(archiveDir, resourceId, resource)
     }
   }
 
