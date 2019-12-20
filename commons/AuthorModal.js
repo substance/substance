@@ -70,7 +70,7 @@ export default class AuthorModal extends Component {
             options: allAffiliations.map(aff => {
               return { value: aff.id, label: aff.name }
             }),
-            selected: data.affiliations,
+            value: data.affiliations,
             placeholder: 'Add Affiliation',
             onchange: this._updateAffiliations
           }).ref('affiliations')
@@ -105,6 +105,6 @@ export default class AuthorModal extends Component {
   }
 
   _updateAffiliations () {
-    this.state.data.affiliations = this.refs.affiliations.getSelectedValues()
+    this.state.data.affiliations = this.refs.affiliations.val()
   }
 }

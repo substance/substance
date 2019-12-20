@@ -13,14 +13,10 @@ export default class MultiSelect extends Component {
     this.setState(this._derivedState(newProps))
   }
 
-  getSelectedValues () {
-    return Array.from(this.state.selected)
-  }
-
   render () {
-    const { options, selected } = this.state
-    const selectedOptions = options.filter(option => selected.has(option.value))
-    const notSelectedOptions = options.filter(option => !selected.has(option.value))
+    const { options, value } = this.state
+    const selectedOptions = options.filter(option => value.has(option.value))
+    const notSelectedOptions = options.filter(option => !value.has(option.value))
     const allOptionsSelected = selectedOptions.length === options.length
 
     const el = $$('div', { class: 'sc-multi-select' }).append(
@@ -44,31 +40,37 @@ export default class MultiSelect extends Component {
     return el
   }
 
+  val () {
+    return Array.from(this.state.value)
+  }
+
   _derivedState (props) {
     const options = this.props.options || []
-    const selected = new Set(this.props.selected || [])
+    const value = new Set(this.props.value || [])
     return {
       options,
-      selected
+      value
     }
   }
 
-  _onClickRemoveOption (option, e) {
-    const selected = this.state.selected
-    selected.delete(option.value)
-    this.extendState({ selected })
-  }
-
   _renderOptions () {
-    const { options, selected } = this.state
-    const notSelectedOptions = options.filter(option => !selected.has(option.value))
+    const { options, value } = this.state
+    const notSelectedOptions = options.filter(option => !value.has(option.value))
     return $$(Select, { class: 'se-options', options: notSelectedOptions })
   }
 
+  _onClickRemoveOption (option, e) {
+    const value = this.state.value
+    value.delete(option.value)
+    this.extendState({ value })
+    this.el.emit('change', { value })
+  }
+
   _onAddItem () {
-    const value = this.refs.optionSelector.val()
-    const { selected } = this.state
-    selected.add(value)
-    this.extendState({ selected })
+    const itemValue = this.refs.optionSelector.val()
+    const { value } = this.state
+    value.add(itemValue)
+    this.extendState({ value })
+    this.el.emit('change', { value })
   }
 }
