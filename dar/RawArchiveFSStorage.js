@@ -59,15 +59,17 @@ export default class RawArchiveFSStorage {
     const documentRecords = await Promise.all(manifest.findAll('document').map(docEl => this._getFileRecord(path.join(archiveDir, docEl.id), true)))
     const assetRecords = await Promise.all(manifest.findAll('asset').map(assetEl => this._getFileRecord(path.join(archiveDir, assetEl.id), false)))
     const resources = [manifestRecord].concat(documentRecords).concat(assetRecords).reduce((resources, record) => {
-      // Note: initially record.filename is an absolute path
-      // Within the raw DAR the filename is the id of the resource
-      const filePath = record.filename
-      const id = path.relative(archiveDir, filePath)
-      record.filename = id
-      record.id = id
-      resources[id] = record
-      if (record.encoding === 'url') {
-        record.data = this._baseUrl + path.relative(this._rootDir, filePath)
+      if (record) {
+        // Note: initially record.filename is an absolute path
+        // Within the raw DAR the filename is the id of the resource
+        const filePath = record.filename
+        const id = path.relative(archiveDir, filePath)
+        record.filename = id
+        record.id = id
+        resources[id] = record
+        if (record.encoding === 'url') {
+          record.data = this._baseUrl + path.relative(this._rootDir, filePath)
+        }
       }
       return resources
     }, {})
@@ -80,7 +82,10 @@ export default class RawArchiveFSStorage {
   _getFileRecord (filePath, loadContent) {
     return new Promise((resolve, reject) => {
       fs.stat(filePath, (err, stats) => {
-        if (err) return reject(err)
+        if (err) {
+          // return null if the file does not exist
+          return resolve(null)
+        }
         const size = stats.size
         const createdAt = stats.birthtime.getTime()
         const updatedAt = stats.mtime.getTime()
