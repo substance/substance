@@ -1,4 +1,3 @@
-/* globals Blob */
 import { forEach, last, uuid, EventEmitter, platform, isString } from '../util'
 import { documentHelpers, DocumentIndex } from '../model'
 import { AbstractEditorSession } from '../editor'
