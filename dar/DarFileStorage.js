@@ -153,10 +153,15 @@ export default class DarFileStorage {
               if (!resourceMap.has(entry.fileName)) {
                 zipfile.readEntry()
               } else {
-                const id = resourceMap.get(entry.fileName)
-                const absPath = path.join(rawArchiveDir, id)
-                fsExtra.ensureDirSync(path.dirname(absPath))
-                readStream.pipe(fs.createWriteStream(absPath))
+                try {
+                  const id = resourceMap.get(entry.fileName)
+                  const absPath = path.join(rawArchiveDir, id)
+                  fsExtra.ensureDirSync(path.dirname(absPath))
+                  readStream.pipe(fs.createWriteStream(absPath))
+                } catch (err) {
+                  console.error('Could not unpack resource.', err)
+                  zipfile.readEntry()
+                }
               }
             })
           }
