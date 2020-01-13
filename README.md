@@ -1,8 +1,6 @@
-# Substance [![Build Status](https://travis-ci.org/substance/substance.svg?branch=devel)](https://travis-ci.org/substance/substance)
+# Substance.js [![Build Status](https://travis-ci.org/substance/substance.svg?branch=devel)](https://travis-ci.org/substance/substance)
 
-Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing system.
-
-Check the [project website](http://substance.io).
+Substance is a JavaScript library for web-based content editing. It provides building blocks for realizing custom text editors and web-based publishing system. It is developed to power our online editing platform [Substance](http://substance.io).
 
 ## Development
 
