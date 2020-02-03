@@ -15,23 +15,33 @@ export default class MultiSelect extends Component {
 
   render () {
     const { options, value } = this.state
+    const { label, placeholder } = this.props
     const selectedOptions = options.filter(option => value.has(option.value))
     const notSelectedOptions = options.filter(option => !value.has(option.value))
     const allOptionsSelected = selectedOptions.length === options.length
 
-    const el = $$('div', { class: 'sc-multi-select' }).append(
-      selectedOptions.map(option => {
-        return $$(HorizontalStack, {},
-          $$('div', { class: 'se-item' }, option.label),
-          $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
+    const el = $$('div', { class: 'sc-multi-select' })
+    if (selectedOptions.length > 0) {
+      el.append(
+        selectedOptions.map(option => {
+          return $$(HorizontalStack, {},
+            $$('div', { class: 'se-item' }, option.label),
+            $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
+          )
+        })
+      )
+    } else if (placeholder) {
+      el.append(
+        $$(HorizontalStack, {},
+          $$('div', { class: 'se-placeholder' }, placeholder)
         )
-      })
-    )
+      )
+    }
 
     if (!allOptionsSelected) {
       el.append(
         $$(HorizontalStack, {},
-          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: this.props.placeholder })
+          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: label })
             .ref('optionSelector').on('input', this._onAddItem)
         )
       )
