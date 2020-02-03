@@ -42,7 +42,8 @@ export default class MultiSelect extends Component {
       el.append(
         $$(HorizontalStack, {},
           $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: label })
-            .ref('optionSelector').on('input', this._onAddItem)
+            .ref('optionSelector')
+            .on('change', this._onAddItem)
         )
       )
     }
@@ -55,8 +56,8 @@ export default class MultiSelect extends Component {
   }
 
   _derivedState (props) {
-    const options = this.props.options || []
-    const value = new Set(this.props.value || [])
+    const options = props.options || []
+    const value = new Set(props.value || [])
     return {
       options,
       value
@@ -76,7 +77,8 @@ export default class MultiSelect extends Component {
     this.el.emit('change', { value })
   }
 
-  _onAddItem () {
+  _onAddItem (e) {
+    e.stopPropagation()
     const itemValue = this.refs.optionSelector.val()
     const { value } = this.state
     value.add(itemValue)
