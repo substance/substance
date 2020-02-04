@@ -1,3 +1,4 @@
+import { documentHelpers } from '../model'
 import ApiExtension from './ApiExtension'
 
 export default class ReferenceApi extends ApiExtension {
@@ -22,5 +23,16 @@ export default class ReferenceApi extends ApiExtension {
     }
     const nodeData = Object.assign({}, data, { type: 'reference' })
     this.api.insertNode([root.id, 'references'], insertPos, nodeData)
+  }
+
+  /**
+   * @param {string} citationId
+   * @param {object} data from CitationModal state
+   */
+  updateCitation (citationId, data) {
+    this.api.getEditorSession().transaction(tx => {
+      documentHelpers.updateProperty(tx, [citationId, 'target'], data.target)
+      this.api._selectItem(tx, tx.get(citationId))
+    })
   }
 }
