@@ -2,10 +2,12 @@ import { $$ } from '../dom'
 import { Button, StackFill, HorizontalStack, Divider } from '../ui'
 import { AnnotationComponent } from '../editor'
 import PopoverMixin from './PopoverMixin'
-import CitationModal from './CitationModal'
+import { getLabel } from './nodeHelpers'
 
 // NOTE: this should be an inline node component
 export default class CitationComponent extends PopoverMixin(AnnotationComponent) {
+  // If we say that popover is always have delete and edit buttons,
+  // then we can move action handlers to mixin
   getActionHandlers () {
     return {
       edit: this._onEdit,
@@ -22,14 +24,10 @@ export default class CitationComponent extends PopoverMixin(AnnotationComponent)
     const el = super.render()
     el.addClass('sc-citation')
 
-    if (node.target && node.target.length > 0) {
-      const references = node.resolve('target')
-      const refLabels = references.map(ref => ref.label)
-      refLabels.sort()
-      el.append(
-        `[${refLabels.join(',')}]`
-      )
-    }
+    // For now this is just for an inline node emulation
+    el.append(
+      getLabel(node)
+    )
 
     return el
   }
@@ -45,21 +43,17 @@ export default class CitationComponent extends PopoverMixin(AnnotationComponent)
     return false
   }
 
+  // TODO: this will not work until citation became an inline node
   _onDelete () {
-    this.context.api.deleteNode(this.props.node.id)
+    const { editorSession } = this.context
+    const { node } = this.props
+    editorSession.executeCommand('remove-citation', { node })
   }
 
   _onEdit () {
-    const { node } = this.props
     const { editorSession } = this.context
-    const document = editorSession.getDocument()
-    this.send('requestModal', () => {
-      return $$(CitationModal, { document, node, mode: 'edit' })
-    }).then(modal => {
-      if (!modal) return
-      const data = { target: modal.state.value }
-      this.context.api.updateCitation(node.id, data)
-    })
+    const { node } = this.props
+    editorSession.executeCommand('edit-citation', { node })
   }
 }
 
