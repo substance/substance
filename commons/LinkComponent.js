@@ -1,12 +1,10 @@
 import { $$ } from '../dom'
-import { platform, getSelectionRect } from '../util'
 import { Button, StackFill, HorizontalStack, Divider } from '../ui'
 import { AnnotationComponent } from '../editor'
+import PopoverMixin from './PopoverMixin'
 import LinkModal from './LinkModal'
 
-// TODO: here a is a lot of shareable logic
-// extract after this is working
-export default class LinkComponent extends AnnotationComponent {
+export default class LinkComponent extends PopoverMixin(AnnotationComponent) {
   getActionHandlers () {
     return {
       edit: this._onEdit,
@@ -14,22 +12,12 @@ export default class LinkComponent extends AnnotationComponent {
     }
   }
 
-  didMount () {
-    const editorState = this.context.editorState
-    if (editorState) {
-      editorState.addObserver(['selectionState'], this._onSelectionStateChange, this, { stage: 'position' })
-    }
-  }
-
-  dispose () {
-    const editorState = this.context.editorState
-    if (editorState) {
-      editorState.removeObserver(this)
-    }
-  }
-
   getTagName () {
     return 'a'
+  }
+
+  getPopoverComponent () {
+    return _LinkPopover
   }
 
   render () {
@@ -40,17 +28,17 @@ export default class LinkComponent extends AnnotationComponent {
     return el
   }
 
-  _getDesiredPopoverPos () {
-    if (platform.inBrowser) {
-      const selectionRect = getSelectionRect({ top: 0, left: 0 })
-      if (selectionRect) {
-        let { left: x, top: y, height, width } = selectionRect
-        y = y + height + 5
-        x = x + width / 2
-        return { x, y }
+  exposePopover (selectionState) {
+    const { selection, annosByType } = selectionState
+    if (selection && selection.isPropertySelection()) {
+      // show only if there is exactly the one link under the selection
+      // and the selection is completely inside of the link
+      const links = annosByType.get('link')
+      if (links && links.length === 1 && links[0] === this.props.node) {
+        return selection.isInsideOf(this.props.node.getSelection())
       }
     }
-    return { x: 0, y: 0 }
+    return false
   }
 
   _onDelete () {
@@ -76,36 +64,6 @@ export default class LinkComponent extends AnnotationComponent {
     const { href } = data
     if (href !== node.href) {
       this.context.api.updateNode(node.id, { href })
-    }
-  }
-
-  _onSelectionStateChange (selectionState) {
-    const oldShowPopup = this._showPopup
-    let showPopup = false
-    const { selection, annosByType } = selectionState
-    if (selection && selection.isPropertySelection()) {
-      // show only if there is exactly the one link under the selection
-      // and the selection is completely inside of the link
-      const links = annosByType.get('link')
-      if (links && links.length === 1 && links[0] === this.props.node) {
-        showPopup = selection.isInsideOf(this.props.node.getSelection())
-      }
-    }
-    this._showPopup = showPopup
-    if (!showPopup && oldShowPopup) {
-      this.send('releasePopover', this)
-    }
-    // always update the request because of positioning
-    if (showPopup) {
-      const node = this.props.node
-      this.send('requestPopover', {
-        requester: this,
-        desiredPos: this._getDesiredPopoverPos(),
-        content: () => {
-          return $$(_LinkPopover, { node })
-        },
-        position: 'relative'
-      })
     }
   }
 }
