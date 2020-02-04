@@ -2,9 +2,17 @@ import { $$ } from '../dom'
 import { Button, StackFill, HorizontalStack, Divider } from '../ui'
 import { AnnotationComponent } from '../editor'
 import PopoverMixin from './PopoverMixin'
+import CitationModal from './CitationModal'
 
 // NOTE: this should be an inline node component
 export default class CitationComponent extends PopoverMixin(AnnotationComponent) {
+  getActionHandlers () {
+    return {
+      edit: this._onEdit,
+      delete: this._onDelete
+    }
+  }
+
   getPopoverComponent () {
     return _CitationPopover
   }
@@ -36,6 +44,23 @@ export default class CitationComponent extends PopoverMixin(AnnotationComponent)
     }
     return false
   }
+
+  _onDelete () {
+    this.context.api.deleteNode(this.props.node.id)
+  }
+
+  _onEdit () {
+    const { node } = this.props
+    const { editorSession } = this.context
+    const document = editorSession.getDocument()
+    this.send('requestModal', () => {
+      return $$(CitationModal, { document, node, mode: 'edit' })
+    }).then(modal => {
+      if (!modal) return
+      const data = { target: modal.state.value }
+      this.context.api.updateCitation(node.id, data)
+    })
+  }
 }
 
 function _CitationPopover (props) {
@@ -44,7 +69,7 @@ function _CitationPopover (props) {
   return $$('div', { class: 'sc-citation-popover' },
     ...references.map(ref => {
       return $$(HorizontalStack, { class: 'se-reference' },
-        $$('div', { class: 'se-label' }, ref.label),
+        $$('div', { class: 'se-label' }, `[${ref.label}]`),
         $$('div', { class: 'se-content' }, ref.content)
       )
     }),
