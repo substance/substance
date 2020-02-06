@@ -4,7 +4,7 @@ import { Form, FormRow, Modal, MultiSelect } from '../ui'
 export default class CitationModal extends Component {
   getInitialState () {
     const { mode, node } = this.props
-    const value = mode === 'edit' ? node.target : []
+    const value = mode === 'edit' ? node.references : []
     return { value }
   }
 
