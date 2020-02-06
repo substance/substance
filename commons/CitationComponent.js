@@ -1,13 +1,9 @@
-import { $$ } from '../dom'
+import { $$, Component } from '../dom'
 import { Button, StackFill, HorizontalStack, Divider } from '../ui'
-import { AnnotationComponent } from '../editor'
 import PopoverMixin from './PopoverMixin'
 import { getLabel } from './nodeHelpers'
 
-// NOTE: this should be an inline node component
-export default class CitationComponent extends PopoverMixin(AnnotationComponent) {
-  // If we say that popover is always have delete and edit buttons,
-  // then we can move action handlers to mixin
+export default class CitationComponent extends PopoverMixin(Component) {
   getActionHandlers () {
     return {
       edit: this._onEdit,
@@ -21,18 +17,15 @@ export default class CitationComponent extends PopoverMixin(AnnotationComponent)
 
   render () {
     const node = this.props.node
-    const el = super.render()
-    el.addClass('sc-citation')
+    const el = $$('span').addClass('sc-citation').attr('data-id', node.id)
 
-    // For now this is just for an inline node emulation
-    el.append(
-      getLabel(node)
-    )
+    const label = getLabel(node) || '???'
+    el.append(label)
 
     return el
   }
 
-  exposePopover (selectionState) {
+  shouldShowPopover (selectionState) {
     const { selection, annosByType } = selectionState
     if (selection && selection.isPropertySelection()) {
       const citations = annosByType.get('cite')
