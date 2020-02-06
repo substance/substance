@@ -58,7 +58,7 @@ export default class CitationComponent extends PopoverMixin(AnnotationComponent)
 }
 
 function _CitationPopover (props) {
-  const references = props.node.resolve('target')
+  const references = props.node.resolve('references')
 
   return $$('div', { class: 'sc-citation-popover' },
     ...references.map(ref => {
