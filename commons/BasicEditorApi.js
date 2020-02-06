@@ -25,7 +25,19 @@ export default class BasicEditorApi {
 
   deleteNode (nodeId) {
     this.editorSession.transaction(tx => {
-      documentHelpers.deepDeleteNode(tx, nodeId)
+      const node = tx.get(nodeId)
+      if (node) {
+        if (node.isInlineNode()) {
+          // Note: inline nodes are bound to a character within the text
+          // in contrast to regular annotations, the text underneath an inline node
+          // is owned by the inline node.
+          // Deleting the node's character implicitly deletes the inline node
+          tx.setSelection(node.getSelection())
+          tx.deleteSelection()
+        } else {
+          documentHelpers.deepDeleteNode(tx, nodeId)
+        }
+      }
     })
   }
 
