@@ -1,9 +1,10 @@
-import { $$, Component } from '../dom'
+import { $$ } from '../dom'
 import { Button, StackFill, HorizontalStack, Divider } from '../ui'
+import NodeComponent from './NodeComponent'
 import PopoverMixin from './PopoverMixin'
 import { getLabel } from './nodeHelpers'
 
-export default class CitationComponent extends PopoverMixin(Component) {
+export default class CitationComponent extends PopoverMixin(NodeComponent) {
   getActionHandlers () {
     return {
       edit: this._onEdit,
