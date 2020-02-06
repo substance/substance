@@ -1,15 +1,13 @@
 import { $$, domHelpers } from '../dom'
 import { renderProperty } from '../editor'
 import SelectableNodeComponent from './SelectableNodeComponent'
+import { getLabel } from './nodeHelpers'
 
 export default class ReferenceComponent extends SelectableNodeComponent {
   render () {
     const { node } = this.props
     const document = node.getDocument()
-    let { label } = node
-    if (node && node.state) {
-      label = node.state.label || label
-    }
+    const label = getLabel(node)
     const el = $$('div', { class: 'sc-reference', 'data-id': node.id })
     if (this.state.selected) el.addClass('sm-selected')
 
