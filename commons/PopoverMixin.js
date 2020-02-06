@@ -4,6 +4,8 @@ import { platform, getSelectionRect } from '../util'
 export default function PopoverMixin (AnnotationComponent) {
   return class AbstractPopover extends AnnotationComponent {
     didMount () {
+      super.didMount()
+
       const editorState = this.context.editorState
       if (editorState) {
         editorState.addObserver(['selectionState'], this._onSelectionStateChange, this, { stage: 'position' })
@@ -11,6 +13,8 @@ export default function PopoverMixin (AnnotationComponent) {
     }
 
     dispose () {
+      super.dispose()
+
       const editorState = this.context.editorState
       if (editorState) {
         editorState.removeObserver(this)
