@@ -28,7 +28,7 @@ export default class LinkComponent extends PopoverMixin(AnnotationComponent) {
     return el
   }
 
-  exposePopover (selectionState) {
+  shouldShowPopover (selectionState) {
     const { selection, annosByType } = selectionState
     if (selection && selection.isPropertySelection()) {
       // show only if there is exactly the one link under the selection

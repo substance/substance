@@ -23,13 +23,13 @@ export default function PopoverMixin (AnnotationComponent) {
     }
 
     // Check if Popover should be exposed based on selection state
-    exposePopover (selectionState) {
+    shouldShowPopover (selectionState) {
       throw new Error('This method is abstract')
     }
 
     _onSelectionStateChange (selectionState) {
       const oldShowPopup = this._showPopup
-      const showPopup = this.exposePopover(selectionState)
+      const showPopup = this.shouldShowPopover(selectionState)
       this._showPopup = showPopup
       if (!showPopup && oldShowPopup) {
         this.send('releasePopover', this)
