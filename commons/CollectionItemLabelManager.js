@@ -2,6 +2,10 @@ export default class CollectionItemLabelManager {
   constructor (editorSession) {
     this.editorSession = editorSession
 
+    this.initialize()
+  }
+
+  initialize () {
     const path = this.getPath()
     this.editorSession.getEditorState().addObserver(['document'], this._onChange, this, {
       stage: 'update',
