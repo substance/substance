@@ -31,7 +31,7 @@ export default class ReferenceApi extends ApiExtension {
    */
   updateCitation (citationId, data) {
     this.api.getEditorSession().transaction(tx => {
-      documentHelpers.updateProperty(tx, [citationId, 'references'], data.target)
+      documentHelpers.updateProperty(tx, [citationId, 'references'], data.references)
       this.api._selectItem(tx, tx.get(citationId))
     })
   }

@@ -15,7 +15,7 @@ export default class EditCitationCommand extends Command {
       return $$(CitationModal, { mode: 'edit', document, node })
     }).then(modal => {
       if (!modal) return
-      const data = { target: modal.state.value }
+      const data = { references: modal.state.value }
       context.api.updateCitation(node.id, data)
     })
   }
