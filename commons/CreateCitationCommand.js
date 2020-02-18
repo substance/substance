@@ -1,18 +1,10 @@
-import { AnnotationCommand } from '../editor'
+import { InsertInlineNodeCommand } from '../editor'
 import { $$ } from '../dom'
 import CitationModal from './CitationModal'
 
-export default class CreateCitationCommand extends AnnotationCommand {
-  getCommandState (params, context) {
-    const sel = params.selection
-    const selectionState = params.selectionState
-    if (sel && !sel.isNull() && sel.isPropertySelection()) {
-      const citations = selectionState.annosByType.get('cite') || []
-      if (super.canCreate(citations, sel, context)) {
-        return { disabled: false }
-      }
-    }
-    return { disabled: true }
+export default class CreateCitationCommand extends InsertInlineNodeCommand {
+  getType () {
+    return 'cite'
   }
 
   execute (params, context) {
@@ -23,8 +15,8 @@ export default class CreateCitationCommand extends AnnotationCommand {
       return $$(CitationModal, { mode: 'create', document })
     }).then(modal => {
       if (!modal) return
-      const target = modal.refs.references.val()
-      context.api.insertAnnotation('cite', { target })
+      const data = { references: modal.state.value }
+      context.api.insertInlineNode('cite', data)
     })
   }
 }
