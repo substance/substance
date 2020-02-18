@@ -120,6 +120,12 @@ export default class BasicEditorApi {
     })
   }
 
+  insertInlineNode (type, nodeData) {
+    this.editorSession.transaction(tx => {
+      tx.insertInlineNode(Object.assign({ type }, nodeData))
+    })
+  }
+
   selectItem (item) {
     if (isString(item)) {
       item = this.getDocument().get(item)
