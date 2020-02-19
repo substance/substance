@@ -55,7 +55,7 @@ function _CitationPopover (props) {
   const references = props.node.resolve('references')
 
   return $$('div', { class: 'sc-citation-popover' },
-    ...references.map(ref => {
+    ...references.sort((a, b) => getLabel(a) - getLabel(b)).map(ref => {
       return $$(HorizontalStack, { class: 'se-reference' },
         $$('div', { class: 'se-label' }, `[${getLabel(ref)}]`),
         $$('div', { class: 'se-content' }, ref.content)
