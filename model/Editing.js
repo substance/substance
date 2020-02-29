@@ -9,6 +9,14 @@ import {
 import { setCursor, isEntirelySelected, selectNode } from './selectionHelpers'
 import paste from './paste'
 
+function _isLowSurrogate (charCode) {
+  return charCode >= 55296 && charCode <= 56319
+}
+
+function _isHighSurrogate (charCode) {
+  return charCode >= 56320 && charCode <= 57343
+}
+
 /**
   Core editing implementation, that controls meta behavior
   such as deleting a selection, merging nodes, etc.
@@ -150,11 +158,28 @@ export default class Editing {
         const endOffset = startOffset + 1
         const start = { path: path, offset: startOffset }
         const end = { path: path, offset: endOffset }
+
+        // ATTENTION: be careful not to corrupt suggorate pairs
+        // i.e. if deleting to the left and we see a low-suggorate character
+        // then we have to delete two chars
+        // and if deleting to the right and we see a hight-suggorate character
+        // we should also delete the lower one
+        const charCode = text.charCodeAt(startOffset)
+        // is character a low-suggorate?
+        if (_isLowSurrogate(charCode)) {
+          const nextCharCode = text.charCodeAt(endOffset)
+          if (_isHighSurrogate(nextCharCode)) {
+            end.offset++
+          }
+        } else if (_isHighSurrogate(charCode)) {
+          start.offset--
+        }
+
         deleteTextRange(tx, start, end)
         tx.setSelection({
           type: 'property',
           path: path,
-          startOffset: startOffset,
+          startOffset: start.offset,
           containerPath: sel.containerPath
         })
       }
