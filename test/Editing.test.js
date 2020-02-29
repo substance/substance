@@ -1376,6 +1376,55 @@ test('Editing: DEL35: Deleting a NodeSelection', (t) => {
   t.end()
 })
 
+test('Editing: DEL36: Deleting unicode using BACKSPACE', (t) => {
+  const { editorSession, doc } = setupEditor(t)
+  const TEXT = 'Text with unicode:'
+  const POO = '💩'
+  const TEXT_AND_POO = TEXT + POO
+  const p = doc.create({
+    id: 'p',
+    type: 'paragraph',
+    content: TEXT + POO
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: p.getPath(),
+    startOffset: TEXT_AND_POO.length,
+    endOffset: TEXT_AND_POO.length
+  })
+  t.doesNotThrow(() => {
+    editorSession.transaction((tx) => {
+      tx.deleteCharacter('left')
+    })
+  }, 'Should not throw an exception')
+  t.equal(p.getText(), 'Text with unicode:', '.. unicode character should have been deleted')
+  t.end()
+})
+
+test('Editing: DEL37: Deleting unicode using DEL', (t) => {
+  const { editorSession, doc } = setupEditor(t)
+  const TEXT = 'Text with unicode:'
+  const POO = '💩'
+  const p = doc.create({
+    id: 'p',
+    type: 'paragraph',
+    content: TEXT + POO
+  })
+  editorSession.setSelection({
+    type: 'property',
+    path: p.getPath(),
+    startOffset: TEXT.length,
+    endOffset: TEXT.length
+  })
+  t.doesNotThrow(() => {
+    editorSession.transaction((tx) => {
+      tx.deleteCharacter('right')
+    })
+  }, 'Should not throw an exception')
+  t.equal(p.getText(), TEXT, '.. unicode character should have been deleted')
+  t.end()
+})
+
 test('Editing: BR1: Breaking without selection', (t) => {
   const { editorSession } = setupEditor(t, _p1)
   editorSession.setSelection(null)
