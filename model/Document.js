@@ -1,10 +1,6 @@
 import isEqual from '../util/isEqual'
-import isNil from '../util/isNil'
-import isPlainObject from '../util/isPlainObject'
 import forEach from '../util/forEach'
-import last from '../util/last'
 import uuid from '../util/uuid'
-import _isDefined from '../util/_isDefined'
 import EventEmitter from '../util/EventEmitter'
 import AnnotationIndex from './AnnotationIndex'
 import ContainerAnnotationIndex from './ContainerAnnotationIndex'
@@ -15,15 +11,11 @@ import IncrementalData from './IncrementalData'
 import DocumentNodeFactory from './DocumentNodeFactory'
 import EditingInterface from './EditingInterface'
 import Selection from './Selection'
-import PropertySelection from './PropertySelection'
-import ContainerSelection from './ContainerSelection'
 import NodeSelection from './NodeSelection'
-import CustomSelection from './CustomSelection'
-import Coordinate from './Coordinate'
-import { createNodeSelection } from './selectionHelpers'
+import { createSelection } from './selectionHelpers'
 import JSONConverter from './JSONConverter'
 import ParentNodeHook from './ParentNodeHook'
-import { SNIPPET_ID, getContainerRoot, compareCoordinates } from './documentHelpers'
+import { SNIPPET_ID } from './documentHelpers'
 import { transformDocumentChange } from './operationHelpers'
 import hasOwnProperty from '../util/hasOwnProperty'
 
@@ -356,112 +348,8 @@ export default class Document extends EventEmitter {
     return this.data.getIndex(name)
   }
 
-  /**
-    Creates a selection which is attached to this document.
-    Every selection implementation provides its own
-    parameter format which is basically a JSON representation.
-
-    @param {model/Selection} sel An object describing the selection.
-
-    @example
-
-    Creating a PropertySelection:
-
-    ```js
-    doc.createSelection({
-      type: 'property',
-      path: [ 'text1', 'content'],
-      startOffset: 10,
-      endOffset: 20,
-      containerPath: 'body'
-    })
-    ```
-
-    Creating a ContainerSelection:
-
-    ```js
-    doc.createSelection({
-      type: 'container',
-      containerPath: 'body',
-      startPath: [ 'p1', 'content'],
-      startOffset: 10,
-      endPath: [ 'p2', 'content'],
-      endOffset: 20
-    })
-    ```
-
-    Creating a NullSelection:
-
-    ```js
-    doc.createSelection(null)
-    ```
-  */
   createSelection (data) {
-    let sel
-    if (isNil(data)) return Selection.nullSelection
-    if (arguments.length !== 1 || !isPlainObject(data)) {
-      throw new Error('Illegal argument: call createSelection({ type: ... }')
-    } else {
-      switch (data.type) {
-        case 'property': {
-          if (isNil(data.endOffset)) {
-            data.endOffset = data.startOffset
-          }
-          if (!_isDefined(data.reverse)) {
-            if (data.startOffset > data.endOffset) {
-              [data.startOffset, data.endOffset] = [data.endOffset, data.startOffset]
-              data.reverse = !data.reverse
-            }
-          }
-          // integrity checks:
-          const text = this.get(data.path, 'strict')
-          if (data.startOffset < 0 || data.startOffset > text.length) {
-            throw new Error('Invalid startOffset: target property has length ' + text.length + ', given startOffset is ' + data.startOffset)
-          }
-          if (data.endOffset < 0 || data.endOffset > text.length) {
-            throw new Error('Invalid startOffset: target property has length ' + text.length + ', given endOffset is ' + data.endOffset)
-          }
-          sel = new PropertySelection(data)
-          break
-        }
-        case 'container': {
-          const containerPath = data.containerPath
-          const ids = this.get(containerPath)
-          if (!ids) throw new Error('Can not create ContainerSelection: container "' + containerPath + '" does not exist.')
-          let start = this._normalizeCoor({ path: data.startPath, offset: data.startOffset, containerPath })
-          let end = this._normalizeCoor({ path: data.endPath, offset: data.endOffset, containerPath })
-          if (!_isDefined(data.reverse)) {
-            if (compareCoordinates(this, containerPath, start, end) > 0) {
-              [start, end] = [end, start]
-              data.reverse = true
-            }
-          }
-          sel = new ContainerSelection(containerPath, start.path, start.offset, end.path, end.offset, data.reverse, data.surfaceId)
-          break
-        }
-        case 'node': {
-          sel = createNodeSelection({
-            doc: this,
-            nodeId: data.nodeId,
-            mode: data.mode,
-            containerPath: data.containerPath,
-            reverse: data.reverse,
-            surfaceId: data.surfaceId
-          })
-          break
-        }
-        case 'custom': {
-          sel = CustomSelection.fromJSON(data)
-          break
-        }
-        default:
-          throw new Error('Illegal selection type', data)
-      }
-    }
-    if (!sel.isNull()) {
-      sel.attach(this)
-    }
-    return sel
+    return createSelection(this, data)
   }
 
   newInstance () {
@@ -651,29 +539,6 @@ export default class Document extends EventEmitter {
         surfaceId: range.surfaceId
       })
     }
-  }
-
-  _normalizeCoor ({ path, offset, containerPath }) {
-    // NOTE: normalizing so that a node coordinate is used only for 'isolated nodes'
-    if (path.length === 1) {
-      // FIXME: originally getContainerRoot was called here
-      // however in this case
-      const node = getContainerRoot(this, containerPath, path[0])
-      if (node.isText()) {
-        // console.warn("DEPRECATED: don't use node coordinates for TextNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
-        return new Coordinate(node.getPath(), offset === 0 ? 0 : node.getLength())
-      } else if (node.isList()) {
-        // console.warn("DEPRECATED: don't use node coordinates for ListNodes. Use selectionHelpers instead to set cursor at first or last position conveniently.")
-        if (offset === 0) {
-          const item = node.getItemAt(0)
-          return new Coordinate(item.getPath(), 0)
-        } else {
-          const item = this.get(last(node.items))
-          return new Coordinate(item.getPath(), item.getLength())
-        }
-      }
-    }
-    return new Coordinate(path, offset)
   }
 
   get _isDocument () { return true }
