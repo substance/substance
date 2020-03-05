@@ -16,7 +16,8 @@ export default function createXmlConverterFactory (rootType, definition) {
         converters.push(_createTextNodeConverter(nodeSpec))
         break
       }
-      case '@annotation': {
+      case '@annotation':
+      case '@inlinenode': {
         converters.push(_createAnnotationConverter(nodeSpec))
         break
       }

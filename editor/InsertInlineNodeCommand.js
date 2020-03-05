@@ -53,9 +53,9 @@ export default class InsertInlineNodeCommand extends Command {
   }
 
   isDisabled (params, context) {
-    const editorSession = this.getEditorSession(params, context)
-    const sel = editorSession.getSelection()
-    const selectionState = editorSession.getSelectionState()
+    const selectionState = params.selectionState
+    const sel = params.selection
+
     if (!sel.isPropertySelection()) {
       return true
     }

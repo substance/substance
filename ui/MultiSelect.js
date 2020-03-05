@@ -15,24 +15,35 @@ export default class MultiSelect extends Component {
 
   render () {
     const { options, value } = this.state
+    const { label, placeholder } = this.props
     const selectedOptions = options.filter(option => value.has(option.value))
     const notSelectedOptions = options.filter(option => !value.has(option.value))
     const allOptionsSelected = selectedOptions.length === options.length
 
-    const el = $$('div', { class: 'sc-multi-select' }).append(
-      selectedOptions.map(option => {
-        return $$(HorizontalStack, {},
-          $$('div', { class: 'se-item' }, option.label),
-          $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
+    const el = $$('div', { class: 'sc-multi-select' })
+    if (selectedOptions.length > 0) {
+      el.append(
+        selectedOptions.map(option => {
+          return $$(HorizontalStack, {},
+            $$('div', { class: 'se-item' }, option.label),
+            $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
+          )
+        })
+      )
+    } else if (placeholder) {
+      el.append(
+        $$(HorizontalStack, {},
+          $$('div', { class: 'se-placeholder' }, placeholder)
         )
-      })
-    )
+      )
+    }
 
     if (!allOptionsSelected) {
       el.append(
         $$(HorizontalStack, {},
-          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: this.props.placeholder })
-            .ref('optionSelector').on('input', this._onAddItem)
+          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: label })
+            .ref('optionSelector')
+            .on('change', this._onAddItem)
         )
       )
     }
@@ -45,8 +56,8 @@ export default class MultiSelect extends Component {
   }
 
   _derivedState (props) {
-    const options = this.props.options || []
-    const value = new Set(this.props.value || [])
+    const options = props.options || []
+    const value = new Set(props.value || [])
     return {
       options,
       value
@@ -66,7 +77,8 @@ export default class MultiSelect extends Component {
     this.el.emit('change', { value })
   }
 
-  _onAddItem () {
+  _onAddItem (e) {
+    e.stopPropagation()
     const itemValue = this.refs.optionSelector.val()
     const { value } = this.state
     value.add(itemValue)
