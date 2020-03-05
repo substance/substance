@@ -17,12 +17,9 @@ export default class ModalCanvas extends Component {
     if (renderModal) {
       el.append(
         renderModal().ref('renderedModal')
-      ).on('click', e => {
-        // Close the modal in case of click outside of modal
-        if (e.target.className === className) {
-          this.close()
-        }
-      })
+      )
+      el.on('mousedown', this._onMousedown, this, { capture: true })
+      el.on('mouseup', this._onMouseup)
     } else {
       el.addClass('sm-hidden')
     }
@@ -55,5 +52,20 @@ export default class ModalCanvas extends Component {
     this._resolve = null
     this.setState({})
     this.send('closePopover')
+  }
+
+  _onMousedown (event) {
+    this._handleMouseup = false
+    if (event.target === this.getNativeElement()) {
+      this._handleMouseup = true
+    }
+  }
+
+  _onMouseup (event) {
+    if (this._handleMouseup) {
+      if (event.target === this.getNativeElement()) {
+        this.close()
+      }
+    }
   }
 }
