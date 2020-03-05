@@ -19,6 +19,10 @@ export default function PopoverMixin (AnnotationComponent) {
       if (editorState) {
         editorState.removeObserver(this)
       }
+
+      if (this._showPopup) {
+        this.send('releasePopover', this)
+      }
     }
 
     // Get Popover component
