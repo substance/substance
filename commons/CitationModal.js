@@ -27,7 +27,7 @@ export default class CitationModal extends Component {
               return { value: ref.id, label: ref.content }
             }),
             value,
-            label: 'Add Reference',
+            label: 'Select Reference',
             placeholder: 'Please select one or more references',
             onchange: this._updateReferencess
           }).ref('references')
