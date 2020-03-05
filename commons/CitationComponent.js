@@ -62,7 +62,7 @@ function _CitationPopover (props) {
       )
     }),
     $$(Divider),
-    $$(HorizontalStack, {},
+    $$(HorizontalStack, { class: 'se-footer' },
       $$('div', { class: 'se-label' }, 'Citation'),
       $$(StackFill),
       $$(Button, { action: 'delete', size: 'small', style: 'danger' }, 'Delete'),
