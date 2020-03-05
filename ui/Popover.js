@@ -40,7 +40,7 @@ export default class Popover extends Component {
    * @param {number} params.desiredPos.y - the desired y screen coordinate
    * @param {Component} [params.requester] - the component that is requesting the content; this is used to dispatch actions
    */
-  acquire (params) {
+  acquire (params, scrollable) {
     const { content, desiredPos, requester, position } = params
     if (!content) throw new Error("'content' is required")
     if (!desiredPos) throw new Error("'desiredPos' is required")
@@ -59,7 +59,7 @@ export default class Popover extends Component {
     // We started with this implementation
     // HACK adding a delay so that other things, e.g. selection related can be done first
     setTimeout(() => {
-      this._showContent(content, requester, desiredPos, position)
+      this._showContent(content, requester, desiredPos, position, scrollable)
     }, 0)
 
     return true
@@ -79,7 +79,7 @@ export default class Popover extends Component {
     return Boolean(this.state.requester)
   }
 
-  _showContent (content, requester, desiredPos, position) {
+  _showContent (content, requester, desiredPos, position, scrollable) {
     this.setState({ content, requester, desiredPos, position })
     const el = this.getElement()
     const bounds = this._getBounds()
@@ -98,8 +98,7 @@ export default class Popover extends Component {
     const maxHeight = bounds.bottom - topPos
 
     // store topPos and leftPos so that we can do repositioning on scroll
-    if (this.props.getScrollable) {
-      const scrollable = this.props.getScrollable()
+    if (scrollable) {
       this._topPos = topPos
       this._leftPos = leftPos
       this._initialScrollTop = scrollable.getProperty('scrollTop')
@@ -185,11 +184,10 @@ export default class Popover extends Component {
    * ATTENTION: this method has to be called by the owner whenever the scrollable
    * has been scrolled.
    */
-  reposition () {
+  reposition (scrollable) {
     // Note: we use this for different kinds of popovers
     // typically, only context menus or alike require a 'relative' positioning
     if (this.state.position === 'relative') {
-      const scrollable = this.props.getScrollable()
       const dtop = scrollable.getProperty('scrollTop') - this._initialScrollTop
       const dleft = scrollable.getProperty('scrollLeft') - this._initialScrollLeft
       this.el.css({

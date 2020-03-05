@@ -1,5 +1,4 @@
 import AbstractEditorSession from './AbstractEditorSession'
-import GlobalEventHandler from './GlobalEventHandler'
 import EditorSessionMixin from './EditorSessionMixin'
 
 export default class EditorSession extends EditorSessionMixin(AbstractEditorSession) {
@@ -13,17 +12,5 @@ export default class EditorSession extends EditorSessionMixin(AbstractEditorSess
     super(id, document, initialEditorState)
 
     this._setup(config)
-  }
-
-  _setup (config) {
-    super._setup(config)
-
-    this.globalEventHandler = new GlobalEventHandler(this.editorState)
-  }
-
-  dispose () {
-    super.dispose()
-
-    this.globalEventHandler.dispose()
   }
 }

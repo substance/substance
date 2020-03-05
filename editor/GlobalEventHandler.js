@@ -12,8 +12,7 @@ import isFunction from '../util/isFunction'
 const EVENTS = new Set(['keydown', 'keyup', 'keypress', 'mousedown', 'mouseup', 'copy'])
 
 export default class GlobalEventHandler {
-  constructor (editorState) {
-    this._editorState = editorState
+  constructor () {
     // a stack of listeners
     this._listeners = new Map()
 

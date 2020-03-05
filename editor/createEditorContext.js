@@ -7,7 +7,6 @@ export default function createEditorContext (config, editorSession) {
     editorState: editorSession.getEditorState(),
     surfaceManager: editorSession.surfaceManager,
     markersManager: editorSession.markersManager,
-    globalEventHandler: editorSession.globalEventHandler,
     keyboardManager: editorSession.keyboardManager,
     findAndReplaceManager: editorSession.findAndReplaceManager
   })
