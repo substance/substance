@@ -82,6 +82,19 @@ export default class NextDocumentSchema {
     ].join('\n')
   }
 
+  getNodeSchema (type) {
+    return this._documentSchema.getNodeSchema(type)
+  }
+
+  getNodeClass (type) {
+    return this._documentSchema.getNodeClass(type)
+  }
+
+  getDefaultTextType () {
+    console.error('DEPRECATED: avoid using schema.getDefaultTextType(). Instead a "container" type should provide this in its schema.')
+    return null
+  }
+
   _getPublicId (version) {
     // TODO: until we introduce minor versions we just use '0' for minor
     return `-//${this.issuer.toUpperCase()}//DTD ${this.name} v${version}.0//EN`

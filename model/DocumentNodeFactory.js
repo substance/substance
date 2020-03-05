@@ -4,7 +4,7 @@ export default class DocumentNodeFactory {
   }
 
   create (nodeType, nodeData) {
-    var NodeClass = this.doc.schema.getNodeClass(nodeType)
+    const NodeClass = this.doc.schema.getNodeClass(nodeType)
     if (!NodeClass) {
       throw new Error('No node registered by that name: ' + nodeType)
     }
