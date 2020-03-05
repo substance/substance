@@ -37,7 +37,6 @@ export default class CitationComponent extends PopoverMixin(NodeComponent) {
     return false
   }
 
-  // TODO: this will not work until citation became an inline node
   _onDelete () {
     const { editorSession } = this.context
     const { node } = this.props
