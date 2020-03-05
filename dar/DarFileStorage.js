@@ -63,6 +63,14 @@ export default class DarFileStorage {
     })
   }
 
+  exportAsZip (darpath, zipfile, cb) {
+    const id = this._path2Id(darpath)
+    const wcDir = this._getWorkingCopyPath(id)
+    this._pack(wcDir, zipfile)
+      .then(() => cb())
+      .catch(cb)
+  }
+
   getAssetUrl (darpath, asset) {
     const archiveId = this._path2Id(darpath)
     return `${this._baseUrl}${archiveId}/${asset.id}`
