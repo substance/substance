@@ -1,5 +1,6 @@
 import { $$, Component } from '../dom'
 import { Form, FormRow, Input, Modal, MultiInput, MultiSelect } from '../ui'
+import AffiliationModal from './AffiliationModal'
 
 export default class AuthorModal extends Component {
   getInitialState () {
@@ -63,21 +64,25 @@ export default class AuthorModal extends Component {
     )
 
     // only show this if there are any affiliations available
-    if (allAffiliations.length > 0) {
-      form.append(
-        $$(FormRow, { label: 'Affiliations' },
-          $$(MultiSelect, {
-            options: allAffiliations.map(aff => {
-              return { value: aff.id, label: aff.name }
-            }),
-            value: data.affiliations,
-            label: 'Select Affiliation',
-            placeholder: 'Please select one or more affiliations',
-            onchange: this._updateAffiliations
-          }).ref('affiliations')
-        )
+    const selectAffiliationsOptions = [
+      { type: 'action', value: 'newAffiliation', label: 'Create New Affiliation' }
+    ].concat(
+      allAffiliations.map(aff => {
+        return { value: aff.id, label: aff.name }
+      })
+    )
+    form.append(
+      $$(FormRow, { label: 'Affiliations' },
+        $$(MultiSelect, {
+          options: selectAffiliationsOptions,
+          value: data.affiliations,
+          label: 'Select Affiliation',
+          placeholder: 'Please select one or more affiliations',
+          onchange: this._updateAffiliations,
+          onaction: this._createAffiliation
+        }).ref('affiliations')
       )
-    }
+    )
 
     el.append(form)
 
@@ -107,5 +112,16 @@ export default class AuthorModal extends Component {
 
   _updateAffiliations () {
     this.state.data.affiliations = this.refs.affiliations.val()
+  }
+
+  _createAffiliation () {
+    return this.send('requestModal', () => {
+      return $$(AffiliationModal, { mode: 'create' })
+    }).then(modal => {
+      if (!modal) return
+      const newAff = this.context.api.addAffiliation(modal.state.data)
+      this.state.data.affiliations.push(newAff.id)
+      this.rerender()
+    })
   }
 }
