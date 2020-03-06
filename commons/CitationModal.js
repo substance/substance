@@ -1,5 +1,6 @@
 import { $$, Component } from '../dom'
 import { Form, FormRow, Modal, MultiSelect } from '../ui'
+import ReferenceModal from './ReferenceModal'
 
 export default class CitationModal extends Component {
   getInitialState () {
@@ -19,25 +20,45 @@ export default class CitationModal extends Component {
     const disableConfirm = value.length === 0
 
     const modalProps = { title, cancelLabel: 'Cancel', confirmLabel, disableConfirm, size: 'large' }
+    const selectRefOptions = [
+      { type: 'action', value: '#create', label: 'Create New Reference' }
+    ].concat(
+      referencesList.map(ref => {
+        return { value: ref.id, label: ref.content }
+      })
+    )
     return $$(Modal, modalProps,
       $$(Form, {},
         $$(FormRow, {},
           $$(MultiSelect, {
-            options: referencesList.map(ref => {
-              return { value: ref.id, label: ref.content }
-            }),
+            options: selectRefOptions,
             value,
             label: 'Select Reference',
             placeholder: 'Please select one or more references',
-            onchange: this._updateReferencess
+            onchange: this._onChange,
+            onaction: this._onAction
           }).ref('references')
         )
       )
     )
   }
 
-  _updateReferencess () {
+  _onChange () {
     const value = this.refs.references.val()
     this.extendState({ value })
+  }
+
+  _onAction () {
+    return this.send('requestModal', () => {
+      return $$(ReferenceModal, { mode: 'create', document })
+    }).then(modal => {
+      if (!modal) return
+      const referenceData = modal.state.data
+      const reference = this.context.api.addReference(referenceData)
+      const newState = {
+        value: this.state.value.concat([reference.id])
+      }
+      this.setState(newState)
+    })
   }
 }
