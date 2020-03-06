@@ -6,7 +6,7 @@ export default class ReferenceApi extends ApiExtension {
    * @param {object} data from ReferenceModal state
    */
   addReference (data) {
-    this.insertReference(data)
+    return this.insertReference(data)
   }
 
   /**
@@ -22,7 +22,7 @@ export default class ReferenceApi extends ApiExtension {
       insertPos = currentReference.getPosition() + 1
     }
     const nodeData = Object.assign({}, data, { type: 'reference' })
-    this.api.insertNode([root.id, 'references'], insertPos, nodeData)
+    return this.api.insertNode([root.id, 'references'], insertPos, nodeData)
   }
 
   /**
