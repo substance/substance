@@ -113,11 +113,14 @@ export default class BasicEditorApi {
   }
 
   insertNode (collectionPath, pos, nodeData) {
+    let newNodeId
     this.editorSession.transaction(tx => {
       const node = tx.create(nodeData)
       documentHelpers.insertAt(tx, collectionPath, pos, node.id)
       this._selectItem(tx, node)
+      newNodeId = node.id
     })
+    return this.editorSession.getDocument().get(newNodeId)
   }
 
   insertInlineNode (type, nodeData) {
@@ -131,6 +134,13 @@ export default class BasicEditorApi {
       item = this.getDocument().get(item)
     }
     this._selectItem(this.editorSession, item)
+  }
+
+  selectInlineNode (inlineNode) {
+    if (isString(inlineNode)) {
+      inlineNode = this.getDocument().get(inlineNode)
+    }
+    this._selectInlineNode(this.editorSession, inlineNode)
   }
 
   renameAsset (assetId, newFilename) {
@@ -149,6 +159,15 @@ export default class BasicEditorApi {
       data: {
         nodeType: node.type
       }
+    })
+  }
+
+  _selectInlineNode (tx, inlineNode) {
+    tx.setSelection({
+      type: 'property',
+      path: inlineNode.start.path,
+      startOffset: inlineNode.start.offset,
+      endOffset: inlineNode.end.offset
     })
   }
 }
