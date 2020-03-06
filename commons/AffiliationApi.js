@@ -6,7 +6,7 @@ export default class AffiliationApi extends ApiExtension {
    * @param {object} data from AffiliationModal state
    */
   addAffiliation (data) {
-    this.insertAffiliation(data)
+    return this.insertAffiliation(data)
   }
 
   insertAffiliation (data, currentAffiliation) {
@@ -18,7 +18,7 @@ export default class AffiliationApi extends ApiExtension {
       insertPos = currentAffiliation.getPosition() + 1
     }
     const nodeData = Object.assign({}, data, { type: 'affiliation' })
-    this.api.insertNode([root.id, 'affiliations'], insertPos, nodeData)
+    return this.api.insertNode([root.id, 'affiliations'], insertPos, nodeData)
   }
 
   /**
