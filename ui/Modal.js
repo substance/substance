@@ -51,12 +51,7 @@ export default class Modal extends Component {
     if (!disableFooter) {
       modalEl.append(
         $$(Divider),
-        $$('div', { class: 'se-modal-footer' },
-          $$(HorizontalStack, {},
-            $$(Button, { size: 'default', style: 'secondary', action: 'cancel' }, cancelLabel),
-            $$(Button, { size: 'default', style: 'primary', action: 'confirm', disabled: disableConfirm }, confirmLabel)
-          )
-        )
+        footerEl
       )
     }
 
