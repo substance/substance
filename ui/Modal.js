@@ -22,7 +22,7 @@ export default class Modal extends Component {
   }
 
   render () {
-    const { title, children, disableConfirm } = this.props
+    const { title, children, disableConfirm, disableFooter } = this.props
     const confirmLabel = this.props.confirmLabel || 'OK'
     const cancelLabel = this.props.cancelLabel || 'Cancel'
     const size = this.props.size || 'default'
@@ -36,17 +36,26 @@ export default class Modal extends Component {
       )
     )
 
-    return $$('div', { class: `sc-modal sm-size-${size}` },
-      title ? headerEl : null,
-      $$('div', { class: 'se-modal-body' }, children),
-      $$(Divider),
-      $$('div', { class: 'se-modal-footer' },
-        $$(HorizontalStack, {},
-          $$(Button, { size: 'default', style: 'secondary', action: 'cancel' }, cancelLabel),
-          $$(Button, { size: 'default', style: 'primary', action: 'confirm', disabled: disableConfirm }, confirmLabel)
-        )
+    const footerEl = $$('div', { class: 'se-modal-footer' },
+      $$(HorizontalStack, {},
+        $$(Button, { size: 'default', style: 'secondary', action: 'cancel' }, cancelLabel),
+        $$(Button, { size: 'default', style: 'primary', action: 'confirm', disabled: disableConfirm }, confirmLabel)
       )
     )
+
+    const modalEl = $$('div', { class: `sc-modal sm-size-${size}` },
+      title ? headerEl : null,
+      $$('div', { class: 'se-modal-body' }, children)
+    )
+
+    if (!disableFooter) {
+      modalEl.append(
+        $$(Divider),
+        footerEl
+      )
+    }
+
+    return modalEl
   }
 
   _onKeydown (event) {
