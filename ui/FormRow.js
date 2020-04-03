@@ -1,5 +1,5 @@
 import { Component } from '../dom'
-import Explanation from './Explanation'
+import Icon from './Icon'
 
 export default class FormRow extends Component {
   render ($$) {
@@ -7,10 +7,20 @@ export default class FormRow extends Component {
     const el = $$('div').addClass('sc-form-row')
 
     if (label) {
+      const labelEl = $$('div').addClass('se-label').append(label)
+      // Shows a question mark and a help message on hover
+      // TODO: in future we will probably want to render message in popover
+      if (explanation) {
+        labelEl.append(
+          $$('div', { class: 'se-explanation' },
+            $$(Icon, { icon: 'question-circle' })
+          )
+        ).setAttribute('title', explanation)
+      }
+
       el.append(
         $$('div').addClass('se-description').append(
-          $$('div').addClass('se-label').append(label),
-          explanation ? $$(Explanation, { message: explanation }) : null,
+          labelEl,
           error ? $$('div').addClass('se-error').append(error) : null
         )
       )
