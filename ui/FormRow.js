@@ -1,16 +1,16 @@
 import { Component } from '../dom'
+import Explanation from './Explanation'
 
 export default class FormRow extends Component {
   render ($$) {
-    const label = this.props.label
-    const error = this.props.error
-    const children = this.props.children
+    const { children, label, explanation, error } = this.props
     const el = $$('div').addClass('sc-form-row')
 
     if (label) {
       el.append(
         $$('div').addClass('se-description').append(
           $$('div').addClass('se-label').append(label),
+          explanation ? $$(Explanation, { message: explanation }) : null,
           error ? $$('div').addClass('se-error').append(error) : null
         )
       )
