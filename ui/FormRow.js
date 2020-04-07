@@ -3,25 +3,23 @@ import Icon from './Icon'
 
 export default class FormRow extends Component {
   render ($$) {
-    const { children, label, explanation, error } = this.props
+    const { children, label, error } = this.props
     const el = $$('div').addClass('sc-form-row')
-
     if (label) {
       const labelEl = $$('div').addClass('se-label').append(label)
-      // Shows a question mark and a help message on hover
-      // TODO: in future we will probably want to render message in popover
-      if (explanation) {
-        labelEl.append(
-          $$('div', { class: 'se-explanation' },
-            $$(Icon, { icon: 'question-circle' })
-          )
-        ).setAttribute('title', explanation)
+      let errorEl = null
+      if (error) {
+        errorEl = $$('div').addClass('se-error').append(error.message)
+        if (error.explanation) {
+          errorEl.append(' ', $$(Icon, { icon: 'question-circle' }))
+          errorEl.setAttribute('title', error.explanation)
+        }
       }
 
       el.append(
         $$('div').addClass('se-description').append(
           labelEl,
-          error ? $$('div').addClass('se-error').append(error) : null
+          errorEl
         )
       )
     }
