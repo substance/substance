@@ -1,4 +1,5 @@
 import { Component } from '../dom'
+import { isString } from '../util'
 import Icon from './Icon'
 
 export default class FormRow extends Component {
@@ -9,7 +10,9 @@ export default class FormRow extends Component {
       const labelEl = $$('div').addClass('se-label').append(label)
       let errorEl = null
       if (error) {
-        errorEl = $$('div').addClass('se-error').append(error.message)
+        // TODO: use a consistent format for errors
+        const errorMessage = isString(error) ? error : error.message
+        errorEl = $$('div').addClass('se-error').append(errorMessage)
         if (error.explanation) {
           errorEl.append(' ', $$(Icon, { icon: 'question-circle' }))
           errorEl.setAttribute('title', error.explanation)
