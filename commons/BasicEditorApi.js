@@ -112,12 +112,14 @@ export default class BasicEditorApi {
     })
   }
 
-  insertNode (collectionPath, pos, nodeData) {
+  insertNode (collectionPath, pos, nodeData, options = {}) {
     let newNodeId
     this.editorSession.transaction(tx => {
       const node = tx.create(nodeData)
       documentHelpers.insertAt(tx, collectionPath, pos, node.id)
-      this._selectItem(tx, node)
+      if (options.select !== false) {
+        this._selectItem(tx, node)
+      }
       newNodeId = node.id
     })
     return this.editorSession.getDocument().get(newNodeId)
