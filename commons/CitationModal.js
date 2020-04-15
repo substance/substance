@@ -54,7 +54,7 @@ export default class CitationModal extends Component {
     }).then(modal => {
       if (!modal) return
       const referenceData = modal.state.data
-      const reference = this.context.api.addReference(referenceData)
+      const reference = this.context.api.addReference(referenceData, { select: false })
       const newState = {
         value: this.state.value.concat([reference.id])
       }
