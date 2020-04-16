@@ -39,7 +39,7 @@ export default class ModalCanvas extends Component {
           )
         })
       )
-      el.on('mousedown', this._onMousedown, this, { capture: true })
+      el.on('mousedown', this._onMousedownCapture, this, { capture: true })
       el.on('mouseup', this._onMouseup)
     } else {
       el.addClass('sm-hidden')
@@ -88,7 +88,7 @@ export default class ModalCanvas extends Component {
     this._pop()
   }
 
-  _onMousedown (event) {
+  _onMousedownCapture (event) {
     this._handleMouseup = false
     if (event.target === this.getNativeElement()) {
       this._handleMouseup = true
