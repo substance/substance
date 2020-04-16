@@ -1,9 +1,13 @@
 import { $$, Component } from '../dom'
 import Button from './Button'
 import HorizontalStack from './HorizontalStack'
-import Select from './Select'
 import Icon from './Icon'
+import QuerySelect from './QuerySelect'
 
+/**
+ * Allows to select incrementally from either a fixed set of options
+ * or from an open set via a query.
+ */
 export default class MultiSelect extends Component {
   getInitialState () {
     return this._derivedState(this.props)
@@ -14,22 +18,22 @@ export default class MultiSelect extends Component {
   }
 
   render () {
-    const { options, value } = this.state
-    const { label, placeholder } = this.props
-    const selectedOptions = options.filter(option => value.has(option.value))
-    const notSelectedOptions = options.filter(option => !value.has(option.value))
-    const allOptionsSelected = selectedOptions.length === options.length
+    const { selectedItems } = this.state
+    const { placeholder, queryPlaceHolder, itemRenderer, optionRenderer } = this.props
 
     const el = $$('div', { class: 'sc-multi-select' })
-    if (selectedOptions.length > 0) {
-      el.append(
-        selectedOptions.map(option => {
-          return $$(HorizontalStack, {},
-            $$('div', { class: 'se-item' }, option.label),
-            $$(Button, { style: 'plain', class: 'se-remove-item' }, $$(Icon, { icon: 'trash' })).on('click', this._onClickRemoveOption.bind(this, option))
-          )
-        })
-      )
+    if (selectedItems.length > 0) {
+      for (const item of selectedItems) {
+        const renderedItem = itemRenderer(item)
+        el.append(
+          $$(HorizontalStack, {},
+            $$('div', { class: 'se-item' }, renderedItem),
+            $$(Button, { style: 'plain', class: 'se-remove-item' },
+              $$(Icon, { icon: 'trash' })
+            ).on('click', this._onClickRemoveItem.bind(this, item))
+          ).ref(item.id)
+        )
+      }
     } else if (placeholder) {
       el.append(
         $$(HorizontalStack, {},
@@ -38,51 +42,68 @@ export default class MultiSelect extends Component {
       )
     }
 
-    if (!allOptionsSelected) {
-      el.append(
-        $$(HorizontalStack, {},
-          $$(Select, { class: 'se-options', options: notSelectedOptions, placeholder: label })
-            .ref('optionSelector')
-            .on('change', this._onAddItem)
-        )
-      )
-    }
+    // TODO: without any additional props it is not possible
+    // to disable the select e.g. when there is no more item left ot be selected
+    const querySelect = $$(QuerySelect, {
+      placeholder: queryPlaceHolder,
+      query: this._query.bind(this),
+      optionRenderer
+    }).ref('select')
+      .on('change', this._onSelectItem)
+
+    el.append(querySelect)
 
     return el
   }
 
+  getValue () {
+    return Array.from(this.state.selectedIds)
+  }
+
   val () {
-    return Array.from(this.state.value)
+    return this.getValue()
   }
 
   _derivedState (props) {
-    const options = props.options || []
-    const value = new Set(props.value || [])
-    return {
-      options,
-      value
+    const selectedItems = new Set(props.selectedItems)
+    const selectedIds = new Set()
+    for (const item of selectedItems) {
+      selectedIds.add(item.key)
     }
+    return { selectedIds, selectedItems }
   }
 
-  _renderOptions () {
-    const { options, value } = this.state
-    const notSelectedOptions = options.filter(option => !value.has(option.value))
-    return $$(Select, { class: 'se-options', options: notSelectedOptions })
+  async _query (str) {
+    // proxying queries
+    const { selectedIds } = this.state
+    let options = await this.props.query(str)
+    options = options.filter(o => !selectedIds.has(o.id))
+    return options
   }
 
-  _onClickRemoveOption (option, e) {
-    const value = this.state.value
-    value.delete(option.value)
-    this.extendState({ value })
-    this.el.emit('change', { value })
-  }
-
-  _onAddItem (e) {
+  _onClickRemoveItem (option, e) {
     e.stopPropagation()
-    const itemValue = this.refs.optionSelector.val()
-    const { value } = this.state
-    value.add(itemValue)
-    this.extendState({ value })
-    this.el.emit('change', { value })
+    const { selectedIds } = this.state
+    selectedIds.delete(option.key)
+    this.extendState({ selectedIds })
+    this.el.emit('change', { value: this.val() })
+  }
+
+  _onSelectItem (e) {
+    e.stopPropagation()
+    debugger
+    const { item } = e.data
+    const action = item.action | 'select'
+    if (action === 'select') {
+      const { selectedIds, selectedItems } = this.state
+      if (!selectedIds.has(item.id)) {
+        selectedIds.add(item.id)
+        selectedItems.add(item)
+        this.extendState({ selectedIds, selectedItems })
+        this.el.emit('change', { value: this.val() })
+      }
+    } else {
+      this.el.emit('action', { item })
+    }
   }
 }
