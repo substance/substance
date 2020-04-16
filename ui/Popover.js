@@ -1,4 +1,4 @@
-import { Component, $$, DefaultDOMElement } from '../dom'
+import { Component, $$, DefaultDOMElement, domHelpers } from '../dom'
 import { isEqual, isFunction, platform } from '../util'
 import renderMenu from './renderMenu'
 
@@ -41,7 +41,7 @@ export default class Popover extends Component {
    * @param {Component} [params.requester] - the component that is requesting the content; this is used to dispatch actions
    */
   acquire (params, scrollable) {
-    const { content, desiredPos, requester, position } = params
+    const { content, desiredPos, requester } = params
     if (!content) throw new Error("'content' is required")
     if (!desiredPos) throw new Error("'desiredPos' is required")
 
@@ -59,7 +59,7 @@ export default class Popover extends Component {
     // We started with this implementation
     // HACK adding a delay so that other things, e.g. selection related can be done first
     setTimeout(() => {
-      this._showContent(content, requester, desiredPos, position, scrollable)
+      this._showContent(params, scrollable)
     }, 0)
 
     return true
@@ -79,8 +79,9 @@ export default class Popover extends Component {
     return Boolean(this.state.requester)
   }
 
-  _showContent (content, requester, desiredPos, position, scrollable) {
-    this.setState({ content, requester, desiredPos, position })
+  _showContent (params, scrollable) {
+    const { desiredPos } = params
+    this.setState(params)
     const el = this.getElement()
     const bounds = this._getBounds()
     // console.log('bounds', bounds, 'desiredPos', desiredPos)
@@ -111,16 +112,16 @@ export default class Popover extends Component {
       'max-height': maxHeight
     })
     el.removeClass('sm-hidden')
-    // NOTE: this is a tricky mechanism trying to detect any mousedowns outside of the context menu
-    // used to close the context menu.
-    // If clicked inside the popover it will not close automatically, only if clicked somewhere else
+    // NOTE: this is a tricky mechanism trying to detect any mousedowns outside of the popover
+    // for example, the context menu.
+    // If clicked inside it will not close automatically. Only if clicked somewhere else
     // or if one of the rendered popover content sends an action.
-    this._closeOnClick = true
+    this._hasMousedownInside = false
     el.on('mousedown', this._onMousedownInside, this, { once: true, capture: true })
     // making sure that there is only one active listener
-    if (!this._hasGlobalMousedownListener) {
-      DefaultDOMElement.getBrowserWindow().on('click', this._onMousedownOutside, this, { once: true, capture: true })
-      this._hasGlobalMousedownListener = true
+    if (!this._hasGlobalClickListener) {
+      DefaultDOMElement.getBrowserWindow().on('click', this._onClickOutside, this, { once: true, capture: true })
+      this._hasGlobalClickListener = true
     }
   }
 
@@ -151,18 +152,29 @@ export default class Popover extends Component {
   }
 
   _onMousedownInside () {
-    this._closeOnClick = false
+    this._hasMousedownInside = true
   }
 
-  _onMousedownOutside () {
-    this._hasGlobalMousedownListener = false
-    // NOTE: this timeout is necessary so that an actual click can be handled
-    // e.g. requesting to show the popover at a different location, or
-    // with different content
-    // In that case we do not want to hide
-    if (this._closeOnClick) {
+  _onClickOutside (e) {
+    this._hasGlobalClickListener = false
+    // TODO: this implementation has a major problem.
+    // If the popover is requested during a mousedown or something related
+    // then there will be a mouseup/click which leads consequently to an immediate closing
+    // instead a popover request should allow to specify a pattern to whitelist
+    // clicks on certain elements.
+    // Example: QuerySelect uses an input field to drive a popover containing the options.
+    // That popover should not be shut when clicking inside the input.
+    if (this.state.ignoreClicksInside) {
+      if (domHelpers.hasAncestor(DefaultDOMElement.wrap(e.target), this.state.ignoreClicksInside)) {
+        return
+      }
+    }
+
+    if (!this._hasMousedownInside) {
       this._hideIfNoNewRequest = true
-      // HACK waiting two ticks because the request itself
+      // NOTE: this timeout is necessary so that an actual click can be handled
+      // e.g. requesting to show the popover at a different location, or
+      // with different content
       setTimeout(() => {
         if (this._hideIfNoNewRequest) {
           this._hide()
