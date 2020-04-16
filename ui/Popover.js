@@ -49,13 +49,14 @@ export default class Popover extends Component {
     // requests the popover for the same position, then we hide the popover
     const state = this.state
     if (state.requester === requester && isEqual(desiredPos, state.desiredPos)) {
+      // console.log('Popover.acquire(): hiding popover because required the second time for same position')
       this._hide()
       return false
     }
 
+    // console.log('Popover.acquire()', requester)
     // Note: this prevents a potentially triggered hide, if a new popover request has come in
     this._hideIfNoNewRequest = false
-
     // We started with this implementation
     // HACK adding a delay so that other things, e.g. selection related can be done first
     setTimeout(() => {
@@ -67,11 +68,13 @@ export default class Popover extends Component {
 
   release (requester) {
     if (this.state.requester === requester) {
+      // console.log('Popover.release()', requester)
       this._hide()
     }
   }
 
   close () {
+    // console.log('Popover.close()')
     this._hide()
   }
 
@@ -148,6 +151,7 @@ export default class Popover extends Component {
     // console.log('FORWARDING action to requester', action, args)
     this.state.requester.send(action, ...args)
     // TODO: think if this is really what we want, i.e. hiding the menu whenever an action is emitted
+    // console.log('Popover._handleAction(): hiding popover')
     this._hide()
   }
 
@@ -177,6 +181,7 @@ export default class Popover extends Component {
       // with different content
       setTimeout(() => {
         if (this._hideIfNoNewRequest) {
+          // console.log('Popover._onClickOutside(): hiding because lacking a new popover request')
           this._hide()
         }
       }, 0)
