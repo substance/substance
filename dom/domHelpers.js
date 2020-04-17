@@ -20,6 +20,7 @@ export function hasAncestor (el, ancestor) {
     if (el === ancestor) return true
     el = el.getParent()
   }
+  return false
 }
 
 export function findChild (el, cssSelector) {
