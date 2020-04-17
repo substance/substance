@@ -1,5 +1,6 @@
 import { Component, $$, domHelpers } from '../dom'
 import { uuid } from '../util'
+import Popover from './Popover'
 
 export default class ModalCanvas extends Component {
   getInitialState () {
@@ -12,7 +13,11 @@ export default class ModalCanvas extends Component {
   getActionHandlers () {
     return {
       cancel: this._cancel,
-      confirm: this._confirm
+      confirm: this._confirm,
+      requestPopover: this._requestPopover,
+      releasePopover: this._releasePopover,
+      repositionPopover: this._repositionPopover,
+      closePopover: this._closePopover
     }
   }
 
@@ -32,12 +37,17 @@ export default class ModalCanvas extends Component {
       el.append(
         $$('div', { class: 'se-current-modal' }).append(
           currentModal.render().ref(currentModal.id)
-        ),
+        ).ref('container'),
         ...stack.map(stackedModal => {
           return $$('div', { class: 'se-stacked-modal' }).append(
             stackedModal.render().ref(stackedModal.id)
           )
-        })
+        }),
+        $$(Popover, {
+          getContainer: () => {
+            return this.refs.container.getElement()
+          }
+        }).ref('popover')
       )
       el.on('mousedown', this._onMousedownCapture, this, { capture: true })
       el.on('mouseup', this._onMouseup)
@@ -84,7 +94,7 @@ export default class ModalCanvas extends Component {
   _close () {
     // console.log('Closing modal')
     // HACK: making sure that any popover requested in this modal is closed
-    this.send('closePopover')
+    this.refs.popover.close()
     this._pop()
   }
 
@@ -116,5 +126,21 @@ export default class ModalCanvas extends Component {
       // Note: this 'closes' the modal by emptying the canvas
       this.setState(this.getInitialState())
     }
+  }
+
+  _requestPopover (...args) {
+    return this.refs.popover.acquire(...args)
+  }
+
+  _releasePopover (...args) {
+    return this.refs.popover.release(...args)
+  }
+
+  _repositionPopover (...args) {
+    return this.refs.popover.reposition(...args)
+  }
+
+  _closePopover (...args) {
+    return this.refs.popover.close(...args)
   }
 }
