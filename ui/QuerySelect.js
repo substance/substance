@@ -20,7 +20,6 @@ export default class QuerySelect extends Component {
       $$(Input, { placeholder })
         .ref('input')
         .on('focus', this._onFocus)
-        .on('blur', this._onBlur)
         .on('input', this._onInput)
     )
     return el
@@ -42,12 +41,6 @@ export default class QuerySelect extends Component {
     domHelpers.stop(event)
     // console.log('QuerySelect._onFocus()')
     this._query()
-  }
-
-  _onBlur (event) {
-    // console.log('QuerySelect._onBlur()')
-    domHelpers.stop(event)
-    this._hideOptions()
   }
 
   async _query () {
