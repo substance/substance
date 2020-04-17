@@ -174,7 +174,7 @@ export default class QuerySelect extends Component {
   }
 
   _onKeydown (event) {
-    const options = this._options
+    const options = this._options || []
     const N = options.length
     switch (event.keyCode) {
       case keys.UP: {

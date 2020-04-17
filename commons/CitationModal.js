@@ -1,5 +1,6 @@
 import { $$, Component } from '../dom'
-import { Form, FormRow, Modal, MultiSelect } from '../ui'
+import { Form, FormRow, Modal, MultiSelect, HorizontalStack } from '../ui'
+import { getLabel } from './nodeHelpers'
 
 export default class CitationModal extends Component {
   getInitialState () {
@@ -23,7 +24,7 @@ export default class CitationModal extends Component {
             selectedItems: selectedReferences,
             queryPlaceHolder: 'Select a reference or Create a new one',
             query: this._queryReferences.bind(this),
-            itemRenderer: this._renderReference,
+            itemRenderer: (item) => $$(ReferenceItem, { item }),
             autofocus: true,
             local: true,
             onchange: this._onReferencesChange,
@@ -60,7 +61,7 @@ export default class CitationModal extends Component {
   }
 
   _renderReference (ref) {
-    return $$('div', { class: 'se-reference' }, ref.content)
+    return $$(ReferenceItem, { node: this.props.node })
   }
 
   _onReferencesChange () {
@@ -89,4 +90,12 @@ export default class CitationModal extends Component {
         console.error('Unknown action', option.action)
     }
   }
+}
+
+function ReferenceItem (props) {
+  const { item } = props
+  return $$(HorizontalStack, { class: 'sc-reference-item' },
+    $$('div', { class: 'se-label' }, getLabel(item)),
+    $$('div', { class: 'se-content' }, item.content)
+  )
 }
