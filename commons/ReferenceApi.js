@@ -5,15 +5,15 @@ export default class ReferenceApi extends ApiExtension {
   /**
    * @param {object} data from ReferenceModal state
    */
-  addReference (data) {
-    this.insertReference(data)
+  addReference (data, options) {
+    return this.insertReference(data, null, options)
   }
 
   /**
    * @param {object} data from ReferenceModal state
    * @param {object} currentReference
    */
-  insertReference (data, currentReference) {
+  insertReference (data, currentReference, options = {}) {
     const editorSession = this.api.getEditorSession()
     const doc = editorSession.getDocument()
     const root = doc.root
@@ -22,7 +22,7 @@ export default class ReferenceApi extends ApiExtension {
       insertPos = currentReference.getPosition() + 1
     }
     const nodeData = Object.assign({}, data, { type: 'reference' })
-    this.api.insertNode([root.id, 'references'], insertPos, nodeData)
+    return this.api.insertNode([root.id, 'references'], insertPos, nodeData, options)
   }
 
   /**
@@ -32,7 +32,7 @@ export default class ReferenceApi extends ApiExtension {
   updateCitation (citationId, data) {
     this.api.getEditorSession().transaction(tx => {
       documentHelpers.updateProperty(tx, [citationId, 'references'], data.references)
-      this.api._selectItem(tx, tx.get(citationId))
+      this.api._selectInlineNode(tx, tx.get(citationId))
     })
   }
 }

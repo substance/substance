@@ -1,5 +1,5 @@
-import { Component, $$, DefaultDOMElement } from '../dom'
-import { isEqual, isFunction, platform } from '../util'
+import { Component, $$, DefaultDOMElement, domHelpers } from '../dom'
+import { isFunction, platform, uuid } from '../util'
 import renderMenu from './renderMenu'
 
 export default class Popover extends Component {
@@ -7,9 +7,23 @@ export default class Popover extends Component {
     return { content: null, requester: null, desiredPos: null }
   }
 
+  didMount () {
+    if (platform.inBrowser) {
+      DefaultDOMElement.getBrowserWindow().on('mousedown', this._onGlobalMousedown, this, { capture: true })
+      DefaultDOMElement.getBrowserWindow().on('mouseup', this._onGlobalMouseup, this, { capture: true })
+    }
+  }
+
+  dispose () {
+    if (platform.inBrowser) {
+      DefaultDOMElement.getBrowserWindow().off(this)
+    }
+  }
+
   render () {
-    const { content, requester } = this.state
-    const el = $$('div', { class: 'sc-popover sm-hidden' })
+    const { content, requester, update } = this.state
+    const el = $$('div', { class: 'sc-popover' })
+    if (!update) el.addClass('sm-hidden')
     if (requester) {
       // Note: content can either be given as menu spec or as a render function
       if (isFunction(content)) {
@@ -41,37 +55,43 @@ export default class Popover extends Component {
    * @param {Component} [params.requester] - the component that is requesting the content; this is used to dispatch actions
    */
   acquire (params, scrollable) {
-    const { content, desiredPos, requester, position } = params
-    if (!content) throw new Error("'content' is required")
-    if (!desiredPos) throw new Error("'desiredPos' is required")
+    // console.log('Popover.acquire()', params)
 
-    // NOTE: this implements a toggle behavior. I.e. if the same requester
-    // requests the popover for the same position, then we hide the popover
-    const state = this.state
-    if (state.requester === requester && isEqual(desiredPos, state.desiredPos)) {
-      this._hide()
-      return false
+    // Note: allowing to update the current popover using the requestId of a previous run
+    if (params.update) {
+      return this._update(params)
     }
 
-    // Note: this prevents a potentially triggered hide, if a new popover request has come in
-    this._hideIfNoNewRequest = false
+    this._checkParams(params)
+    this.setState(Object.assign({}, params, { requestId: uuid(), scrollable }))
 
-    // We started with this implementation
-    // HACK adding a delay so that other things, e.g. selection related can be done first
+    // ATTENTION: we have to postpone showing the content
+    // as otherwise, e.g. the DOM selection is not yet updated,
+    // which is needed for positioning
     setTimeout(() => {
-      this._showContent(content, requester, desiredPos, position, scrollable)
+      this._showPopover()
     }, 0)
+    return this.state.requestId
+  }
 
-    return true
+  _update (params) {
+    if (params.requestId === this.state.requestId) {
+      this.extendState(params)
+      this._showPopover()
+    } else {
+      console.error('Invalid request id')
+    }
   }
 
   release (requester) {
     if (this.state.requester === requester) {
+      // console.log('Popover.release()', requester)
       this._hide()
     }
   }
 
   close () {
+    // console.log('Popover.close()')
     this._hide()
   }
 
@@ -79,8 +99,13 @@ export default class Popover extends Component {
     return Boolean(this.state.requester)
   }
 
-  _showContent (content, requester, desiredPos, position, scrollable) {
-    this.setState({ content, requester, desiredPos, position })
+  _checkParams (params) {
+    if (!params.content) throw new Error("'params.content' is required")
+    if (!params.desiredPos) throw new Error("'desiredPos' is required")
+  }
+
+  _showPopover () {
+    const { desiredPos, scrollable } = this.state
     const el = this.getElement()
     const bounds = this._getBounds()
     // console.log('bounds', bounds, 'desiredPos', desiredPos)
@@ -111,17 +136,7 @@ export default class Popover extends Component {
       'max-height': maxHeight
     })
     el.removeClass('sm-hidden')
-    // NOTE: this is a tricky mechanism trying to detect any mousedowns outside of the context menu
-    // used to close the context menu.
-    // If clicked inside the popover it will not close automatically, only if clicked somewhere else
-    // or if one of the rendered popover content sends an action.
-    this._closeOnClick = true
-    el.on('mousedown', this._onMousedownInside, this, { once: true, capture: true })
-    // making sure that there is only one active listener
-    if (!this._hasGlobalMousedownListener) {
-      DefaultDOMElement.getBrowserWindow().on('click', this._onMousedownOutside, this, { once: true, capture: true })
-      this._hasGlobalMousedownListener = true
-    }
+    this._visible = true
   }
 
   _getBounds () {
@@ -147,37 +162,47 @@ export default class Popover extends Component {
     // console.log('FORWARDING action to requester', action, args)
     this.state.requester.send(action, ...args)
     // TODO: think if this is really what we want, i.e. hiding the menu whenever an action is emitted
+    // console.log('Popover._handleAction(): hiding popover')
     this._hide()
   }
 
-  _onMousedownInside () {
-    this._closeOnClick = false
+  _onGlobalMousedown () {
+    // Note: we auto hide on every click
+    // except those that occur inside the popover
+    // and those that are 'white-listed' via params.allowClickInsideOf
+    this._lastRequestId = this.state.requestId
   }
 
-  _onMousedownOutside () {
-    this._hasGlobalMousedownListener = false
-    // NOTE: this timeout is necessary so that an actual click can be handled
-    // e.g. requesting to show the popover at a different location, or
-    // with different content
-    // In that case we do not want to hide
-    if (this._closeOnClick) {
-      this._hideIfNoNewRequest = true
-      // HACK waiting two ticks because the request itself
-      setTimeout(() => {
-        if (this._hideIfNoNewRequest) {
-          this._hide()
-        }
-      }, 0)
+  _onGlobalMouseup (e) {
+    if (!this._visible) return
+
+    const targetEl = DefaultDOMElement.wrap(e.target)
+    // do not auto-close if clicked inside the popover
+    if (domHelpers.hasAncestor(targetEl, this.getElement())) {
+      return
+    }
+    // Additionally, allow to skip auto-closing if clicked insied of a given element
+    // e.g. QuerySelect has an input, that has a dropdown attached. Clicking into the input
+    // should not auto-close the dropdown.
+    if (this.state.allowClickInsideOf) {
+      if (domHelpers.hasAncestor(targetEl, this.state.ignoreClicksInside)) {
+        // console.log('Ignoring click because it is inside of a white-listed element')
+        return
+      }
+    }
+    const lastRequestId = this._lastRequestId
+    const currentRequestId = this.state.requestId
+    if (lastRequestId === currentRequestId) {
+      this._hide()
     }
   }
 
   _hide () {
     // console.log('Hiding')
-    const requester = this.state.requester
-    if (requester && requester.onClosePopover) {
-      requester.onClosePopover()
-    }
+    const onClose = this.state.onClose
+    if (onClose) onClose()
     this.setState(this.getInitialState())
+    this._visible = false
   }
 
   /**

@@ -15,6 +15,14 @@ export function findParent (el, selector) {
   }
 }
 
+export function hasAncestor (el, ancestor) {
+  while (el) {
+    if (el === ancestor) return true
+    el = el.getParent()
+  }
+  return false
+}
+
 export function findChild (el, cssSelector) {
   const children = el.getChildren()
   for (let i = 0; i < children.length; i++) {

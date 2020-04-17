@@ -35,6 +35,8 @@ export default class Input extends Component {
 
   _getProps () {
     const attributes = Object.assign({ class: this._getClass() }, this.props)
+    // delete the placeholder attribute if it is nil
+    if (!attributes.placeholder) delete attributes.placeholder
     delete attributes.label
     return attributes
   }
