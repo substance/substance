@@ -15,7 +15,7 @@ export default class CreateCitationCommand extends InsertInlineNodeCommand {
       return $$(CitationModal, { mode: 'create', document })
     }).then(modal => {
       if (!modal) return
-      const data = { references: modal.state.value }
+      const data = { references: modal.state.selectedReferences.map(ref => ref.id) }
       context.api.insertInlineNode('cite', data)
     })
   }
