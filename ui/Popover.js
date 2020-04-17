@@ -21,8 +21,9 @@ export default class Popover extends Component {
   }
 
   render () {
-    const { content, requester } = this.state
-    const el = $$('div', { class: 'sc-popover sm-hidden' })
+    const { content, requester, update } = this.state
+    const el = $$('div', { class: 'sc-popover' })
+    if (!update) el.addClass('sm-hidden')
     if (requester) {
       // Note: content can either be given as menu spec or as a render function
       if (isFunction(content)) {
@@ -54,10 +55,15 @@ export default class Popover extends Component {
    * @param {Component} [params.requester] - the component that is requesting the content; this is used to dispatch actions
    */
   acquire (params, scrollable) {
-    // console.log('Popover.acquire()', requester)
-    this._checkParams(params)
+    // console.log('Popover.acquire()', params)
 
-    this.setState(Object.assign({ requestId: uuid(), scrollable }, params))
+    // Note: allowing to update the current popover using the requestId of a previous run
+    if (params.update) {
+      return this._update(params)
+    }
+
+    this._checkParams(params)
+    this.setState(Object.assign({}, params, { requestId: uuid(), scrollable }))
 
     // ATTENTION: we have to postpone showing the content
     // as otherwise, e.g. the DOM selection is not yet updated,
@@ -65,8 +71,16 @@ export default class Popover extends Component {
     setTimeout(() => {
       this._showPopover()
     }, 0)
+    return this.state.requestId
+  }
 
-    return true
+  _update (params) {
+    if (params.requestId === this.state.requestId) {
+      this.extendState(params)
+      this._showPopover()
+    } else {
+      console.error('Invalid request id')
+    }
   }
 
   release (requester) {
@@ -185,10 +199,8 @@ export default class Popover extends Component {
 
   _hide () {
     // console.log('Hiding')
-    const requester = this.state.requester
-    if (requester && requester.onClosePopover) {
-      requester.onClosePopover()
-    }
+    const onClose = this.state.onClose
+    if (onClose) onClose()
     this.setState(this.getInitialState())
     this._visible = false
   }

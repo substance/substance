@@ -19,11 +19,13 @@ export default class MultiSelect extends Component {
 
   render () {
     const { selectedItems } = this.state
-    const { placeholder, queryPlaceHolder, itemRenderer, optionRenderer } = this.props
+    const { placeholder, queryPlaceHolder, itemRenderer } = this.props
+    // optional props for query-select
+    const { optionRenderer, local, autofocus } = this.props
 
     const el = $$('div', { class: 'sc-multi-select' })
-    if (selectedItems.length > 0) {
-      for (const item of selectedItems) {
+    if (selectedItems.size > 0) {
+      for (const item of selectedItems.values()) {
         const renderedItem = itemRenderer(item)
         el.append(
           $$(HorizontalStack, {},
@@ -47,8 +49,10 @@ export default class MultiSelect extends Component {
     const querySelect = $$(QuerySelect, {
       placeholder: queryPlaceHolder,
       query: this._query.bind(this),
-      optionRenderer
-    }).ref('select')
+      optionRenderer,
+      autofocus,
+      local // controls how queries are debounced (faster than for remote queries)
+    }).ref('querySelect')
       .on('change', this._onSelectItem)
 
     el.append(querySelect)
@@ -57,53 +61,64 @@ export default class MultiSelect extends Component {
   }
 
   getValue () {
-    return Array.from(this.state.selectedIds)
+    return Array.from(this.state.selectedItems.values())
   }
 
   val () {
     return this.getValue()
   }
 
+  reset () {
+    return this.refs.querySelect.reset()
+  }
+
+  focus () {
+    return this.refs.querySelect.focus()
+  }
+
   _derivedState (props) {
-    const selectedItems = new Set(props.selectedItems)
-    const selectedIds = new Set()
-    for (const item of selectedItems) {
-      selectedIds.add(item.key)
+    // Note: using a map here, so that there can be only one item per id
+    const selectedItems = new Map()
+    for (const item of props.selectedItems) {
+      selectedItems.set(item.id, item)
     }
-    return { selectedIds, selectedItems }
+    return { selectedItems }
   }
 
   async _query (str) {
     // proxying queries
-    const { selectedIds } = this.state
+    const { selectedItems } = this.state
     let options = await this.props.query(str)
-    options = options.filter(o => !selectedIds.has(o.id))
+    options = options.filter(o => !selectedItems.has(o.id))
     return options
   }
 
-  _onClickRemoveItem (option, e) {
+  _onClickRemoveItem (item, e) {
     e.stopPropagation()
-    const { selectedIds } = this.state
-    selectedIds.delete(option.key)
-    this.extendState({ selectedIds })
-    this.el.emit('change', { value: this.val() })
+    const { selectedItems } = this.state
+    selectedItems.delete(item.id)
+    this.rerender()
+    this.el.emit('change')
   }
 
   _onSelectItem (e) {
     e.stopPropagation()
-    debugger
-    const { item } = e.data
-    const action = item.action | 'select'
-    if (action === 'select') {
-      const { selectedIds, selectedItems } = this.state
-      if (!selectedIds.has(item.id)) {
-        selectedIds.add(item.id)
-        selectedItems.add(item)
-        this.extendState({ selectedIds, selectedItems })
-        this.el.emit('change', { value: this.val() })
+    const option = e.detail
+    const action = option.action
+    switch (action) {
+      case 'select': {
+        const { selectedItems } = this.state
+        const item = option.item
+        if (!selectedItems.has(item.id)) {
+          selectedItems.set(item.id, item)
+          this.rerender()
+          this.reset()
+          this.el.emit('change')
+        }
+        break
       }
-    } else {
-      this.el.emit('action', { item })
+      default:
+        this.el.emit('action', option)
     }
   }
 }
