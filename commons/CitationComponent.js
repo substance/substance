@@ -57,7 +57,8 @@ function _CitationPopover (props) {
     ...references.sort((a, b) => getLabel(a) - getLabel(b)).map(ref => {
       return $$(HorizontalStack, { class: 'se-reference' },
         $$('div', { class: 'se-label' }, `[${getLabel(ref)}]`),
-        $$('div', { class: 'se-content' }, ref.content)
+        $$('div', { class: 'se-content' }, ref.content),
+        $$(StackFill)
       )
     }),
     $$(Divider),
