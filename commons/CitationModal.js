@@ -95,7 +95,7 @@ export default class CitationModal extends Component {
 function ReferenceItem (props) {
   const { item } = props
   return $$(HorizontalStack, { class: 'sc-reference-item' },
-    $$('div', { class: 'se-label' }, getLabel(item)),
+    $$('div', { class: 'se-label' }, '[' + getLabel(item) + ']'),
     $$('div', { class: 'se-content' }, item.content)
   )
 }
