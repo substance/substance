@@ -11,11 +11,13 @@ export default class CitationModal extends Component {
 
   render () {
     const { mode } = this.props
-    const { selectedReferences } = this.state
+    let { selectedReferences } = this.state
     const confirmLabel = mode === 'edit' ? 'Update' : 'Create'
     const title = mode === 'edit' ? 'Edit Citation' : 'Create Citation'
     const disableConfirm = selectedReferences.length === 0
     const modalProps = { title, cancelLabel: 'Cancel', confirmLabel, disableConfirm, size: 'large' }
+    // sort refs by label
+    selectedReferences = selectedReferences.slice().sort((a, b) => getLabel(a) - getLabel(b))
     return $$(Modal, modalProps,
       $$(Form, {},
         $$(FormRow, {},
