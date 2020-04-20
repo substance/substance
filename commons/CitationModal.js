@@ -26,7 +26,7 @@ export default class CitationModal extends Component {
             selectedItems: selectedReferences,
             queryPlaceHolder: 'Select a reference or Create a new one',
             query: this._queryReferences.bind(this),
-            itemRenderer: (item) => $$(ReferenceItem, { item }),
+            itemRenderer: this._renderReference.bind(this),
             autofocus: true,
             local: true,
             onchange: this._onReferencesChange,
@@ -62,8 +62,8 @@ export default class CitationModal extends Component {
     return options
   }
 
-  _renderReference (ref) {
-    return $$(ReferenceItem, { node: this.props.node })
+  _renderReference (item) {
+    return $$(_ReferenceItem, { item })
   }
 
   _onReferencesChange () {
@@ -94,7 +94,7 @@ export default class CitationModal extends Component {
   }
 }
 
-function ReferenceItem (props) {
+function _ReferenceItem (props) {
   const { item } = props
   return $$(HorizontalStack, { class: 'sc-reference-item' },
     $$('div', { class: 'se-label' }, '[' + getLabel(item) + ']'),
