@@ -76,6 +76,13 @@ export default class DarFileStorage {
     return `${this._baseUrl}${archiveId}/${asset.id}`
   }
 
+  getAssetBlob (darpath, assetId, cb) {
+    const id = this._path2Id(darpath)
+    const wcDir = this._getWorkingCopyPath(id)
+    const assetPath = path.join(wcDir, assetId)
+    return fs.readFile(assetPath, cb)
+  }
+
   _path2Id (darpath) {
     darpath = String(darpath)
     darpath = path.normalize(darpath)

@@ -115,7 +115,15 @@ export default class DocumentArchive extends EventEmitter {
     if (blobEntry) {
       return Promise.resolve(blobEntry.blob)
     } else {
-      return this.storage.getBlob(assetId)
+      return new Promise((resolve, reject) => {
+        this.storage.getAssetBlob(this._archiveId, assetId, (err, buffer) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(buffer)
+          }
+        })
+      })
     }
   }
 
