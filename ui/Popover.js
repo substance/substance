@@ -77,9 +77,11 @@ export default class Popover extends Component {
     // ATTENTION: we have to postpone showing the content
     // as otherwise, e.g. the DOM selection is not yet updated,
     // which is needed for positioning
-    setTimeout(() => {
-      this._showPopover()
-    }, 0)
+    if (platform.inBrowser) {
+      window.requestAnimationFrame(() => {
+        this._showPopover()
+      })
+    }
     return this.state.requestId
   }
 
