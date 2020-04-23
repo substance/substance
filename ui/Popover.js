@@ -62,6 +62,15 @@ export default class Popover extends Component {
       return this._update(params)
     }
 
+    // NOTE: this implements a toggle behavior. I.e. if the same requester
+    // requests the popover for the same position, then we hide the popover
+    const state = this.state
+    if (params.toggle && state.requester === params.requester) {
+      // console.log('Popover: toggling')
+      this._hide()
+      return false
+    }
+
     this._checkParams(params)
     this.setState(Object.assign({}, params, { requestId: uuid(), scrollable }))
 
