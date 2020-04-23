@@ -16,6 +16,8 @@ export default class InsertAuthorCommand extends ItemCommand {
     }).then(modal => {
       if (!modal) return
       const data = modal.state.data
+      // turn affiliations into ids
+      data.affiliations = data.affiliations.map(a => a.id)
       context.api.insertAuthor(data, commandState.node)
     })
   }
