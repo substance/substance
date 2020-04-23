@@ -1,3 +1,4 @@
+import { uuid } from '../util'
 import DocumentIndex from './DocumentIndex'
 
 export default class RelationshipIndex extends DocumentIndex {
@@ -5,6 +6,7 @@ export default class RelationshipIndex extends DocumentIndex {
     super()
 
     this.reverseIndex = new Map()
+    this.sha = uuid()
   }
 
   select (node) {
@@ -13,6 +15,7 @@ export default class RelationshipIndex extends DocumentIndex {
 
   clear () {
     this.reverseIndex.clear()
+    this._updateSha()
   }
 
   get (id) {
@@ -76,6 +79,7 @@ export default class RelationshipIndex extends DocumentIndex {
       this.reverseIndex.set(id, refs)
     }
     refs.add(ref)
+    this._updateSha()
   }
 
   _remove (id, ref) {
@@ -83,6 +87,12 @@ export default class RelationshipIndex extends DocumentIndex {
     const refs = this.reverseIndex.get(id)
     if (refs) {
       refs.delete(ref)
+      this._updateSha()
     }
+  }
+
+  _updateSha () {
+    // console.log('RelationshipIndex._updateSha()')
+    this.sha = uuid()
   }
 }
