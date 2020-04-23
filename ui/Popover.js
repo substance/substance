@@ -145,7 +145,6 @@ export default class Popover extends Component {
       'max-height': maxHeight
     })
     el.removeClass('sm-hidden')
-    this._visible = true
   }
 
   _getBounds () {
@@ -175,6 +174,10 @@ export default class Popover extends Component {
     this._hide()
   }
 
+  _isVisible () {
+    return !this.getElement().hasClass('sm-hidden')
+  }
+
   _onGlobalMousedown () {
     // Note: we auto hide on every click
     // except those that occur inside the popover
@@ -183,9 +186,13 @@ export default class Popover extends Component {
   }
 
   _onGlobalMouseup (e) {
-    if (!this._visible) return
-
     const targetEl = DefaultDOMElement.wrap(e.target)
+    this._autoclose(targetEl)
+  }
+
+  _autoclose (targetEl) {
+    if (!this._isVisible()) return
+
     // do not auto-close if clicked inside the popover
     if (domHelpers.hasAncestor(targetEl, this.getElement())) {
       return
@@ -202,6 +209,7 @@ export default class Popover extends Component {
     const lastRequestId = this._lastRequestId
     const currentRequestId = this.state.requestId
     if (lastRequestId === currentRequestId) {
+      // console.log('Popover: auto-closing because clicked outside of popover.')
       this._hide()
     }
   }
@@ -211,7 +219,6 @@ export default class Popover extends Component {
     const onClose = this.state.onClose
     if (onClose) onClose()
     this.setState(this.getInitialState())
-    this._visible = false
   }
 
   /**
