@@ -201,7 +201,7 @@ export default class Popover extends Component {
     // e.g. QuerySelect has an input, that has a dropdown attached. Clicking into the input
     // should not auto-close the dropdown.
     if (this.state.allowClickInsideOf) {
-      if (domHelpers.hasAncestor(targetEl, this.state.ignoreClicksInside)) {
+      if (domHelpers.hasAncestor(targetEl, this.state.allowClickInsideOf)) {
         // console.log('Ignoring click because it is inside of a white-listed element')
         return
       }
