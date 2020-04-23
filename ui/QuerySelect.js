@@ -84,7 +84,7 @@ export default class QuerySelect extends Component {
           return this._renderOptions(options)
         },
         position: 'relative',
-        ignoreClicksInside: this.refs.input.getElement(),
+        allowClickInsideOf: this.refs.input.getElement(),
         onClose: () => {
           this._showsOptions = false
         }
