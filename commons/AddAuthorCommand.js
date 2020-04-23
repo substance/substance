@@ -15,6 +15,8 @@ export default class AddAuthorCommand extends Command {
     }).then(modal => {
       if (!modal) return
       const data = modal.state.data
+      // ATTENTION: we have to map to ids here
+      data.affiliations = data.affiliations.map(a => a.id)
       context.api.addAuthor(data)
     })
   }
