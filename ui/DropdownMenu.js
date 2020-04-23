@@ -66,8 +66,7 @@ export default class DropdownMenu extends Component {
       size,
       icon,
       label,
-      tooltip,
-      dropdown: true
+      tooltip
     }
   }
 
@@ -80,7 +79,9 @@ export default class DropdownMenu extends Component {
       this.send('requestPopover', {
         requester: this,
         desiredPos: { x, y },
-        content: menuSpec
+        content: menuSpec,
+        toggle: true,
+        allowClickInsideOf: this.getElement()
       })
     }
   }
