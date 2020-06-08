@@ -6,4 +6,6 @@ export default class TestEmphasis extends PropertyAnnotation {
       type: 'emphasis'
     }
   }
+
+  static get autoExpandRight () { return true }
 }
