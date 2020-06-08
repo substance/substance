@@ -36,14 +36,11 @@ import AnnotationMixin from './AnnotationMixin'
   ```
 */
 export default class PropertyAnnotation extends AnnotationMixin(DocumentNode) {
-  // TODO: find out where we use these and try to get rid if we don't need them
   get _isAnnotation () { return true }
 
   get _isPropertyAnnotation () { return true }
 
   static isPropertyAnnotation () { return true }
-
-  static get autoExpandRight () { return true }
 
   define () {
     return {

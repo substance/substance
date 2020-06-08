@@ -6,4 +6,6 @@ export default class TestStrong extends PropertyAnnotation {
       type: 'strong'
     }
   }
+
+  static get autoExpandRight () { return true }
 }

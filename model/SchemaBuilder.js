@@ -126,6 +126,12 @@ class NodeBuilder {
         return compiledSpec
       }
     }
+    // EXPERIMENTAL: special handling for formatting annotations, because they are usually created
+    // prior to typing, thus they should be expanded when typing at the right boundary
+    if (parentType === '@annotation' && nodeSpec.options.formatting) {
+      Node.autoExpandRight = true
+    }
+
     nodeClasses.set(nodeType, Node)
     return Node
   }

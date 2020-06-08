@@ -6,4 +6,6 @@ export default class TestSuperscript extends PropertyAnnotation {
       type: 'superscript'
     }
   }
+
+  static get autoExpandRight () { return true }
 }

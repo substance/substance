@@ -6,4 +6,6 @@ export default class TestSubscript extends PropertyAnnotation {
       type: 'subscript'
     }
   }
+
+  static get autoExpandRight () { return true }
 }
