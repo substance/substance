@@ -62,7 +62,7 @@ export default class NextDocumentSchema {
     if (version !== this.version) {
       console.error('TODO: implement migrations')
     }
-    const importer = this._xmlConverterFactory.createImporter(doc, context)
+    const importer = this._createXmlImporter(doc, context)
     importer.importIntoDocument(xmlDom)
   }
 
@@ -116,5 +116,9 @@ export default class NextDocumentSchema {
       this._definitions.set(version, _createDefinition(version, this._actions))
     }
     return this._definitions.get(version)
+  }
+
+  _createXmlImporter (doc, context) {
+    return this._xmlConverterFactory.createImporter(doc, context)
   }
 }
