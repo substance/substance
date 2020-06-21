@@ -3,14 +3,12 @@ import TestArticle from './TestArticle'
 import getTestConfig from './getTestConfig'
 
 export default function createTestArticle (seedFn) {
-  let config = getTestConfig()
-  let schema = new DocumentSchema({
+  const config = getTestConfig()
+  const schema = new DocumentSchema({
     DocumentClass: TestArticle,
-    nodes: config.getNodes(),
-    // TODO: try to get rid of this by using property schema
-    defaultTextType: 'paragraph'
+    nodes: config.getNodes()
   })
-  let doc = TestArticle.createEmptyTestArticle(schema)
+  const doc = TestArticle.createEmptyTestArticle(schema)
   if (seedFn) {
     seedFn(doc)
   }

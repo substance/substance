@@ -56,34 +56,8 @@ const defaultAnnotationConverter = {
 
 const defaultBlockConverter = {
   export: function (node, el, converter) {
-    el.attr('data-type', node.type)
-    const nodeSchema = node.getSchema()
-    for (const prop of nodeSchema) {
-      const name = prop.name
-      if (name === 'id' || name === 'type') continue
-      // using RDFa like attributes
-      const propEl = converter.$$('div').attr('property', name)
-      let value = node.get(name)
-      if (prop.isText()) {
-        propEl.append(converter.annotatedText([node.id, name]))
-      } else if (prop.isReference()) {
-        if (prop.isOwned()) {
-          value = node.resolve(name)
-          if (prop.isArray()) {
-            propEl.append(value.map(child => converter.convertNode(child)))
-          } else {
-            propEl.append(converter.convertNode(value))
-          }
-        } else {
-          // TODO: what to do with relations? maybe create a link pointing to the real one?
-          // or render a label of the other
-          // For now, we skip such props
-          continue
-        }
-      } else {
-        propEl.append(String(value))
-      }
-      el.append(propEl)
+    if (node.isText()) {
+      el.append(converter.annotatedText(node.getPath()))
     }
   }
 }

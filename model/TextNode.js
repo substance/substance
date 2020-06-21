@@ -17,7 +17,7 @@ export default class TextNode extends TextNodeMixin(DocumentNode) {
 
   define () {
     return {
-      type: 'text-node',
+      type: '@text',
       content: 'text',
       direction: { type: 'enum', optional: true, values: ['left', 'right'] },
       textAlign: { type: 'enum', default: 'left', values: ['left', 'right'] }

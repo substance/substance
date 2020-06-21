@@ -152,7 +152,7 @@ test('DOMImporter: convertContainer() -- trailing text', (t) => {
   const els = DefaultDOMElement.parseSnippet('<p>A paragraph</p> and some trailing text', 'html')
   const container = importer.convertContainer(els, 'body')
   t.equal(container.getLength(), 2, 'should have two nodes')
-  t.deepEqual(container.getNodes().map(n => n.type), ['paragraph', 'paragraph'], 'both should be paragraphs')
+  t.deepEqual(container.getNodes().map(n => n.type), ['paragraph', '@text'])
   t.end()
 })
 

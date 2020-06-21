@@ -3,12 +3,10 @@ import getTestConfig from './getTestConfig'
 import TestArticle from './TestArticle'
 
 export default function getTestSchema () {
-  let config = getTestConfig()
-  let schema = new DocumentSchema({
+  const config = getTestConfig()
+  const schema = new DocumentSchema({
     DocumentClass: TestArticle,
-    nodes: config.getNodes(),
-    // TODO: try to get rid of this by using property schema
-    defaultTextType: 'paragraph'
+    nodes: config.getNodes()
   })
   return schema
 }

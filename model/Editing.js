@@ -855,6 +855,7 @@ export default class Editing {
       })
     // otherwise split the text property and create a new paragraph node with trailing text and annotations transferred
     } else {
+      const containerProp = tx.getProperty(containerPath)
       const textPath = node.getPath()
       const textProp = textPath[1]
       const newId = uuid(node.type)
@@ -863,7 +864,7 @@ export default class Editing {
       newNodeData[textProp] = text.substring(offset)
       // if at the end insert a default text node no matter in which text node we are
       if (offset === text.length) {
-        newNodeData.type = tx.getSchema().getDefaultTextType()
+        newNodeData.type = containerProp.defaultTextType
       }
       const newNode = tx.create(newNodeData)
       // Now we need to transfer annotations

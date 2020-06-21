@@ -1,5 +1,6 @@
 import Schema from './Schema'
 import DocumentNode from './DocumentNode'
+import TextNode from './TextNode'
 import Container from './Container'
 import PropertyAnnotation from './PropertyAnnotation'
 import ContainerAnnotation from './ContainerAnnotation'
@@ -21,14 +22,7 @@ export default class DocumentSchema extends Schema {
   /*
     @override
   */
-  getDefaultTextType () {
-    return this.defaultTextType
-  }
-
-  /*
-    @override
-  */
   getBuiltIns () {
-    return [DocumentNode, PropertyAnnotation, Container, ContainerAnnotation]
+    return [DocumentNode, TextNode, PropertyAnnotation, Container, ContainerAnnotation]
   }
 }

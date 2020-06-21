@@ -6,7 +6,7 @@ import uuid from '../util/uuid'
 // Unfortunately, this can be difficult in some cases,
 // e.g. other nodes that have a reference to the re-named node
 // We only fix annotations for now.
-export default function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id, visited) {
+export default function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id, visited, mappedTypes) {
   if (visited[id]) throw new Error('FIXME: dont call me twice')
   visited[id] = id
   const node = sourceDoc.get(id, 'strict')
@@ -34,11 +34,11 @@ export default function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id,
       // update renamed references
       if (prop.isArray()) {
         const ids = nodeData[name]
-        nodeData[name] = _transferArrayOfReferences(sourceDoc, targetDoc, ids, visited)
+        nodeData[name] = _transferArrayOfReferences(sourceDoc, targetDoc, ids, visited, mappedTypes)
       } else {
         const id = nodeData[name]
         if (!visited[id]) {
-          nodeData[name] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited)
+          nodeData[name] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited, mappedTypes)
         }
       }
     // Look for text properties and create annotations in the target doc accordingly
@@ -62,24 +62,26 @@ export default function _transferWithDisambiguatedIds (sourceDoc, targetDoc, id,
       }
     }
   }
+  // replace types: this is used e.g. to map to the defaultTextType of a container
+  if (mappedTypes[nodeData.type]) nodeData.type = mappedTypes[nodeData.type]
   targetDoc.create(nodeData)
   for (let i = 0; i < annos.length; i++) {
-    _transferWithDisambiguatedIds(sourceDoc, targetDoc, annos[i].id, visited)
+    _transferWithDisambiguatedIds(sourceDoc, targetDoc, annos[i].id, visited, mappedTypes)
   }
   return nodeData.id
 }
 
-function _transferArrayOfReferences (sourceDoc, targetDoc, arr, visited) {
+function _transferArrayOfReferences (sourceDoc, targetDoc, arr, visited, mappedTypes) {
   const result = arr.slice(0)
   for (let i = 0; i < arr.length; i++) {
     const val = arr[i]
     // multi-dimensional
     if (isArray(val)) {
-      result[i] = _transferArrayOfReferences(sourceDoc, targetDoc, val, visited)
+      result[i] = _transferArrayOfReferences(sourceDoc, targetDoc, val, visited, mappedTypes)
     } else {
       const id = val
       if (id && !visited[id]) {
-        result[i] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited)
+        result[i] = _transferWithDisambiguatedIds(sourceDoc, targetDoc, id, visited, mappedTypes)
       }
     }
   }

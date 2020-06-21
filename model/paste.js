@@ -81,7 +81,6 @@ export default function paste (tx, args) {
 function _convertPlainTextToDocument (tx, args) {
   const lines = args.text.split(/\s*\n\s*\n/)
   const pasteDoc = tx.getDocument().newInstance()
-  const defaultTextType = pasteDoc.getSchema().getDefaultTextType()
   const container = pasteDoc.create({
     type: '@container',
     id: SNIPPET_ID,
@@ -91,15 +90,15 @@ function _convertPlainTextToDocument (tx, args) {
   if (lines.length === 1) {
     node = pasteDoc.create({
       id: TEXT_SNIPPET_ID,
-      type: defaultTextType,
+      type: '@text',
       content: lines[0]
     })
     container.append(node.id)
   } else {
     for (let i = 0; i < lines.length; i++) {
       node = pasteDoc.create({
-        id: uuid(defaultTextType),
-        type: defaultTextType,
+        id: uuid(),
+        type: '@text',
         content: lines[i]
       })
       container.append(node.id)
@@ -112,10 +111,10 @@ function _convertIntoAnnotatedText (tx, copy) {
   const sel = tx.selection
   const path = sel.start.path
   const snippet = tx.createSnippet()
-  const defaultTextType = snippet.getSchema().getDefaultTextType()
 
   // walk through all nodes
   const container = copy.get('snippet')
+
   const nodeIds = container.getContent()
   // collect all transformed annotations
   const fragments = []
@@ -144,7 +143,7 @@ function _convertIntoAnnotatedText (tx, copy) {
   }
   snippet.create({
     id: TEXT_SNIPPET_ID,
-    type: defaultTextType,
+    type: '@text',
     content: fragments.join('')
   })
   annos.forEach(anno => snippet.create(anno))
@@ -191,6 +190,7 @@ function _pasteDocument (tx, pasteDoc) {
 
   const sel = tx.selection
   const containerPath = sel.containerPath
+
   let insertPos
   // FIXME: this does not work for lists
   // IMO we need to add a special implementation for lists
@@ -289,6 +289,9 @@ function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
   const nodeIds = pasteDoc.get(SNIPPET_ID).nodes
   const insertedNodes = []
   const visited = {}
+  const containerProp = tx.getProperty(containerPath)
+  const mappedTypes = { '@text': containerProp.defaultTextType }
+
   let nodes = nodeIds.map(id => pasteDoc.get(id))
 
   // now filter nodes w.r.t. allowed types for the given container
@@ -303,7 +306,7 @@ function _pasteContainerNodes (tx, pasteDoc, containerPath, insertPos) {
     // to avoid collisions in the target doc
     // Plus, it uses reflection to create owned nodes recursively,
     // and to transfer attached annotations.
-    const newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited)
+    const newId = _transferWithDisambiguatedIds(node.getDocument(), tx, node.id, visited, mappedTypes)
     // get the node in the targetDocument
     node = tx.get(newId)
     insertAt(tx, containerPath, insertPos++, newId)
@@ -322,7 +325,7 @@ function _pasteListItems (tx, list, otherList, insertPos) {
   const visited = {}
   let lastItem
   for (const item of items) {
-    const newId = _transferWithDisambiguatedIds(item.getDocument(), tx, item.id, visited)
+    const newId = _transferWithDisambiguatedIds(item.getDocument(), tx, item.id, visited, {})
     insertAt(tx, list.getItemsPath(), insertPos++, newId)
     lastItem = tx.get(newId)
   }

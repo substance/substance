@@ -40,7 +40,7 @@ function _copyPropertySelection (doc, selection) {
   const snippet = doc.createSnippet()
   const containerNode = snippet.getContainer()
   snippet.create({
-    type: doc.schema.getDefaultTextType(),
+    type: '@text',
     id: TEXT_SNIPPET_ID,
     content: text.substring(offset, endOffset)
   })

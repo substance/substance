@@ -218,14 +218,6 @@ export default class Document extends EventEmitter {
     }
   }
 
-  createDefaultTextNode (text, dir) {
-    return this.create({
-      type: this.getSchema().getDefaultTextType(),
-      content: text || '',
-      direction: dir
-    })
-  }
-
   /**
     Delete the node with given id.
 

@@ -33,7 +33,6 @@ export default class DOMImporter {
     this.idAttribute = params.idAttribute || 'id'
     this.options = options
 
-    this._defaultBlockConverter = null
     this._allConverters = []
     this._blockConverters = []
     this._propertyAnnotationConverters = []
@@ -52,8 +51,6 @@ export default class DOMImporter {
   _initialize () {
     const schema = this._getSchema()
     const converters = this.converters
-    // LEGACY: in older versions we had a globally defined defaultTextType
-    const defaultTextType = schema.getDefaultTextType()
     for (let i = 0; i < converters.length; i++) {
       let converter
       if (typeof converters[i] === 'function') {
@@ -74,11 +71,6 @@ export default class DOMImporter {
       const NodeClass = schema.getNodeClass(converter.type)
       if (!NodeClass) {
         throw new Error('No node type defined for converter')
-      }
-      // LEGACY: see above
-      // TODO: try to get rid of this
-      if (defaultTextType && !this._defaultBlockConverter && defaultTextType === converter.type) {
-        this._defaultBlockConverter = converter
       }
       this._allConverters.push(converter)
       // Defaults to _blockConverters
@@ -549,12 +541,6 @@ export default class DOMImporter {
   _wrapInlineElementsIntoBlockElement (childIterator) {
     if (!childIterator.hasNext()) return
 
-    const schema = this._getSchema()
-    const converter = this._defaultBlockConverter
-    if (!converter) {
-      throw new Error('Wrapping inline elements automatically is not supported in this schema.')
-    }
-
     const dom = childIterator.peek().getOwnerDocument()
     const wrapper = dom.createElement('wrapper')
     while (childIterator.hasNext()) {
@@ -567,9 +553,9 @@ export default class DOMImporter {
       }
       wrapper.append(el.clone())
     }
-    const type = schema.getDefaultTextType()
-    const id = this._getNextId(dom, type)
-    let nodeData = { type, id }
+    const converter = DefaultTextConverter
+    const id = this._getNextId(dom, 'text')
+    let nodeData = { type: '@text', id }
     this.state.pushContext('wrapper', converter)
     nodeData = converter.import(wrapper, nodeData, this) || nodeData
     const context = this.state.popContext()
@@ -691,5 +677,11 @@ class DOMImporterState {
 
   getCurrentContext () {
     return last(this.contexts)
+  }
+}
+
+const DefaultTextConverter = {
+  import (el, node, converter) {
+    node.content = converter.annotatedText(el, [node.id, 'content'])
   }
 }
