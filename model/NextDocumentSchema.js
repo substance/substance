@@ -1,13 +1,13 @@
 import { DefaultDOMElement as DOM, prettyPrintXML } from '../dom'
 import { camelCase } from '../util'
 import DocumentSchema from './DocumentSchema'
-import NextDocument from './NextDocument'
 import _createValidator from './_createValidator'
 import _createDefinition from './_createDefinition'
 import _createXmlConverterFactory from './_createXmlConverterFactory'
+import NextDocument from './NextDocument'
 
 export default class NextDocumentSchema {
-  constructor (version, rootType, issuer, nodes, actions) {
+  constructor (version, rootType, issuer, nodes, actions, options = {}) {
     this.name = rootType[0].toUpperCase() + camelCase(rootType).slice(1)
     this.rootType = rootType
     this.version = version
@@ -26,19 +26,21 @@ export default class NextDocumentSchema {
     const _definition = this._getDefinition(this.version)
 
     this._xmlConverterFactory = _createXmlConverterFactory(rootType, _definition)
+    this._DocumentClass = options.DocumentClass || NextDocument
 
     // legacy
     this._documentSchema = new DocumentSchema({
       // TODO: we should allow to override NextDocument
       // e.g. to provide a getTitle() implementation, etc.
-      DocumentClass: NextDocument,
+      DocumentClass: this._DocumentClass,
       nodes: Array.from(nodes.values()),
       definition: _definition
     })
   }
 
   createDocumentInstance () {
-    return new NextDocument(this._documentSchema, this)
+    const DocumentClass = this._DocumentClass
+    return new DocumentClass(this)
   }
 
   importDocumentFromXml (doc, xmlStr, context) {

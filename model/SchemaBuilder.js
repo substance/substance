@@ -40,11 +40,11 @@ export default class SchemaBuilder {
     })
   }
 
-  createSchema () {
+  createSchema (options = {}) {
     const nodes = this._buildNodes()
     const rootType = this.rootType
     const version = this._definition.version
-    return new NextDocumentSchema(version, rootType, this.issuer, nodes, this._actions)
+    return new NextDocumentSchema(version, rootType, this.issuer, nodes, this._actions, options)
   }
 
   _record (action) {
