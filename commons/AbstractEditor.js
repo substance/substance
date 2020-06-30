@@ -33,9 +33,13 @@ export default class AbstractEditor extends Component {
     throw new Error('This method is abstract')
   }
 
+  _getConfig (props) {
+    return props.archive.getConfig()
+  }
+
   _initialize (props) {
     const { archive } = props
-    const config = archive.getConfig()
+    const config = this._getConfig()
     const document = this._getDocumentFromArchive(archive)
     this.document = document
 
