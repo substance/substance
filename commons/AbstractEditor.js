@@ -15,6 +15,12 @@ export default class AbstractEditor extends Component {
     })
   }
 
+  _createEditorSession (document, config) {
+    return new EditorSession('document', document, config, {
+      overlayId: null
+    })
+  }
+
   _createAPI (archive, editorSession) {
     throw new Error('This method is abstract')
   }
@@ -27,15 +33,17 @@ export default class AbstractEditor extends Component {
     throw new Error('This method is abstract')
   }
 
+  _getConfig (props) {
+    return props.archive.getConfig()
+  }
+
   _initialize (props) {
     const { archive } = props
-    const config = archive.getConfig()
+    const config = this._getConfig()
     const document = this._getDocumentFromArchive(archive)
     this.document = document
 
-    const editorSession = new EditorSession('document', document, config, {
-      overlayId: null
-    })
+    const editorSession = this._createEditorSession(document, config)
     this.editorSession = editorSession
 
     const editorState = editorSession.editorState
