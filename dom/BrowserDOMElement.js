@@ -544,13 +544,21 @@ class BrowserDOMElement extends DOMElement {
   }
 
   serialize () {
-    const outerHTML = this.el.outerHTML
-    if (isString(outerHTML)) {
-      return outerHTML
+    if (this._isXML()) {
+      return this._serializeWithXMLSerializer()
+    } else if (this.isDocumentNode) {
+      return this.el.documentElement.outerHTML
     } else {
-      const xs = new window.XMLSerializer()
-      return xs.serializeToString(this.el)
+      return this.el.outerHTML
     }
+  }
+
+  _serializeWithXMLSerializer () {
+    // ATTENTION: the XMLSerializer has IMO an inconsistent behavior
+    // compared to el.innerHTML
+    // e.g. the content of script elements gets escaped
+    const xs = new window.XMLSerializer()
+    return xs.serializeToString(this.el)
   }
 
   isInDocument () {

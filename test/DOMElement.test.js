@@ -826,6 +826,14 @@ function DOMElementTests (impl) {
     t.equal(xmlDom.serialize(), _xmlStr(newPublicId, newSystemId), 'docType should have been updated')
     t.end()
   })
+
+  test('HTML serializing script elements with CDATA', (t) => {
+    const input = '<html><head><script><![CDATA[<xml/>]]></script></head><body></body></html>'
+    const dom = DefaultDOMElement.parseHTML(input)
+    const output = dom.serialize()
+    t.equal(output, input, 'serialisation should not HTML escape content of script tags with CDATA')
+    t.end()
+  })
 }
 
 if (platform.inBrowser) {
