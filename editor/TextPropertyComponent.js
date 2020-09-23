@@ -71,7 +71,7 @@ export default class TextPropertyComponent extends AnnotatedTextComponent {
     } else {
       el = super._renderFragment.apply(this, arguments)
       if (id) {
-        el.ref(id + '@' + fragment.counter)
+        el.ref(id + '@' + fragment.fragmentCount)
       }
     }
     el.attr('data-offset', fragment.offset)
