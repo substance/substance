@@ -2402,28 +2402,28 @@ var dataViewCtorString = toSource(DataView),
 var getTag = baseGetTag;
 
 // Fallback for data views, maps, sets, and weak maps in IE 11 and promises in Node.js < 6.
-if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag$1) ||
-    (Map && getTag(new Map) != mapTag$1) ||
-    (Promise && getTag(Promise.resolve()) != promiseTag) ||
-    (Set && getTag(new Set) != setTag$1) ||
-    (WeakMap && getTag(new WeakMap) != weakMapTag$1)) {
-  getTag = function(value) {
-    var result = baseGetTag(value),
-        Ctor = result == objectTag$1 ? value.constructor : undefined,
-        ctorString = Ctor ? toSource(Ctor) : '';
+// if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag$1) ||
+//     (Map && getTag(new Map) != mapTag$1) ||
+//     (Promise && getTag(Promise.resolve()) != promiseTag) ||
+//     (Set && getTag(new Set) != setTag$1) ||
+//     (WeakMap && getTag(new WeakMap) != weakMapTag$1)) {
+//   getTag = function(value) {
+//     var result = baseGetTag(value),
+//         Ctor = result == objectTag$1 ? value.constructor : undefined,
+//         ctorString = Ctor ? toSource(Ctor) : '';
 
-    if (ctorString) {
-      switch (ctorString) {
-        case dataViewCtorString: return dataViewTag$1;
-        case mapCtorString: return mapTag$1;
-        case promiseCtorString: return promiseTag;
-        case setCtorString: return setTag$1;
-        case weakMapCtorString: return weakMapTag$1;
-      }
-    }
-    return result;
-  };
-}
+//     if (ctorString) {
+//       switch (ctorString) {
+//         case dataViewCtorString: return dataViewTag$1;
+//         case mapCtorString: return mapTag$1;
+//         case promiseCtorString: return promiseTag;
+//         case setCtorString: return setTag$1;
+//         case weakMapCtorString: return weakMapTag$1;
+//       }
+//     }
+//     return result;
+//   };
+// }
 
 var getTag$1 = getTag;
 
